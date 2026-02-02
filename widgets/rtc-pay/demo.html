@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RustChain Payment Widget Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #1a1a1a;
+      border-bottom: 3px solid #FF6B35;
+      padding-bottom: 10px;
+    }
+    h2 { color: #333; margin-top: 40px; }
+    .demo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .demo-card h3 {
+      margin-top: 0;
+      color: #FF6B35;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    pre {
+      background: #1a1a1a;
+      color: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    .highlight { color: #FF6B35; }
+    .string { color: #98c379; }
+    .attr { color: #e06c75; }
+    .product {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .product img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #eee;
+    }
+    .product-info { flex: 1; }
+    .product-name { font-weight: 600; font-size: 18px; }
+    .product-price { color: #FF6B35; font-size: 20px; font-weight: 700; }
+    .badge {
+      display: inline-block;
+      background: #FF6B35;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .network-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .network-stat {
+      background: linear-gradient(135deg, #fff5f0 0%, #fff8f5 100%);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .network-stat .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #FF6B35;
+    }
+    .network-stat .label {
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🦀 RustChain Payment Widget</h1>
+  <p>Accept RTC payments on any website with a simple embeddable button.</p>
+
+  <div class="demo-card">
+    <h3>Live Demo</h3>
+    <p>Click the button below to see the payment modal in action:</p>
+    
+    <div class="product">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,#FF6B35,#F7931A);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:32px;">🦀</div>
+      <div class="product-info">
+        <div class="product-name">RustChain Premium Access</div>
+        <div>One-time payment for lifetime access</div>
+        <div class="product-price">5 RTC</div>
+      </div>
+      <div id="rtc-pay" 
+           data-to="RTC1234567890abcdef1234567890abcdef12345678"
+           data-amount="5"
+           data-memo="Premium Access - Order #12345">
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h3>Quick Start</h3>
+    <p>Add the payment widget to your site in seconds:</p>
+    
+    <pre><code><span class="comment">&lt;!-- 1. Include the script --&gt;</span>
+<span class="attr">&lt;script</span> <span class="highlight">src</span>=<span class="string">"rustchain-pay.js"</span><span class="attr">&gt;&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- 2. Add a payment button --&gt;</span>
+<span class="attr">&lt;div</span> <span class="highlight">id</span>=<span class="string">"rtc-pay"</span>
+     <span class="highlight">data-to</span>=<span class="string">"RTCyourwalletaddress..."</span>
+     <span class="highlight">data-amount</span>=<span class="string">"10"</span>
+     <span class="highlight">data-memo</span>=<span class="string">"Order #123"</span><span class="attr">&gt;&lt;/div&gt;</span></code></pre>
+  </div>
+
+  <div class="demo-card">
+    <h3>Programmatic Usage</h3>
+    <p>Open the payment modal via JavaScript:</p>
+    
+    <pre><code><span class="highlight">RustChainPay</span>.open({
+  to: <span class="string">'RTCyourwalletaddress...'</span>,
+  amount: <span class="string">'25'</span>,
+  memo: <span class="string">'Invoice #456'</span>,
+  onSuccess: (result) => {
+    console.log(<span class="string">'Payment complete!'</span>, result);
+  },
+  onError: (err) => {
+    console.error(<span class="string">'Payment failed:'</span>, err);
+  }
+});</code></pre>
+    
+    <button onclick="openDemoPayment()" style="background:#FF6B35;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;margin-top:16px;">
+      Try Programmatic Open
+    </button>
+  </div>
+
+  <div class="demo-card">
+    <h3>Configuration Options</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="border-bottom:1px solid #eee;">
+        <th style="text-align:left;padding:12px 8px;">Attribute</th>
+        <th style="text-align:left;padding:12px 8px;">Description</th>
+        <th style="text-align:left;padding:12px 8px;">Required</th>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:12px 8px;"><code>data-to</code></td>
+        <td style="padding:12px 8px;">Recipient wallet address (RTC...)</td>
+        <td style="padding:12px 8px;"><span class="badge">Required</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:12px 8px;"><code>data-amount</code></td>
+        <td style="padding:12px 8px;">Payment amount in RTC</td>
+        <td style="padding:12px 8px;"><span class="badge">Required</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:12px 8px;"><code>data-memo</code></td>
+        <td style="padding:12px 8px;">Optional memo/note for the payment</td>
+        <td style="padding:12px 8px;">Optional</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:12px 8px;"><code>data-node</code></td>
+        <td style="padding:12px 8px;">Custom RustChain node URL</td>
+        <td style="padding:12px 8px;">Optional</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:12px 8px;"><code>data-callback</code></td>
+        <td style="padding:12px 8px;">Webhook URL for payment notifications</td>
+        <td style="padding:12px 8px;">Optional</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="demo-card">
+    <h3>Multiple Buttons</h3>
+    <p>Add multiple payment options on the same page:</p>
+    
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;">
+      <div data-rtc-pay data-to="RTC1234567890abcdef1234567890abcdef12345678" data-amount="1" data-memo="Tip"></div>
+      <div data-rtc-pay data-to="RTC1234567890abcdef1234567890abcdef12345678" data-amount="5" data-memo="Small donation"></div>
+      <div data-rtc-pay data-to="RTC1234567890abcdef1234567890abcdef12345678" data-amount="25" data-memo="Large donation"></div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h3>RustChain Network</h3>
+    <p>RustChain is a Proof-of-Antiquity blockchain rewarding vintage hardware.</p>
+    
+    <div class="network-info">
+      <div class="network-stat">
+        <div class="value">9</div>
+        <div class="label">Active Miners</div>
+      </div>
+      <div class="network-stat">
+        <div class="value">3</div>
+        <div class="label">Attestation Nodes</div>
+      </div>
+      <div class="network-stat">
+        <div class="value">6</div>
+        <div class="label">HW Fingerprint Checks</div>
+      </div>
+    </div>
+    
+    <p style="font-size:14px;color:#666;">
+      <strong>Supported Hardware:</strong> PowerPC G4/G5, 68K Macs, SPARC, and other vintage systems earn higher mining multipliers than modern machines.
+    </p>
+  </div>
+
+  <div class="demo-card">
+    <h3>Security</h3>
+    <p>The payment widget is designed with security as a top priority:</p>
+    <ul>
+      <li>✅ <strong>Client-side signing</strong> - Private keys never leave your browser</li>
+      <li>✅ <strong>Ed25519 signatures</strong> - Industry-standard cryptography</li>
+      <li>✅ <strong>No external dependencies</strong> - Self-contained widget</li>
+      <li>✅ <strong>Open source</strong> - Audit the code yourself</li>
+    </ul>
+  </div>
+
+  <script src="rustchain-pay.js"></script>
+  <script>
+    function openDemoPayment() {
+      RustChainPay.open({
+        to: 'RTC1234567890abcdef1234567890abcdef12345678',
+        amount: '25',
+        memo: 'Programmatic Demo Payment',
+        onSuccess: (result) => {
+          alert('Payment successful! TX: ' + (result.tx_hash || 'demo'));
+        },
+        onError: (err) => {
+          console.log('Payment cancelled or failed:', err.message);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
