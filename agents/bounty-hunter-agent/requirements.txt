@@ -1,0 +1,9 @@
+pygithub==2.1.1
+gitpython==3.1.40
+langchain==0.1.0
+langgraph==0.0.20
+anthropic==0.8.1
+openai==1.6.1
+pytest==7.4.3
+requests==2.31.0
+python-dotenv==1.0.0
