@@ -1,0 +1,34 @@
+name: Auto Triage Claims
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    if: github.event_name != 'issue_comment' || contains(fromJson('[74,47,87,103]'), github.event.issue.number)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Auto Triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SINCE_HOURS: "168"
+          LEDGER_REPO: "rustchain-bounties"
+          LEDGER_ISSUE: "104"
+        run: |
+          python3 scripts/auto_triage_claims.py
