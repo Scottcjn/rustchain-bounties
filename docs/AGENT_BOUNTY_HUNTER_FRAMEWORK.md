@@ -10,10 +10,6 @@ This document describes a practical AI-agent bounty framework that is already us
   - `submit-template`: generate submission update text
   - `monitor`: monitor issue/PR pairs for payout readiness (supports auto-discovery)
   - `post-comment`: post comment with dry-run default and explicit `--confirm` gate
-- `data/agent_monitor_targets.json`
-  - Sample monitoring targets covering real completed submissions
-- `data/agent_execution_log_2026-02-12.json`
-  - Real end-to-end execution log from this agent run
 
 ## Human-in-the-Loop Safety
 
@@ -57,7 +53,7 @@ python3 scripts/agent_bounty_hunter.py submit-template \
 
 # 4) Monitor active issue/PR pairs
 python3 scripts/agent_bounty_hunter.py monitor \
-  --targets-json data/agent_monitor_targets.json
+  --targets-json path/to/your_targets.json
 
 # 5) Auto-discover your own claimed/submitted targets for monitoring
 python3 scripts/agent_bounty_hunter.py monitor \
