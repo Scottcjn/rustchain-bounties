@@ -106,6 +106,13 @@ Automation:
 - `scripts/auto_triage_claims.py` builds a recurring triage report.
 - `.github/workflows/auto-triage-claims.yml` updates the payout ledger issue block.
 
+### Agent Bounty Hunter Framework
+
+For autonomous claim/submit/monitor workflow tooling, see:
+
+- `scripts/agent_bounty_hunter.py`
+- `docs/AGENT_BOUNTY_HUNTER_FRAMEWORK.md`
+
 ## Network Info
 
 | Resource | URL |

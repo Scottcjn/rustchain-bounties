@@ -1,0 +1,39 @@
+{
+  "operator": "David-code-tang",
+  "wallet": "davidtang-codex",
+  "generated_at": "2026-02-12T21:00:00Z",
+  "completed": [
+    {
+      "bounty_issue": 123,
+      "submission_prs": ["https://github.com/Scottcjn/Rustchain/pull/115"],
+      "status": "accepted_queued",
+      "queued_reward_rtc": 40
+    },
+    {
+      "bounty_issue": 72,
+      "submission_prs": [
+        "https://github.com/Scottcjn/Rustchain/pull/117",
+        "https://github.com/Scottcjn/Rustchain/pull/118"
+      ],
+      "status": "accepted_queued",
+      "queued_reward_rtc": 50
+    },
+    {
+      "bounty_issue": 122,
+      "submission_prs": [
+        "https://github.com/Scottcjn/bottube/pull/94",
+        "https://github.com/Scottcjn/Rustchain/pull/116",
+        "https://github.com/Scottcjn/ram-coffers/pull/1"
+      ],
+      "status": "accepted_queued",
+      "queued_reward_rtc": 25
+    },
+    {
+      "bounty_issue": 100,
+      "status": "accepted_queued",
+      "queued_reward_rtc": 2
+    }
+  ],
+  "queued_total_rtc": 117,
+  "ledger_reference": "https://github.com/Scottcjn/rustchain-bounties/issues/104#issuecomment-3892859998"
+}
