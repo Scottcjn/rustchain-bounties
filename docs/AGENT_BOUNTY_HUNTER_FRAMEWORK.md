@@ -8,7 +8,8 @@ This document describes a practical AI-agent bounty framework that is already us
   - `scan`: fetch/rank open bounty leads
   - `claim-template`: generate claim comment text
   - `submit-template`: generate submission update text
-  - `monitor`: monitor issue/PR pairs for payout readiness
+  - `monitor`: monitor issue/PR pairs for payout readiness (supports auto-discovery)
+  - `post-comment`: post comment with dry-run default and explicit `--confirm` gate
 - `data/agent_monitor_targets.json`
   - Sample monitoring targets covering real completed submissions
 - `data/agent_execution_log_2026-02-12.json`
@@ -57,10 +58,33 @@ python3 scripts/agent_bounty_hunter.py submit-template \
 # 4) Monitor active issue/PR pairs
 python3 scripts/agent_bounty_hunter.py monitor \
   --targets-json data/agent_monitor_targets.json
+
+# 5) Auto-discover your own claimed/submitted targets for monitoring
+python3 scripts/agent_bounty_hunter.py monitor \
+  --auto-discover \
+  --owner Scottcjn \
+  --repo rustchain-bounties \
+  --handle David-code-tang
+
+# 6) Live comment posting is gated (dry-run by default)
+python3 scripts/agent_bounty_hunter.py post-comment \
+  --owner Scottcjn \
+  --repo rustchain-bounties \
+  --issue 34 \
+  --body "Submission update: ..."
+# Live post:
+python3 scripts/agent_bounty_hunter.py post-comment \
+  --token "$GITHUB_TOKEN" \
+  --owner Scottcjn \
+  --repo rustchain-bounties \
+  --issue 34 \
+  --body "Submission update: ..." \
+  --no-dry-run \
+  --confirm
 ```
 
 ## Limitations
 
-- Reward extraction is heuristic from title/body text.
+- Reward extraction is heuristic from title/body text but now avoids obvious "pool" overestimation.
 - Difficulty scoring is heuristic and should be tuned per repo.
 - External platform constraints still require maintainer review and payout timing.

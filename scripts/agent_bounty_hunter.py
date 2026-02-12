@@ -12,6 +12,7 @@ It is intentionally human-in-the-loop for final posting and merge actions.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import re
 import sys
@@ -20,8 +21,10 @@ import urllib.request
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.error import HTTPError, URLError
 
 RTC_USD_REF = 0.10
+PR_URL_RE = re.compile(r"https://github\.com/([^/\s]+/[^/\s]+)/pull/(\d+)")
 
 
 @dataclass
@@ -53,15 +56,78 @@ def gh_get(path: str, token: str = "") -> Any:
         return json.loads(resp.read().decode("utf-8"))
 
 
+def gh_get_safe(path: str, token: str = "", fallback: Any = None) -> Any:
+    try:
+        return gh_get(path, token=token)
+    except (HTTPError, URLError, TimeoutError, http.client.RemoteDisconnected):
+        return fallback
+
+
+def gh_post(path: str, payload: Dict[str, Any], token: str = "") -> Any:
+    if not token:
+        raise ValueError("GitHub token is required for POST actions")
+    base = "https://api.github.com"
+    url = path if path.startswith("http") else f"{base}{path}"
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+    )
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("User-Agent", "agent-bounty-hunter")
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _pick(values: List[float], default: float = 0.0) -> float:
+    return max(values) if values else default
+
+
 def parse_reward(body: str, title: str) -> Tuple[float, float]:
-    text = f"{title}\n{body}"
+    text = f"{title}\n{body or ''}"
 
-    rtc_values = [float(x) for x in re.findall(r"(?i)\b(\d+(?:\.\d+)?)\s*RTC\b", text)]
-    usd_values = [float(x) for x in re.findall(r"\$\s*(\d+(?:\.\d+)?)", text)]
+    # Prefer explicit title declaration, e.g. "(75 RTC)".
+    title_rtc = [
+        float(x)
+        for x in re.findall(r"(?i)\((\d+(?:\.\d+)?)\s*RTC\)", title or "")
+        if "pool" not in (title or "").lower()
+    ]
+    title_usd = [float(x) for x in re.findall(r"(?i)\(\$\s*(\d+(?:\.\d+)?)\)", title or "")]
 
-    reward_rtc = max(rtc_values) if rtc_values else 0.0
-    reward_usd = max(usd_values) if usd_values else reward_rtc * RTC_USD_REF
+    reward_rtc = _pick(title_rtc, 0.0)
+    reward_usd = _pick(title_usd, 0.0)
 
+    # Fallback to body/title line cues; avoid "pool/prize pool" overestimation.
+    if reward_rtc == 0.0 and reward_usd == 0.0:
+        rtc_values: List[float] = []
+        usd_values: List[float] = []
+        for line in text.splitlines():
+            low = line.lower()
+            if "pool" in low:
+                continue
+            if any(k in low for k in ("reward", "bounty", "earn", "payout", "prize")):
+                rtc_values.extend(float(x) for x in re.findall(r"(?i)\b(\d+(?:\.\d+)?)\s*RTC\b", line))
+                usd_values.extend(float(x) for x in re.findall(r"\$\s*(\d+(?:\.\d+)?)", line))
+        reward_rtc = _pick(rtc_values, 0.0)
+        reward_usd = _pick(usd_values, 0.0)
+
+    # Pool-based bounty programs often represent shared budgets, not per-task payout.
+    if reward_rtc == 0.0 and reward_usd == 0.0 and "pool" in (title or "").lower():
+        return 0.0, 0.0
+
+    # Last resort generic parse.
+    if reward_rtc == 0.0 and reward_usd == 0.0:
+        reward_rtc = _pick([float(x) for x in re.findall(r"(?i)\b(\d+(?:\.\d+)?)\s*RTC\b", text)], 0.0)
+        reward_usd = _pick([float(x) for x in re.findall(r"\$\s*(\d+(?:\.\d+)?)", text)], 0.0)
+        # If only pool-like language exists, treat as unknown instead of overestimating.
+        if "pool" in text.lower() and not re.search(r"(?i)\b(reward|earn|payout)\b", text):
+            reward_rtc = 0.0
+            reward_usd = 0.0
+
+    if reward_usd == 0 and reward_rtc > 0:
+        reward_usd = reward_rtc * RTC_USD_REF
     if reward_rtc == 0 and reward_usd > 0:
         reward_rtc = reward_usd / RTC_USD_REF
 
@@ -202,34 +268,127 @@ def monitor_targets(targets: List[Dict[str, Any]], token: str = "") -> List[Dict
         issue_repo = t["issue_repo"]
         pr_repo = t["pr_repo"]
         issue_no = t["issue"]
-        pr_no = t["pr"]
+        pr_no = t.get("pr")
         label = t.get("label", f"{issue_repo}#{issue_no}")
 
-        issue = gh_get(f"/repos/{issue_repo}/issues/{issue_no}", token)
-        pr = gh_get(f"/repos/{pr_repo}/pulls/{pr_no}", token)
+        issue = gh_get_safe(f"/repos/{issue_repo}/issues/{issue_no}", token, fallback={})
+        issue_comments = gh_get_safe(f"/repos/{issue_repo}/issues/{issue_no}/comments?per_page=100", token, fallback=[])
+        payout_signal = payout_signal_from_comments(issue_comments if isinstance(issue_comments, list) else [])
 
-        merged = bool(pr.get("merged", False))
-        pr_state = pr.get("state", "unknown")
+        merged = False
+        pr_state = "missing"
+        if pr_no is not None:
+            pr = gh_get_safe(f"/repos/{pr_repo}/pulls/{pr_no}", token, fallback={})
+            merged = bool(pr.get("merged", False)) if isinstance(pr, dict) else False
+            pr_state = pr.get("state", "unknown") if isinstance(pr, dict) else "unknown"
         issue_state = issue.get("state", "unknown")
 
-        payout_action = "wait_for_review"
-        if merged:
-            payout_action = "request_payout"
-        elif pr_state == "closed":
-            payout_action = "check_followup"
+        payout_action = classify_payout_action(merged, pr_state, issue_state, payout_signal)
 
         rows.append(
             {
                 "label": label,
                 "issue": f"https://github.com/{issue_repo}/issues/{issue_no}",
-                "pr": f"https://github.com/{pr_repo}/pull/{pr_no}",
+                "pr": (f"https://github.com/{pr_repo}/pull/{pr_no}" if pr_no is not None else ""),
                 "issue_state": issue_state,
                 "pr_state": pr_state,
                 "merged": merged,
+                "payout_signal": payout_signal,
                 "payout_action": payout_action,
             }
         )
     return rows
+
+
+def payout_signal_from_comments(comments: List[Dict[str, Any]]) -> str:
+    text = "\n".join((c.get("body", "") or "").lower() for c in comments)
+    if any(k in text for k in ("payout queued", "queued id", "pending id")):
+        return "queued"
+    if any(k in text for k in ("paid", "payout sent", "confirmed payout")):
+        return "paid"
+    if any(k in text for k in ("changes requested", "please update", "partial progress")):
+        return "needs_update"
+    return "none"
+
+
+def classify_payout_action(merged: bool, pr_state: str, issue_state: str, payout_signal: str) -> str:
+    if payout_signal == "paid":
+        return "complete"
+    if payout_signal == "queued":
+        return "wait_payout_queue"
+    if payout_signal == "needs_update":
+        return "address_review"
+    if merged:
+        return "request_payout"
+    if pr_state == "closed":
+        return "check_followup"
+    if issue_state == "closed":
+        return "verify_closure"
+    return "wait_for_review"
+
+
+def discover_monitor_targets(owner: str, repo: str, handle: str, token: str = "", limit: int = 200) -> List[Dict[str, Any]]:
+    search_q = urllib.parse.quote(f"repo:{owner}/{repo} commenter:{handle}")
+    found = gh_get_safe(f"/search/issues?q={search_q}&per_page=100", token, fallback={})
+    items = found.get("items", []) if isinstance(found, dict) else []
+    if not isinstance(items, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    seen: set[Tuple[str, int, str, Optional[int]]] = set()
+    for item in items[:limit]:
+        issue_repo = ((item.get("repository_url", "") or "").split("/repos/")[-1]) if item.get("repository_url") else ""
+        issue_no = item.get("number")
+        if not issue_repo or not issue_no:
+            continue
+        comments = gh_get_safe(f"/repos/{issue_repo}/issues/{issue_no}/comments?per_page=100", token, fallback=[])
+        if not isinstance(comments, list):
+            continue
+        for c in comments:
+            user = ((c.get("user") or {}).get("login") or "").lower()
+            if user != handle.lower():
+                continue
+            body = c.get("body", "") or ""
+            prs = PR_URL_RE.findall(body)
+            if not prs:
+                key = (issue_repo, int(issue_no), issue_repo, None)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append({"issue_repo": issue_repo, "issue": int(issue_no), "pr_repo": issue_repo, "pr": None})
+                continue
+            for pr_repo, pr_no_str in prs:
+                pr_no = int(pr_no_str)
+                key = (issue_repo, int(issue_no), pr_repo, pr_no)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append({"issue_repo": issue_repo, "issue": int(issue_no), "pr_repo": pr_repo, "pr": pr_no})
+    return out
+
+
+def post_issue_comment(
+    owner: str,
+    repo: str,
+    issue_no: int,
+    body: str,
+    token: str = "",
+    dry_run: bool = True,
+    confirm: bool = False,
+) -> Dict[str, Any]:
+    if dry_run or not confirm:
+        return {
+            "mode": "dry-run",
+            "target": f"{owner}/{repo}#{issue_no}",
+            "body_preview": body[:280],
+            "posted": False,
+        }
+    posted = gh_post(f"/repos/{owner}/{repo}/issues/{issue_no}/comments", {"body": body}, token=token)
+    return {
+        "mode": "live",
+        "target": f"{owner}/{repo}#{issue_no}",
+        "posted": True,
+        "comment_url": posted.get("html_url", ""),
+    }
 
 
 def print_json(data: Any) -> None:
@@ -262,7 +421,20 @@ def main() -> int:
     p_submit.add_argument("--pr", action="append", required=True, help="repeat for multiple PR links")
 
     p_monitor = sub.add_parser("monitor", help="monitor issue/PR pairs")
-    p_monitor.add_argument("--targets-json", required=True, help="path to JSON list of monitoring targets")
+    p_monitor.add_argument("--targets-json", default="", help="path to JSON list of monitoring targets")
+    p_monitor.add_argument("--auto-discover", action="store_true", help="discover targets from claimant comments")
+    p_monitor.add_argument("--owner", default="Scottcjn")
+    p_monitor.add_argument("--repo", default="rustchain-bounties")
+    p_monitor.add_argument("--handle", default="David-code-tang")
+    p_monitor.add_argument("--limit", type=int, default=200)
+
+    p_post = sub.add_parser("post-comment", help="post issue comment with dry-run safety gate")
+    p_post.add_argument("--owner", default="Scottcjn")
+    p_post.add_argument("--repo", default="rustchain-bounties")
+    p_post.add_argument("--issue", type=int, required=True)
+    p_post.add_argument("--body", required=True)
+    p_post.add_argument("--confirm", action="store_true", help="required with --no-dry-run for live posting")
+    p_post.add_argument("--no-dry-run", action="store_true", help="enable live post (requires token + --confirm)")
 
     args = parser.parse_args()
 
@@ -286,10 +458,41 @@ def main() -> int:
         return 0
 
     if args.cmd == "monitor":
-        with open(args.targets_json, "r", encoding="utf-8") as f:
-            targets = json.load(f)
+        targets: List[Dict[str, Any]] = []
+        if args.targets_json:
+            with open(args.targets_json, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, list):
+                    targets.extend(loaded)
+        if args.auto_discover:
+            targets.extend(
+                discover_monitor_targets(
+                    owner=args.owner,
+                    repo=args.repo,
+                    handle=args.handle,
+                    token=args.token,
+                    limit=args.limit,
+                )
+            )
+        if not targets:
+            print_json({"generated_at": now_utc(), "rows": [], "note": "no monitor targets found"})
+            return 0
         rows = monitor_targets(targets, token=args.token)
         print_json({"generated_at": now_utc(), "rows": rows})
+        return 0
+
+    if args.cmd == "post-comment":
+        dry_run = not args.no_dry_run
+        posted = post_issue_comment(
+            owner=args.owner,
+            repo=args.repo,
+            issue_no=args.issue,
+            body=args.body,
+            token=args.token,
+            dry_run=dry_run,
+            confirm=args.confirm,
+        )
+        print_json(posted)
         return 0
 
     return 2
