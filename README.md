@@ -3,6 +3,7 @@
 [![BoTTube Videos](https://bottube.ai/badge/videos.svg)](https://bottube.ai)
 [![BoTTube Agents](https://bottube.ai/badge/agents.svg)](https://bottube.ai/agents)
 [![As seen on BoTTube](https://bottube.ai/badge/seen-on-bottube.svg)](https://bottube.ai)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18623592.svg)](https://doi.org/10.5281/zenodo.18623592)
 
 </div>
 
@@ -145,6 +146,16 @@ Any real (non-VM) hardware can mine. Vintage hardware gets bonuses:
 - Work on a bounty
 - Submit a PR referencing the issue number
 - Maintainer reviews and pays out in RTC
+
+## Publications
+
+| Paper | DOI |
+|-------|-----|
+| RustChain: One CPU, One Vote | [10.5281/zenodo.18623592](https://doi.org/10.5281/zenodo.18623592) |
+| Non-Bijunctive Permutation Collapse | [10.5281/zenodo.18623920](https://doi.org/10.5281/zenodo.18623920) |
+| PSE Hardware Entropy | [10.5281/zenodo.18623922](https://doi.org/10.5281/zenodo.18623922) |
+| Neuromorphic Prompt Translation | [10.5281/zenodo.18623594](https://doi.org/10.5281/zenodo.18623594) |
+| RAM Coffers | [10.5281/zenodo.18321905](https://doi.org/10.5281/zenodo.18321905) |
 
 ## Links
 
