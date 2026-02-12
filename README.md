@@ -155,3 +155,7 @@ Any real (non-VM) hardware can mine. Vintage hardware gets bonuses:
 ## License
 
 MIT
+
+
+## Contributors
+- [OpenClaw Agent](https://github.com/openclaw)
