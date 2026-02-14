@@ -42,8 +42,11 @@ DEFAULT_TARGETS = [
         "issue": 47,
         "min_account_age_days": 30,
         "required_stars": ["Rustchain"],
-        "require_wallet": True,
+        # Bounty allows either a RustChain wallet name OR a BoTTube username.
+        # Treat either as a valid payout target.
+        "require_wallet": False,
         "require_bottube_username": False,
+        "require_payout_target": True,
         "require_proof_link": False,
         "name": "Rustchain Star",
     },
@@ -126,31 +129,37 @@ def _gh_paginated(path: str, token: str) -> List[Dict[str, Any]]:
 
 
 def _extract_wallet(body: str) -> Optional[str]:
-    # Strip light markdown formatting so patterns like **Wallet:** work.
-    body = re.sub(r"[*_`]", "", body)
+    # Strip minimal markdown that commonly wraps labels like **RTC Wallet:**,
+    # without corrupting valid underscores in wallet names (e.g. abdul_rtc_01).
+    body = re.sub(r"[`*]", "", body)
     patterns = [
-        r"(?im)^\s*(?:rtc\s*)?wallet(?:\s*(?:name|id|address))?\s*[:\-]\s*`?([A-Za-z0-9_\-]{3,64})`?\s*$",
-        r"(?im)wallet(?:\s*(?:name|id|address))?\s*[:\-]\s*`?([A-Za-z0-9_\-]{3,64})`?",
+        r"(?im)^\s*(?:rtc\s*)?wallet(?:\s*(?:name|id|address))?\s*[:\-]\s*([A-Za-z0-9_-]{3,64})\s*$",
+        r"(?im)(?:rtc\s*)?wallet(?:\s*(?:name|id|address))?\s*[:\-]\s*([A-Za-z0-9_-]{3,64})",
     ]
     for pat in patterns:
-        m = re.search(pat, body)
-        if m:
-            return m.group(1).strip()
+        matches = list(re.finditer(pat, body))
+        if matches:
+            # People often post follow-ups like "wallet fixed"; prefer the most
+            # recent match in the merged multi-comment body.
+            return matches[-1].group(1).strip()
     return None
 
 
 def _extract_bottube_user(body: str) -> Optional[str]:
-    body = re.sub(r"[*_`]", "", body)
+    # Strip minimal markdown without corrupting valid underscores in usernames
+    # and URLs like `https://bottube.ai/agent/claw_ai`.
+    body = re.sub(r"[`*]", "", body)
     patterns = [
-        r"(?im)^\s*bottube(?:\s*(?:username|user|account))?\s*[:\-]\s*`?([A-Za-z0-9_\-]{2,64})`?\s*$",
-        r"(?im)bottube(?:\s*(?:username|user|account))?\s*[:\-]\s*`?([A-Za-z0-9_\-]{2,64})`?",
-        r"https?://(?:www\.)?bottube\.ai/@([A-Za-z0-9_\-]{2,64})",
-        r"https?://(?:www\.)?bottube\.ai/agent/([A-Za-z0-9_\-]{2,64})",
+        # Prefer extracting from profile URLs if present.
+        r"https?://(?:www\.)?bottube\.ai/@([A-Za-z0-9_-]{2,64})",
+        r"https?://(?:www\.)?bottube\.ai/agent/([A-Za-z0-9_-]{2,64})",
+        r"(?im)^\s*bottube(?:\s*(?:username|user|account))?\s*[:\-]\s*([A-Za-z0-9_-]{2,64})\s*$",
+        r"(?im)bottube(?:\s*(?:username|user|account))?\s*[:\-]\s*([A-Za-z0-9_-]{2,64})",
     ]
     for pat in patterns:
-        m = re.search(pat, body)
-        if m:
-            return m.group(1).strip()
+        matches = list(re.finditer(pat, body))
+        if matches:
+            return matches[-1].group(1).strip()
     return None
 
 
@@ -232,9 +241,23 @@ def _build_report_md(
     return "\n".join(lines).strip()
 
 
+def _ignored_users() -> Set[str]:
+    # Ignore maintainers/bots so their informational comments don't become
+    # "claims" (which would pollute triage results).
+    ignored = {"scottcjn", "github-actions[bot]", "sophiaeagent-beep"}
+    extra = os.environ.get("TRIAGE_IGNORE_USERS", "").strip()
+    if extra:
+        for u in extra.split(","):
+            u = u.strip().lower()
+            if u:
+                ignored.add(u)
+    return ignored
+
+
 def main() -> int:
     token = _env("GITHUB_TOKEN")
     since_hours = int(_env("SINCE_HOURS", "72"))
+    ignored_users = _ignored_users()
     targets_json = os.environ.get("TRIAGE_TARGETS_JSON", "").strip()
     if targets_json:
         targets = json.loads(targets_json)
@@ -263,6 +286,7 @@ def main() -> int:
         min_age = int(target.get("min_account_age_days", 0))
         req_wallet = bool(target.get("require_wallet", True))
         req_bt = bool(target.get("require_bottube_username", False))
+        req_payout_target = bool(target.get("require_payout_target", False))
         req_proof = bool(target.get("require_proof_link", False))
         req_stars = list(target.get("required_stars", []))
 
@@ -278,7 +302,7 @@ def main() -> int:
             if not user:
                 continue
             # Ignore maintainer/system messages
-            if user.lower() in {"scottcjn", "github-actions[bot]"}:
+            if user.lower() in ignored_users:
                 continue
             created = c.get("created_at")
             if not created:
@@ -323,8 +347,12 @@ def main() -> int:
 
             if age_days is not None and age_days < min_age:
                 blockers.append(f"account_age<{min_age}")
-            if req_wallet and not wallet:
-                blockers.append("missing_wallet")
+            if req_payout_target:
+                if not wallet and not bottube_user:
+                    blockers.append("missing_payout_target")
+            else:
+                if req_wallet and not wallet:
+                    blockers.append("missing_wallet")
             if wallet and _wallet_looks_external(wallet):
                 blockers.append("wallet_external_format")
             if req_bt and not bottube_user:
