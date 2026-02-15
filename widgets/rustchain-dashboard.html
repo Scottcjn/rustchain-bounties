@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Dashboard Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .rustchain-widget {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            overflow: hidden;
+        }
+        
+        .widget-header {
+            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .widget-header .icon {
+            font-size: 24px;
+        }
+        
+        .widget-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .widget-body {
+            padding: 20px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-online {
+            background: #3fb950;
+            box-shadow: 0 0 8px #3fb950;
+        }
+        
+        .status-offline {
+            background: #f85149;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .epoch-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .epoch-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #238636, #3fb950);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .miner-animation {
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
+            height: 20px;
+        }
+        
+        .miner-bar {
+            width: 4px;
+            background: #58a6ff;
+            border-radius: 2px;
+            animation: miner-activity 1s ease-in-out infinite;
+        }
+        
+        .miner-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
+        .miner-bar:nth-child(2) { height: 70%; animation-delay: 0.1s; }
+        .miner-bar:nth-child(3) { height: 100%; animation-delay: 0.2s; }
+        .miner-bar:nth-child(4) { height: 60%; animation-delay: 0.3s; }
+        .miner-bar:nth-child(5) { height: 80%; animation-delay: 0.4s; }
+        
+        @keyframes miner-activity {
+            0%, 100% { opacity: 0.4; transform: scaleY(0.8); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+        
+        .widget-footer {
+            padding: 12px 20px;
+            background: #0d1117;
+            border-top: 1px solid #21262d;
+            font-size: 12px;
+            color: #8b949e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .refresh-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            padding: 20px;
+            text-align: center;
+            color: #f85149;
+        }
+        
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="rustchain-widget" id="rustchainWidget">
+        <div class="widget-header">
+            <span class="icon">⛓️</span>
+            <h2>RustChain Network</h2>
+        </div>
+        
+        <div class="widget-body">
+            <div class="stat-row">
+                <span class="stat-label">Network Status</span>
+                <div class="stat-value">
+                    <span id="networkStatus">Loading...</span>
+                    <span class="status-indicator" id="statusIndicator"></span>
+                </div>
+            </div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Current Epoch</span>
+                <div class="stat-value" id="epochNumber">—</div>
+            </div>
+            
+            <div class="epoch-bar">
+                <div class="epoch-progress" id="epochProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Active Miners</span>
+                <div class="stat-value">
+                    <span id="minerCount">—</span>
+                    <div class="miner-animation" id="minerAnimation">
+                        <div class="miner-bar"></div>
+                        <div class="miner-bar"></div>
+                        <div class="miner-bar"></div>
+                        <div class="miner-bar"></div>
+                        <div class="miner-bar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Node Health</span>
+                <div class="stat-value" id="nodeHealth">—</div>
+            </div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Last Block</span>
+                <div class="stat-value" id="lastBlock">—</div>
+            </div>
+        </div>
+        
+        <div class="widget-footer">
+            <span>Auto-refresh: 60s</span>
+            <div class="refresh-indicator">
+                <span id="lastUpdate">Updating...</span>
+                <div class="spinner" id="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        let refreshInterval;
+
+        async function fetchData(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        }
+
+        function updateStatus(online) {
+            const statusEl = document.getElementById('networkStatus');
+            const indicator = document.getElementById('statusIndicator');
+            
+            if (online) {
+                statusEl.textContent = 'Online';
+                indicator.className = 'status-indicator status-online';
+            } else {
+                statusEl.textContent = 'Offline';
+                indicator.className = 'status-indicator status-offline';
+            }
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = 
+                now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function loadData() {
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = 'block';
+
+            // Fetch all endpoints
+            const [health, epoch, miners] = await Promise.all([
+                fetchData('/health'),
+                fetchData('/epoch'),
+                fetchData('/api/miners')
+            ]);
+
+            // Update network status
+            updateStatus(health !== null);
+
+            // Update epoch
+            if (epoch) {
+                document.getElementById('epochNumber').textContent = 
+                    epoch.current?.toLocaleString() || '—';
+                
+                // Estimate epoch progress (assuming ~2-5 min epochs)
+                const epochAge = epoch.age_seconds || 0;
+                const progress = Math.min((epochAge / 300) * 100, 100); // 5 min = 100%
+                document.getElementById('epochProgress').style.width = `${progress}%`;
+            }
+
+            // Update miners
+            if (miners && Array.isArray(miners)) {
+                document.getElementById('minerCount').textContent = miners.length;
+            } else if (miners && miners.count) {
+                document.getElementById('minerCount').textContent = miners.count;
+            }
+
+            // Update node health
+            if (health) {
+                const healthStatus = health.status || 'unknown';
+                document.getElementById('nodeHealth').textContent = 
+                    healthStatus.charAt(0).toUpperCase() + healthStatus.slice(1);
+            }
+
+            // Update last block
+            if (epoch && epoch.last_block) {
+                document.getElementById('lastBlock').textContent = 
+                    `#${epoch.last_block.toLocaleString()}`;
+            }
+
+            updateLastUpdate();
+            spinner.style.display = 'none';
+        }
+
+        // Initial load
+        loadData();
+
+        // Auto-refresh every 60 seconds
+        refreshInterval = setInterval(loadData, 60000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
