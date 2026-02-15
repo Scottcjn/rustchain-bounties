@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RustChain Dashboard Widget</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .rustchain-widget {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      color: #fff;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .widget-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .widget-logo svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .widget-title {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+
+    .status-badge.offline {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2ecc71;
+      animation: pulse 2s infinite;
+    }
+
+    .status-badge.offline .status-dot {
+      background: #e74c3c;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      transition: transform 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-value.highlight {
+      color: #f39c12;
+    }
+
+    .miners-section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .miners-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .miners-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .miners-activity {
+      display: flex;
+      gap: 3px;
+      height: 30px;
+      align-items: flex-end;
+    }
+
+    .activity-bar {
+      width: 6px;
+      background: linear-gradient(to top, #f39c12, #e74c3c);
+      border-radius: 3px;
+      animation: activityPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes activityPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .miners-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .miner-chip {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(243, 156, 18, 0.2);
+      color: #f39c12;
+      border-radius: 12px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .widget-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .explorer-link {
+      color: #3498db;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+
+    .explorer-link:hover {
+      color: #5dade2;
+    }
+
+    .refresh-timer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: #f39c12;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 20px;
+      color: #e74c3c;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 420px) {
+      .rustchain-widget {
+        padding: 16px;
+        border-radius: 12px;
+      }
+      .stat-value {
+        font-size: 20px;
+      }
+      .stats-grid {
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body style="background: #0a0a0a; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;">
+
+<div class="rustchain-widget" id="rustchain-widget">
+  <div class="loading">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const API_BASE = 'https://50.28.86.131';
+  const EXPLORER_URL = 'https://rustchain.org/explorer';
+  const REFRESH_INTERVAL = 60000; // 60 seconds
+  
+  let refreshCountdown = 60;
+  let countdownInterval;
+
+  async function fetchWithTimeout(url, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { 
+        signal: controller.signal,
+        // Handle self-signed cert in browser context
+      });
+      clearTimeout(id);
+      return response;
+    } catch (e) {
+      clearTimeout(id);
+      throw e;
+    }
+  }
+
+  async function fetchData() {
+    try {
+      const [healthRes, epochRes, minersRes] = await Promise.allSettled([
+        fetchWithTimeout(`${API_BASE}/health`),
+        fetchWithTimeout(`${API_BASE}/epoch`),
+        fetchWithTimeout(`${API_BASE}/api/miners`)
+      ]);
+
+      const health = healthRes.status === 'fulfilled' ? await healthRes.value.json().catch(() => null) : null;
+      const epoch = epochRes.status === 'fulfilled' ? await epochRes.value.json().catch(() => null) : null;
+      const miners = minersRes.status === 'fulfilled' ? await minersRes.value.json().catch(() => null) : null;
+
+      return { health, epoch, miners, error: null };
+    } catch (error) {
+      return { health: null, epoch: null, miners: null, error: error.message };
+    }
+  }
+
+  function generateActivityBars() {
+    return Array.from({ length: 12 }, (_, i) => {
+      const height = Math.random() * 20 + 10;
+      const delay = i * 0.1;
+      return `<div class="activity-bar" style="height: ${height}px; animation-delay: ${delay}s;"></div>`;
+    }).join('');
+  }
+
+  function renderWidget(data) {
+    const widget = document.getElementById('rustchain-widget');
+    const isOnline = data.health && !data.error;
+    const epochNumber = data.epoch?.epoch || data.epoch?.current_epoch || '—';
+    const minerList = Array.isArray(data.miners) ? data.miners : (data.miners?.miners || []);
+    const minerCount = minerList.length || (data.miners?.count || 0);
+    const totalDistributed = data.epoch?.total_distributed || data.epoch?.rtc_distributed || '—';
+
+    widget.innerHTML = `
+      <div class="widget-header">
+        <div class="widget-logo">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#f39c12"/>
+            <path d="M8 12h16M8 16h12M8 20h14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <span class="widget-title">RustChain</span>
+        </div>
+        <div class="status-badge ${isOnline ? '' : 'offline'}">
+          <div class="status-dot"></div>
+          ${isOnline ? 'Online' : 'Offline'}
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card" onclick="window.open('${EXPLORER_URL}', '_blank')">
+          <div class="stat-label">Current Epoch</div>
+          <div class="stat-value highlight">${epochNumber}</div>
+        </div>
+        <div class="stat-card" onclick="window.open('${EXPLORER_URL}/miners', '_blank')">
+          <div class="stat-label">Active Miners</div>
+          <div class="stat-value">${minerCount}</div>
+        </div>
+        <div class="stat-card" onclick="window.open('${EXPLORER_URL}', '_blank')">
+          <div class="stat-label">Network Health</div>
+          <div class="stat-value" style="color: ${isOnline ? '#2ecc71' : '#e74c3c'}">
+            ${isOnline ? '✓ Healthy' : '✗ Down'}
+          </div>
+        </div>
+        <div class="stat-card" onclick="window.open('${EXPLORER_URL}/stats', '_blank')">
+          <div class="stat-label">RTC Distributed</div>
+          <div class="stat-value">${typeof totalDistributed === 'number' ? totalDistributed.toLocaleString() : totalDistributed}</div>
+        </div>
+      </div>
+
+      ${minerList.length > 0 ? `
+        <div class="miners-section">
+          <div class="miners-header">
+            <span class="miners-title">Mining Activity</span>
+            <div class="miners-activity">
+              ${generateActivityBars()}
+            </div>
+          </div>
+          <div class="miners-list">
+            ${minerList.slice(0, 6).map(m => {
+              const name = typeof m === 'string' ? m : (m.miner_id || m.name || 'Unknown');
+              return `<span class="miner-chip">${name}</span>`;
+            }).join('')}
+            ${minerList.length > 6 ? `<span class="miner-chip">+${minerList.length - 6} more</span>` : ''}
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="widget-footer">
+        <a href="${EXPLORER_URL}" target="_blank" class="explorer-link">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          Block Explorer
+        </a>
+        <div class="refresh-timer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          <span id="countdown">${refreshCountdown}s</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderError(message) {
+    const widget = document.getElementById('rustchain-widget');
+    widget.innerHTML = `
+      <div class="widget-header">
+        <div class="widget-logo">
+          <svg viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#f39c12"/>
+            <path d="M8 12h16M8 16h12M8 20h14" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <span class="widget-title">RustChain</span>
+        </div>
+        <div class="status-badge offline">
+          <div class="status-dot"></div>
+          Offline
+        </div>
+      </div>
+      <div class="error-message">
+        <p>Unable to connect to RustChain network</p>
+        <p style="font-size: 11px; margin-top: 8px; color: rgba(255,255,255,0.4);">Retrying in ${refreshCountdown}s...</p>
+      </div>
+    `;
+  }
+
+  async function refresh() {
+    const data = await fetchData();
+    if (data.error && !data.health) {
+      renderError(data.error);
+    } else {
+      renderWidget(data);
+    }
+    
+    // Reset countdown
+    refreshCountdown = 60;
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      refreshCountdown--;
+      const el = document.getElementById('countdown');
+      if (el) el.textContent = `${refreshCountdown}s`;
+      if (refreshCountdown <= 0) {
+        refresh();
+      }
+    }, 1000);
+  }
+
+  // Initial load
+  refresh();
+})();
+</script>
+
+</body>
+</html>
