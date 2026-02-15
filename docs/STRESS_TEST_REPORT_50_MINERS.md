@@ -4,7 +4,7 @@ Generated on: `2026-02-15 15:12:46`
 ## 📊 Executive Summary
 | Metric | Value |
 |--------|-------|
-| **Target Node** | `https://50.28.86.131` |
+| **Target Node** | `https://testnet.rustchain.io` |
 | **Total Simulated Miners** | 50 |
 | **Success Rate** | 20.0% (10/50) |
 | **Total Duration** | 22.88s |

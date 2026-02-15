@@ -101,3 +101,18 @@ class MinerSimulator:
                 "arch": self.arch_key
             }
         }
+
+    def build_malformed_payload(self, nonce):
+        """Constructs an intentionally broken payload for security testing."""
+        payload = self.build_attestation_payload(nonce)
+        choice = random.choice(["missing_nonce", "bad_commitment", "wrong_arch", "corrupt_json"])
+
+        if choice == "missing_nonce":
+            del payload["nonce"]
+        elif choice == "bad_commitment":
+            payload["report"]["commitment"] = "invalid_hash_value"
+        elif choice == "wrong_arch":
+            payload["device"]["arch"] = "intel-i9-but-really-g4"
+        elif choice == "corrupt_json":
+            return "{\"invalid\": json..."
+        return payload

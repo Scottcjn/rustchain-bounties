@@ -19,6 +19,8 @@ async def main():
     parser.add_argument("--timeout", type=int, default=30, help="Request timeout in seconds")
 
     parser.add_argument("--dupes", type=float, default=0.0, help="Ratio of miners sharing the same ID (0.0 to 1.0)")
+    parser.add_argument("--malformed", action="store_true", help="Include malformed payload test cases")
+    parser.add_argument("--epoch-boundary", action="store_true", help="Simulate submissions during epoch transitions")
 
     args = parser.parse_args()
 
@@ -31,7 +33,12 @@ async def main():
     harness = StressHarness(node_url=args.url, concurrency=args.concurrency, timeout=args.timeout)
 
     start_time = asyncio.get_event_loop().time()
-    await harness.run_test(args.miners, duplicate_ratio=args.dupes)
+    await harness.run_test(
+        num_miners=args.miners,
+        duplicate_ratio=args.dupes,
+        test_malformed=args.malformed,
+        test_epoch_boundary=args.epoch_boundary
+    )
     duration = asyncio.get_event_loop().time() - start_time
 
     reporter = StressTestReporter(
