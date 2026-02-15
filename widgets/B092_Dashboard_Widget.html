@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Dashboard Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+        
+        .icon.epoch { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .icon.miners { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .icon.balance { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .icon.health { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        
+        .card-title {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .miners-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .miner-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .miner-id {
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .multiplier {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <h1>🦞 RustChain Dashboard</h1>
+            <p>Real-time network statistics</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon epoch">⏱️</div>
+                    <div>
+                        <div class="card-title">Current Epoch</div>
+                        <div class="card-value" id="epoch">Loading...</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="epoch-progress" style="width: 0%"></div>
+                </div>
+                <p style="margin-top: 8px; color: rgba(255,255,255,0.6); font-size: 0.875rem;">
+                    Slot <span id="slot">-</span> / 144
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon miners">⛏️</div>
+                    <div>
+                        <div class="card-title">Active Miners</div>
+                        <div class="card-value" id="miners">Loading...</div>
+                    </div>
+                </div>
+                <div class="miners-list" id="miners-list">
+                    Loading...
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon balance">💰</div>
+                    <div>
+                        <div class="card-title">Epoch Pot</div>
+                        <div class="card-value" id="pot">Loading...</div>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 8px;">
+                    RTC distributed this epoch
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon health">❤️</div>
+                    <div>
+                        <div class="card-title">Node Health</div>
+                        <div class="card-value" id="health">Loading...</div>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 8px;">
+                    Version: <span id="version">-</span>
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Data refreshes every 60 seconds • RustChain v2.2.1</p>
+            <p style="margin-top: 8px;">Built by BHP Team</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        
+        async function fetchData() {
+            try {
+                // Fetch epoch data
+                const epochRes = await fetch(`${API_BASE}/epoch`, { mode: 'no-cors' });
+                const epochData = await epochRes.json();
+                
+                document.getElementById('epoch').textContent = epochData.epoch;
+                document.getElementById('slot').textContent = epochData.slot;
+                document.getElementById('pot').textContent = epochData.epoch_pot + ' RTC';
+                
+                const progress = (epochData.slot / epochData.blocks_per_epoch) * 100;
+                document.getElementById('epoch-progress').style.width = progress + '%';
+                
+                // Fetch miners
+                const minersRes = await fetch(`${API_BASE}/api/miners`, { mode: 'no-cors' });
+                const minersData = await minersRes.json();
+                
+                document.getElementById('miners').textContent = minersData.length;
+                
+                const minersList = document.getElementById('miners-list');
+                minersList.innerHTML = minersData.slice(0, 5).map(miner => `
+                    <div class="miner-item">
+                        <span class="miner-id">${miner.miner.substring(0, 20)}...</span>
+                        <span class="multiplier">${miner.antiquity_multiplier}x</span>
+                    </div>
+                `).join('');
+                
+                // Fetch health
+                const healthRes = await fetch(`${API_BASE}/health`, { mode: 'no-cors' });
+                const healthData = await healthRes.json();
+                
+                document.getElementById('health').textContent = healthData.ok ? '✅ Healthy' : '❌ Error';
+                document.getElementById('version').textContent = healthData.version;
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('health').textContent = '⚠️ Check API';
+            }
+        }
+        
+        // Initial fetch
+        fetchData();
+        
+        // Refresh every 60 seconds
+        setInterval(fetchData, 60000);
+    </script>
+</body>
+</html>
