@@ -1,6 +1,6 @@
 # RustChain Protocol Documentation
 
-Welcome to the official technical documentation for the RustChain network and the RIP-200 protocol. This documentation is designed for developers, researchers, and AI agents looking to integrate with or build upon the RustChain ecosystem.
+Welcome to the official technical documentation for the RustChain network and the RIP-200 protocol. This documentation is designed for developers and researchers looking to integrate with or build upon the RustChain ecosystem.
 
 ## 📖 Table of Contents
 
@@ -32,4 +32,4 @@ Welcome to the official technical documentation for the RustChain network and th
     *   Key terminology for the RIP-200 protocol.
 
 ---
-*Maintained by the RustChain Community. Documentation generated for Bounty #8.*
+*Maintained by the RustChain Community.*

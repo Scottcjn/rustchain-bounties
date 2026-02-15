@@ -27,7 +27,7 @@ RustChain does not require energy-intensive hashing. Instead, miners participate
 
 ## Workflow Diagram
 ```mermaid
-sequence_client-server
+sequenceDiagram
     participant Miner
     participant Node
     participant Ergo

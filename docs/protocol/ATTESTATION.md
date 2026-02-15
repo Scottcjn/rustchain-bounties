@@ -15,13 +15,13 @@ The miner client executes a suite of checks to prove its physical identity. If a
 
 | Check ID | Name | Description |
 |---|---|---|
-| **Check 1** | **Anti-Emulation** | Detects VM signatures (e.g., VirtIO, VMware/VirtualBox MACs, QEMU CPU flags). |
-| **Check 2** | **CPU Features** | Verifies specific hardware flags (e.g., AltiVec for PowerPC, AVX-512 for modern x86) to match claimed architecture. |
-| **Check 3** | **I/O Latency** | Measures disk and network stack jitter. Emulated I/O paths typically show lower jitter than physical disks. |
-| **Check 4** | **Serial Binding** | Extracts and binds the submission to hardware serials (DMI/UUID on Linux, IOKit on macOS). |
-| **Check 5** | **MAC Consistency** | Verifies the hardware MAC address against vendor OUI databases to ensure it's not a spoofed virtual interface. |
-| **Check 6** | **Network Topology** | Analyzes the network path and hostname to ensure it matches a typical physical machine setup. |
-| **+1 Bonus** | **Entropy Score** | Measures CPU clock drift (jitter) using tight execution loops. Higher entropy = more likely to be real silicon. |
+| **Check 1** | **Clock-Skew & Oscillator Drift** | Analyzes the unique timing drift of the hardware oscillator relative to server time. |
+| **Check 2** | **Cache Timing Fingerprint** | Measures memory latency patterns across cache lines to identify physical CPU geometry. |
+| **Check 3** | **SIMD Unit Identity** | Verifies the specific implementation of SIMD units (e.g., AltiVec, SSE, NEON) to match claimed silicon. |
+| **Check 4** | **Thermal Drift Entropy** | Captures fluctuations in processing speed caused by thermal throttling and ambient environment. |
+| **Check 5** | **Instruction Path Jitter** | Measures microscopic variations in the execution time of complex instruction sequences. |
+| **Check 6** | **Anti-Emulation / VM Detection** | Deep scan for virtualization artifacts, hypervisor signatures, and emulated device drivers. |
+| **+1 Bonus** | **Physical Context** | Weighted verification of hardware serials and MAC consistency against manufacturing databases. |
 
 ### 3. Submission Phase
 The miner constructs a JSON payload containing the hardware report and a cryptographic commitment.

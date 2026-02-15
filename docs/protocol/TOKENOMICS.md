@@ -16,11 +16,10 @@ Rewards are based on **rarity + preservation value**, not just raw age.
 
 | Tier | Base Multiplier | Examples |
 | :--- | :--- | :--- |
-| **Legendary** | 3.0x | Intel 386, Motorola 68000, MIPS R2000 |
+| **Legendary** | 4.0x | Intel 386, Motorola 68000, MIPS R2000 |
 | **Epic** | 2.5x | PowerPC G4, 486, Pentium I |
 | **Rare** | 2.0x | PowerPC G5, DEC Alpha, SPARC, POWER8 |
 | **Common** | 0.8x - 1.0x | Modern x86_64 (Skylake+, Zen 3+) |
-| **Cheap** | 0.0005x | ARM (Raspberry Pi, cheap SBCs) |
 | **Flagged** | 0x | VMs, Emulators (failed fingerprints) |
 
 #### 2. Time Decay (For Vintage Hardware)
@@ -37,7 +36,7 @@ Modern hardware (≤ 5 years old) that might have a lower base multiplier can ea
 Enterprise-class CPUs (Intel Xeon, AMD EPYC/Opteron) receive a flat **+10% bonus** on top of their final calculated multiplier.
 
 ## Rationale
-- **ARM Penalty**: Raspberry Pis and cheap ARM chips are penalized (0.0005x) to prevent "mining farms" that would centralize the network.
+- **Hardware Diversity**: Low-power devices like Raspberry Pis or modern ARM SBCs receive lower multipliers to prevent "mining farms" from centralizing the network.
 - **VM/Emulator Exclusion**: VMs receive 0x rewards because they do not contribute to the preservation of physical computing history.
 - **Fairness**: By prioritizing unique hardware serials and antiquity, the network remains accessible to enthusiasts rather than just those with massive capital.
 

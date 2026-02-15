@@ -25,22 +25,25 @@ A coordination layer (Beacon 2.6 protocol) that allows miners and AI agents to:
 To prevent long-range attacks and ensure data integrity, RustChain periodically "anchors" its state to the Ergo blockchain.
 
 ### How Anchoring Works
-1. **Commitment Generation**: Every 144 RustChain blocks (~24 hours), the node calculates a **Merkle Root** of the current state, including:
+1. **Commitment Generation**: Every 144 RustChain blocks (~24 hours), the node calculates a **Blake2b256 commitment hash** of the current state, including:
    - Block hashes.
    - Attestation records.
    - Ledger balances.
 2. **Ergo Transaction**: The node creates a special transaction on the Ergo blockchain.
 3. **Register Storage**: The RustChain commitments are stored directly in the Ergo transaction registers:
-   - **R4**: RustChain block height.
-   - **R5**: Commitment hash (Blake2b256).
-   - **R6**: Timestamp.
+   - **R4**: commitment (Blake2b256 hash)
+   - **R5**: miner_count
+   - **R6**: miner_ids
+   - **R7**: architectures
+   - **R8**: slot_height
+   - **R9**: timestamp
 4. **Finality**: Once the Ergo transaction reaches 6+ confirmations, the corresponding RustChain state is considered immutable.
 
 ### Verification of Proof
 Any external auditor can verify a RustChain block by:
 1. Fetching the anchor transaction ID from the RustChain node.
-2. Querying the Ergo blockchain to retrieve the hash stored in Register R5.
-3. Locally recalculating the RustChain state Merkle Root and comparing it to the anchored hash.
+2. Querying the Ergo blockchain to retrieve the hash stored in Register R4.
+3. Locally recalculating the RustChain state commitment and comparing it to the anchored hash.
 
 ## Data Flow Diagram
 ```mermaid
