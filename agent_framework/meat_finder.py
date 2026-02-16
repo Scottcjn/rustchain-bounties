@@ -6,7 +6,8 @@ import os
 from typing import List, Dict
 
 # Configuration
-MEAT_LOG = "/Users/xr/clawd/meat_finder.log"
+DEFAULT_LOG_PATH = os.path.join(os.path.dirname(__file__), "meat_finder.log")
+MEAT_LOG = os.getenv("MEAT_LOG", DEFAULT_LOG_PATH)
 KEYWORDS = ["python", "scraping", "crawler", "bot", "automation", "script", "data"]
 MIN_BOUNTY_USD = 10.0
 
@@ -23,12 +24,22 @@ class MeatFinder:
         """Scans Scottcjn's repos for open bounties."""
         repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
         for repo in repos:
-            url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty"
-            try:
-                resp = requests.get(url, timeout=15)
-                if resp.status_code == 200:
+            page = 1
+            while True:
+                url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100&page={page}"
+                try:
+                    resp = requests.get(url, timeout=15)
+                    if resp.status_code != 200:
+                        break
                     issues = resp.json()
+                    if not issues:
+                        break
+
                     for issue in issues:
+                        # GitHub issues API returns PRs too; skip them explicitly.
+                        if issue.get("pull_request"):
+                            continue
+
                         title = issue.get("title", "").lower()
                         body = issue.get("body", "").lower()
                         if any(k in title or k in body for k in KEYWORDS):
@@ -39,8 +50,14 @@ class MeatFinder:
                                 "url": issue["html_url"],
                                 "tags": [l["name"] for l in issue.get("labels", [])]
                             })
-            except Exception as e:
-                print(f"GitHub scan error for {repo}: {e}")
+
+                    # Continue pagination when current page is full.
+                    if len(issues) < 100:
+                        break
+                    page += 1
+                except Exception as e:
+                    print(f"GitHub scan error for {repo}: {e}")
+                    break
 
     def scan_bountycaster_proxy(self):
         """
@@ -67,6 +84,9 @@ class MeatFinder:
         return "\n".join(report_lines)
 
     def save_log(self):
+        log_dir = os.path.dirname(MEAT_LOG)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
         with open(MEAT_LOG, "a") as f:
             f.write(f"--- Scan at {time.ctime()} ---\n")
             f.write(json.dumps(self.found_tasks, indent=2))
