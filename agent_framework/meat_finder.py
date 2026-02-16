@@ -3,6 +3,7 @@ import json
 import time
 import requests
 import os
+import re
 from typing import List, Dict, Optional
 
 # Configuration
@@ -42,6 +43,13 @@ class MeatFinder:
                     return seg[1:-1]
         return None
 
+    def _extract_rtc_reward(self, text: str) -> int:
+        """Best-effort RTC reward extraction from title/body for payout-first ranking."""
+        matches = re.findall(r"(\d{1,6})\s*RTC", text, flags=re.IGNORECASE)
+        if not matches:
+            return 0
+        return max(int(v) for v in matches)
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
@@ -73,12 +81,16 @@ class MeatFinder:
                             if task_id in self._seen_ids:
                                 continue
                             self._seen_ids.add(task_id)
+                            reward_rtc = self._extract_rtc_reward(
+                                f"{issue.get('title', '')}\n{issue.get('body', '')}"
+                            )
                             self.found_tasks.append({
                                 "platform": "GitHub",
                                 "id": task_id,
                                 "title": issue["title"],
                                 "url": issue["html_url"],
-                                "tags": [l["name"] for l in issue.get("labels", [])]
+                                "tags": [l["name"] for l in issue.get("labels", [])],
+                                "reward_rtc": reward_rtc,
                             })
 
                     # Follow GitHub Link headers for robust pagination.
@@ -105,8 +117,14 @@ class MeatFinder:
             return "No new 'meat' found in this cycle."
         
         report_lines = ["🥩 **Found New Meat!**"]
-        for task in sorted(self.found_tasks, key=lambda t: t.get("id", "")):
-            line = f"- [{task['platform']}] {task['title']} ({task['url']})"
+        ordered_tasks = sorted(
+            self.found_tasks,
+            key=lambda t: (-int(t.get("reward_rtc", 0)), t.get("id", "")),
+        )
+        for task in ordered_tasks:
+            reward = int(task.get("reward_rtc", 0))
+            reward_suffix = f" [~{reward} RTC]" if reward > 0 else ""
+            line = f"- [{task['platform']}] {task['title']}{reward_suffix} ({task['url']})"
             report_lines.append(line)
         
         return "\n".join(report_lines)

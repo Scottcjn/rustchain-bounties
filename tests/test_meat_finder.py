@@ -46,6 +46,20 @@ class MeatFinderTests(unittest.TestCase):
             else:
                 os.environ["GITHUB_TOKEN"] = prev_github
 
+    def test_extract_rtc_reward_and_report_ordering(self):
+        finder = MeatFinder()
+        self.assertEqual(finder._extract_rtc_reward("Bounty 75 RTC"), 75)
+        self.assertEqual(finder._extract_rtc_reward("Mixed 20 rtc and 150 RTC"), 150)
+        self.assertEqual(finder._extract_rtc_reward("No reward listed"), 0)
+
+        finder.found_tasks = [
+            {"platform": "GitHub", "id": "r#2", "title": "lower", "url": "u2", "reward_rtc": 25},
+            {"platform": "GitHub", "id": "r#1", "title": "higher", "url": "u1", "reward_rtc": 100},
+        ]
+        report = finder.report()
+        self.assertLess(report.find("higher"), report.find("lower"))
+        self.assertIn("~100 RTC", report)
+
     def test_scan_skips_prs_and_follows_pagination(self):
         calls = []
 
