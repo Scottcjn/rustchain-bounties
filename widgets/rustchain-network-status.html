@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain 网络状态监控</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #eaeaea;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #8892b0;
+            margin-bottom: 30px;
+        }
+        
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .node-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .node-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .node-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #eaeaea;
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.healthy {
+            background: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+        
+        .status-indicator.slow {
+            background: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+        
+        .status-indicator.down {
+            background: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        
+        .status-indicator.unknown {
+            background: #6b7280;
+            box-shadow: 0 0 20px rgba(107, 114, 128, 0.5);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .status-text {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .status-text.healthy {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .status-text.slow {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        
+        .status-text.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .status-text.unknown {
+            background: rgba(107, 114, 128, 0.2);
+            color: #6b7280;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            color: #8892b0;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            color: #eaeaea;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+        
+        .uptime-section {
+            margin-top: 20px;
+        }
+        
+        .uptime-section h3 {
+            color: #a8b2d1;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .uptime-bars {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .uptime-bar {
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        .uptime-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .uptime-bar-header span {
+            color: #8892b0;
+            font-size: 0.85em;
+        }
+        
+        .uptime-bar-progress {
+            height: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .uptime-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 8px;
+            transition: width 0.5s ease;
+        }
+        
+        .uptime-bar-fill.warning {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .uptime-bar-fill.error {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .response-time-section {
+            margin-top: 20px;
+        }
+        
+        .response-time-section h3 {
+            color: #a8b2d1;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .response-time-chart {
+            height: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .response-time-bar {
+            width: 30px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.3s ease;
+        }
+        
+        .response-time-bar.slow {
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .response-time-bar.down {
+            background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .response-time-labels {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .response-time-labels span {
+            color: #8892b0;
+            font-size: 0.8em;
+        }
+        
+        .global-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .global-stat {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .global-stat h3 {
+            color: #a8b2d1;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .global-stat .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #eaeaea;
+        }
+        
+        .global-stat .sub {
+            color: #8892b0;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8892b0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nodes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .uptime-bars {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 RustChain 网络状态监控</h1>
+        <p class="subtitle">实时监控所有 RustChain 节点的健康状态</p>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载节点数据...</p>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="nodes-grid" id="nodes-grid">
+            </div>
+            
+            <div class="global-stats">
+                <div class="global-stat">
+                    <h3>网络总体状态</h3>
+                    <div class="value" id="overall-status">-</div>
+                </div>
+                <div class="global-stat">
+                    <h3>平均响应时间</h3>
+                    <div class="value" id="avg-response-time">-</div>
+                </div>
+                <div class="global-stat">
+                    <h3>平均正常运行时间</h3>
+                    <div class="value" id="avg-uptime">-</div>
+                </div>
+            </div>
+            
+            <div class="last-updated">
+                最后更新: <span id="last-updated">-</span> | 自动刷新: 每 60 秒
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NODES = [
+            {
+                name: 'Primary',
+                url: 'https://50.28.86.131/health',
+                description: '主节点'
+            },
+            {
+                name: 'Ergo Anchor',
+                url: 'https://50.28.86.153/health',
+                description: 'Ergo 锚点'
+            },
+            {
+                name: 'External',
+                url: 'http://76.8.228.245:8099/health',
+                description: '外部节点'
+            }
+        ];
+        
+        const SLOW_THRESHOLD = 2000; // 2秒
+        const REFRESH_INTERVAL = 60000; // 60秒
+        
+        let nodeStatus = {};
+        let uptimeHistory = {}; // 存储历史数据用于计算正常运行时间
+        let responseTimeHistory = {}; // 存储响应时间历史
+        
+        async function checkNode(node) {
+            const startTime = Date.now();
+            try {
+                const response = await fetch(node.url, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000) // 5秒超时
+                });
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        status: 'healthy',
+                        responseTime: responseTime,
+                        data: data
+                    };
+                } else {
+                    return {
+                        status: 'down',
+                        responseTime: responseTime,
+                        error: `HTTP ${response.status}`
+                    };
+                }
+            } catch (error) {
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                return {
+                    status: 'down',
+                    responseTime: responseTime,
+                    error: error.message
+                };
+            }
+        }
+        
+        async function checkAllNodes() {
+            const startTime = Date.now();
+            
+            // 检查所有节点
+            const checks = NODES.map(async (node) => {
+                const result = await checkNode(node);
+                return { node, ...result };
+            });
+            
+            const results = await Promise.all(checks);
+            
+            // 更新节点状态
+            results.forEach(result => {
+                const nodeKey = result.node.name;
+                
+                // 初始化历史记录
+                if (!uptimeHistory[nodeKey]) {
+                    uptimeHistory[nodeKey] = { checks: 0, healthy: 0 };
+                }
+                if (!responseTimeHistory[nodeKey]) {
+                    responseTimeHistory[nodeKey] = [];
+                }
+                
+                // 更新统计
+                uptimeHistory[nodeKey].checks++;
+                if (result.status === 'healthy') {
+                    uptimeHistory[nodeKey].healthy++;
+                }
+                
+                // 记录响应时间（保留最近100次）
+                responseTimeHistory[nodeKey].push(result.responseTime);
+                if (responseTimeHistory[nodeKey].length > 100) {
+                    responseTimeHistory[nodeKey].shift();
+                }
+                
+                nodeStatus[nodeKey] = result;
+            });
+            
+            // 更新UI
+            updateDashboard();
+            updateGlobalStats();
+            
+            // 更新时间戳
+            document.getElementById('last-updated').textContent = new Date().toLocaleString('zh-CN');
+            
+            console.log(`所有节点检查完成，耗时 ${Date.now() - startTime}ms`);
+        }
+        
+        function updateDashboard() {
+            const grid = document.getElementById('nodes-grid');
+            grid.innerHTML = '';
+            
+            NODES.forEach(node => {
+                const status = nodeStatus[node.name];
+                const card = createNodeCard(node, status);
+                grid.appendChild(card);
+            });
+        }
+        
+        function createNodeCard(node, status) {
+            const card = document.createElement('div');
+            card.className = 'node-card';
+            
+            if (!status) {
+                status = {
+                    status: 'unknown',
+                    responseTime: '-',
+                    error: '检查中...'
+                };
+            }
+            
+            // 确定状态类
+            let statusClass = 'unknown';
+            if (status.status === 'healthy') {
+                statusClass = status.responseTime > SLOW_THRESHOLD ? 'slow' : 'healthy';
+            } else if (status.status === 'down') {
+                statusClass = 'down';
+            }
+            
+            // 计算正常运行时间
+            const uptime = uptimeHistory[node.name];
+            const uptimePercent = uptime ? ((uptime.healthy / uptime.checks) * 100).toFixed(1) : '-';
+            
+            // 计算平均响应时间
+            const responseTimes = responseTimeHistory[node.name] || [];
+            const avgResponseTime = responseTimes.length > 0 
+                ? (responseTimes.reduce((sum, t) => sum + t, 0) / responseTimes.length).toFixed(0)
+                : '-';
+            
+            card.innerHTML = `
+                <div class="node-header">
+                    <div class="node-name">${node.name}</div>
+                    <div class="status-indicator ${statusClass}"></div>
+                </div>
+                <div class="status-text ${statusClass}">
+                    ${status.status === 'healthy' && status.responseTime > SLOW_THRESHOLD ? '⚠️ 响应较慢' : 
+                      status.status === 'healthy' ? '✅ 正常运行' : 
+                      status.status === 'down' ? '❌ 节点离线' : '⏳ 未知状态'}
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">响应时间</div>
+                        <div class="stat-value">${status.responseTime === '-' ? '-' : status.responseTime + ' ms'}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">平均响应</div>
+                        <div class="stat-value">${avgResponseTime === '-' ? '-' : avgResponseTime + ' ms'}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">正常运行时间</div>
+                        <div class="stat-value">${uptimePercent === '-' ? '-' : uptimePercent + '%'}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">检查次数</div>
+                        <div class="stat-value">${uptime ? uptime.checks : '-'}</div>
+                    </div>
+                </div>
+                <div class="uptime-section">
+                    <h3>历史正常运行时间</h3>
+                    <div class="uptime-bars">
+                        <div class="uptime-bar">
+                            <div class="uptime-bar-header">
+                                <span>最近24小时</span>
+                            </div>
+                            <div class="uptime-bar-progress">
+                                <div class="uptime-bar-fill ${uptimePercent < 95 ? uptimePercent < 80 ? 'error' : 'warning' : ''}" 
+                                     style="width: ${uptimePercent === '-' ? 0 : uptimePercent}%"></div>
+                            </div>
+                        </div>
+                        <div class="uptime-bar">
+                            <div class="uptime-bar-header">
+                                <span>最近7天</span>
+                            </div>
+                            <div class="uptime-bar-progress">
+                                <div class="uptime-bar-fill" style="width: ${uptimePercent === '-' ? 0 : uptimePercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${status.data ? `
+                <div class="response-time-section">
+                    <h3>节点信息</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
+                        <div><strong>版本:</strong> ${status.data.version || '-'}</div>
+                        <div><strong>正常运行时间:</strong> ${formatUptime(status.data.uptime_s)}</div>
+                        <div><strong>数据库读写:</strong> ${status.data.db_rw ? '✅' : '❌'}</div>
+                        <div><strong>区块延迟:</strong> ${status.data.tip_age_slots !== undefined ? status.data.tip_age_slots + ' slots' : '-'}</div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            return card;
+        }
+        
+        function formatUptime(seconds) {
+            if (!seconds) return '-';
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (days > 0) {
+                return `${days}天 ${hours}小时`;
+            } else if (hours > 0) {
+                return `${hours}小时 ${minutes}分钟`;
+            } else {
+                return `${minutes}分钟`;
+            }
+        }
+        
+        function updateGlobalStats() {
+            // 计算总体状态
+            const healthyCount = Object.values(nodeStatus).filter(s => s && s.status === 'healthy').length;
+            const totalCount = NODES.length;
+            
+            let overallStatus = 'unknown';
+            let overallStatusText = '未知';
+            
+            if (healthyCount === totalCount) {
+                overallStatus = 'healthy';
+                overallStatusText = '所有节点正常';
+            } else if (healthyCount > 0) {
+                overallStatus = 'slow';
+                overallStatusText = `部分节点离线 (${healthyCount}/${totalCount})`;
+            } else {
+                overallStatus = 'down';
+                overallStatusText = '所有节点离线';
+            }
+            
+            document.getElementById('overall-status').textContent = overallStatusText;
+            document.getElementById('overall-status').className = 'value ' + overallStatus;
+            
+            // 计算平均响应时间
+            const allResponseTimes = Object.values(nodeStatus)
+                .filter(s => s && s.status === 'healthy')
+                .map(s => s.responseTime);
+            
+            if (allResponseTimes.length > 0) {
+                const avgResponse = allResponseTimes.reduce((sum, t) => sum + t, 0) / allResponseTimes.length;
+                document.getElementById('avg-response-time').textContent = avgResponse.toFixed(0) + ' ms';
+            } else {
+                document.getElementById('avg-response-time').textContent = '-';
+            }
+            
+            // 计算平均正常运行时间
+            const allUptimes = Object.values(uptimeHistory)
+                .filter(u => u && u.checks > 0)
+                .map(u => (u.healthy / u.checks) * 100);
+            
+            if (allUptimes.length > 0) {
+                const avgUptime = allUptimes.reduce((sum, u) => sum + u, 0) / allUptimes.length;
+                document.getElementById('avg-uptime').textContent = avgUptime.toFixed(1) + '%';
+            } else {
+                document.getElementById('avg-uptime').textContent = '-';
+            }
+        }
+        
+        // 初始化
+        async function init() {
+            await checkAllNodes();
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            
+            // 设置自动刷新
+            setInterval(checkAllNodes, REFRESH_INTERVAL);
+        }
+        
+        // 扩展 AbortSignal 的 timeout 方法
+        if (!AbortSignal.timeout) {
+            AbortSignal.timeout = function(ms) {
+                const controller = new AbortController();
+                setTimeout(() => controller.abort(), ms);
+                return controller.signal;
+            };
+        }
+        
+        // 页面加载时启动
+        window.onload = init;
+    </script>
+</body>
+</html>

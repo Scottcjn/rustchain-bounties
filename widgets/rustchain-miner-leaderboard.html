@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain 矿工排行榜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #eaeaea;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #8892b0;
+            margin-bottom: 30px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #a8b2d1;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #eaeaea;
+        }
+        
+        .stat-card .sub {
+            color: #8892b0;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #eaeaea;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        .leaderboard-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th {
+            background: rgba(102, 126, 234, 0.2);
+            color: #eaeaea;
+            font-weight: 600;
+            padding: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .leaderboard-table th:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+        
+        .leaderboard-table th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.5;
+        }
+        
+        .leaderboard-table th.sort-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+        
+        .leaderboard-table th.sort-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+        
+        .leaderboard-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease;
+        }
+        
+        .leaderboard-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .rank {
+            font-weight: bold;
+            text-align: center !important;
+            width: 80px;
+        }
+        
+        .rank-1 { color: #ffd700; font-size: 1.2em; }
+        .rank-2 { color: #c0c0c0; font-size: 1.1em; }
+        .rank-3 { color: #cd7f32; font-size: 1.1em; }
+        
+        .miner-id {
+            font-family: 'Courier New', monospace;
+            color: #a8b2d1;
+        }
+        
+        .hardware-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hardware-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.5em;
+        }
+        
+        .hardware-icon.vintage {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        }
+        
+        .hardware-icon.modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hardware-icon.exotic {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .hardware-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .hardware-type {
+            font-weight: 600;
+            color: #eaeaea;
+        }
+        
+        .hardware-family {
+            color: #8892b0;
+            font-size: 0.85em;
+        }
+        
+        .multiplier {
+            text-align: center !important;
+        }
+        
+        .multiplier-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .multiplier-badge.vintage {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #1a1a2e;
+        }
+        
+        .multiplier-badge.exotic {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #eaeaea;
+        }
+        
+        .multiplier-badge.modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #eaeaea;
+        }
+        
+        .value {
+            font-weight: bold;
+            color: #eaeaea;
+        }
+        
+        .usd {
+            color: #8892b0;
+            font-size: 0.85em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8892b0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .leaderboard-table {
+                font-size: 0.9em;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 10px;
+            }
+            
+            .hardware-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 RustChain 矿工排行榜</h1>
+        <p class="subtitle">顶级收益矿工与硬件展示</p>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载矿工数据...</p>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <h3>总矿工数</h3>
+                    <div class="value" id="total-miners">-</div>
+                    <div class="sub" id="total-epochs">活跃Epoch: -</div>
+                </div>
+                <div class="stat-card">
+                    <h3>总发放RTC</h3>
+                    <div class="value" id="total-rtc">-</div>
+                    <div class="sub">累计奖励</div>
+                </div>
+                <div class="stat-card">
+                    <h3>最稀有硬件</h3>
+                    <div class="value" id="rarest-hardware">-</div>
+                    <div class="sub">最高乘数</div>
+                </div>
+                <div class="stat-card">
+                    <h3>最新矿工</h3>
+                    <div class="value" id="newest-miner">-</div>
+                    <div class="sub" id="newest-miner-hardware">-</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn active" onclick="sortBy('multiplier')">按乘数排序</button>
+                <button class="btn" onclick="sortBy('epochs')">按活跃Epoch排序</button>
+                <button class="btn" onclick="sortBy('earnings')">按收益排序</button>
+                <button class="btn" onclick="loadData()">🔄 刷新数据</button>
+            </div>
+            
+            <div class="leaderboard-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortBy('multiplier')">排名</th>
+                            <th>矿工ID</th>
+                            <th>硬件信息</th>
+                            <th class="sortable" onclick="sortBy('multiplier')">乘数</th>
+                            <th class="sortable" onclick="sortBy('epochs')">活跃Epoch</th>
+                            <th class="sortable" onclick="sortBy('earnings')">估计收益</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="last-updated">
+                最后更新: <span id="last-updated">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RTC_PER_EPOCH = 1.5;
+        const SECONDS_PER_EPOCH = 600;
+        const EPOCHS_PER_DAY = 86400 / SECONDS_PER_EPOCH;
+        const RTC_PRICE_USD = 0.10;
+        
+        let miners = [];
+        let currentSort = 'multiplier';
+        let sortDirection = 'desc';
+        
+        async function loadMinerData() {
+            try {
+                const response = await fetch('https://50.28.86.131/api/miners');
+                miners = await response.json();
+                
+                // 计算估计收益
+                miners.forEach(miner => {
+                    miner.estimatedEarnings = calculateEarnings(miner);
+                });
+                
+                updateDashboard();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+            } catch (error) {
+                console.error('加载矿工数据失败:', error);
+                document.getElementById('loading').innerHTML = `
+                    <p style="color: #f5576c;">❌ 加载矿工数据失败</p>
+                    <p style="color: #8892b0; margin-top: 10px;">请检查网络连接或稍后重试</p>
+                    <button onclick="loadMinerData()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer;">重试</button>
+                `;
+            }
+        }
+        
+        function calculateEarnings(miner) {
+            const multiplier = miner.antiquity_multiplier || 1;
+            const epochsActive = miner.last_attest || 0;
+            
+            // 简单估算：每epoch收益 * 乘数 / 总乘数
+            const totalMultiplier = miners.reduce((sum, m) => sum + (m.antiquity_multiplier || 1), 0);
+            const share = totalMultiplier > 0 ? multiplier / totalMultiplier : 0;
+            
+            const earningsPerEpoch = share * RTC_PER_EPOCH;
+            const estimatedEarnings = epochsActive * earningsPerEpoch;
+            
+            return {
+                perEpoch: earningsPerEpoch,
+                total: estimatedEarnings,
+                usd: estimatedEarnings * RTC_PRICE_USD
+            };
+        }
+        
+        function sortBy(field) {
+            // 更新排序按钮状态
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 切换排序方向
+            if (currentSort === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort = field;
+                sortDirection = 'desc';
+            }
+            
+            // 排序数据
+            miners.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch(field) {
+                    case 'multiplier':
+                        valueA = a.antiquity_multiplier || 1;
+                        valueB = b.antiquity_multiplier || 1;
+                        break;
+                    case 'epochs':
+                        valueA = a.last_attest || 0;
+                        valueB = b.last_attest || 0;
+                        break;
+                    case 'earnings':
+                        valueA = a.estimatedEarnings?.total || 0;
+                        valueB = b.estimatedEarnings?.total || 0;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (sortDirection === 'asc') {
+                    return valueA - valueB;
+                } else {
+                    return valueB - valueA;
+                }
+            });
+            
+            // 更新表头排序指示器
+            document.querySelectorAll('.leaderboard-table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            const headerIndex = {
+                'multiplier': 3,
+                'epochs': 4,
+                'earnings': 5
+            }[field];
+            
+            if (headerIndex !== undefined) {
+                const headerCell = document.querySelector(`.leaderboard-table th:nth-child(${headerIndex + 1})`);
+                if (headerCell) {
+                    headerCell.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            }
+            
+            updateLeaderboard();
+        }
+        
+        function updateDashboard() {
+            // 更新统计卡片
+            document.getElementById('total-miners').textContent = miners.length;
+            
+            // 计算总发放RTC
+            const totalEpochs = miners.reduce((sum, m) => sum + (m.last_attest || 0), 0);
+            const totalRTC = totalEpochs * RTC_PER_EPOCH;
+            document.getElementById('total-rtc').textContent = totalRTC.toFixed(0) + ' RTC';
+            
+            // 计算最稀有硬件（最高乘数）
+            const rarest = miners.reduce((max, m) => {
+                const mult = m.antiquity_multiplier || 1;
+                const maxMult = max.antiquity_multiplier || 1;
+                return mult > maxMult ? m : max;
+            }, miners[0]);
+            
+            if (rarest) {
+                const rarestMult = rarest.antiquity_multiplier || 1;
+                document.getElementById('rarest-hardware').textContent = `${rarest.device_family || '-'} ${rarest.device_arch || '-'}`;
+                document.getElementById('rarest-hardware').innerHTML += `<div class="sub">乘数: ${rarestMult}x</div>`;
+            }
+            
+            // 最新矿工
+            const newest = miners.reduce((min, m) => {
+                const lastAttestA = m.last_attest || 0;
+                const lastAttestB = min.last_attest || 0;
+                return lastAttestA > lastAttestB ? m : min;
+            }, miners[0]);
+            
+            if (newest) {
+                document.getElementById('newest-miner').textContent = formatMinerId(newest.miner);
+                document.getElementById('newest-miner-hardware').textContent = `${newest.device_family || '-'} ${newest.device_arch || '-'}`;
+            }
+            
+            updateLeaderboard();
+        }
+        
+        function updateLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            
+            miners.forEach((miner, index) => {
+                const row = document.createElement('tr');
+                
+                // 确定硬件类型
+                let hardwareType = 'modern';
+                if (miner.antiquity_multiplier >= 2.0) {
+                    hardwareType = 'vintage';
+                } else if (miner.antiquity_multiplier >= 1.5 && miner.antiquity_multiplier < 2.0) {
+                    hardwareType = 'exotic';
+                }
+                
+                // 确定硬件图标emoji
+                const hardwareEmoji = getHardwareEmoji(miner.device_family, miner.device_arch);
+                
+                row.innerHTML = `
+                    <td class="rank rank-${index + 1}">${index + 1}</td>
+                    <td class="miner-id">${formatMinerId(miner.miner)}</td>
+                    <td>
+                        <div class="hardware-info">
+                            <div class="hardware-icon ${hardwareType}">
+                                ${hardwareEmoji}
+                            </div>
+                            <div class="hardware-details">
+                                <div class="hardware-type">${miner.device_family || '-'}</div>
+                                <div class="hardware-family">${miner.device_arch || '-'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="multiplier">
+                        <span class="multiplier-badge ${hardwareType}">${miner.antiquity_multiplier || 1}x</span>
+                    </td>
+                    <td>${(miner.last_attest || 0).toLocaleString()}</td>
+                    <td>
+                        <div class="value">${miner.estimatedEarnings?.total?.toFixed(1) || 0} RTC</div>
+                        <div class="usd">≈ $${miner.estimatedEarnings?.usd?.toFixed(2) || 0}</div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function formatMinerId(minerId) {
+            if (!minerId) return '-';
+            if (minerId.length <= 12) return minerId;
+            return minerId.substring(0, 6) + '...' + minerId.substring(minerId.length - 4);
+        }
+        
+        function getHardwareEmoji(family, arch) {
+            const familyLower = (family || '').toLowerCase();
+            const archLower = (arch || '').toLowerCase();
+            
+            if (familyLower.includes('powerpc') || familyLower.includes('power')) {
+                if (archLower.includes('g4')) return '💿';
+                if (archLower.includes('g5')) return '🖥️';
+                if (archLower.includes('power8') || archLower.includes('power9')) return '🏢';
+                return '🖥️';
+            }
+            
+            if (familyLower.includes('sparc')) {
+                return '🌞';
+            }
+            
+            if (familyLower.includes('mips')) {
+                return '🎮';
+            }
+            
+            if (familyLower.includes('arm') || familyLower.includes('apple silicon') || familyLower.includes('aarch64')) {
+                return '🍎';
+            }
+            
+            if (familyLower.includes('x86') || familyLower.includes('x64')) {
+                return '💻';
+            }
+            
+            return '❓';
+        }
+        
+        function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            loadMinerData();
+        }
+        
+        // 页面加载时获取数据
+        window.onload = loadMinerData;
+    </script>
+</body>
+</html>
