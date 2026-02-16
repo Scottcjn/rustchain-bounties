@@ -91,6 +91,40 @@ class MeatFinderTests(unittest.TestCase):
             else:
                 os.environ["MEAT_MIN_RTC"] = prev_min
 
+    def test_scan_retries_transient_failures(self):
+        calls = {"count": 0}
+
+        page = [
+            {
+                "number": 9,
+                "title": "Automation helper",
+                "body": "bot script",
+                "html_url": "https://github.com/a/9",
+                "labels": [{"name": "bounty"}],
+            }
+        ]
+
+        def fake_get(url, headers=None, timeout=15):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                return FakeResp(502, {"message": "bad gateway"}, headers={})
+            return FakeResp(200, page, headers={})
+
+        original_get = meat_finder.requests.get
+        original_sleep = meat_finder.time.sleep
+        meat_finder.requests.get = fake_get  # type: ignore[assignment]
+        meat_finder.time.sleep = lambda *_args, **_kwargs: None  # type: ignore[assignment]
+        try:
+            finder = MeatFinder()
+            finder.scan_github_elyan()
+        finally:
+            meat_finder.requests.get = original_get  # type: ignore[assignment]
+            meat_finder.time.sleep = original_sleep  # type: ignore[assignment]
+
+        self.assertGreaterEqual(calls["count"], 2)
+        ids = [task["id"] for task in finder.found_tasks]
+        self.assertTrue(any("#9" in i for i in ids))
+
     def test_scan_skips_prs_and_follows_pagination(self):
         calls = []
 

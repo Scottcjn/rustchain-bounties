@@ -4,7 +4,7 @@ import time
 import requests
 import os
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 # Configuration
 DEFAULT_LOG_PATH = os.path.join(os.path.dirname(__file__), "meat_finder.log")
@@ -42,6 +42,41 @@ class MeatFinder:
                 if seg.startswith("<") and seg.endswith(">"):
                     return seg[1:-1]
         return None
+
+    def _retry_delay_seconds(self, resp: requests.Response, attempt: int) -> float:
+        retry_after = resp.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return max(0.0, float(retry_after))
+            except ValueError:
+                pass
+        # Small bounded backoff: 1s, 2s, 4s
+        return float(min(4, 2 ** max(0, attempt - 1)))
+
+    def _github_get_with_retry(self, url: str, max_attempts: int = 3, timeout: int = 15) -> Tuple[Optional[requests.Response], Optional[str]]:
+        last_err: Optional[str] = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = requests.get(url, headers=self._github_headers(), timeout=timeout)
+            except Exception as e:
+                last_err = str(e)
+                if attempt < max_attempts:
+                    time.sleep(min(4, 2 ** (attempt - 1)))
+                    continue
+                return None, last_err
+
+            if resp.status_code == 200:
+                return resp, None
+
+            # Retry transient/rate-limit style statuses.
+            if resp.status_code in (403, 429, 500, 502, 503, 504) and attempt < max_attempts:
+                last_err = f"status={resp.status_code}"
+                time.sleep(self._retry_delay_seconds(resp, attempt))
+                continue
+
+            return resp, f"status={resp.status_code}"
+
+        return None, last_err
 
     def _extract_rtc_reward(self, text: str) -> int:
         """Best-effort RTC reward extraction from title/body for payout-first ranking.
@@ -84,9 +119,12 @@ class MeatFinder:
             url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100"
             while url:
                 try:
-                    resp = requests.get(url, headers=self._github_headers(), timeout=15)
-                    if resp.status_code != 200:
-                        print(f"GitHub scan warning for {repo}: status={resp.status_code}")
+                    resp, err = self._github_get_with_retry(url)
+                    if resp is None:
+                        print(f"GitHub scan warning for {repo}: request failed ({err})")
+                        break
+                    if err:
+                        print(f"GitHub scan warning for {repo}: {err}")
                         break
                     issues = resp.json()
                     if not isinstance(issues, list):
