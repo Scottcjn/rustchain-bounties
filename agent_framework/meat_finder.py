@@ -50,6 +50,13 @@ class MeatFinder:
             return 0
         return max(int(v) for v in matches)
 
+    def _max_report_results(self) -> int:
+        raw = os.getenv("MEAT_MAX_RESULTS", "30")
+        try:
+            return max(1, int(raw))
+        except ValueError:
+            return 30
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
@@ -121,12 +128,19 @@ class MeatFinder:
             self.found_tasks,
             key=lambda t: (-int(t.get("reward_rtc", 0)), t.get("id", "")),
         )
-        for task in ordered_tasks:
+
+        limit = self._max_report_results()
+        visible_tasks = ordered_tasks[:limit]
+        for task in visible_tasks:
             reward = int(task.get("reward_rtc", 0))
             reward_suffix = f" [~{reward} RTC]" if reward > 0 else ""
             line = f"- [{task['platform']}] {task['title']}{reward_suffix} ({task['url']})"
             report_lines.append(line)
-        
+
+        hidden_count = len(ordered_tasks) - len(visible_tasks)
+        if hidden_count > 0:
+            report_lines.append(f"…and {hidden_count} more matches (set MEAT_MAX_RESULTS to adjust output size).")
+
         return "\n".join(report_lines)
 
     def save_log(self):

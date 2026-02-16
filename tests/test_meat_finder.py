@@ -47,18 +47,31 @@ class MeatFinderTests(unittest.TestCase):
                 os.environ["GITHUB_TOKEN"] = prev_github
 
     def test_extract_rtc_reward_and_report_ordering(self):
-        finder = MeatFinder()
-        self.assertEqual(finder._extract_rtc_reward("Bounty 75 RTC"), 75)
-        self.assertEqual(finder._extract_rtc_reward("Mixed 20 rtc and 150 RTC"), 150)
-        self.assertEqual(finder._extract_rtc_reward("No reward listed"), 0)
+        prev_max = os.environ.get("MEAT_MAX_RESULTS")
+        try:
+            finder = MeatFinder()
+            self.assertEqual(finder._extract_rtc_reward("Bounty 75 RTC"), 75)
+            self.assertEqual(finder._extract_rtc_reward("Mixed 20 rtc and 150 RTC"), 150)
+            self.assertEqual(finder._extract_rtc_reward("No reward listed"), 0)
 
-        finder.found_tasks = [
-            {"platform": "GitHub", "id": "r#2", "title": "lower", "url": "u2", "reward_rtc": 25},
-            {"platform": "GitHub", "id": "r#1", "title": "higher", "url": "u1", "reward_rtc": 100},
-        ]
-        report = finder.report()
-        self.assertLess(report.find("higher"), report.find("lower"))
-        self.assertIn("~100 RTC", report)
+            finder.found_tasks = [
+                {"platform": "GitHub", "id": "r#2", "title": "lower", "url": "u2", "reward_rtc": 25},
+                {"platform": "GitHub", "id": "r#1", "title": "higher", "url": "u1", "reward_rtc": 100},
+            ]
+            report = finder.report()
+            self.assertLess(report.find("higher"), report.find("lower"))
+            self.assertIn("~100 RTC", report)
+
+            os.environ["MEAT_MAX_RESULTS"] = "1"
+            limited_report = finder.report()
+            self.assertIn("higher", limited_report)
+            self.assertNotIn("lower", limited_report)
+            self.assertIn("and 1 more matches", limited_report)
+        finally:
+            if prev_max is None:
+                os.environ.pop("MEAT_MAX_RESULTS", None)
+            else:
+                os.environ["MEAT_MAX_RESULTS"] = prev_max
 
     def test_scan_skips_prs_and_follows_pagination(self):
         calls = []
