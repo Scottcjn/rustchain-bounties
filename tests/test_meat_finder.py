@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from agent_framework.meat_finder import MeatFinder
@@ -20,6 +21,30 @@ class MeatFinderTests(unittest.TestCase):
         link = '<https://api.github.com/x?page=2>; rel="next", <https://api.github.com/x?page=3>; rel="last"'
         self.assertEqual(finder._next_link(link), "https://api.github.com/x?page=2")
         self.assertIsNone(finder._next_link(None))
+
+    def test_headers_pick_up_runtime_token(self):
+        prev_gh = os.environ.get("GH_TOKEN")
+        prev_github = os.environ.get("GITHUB_TOKEN")
+        try:
+            os.environ.pop("GH_TOKEN", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            finder = MeatFinder()
+            self.assertNotIn("Authorization", finder._github_headers())
+
+            os.environ["GH_TOKEN"] = "abc123"
+            self.assertEqual(
+                finder._github_headers().get("Authorization"),
+                "Bearer abc123",
+            )
+        finally:
+            if prev_gh is None:
+                os.environ.pop("GH_TOKEN", None)
+            else:
+                os.environ["GH_TOKEN"] = prev_gh
+            if prev_github is None:
+                os.environ.pop("GITHUB_TOKEN", None)
+            else:
+                os.environ["GITHUB_TOKEN"] = prev_github
 
     def test_scan_skips_prs_and_follows_pagination(self):
         calls = []

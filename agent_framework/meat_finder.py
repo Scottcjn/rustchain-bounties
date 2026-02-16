@@ -10,7 +10,7 @@ DEFAULT_LOG_PATH = os.path.join(os.path.dirname(__file__), "meat_finder.log")
 MEAT_LOG = os.getenv("MEAT_LOG", DEFAULT_LOG_PATH)
 KEYWORDS = ["python", "scraping", "crawler", "bot", "automation", "script", "data"]
 MIN_BOUNTY_USD = 10.0
-GITHUB_TOKEN = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
+# GH token is resolved dynamically per request so runtime env updates are honored.
 
 class MeatFinder:
     """
@@ -27,8 +27,9 @@ class MeatFinder:
             "Accept": "application/vnd.github+json",
             "User-Agent": "raybot-meat-finder"
         }
-        if GITHUB_TOKEN:
-            headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+        github_token = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
+        if github_token:
+            headers["Authorization"] = f"Bearer {github_token}"
         return headers
 
     def _next_link(self, link_header: Optional[str]) -> Optional[str]:
@@ -53,7 +54,11 @@ class MeatFinder:
                         print(f"GitHub scan warning for {repo}: status={resp.status_code}")
                         break
                     issues = resp.json()
-                    if not isinstance(issues, list) or not issues:
+                    if not isinstance(issues, list):
+                        message = issues.get("message") if isinstance(issues, dict) else str(issues)
+                        print(f"GitHub scan warning for {repo}: unexpected payload ({message})")
+                        break
+                    if not issues:
                         break
 
                     for issue in issues:
