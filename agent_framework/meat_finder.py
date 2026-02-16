@@ -44,11 +44,23 @@ class MeatFinder:
         return None
 
     def _extract_rtc_reward(self, text: str) -> int:
-        """Best-effort RTC reward extraction from title/body for payout-first ranking."""
-        matches = re.findall(r"(\d{1,6})\s*RTC", text, flags=re.IGNORECASE)
-        if not matches:
+        """Best-effort RTC reward extraction from title/body for payout-first ranking.
+
+        Supports forms like: 500 RTC, 1,200 RTC, 1k RTC, 2.5k RTC.
+        """
+        pattern = re.compile(r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\s*RTC", re.IGNORECASE)
+        rewards: List[int] = []
+        for num_raw, k_suffix in pattern.findall(text):
+            try:
+                base = float(num_raw.replace(",", ""))
+            except ValueError:
+                continue
+            if k_suffix:
+                base *= 1000
+            rewards.append(int(base))
+        if not rewards:
             return 0
-        return max(int(v) for v in matches)
+        return max(rewards)
 
     def _max_report_results(self) -> int:
         raw = os.getenv("MEAT_MAX_RESULTS", "30")
