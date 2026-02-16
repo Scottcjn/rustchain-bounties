@@ -57,6 +57,14 @@ class MeatFinder:
         except ValueError:
             return 30
 
+    def _min_reward_rtc(self) -> int:
+        """Optional payout floor to suppress low/no-value matches in report output."""
+        raw = os.getenv("MEAT_MIN_RTC", "0")
+        try:
+            return max(0, int(raw))
+        except ValueError:
+            return 0
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
@@ -128,6 +136,15 @@ class MeatFinder:
             self.found_tasks,
             key=lambda t: (-int(t.get("reward_rtc", 0)), t.get("id", "")),
         )
+
+        min_reward = self._min_reward_rtc()
+        if min_reward > 0:
+            ordered_tasks = [
+                t for t in ordered_tasks if int(t.get("reward_rtc", 0)) >= min_reward
+            ]
+
+        if not ordered_tasks:
+            return "No new 'meat' found in this cycle."
 
         limit = self._max_report_results()
         visible_tasks = ordered_tasks[:limit]

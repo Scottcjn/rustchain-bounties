@@ -48,6 +48,7 @@ class MeatFinderTests(unittest.TestCase):
 
     def test_extract_rtc_reward_and_report_ordering(self):
         prev_max = os.environ.get("MEAT_MAX_RESULTS")
+        prev_min = os.environ.get("MEAT_MIN_RTC")
         try:
             finder = MeatFinder()
             self.assertEqual(finder._extract_rtc_reward("Bounty 75 RTC"), 75)
@@ -55,6 +56,7 @@ class MeatFinderTests(unittest.TestCase):
             self.assertEqual(finder._extract_rtc_reward("No reward listed"), 0)
 
             finder.found_tasks = [
+                {"platform": "GitHub", "id": "r#3", "title": "zero", "url": "u3", "reward_rtc": 0},
                 {"platform": "GitHub", "id": "r#2", "title": "lower", "url": "u2", "reward_rtc": 25},
                 {"platform": "GitHub", "id": "r#1", "title": "higher", "url": "u1", "reward_rtc": 100},
             ]
@@ -66,12 +68,26 @@ class MeatFinderTests(unittest.TestCase):
             limited_report = finder.report()
             self.assertIn("higher", limited_report)
             self.assertNotIn("lower", limited_report)
-            self.assertIn("and 1 more matches", limited_report)
+            self.assertIn("and 2 more matches", limited_report)
+
+            os.environ["MEAT_MIN_RTC"] = "50"
+            filtered_report = finder.report()
+            self.assertIn("higher", filtered_report)
+            self.assertNotIn("lower", filtered_report)
+            self.assertNotIn("zero", filtered_report)
+
+            os.environ["MEAT_MIN_RTC"] = "999"
+            empty_report = finder.report()
+            self.assertEqual(empty_report, "No new 'meat' found in this cycle.")
         finally:
             if prev_max is None:
                 os.environ.pop("MEAT_MAX_RESULTS", None)
             else:
                 os.environ["MEAT_MAX_RESULTS"] = prev_max
+            if prev_min is None:
+                os.environ.pop("MEAT_MIN_RTC", None)
+            else:
+                os.environ["MEAT_MIN_RTC"] = prev_min
 
     def test_scan_skips_prs_and_follows_pagination(self):
         calls = []
