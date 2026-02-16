@@ -20,6 +20,7 @@ class MeatFinder:
 
     def __init__(self):
         self.found_tasks = []
+        self._seen_ids = set()
 
     def _github_headers(self) -> Dict[str, str]:
         headers = {
@@ -63,9 +64,13 @@ class MeatFinder:
                         title = issue.get("title", "").lower()
                         body = issue.get("body", "").lower()
                         if any(k in title or k in body for k in KEYWORDS):
+                            task_id = f"{repo}#{issue['number']}"
+                            if task_id in self._seen_ids:
+                                continue
+                            self._seen_ids.add(task_id)
                             self.found_tasks.append({
                                 "platform": "GitHub",
-                                "id": f"{repo}#{issue['number']}",
+                                "id": task_id,
                                 "title": issue["title"],
                                 "url": issue["html_url"],
                                 "tags": [l["name"] for l in issue.get("labels", [])]
@@ -95,7 +100,7 @@ class MeatFinder:
             return "No new 'meat' found in this cycle."
         
         report_lines = ["🥩 **Found New Meat!**"]
-        for task in self.found_tasks:
+        for task in sorted(self.found_tasks, key=lambda t: t.get("id", "")):
             line = f"- [{task['platform']}] {task['title']} ({task['url']})"
             report_lines.append(line)
         

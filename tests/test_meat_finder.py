@@ -48,7 +48,14 @@ class MeatFinderTests(unittest.TestCase):
                 "body": "automation",
                 "html_url": "https://github.com/a/3",
                 "labels": [{"name": "bounty"}],
-            }
+            },
+            {
+                "number": 1,
+                "title": "Automation helper",
+                "body": "bot script",
+                "html_url": "https://github.com/a/1",
+                "labels": [{"name": "bounty"}],
+            },
         ]
 
         def fake_get(url, headers=None, timeout=15):
@@ -69,9 +76,9 @@ class MeatFinderTests(unittest.TestCase):
         finally:
             meat_finder.requests.get = original_get  # type: ignore[assignment]
 
-        # one non-PR from page1 + one from page2, then repeated across repos due same fake
         self.assertGreaterEqual(len(finder.found_tasks), 2)
-        ids = {task["id"] for task in finder.found_tasks}
+        ids = [task["id"] for task in finder.found_tasks]
+        self.assertEqual(len(ids), len(set(ids)))  # duplicate issue IDs are de-duplicated
         self.assertTrue(any("#1" in i for i in ids))
         self.assertFalse(any("#2" in i for i in ids))
         # Ensure auth/user-agent headers are passed through requests
