@@ -235,10 +235,10 @@ def build_claim_template(issue: Dict[str, Any], wallet: str, handle: str) -> str
     title = issue.get("title", "")
     issue_no = issue.get("number")
     return (
-        f"Claiming this bounty.\\n\\n"
-        f"- GitHub: @{handle}\\n"
-        f"- RTC wallet (miner id): {wallet}\\n"
-        f"- Target issue: #{issue_no} {title}\\n"
+        f"Claiming this bounty.\n\n"
+        f"- GitHub: @{handle}\n"
+        f"- RTC wallet (miner id): {wallet}\n"
+        f"- Target issue: #{issue_no} {title}\n"
         f"- Plan: deliver a reviewable PR with validation evidence and bounty-thread submission links."
     )
 

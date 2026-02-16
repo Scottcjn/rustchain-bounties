@@ -7,6 +7,7 @@ from scripts.agent_bounty_hunter import (
     classify_payout_action,
     payout_signal_from_comments,
     discover_monitor_targets,
+    build_claim_template,
 )
 
 
@@ -92,6 +93,11 @@ class AgentHunterTests(unittest.TestCase):
             hunter.gh_get = original  # type: ignore[assignment]
         self.assertEqual(len(targets), 2)
         self.assertEqual(targets[0]["issue"], 34)
+
+    def test_build_claim_template_uses_real_newlines(self):
+        text = build_claim_template({"number": 34, "title": "Agent Bounty"}, wallet="rtc-agent-x", handle="ai-bot")
+        self.assertIn("\n- GitHub: @ai-bot\n", text)
+        self.assertNotIn("\\n", text)
 
 
 if __name__ == "__main__":
