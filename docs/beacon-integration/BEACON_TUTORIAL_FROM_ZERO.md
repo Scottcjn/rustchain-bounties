@@ -153,6 +153,27 @@ including identity bootstrap, heartbeat reporting, and peer discovery.
 
 那你就具备了可审核、可回款的 Beacon 教程交付物。
 
+## 8. 一键自检（交付前 30 秒）
+
+在提交 PR / bounty claim 前，建议跑一次最小自检，确保审核人可复现：
+
+```bash
+set -e
+python3 --version
+python3 quick_beacon_demo.py | tee evidence/demo-output.txt
+python3 - <<'PY'
+from beacon_skill import AgentIdentity
+identity = AgentIdentity.load()
+print(identity.agent_id)
+PY
+```
+
+然后确认三件事：
+
+- `evidence/demo-output.txt` 里有 heartbeat 返回
+- 能打印出稳定的 `agent_id`
+- PR 描述里包含「教程文件路径 + 运行输出 + Agent ID」
+
 下一步建议：
 
 1) 增加 Mayday 示例
