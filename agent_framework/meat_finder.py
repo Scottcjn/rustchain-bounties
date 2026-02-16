@@ -3,13 +3,14 @@ import json
 import time
 import requests
 import os
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # Configuration
 DEFAULT_LOG_PATH = os.path.join(os.path.dirname(__file__), "meat_finder.log")
 MEAT_LOG = os.getenv("MEAT_LOG", DEFAULT_LOG_PATH)
 KEYWORDS = ["python", "scraping", "crawler", "bot", "automation", "script", "data"]
 MIN_BOUNTY_USD = 10.0
+GITHUB_TOKEN = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
 
 class MeatFinder:
     """
@@ -20,19 +21,38 @@ class MeatFinder:
     def __init__(self):
         self.found_tasks = []
 
+    def _github_headers(self) -> Dict[str, str]:
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "raybot-meat-finder"
+        }
+        if GITHUB_TOKEN:
+            headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+        return headers
+
+    def _next_link(self, link_header: Optional[str]) -> Optional[str]:
+        if not link_header:
+            return None
+        for part in link_header.split(","):
+            if 'rel="next"' in part:
+                seg = part.split(";")[0].strip()
+                if seg.startswith("<") and seg.endswith(">"):
+                    return seg[1:-1]
+        return None
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
         for repo in repos:
-            page = 1
-            while True:
-                url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100&page={page}"
+            url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100"
+            while url:
                 try:
-                    resp = requests.get(url, timeout=15)
+                    resp = requests.get(url, headers=self._github_headers(), timeout=15)
                     if resp.status_code != 200:
+                        print(f"GitHub scan warning for {repo}: status={resp.status_code}")
                         break
                     issues = resp.json()
-                    if not issues:
+                    if not isinstance(issues, list) or not issues:
                         break
 
                     for issue in issues:
@@ -51,10 +71,8 @@ class MeatFinder:
                                 "tags": [l["name"] for l in issue.get("labels", [])]
                             })
 
-                    # Continue pagination when current page is full.
-                    if len(issues) < 100:
-                        break
-                    page += 1
+                    # Follow GitHub Link headers for robust pagination.
+                    url = self._next_link(resp.headers.get("Link"))
                 except Exception as e:
                     print(f"GitHub scan error for {repo}: {e}")
                     break
