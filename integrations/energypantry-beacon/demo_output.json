@@ -1,0 +1,38 @@
+{
+  "eventCount": 3,
+  "events": [
+    {
+      "kind": "heartbeat",
+      "agent_id": "bcn_energypantry",
+      "ts": 1771321477,
+      "payload": {
+        "status": "alive",
+        "role": "operator"
+      }
+    },
+    {
+      "kind": "mayday",
+      "agent_id": "bcn_energypantry",
+      "ts": 1771321477,
+      "payload": {
+        "reason": "Need extra GPU workers",
+        "details": {
+          "urgency": "medium",
+          "source": "energypantry-agent"
+        },
+        "urgency": "medium"
+      }
+    },
+    {
+      "kind": "contract_offer",
+      "agent_id": "bcn_energypantry",
+      "ts": 1771321477,
+      "payload": {
+        "resource": "gpu_hours",
+        "amount_rtc": 40,
+        "term": "7d",
+        "counterparty": "bcn_superplane_bridge"
+      }
+    }
+  ]
+}
