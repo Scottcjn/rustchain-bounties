@@ -91,12 +91,12 @@ class MeatFinder:
     def _extract_rtc_reward(self, text: str) -> int:
         """Best-effort RTC reward extraction from title/body for payout-first ranking.
 
-        Supports forms like: 500 RTC, 1,200 RTC, 1k RTC, 2.5k RTC, and RTC 500.
+        Supports forms like: 500 RTC, ~500 RTC, 500+ RTC, 1,200 RTC, 1k RTC, 2.5k RTC, RTC 500, and RTC~2k.
         """
         rewards: List[int] = []
         patterns = [
-            re.compile(r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\s*RTC", re.IGNORECASE),
-            re.compile(r"RTC\s*[:：-]?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?", re.IGNORECASE),
+            re.compile(r"[~≈]?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\+?\s*RTC", re.IGNORECASE),
+            re.compile(r"RTC\s*[:：\-~≈]?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\+?", re.IGNORECASE),
         ]
         for pattern in patterns:
             for num_raw, k_suffix in pattern.findall(text):
