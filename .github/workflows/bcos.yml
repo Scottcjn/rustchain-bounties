@@ -42,7 +42,6 @@ jobs:
               if (p.endsWith(".md")) return true;
               if (p.endsWith(".png") || p.endsWith(".jpg") || p.endsWith(".jpeg") || p.endsWith(".gif") || p.endsWith(".svg")) return true;
               if (p.endsWith(".pdf")) return true;
-              if (p.startsWith(".github/workflows/")) return true;
               return false;
             }
 
