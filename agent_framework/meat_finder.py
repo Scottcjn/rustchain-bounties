@@ -96,18 +96,20 @@ class MeatFinder:
             base *= 1000
         elif suffix == "m":
             base *= 1_000_000
+        elif suffix in ("w", "万"):
+            base *= 10_000
 
         return int(base)
 
     def _extract_rtc_reward(self, text: str) -> int:
         """Best-effort RTC reward extraction from title/body for payout-first ranking.
 
-        Supports forms like: 500 RTC, ~500 RTC, 500+ RTC, 1,200 RTC, 1，200 RTC, 1k RTC, 2.5k RTC, 1.2M RTC, RTC 500, and RTC~2k.
+        Supports forms like: 500 RTC, ~500 RTC, 500+ RTC, 1,200 RTC, 1，200 RTC, 1k RTC, 2.5k RTC, 1.2M RTC, 3w RTC, 2万 RTC, RTC 500, and RTC~2k.
         """
         rewards: List[int] = []
         patterns = [
-            re.compile(r"[~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmM])?\+?\s*RTC", re.IGNORECASE),
-            re.compile(r"RTC\s*[:：\-~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmM])?\+?", re.IGNORECASE),
+            re.compile(r"[~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmMwW万])?\+?\s*RTC", re.IGNORECASE),
+            re.compile(r"RTC\s*[:：\-~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmMwW万])?\+?", re.IGNORECASE),
         ]
         for pattern in patterns:
             for num_raw, k_suffix in pattern.findall(text):
