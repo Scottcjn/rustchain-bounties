@@ -93,6 +93,30 @@ class MeatFinderTests(unittest.TestCase):
             else:
                 os.environ["MEAT_MIN_RTC"] = prev_min
 
+    def test_github_repos_env_override(self):
+        prev = os.environ.get("MEAT_GITHUB_REPOS")
+        try:
+            finder = MeatFinder()
+            os.environ.pop("MEAT_GITHUB_REPOS", None)
+            self.assertEqual(
+                finder._github_repos(),
+                ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"],
+            )
+
+            os.environ["MEAT_GITHUB_REPOS"] = "owner/a, owner/b ,,invalid"
+            self.assertEqual(finder._github_repos(), ["owner/a", "owner/b"])
+
+            os.environ["MEAT_GITHUB_REPOS"] = "invalid-only"
+            self.assertEqual(
+                finder._github_repos(),
+                ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"],
+            )
+        finally:
+            if prev is None:
+                os.environ.pop("MEAT_GITHUB_REPOS", None)
+            else:
+                os.environ["MEAT_GITHUB_REPOS"] = prev
+
     def test_scan_retries_transient_failures(self):
         calls = {"count": 0}
 

@@ -11,6 +11,7 @@ DEFAULT_LOG_PATH = os.path.join(os.path.dirname(__file__), "meat_finder.log")
 MEAT_LOG = os.getenv("MEAT_LOG", DEFAULT_LOG_PATH)
 KEYWORDS = ["python", "scraping", "crawler", "bot", "automation", "script", "data"]
 MIN_BOUNTY_USD = 10.0
+DEFAULT_GITHUB_REPOS = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
 # GH token is resolved dynamically per request so runtime env updates are honored.
 
 class MeatFinder:
@@ -121,9 +122,28 @@ class MeatFinder:
         except ValueError:
             return 0
 
+    def _github_repos(self) -> List[str]:
+        """Optional repo override for faster, payout-first scanning.
+
+        Env format: MEAT_GITHUB_REPOS="owner/repo,owner/repo2"
+        """
+        raw = os.getenv("MEAT_GITHUB_REPOS", "").strip()
+        if not raw:
+            return list(DEFAULT_GITHUB_REPOS)
+
+        repos: List[str] = []
+        for candidate in (part.strip() for part in raw.split(",")):
+            if not candidate:
+                continue
+            if "/" not in candidate:
+                continue
+            repos.append(candidate)
+
+        return repos or list(DEFAULT_GITHUB_REPOS)
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
-        repos = ["Scottcjn/Rustchain", "Scottcjn/bottube", "Scottcjn/rustchain-bounties"]
+        repos = self._github_repos()
         for repo in repos:
             url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100"
             while url:
