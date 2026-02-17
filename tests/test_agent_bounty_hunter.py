@@ -41,6 +41,11 @@ class AgentHunterTests(unittest.TestCase):
         self.assertEqual(usd2, 2000.0)
         self.assertEqual(rtc2, 20000.0)
 
+    def test_parse_reward_supports_m_suffix(self):
+        rtc, usd = parse_reward("Reward: 1.2m RTC", "[BOUNTY] Mega campaign")
+        self.assertEqual(rtc, 1200000.0)
+        self.assertEqual(usd, 120000.0)
+
     def test_difficulty(self):
         self.assertEqual(estimate_difficulty("critical security hardening", ""), "high")
         self.assertEqual(estimate_difficulty("tooling bot", "api integration"), "medium")

@@ -25,7 +25,7 @@ from urllib.error import HTTPError, URLError
 
 RTC_USD_REF = 0.10
 PR_URL_RE = re.compile(r"https://github\.com/([^/\s]+/[^/\s]+)/pull/(\d+)")
-NUM_TOKEN_RE = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(k)?\b", flags=re.IGNORECASE)
+NUM_TOKEN_RE = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)([km])?\b", flags=re.IGNORECASE)
 
 
 @dataclass
@@ -86,22 +86,27 @@ def _pick(values: List[float], default: float = 0.0) -> float:
     return max(values) if values else default
 
 
+def _suffix_multiplier(suffix: str) -> float:
+    s = (suffix or "").lower()
+    if s == "k":
+        return 1000.0
+    if s == "m":
+        return 1_000_000.0
+    return 1.0
+
+
 def _extract_amounts(text: str, suffix_pattern: str) -> List[float]:
     values: List[float] = []
-    for raw, kflag in re.findall(rf"{NUM_TOKEN_RE.pattern}\s*{suffix_pattern}", text, flags=re.IGNORECASE):
-        value = float(raw.replace(",", ""))
-        if kflag:
-            value *= 1000
+    for raw, suffix in re.findall(rf"{NUM_TOKEN_RE.pattern}\s*{suffix_pattern}", text, flags=re.IGNORECASE):
+        value = float(raw.replace(",", "")) * _suffix_multiplier(suffix)
         values.append(value)
     return values
 
 
 def _extract_usd_amounts(text: str) -> List[float]:
     values: List[float] = []
-    for raw, kflag in re.findall(rf"\$\s*{NUM_TOKEN_RE.pattern}", text, flags=re.IGNORECASE):
-        value = float(raw.replace(",", ""))
-        if kflag:
-            value *= 1000
+    for raw, suffix in re.findall(rf"\$\s*{NUM_TOKEN_RE.pattern}", text, flags=re.IGNORECASE):
+        value = float(raw.replace(",", "")) * _suffix_multiplier(suffix)
         values.append(value)
     return values
 
