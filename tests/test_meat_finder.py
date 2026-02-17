@@ -117,6 +117,24 @@ class MeatFinderTests(unittest.TestCase):
             else:
                 os.environ["MEAT_GITHUB_REPOS"] = prev
 
+    def test_keywords_env_override(self):
+        prev = os.environ.get("MEAT_KEYWORDS")
+        try:
+            finder = MeatFinder()
+            os.environ.pop("MEAT_KEYWORDS", None)
+            self.assertIn("automation", finder._keywords())
+
+            os.environ["MEAT_KEYWORDS"] = "agent, parser  ,"
+            self.assertEqual(finder._keywords(), ["agent", "parser"])
+
+            os.environ["MEAT_KEYWORDS"] = "   ,  "
+            self.assertIn("python", finder._keywords())
+        finally:
+            if prev is None:
+                os.environ.pop("MEAT_KEYWORDS", None)
+            else:
+                os.environ["MEAT_KEYWORDS"] = prev
+
     def test_scan_retries_transient_failures(self):
         calls = {"count": 0}
 

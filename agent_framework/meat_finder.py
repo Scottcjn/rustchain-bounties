@@ -141,9 +141,23 @@ class MeatFinder:
 
         return repos or list(DEFAULT_GITHUB_REPOS)
 
+    def _keywords(self) -> List[str]:
+        """Optional keyword override for tuning bounty matching.
+
+        Env format: MEAT_KEYWORDS="python,automation,agent"
+        Empty/invalid values gracefully fall back to defaults.
+        """
+        raw = os.getenv("MEAT_KEYWORDS", "").strip()
+        if not raw:
+            return list(KEYWORDS)
+
+        parsed = [part.strip().lower() for part in raw.split(",") if part.strip()]
+        return parsed or list(KEYWORDS)
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = self._github_repos()
+        keywords = self._keywords()
         for repo in repos:
             url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100"
             while url:
@@ -170,7 +184,7 @@ class MeatFinder:
 
                         title = issue.get("title", "").lower()
                         body = issue.get("body", "").lower()
-                        if any(k in title or k in body for k in KEYWORDS):
+                        if any(k in title or k in body for k in keywords):
                             task_id = f"{repo}#{issue['number']}"
                             if task_id in self._seen_ids:
                                 continue
