@@ -78,21 +78,30 @@ class MeatFinder:
 
         return None, last_err
 
+    def _parse_reward_number(self, num_raw: str, k_suffix: str) -> Optional[int]:
+        try:
+            base = float(num_raw.replace(",", ""))
+        except ValueError:
+            return None
+        if k_suffix:
+            base *= 1000
+        return int(base)
+
     def _extract_rtc_reward(self, text: str) -> int:
         """Best-effort RTC reward extraction from title/body for payout-first ranking.
 
-        Supports forms like: 500 RTC, 1,200 RTC, 1k RTC, 2.5k RTC.
+        Supports forms like: 500 RTC, 1,200 RTC, 1k RTC, 2.5k RTC, and RTC 500.
         """
-        pattern = re.compile(r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\s*RTC", re.IGNORECASE)
         rewards: List[int] = []
-        for num_raw, k_suffix in pattern.findall(text):
-            try:
-                base = float(num_raw.replace(",", ""))
-            except ValueError:
-                continue
-            if k_suffix:
-                base *= 1000
-            rewards.append(int(base))
+        patterns = [
+            re.compile(r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\s*RTC", re.IGNORECASE),
+            re.compile(r"RTC\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?", re.IGNORECASE),
+        ]
+        for pattern in patterns:
+            for num_raw, k_suffix in pattern.findall(text):
+                parsed = self._parse_reward_number(num_raw, k_suffix)
+                if parsed is not None:
+                    rewards.append(parsed)
         if not rewards:
             return 0
         return max(rewards)
