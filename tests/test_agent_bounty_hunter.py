@@ -32,6 +32,11 @@ class AgentHunterTests(unittest.TestCase):
         rtc, _ = parse_reward(body, "[BOUNTY] wRTC Visibility Pack (75 RTC)")
         self.assertEqual(rtc, 75.0)
 
+    def test_parse_reward_prefers_title_inline_rtc_token(self):
+        body = "Reward: 300 RTC\nPool cap: 1200 RTC"
+        rtc, _ = parse_reward(body, "[BOUNTY] parser cleanup (75 RTC bonus)")
+        self.assertEqual(rtc, 75.0)
+
     def test_parse_reward_supports_commas_and_k_suffix(self):
         rtc, usd = parse_reward("Reward: 1,500 RTC", "[BOUNTY] Parser upgrade")
         self.assertEqual(rtc, 1500.0)

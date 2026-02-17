@@ -115,7 +115,7 @@ def parse_reward(body: str, title: str) -> Tuple[float, float]:
     text = f"{title}\n{body or ''}"
 
     # Prefer explicit title declaration, e.g. "(75 RTC)" / "($200)".
-    title_rtc = _extract_amounts(title or "", r"RTC\)") if "pool" not in (title or "").lower() else []
+    title_rtc = _extract_amounts(title or "", r"RTC(?:\)|\b)") if "pool" not in (title or "").lower() else []
     title_usd = _extract_usd_amounts(title or "")
 
     reward_rtc = _pick(title_rtc, 0.0)
