@@ -25,6 +25,7 @@ from urllib.error import HTTPError, URLError
 
 RTC_USD_REF = 0.10
 PR_URL_RE = re.compile(r"https://github\.com/([^/\s]+/[^/\s]+)/pull/(\d+)")
+NUM_TOKEN_RE = re.compile(r"\b(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(k)?\b", flags=re.IGNORECASE)
 
 
 @dataclass
@@ -85,16 +86,32 @@ def _pick(values: List[float], default: float = 0.0) -> float:
     return max(values) if values else default
 
 
+def _extract_amounts(text: str, suffix_pattern: str) -> List[float]:
+    values: List[float] = []
+    for raw, kflag in re.findall(rf"{NUM_TOKEN_RE.pattern}\s*{suffix_pattern}", text, flags=re.IGNORECASE):
+        value = float(raw.replace(",", ""))
+        if kflag:
+            value *= 1000
+        values.append(value)
+    return values
+
+
+def _extract_usd_amounts(text: str) -> List[float]:
+    values: List[float] = []
+    for raw, kflag in re.findall(rf"\$\s*{NUM_TOKEN_RE.pattern}", text, flags=re.IGNORECASE):
+        value = float(raw.replace(",", ""))
+        if kflag:
+            value *= 1000
+        values.append(value)
+    return values
+
+
 def parse_reward(body: str, title: str) -> Tuple[float, float]:
     text = f"{title}\n{body or ''}"
 
-    # Prefer explicit title declaration, e.g. "(75 RTC)".
-    title_rtc = [
-        float(x)
-        for x in re.findall(r"(?i)\((\d+(?:\.\d+)?)\s*RTC\)", title or "")
-        if "pool" not in (title or "").lower()
-    ]
-    title_usd = [float(x) for x in re.findall(r"(?i)\(\$\s*(\d+(?:\.\d+)?)\)", title or "")]
+    # Prefer explicit title declaration, e.g. "(75 RTC)" / "($200)".
+    title_rtc = _extract_amounts(title or "", r"RTC\)") if "pool" not in (title or "").lower() else []
+    title_usd = _extract_usd_amounts(title or "")
 
     reward_rtc = _pick(title_rtc, 0.0)
     reward_usd = _pick(title_usd, 0.0)
@@ -108,8 +125,8 @@ def parse_reward(body: str, title: str) -> Tuple[float, float]:
             if "pool" in low:
                 continue
             if any(k in low for k in ("reward", "bounty", "earn", "payout", "prize")):
-                rtc_values.extend(float(x) for x in re.findall(r"(?i)\b(\d+(?:\.\d+)?)\s*RTC\b", line))
-                usd_values.extend(float(x) for x in re.findall(r"\$\s*(\d+(?:\.\d+)?)", line))
+                rtc_values.extend(_extract_amounts(line, r"RTC\b"))
+                usd_values.extend(_extract_usd_amounts(line))
         reward_rtc = _pick(rtc_values, 0.0)
         reward_usd = _pick(usd_values, 0.0)
 
@@ -119,8 +136,8 @@ def parse_reward(body: str, title: str) -> Tuple[float, float]:
 
     # Last resort generic parse.
     if reward_rtc == 0.0 and reward_usd == 0.0:
-        reward_rtc = _pick([float(x) for x in re.findall(r"(?i)\b(\d+(?:\.\d+)?)\s*RTC\b", text)], 0.0)
-        reward_usd = _pick([float(x) for x in re.findall(r"\$\s*(\d+(?:\.\d+)?)", text)], 0.0)
+        reward_rtc = _pick(_extract_amounts(text, r"RTC\b"), 0.0)
+        reward_usd = _pick(_extract_usd_amounts(text), 0.0)
         # If only pool-like language exists, treat as unknown instead of overestimating.
         if "pool" in text.lower() and not re.search(r"(?i)\b(reward|earn|payout)\b", text):
             reward_rtc = 0.0

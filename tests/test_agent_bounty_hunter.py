@@ -32,6 +32,15 @@ class AgentHunterTests(unittest.TestCase):
         rtc, _ = parse_reward(body, "[BOUNTY] wRTC Visibility Pack (75 RTC)")
         self.assertEqual(rtc, 75.0)
 
+    def test_parse_reward_supports_commas_and_k_suffix(self):
+        rtc, usd = parse_reward("Reward: 1,500 RTC", "[BOUNTY] Parser upgrade")
+        self.assertEqual(rtc, 1500.0)
+        self.assertEqual(usd, 150.0)
+
+        rtc2, usd2 = parse_reward("Bounty: $2k", "[BOUNTY] DevRel sprint")
+        self.assertEqual(usd2, 2000.0)
+        self.assertEqual(rtc2, 20000.0)
+
     def test_difficulty(self):
         self.assertEqual(estimate_difficulty("critical security hardening", ""), "high")
         self.assertEqual(estimate_difficulty("tooling bot", "api integration"), "medium")
