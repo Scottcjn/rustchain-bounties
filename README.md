@@ -202,3 +202,8 @@ Any real (non-VM) hardware can mine. Vintage hardware gets bonuses:
 ## License
 
 MIT
+
+## Community Bounty Claim Helper
+
+- Claim template: [`docs/COMMUNITY_BOUNTY_CLAIM_TEMPLATE.md`](docs/COMMUNITY_BOUNTY_CLAIM_TEMPLATE.md)
+- Issue #87 acceptance packet: [`docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md`](docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md)

@@ -21,3 +21,14 @@ When to pick a tier:
 - Include proof for bounty-related automation (sample output or test run).
 - Avoid adding vendored blobs; prefer pulling via package managers.
 
+## Maintainer Yes/No Checkpoint (Issue #87)
+
+Before asking for payout or merge review, include this five-line packet:
+
+1. Issue link
+2. PR link
+3. Last commit link
+4. One-sentence scope statement
+5. One verification note
+
+Packet template: `docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md`
