@@ -96,7 +96,7 @@ class MeatFinder:
         rewards: List[int] = []
         patterns = [
             re.compile(r"(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?\s*RTC", re.IGNORECASE),
-            re.compile(r"RTC\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?", re.IGNORECASE),
+            re.compile(r"RTC\s*[:：-]?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?", re.IGNORECASE),
         ]
         for pattern in patterns:
             for num_raw, k_suffix in pattern.findall(text):

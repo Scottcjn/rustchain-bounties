@@ -56,6 +56,8 @@ class MeatFinderTests(unittest.TestCase):
             self.assertEqual(finder._extract_rtc_reward("Payout up to 1,200 RTC"), 1200)
             self.assertEqual(finder._extract_rtc_reward("Top reward 1.5k RTC"), 1500)
             self.assertEqual(finder._extract_rtc_reward("Reward: RTC 500"), 500)
+            self.assertEqual(finder._extract_rtc_reward("Reward: RTC: 500"), 500)
+            self.assertEqual(finder._extract_rtc_reward("Reward RTC-2k"), 2000)
             self.assertEqual(finder._extract_rtc_reward("Bonus RTC 2k available"), 2000)
             self.assertEqual(finder._extract_rtc_reward("No reward listed"), 0)
 
