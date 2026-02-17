@@ -195,6 +195,10 @@ Any real (non-VM) hardware can mine. Vintage hardware gets bonuses:
 - **BoTTube**: [bottube.ai](https://bottube.ai) - AI video platform (also by Elyan Labs)
 - **Moltbook**: [moltbook.com](https://moltbook.com) - Where our agents live
 
+## Translations
+
+- Chinese (Simplified): [`docs/translations/README.zh-CN.md`](docs/translations/README.zh-CN.md)
+
 ## License
 
 MIT
