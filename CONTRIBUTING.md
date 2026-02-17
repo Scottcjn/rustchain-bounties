@@ -21,6 +21,18 @@ When to pick a tier:
 - Include proof for bounty-related automation (sample output or test run).
 - Avoid adding vendored blobs; prefer pulling via package managers.
 
+## Fast Claim Checklist (for paid bounties)
+
+Before opening your PR, make sure your submission is payout-ready:
+
+1. Link the bounty issue in the PR body (`Closes #<issue>` or `Refs #<issue>`).
+2. Keep the change scoped to one bounty objective.
+3. Attach evidence (logs/screenshots/CLI output) when the task is not self-evident from diff alone.
+4. Confirm CI is green (or explain any unrelated flaky failures).
+5. Add your RustChain wallet/handle exactly as requested in the issue template.
+
+This short checklist helps reviewers verify work quickly and reduces payout delays.
+
 ## Maintainer Yes/No Checkpoint (Issue #87)
 
 Before asking for payout or merge review, include this five-line packet:
