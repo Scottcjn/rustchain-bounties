@@ -1,163 +1,52 @@
-//! Bounty Scanner - Fetches and ranks open bounty leads from GitHub
-//!
-//! This module handles:
-//! - Fetching issues with bounty-related labels
-//! - Ranking by difficulty and reward potential
-//! - Filtering by repository and status
+use reqwest::Client;
+use serde_json::Value;
+use anyhow::Result;
 
-use anyhow::{Result, Context};
-use serde::Deserialize;
-use std::collections::HashMap;
+/// Scanner module for discovering bounty issues
+pub async fn scan_bounties(top: u32, min_reward: Option<f64>) -> Result<()> {
+    let client = Client::new();
 
-#[derive(Debug, Clone)]
-pub struct BountyLead {
-    pub number: u64,
-    pub title: String,
-    pub body: String,
-    pub labels: Vec<String>,
-    pub reward_estimate: String,
-    pub difficulty: String,
-    pub url: String,
-    pub repository: String,
-}
-
-impl BountyLead {
-    pub fn score(&self) -> u64 {
-        // Simple scoring: higher reward = higher score
-        let reward_score = match self.reward_estimate.contains("100") {
-            true => 100,
-            true => 80,
-            true => 50,
-            _ => 20,
-        };
-        reward_score
-    }
-}
-
-pub async fn scan_bounties(
-    owner: &str,
-    repo: &str,
-    github_token: &str,
-) -> Result<Vec<BountyLead>> {
-    let client = reqwest::Client::new();
-    
-    // Fetch open issues with bounty labels
-    let url = format!(
-        "https://api.github.com/repos/{}/{}/issues?state=open&per_page=100",
-        owner, repo
-    );
-    
-    let response = client
-        .get(&url)
-        .header("Authorization", format!("token {}", github_token))
+    // Fetch issues from rustchain-bounties repository
+    let url = "https://api.github.com/repos/Scottcjn/rustchain-bounties/issues?state=open&labels=bounty";
+    let response = client.get(url)
         .header("Accept", "application/vnd.github.v3+json")
         .send()
-        .await
-        .context("Failed to fetch issues")?
-        .json::<serde_json::Value>()
-        .await
-        .context("Failed to parse issues")?;
+        .await?;
 
-    let issues = response.as_array()
-        .context("Issues should be an array")?;
+    let issues: Value = response.json().await?;
 
-    let mut bounties: Vec<BountyLead> = Vec::new();
+    println!("Scanning top {} bounties...", top);
+    if let Some(issues_array) = issues.as_array() {
+        for (i, issue) in issues_array.iter().take(top as usize).enumerate() {
+            let number = issue["number"].as_u64().unwrap_or(0);
+            let title = issue["title"].as_str().unwrap_or("Unknown");
+            let body = issue["body"].as_str().unwrap_or("");
 
-    for issue in issues {
-        let labels = issue["labels"]
-            .as_array()
-            .map(|arr| arr.iter().filter_map(|l| l["name"].as_str().map(String::from)).collect())
-            .unwrap_or_default();
+            println!("{}. #{} - {}", i + 1, number, title);
 
-        // Skip PRs
-        if issue.get("pull_request").is_some() {
-            continue;
-        }
-
-        // Check for bounty-related labels
-        let has_bounty_label = labels.iter().any(|l| 
-            l.to_lowercase().contains("bounty") || 
-            l.to_lowercase().contains("reward") ||
-            l.to_lowercase().contains("paid")
-        );
-
-        if has_bounty_label || is_reward_issue(&issue["body"].as_str().unwrap_or("")) {
-            let (reward, difficulty) = parse_reward_info(&issue["body"].as_str().unwrap_or(""));
-            
-            bounties.push(BountyLead {
-                number: issue["number"].as_u64().unwrap_or(0),
-                title: issue["title"].as_str().unwrap_or("").to_string(),
-                body: issue["body"].as_str().unwrap_or("").to_string(),
-                labels,
-                reward_estimate: reward,
-                difficulty,
-                url: issue["html_url"].as_str().unwrap_or("").to_string(),
-                repository: format!("{}/{}", owner, repo),
-            });
-        }
-    }
-
-    // Sort by score (descending)
-    bounties.sort_by(|a, b| b.score().cmp(&a.score()));
-
-    Ok(bounties)
-}
-
-fn is_reward_issue(body: &str) -> bool {
-    body.to_lowercase().contains("rtc") ||
-    body.to_lowercase().contains("reward") ||
-    body.to_lowercase().contains("bounty") ||
-    body.to_lowercase().contains("payment")
-}
-
-fn parse_reward_info(body: &str) -> (String, String) {
-    let body_lower = body.to_lowercase();
-    
-    let reward = if body_lower.contains("100") {
-        "100+ RTC".to_string()
-    } else if body_lower.contains("50") {
-        "50 RTC".to_string()
-    } else if body_lower.contains("25") {
-        "25 RTC".to_string()
-    } else if body_lower.contains("10") {
-        "10 RTC".to_string()
-    } else {
-        "Unspecified".to_string()
-    };
-
-    let difficulty = if body_lower.contains("critical") || body_lower.contains("security") {
-        "Critical".to_string()
-    } else if body_lower.contains("high") {
-        "High".to_string()
-    } else if body_lower.contains("medium") {
-        "Medium".to_string()
-    } else {
-        "Normal".to_string()
-    };
-
-    (reward, difficulty)
-}
-
-pub async fn scan_multiple_repos(
-    repos: HashMap<&str, &str>,
-    github_token: &str,
-) -> Result<Vec<BountyLead>> {
-    let mut all_bounties = Vec::new();
-
-    for (owner, repo) in repos {
-        match scan_bounties(owner, repo, github_token).await {
-            Ok(mut bounties) => {
-                all_bounties.append(&mut bounties);
-            }
-            Err(e) => {
-                eprintln!("Warning: Failed to scan {}/{}: {}", owner, repo, e);
+            // Extract reward from issue body
+            if let Some(reward) = extract_reward(body) {
+                if let Some(min) = min_reward {
+                    if reward < min {
+                        continue;
+                    }
+                }
+                println!("   Reward: {} RTC", reward);
             }
         }
     }
 
-    // Remove duplicates and re-sort
-    all_bounties.sort_by(|a, b| b.score().cmp(&a.score()));
-    all_bounties.dedup_by(|a, b| a.number == b.number && a.repository == b.repository);
+    Ok(())
+}
 
-    Ok(all_bounties)
+fn extract_reward(body: &str) -> Option<f64> {
+    // Simple heuristic: look for RTC or reward patterns
+    if let Some(caps) = regex::Regex::new(r"(\d+)\s*RTC")
+        .ok()?
+        .captures(body)
+    {
+        caps.get(1)?.as_str().parse().ok()
+    } else {
+        None
+    }
 }
