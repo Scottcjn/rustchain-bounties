@@ -194,7 +194,7 @@ def _extract_wallet(body: str) -> Optional[str]:
             continue
 
         # English label with value on next line.
-        if re.search(r"(?i)\b(?:rtc\s*)?(?:wallet|miner_id|address)\b.*[:：\-]\s*$", s):
+        if re.search(r"(?i)\b(?:rtc\s*)?(?:wallet|miner[_\-\s]?id|address)\b.*[:：\-]\s*$", s):
             expect_next = True
             continue
 
@@ -202,7 +202,7 @@ def _extract_wallet(body: str) -> Optional[str]:
         m = re.search(
             r"(?i)\b(?:payout\s*target\s*)?"
             r"(?:rtc\s*)?"
-            r"(wallet|miner_id|address)\s*"
+            r"(wallet|miner[_\-\s]?id|address)\s*"
             r"(?:\((?:miner_?id|id|address)\))?\s*[:：\-]\s*"
             r"([A-Za-z0-9_\-]{4,80})\b",
             s,
