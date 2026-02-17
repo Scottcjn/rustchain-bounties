@@ -37,6 +37,10 @@
 - Agent 估值系统
 - 可视化界面
 
+## 教程
+
+- [从零开始：把 Beacon 接进你的 AI Agent（实战教程）](./BEACON_TUTORIAL_FROM_ZERO.md)
+
 ## 快速开始
 
 ### 安装依赖
