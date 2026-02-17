@@ -144,6 +144,42 @@ class MeatFinderTests(unittest.TestCase):
             else:
                 os.environ["MEAT_KEYWORDS"] = prev
 
+    def test_keyword_matcher_word_boundary_for_short_tokens(self):
+        finder = MeatFinder()
+        self.assertTrue(finder._text_matches_keywords("Need a bot for moderation", ["bot"]))
+        self.assertFalse(finder._text_matches_keywords("bottube analytics task", ["bot"]))
+        self.assertTrue(finder._text_matches_keywords("Python automation helper", ["python"]))
+
+    def test_scan_skips_false_positive_short_keyword_substrings(self):
+        page = [
+            {
+                "number": 7,
+                "title": "Improve bottube onboarding",
+                "body": "no scripting required",
+                "html_url": "https://github.com/a/7",
+                "labels": [{"name": "bounty"}],
+            }
+        ]
+
+        def fake_get(_url, headers=None, timeout=15):
+            return FakeResp(200, page, headers={})
+
+        original_get = meat_finder.requests.get
+        meat_finder.requests.get = fake_get  # type: ignore[assignment]
+        prev_keywords = os.environ.get("MEAT_KEYWORDS")
+        try:
+            os.environ["MEAT_KEYWORDS"] = "bot"
+            finder = MeatFinder()
+            finder.scan_github_elyan()
+        finally:
+            meat_finder.requests.get = original_get  # type: ignore[assignment]
+            if prev_keywords is None:
+                os.environ.pop("MEAT_KEYWORDS", None)
+            else:
+                os.environ["MEAT_KEYWORDS"] = prev_keywords
+
+        self.assertEqual(len(finder.found_tasks), 0)
+
     def test_scan_retries_transient_failures(self):
         calls = {"count": 0}
 

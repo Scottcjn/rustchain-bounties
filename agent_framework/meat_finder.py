@@ -167,6 +167,26 @@ class MeatFinder:
         parsed = [part.strip().lower() for part in raw.split(",") if part.strip()]
         return parsed or list(KEYWORDS)
 
+    def _text_matches_keywords(self, text: str, keywords: List[str]) -> bool:
+        """Keyword matcher with boundary-aware logic for short tokens.
+
+        Prevents false positives like matching `bot` inside `bottube`.
+        """
+        haystack = (text or "").lower()
+        if not haystack:
+            return False
+
+        for kw in keywords:
+            token = (kw or "").strip().lower()
+            if not token:
+                continue
+            if len(token) <= 3 and token.isalnum():
+                if re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", haystack):
+                    return True
+            elif token in haystack:
+                return True
+        return False
+
     def scan_github_elyan(self):
         """Scans Scottcjn's repos for open bounties."""
         repos = self._github_repos()
@@ -197,7 +217,7 @@ class MeatFinder:
 
                         title = issue.get("title", "").lower()
                         body = issue.get("body", "").lower()
-                        if any(k in title or k in body for k in keywords):
+                        if self._text_matches_keywords(f"{title}\n{body}", keywords):
                             task_id = f"{repo}#{issue['number']}"
                             if task_id in self._seen_ids:
                                 continue
