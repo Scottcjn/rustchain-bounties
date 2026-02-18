@@ -34,6 +34,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(badges): refresh dynamic endpoint badges [skip ci]"
-          file_pattern: "badges/*.json badges/hunters/*.json"
+          file_pattern: |
+            badges/*.json
+            badges/hunters/*.json
           commit_user_name: "RustChain Bot"
           commit_user_email: "actions@github.com"
