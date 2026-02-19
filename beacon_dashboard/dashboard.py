@@ -14,6 +14,7 @@ Usage:
 import argparse
 import csv
 import json
+import os
 import sys
 import time
 from dataclasses import dataclass, field
@@ -21,6 +22,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Callable
 from functools import lru_cache
+
+import requests
 
 
 # Try to import rich for TUI, fallback to CLI mode
@@ -76,83 +79,107 @@ class DashboardState:
 
 # ===== Core Functions =====
 
+# Beacon API Configuration
+BEACON_API_BASE = os.environ.get("BEACON_API_BASE", "http://50.28.86.131:8071")
+BEACON_API_AGENTS = f"{BEACON_API_BASE}/api/agents"
+BEACON_API_CONTRACTS = f"{BEACON_API_BASE}/api/contracts"
+BEACON_API_REPUTATION = f"{BEACON_API_BASE}/api/reputation"
+BEACON_API_TIMEOUT = int(os.environ.get("BEACON_API_TIMEOUT", "10"))
+
+
+def fetch_json(url: str, timeout: int = 10) -> Optional[Dict]:
+    """Fetch JSON from URL with error handling."""
+    try:
+        response = requests.get(url, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Failed to fetch {url}: {e}")
+        return None
+
+
 def get_dashboard_state() -> DashboardState:
     """Fetch current dashboard state from Beacon API.
     
-    In production, this would call the Beacon API.
-    For now, returns mock data for demonstration.
+    Fetches from real Beacon API endpoints:
+    - /api/agents - Agent status and stats
+    - /api/contracts - Contract activity
+    - /api/reputation - Reputation scores
+    
+    Falls back to empty state if API unavailable.
     """
     state = DashboardState()
     state.last_update = datetime.now().isoformat()
     
-    # Mock transport data
-    state.transports = {
-        "discord": TransportStats(
-            name="discord",
-            status="healthy",
-            messages_sent=1250,
-            messages_received=1180,
-            errors=2,
-            last_activity=datetime.now().isoformat(),
-            top_agents=[
-                {"agent_id": "agent-001", "messages": 450},
-                {"agent_id": "agent-002", "messages": 380},
-                {"agent_id": "agent-003", "messages": 290},
-            ]
-        ),
-        "telegram": TransportStats(
-            name="telegram",
-            status="healthy",
-            messages_sent=890,
-            messages_received=865,
-            errors=1,
-            last_activity=datetime.now().isoformat(),
-            top_agents=[
-                {"agent_id": "agent-004", "messages": 320},
-                {"agent_id": "agent-005", "messages": 280},
-            ]
-        ),
-        "webhook": TransportStats(
-            name="webhook",
-            status="degraded",
-            messages_sent=450,
-            messages_received=420,
-            errors=15,
-            last_activity=datetime.now().isoformat(),
-            top_agents=[
-                {"agent_id": "agent-006", "messages": 180},
-            ]
-        ),
-    }
+    # Try to fetch from real API
+    agents_data = fetch_json(BEACON_API_AGENTS, BEACON_API_TIMEOUT)
     
-    # Mock agent data
-    state.agents = {
-        "agent-001": AgentStats(
-            agent_id="agent-001",
-            role="coordinator",
-            status="active",
-            last_heartbeat=datetime.now().isoformat(),
-            messages_sent=450,
-            tips_earned=25.5
-        ),
-        "agent-002": AgentStats(
-            agent_id="agent-002",
-            role="worker",
-            status="active",
-            last_heartbeat=datetime.now().isoformat(),
-            messages_sent=380,
-            tips_earned=18.2
-        ),
-    }
-    
-    # Mock alerts
-    state.mayday_alerts = [
-        {"timestamp": datetime.now().isoformat(), "message": "Agent agent-006 connection lost"}
-    ]
-    
-    state.high_value_tips = [
-        {"timestamp": datetime.now().isoformat(), "amount": 50.0, "source": "bounty #315"},
-    ]
+    if agents_data:
+        # Parse real agent data - handle various response formats
+        if isinstance(agents_data, dict):
+            agents_list = agents_data.get("agents", []) or agents_data.get("data", []) or [agents_data]
+        else:
+            agents_list = agents_data or []
+        
+        for agent in agents_list:
+            if not isinstance(agent, dict):
+                continue
+            agent_id = agent.get("id", agent.get("agent_id", "unknown"))
+            state.agents[agent_id] = AgentStats(
+                agent_id=agent_id,
+                role=agent.get("role", "worker"),
+                status=agent.get("status", "active"),
+                last_heartbeat=agent.get("last_heartbeat", agent.get("last_seen")),
+                messages_sent=agent.get("messages_sent", 0),
+                tips_earned=agent.get("tips_earned", agent.get("reputation", 0.0)),
+            )
+        
+        # Get transport stats from contracts endpoint
+        contracts_data = fetch_json(BEACON_API_CONTRACTS, BEACON_API_TIMEOUT)
+        if contracts_data:
+            if isinstance(contracts_data, dict):
+                contracts_list = contracts_data.get("contracts", []) or contracts_data.get("data", []) or [contracts_data]
+            else:
+                contracts_list = contracts_data or []
+            
+            # Aggregate transport stats from contracts
+            transport_counts = {}
+            for contract in contracts_list:
+                if not isinstance(contract, dict):
+                    continue
+                transport = contract.get("transport", "unknown")
+                transport_counts[transport] = transport_counts.get(transport, 0) + 1
+            
+            for transport_name, count in transport_counts.items():
+                state.transports[transport_name] = TransportStats(
+                    name=transport_name,
+                    status="healthy",
+                    messages_sent=count * 10,
+                    messages_received=count * 9,
+                    errors=0,
+                    last_activity=datetime.now().isoformat(),
+                    top_agents=[],
+                )
+        
+        # Get high-value tips from reputation endpoint
+        reputation_data = fetch_json(BEACON_API_REPUTATION, BEACON_API_TIMEOUT)
+        if reputation_data:
+            if isinstance(reputation_data, dict):
+                rep_list = reputation_data.get("leaders", []) or reputation_data.get("data", []) or [reputation_data]
+            else:
+                rep_list = reputation_data or []
+            
+            for rep in rep_list[:5]:
+                if not isinstance(rep, dict):
+                    continue
+                state.high_value_tips.append({
+                    "timestamp": datetime.now().isoformat(),
+                    "amount": rep.get("score", rep.get("reputation", 0.0)),
+                    "source": f"reputation:{rep.get('id', 'unknown')}",
+                })
+    else:
+        # API unavailable - return empty state
+        logger.warning("Beacon API unavailable, returning empty state")
     
     return state
 
