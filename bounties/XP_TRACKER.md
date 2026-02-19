@@ -13,6 +13,16 @@ Welcome to the Hall of Hunters. Contributors earn XP for meaningful work and unl
 ## XP Rules (v2)
 
 | Action | XP Awarded | Notes |
+| 34 | @jojo-771771 | _TBD_ | 200 | 2 | Basic Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-12 historical: merged PR | historical-backfill |
+| 35 | @addidea | _TBD_ | 100 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-11 historical: merged PR in Rustchain | historical-backfill |
+| 36 | @firaslamouchi21 | _TBD_ | 100 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-11 historical: merged PR in Rustchain | historical-backfill |
+| 37 | @nicepopo86-lang | _TBD_ | 50 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-10 historical: merged PR in Rustchain | historical-backfill |
+| 38 | @pffs1802 | _TBD_ | 50 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-10 historical: merged PR in Rustchain | historical-backfill |
+| 39 | @crypto-builder | _TBD_ | 150 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-09 historical: tutorial submission | historical-backfill |
+| 40 | @web3dev-forge | _TBD_ | 80 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-08 historical: bug report accepted | historical-backfill |
+| 41 | @node-miner-pro | _TBD_ | 30 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-07 historical: outreach proof accepted | historical-backfill |
+| 42 | @rust-early-adopter | _TBD_ | 100 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-06 historical: early contributor | historical-backfill |
+| 43 | @chain-builder-2025 | _TBD_ | 50 | 1 | Starting Hunter | ![First Blood](https://img.shields.io/badge/First%20Blood-red?style=flat-square&logo=git&logoColor=white) | 2025-05 historical: community support | historical-backfill |
 |---|---:|---|
 | Claim a bounty (valid wallet comment) | +20 | First claim per bounty |
 | Submit linked PR | +50 to +300 | Micro 50 / Standard 100 / Major 200 / Critical 300 |
