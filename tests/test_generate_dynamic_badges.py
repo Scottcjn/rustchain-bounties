@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Tests for generate_dynamic_badges.py"""
+"""Tests for generate_dynamic_badges.py
+
+Local run command:
+    python -m pytest tests/test_generate_dynamic_badges.py -v
+
+Or with coverage:
+    python -m pytest tests/test_generate_dynamic_badges.py -v --cov=.github/scripts --cov-report=term-missing
+"""
 
 import json
 import tempfile

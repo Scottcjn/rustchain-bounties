@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Tests for update_xp_tracker_api.py"""
+"""Tests for update_xp_tracker_api.py
+
+Local run command:
+    python -m pytest tests/test_update_xp_tracker_api.py -v
+
+Or with coverage:
+    python -m pytest tests/test_update_xp_tracker_api.py -v --cov=.github/scripts --cov-report=term-missing
+"""
 
 import pytest
 import sys
