@@ -1,0 +1,35 @@
+name: XP and Badge Tests
+
+on:
+  push:
+    paths:
+      - ".github/scripts/**"
+      - "tests/**"
+      - ".github/workflows/xp-badge-tests.yml"
+  pull_request:
+    paths:
+      - ".github/scripts/**"
+      - "tests/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    
+    - name: Run core tests
+      run: |
+        python tests/test_core.py
+
