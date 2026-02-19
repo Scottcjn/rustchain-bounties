@@ -1,5 +1,10 @@
 import os
+import sys
 import unittest
+from pathlib import Path
+
+# Add root directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agent_framework.meat_finder import MeatFinder
 import agent_framework.meat_finder as meat_finder
