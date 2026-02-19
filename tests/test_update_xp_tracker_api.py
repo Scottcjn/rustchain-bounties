@@ -150,12 +150,12 @@ class TestBadgeUrl:
 
     def test_known_badge(self):
         url = badge_url("First Blood")
-        assert "First-Blood" in url
+        assert "First%20Blood" in url  # URL encoded space
         assert "red" in url
 
     def test_unknown_badge(self):
         url = badge_url("Unknown Badge")
-        assert "Unknown-Badge" in url
+        assert "Unknown%20Badge" in url  # URL encoded space
         assert "blue" in url  # default
 
 
