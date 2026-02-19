@@ -200,35 +200,6 @@ def main():
             last_action="2025-09 historical: tutorial submission",
             source_issue=50
         ),
-        HistoricalContributor(
-            username="web3dev-forge",
-            xp=80,
-            badges=set(),
-            last_action="2025-08 historical: bug report accepted",
-            source_issue=45
-        ),
-        HistoricalContributor(
-            username="node-miner-pro",
-            xp=30,
-            badges=set(),
-            last_action="2025-07 historical: outreach proof accepted",
-            source_issue=40
-        ),
-        # More historical from early community activities
-        HistoricalContributor(
-            username="rust-early-adopter",
-            xp=100,
-            badges=set(),
-            last_action="2025-06 historical: early contributor",
-            source_issue=30
-        ),
-        HistoricalContributor(
-            username="chain-builder-2025",
-            xp=50,
-            badges=set(),
-            last_action="2025-05 historical: community support",
-            source_issue=25
-        ),
     ]
     
     # Filter out existing hunters
@@ -264,11 +235,11 @@ def main():
     # Find the leaderboard section and append new hunters
     lines = content.splitlines()
     
-    # Find the last table row
+    # Find the separator line and insert AFTER it
     insert_idx = len(lines)
     for i, line in enumerate(lines):
         if line.strip().startswith("|---"):
-            insert_idx = i
+            insert_idx = i + 1  # Insert AFTER the separator line
             break
     
     # Generate new rows
