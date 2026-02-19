@@ -1,0 +1,36 @@
+name: Script Tests
+
+on:
+  push:
+    paths:
+      - '.github/scripts/**/*.py'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - '.github/scripts/**/*.py'
+      - 'tests/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install pytest pyyaml requests
+
+      - name: Check script syntax
+        run: |
+          python3 -m py_compile .github/scripts/update_xp_tracker_api.py
+          python3 -m py_compile .github/scripts/generate_dynamic_badges.py
+          echo "Syntax check passed"
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v --tb=short
