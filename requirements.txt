@@ -1,0 +1,18 @@
+# RustChain Bounty Tooling - Pinned Dependencies
+# These versions ensure reproducible builds
+
+# Testing
+pytest==8.0.0
+
+# Core
+pyyaml==6.0.1
+requests==2.31.0
+
+# GitHub CLI
+gh==2.39.0
+
+# Git operations
+GitPython==3.1.42
+
+# Security
+cryptography==42.0.5
