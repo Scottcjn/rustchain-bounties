@@ -78,6 +78,29 @@ To keep bounties safe and reviewable, this repo enforces supply-chain and disclo
 
 Reference: `docs/BOUNTY_HYGIENE.md`
 
+### Running the Linter Locally
+
+The supply-chain hygiene linter checks for risky install patterns, validates bounty templates, and verifies PR structure.
+
+```bash
+# Install dependency (optional — works without pyyaml via fallback parser)
+pip install pyyaml
+
+# Run with warnings (exit 0 even if issues found)
+python scripts/supply_chain_lint.py
+
+# Run in strict mode (exit 1 on any finding — same as CI)
+python scripts/supply_chain_lint.py --strict
+
+# Dry run — show what would be checked without running
+python scripts/supply_chain_lint.py --dry-run
+
+# Run tests
+python -m pytest tests/test_supply_chain_lint.py -v
+```
+
+Intentional exceptions (e.g., documentation that references risky patterns as warnings) are managed in `.github/supply-chain-allowlist.yml`.
+
 ## Claiming a Bounty
 
 Comment on the bounty issue with:
