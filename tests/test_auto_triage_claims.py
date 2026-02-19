@@ -1,6 +1,11 @@
 import unittest
+import sys
+from pathlib import Path
 
-from scripts.auto_triage_claims import _extract_wallet, _extract_bottube_user, _has_proof_link, _looks_like_claim
+# Add scripts directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+
+from auto_triage_claims import _extract_wallet, _extract_bottube_user, _has_proof_link, _looks_like_claim
 
 
 class AutoTriageClaimsTests(unittest.TestCase):

@@ -1,6 +1,11 @@
 import unittest
+import sys
+from pathlib import Path
 
-from scripts.agent_bounty_hunter import (
+# Add scripts directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+
+from agent_bounty_hunter import (
     parse_reward,
     estimate_difficulty,
     capability_fit,
