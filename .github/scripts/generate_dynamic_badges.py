@@ -289,14 +289,23 @@ def main() -> None:
     # === NEW: Weekly Growth Badge (estimated from recent activity) ===
     # Parse last_action dates to estimate weekly growth
     recent_xp = 0
+    now = dt.datetime.now(dt.UTC)
+    week_ago = now - dt.timedelta(days=7)
+    
     for row in rows:
         last_action = str(row.get("last_action", ""))
-        # Look for recent dates (within last 7 days)
-        if "2026-02-1" in last_action or "2026-02-0" in last_action:  # Feb 2026
-            # Extract XP gain from last action
-            xp_match = re.search(r"\+(\d+)\s*XP", last_action)
-            if xp_match:
-                recent_xp += int(xp_match.group(1))
+        # Extract date from last_action (format: "YYYY-MM-DD (+N XP)" or similar)
+        date_match = re.search(r"(\d{4})-(\d{2})-(\d{2})", last_action)
+        if date_match:
+            try:
+                action_date = dt.datetime(int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3)), tzinfo=dt.UTC)
+                if action_date >= week_ago:
+                    # Extract XP gain from last action
+                    xp_match = re.search(r"\+(\d+)\s*XP", last_action)
+                    if xp_match:
+                        recent_xp += int(xp_match.group(1))
+            except ValueError:
+                pass  # Invalid date, skip
     
     growth_color = "green" if recent_xp > 0 else "grey"
     write_badge(
