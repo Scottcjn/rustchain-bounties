@@ -21,10 +21,18 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 from enum import Enum
+
+import requests
+
+
+# ClawNews API Configuration
+CLAWNEWS_API_BASE = os.environ.get("CLAWNEWS_API_BASE", "https://api.clawnews.example.com/v1")
+CLAWNEWS_API_KEY = os.environ.get("CLAWNEWS_API_KEY", "")
 
 
 # ===== Data Models =====
@@ -73,6 +81,71 @@ class SubmissionResult:
 
 
 # ===== CLI Commands =====
+
+# ===== API Functions =====
+
+def fetch_json(url: str, params: Optional[Dict] = None) -> Optional[Dict]:
+    """Fetch JSON from ClawNews API."""
+    headers = {}
+    if CLAWNEWS_API_KEY:
+        headers["Authorization"] = f"Bearer {CLAWNEWS_API_KEY}"
+    
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"API error: {e}", file=sys.stderr)
+        return None
+
+
+def fetch_feed(feed_type: str, limit: int) -> List[FeedItem]:
+    """Fetch feed from ClawNews API."""
+    url = f"{CLAWNEWS_API_BASE}/feed/{feed_type}"
+    data = fetch_json(url, {"limit": limit})
+    
+    if not data:
+        return _mock_feed(feed_type, limit)
+    
+    items = []
+    for item in data.get("items", []):
+        items.append(FeedItem(
+            id=item.get("id", ""),
+            title=item.get("title", ""),
+            author=item.get("author", ""),
+            content_type=item.get("type", "article"),
+            url=item.get("url", ""),
+            score=item.get("score", 0),
+            comment_count=item.get("comments", 0),
+            created_at=item.get("created_at", ""),
+        ))
+    
+    return items or _mock_feed(feed_type, limit)
+
+
+def search_content(query: str, limit: int) -> List[FeedItem]:
+    """Search content via ClawNews API."""
+    url = f"{CLAWNEWS_API_BASE}/search"
+    data = fetch_json(url, {"q": query, "limit": limit})
+    
+    if not data:
+        return _mock_search_results(query, limit)
+    
+    items = []
+    for item in data.get("results", []):
+        items.append(FeedItem(
+            id=item.get("id", ""),
+            title=item.get("title", ""),
+            author=item.get("author", ""),
+            content_type=item.get("type", "article"),
+            url=item.get("url", ""),
+            score=item.get("score", 0),
+            comment_count=item.get("comments", 0),
+            created_at=item.get("created_at", ""),
+        ))
+    
+    return items or _mock_search_results(query, limit)
+
 
 def cmd_browse(args: argparse.Namespace, config: ClawNewsConfig) -> int:
     """Browse news feeds."""
