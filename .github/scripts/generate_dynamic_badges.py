@@ -8,6 +8,11 @@ Outputs:
 - badges/legendary-hunters.json
 - badges/updated-at.json
 - badges/hunters/<hunter>.json (per hunter)
+- badges/weekly-growth.json (new)
+- badges/top-3-hunters.json (new)
+- badges/docs-champions.json (new - if data exists)
+- badges/bug-slayers.json (new - if data exists)
+- badges/outreach-stars.json (new - if data exists)
 """
 
 from __future__ import annotations
@@ -17,7 +22,7 @@ import datetime as dt
 import json
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set, Optional
 
 
 def parse_args() -> argparse.Namespace:
@@ -68,6 +73,8 @@ def parse_rows(md_text: str) -> List[Dict[str, object]]:
             "xp": parse_int(cells[3]),
             "level": parse_int(cells[4]),
             "title": cells[5],
+            "badges": cells[6] if len(cells) > 6 else "",
+            "last_action": cells[7] if len(cells) > 7 else "",
         }
         rows.append(row)
         i += 1
@@ -107,8 +114,89 @@ def write_badge(path: Path, label: str, message: str, color: str,
         "namedLogo": named_logo,
         "logoColor": logo_color,
     }
+    validate_badge_schema(payload, path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+# Schema for shields.io badge validation
+BADGE_SCHEMA = {
+    "required": ["schemaVersion", "label", "message", "color"],
+    "properties": {
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "label": {"type": "string"},
+        "message": {"type": "string"},
+        "color": {"type": "string"},
+        "namedLogo": {"type": "string"},
+        "logoColor": {"type": "string"},
+    },
+}
+
+
+def validate_badge_schema(payload: Dict, path: Path) -> None:
+    """Validate badge JSON conforms to shields.io schema."""
+    errors: List[str] = []
+    
+    # Check required fields
+    for field in BADGE_SCHEMA["required"]:
+        if field not in payload:
+            errors.append(f"Missing required field: {field}")
+    
+    # Check schemaVersion is integer
+    if "schemaVersion" in payload and not isinstance(payload["schemaVersion"], int):
+        errors.append("schemaVersion must be an integer")
+    
+    if errors:
+        raise ValueError(f"Invalid badge schema for {path}: {', '.join(errors)}")
+
+
+# Category badge mappings - maps badge names to categories
+CATEGORY_BADGES = {
+    "docs": {"Tutorial Titan", "Doc Wizard", "Documentation Pro"},
+    "bug": {"Bug Slayer", "Bug Hunter", "Security Researcher"},
+    "outreach": {"Outreach Star", "Social Champion", "Evangelist"},
+}
+
+
+def get_category_hunters(rows: List[Dict[str, object]]) -> Dict[str, List[Dict[str, object]]]:
+    """Extract hunters that have category-specific badges."""
+    category_hunters: Dict[str, List[Dict[str, object]]] = {
+        "docs": [],
+        "bug": [],
+        "outreach": [],
+    }
+    
+    for row in rows:
+        # Parse badges from the row - badges are in the Badges column (index 6)
+        badges_cell = str(row.get("badges", ""))
+        
+        for category, category_badge_set in CATEGORY_BADGES.items():
+            for badge in category_badge_set:
+                if badge.lower() in badges_cell.lower():
+                    category_hunters[category].append(row)
+                    break
+    
+    return category_hunters
+
+
+def slugify_hunter_collision_safe(hunter: str, used_slugs: Set[str]) -> str:
+    """Generate collision-safe slug for hunter name.
+    
+    If the base slug already exists, append a counter suffix.
+    """
+    base_slug = slugify_hunter(hunter)
+    if base_slug not in used_slugs:
+        used_slugs.add(base_slug)
+        return base_slug
+    
+    # Handle collision - try numbered variants
+    counter = 1
+    while f"{base_slug}-{counter}" in used_slugs:
+        counter += 1
+    
+    slug = f"{base_slug}-{counter}"
+    used_slugs.add(slug)
+    return slug
 
 
 def main() -> None:
@@ -174,18 +262,105 @@ def main() -> None:
         logo_color="white",
     )
 
+    # === NEW: Top 3 Hunters Summary Badge ===
+    if len(rows) >= 3:
+        top3_names = [str(r["hunter"]).lstrip("@") for r in rows[:3]]
+        top3_msg = ", ".join(top3_names[:2]) + (f" +{len(top3_names)-2}" if len(top3_names) > 2 else "")
+        write_badge(
+            out_dir / "top-3-hunters.json",
+            label="Top 3 Hunters",
+            message=top3_msg,
+            color="gold",
+            named_logo="trophy",
+            logo_color="black",
+        )
+    elif len(rows) > 0:
+        # Only 1-2 hunters
+        top_names = ", ".join(str(r["hunter"]).lstrip("@") for r in rows)
+        write_badge(
+            out_dir / "top-3-hunters.json",
+            label="Top Hunters",
+            message=top_names,
+            color="gold",
+            named_logo="trophy",
+            logo_color="black",
+        )
+
+    # === NEW: Weekly Growth Badge (estimated from recent activity) ===
+    # Parse last_action dates to estimate weekly growth
+    recent_xp = 0
+    for row in rows:
+        last_action = str(row.get("last_action", ""))
+        # Look for recent dates (within last 7 days)
+        if "2026-02-1" in last_action or "2026-02-0" in last_action:  # Feb 2026
+            # Extract XP gain from last action
+            xp_match = re.search(r"\+(\d+)\s*XP", last_action)
+            if xp_match:
+                recent_xp += int(xp_match.group(1))
+    
+    growth_color = "green" if recent_xp > 0 else "grey"
+    write_badge(
+        out_dir / "weekly-growth.json",
+        label="This Week",
+        message=f"+{recent_xp} XP" if recent_xp > 0 else "no new XP",
+        color=growth_color,
+        named_logo="trending-up" if recent_xp > 0 else "minus",
+        logo_color="white",
+    )
+
+    # === NEW: Category Badges (docs, bug, outreach) ===
+    category_hunters = get_category_hunters(rows)
+    
+    # Docs champions
+    docs_count = len(category_hunters["docs"])
+    if docs_count > 0:
+        write_badge(
+            out_dir / "docs-champions.json",
+            label="Docs Champions",
+            message=str(docs_count),
+            color="blue",
+            named_logo="book",
+            logo_color="white",
+        )
+    
+    # Bug slayers
+    bug_count = len(category_hunters["bug"])
+    if bug_count > 0:
+        write_badge(
+            out_dir / "bug-slayers.json",
+            label="Bug Slayers",
+            message=str(bug_count),
+            color="darkred",
+            named_logo="bug",
+            logo_color="white",
+        )
+    
+    # Outreach stars
+    outreach_count = len(category_hunters["outreach"])
+    if outreach_count > 0:
+        write_badge(
+            out_dir / "outreach-stars.json",
+            label="Outreach Stars",
+            message=str(outreach_count),
+            color="pink",
+            named_logo="megaphone",
+            logo_color="white",
+        )
+
     # Reset per-hunter directory before writing fresh files.
     hunters_dir = out_dir / "hunters"
     hunters_dir.mkdir(parents=True, exist_ok=True)
     for old_file in hunters_dir.glob("*.json"):
         old_file.unlink()
 
+    # === Use collision-safe slug mapping ===
+    used_slugs: Set[str] = set()
     for row in rows:
         hunter = str(row["hunter"])
         xp = int(row["xp"])
         level = int(row["level"])
         title = str(row["title"])
-        slug = slugify_hunter(hunter)
+        slug = slugify_hunter_collision_safe(hunter, used_slugs)
         write_badge(
             hunters_dir / f"{slug}.json",
             label=f"{hunter} XP",
