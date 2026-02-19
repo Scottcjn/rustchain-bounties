@@ -26,6 +26,9 @@ from update_xp_tracker_api import (
     parse_table_cells,
     parse_hunter_row,
     determine_new_badges,
+    render_row,
+    update_frontmatter,
+    update_table_in_md,
     HunterRow,
 )
 
@@ -277,3 +280,272 @@ class TestHunterRow:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+class TestRenderRow:
+    """Test render_row function"""
+
+    def test_render_basic_row(self):
+        row = HunterRow(
+            hunter="@test",
+            wallet="wallet1",
+            xp=1000,
+            level=4,
+            title="Rising Hunter",
+            badges=set(),
+            last_action="2026-02-18 12:00 UTC (+100 XP: test)",
+            notes="test notes"
+        )
+        result = render_row(1, row)
+        assert "| 1 | @test | wallet1 | 1000 | 4 | Rising Hunter |" in result
+        assert "test notes" in result
+
+    def test_render_row_with_badges(self):
+        row = HunterRow(
+            hunter="@hunter",
+            wallet="wallet1",
+            xp=2000,
+            level=5,
+            title="Multiplier Hunter",
+            badges={"First Blood", "Rising Hunter"},
+            last_action="test action",
+            notes="-"
+        )
+        result = render_row(2, row)
+        assert "| 2 | @hunter |" in result
+        assert "First Blood" in result
+        assert "Rising Hunter" in result
+
+
+class TestUpdateFrontmatter:
+    """Test update_frontmatter function"""
+
+    def test_updates_existing_date(self):
+        md = """---
+title: Test
+last_updated: 2026-01-01
+---
+
+# Content
+"""
+        result = update_frontmatter(md)
+        assert "last_updated: 2026-01-01" not in result
+        assert "last_updated:" in result
+
+    def test_handles_no_frontmatter(self):
+        md = "# Just content\n\nNo frontmatter here."
+        result = update_frontmatter(md)
+        # Should return unchanged since no date to update
+        assert result == md
+
+
+class TestUpdateTableInMd:
+    """Test update_table_in_md function - main integration tests"""
+
+    def test_new_hunter_gets_added(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @existing | wallet1 | 500 | 3 | Priority Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+
+- 2026-02-01 12:00 UTC: @existing earned **50 XP** (base action) -> Total: 500 XP (Level 3 - Priority Hunter)
+"""
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="new hunter",
+            gained_xp=100,
+            reason="test bounty",
+            labels=set(),
+        )
+        assert total_xp == 100
+        assert level == 2
+        assert "@new hunter" in result
+        assert "First Blood" in unlocked  # First bounty earns First Blood badge
+
+    def test_existing_hunter_xp_increases(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @test | wallet1 | 500 | 3 | Priority Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+"""
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="test",
+            gained_xp=100,
+            reason="standard tier",
+            labels={"standard"},
+        )
+        assert total_xp == 600
+        assert level == 3  # Still Priority Hunter at 600 XP
+
+    def test_rank_recalculation(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @first | wallet1 | 1000 | 4 | Rising Hunter | - | 2026-02-01 | - |
+| 2 | @second | wallet2 | 500 | 3 | Priority Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+"""
+        # Add 600 XP to second place - should now be first
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="second",
+            gained_xp=600,
+            reason="major tier",
+            labels={"major"},
+        )
+        # Second should now be first with 1100 XP
+        lines = result.splitlines()
+        first_line = [l for l in lines if l.strip().startswith("| 1 |")][0]
+        assert "@second" in first_line
+        assert "1100" in first_line
+
+    def test_badge_unlock_at_threshold(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @test | wallet1 | 900 | 3 | Priority Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+"""
+        # Add 150 XP to cross 1000 threshold
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="test",
+            gained_xp=150,
+            reason="standard tier",
+            labels=set(),
+        )
+        assert total_xp == 1050
+        assert level == 4  # Rising Hunter
+        assert "Rising Hunter" in unlocked
+
+    def test_retroactive_backfill_badge(self):
+        """Test that existing hunters get retroactively awarded threshold badges"""
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @veteran | wallet1 | 6000 | 7 | Veteran Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+"""
+        # Award XP to someone else - should trigger backfill for veteran
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="newbie",
+            gained_xp=50,
+            reason="micro tier",
+            labels=set(),
+        )
+        # Veteran should now have Veteran Hunter badge from backfill
+        assert "Veteran Hunter" in result
+        # But no new badges for the newbie (not enough XP)
+        assert "First Blood" in unlocked  # First bounty = First Blood
+
+    def test_tutorial_label_gives_badge(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @writer | wallet1 | 100 | 2 | Basic Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+"""
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="writer",
+            gained_xp=150,
+            reason="tutorial/docs",
+            labels={"tutorial"},
+        )
+        assert "Tutorial Titan" in unlocked
+
+    def test_latest_awards_section_updated(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @test | wallet1 | 100 | 2 | Basic Hunter | - | 2026-02-01 | - |
+
+## Latest Awards
+
+- 2026-02-01 12:00 UTC: @test earned **50 XP** (base action)
+"""
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="test",
+            gained_xp=100,
+            reason="standard tier",
+            labels={"standard"},
+        )
+        assert "Latest Awards" in result
+        # Should have two award entries now (one with ** markers)
+        award_lines = [l for l in result.splitlines() if "earned **" in l]
+        assert len(award_lines) == 2
+
+    def test_creates_latest_awards_if_missing(self):
+        md = """---
+title: XP Tracker
+last_updated: 2026-02-01
+---
+
+# Leaderboard
+
+| Rank | Hunter | Wallet | XP | Level | Title | Badges | Last Action | Notes |
+|------|--------|--------|-----|-------|-------|--------|-------------|-------|
+| 1 | @test | wallet1 | 100 | 2 | Basic Hunter | - | 2026-02-01 | - |
+"""
+        result, total_xp, level, title, unlocked = update_table_in_md(
+            md=md,
+            actor="test",
+            gained_xp=50,
+            reason="base action",
+            labels=set(),
+        )
+        assert "## Latest Awards" in result
+        assert "earned **" in result
