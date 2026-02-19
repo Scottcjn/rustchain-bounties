@@ -149,7 +149,8 @@ def calculate_xp(event_type: str, event_action: str, labels: Set[str], pr_merged
 
 def badge_url(name: str) -> str:
     color, logo, logo_color = BADGE_STYLE.get(name, ("blue", "star", "white"))
-    encoded = quote(name)
+    # Replace spaces with hyphens for shields.io compatibility
+    encoded = quote(name.replace(" ", "-"))
     return (
         f"https://img.shields.io/badge/{encoded}-{color}"
         f"?style=flat-square&logo={logo}&logoColor={logo_color}"
