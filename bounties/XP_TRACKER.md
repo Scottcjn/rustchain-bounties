@@ -96,7 +96,15 @@ Welcome to the Hall of Hunters. Contributors earn XP for meaningful work and unl
 
 - Total XP: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/hunter-stats.json`
 - Top Hunter: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/top-hunter.json`
+- Top 3 Hunters: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/top-3-hunters.json`
 - Active Hunters: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/active-hunters.json`
+- Legendary Hunters: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/legendary-hunters.json`
+- Weekly Growth: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/weekly-growth.json`
+
+### Category Badges
+- Bug Slayers: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/category-bug-slayers.json`
+- Tutorial Titans: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/category-tutorial-titans.json`
+- Outreach Pros: `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/category-outreach-pros.json`
 
 Per-hunter dynamic badge pattern:
 `https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Scottcjn/rustchain-bounties/main/badges/hunters/<hunter-slug>.json`
