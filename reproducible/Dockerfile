@@ -1,7 +1,7 @@
 # RustChain Bounty Tools - Reproducible Container
 # This Dockerfile pins all dependencies for deterministic builds
 
-FROM python:3.11-slim@sha256:6ba6d3f4b3e3f9d9e9d4b3c2a1e8f7d6c5b4a3e2f1d0c9b8a7f6e5d4c3b2a1
+FROM python:3.11-slim-bookworm@sha256:04cd27899595a99dfe77709d96f08876bf2ee99139ee2f0fe9ac948005034e5b
 
 LABEL maintainer="RustChain Community"
 LABEL description="Reproducible environment for RustChain bounty tooling"
@@ -15,9 +15,9 @@ ENV PYTHONUNBUFFERED=1 \
 # Install pinned dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # Pin apt packages
-    curl=7.88.1-0.2+deb12u1 \
-    git=1:2.39.5-0+deb12u1 \
-    sqlite3=3.40.1-1 \
+    curl=7.88.1-10+deb12u14 \
+    git=1:2.39.5-0+deb12u3 \
+    sqlite3=3.40.1-2+deb12u2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pinned Python packages
@@ -33,7 +33,6 @@ WORKDIR /app
 # Copy only necessary files for testing
 COPY tests/ ./tests/
 COPY scripts/ ./scripts/
-COPY requirements*.txt ./
 
 # Default command runs tests
 CMD ["pytest", "tests/", "-v", "--tb=short"]
