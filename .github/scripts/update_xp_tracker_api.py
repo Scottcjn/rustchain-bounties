@@ -452,32 +452,47 @@ def main() -> None:
     if not args.token or not args.repo:
         raise SystemExit("--token and --repo are required in API mode")
 
-    content, sha = get_file_contents(
-        token=args.token,
-        repo=args.repo,
-        path=args.tracker_path,
-        branch=args.branch,
-    )
-    content = update_frontmatter(content)
-    updated_md, total_xp, level, title, unlocked = update_table_in_md(
-        md=content,
-        actor=args.actor,
-        gained_xp=gained_xp,
-        reason=reason,
-        labels=labels,
-    )
+    max_attempts = 4
+    commit_url = ""
+    total_xp = 0
+    level = 1
+    title = "Starting Hunter"
+    unlocked: List[str] = []
 
     message = f"chore(xp): update tracker for @{args.actor} (+{gained_xp} XP)"
-    commit_url = put_file_contents(
-        token=args.token,
-        repo=args.repo,
-        path=args.tracker_path,
-        branch=args.branch,
-        sha=sha,
-        content=updated_md,
-        message=message,
-    )
 
+    for attempt in range(1, max_attempts + 1):
+        content, sha = get_file_contents(
+            token=args.token,
+            repo=args.repo,
+            path=args.tracker_path,
+            branch=args.branch,
+        )
+        content = update_frontmatter(content)
+        updated_md, total_xp, level, title, unlocked = update_table_in_md(
+            md=content,
+            actor=args.actor,
+            gained_xp=gained_xp,
+            reason=reason,
+            labels=labels,
+        )
+
+        try:
+            commit_url = put_file_contents(
+                token=args.token,
+                repo=args.repo,
+                path=args.tracker_path,
+                branch=args.branch,
+                sha=sha,
+                content=updated_md,
+                message=message,
+            )
+            break
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else None
+            if status == 409 and attempt < max_attempts:
+                continue
+            raise
     result = {
         "mode": "api",
         "actor": args.actor,
