@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: MIT
 # SHA256 Checksum Verifier
 # Verifies integrity of RustChain Bounty artifacts
 

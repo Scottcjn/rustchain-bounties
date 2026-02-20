@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: MIT
 # SHA256 Checksum Generator for RustChain Bounty Artifacts
 
 set -e
