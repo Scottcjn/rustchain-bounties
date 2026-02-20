@@ -1,0 +1,29 @@
+# Supply-Chain Hygiene Linter — Allowlist
+#
+# Intentional exceptions to risky-pattern detection.
+# Each entry here has been reviewed and accepted by maintainers.
+#
+# Format:
+#   files:     — exact relative paths to skip entirely
+#   patterns:  — regex patterns; lines matching these are skipped
+#
+# To add an exception:
+#   1. Add the file path or a regex pattern below.
+#   2. Include a comment explaining WHY the exception is safe.
+#   3. Get maintainer approval before merging.
+
+files:
+  # The linter itself contains pattern definitions — not actual risky commands
+  - "scripts/supply_chain_lint.py"
+  # The linter tests use risky patterns as test fixtures
+  - "tests/test_supply_chain_lint.py"
+  # The allowlist file references patterns by name — not actual commands
+  - ".github/supply-chain-allowlist.yml"
+
+patterns:
+  # Documentation lines that reference risky patterns as examples of what NOT to do.
+  # These are descriptive warnings, not actual install commands.
+  - "avoid blind install"
+  - "no blind install patterns"
+  - "No `curl \\| bash` or equivalent"
+  - "ask reviewers to run blind"

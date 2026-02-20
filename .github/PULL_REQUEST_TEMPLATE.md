@@ -49,3 +49,19 @@ Suggested gate for maintainers: >=13/20 total and Correctness > 0.
 - [ ] Code is tested
 - [ ] No secrets or credentials committed
 - [ ] Submission does not match any global disqualifier
+
+
+## Supply-Chain Proof (Required if changed)
+
+Complete this if your PR changes dependencies, install docs, CI tooling, or external artifacts.
+
+- [ ] Dependency versions are pinned (or intentionally ranged with reason)
+- [ ] External repo references include commit SHA
+- [ ] Artifact checksum/container digest provided
+- [ ] No `curl | bash` or equivalent blind install steps
+
+Proof details:
+- Dependency diff summary:
+- SHA/checksum/digest:
+- Repro command used by reviewer:
+

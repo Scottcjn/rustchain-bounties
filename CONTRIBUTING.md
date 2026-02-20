@@ -44,3 +44,17 @@ Before asking for payout or merge review, include this five-line packet:
 5. One verification note
 
 Packet template: `docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md`
+
+
+## Supply-Chain Hygiene
+
+If your PR changes dependencies, install scripts/docs, CI tooling, or external artifacts:
+
+- pin versions and external references where possible
+- include commit SHAs for external repos
+- include checksum/digest for artifacts or images
+- avoid blind install commands (`curl | bash`)
+- document exact reproduction commands for reviewers
+
+See `docs/BOUNTY_HYGIENE.md` for details.
+

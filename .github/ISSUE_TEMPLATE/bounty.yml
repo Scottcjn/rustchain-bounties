@@ -16,7 +16,10 @@ body:
         **RTC wallets are simple string names**, not blockchain addresses.
         Pick any name you like: `my-cool-wallet`, `alice`, `builder-fred`, etc.
 
-        Start mining: `pip install clawrtc && clawrtc --wallet your-name`
+        Start mining with reproducible instructions only:
+        - use pinned versions/commits
+        - provide checksum or container digest
+        - avoid unpinned `pip install` in bounty posts
 
         **Do NOT submit ETH, SOL, or ERG addresses as your wallet.**
         Those chains (Solana wRTC, Ergo anchoring) exist for bridging INTO the RTC economy — not for cashing out.
@@ -85,6 +88,42 @@ body:
         - File: /root/rustchain/...
         - Docs: ...
         - Related issue: #...
+
+
+  - type: textarea
+    id: target
+    attributes:
+      label: Target Repo / Ref / Environment
+      description: Exact target for reproducible review.
+      placeholder: |
+        Repository: owner/repo
+        Branch or commit range: ...
+        Deployment/test environment: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: supply_chain
+    attributes:
+      label: Supply-Chain Hygiene
+      description: Required for any bounty that changes dependencies, install steps, CI, or tooling.
+      placeholder: |
+        - Pinned dependency versions:
+        - External repos pinned to commit SHA:
+        - Artifact checksum/container digest:
+        - Any install commands reviewers must run:
+    validations:
+      required: true
+
+  - type: textarea
+    id: disclosure
+    attributes:
+      label: Disclosure / Safe Harbor (Security Bounties)
+      description: Required for security/red-team bounties.
+      placeholder: |
+        Disclosure window: ...
+        Safe harbor: SECURITY.md
+        Severity rubric + payout table reference: ...
 
   - type: textarea
     id: quality_gate
