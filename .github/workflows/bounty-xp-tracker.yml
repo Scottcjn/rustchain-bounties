@@ -2,10 +2,14 @@ name: Bounty XP Tracker and Leaderboard Updater
 
 on:
   issues:
-    types: [closed, labeled]
+    types: [closed]
   pull_request:
-    types: [closed, synchronize, labeled]
+    types: [closed]
   workflow_dispatch:
+
+concurrency:
+  group: bounty-xp-tracker-${{ github.repository }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -17,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && (github.event.action == 'closed' || github.event.action == 'labeled')) ||
+      (github.event_name == 'issues' && github.event.action == 'closed') ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
 
     steps:
@@ -46,7 +50,7 @@ jobs:
           PR_MERGED: ${{ github.event.pull_request.merged || false }}
           ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
           PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-          TARGET_BRANCH: ${{ github.ref_name || 'main' }}
+          TARGET_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
         run: |
           python .github/scripts/update_xp_tracker_api.py \
             --token "$GITHUB_TOKEN" \
