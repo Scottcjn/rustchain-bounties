@@ -7,6 +7,8 @@ Outputs:
 - badges/active-hunters.json
 - badges/legendary-hunters.json
 - badges/updated-at.json
+- badges/top-3-hunters.json
+- badges/weekly-growth.json
 - badges/hunters/<hunter>.json (per hunter)
 """
 
@@ -17,7 +19,7 @@ import datetime as dt
 import json
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,7 +34,7 @@ def parse_int(value: str) -> int:
     return int(match.group(0)) if match else 0
 
 
-def parse_rows(md_text: str) -> List[Dict[str, object]]:
+def parse_rows(md_text: str) -> List[Dict[str, Any]]:
     lines = md_text.splitlines()
     header_idx = -1
     for i, line in enumerate(lines):
@@ -43,7 +45,7 @@ def parse_rows(md_text: str) -> List[Dict[str, object]]:
     if header_idx < 0:
         return []
 
-    rows: List[Dict[str, object]] = []
+    rows: List[Dict[str, Any]] = []
     i = header_idx + 2
     while i < len(lines) and lines[i].strip().startswith("|"):
         line = lines[i].strip()
@@ -68,6 +70,8 @@ def parse_rows(md_text: str) -> List[Dict[str, object]]:
             "xp": parse_int(cells[3]),
             "level": parse_int(cells[4]),
             "title": cells[5],
+            "badges": cells[6],
+            "last_action": cells[7],
         }
         rows.append(row)
         i += 1
@@ -111,6 +115,27 @@ def write_badge(path: Path, label: str, message: str, color: str,
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def calculate_weekly_growth(rows: List[Dict[str, Any]]) -> int:
+    """Calculate total XP gained in the last 7 days based on Last Action column."""
+    total_growth = 0
+    now = dt.datetime.now()
+    seven_days_ago = now - dt.timedelta(days=7)
+    
+    for row in rows:
+        last_action = str(row.get("last_action", ""))
+        # Format: "2026-02-13: +300 XP (rustchain-bounties#62, 150 RTC)"
+        match = re.match(r"(\d{4}-\d{2}-\d{2}):\s*\+(\d+)\s*XP", last_action)
+        if match:
+            date_str, xp_str = match.groups()
+            try:
+                action_date = dt.datetime.strptime(date_str, "%Y-%m-%d")
+                if action_date >= seven_days_ago:
+                    total_growth += int(xp_str)
+            except ValueError:
+                continue
+    return total_growth
+
+
 def main() -> None:
     args = parse_args()
     tracker_path = Path(args.tracker)
@@ -125,13 +150,20 @@ def main() -> None:
     total_xp = sum(int(row["xp"]) for row in rows)
     active_hunters = len(rows)
     legendary = sum(1 for row in rows if int(row["level"]) >= 10)
+    weekly_growth = calculate_weekly_growth(rows)
 
     if rows:
         top = rows[0]
         top_name = str(top["hunter"]).lstrip("@")
         top_msg = f"{top_name} ({top['xp']} XP)"
+        
+        # Top 3 summary
+        top_3 = rows[:3]
+        top_3_names = [str(r["hunter"]).lstrip("@") for r in top_3]
+        top_3_msg = ", ".join(top_3_names)
     else:
         top_msg = "none yet"
+        top_3_msg = "none yet"
 
     write_badge(
         out_dir / "hunter-stats.json",
@@ -150,6 +182,14 @@ def main() -> None:
         logo_color="black" if rows else "white",
     )
     write_badge(
+        out_dir / "top-3-hunters.json",
+        label="Leaders",
+        message=top_3_msg,
+        color="gold" if rows else "lightgrey",
+        named_logo="crown",
+        logo_color="white",
+    )
+    write_badge(
         out_dir / "active-hunters.json",
         label="Active Hunters",
         message=str(active_hunters),
@@ -164,6 +204,14 @@ def main() -> None:
         color="gold" if legendary > 0 else "lightgrey",
         named_logo="crown",
         logo_color="black" if legendary > 0 else "white",
+    )
+    write_badge(
+        out_dir / "weekly-growth.json",
+        label="Weekly XP",
+        message=f"+{weekly_growth}",
+        color="brightgreen" if weekly_growth > 0 else "blue",
+        named_logo="trending-up" if weekly_growth > 0 else "dash",
+        logo_color="white",
     )
     write_badge(
         out_dir / "updated-at.json",
@@ -200,6 +248,7 @@ def main() -> None:
         "active_hunters": active_hunters,
         "legendary_hunters": legendary,
         "top_hunter": top_msg,
+        "weekly_growth": weekly_growth,
         "generated_files": len(list(out_dir.glob("*.json"))) + len(list((out_dir / "hunters").glob("*.json"))),
     }))
 
