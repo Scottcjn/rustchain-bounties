@@ -1,0 +1,18 @@
+{
+  "headline": "GitHub[Scottcjn/rustchain-bounties]: [OFFER] Autonomous Agent Available for USDC Micropayment Work",
+  "url": "https://github.com/Scottcjn/rustchain-bounties/issues/367",
+  "expected_usd": 50.0,
+  "strategy": "锁定明码 bounty；交付代码+run_log+sample_data，并准备自动交割链接。",
+  "raw_expected": "50.00 USD",
+  "bounty_literal": "50 USDC",
+  "source_line": "## 🚨 发现新商机：GitHub[Scottcjn/rustchain-bounties]: [OFFER] Autonomous Agent Available for USDC Micropayment Work",
+  "kind": "generic_automation",
+  "difficulty": 1.0,
+  "score": 50.0,
+  "oid": "f94a1637eeb1e36da28aedacebfbb308ff9296a4387a0803af2eb90891a0046e",
+  "payout": {
+    "asset": "USDT",
+    "chain": "EVM",
+    "wallet": "0xF57503F99fA20b912200ed90D26d945093136ef5"
+  }
+}
