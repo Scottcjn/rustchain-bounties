@@ -3,10 +3,11 @@ import json
 import unittest
 from pathlib import Path
 import sys
-import os
+import datetime as dt
 
-# Mock dependencies
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Load badge script module from .github/scripts
+SCRIPT_DIR = Path(__file__).resolve().parent.parent / ".github" / "scripts"
+sys.path.insert(0, str(SCRIPT_DIR))
 import generate_dynamic_badges
 
 class TestBadgeGenerator(unittest.TestCase):
@@ -25,8 +26,10 @@ class TestBadgeGenerator(unittest.TestCase):
             {"last_action": "2026-01-01: +500 XP"}, # Old
             {"last_action": "Invalid date"},
         ]
-        growth = generate_dynamic_badges.calculate_weekly_growth(rows)
-        # Note: Depending on current date, 2026-02-22 should be within 7 days
+        growth = generate_dynamic_badges.calculate_weekly_growth(
+            rows,
+            reference_date=dt.date(2026, 2, 23),
+        )
         self.assertEqual(growth, 100)
 
     def test_color_for_level(self):

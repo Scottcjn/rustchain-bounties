@@ -122,11 +122,22 @@ def write_badge(path: Path, label: str, message: str, color: str,
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def calculate_weekly_growth(rows: List[Dict[str, Any]]) -> int:
-    """Calculate total XP gained in the last 7 days based on Last Action column."""
+def parse_tracker_last_updated(md_text: str) -> dt.date | None:
+    """Parse front-matter `last_updated` date from XP tracker markdown."""
+    match = re.search(r"(?m)^last_updated:\s*(\d{4}-\d{2}-\d{2})\s*$", md_text)
+    if not match:
+        return None
+    try:
+        return dt.datetime.strptime(match.group(1), "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def calculate_weekly_growth(rows: List[Dict[str, Any]], reference_date: dt.date | None = None) -> int:
+    """Calculate total XP gained in the last 7 calendar days ending on reference_date."""
     total_growth = 0
-    now = dt.datetime.now()
-    seven_days_ago = now - dt.timedelta(days=7)
+    anchor_date = reference_date or dt.datetime.now(dt.UTC).date()
+    seven_day_start = anchor_date - dt.timedelta(days=6)
     
     for row in rows:
         last_action = str(row.get("last_action", ""))
@@ -135,8 +146,8 @@ def calculate_weekly_growth(rows: List[Dict[str, Any]]) -> int:
         if match:
             date_str, xp_str = match.groups()
             try:
-                action_date = dt.datetime.strptime(date_str, "%Y-%m-%d")
-                if action_date >= seven_days_ago:
+                action_date = dt.datetime.strptime(date_str, "%Y-%m-%d").date()
+                if seven_day_start <= action_date <= anchor_date:
                     total_growth += int(xp_str)
             except ValueError:
                 continue
@@ -198,11 +209,13 @@ def main() -> None:
 
     md_text = tracker_path.read_text(encoding="utf-8")
     rows = parse_rows(md_text)
+    tracker_last_updated = parse_tracker_last_updated(md_text)
+    reference_date = tracker_last_updated or dt.datetime.now(dt.UTC).date()
 
     total_xp = sum(int(row["xp"]) for row in rows)
     active_hunters = len(rows)
     legendary = sum(1 for row in rows if int(row["level"]) >= 10)
-    weekly_growth = calculate_weekly_growth(rows)
+    weekly_growth = calculate_weekly_growth(rows, reference_date=reference_date)
 
     if rows:
         top = rows[0]
@@ -268,7 +281,7 @@ def main() -> None:
     write_badge(
         out_dir / "updated-at.json",
         label="XP Updated",
-        message=dt.datetime.now(dt.UTC).strftime("%Y-%m-%d"),
+        message=reference_date.strftime("%Y-%m-%d"),
         color="blue",
         named_logo="clockify",
         logo_color="white",

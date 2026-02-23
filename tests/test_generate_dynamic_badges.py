@@ -15,6 +15,7 @@ import sys
 import tempfile
 import textwrap
 import unittest
+import datetime as dt
 from pathlib import Path
 
 # Add the script directory to import path
@@ -117,6 +118,32 @@ class TestParseRows(unittest.TestCase):
         """)
         rows = badge_mod.parse_rows(md)
         self.assertEqual(len(rows), 1)
+
+
+class TestTrackerMetadata(unittest.TestCase):
+    """Test tracker front-matter parsing helpers."""
+
+    def test_parse_tracker_last_updated(self):
+        parsed = badge_mod.parse_tracker_last_updated(POPULATED_TRACKER)
+        self.assertEqual(parsed, dt.date(2025, 1, 1))
+
+    def test_parse_tracker_last_updated_missing(self):
+        parsed = badge_mod.parse_tracker_last_updated("# no front matter")
+        self.assertIsNone(parsed)
+
+
+class TestWeeklyGrowth(unittest.TestCase):
+    """Test weekly growth calculation behavior."""
+
+    def test_weekly_growth_uses_reference_date_window(self):
+        rows = [
+            {"last_action": "2026-02-20: +100 XP (x, 1 RTC)"},
+            {"last_action": "2026-02-14: +50 XP (x, 1 RTC)"},
+            {"last_action": "2026-02-13: +300 XP (x, 1 RTC)"},
+            {"last_action": "not parseable"},
+        ]
+        growth = badge_mod.calculate_weekly_growth(rows, reference_date=dt.date(2026, 2, 20))
+        self.assertEqual(growth, 150)
 
 
 class TestParseInt(unittest.TestCase):
@@ -313,6 +340,9 @@ class TestEndToEndBadgeGeneration(unittest.TestCase):
             legendary = json.loads((out_dir / "legendary-hunters.json").read_text())
             self.assertEqual(legendary["message"], "1")  # Only alice is level 10+
             self.assertEqual(legendary["color"], "gold")
+
+            updated = json.loads((out_dir / "updated-at.json").read_text())
+            self.assertEqual(updated["message"], "2025-01-01")
 
     def test_empty_table_generates_badges(self):
         """Empty table should still generate summary badges with defaults."""
