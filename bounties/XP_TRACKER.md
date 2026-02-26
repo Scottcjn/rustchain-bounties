@@ -2,7 +2,7 @@
 title: RustChain Bounty Hunter XP and Levels
 description: Track XP, levels, badges, and progression for all bounty hunters (humans + agents)
 version: 1.4
-last_updated: 2026-02-20
+last_updated: 2026-02-26
 maintainer: Scottcjn
 ---
 
