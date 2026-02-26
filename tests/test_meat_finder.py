@@ -29,6 +29,7 @@ class MeatFinderTests(unittest.TestCase):
             os.environ.pop("GH_TOKEN", None)
             os.environ.pop("GITHUB_TOKEN", None)
             finder = MeatFinder()
+            finder._has_gh_cli_auth = lambda: False  # type: ignore[assignment]
             self.assertNotIn("Authorization", finder._github_headers())
 
             os.environ["GH_TOKEN"] = "abc123"
@@ -36,6 +37,27 @@ class MeatFinderTests(unittest.TestCase):
                 finder._github_headers().get("Authorization"),
                 "Bearer abc123",
             )
+        finally:
+            if prev_gh is None:
+                os.environ.pop("GH_TOKEN", None)
+            else:
+                os.environ["GH_TOKEN"] = prev_gh
+            if prev_github is None:
+                os.environ.pop("GITHUB_TOKEN", None)
+            else:
+                os.environ["GITHUB_TOKEN"] = prev_github
+
+    def test_headers_fallback_to_gh_auth_status_when_env_token_missing(self):
+        prev_gh = os.environ.get("GH_TOKEN")
+        prev_github = os.environ.get("GITHUB_TOKEN")
+        try:
+            os.environ.pop("GH_TOKEN", None)
+            os.environ.pop("GITHUB_TOKEN", None)
+            finder = MeatFinder()
+            finder._has_gh_cli_auth = lambda: True  # type: ignore[assignment]
+            headers = finder._github_headers()
+            self.assertNotIn("Authorization", headers)
+            self.assertEqual(headers.get("X-OpenClaw-GH-Auth"), "gh-cli")
         finally:
             if prev_gh is None:
                 os.environ.pop("GH_TOKEN", None)

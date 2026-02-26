@@ -4,6 +4,8 @@ import time
 import requests
 import os
 import re
+import shutil
+import subprocess
 from typing import List, Dict, Optional, Tuple
 
 # Configuration
@@ -23,6 +25,31 @@ class MeatFinder:
     def __init__(self):
         self.found_tasks = []
         self._seen_ids = set()
+        self._gh_auth_cached: Optional[bool] = None
+
+    def _has_gh_cli_auth(self) -> bool:
+        """Best-effort check for `gh auth status` without requiring GH_TOKEN env vars."""
+        if self._gh_auth_cached is not None:
+            return self._gh_auth_cached
+
+        if shutil.which("gh") is None:
+            self._gh_auth_cached = False
+            return False
+
+        try:
+            proc = subprocess.run(
+                ["gh", "auth", "status"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+            self._gh_auth_cached = proc.returncode == 0
+        except Exception:
+            self._gh_auth_cached = False
+
+        return self._gh_auth_cached
 
     def _github_headers(self) -> Dict[str, str]:
         headers = {
@@ -32,6 +59,12 @@ class MeatFinder:
         github_token = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
         if github_token:
             headers["Authorization"] = f"Bearer {github_token}"
+            return headers
+
+        # Fallback: allow gh CLI credential store to satisfy auth checks.
+        if self._has_gh_cli_auth():
+            headers["X-OpenClaw-GH-Auth"] = "gh-cli"
+
         return headers
 
     def _next_link(self, link_header: Optional[str]) -> Optional[str]:
