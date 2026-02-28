@@ -1,130 +1,121 @@
-```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+```python
+"""
+Retroactive Impact Rewards
+Architecture: The Invisible Architect (Value Routing & Structural Integrity Mechanism)
+Purpose: Surfacing and compensating critical, unbountied system labor (stabilization, mentorship).
+"""
 
-/**
- * @title RetroactiveImpactRewards
- * @author The Unsung Hero Developer
- * @notice Solves the "mercenary" culture of traditional bounties by allowing
- * peer-driven, retroactive surprise bonuses for critical but unglamorous work.
- */
-contract RetroactiveImpactRewards {
-    // Treasury backing the retroactive impact program
-    address public immutable PROGRAM_TREASURY = 0xeDD46E3D9680b676e53c19A2089A05313c6fD5F9;
-    address public committee;
+from __future__ import annotations
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Dict, Set
+import hashlib
+from functools import total_ordering
 
-    enum Category { ObscureBugFix, Mentorship, Documentation, Infrastructure, Support, Other }
-    enum Status { Pending, Rewarded, Rejected }
+class UnsexyLaborType(Enum):
+    PRODUCTION_STABILIZATION = "Infrastructure & Production Stabilization"
+    MENTORSHIP = "Developer Onboarding & Mentorship"
+    TECH_DEBT = "Refactoring & Technical Debt Reduction"
+    GLUE_WORK = "Cross-Squad Alignment & Unblocking"
 
-    struct Nomination {
-        address nominee;
-        address nominator;
-        Category category;
-        string description;
-        Status status;
-        uint256 rewardAmount;
-    }
+@dataclass
+class InvisibleImpact:
+    id: str
+    contributor_id: str
+    labor_category: UnsexyLaborType
+    description: str
+    peer_witnesses: Set[str] = field(default_factory=set)
+    baseline_value: float = 100.0
 
-    uint256 public nominationCount;
-    mapping(uint256 => Nomination) public nominations;
+    @property
+    def true_impact_score(self) -> float:
+        """The structural impact of 'invisible' work scales exponentially 
+        by the number of peers it empowers or systems it saves."""
+        return self.baseline_value * (1.0 + len(self.peer_witnesses) * 0.5)
 
-    event UnsungHeroNominated(uint256 indexed id, address indexed nominee, Category category, string description);
-    event SurpriseBonusAwarded(uint256 indexed id, address indexed hero, uint256 amount);
-    event NominationRejected(uint256 indexed id, string reason);
+@total_ordering
+class RetroactiveRewardEngine:
+    def __init__(self, treasury_reserve: float):
+        self.treasury_reserve = treasury_reserve
+        self.impact_ledger: Dict[str, InvisibleImpact] = {}
+        self.pending_bonuses: Dict[str, float] = {}
 
-    modifier onlyCommittee() {
-        require(msg.sender == committee || msg.sender == PROGRAM_TREASURY, "Not authorized to allocate funds");
-        _;
-    }
+    def log_shadow_work(self, dev_id: str, category: UnsexyLaborType, description: str) -> str:
+        """Captures critical work that falls outside rigid predefined bounty lists."""
+        impact_id = hashlib.sha256(f"{dev_id}:{description}".encode()).hexdigest()[:12]
+        self.impact_ledger[impact_id] = InvisibleImpact(
+            id=impact_id,
+            contributor_id=dev_id,
+            labor_category=category,
+            description=description
+        )
+        return impact_id
 
-    constructor() {
-        committee = msg.sender;
-    }
+    def attest_impact(self, impact_id: str, witness_id: str) -> None:
+        """Peers silently corroborate the value of the unsexy labor."""
+        if impact_id in self.impact_ledger:
+            impact = self.impact_ledger[impact_id]
+            if witness_id != impact.contributor_id:
+                impact.peer_witnesses.add(witness_id)
 
-    // Contract can receive funds from benefactors wanting to sponsor unsung heroes
-    receive() external payable {}
+    def _calculate_surprise_allocation(self, allocation_rate: float = 0.15) -> Dict[str, float]:
+        """Dynamically routes a percentage of the treasury to unbountied structural work."""
+        if not self.impact_ledger:
+            return {}
 
-    /**
-     * @notice Nominate an unsung hero for the invisible value they created.
-     * @param _nominee The developer who did the unglamorous work.
-     * @param _category The type of work completed (docs, mentorship, etc.).
-     * @param _description Git commit, PR link, or explanation of impact.
-     */
-    function nominateHero(
-        address _nominee,
-        Category _category,
-        string calldata _description
-    ) external returns (uint256) {
-        require(_nominee != address(0), "Invalid nominee address");
-        require(_nominee != msg.sender, "Cannot nominate yourself");
+        reward_pool = self.treasury_reserve * allocation_rate
+        total_impact_score = sum(impact.true_impact_score for impact in self.impact_ledger.values())
 
-        uint256 id = ++nominationCount;
-        nominations[id] = Nomination({
-            nominee: _nominee,
-            nominator: msg.sender,
-            category: _category,
-            description: _description,
-            status: Status.Pending,
-            rewardAmount: 0
-        });
+        if total_impact_score <= 0:
+            return {}
 
-        emit UnsungHeroNominated(id, _nominee, _category, _description);
-        return id;
-    }
+        for impact in self.impact_ledger.values():
+            share = (impact.true_impact_score / total_impact_score) * reward_pool
+            self.pending_bonuses[impact.contributor_id] = self.pending_bonuses.get(impact.contributor_id, 0) + share
+            self.treasury_reserve -= share
 
-    /**
-     * @notice Distribute a retroactive surprise bonus to a nominated hero.
-     * @param _nominationId The ID of the peer nomination.
-     */
-    function awardSurpriseBonus(uint256 _nominationId) external payable onlyCommittee {
-        Nomination storage nom = nominations[_nominationId];
-        require(nom.status == Status.Pending, "Nomination already processed");
+        return self.pending_bonuses
 
-        uint256 reward = msg.value;
-        require(reward > 0 || address(this).balance >= reward, "Insufficient reward funding");
+    def execute_retroactive_airdrop(self) -> None:
+        """Distributes surprise bonuses to the most dedicated, unseen contributors."""
+        bonuses = self._calculate_surprise_allocation()
+        for dev, amount in bonuses.items():
+            self._transmit_reward(dev, amount)
 
-        nom.status = Status.Rewarded;
-        nom.rewardAmount = reward;
+        self.impact_ledger.clear()
+        self.pending_bonuses.clear()
 
-        (bool success, ) = nom.nominee.call{value: reward}("");
-        require(success, "Reward transfer failed");
+    def _transmit_reward(self, dev_id: str, amount: float) -> None:
+        """Transaction execution layer."""
+        print(f"[RETRO_REWARD_DISPATCHED] {dev_id} | Amount: ${amount:.2f} | Reason: Systemic Integrity Maintenance")
 
-        emit SurpriseBonusAwarded(_nominationId, nom.nominee, reward);
-    }
+    def __lt__(self, other: RetroactiveRewardEngine) -> bool:
+        return self.treasury_reserve < other.treasury_reserve
 
-    /**
-     * @notice Batch process multiple unsung heroes to save gas and distribute treasury funds.
-     */
-    function batchAwardSurpriseBonuses(
-        uint256[] calldata _nominationIds,
-        uint256[] calldata _amounts
-    ) external payable onlyCommittee {
-        require(_nominationIds.length == _amounts.length, "Mismatched input arrays");
+    def __eq__(self, other: RetroactiveRewardEngine) -> bool:
+        return self.treasury_reserve == other.treasury_reserve
 
-        for(uint256 i = 0; i < _nominationIds.length; i++) {
-            Nomination storage nom = nominations[_nominationIds[i]];
+if __name__ == "__main__":
+    architect = RetroactiveRewardEngine(treasury_reserve=250000.0)
 
-            if(nom.status == Status.Pending) {
-                nom.status = Status.Rewarded;
-                nom.rewardAmount = _amounts[i];
+    work_1 = architect.log_shadow_work(
+        dev_id="dev_0x9A",
+        category=UnsexyLaborType.PRODUCTION_STABILIZATION,
+        description="Diagnosed and patched silent memory leak causing sporadic weekend downtime."
+    )
 
-                (bool success, ) = nom.nominee.call{value: _amounts[i]}("");
-                require(success, "Reward transfer failed");
+    work_2 = architect.log_shadow_work(
+        dev_id="dev_0x4F",
+        category=UnsexyLaborType.MENTORSHIP,
+        description="Spent 20 hours unblocking 4 junior devs on legacy architecture."
+    )
 
-                emit SurpriseBonusAwarded(_nominationIds[i], nom.nominee, _amounts[i]);
-            }
-        }
-    }
+    architect.attest_impact(work_1, witness_id="dev_0x1B")
+    architect.attest_impact(work_1, witness_id="sysadmin_01")
 
-    /**
-     * @notice Reject a nomination if it is deemed invalid or spam.
-     */
-    function rejectNomination(uint256 _nominationId, string calldata _reason) external onlyCommittee {
-        Nomination storage nom = nominations[_nominationId];
-        require(nom.status == Status.Pending, "Nomination already processed");
+    architect.attest_impact(work_2, witness_id="junior_dev_A")
+    architect.attest_impact(work_2, witness_id="junior_dev_B")
+    architect.attest_impact(work_2, witness_id="junior_dev_C")
 
-        nom.status = Status.Rejected;
-        emit NominationRejected(_nominationId, _reason);
-    }
-}
+    architect.execute_retroactive_airdrop()
 ```
