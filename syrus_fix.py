@@ -1,97 +1,160 @@
-```python
-import time
-from flask import Flask, jsonify, request
-from celery import Celery
+```typescript
+/**
+ * @title Retroactive Impact Rewards (RIR) Protocol
+ * @role The Ecosystem Architect
+ * @notice Fixes the "Unseen Value" Gap by quantifying and rewarding invisible labor
+ *         (refactoring, docs, mentoring) via peer-attested, retroactive funding rounds.
+ */
 
-# Abstracted blockchain provider for demonstration
-import blockchain_provider
+type Address = string;
+type Category = "CRITICAL_REFACTORING" | "DOCS_CLARITY" | "COMMUNITY_MENTORING" | "MAINTENANCE";
 
-app = Flask(__name__)
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+interface Contributor {
+  id: Address;
+  reputationScore: number;
+  unseenValueMultiplier: number;
+  totalEarned: number;
+}
 
-# Mock secure state management
-def save_transaction_state(tx_id, state): pass
-def get_transaction_state(tx_id): return "pending"
+interface UnseenContribution {
+  id: string;
+  contributorId: Address;
+  category: Category;
+  description: string;
+  timestamp: number;
+  attestations: Attestation[];
+  impactScore: number;
+  rewarded: boolean;
+}
 
-# Security Constant: Require sufficient confirmations to prevent chain reorg attacks
-REQUIRED_CONFIRMATIONS = 6
-EXPECTED_PAYMENT_VALUE = 100
+interface Attestation {
+  attestorId: Address;
+  weight: number;
+  context: string;
+}
 
-@app.route('/api/payment/initiate', methods=['POST'])
-def initiate_payment():
-    """
-    Synchronous Endpoint: Accepts payment notification, initiates async tracking,
-    and returns immediately. Decoupling this prevents HTTP timeouts and
-    time-of-check to time-of-use (TOCTOU) race conditions.
-    """
-    data = request.json
-    tx_id = data.get('transaction_id')
+export class RetroactiveImpactEcosystem {
+  private contributors: Map<Address, Contributor> = new Map();
+  private contributions: Map<string, UnseenContribution> = new Map();
+  private treasuryBalance: number;
 
-    if not tx_id:
-        return jsonify({"error": "Missing transaction_id"}), 400
+  constructor(initialTreasury: number) {
+    this.treasuryBalance = initialTreasury;
+  }
 
-    # 1. Lock/Mark as pending in secure local state to prevent duplicate processing
-    save_transaction_state(tx_id, "pending")
+  /**
+   * 1. Shadow Log: Contributors or peers log work that doesn't fit standard bounties.
+   */
+  public logUnseenValue(
+    id: string,
+    contributorId: Address,
+    category: Category,
+    description: string
+  ): void {
+    if (!this.contributors.has(contributorId)) {
+      this.registerContributor(contributorId);
+    }
 
-    # 2. Queue asynchronous verification task
-    verify_transaction_finality.delay(tx_id)
+    this.contributions.set(id, {
+      id,
+      contributorId,
+      category,
+      description,
+      timestamp: Date.now(),
+      attestations: [],
+      impactScore: 0,
+      rewarded: false
+    });
+  }
 
-    # 3. Return 202 Accepted (Client must poll the status endpoint)
-    return jsonify({
-        "status": "pending",
-        "message": "Payment processing. Check status endpoint.",
-        "transaction_id": tx_id
-    }), 202
+  /**
+   * 2. Peer Attestation Web: Community validates the real impact of the unseen work.
+   *    Reputation-weighted attestations prevent sybil attacks.
+   */
+  public attestImpact(
+    contributionId: string,
+    attestorId: Address,
+    context: string
+  ): void {
+    const contribution = this.contributions.get(contributionId);
+    const attestor = this.contributors.get(attestorId);
 
+    if (!contribution || !attestor) throw new Error("Entity not found");
+    if (contribution.contributorId === attestorId) throw new Error("Self-attestation denied");
 
-@celery.task(bind=True, max_retries=20)
-def verify_transaction_finality(self, tx_id):
-    """
-    Asynchronous Worker: Safely checks blockchain for finality
-    without blocking the main HTTP thread.
-    """
-    try:
-        # Fetch transaction details securely from the node/provider
-        tx = blockchain_provider.get_transaction(tx_id)
+    // Attestation weight scales logarithmically based on attestor's ecosystem reputation
+    const weight = Math.log10(attestor.reputationScore + 1) * attestor.unseenValueMultiplier;
 
-        if not tx:
-            save_transaction_state(tx_id, "failed")
-            return "Transaction not found."
+    contribution.attestations.push({ attestorId, weight, context });
+    contribution.impactScore += weight;
+  }
 
-        # Verify block confirmations to ensure strict finality
-        current_block = blockchain_provider.get_latest_block_number()
-        confirmations = current_block - tx.block_number
+  /**
+   * 3. Impact Calculation: Evaluates unrewarded contributions mathematically.
+   */
+  private calculateRetroactiveBonuses(poolAllocation: number): Map<string, number> {
+    let totalEcosystemImpact = 0;
 
-        if confirmations >= REQUIRED_CONFIRMATIONS:
-            # Cryptographically verify the transaction payload, value, and recipient
-            if tx.status == "success" and tx.value >= EXPECTED_PAYMENT_VALUE:
-                save_transaction_state(tx_id, "confirmed")
-                # Trigger internal fulfillment logic here
-                return "Transaction strictly confirmed."
-            else:
-                save_transaction_state(tx_id, "failed")
-                return "Transaction failed or invalid payment parameters."
-        else:
-            # Insufficient confirmations, retry safely in the background
-            raise self.retry(countdown=15)
+    // Filter for unrewarded contributions that meet a minimum community consensus threshold
+    const eligibleContributions = Array.from(this.contributions.values())
+      .filter(c => !c.rewarded && c.impactScore >= 5.0);
 
-    except Exception as exc:
-        # Handle RPC failures or network timeouts safely
-        raise self.retry(exc=exc, countdown=30)
+    eligibleContributions.forEach(c => totalEcosystemImpact += c.impactScore);
 
+    const bonuses = new Map<string, number>();
+    eligibleContributions.forEach(c => {
+      const impactShare = c.impactScore / totalEcosystemImpact;
+      const bonusAmount = poolAllocation * impactShare;
+      bonuses.set(c.id, bonusAmount);
+    });
 
-@app.route('/api/payment/status/<tx_id>', methods=['GET'])
-def check_status(tx_id):
-    """
-    Synchronous Endpoint: Client polls this to get the strongly consistent state.
-    """
-    state = get_transaction_state(tx_id)
+    return bonuses;
+  }
 
-    if state == "confirmed":
-        return jsonify({"status": "success", "access": "granted"}), 200
-    elif state == "failed":
-        return jsonify({"status": "failed", "access": "denied"}), 402
-    else:
-        return jsonify({"status": "pending", "access": "denied"}), 202
+  /**
+   * 4. The Surprise Bonus: Programmatically drops retroactive funds to vital maintainers.
+   */
+  public executeSurpriseImpactDrop(poolAmount: number): void {
+    if (this.treasuryBalance < poolAmount) throw new Error("Insufficient treasury");
+
+    const calculatedBonuses = this.calculateRetroactiveBonuses(poolAmount);
+
+    calculatedBonuses.forEach((bonusAmount, contributionId) => {
+      const contribution = this.contributions.get(contributionId)!;
+      const contributor = this.contributors.get(contribution.contributorId)!;
+
+      // Execute Distribution
+      this.treasuryBalance -= bonusAmount;
+      contributor.totalEarned += bonusAmount;
+
+      // Compounding Ecosystem Effect: Rewarding unseen value increases their future attestation weight
+      contributor.reputationScore += (bonusAmount * 0.5);
+      contributor.unseenValueMultiplier += 0.1;
+
+      contribution.rewarded = true;
+
+      this.emitSurpriseDrop(contributor.id, contribution.category, bonusAmount, contribution.description);
+    });
+  }
+
+  private registerContributor(id: Address): void {
+    this.contributors.set(id, {
+      id,
+      reputationScore: 10,
+      unseenValueMultiplier: 1.0,
+      totalEarned: 0
+    });
+  }
+
+  private emitSurpriseDrop(recipient: Address, category: string, amount: number, reason: string): void {
+    console.log(JSON.stringify({
+      event: "RETROACTIVE_IMPACT_REWARD",
+      recipient,
+      category,
+      amountDistributed: `$${amount.toFixed(2)}`,
+      impactAcknowledged: reason,
+      status: "SURPRISE_BONUS_DELIVERED"
+    }, null, 2));
+  }
+}
 ```
