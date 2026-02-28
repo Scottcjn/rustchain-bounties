@@ -1,44 +1,43 @@
 ```markdown
-# Retroactive Impact Rewards
+## Retroactive Impact Rewards
 
-> "It's easier to agree on what was useful than what will be useful." — Vitalik Buterin
+> *"It's easier to agree on what was useful than what will be useful."* — Vitalik Buterin
 
-## How It Works
+### Architecture & Mechanism
 
-Every month, maintainers review ALL contributions from the past 30 days and distribute a **bonus pool** to the work that had the most real impact. This is NOT announced in advance — you cannot game it.
+Every month, the community and maintainers nominate contributions from the past 30 days. A **bonus pool** is then distributed to the work that demonstrated the highest realized value. Because specific deliverables are not predefined, the system resists gaming—you only win by delivering actual, measurable impact.
 
-## Monthly Pool: 100 RTC
+### Monthly Pool Allocation: 100 RTC
 
-Distributed to the top 3-5 most impactful contributions of the month, regardless of whether they were tied to a bounty.
+Distributed dynamically to the top 3-5 most impactful contributions of the month. Allocation is proportional to the observed value generated for the ecosystem.
 
-## What Counts as Impact
+### What Qualifies as Value
 
-- A PR that fixed a real production bug
-- Documentation that we saw new users actually reference
-- A security report that prevented a real attack
-- Community help — answering questions, mentoring newcomers
-- Content that brought measurable new users
-- Anything we didn't think to bounty but turned out to matter
+- **Critical Fixes:** A PR that resolved a live production vulnerability or bottleneck.
+- **High-Utility Resources:** Documentation or tooling that metrics show users actively rely on.
+- **Ecosystem Defense:** Security reports or structural improvements that prevented realized risk.
+- **Force Multiplication:** Answering complex questions, mentoring newcomers, or unblocking other contributors.
+- **Unprompted Innovation:** High-leverage work we didn't think to bounty, but fundamentally improved the project.
 
-## What Does NOT Count
+### What Does NOT Qualify
 
-- Quantity of PRs (10 typo fixes ≠ impact)
-- Self-promotion
-- Work that was already fully paid via a bounty (no double-dipping)
+- **Vanity Metrics:** High volume of low-effort PRs (e.g., 10 trivial typo fixes ≠ impact).
+- **Self-Promotion:** Content optimized for personal reach rather than ecosystem growth.
+- **Fairly Compensated Work:** Bountied tasks where the initial payout adequately matched the generated value. *(Note: Bountied work that delivered outsized, unexpected value beyond its original scope remains eligible for an impact top-up).*
 
-## Past Awards
+### Impact Ledger
 
-| Month | Winner | Contribution | Award |
-|-------|--------|-------------|-------|
-| *March 2026* | *Coming soon!* | | |
+| Month | Contributor | High-Value Contribution | Allocation |
+|-------|-------------|-------------------------|------------|
+| *March 2026* | *TBD* | *Continuous value monitoring in progress...* | |
 
 ---
 
-## Why This Matters
+### The Value-First Philosophy
 
-Bounties reward what we PLAN. Retroactive rewards honor what we DISCOVER was valuable. The best contributions are often the ones nobody asked for.
+Standard bounties incentivize what we *predict* will be useful. Retroactive rewards validate what we *discover* is valuable. By deferring the reward until the impact is proven, we align contributor incentives directly with the long-term success of the protocol.
 
-This program is inspired by [Optimism's RetroPGF](https://app.optimism.io/retropgf) (which has distributed $100M+ to impactful public goods work).
+*Inspired by [Optimism's RetroPGF](https://app.optimism.io/retropgf).*
 
-*Do good work. We'll notice.*
+**Build value. The architecture will recognize it.**
 ```
