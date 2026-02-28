@@ -243,6 +243,7 @@ MIT
 
 - Claim template: [`docs/COMMUNITY_BOUNTY_CLAIM_TEMPLATE.md`](docs/COMMUNITY_BOUNTY_CLAIM_TEMPLATE.md)
 - Issue #87 acceptance packet: [`docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md`](docs/ISSUE_87_MINIMAL_ACCEPTANCE_PACKET.md)
+- Bring a Friend to Mine Guide: [`docs/BRING_FRIEND_TO_MINE_GUIDE.md`](docs/BRING_FRIEND_TO_MINE_GUIDE.md)
 
 ## Weekly Node/Miner Scan (Maintainers)
 
