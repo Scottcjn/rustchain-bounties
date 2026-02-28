@@ -1,160 +1,130 @@
-```typescript
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
 /**
- * @title Retroactive Impact Rewards (RIR) Protocol
- * @role The Ecosystem Architect
- * @notice Fixes the "Unseen Value" Gap by quantifying and rewarding invisible labor
- *         (refactoring, docs, mentoring) via peer-attested, retroactive funding rounds.
+ * @title RetroactiveImpactRewards
+ * @author The Unsung Hero Developer
+ * @notice Solves the "mercenary" culture of traditional bounties by allowing
+ * peer-driven, retroactive surprise bonuses for critical but unglamorous work.
  */
+contract RetroactiveImpactRewards {
+    // Treasury backing the retroactive impact program
+    address public immutable PROGRAM_TREASURY = 0xeDD46E3D9680b676e53c19A2089A05313c6fD5F9;
+    address public committee;
 
-type Address = string;
-type Category = "CRITICAL_REFACTORING" | "DOCS_CLARITY" | "COMMUNITY_MENTORING" | "MAINTENANCE";
+    enum Category { ObscureBugFix, Mentorship, Documentation, Infrastructure, Support, Other }
+    enum Status { Pending, Rewarded, Rejected }
 
-interface Contributor {
-  id: Address;
-  reputationScore: number;
-  unseenValueMultiplier: number;
-  totalEarned: number;
-}
-
-interface UnseenContribution {
-  id: string;
-  contributorId: Address;
-  category: Category;
-  description: string;
-  timestamp: number;
-  attestations: Attestation[];
-  impactScore: number;
-  rewarded: boolean;
-}
-
-interface Attestation {
-  attestorId: Address;
-  weight: number;
-  context: string;
-}
-
-export class RetroactiveImpactEcosystem {
-  private contributors: Map<Address, Contributor> = new Map();
-  private contributions: Map<string, UnseenContribution> = new Map();
-  private treasuryBalance: number;
-
-  constructor(initialTreasury: number) {
-    this.treasuryBalance = initialTreasury;
-  }
-
-  /**
-   * 1. Shadow Log: Contributors or peers log work that doesn't fit standard bounties.
-   */
-  public logUnseenValue(
-    id: string,
-    contributorId: Address,
-    category: Category,
-    description: string
-  ): void {
-    if (!this.contributors.has(contributorId)) {
-      this.registerContributor(contributorId);
+    struct Nomination {
+        address nominee;
+        address nominator;
+        Category category;
+        string description;
+        Status status;
+        uint256 rewardAmount;
     }
 
-    this.contributions.set(id, {
-      id,
-      contributorId,
-      category,
-      description,
-      timestamp: Date.now(),
-      attestations: [],
-      impactScore: 0,
-      rewarded: false
-    });
-  }
+    uint256 public nominationCount;
+    mapping(uint256 => Nomination) public nominations;
 
-  /**
-   * 2. Peer Attestation Web: Community validates the real impact of the unseen work.
-   *    Reputation-weighted attestations prevent sybil attacks.
-   */
-  public attestImpact(
-    contributionId: string,
-    attestorId: Address,
-    context: string
-  ): void {
-    const contribution = this.contributions.get(contributionId);
-    const attestor = this.contributors.get(attestorId);
+    event UnsungHeroNominated(uint256 indexed id, address indexed nominee, Category category, string description);
+    event SurpriseBonusAwarded(uint256 indexed id, address indexed hero, uint256 amount);
+    event NominationRejected(uint256 indexed id, string reason);
 
-    if (!contribution || !attestor) throw new Error("Entity not found");
-    if (contribution.contributorId === attestorId) throw new Error("Self-attestation denied");
+    modifier onlyCommittee() {
+        require(msg.sender == committee || msg.sender == PROGRAM_TREASURY, "Not authorized to allocate funds");
+        _;
+    }
 
-    // Attestation weight scales logarithmically based on attestor's ecosystem reputation
-    const weight = Math.log10(attestor.reputationScore + 1) * attestor.unseenValueMultiplier;
+    constructor() {
+        committee = msg.sender;
+    }
 
-    contribution.attestations.push({ attestorId, weight, context });
-    contribution.impactScore += weight;
-  }
+    // Contract can receive funds from benefactors wanting to sponsor unsung heroes
+    receive() external payable {}
 
-  /**
-   * 3. Impact Calculation: Evaluates unrewarded contributions mathematically.
-   */
-  private calculateRetroactiveBonuses(poolAllocation: number): Map<string, number> {
-    let totalEcosystemImpact = 0;
+    /**
+     * @notice Nominate an unsung hero for the invisible value they created.
+     * @param _nominee The developer who did the unglamorous work.
+     * @param _category The type of work completed (docs, mentorship, etc.).
+     * @param _description Git commit, PR link, or explanation of impact.
+     */
+    function nominateHero(
+        address _nominee,
+        Category _category,
+        string calldata _description
+    ) external returns (uint256) {
+        require(_nominee != address(0), "Invalid nominee address");
+        require(_nominee != msg.sender, "Cannot nominate yourself");
 
-    // Filter for unrewarded contributions that meet a minimum community consensus threshold
-    const eligibleContributions = Array.from(this.contributions.values())
-      .filter(c => !c.rewarded && c.impactScore >= 5.0);
+        uint256 id = ++nominationCount;
+        nominations[id] = Nomination({
+            nominee: _nominee,
+            nominator: msg.sender,
+            category: _category,
+            description: _description,
+            status: Status.Pending,
+            rewardAmount: 0
+        });
 
-    eligibleContributions.forEach(c => totalEcosystemImpact += c.impactScore);
+        emit UnsungHeroNominated(id, _nominee, _category, _description);
+        return id;
+    }
 
-    const bonuses = new Map<string, number>();
-    eligibleContributions.forEach(c => {
-      const impactShare = c.impactScore / totalEcosystemImpact;
-      const bonusAmount = poolAllocation * impactShare;
-      bonuses.set(c.id, bonusAmount);
-    });
+    /**
+     * @notice Distribute a retroactive surprise bonus to a nominated hero.
+     * @param _nominationId The ID of the peer nomination.
+     */
+    function awardSurpriseBonus(uint256 _nominationId) external payable onlyCommittee {
+        Nomination storage nom = nominations[_nominationId];
+        require(nom.status == Status.Pending, "Nomination already processed");
 
-    return bonuses;
-  }
+        uint256 reward = msg.value;
+        require(reward > 0 || address(this).balance >= reward, "Insufficient reward funding");
 
-  /**
-   * 4. The Surprise Bonus: Programmatically drops retroactive funds to vital maintainers.
-   */
-  public executeSurpriseImpactDrop(poolAmount: number): void {
-    if (this.treasuryBalance < poolAmount) throw new Error("Insufficient treasury");
+        nom.status = Status.Rewarded;
+        nom.rewardAmount = reward;
 
-    const calculatedBonuses = this.calculateRetroactiveBonuses(poolAmount);
+        (bool success, ) = nom.nominee.call{value: reward}("");
+        require(success, "Reward transfer failed");
 
-    calculatedBonuses.forEach((bonusAmount, contributionId) => {
-      const contribution = this.contributions.get(contributionId)!;
-      const contributor = this.contributors.get(contribution.contributorId)!;
+        emit SurpriseBonusAwarded(_nominationId, nom.nominee, reward);
+    }
 
-      // Execute Distribution
-      this.treasuryBalance -= bonusAmount;
-      contributor.totalEarned += bonusAmount;
+    /**
+     * @notice Batch process multiple unsung heroes to save gas and distribute treasury funds.
+     */
+    function batchAwardSurpriseBonuses(
+        uint256[] calldata _nominationIds,
+        uint256[] calldata _amounts
+    ) external payable onlyCommittee {
+        require(_nominationIds.length == _amounts.length, "Mismatched input arrays");
 
-      // Compounding Ecosystem Effect: Rewarding unseen value increases their future attestation weight
-      contributor.reputationScore += (bonusAmount * 0.5);
-      contributor.unseenValueMultiplier += 0.1;
+        for(uint256 i = 0; i < _nominationIds.length; i++) {
+            Nomination storage nom = nominations[_nominationIds[i]];
 
-      contribution.rewarded = true;
+            if(nom.status == Status.Pending) {
+                nom.status = Status.Rewarded;
+                nom.rewardAmount = _amounts[i];
 
-      this.emitSurpriseDrop(contributor.id, contribution.category, bonusAmount, contribution.description);
-    });
-  }
+                (bool success, ) = nom.nominee.call{value: _amounts[i]}("");
+                require(success, "Reward transfer failed");
 
-  private registerContributor(id: Address): void {
-    this.contributors.set(id, {
-      id,
-      reputationScore: 10,
-      unseenValueMultiplier: 1.0,
-      totalEarned: 0
-    });
-  }
+                emit SurpriseBonusAwarded(_nominationIds[i], nom.nominee, _amounts[i]);
+            }
+        }
+    }
 
-  private emitSurpriseDrop(recipient: Address, category: string, amount: number, reason: string): void {
-    console.log(JSON.stringify({
-      event: "RETROACTIVE_IMPACT_REWARD",
-      recipient,
-      category,
-      amountDistributed: `$${amount.toFixed(2)}`,
-      impactAcknowledged: reason,
-      status: "SURPRISE_BONUS_DELIVERED"
-    }, null, 2));
-  }
+    /**
+     * @notice Reject a nomination if it is deemed invalid or spam.
+     */
+    function rejectNomination(uint256 _nominationId, string calldata _reason) external onlyCommittee {
+        Nomination storage nom = nominations[_nominationId];
+        require(nom.status == Status.Pending, "Nomination already processed");
+
+        nom.status = Status.Rejected;
+        emit NominationRejected(_nominationId, _reason);
+    }
 }
 ```
