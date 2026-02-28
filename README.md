@@ -131,6 +131,33 @@ Automation:
 - `scripts/auto_triage_claims.py` builds a recurring triage report.
 - `.github/workflows/auto-triage-claims.yml` updates the payout ledger issue block.
 
+#### Sybil/Farming Risk Scoring (Explainable)
+
+`auto_triage_claims.py` includes an explainable risk module (`scripts/triage_risk_scoring.py`) to assist claim review. It is triage-only and does **not** auto-ban or auto-deny claims.
+
+Signals (reason-code based):
+- `ACCOUNT_AGE_*` - account age bands (very new/new)
+- `CLAIM_BURST_*` - many claims from one account in a short window
+- `TEMPLATE_REUSE_*` - high text similarity/template reuse across accounts
+- `SHARED_WALLET_ACCOUNTS` / `SHARED_BOTTUBE_ACCOUNT` - cross-account payout identity reuse
+- `DUPLICATE_PROOF_LINKS:*` - proof links reused by multiple users
+- `CADENCE_TIGHT_WINDOW_*` - optional tight posting-cadence anomaly
+
+Output includes:
+- numeric `risk_score`
+- `risk_bucket` (`low` / `medium` / `high`)
+- explainable `risk_reasons` list per claim
+- top-N suspicious claims sorted by descending score
+
+Configuration:
+- weights/thresholds live in `scripts/triage_risk_scoring.py` (`RiskConfig`)
+- top list length is configurable via `SUSPICIOUS_TOP_N` (default `10`)
+
+Limitations:
+- heuristic scoring from claim metadata only (no black-box model)
+- missing fields are tolerated; unavailable signals are skipped (graceful degradation)
+- score is advisory and should be combined with human review + proof verification
+
 ### Agent Bounty Hunter Framework
 
 For autonomous claim/submit/monitor workflow tooling, see:
