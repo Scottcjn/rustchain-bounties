@@ -1,43 +1,97 @@
-```markdown
-## Retroactive Impact Rewards
+```python
+import time
+from flask import Flask, jsonify, request
+from celery import Celery
 
-> *"It's easier to agree on what was useful than what will be useful."* — Vitalik Buterin
+# Abstracted blockchain provider for demonstration
+import blockchain_provider
 
-### Architecture & Mechanism
+app = Flask(__name__)
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 
-Every month, the community and maintainers nominate contributions from the past 30 days. A **bonus pool** is then distributed to the work that demonstrated the highest realized value. Because specific deliverables are not predefined, the system resists gaming—you only win by delivering actual, measurable impact.
+# Mock secure state management
+def save_transaction_state(tx_id, state): pass
+def get_transaction_state(tx_id): return "pending"
 
-### Monthly Pool Allocation: 100 RTC
+# Security Constant: Require sufficient confirmations to prevent chain reorg attacks
+REQUIRED_CONFIRMATIONS = 6
+EXPECTED_PAYMENT_VALUE = 100
 
-Distributed dynamically to the top 3-5 most impactful contributions of the month. Allocation is proportional to the observed value generated for the ecosystem.
+@app.route('/api/payment/initiate', methods=['POST'])
+def initiate_payment():
+    """
+    Synchronous Endpoint: Accepts payment notification, initiates async tracking,
+    and returns immediately. Decoupling this prevents HTTP timeouts and
+    time-of-check to time-of-use (TOCTOU) race conditions.
+    """
+    data = request.json
+    tx_id = data.get('transaction_id')
 
-### What Qualifies as Value
+    if not tx_id:
+        return jsonify({"error": "Missing transaction_id"}), 400
 
-- **Critical Fixes:** A PR that resolved a live production vulnerability or bottleneck.
-- **High-Utility Resources:** Documentation or tooling that metrics show users actively rely on.
-- **Ecosystem Defense:** Security reports or structural improvements that prevented realized risk.
-- **Force Multiplication:** Answering complex questions, mentoring newcomers, or unblocking other contributors.
-- **Unprompted Innovation:** High-leverage work we didn't think to bounty, but fundamentally improved the project.
+    # 1. Lock/Mark as pending in secure local state to prevent duplicate processing
+    save_transaction_state(tx_id, "pending")
 
-### What Does NOT Qualify
+    # 2. Queue asynchronous verification task
+    verify_transaction_finality.delay(tx_id)
 
-- **Vanity Metrics:** High volume of low-effort PRs (e.g., 10 trivial typo fixes ≠ impact).
-- **Self-Promotion:** Content optimized for personal reach rather than ecosystem growth.
-- **Fairly Compensated Work:** Bountied tasks where the initial payout adequately matched the generated value. *(Note: Bountied work that delivered outsized, unexpected value beyond its original scope remains eligible for an impact top-up).*
+    # 3. Return 202 Accepted (Client must poll the status endpoint)
+    return jsonify({
+        "status": "pending",
+        "message": "Payment processing. Check status endpoint.",
+        "transaction_id": tx_id
+    }), 202
 
-### Impact Ledger
 
-| Month | Contributor | High-Value Contribution | Allocation |
-|-------|-------------|-------------------------|------------|
-| *March 2026* | *TBD* | *Continuous value monitoring in progress...* | |
+@celery.task(bind=True, max_retries=20)
+def verify_transaction_finality(self, tx_id):
+    """
+    Asynchronous Worker: Safely checks blockchain for finality
+    without blocking the main HTTP thread.
+    """
+    try:
+        # Fetch transaction details securely from the node/provider
+        tx = blockchain_provider.get_transaction(tx_id)
 
----
+        if not tx:
+            save_transaction_state(tx_id, "failed")
+            return "Transaction not found."
 
-### The Value-First Philosophy
+        # Verify block confirmations to ensure strict finality
+        current_block = blockchain_provider.get_latest_block_number()
+        confirmations = current_block - tx.block_number
 
-Standard bounties incentivize what we *predict* will be useful. Retroactive rewards validate what we *discover* is valuable. By deferring the reward until the impact is proven, we align contributor incentives directly with the long-term success of the protocol.
+        if confirmations >= REQUIRED_CONFIRMATIONS:
+            # Cryptographically verify the transaction payload, value, and recipient
+            if tx.status == "success" and tx.value >= EXPECTED_PAYMENT_VALUE:
+                save_transaction_state(tx_id, "confirmed")
+                # Trigger internal fulfillment logic here
+                return "Transaction strictly confirmed."
+            else:
+                save_transaction_state(tx_id, "failed")
+                return "Transaction failed or invalid payment parameters."
+        else:
+            # Insufficient confirmations, retry safely in the background
+            raise self.retry(countdown=15)
 
-*Inspired by [Optimism's RetroPGF](https://app.optimism.io/retropgf).*
+    except Exception as exc:
+        # Handle RPC failures or network timeouts safely
+        raise self.retry(exc=exc, countdown=30)
 
-**Build value. The architecture will recognize it.**
+
+@app.route('/api/payment/status/<tx_id>', methods=['GET'])
+def check_status(tx_id):
+    """
+    Synchronous Endpoint: Client polls this to get the strongly consistent state.
+    """
+    state = get_transaction_state(tx_id)
+
+    if state == "confirmed":
+        return jsonify({"status": "success", "access": "granted"}), 200
+    elif state == "failed":
+        return jsonify({"status": "failed", "access": "denied"}), 402
+    else:
+        return jsonify({"status": "pending", "access": "denied"}), 202
 ```
