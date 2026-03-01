@@ -1,0 +1,1 @@
+{"command": "pwd && ls -la"}
