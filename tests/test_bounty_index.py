@@ -1,0 +1,1 @@
+{"command":"glob","max_results":20,"path":"","pattern":"**/*.py"}
