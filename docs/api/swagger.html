@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RustChain Node API - Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .swagger-ui .topbar {
+      background-color: #1a1a2e;
+    }
+    .swagger-ui .topbar .download-url-wrapper input[type=text] {
+      border: 2px solid #4a90d9;
+    }
+    .swagger-ui .topbar .download-url-wrapper .download-url-button {
+      background-color: #4a90d9;
+    }
+    .swagger-ui .info .title {
+      color: #4a90d9;
+    }
+    .swagger-ui .scheme-container {
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function() {
+      // Fetch the OpenAPI spec from the same directory
+      fetch('./openapi.yaml')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load OpenAPI spec');
+          }
+          return response.text();
+        })
+        .then(spec => {
+          // Parse YAML (simple inline parser for basic YAML)
+          const parsed = parseYAML(spec);
+          
+          window.ui = SwaggerUIBundle({
+            spec: parsed,
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset
+            ],
+            plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+            validatorUrl: null,
+            tryItOutEnabled: true,
+            requestInterceptor: function(request) {
+              // Add CORS headers if needed
+              return request;
+            },
+            responseInterceptor: function(response) {
+              return response;
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error loading OpenAPI spec:', error);
+          document.getElementById('swagger-ui').innerHTML = 
+            '<div style="padding: 40px; font-family: sans-serif;">' +
+            '<h2>Error Loading API Documentation</h2>' +
+            '<p>Failed to load openapi.yaml. Please ensure you are serving this file from a web server.</p>' +
+            '<p>You can use: <code>python3 -m http.server 8000</code> in this directory.</p>' +
+            '<p>Then visit: <a href="http://localhost:8000/swagger.html">http://localhost:8000/swagger.html</a></p>' +
+            '</div>';
+        });
+    };
+
+    // Simple YAML parser for basic OpenAPI specs
+    function parseYAML(yaml) {
+      // For production use, you'd want a proper YAML parser
+      // This is a simplified version that works for our spec
+      try {
+        // Try to use js-yaml if available (it won't be in this inline version)
+        // So we'll use a fetch-based approach instead
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+  </script>
+  
+  <!-- Alternative: Direct spec embedding approach -->
+  <script type="text/javascript">
+    // Fallback: Load spec via fetch with proper YAML parsing
+    // This version uses a CDN for js-yaml
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <script>
+    // Re-define the onload with js-yaml available
+    window.addEventListener('load', function() {
+      fetch('./openapi.yaml')
+        .then(response => response.text())
+        .then(yamlText => {
+          try {
+            const spec = jsyaml.load(yamlText);
+            
+            window.ui = SwaggerUIBundle({
+              spec: spec,
+              dom_id: '#swagger-ui',
+              deepLinking: true,
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+              ],
+              layout: "StandaloneLayout",
+              validatorUrl: null,
+              tryItOutEnabled: true
+            });
+          } catch (e) {
+            console.error('Error parsing YAML:', e);
+            document.getElementById('swagger-ui').innerHTML = 
+              '<div style="padding: 40px; font-family: sans-serif; color: red;">' +
+              '<h2>Error Parsing OpenAPI Spec</h2>' +
+              '<p>' + e.message + '</p>' +
+              '</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error loading spec:', error);
+        });
+    });
+  </script>
+</body>
+</html>

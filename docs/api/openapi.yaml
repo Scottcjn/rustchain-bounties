@@ -1,0 +1,820 @@
+openapi: 3.0.3
+info:
+  title: RustChain Node API
+  description: |
+    Public API for RustChain node operations including health checks, 
+    epoch information, miner management, attestation, and wallet operations.
+    
+    ## Authentication
+    Some endpoints require an `X-Admin-Key` header for authentication.
+    These are marked as requiring admin authentication in their descriptions.
+    
+    ## Rate Limiting
+    If you receive HTTP 429, implement exponential backoff before retrying.
+    
+    ## TLS Note
+    The node currently uses a self-signed certificate. For testing:
+    ```bash
+    curl -sk https://rustchain.org/health
+    ```
+  version: 2.2.1-rip200
+  contact:
+    name: RustChain
+    url: https://rustchain.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://rustchain.org
+    description: Production node
+  - url: https://50.28.86.131
+    description: Alternative production node
+
+tags:
+  - name: Health
+    description: Node health and readiness endpoints
+  - name: Epoch
+    description: Epoch and slot information
+  - name: Miners
+    description: Miner information and statistics
+  - name: Attestation
+    description: Hardware attestation endpoints
+  - name: Wallet
+    description: Wallet and balance operations
+  - name: Admin
+    description: Admin-only operations requiring X-Admin-Key
+
+# Common schemas
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: Whether the node is healthy
+        version:
+          type: string
+          description: Node version
+        uptime_s:
+          type: number
+          description: Uptime in seconds
+        db_rw:
+          type: boolean
+          description: Database read/write status
+        tip_age_slots:
+          type: number
+          description: Age of tip in slots
+        backup_age_hours:
+          type: number
+          description: Age of last backup in hours
+      example:
+        ok: true
+        version: "2.2.1-rip200"
+        uptime_s: 24000
+        db_rw: true
+        tip_age_slots: 0
+        backup_age_hours: 0.08
+
+    EpochResponse:
+      type: object
+      properties:
+        epoch:
+          type: integer
+          description: Current epoch number
+        slot:
+          type: integer
+          description: Current slot number
+        blocks_per_epoch:
+          type: integer
+          description: Number of blocks per epoch
+        enrolled_miners:
+          type: integer
+          description: Number of enrolled miners
+        epoch_pot:
+          type: number
+          description: Epoch pot amount in RTC
+        total_supply_rtc:
+          type: number
+          description: Total RTC supply
+      example:
+        epoch: 89
+        slot: 12910
+        blocks_per_epoch: 144
+        enrolled_miners: 29
+        epoch_pot: 1.5
+        total_supply_rtc: 8388608
+
+    MinerInfo:
+      type: object
+      properties:
+        miner:
+          type: string
+          description: Miner identifier
+        hardware_type:
+          type: string
+          description: Hardware type
+        device_arch:
+          type: string
+          description: Device architecture
+        device_family:
+          type: string
+          description: Device family
+        antiquity_multiplier:
+          type: number
+          description: Antiquity multiplier
+        last_attest:
+          type: integer
+          format: int64
+          description: Last attestation timestamp (Unix)
+        entropy_score:
+          type: number
+          description: Entropy score
+      example:
+        miner: "victus-x86-scott"
+        hardware_type: "x86"
+        device_arch: "amd64"
+        device_family: "victus"
+        antiquity_multiplier: 1.0
+        last_attest: 1771038696
+        entropy_score: 0.95
+
+    BalanceResponse:
+      type: object
+      properties:
+        miner_id:
+          type: string
+          description: Miner identifier
+        amount_i64:
+          type: integer
+          format: int64
+          description: Balance in smallest units
+        amount_rtc:
+          type: number
+          description: Balance in RTC
+      example:
+        miner_id: "victus-x86-scott"
+        amount_i64: 265420827
+        amount_rtc: 265.420827
+
+    AttestationChallengeResponse:
+      type: object
+      properties:
+        nonce:
+          type: string
+          description: Challenge nonce
+        server_time:
+          type: integer
+          format: int64
+          description: Server timestamp (Unix)
+        expires_at:
+          type: integer
+          format: int64
+          description: Challenge expiration timestamp (Unix)
+      example:
+        nonce: "abc123..."
+        server_time: 1771038696
+        expires_at: 1771038996
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        ttl_s:
+          type: integer
+          description: Time to live in seconds (for retry)
+      example:
+        error: "no_recent_attestation"
+        message: "No recent attestation found"
+        ttl_s: 600
+
+    StatsResponse:
+      type: object
+      description: Network statistics
+      properties:
+        total_miners:
+          type: integer
+          description: Total number of miners
+        active_miners:
+          type: integer
+          description: Number of active miners
+        network_hashrate:
+          type: number
+          description: Network hashrate
+        current_epoch:
+          type: integer
+          description: Current epoch
+
+    HallOfFameResponse:
+      type: object
+      description: Hall of Fame leaderboard with 5 categories
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              winners:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rank:
+                      type: integer
+                    miner:
+                      type: string
+                    score:
+                      type: number
+
+    FeePoolResponse:
+      type: object
+      description: RIP-301 fee pool statistics
+      properties:
+        total_fees:
+          type: number
+          description: Total fees in pool
+        distributed:
+          type: number
+          description: Amount distributed
+        pending:
+          type: number
+          description: Amount pending distribution
+
+    EligibilityResponse:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+          description: Whether miner is eligible
+        miner_id:
+          type: string
+          description: Miner identifier
+        reason:
+          type: string
+          description: Reason if not eligible
+
+  securitySchemes:
+    AdminKey:
+      type: apiKey
+      in: header
+      name: X-Admin-Key
+      description: Admin API key for authenticated endpoints
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Node health check
+      description: Returns the health status of the node including uptime, version, and database status.
+      operationId: getHealth
+      responses:
+        '200':
+          description: Node is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Node is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness probe
+      description: Returns whether the node is ready to accept requests.
+      operationId: getReady
+      responses:
+        '200':
+          description: Node is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                example:
+                  ready: true
+        '503':
+          description: Node is not ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                  reason:
+                    type: string
+
+  /epoch:
+    get:
+      tags:
+        - Epoch
+      summary: Current epoch information
+      description: Returns current epoch, slot, and enrolled miners information.
+      operationId: getEpoch
+      responses:
+        '200':
+          description: Epoch information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpochResponse'
+
+  /api/miners:
+    get:
+      tags:
+        - Miners
+      summary: List active miners
+      description: Returns a list of all active miners with their attestation data.
+      operationId: getMiners
+      responses:
+        '200':
+          description: List of active miners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MinerInfo'
+
+  /api/stats:
+    get:
+      tags:
+        - Miners
+      summary: Network statistics
+      description: Returns overall network statistics.
+      operationId: getStats
+      responses:
+        '200':
+          description: Network statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+
+  /api/hall_of_fame:
+    get:
+      tags:
+        - Miners
+      summary: Hall of Fame leaderboard
+      description: Returns the Hall of Fame leaderboard with 5 categories.
+      operationId: getHallOfFame
+      responses:
+        '200':
+          description: Hall of Fame leaderboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HallOfFameResponse'
+
+  /api/fee_pool:
+    get:
+      tags:
+        - Miners
+      summary: RIP-301 fee pool statistics
+      description: Returns fee pool statistics according to RIP-301.
+      operationId: getFeePool
+      responses:
+        '200':
+          description: Fee pool statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeePoolResponse'
+
+  /balance:
+    get:
+      tags:
+        - Wallet
+      summary: Get miner balance
+      description: Returns the balance for a specific miner.
+      operationId: getBalance
+      parameters:
+        - name: miner_id
+          in: query
+          required: true
+          description: Miner identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          description: Missing or invalid miner_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Miner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /wallet/balance:
+    get:
+      tags:
+        - Wallet
+      summary: Get miner wallet balance
+      description: Alternative endpoint for getting miner balance.
+      operationId: getWalletBalance
+      parameters:
+        - name: miner_id
+          in: query
+          required: true
+          description: Miner identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          description: Missing or invalid miner_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Miner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /lottery/eligibility:
+    get:
+      tags:
+        - Epoch
+      summary: Check epoch eligibility
+      description: Checks if a miner is eligible for the current epoch lottery.
+      operationId: getLotteryEligibility
+      parameters:
+        - name: miner_id
+          in: query
+          required: true
+          description: Miner identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Eligibility status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityResponse'
+        '400':
+          description: Missing or invalid miner_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /explorer:
+    get:
+      tags:
+        - Health
+      summary: Block explorer
+      description: Redirects to the block explorer UI page.
+      operationId: getExplorer
+      responses:
+        '302':
+          description: Redirect to explorer UI
+          headers:
+            Location:
+              description: URL of the explorer UI
+              schema:
+                type: string
+
+  /attest/challenge:
+    post:
+      tags:
+        - Attestation
+      summary: Get attestation challenge
+      description: |
+        Returns a challenge nonce for hardware attestation.
+        The miner must use this nonce to build an attestation payload.
+      operationId: postAttestationChallenge
+      requestBody:
+        description: Empty object or optional attestation request
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Challenge returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationChallengeResponse'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /attest/submit:
+    post:
+      tags:
+        - Attestation
+      summary: Submit hardware attestation
+      description: |
+        Submits a hardware attestation payload.
+        This is part of the RIP-200 PoA flow used by modern miner clients.
+      operationId: postAttestationSubmit
+      security:
+        - AdminKey: []
+      requestBody:
+        description: Attestation payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  type: string
+                  description: Challenge nonce
+                attestation:
+                  type: string
+                  description: Hardware attestation data
+                miner_id:
+                  type: string
+                  description: Miner identifier
+              required:
+                - nonce
+                - attestation
+                - miner_id
+      responses:
+        '200':
+          description: Attestation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  valid_until:
+                    type: integer
+                    format: int64
+        '400':
+          description: Invalid attestation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /epoch/enroll:
+    post:
+      tags:
+        - Epoch
+      summary: Enroll for epoch
+      description: |
+        Enrolls a miner for the current epoch.
+        Requires a recent successful attestation (within TTL).
+      operationId: postEpochEnroll
+      security:
+        - AdminKey: []
+      requestBody:
+        description: Enrollment request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                miner_id:
+                  type: string
+                  description: Miner identifier
+              required:
+                - miner_id
+      responses:
+        '200':
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  epoch:
+                    type: integer
+        '400':
+          description: No recent attestation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  error: "no_recent_attestation"
+                  ttl_s: 600
+
+  /wallet/transfer/signed:
+    post:
+      tags:
+        - Wallet
+      summary: Ed25519 signed transfer
+      description: |
+        Execute a wallet transfer with Ed25519 signature.
+        Requires admin authentication.
+      operationId: postWalletTransferSigned
+      security:
+        - AdminKey: []
+      requestBody:
+        description: Signed transfer request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  description: Source miner ID
+                to:
+                  type: string
+                  description: Destination miner ID
+                amount:
+                  type: number
+                  description: Amount to transfer in RTC
+                signature:
+                  type: string
+                  description: Ed25519 signature
+              required:
+                - from
+                - to
+                - amount
+                - signature
+      responses:
+        '200':
+          description: Transfer successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  tx_hash:
+                    type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /wallet/transfer:
+    post:
+      tags:
+        - Admin
+      summary: Admin wallet transfer
+      description: |
+        Execute an admin wallet transfer.
+        Requires admin key authentication.
+      operationId: postWalletTransfer
+      security:
+        - AdminKey: []
+      requestBody:
+        description: Transfer request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:
+                  type: string
+                  description: Source miner ID
+                to:
+                  type: string
+                  description: Destination miner ID
+                amount:
+                  type: number
+                  description: Amount to transfer in RTC
+              required:
+                - from
+                - to
+                - amount
+      responses:
+        '200':
+          description: Transfer successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  tx_hash:
+                    type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /withdraw/request:
+    post:
+      tags:
+        - Admin
+      summary: Withdrawal request
+      description: |
+        Submit a withdrawal request.
+        Requires admin authentication.
+      operationId: postWithdrawRequest
+      security:
+        - AdminKey: []
+      requestBody:
+        description: Withdrawal request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                miner_id:
+                  type: string
+                  description: Miner identifier
+                amount:
+                  type: number
+                  description: Amount to withdraw in RTC
+                destination:
+                  type: string
+                  description: Destination address
+              required:
+                - miner_id
+                - amount
+                - destination
+      responses:
+        '200':
+          description: Withdrawal request submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  request_id:
+                    type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
