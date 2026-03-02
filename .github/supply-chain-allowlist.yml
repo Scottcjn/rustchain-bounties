@@ -21,6 +21,10 @@ files:
   - ".github/supply-chain-allowlist.yml"
   # Reproducible README contains descriptive warnings about risky patterns
   - "reproducible/README.md"
+  # Verification files contain original problematic examples for documentation
+  - "DOCUMENTATION_FIXES.md"
+  - "WALLET_VERIFICATION.md"
+  - "PR_SUBMISSION_PACKAGE.md"
 
 patterns:
   # Documentation lines that reference risky patterns as examples of what NOT to do.
