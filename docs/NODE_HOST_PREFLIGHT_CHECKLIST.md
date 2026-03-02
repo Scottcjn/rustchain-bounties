@@ -70,12 +70,30 @@ Example:
 
 Your node version must match network version (or be upgraded within 24h when flagged).
 
-```bash
-# network version (seed)
-curl -sk https://50.28.86.131/health | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])"
+Instead of using pipe commands, use separate steps:
 
-# your node version
-curl -sk https://YOUR_NODE/health | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])"
+```bash
+# Step 1: Get network version
+curl -sk https://50.28.86.131/health > network_health.json
+
+# Step 2: Extract version with Python
+python3 -c "
+import json
+with open('network_health.json', 'r') as f:
+    health = json.load(f)
+print('Network version:', health['version'])
+"
+
+# Step 3: Get your node version  
+curl -sk https://YOUR_NODE/health > your_health.json
+
+# Step 4: Extract your version
+python3 -c "
+import json
+with open('your_health.json', 'r') as f:
+    health = json.load(f)
+print('Your version:', health['version'])
+"
 ```
 
 If mismatch persists, payout can be held until upgrade is confirmed.
