@@ -1,5 +1,7 @@
 # RustChain
 
+[![GitHub Stars](https://img.shields.io/github/stars/Scottcjn/Rustchain?style=social)](https://github.com/Scottcjn/Rustchain/stargazers)
+
 [![RTC Rewards](https://img.shields.io/badge/RTC-Rewards-orange)](https://rustchain.ai)
 [![Proof of Age](https://img.shields.io/badge/Consensus-Proof%20of%20Age-blue)](https://rustchain.ai)
 [![Hardware Mining](https://img.shields.io/badge/Mining-Hardware%20Friendly-green)](https://rustchain.ai)
