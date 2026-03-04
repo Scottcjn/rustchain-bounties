@@ -33,6 +33,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Ensure 'python' executable is available
+        run: |
+          # Some runners provide only 'python3'. Create a 'python' symlink if missing so scripts invoking 'python' work.
+          if ! command -v python >/dev/null 2>&1; then
+            sudo ln -sf "$(command -v python3)" /usr/bin/python || true
+          fi
+          python --version
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
