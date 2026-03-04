@@ -17,6 +17,9 @@ from __future__ import annotations
 import argparse
 import base64
 import datetime as dt
+# Compatibility: define dt.UTC alias for timezone.utc expected throughout scripts
+if not hasattr(dt, "UTC"):
+    dt.UTC = dt.timezone.utc
 import json
 import re
 from dataclasses import dataclass
@@ -346,7 +349,7 @@ def update_table_in_md(md: str, actor: str, gained_xp: int, reason: str,
     )
     target.badges.update(unlocked)
 
-    stamp = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     target.xp = new_total
     target.level = level
     target.title = title

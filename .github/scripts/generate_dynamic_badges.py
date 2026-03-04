@@ -19,6 +19,9 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+# Compatibility: provide UTC alias expected by existing code (uses dt.UTC)
+if not hasattr(dt, "UTC"):
+    dt.UTC = dt.timezone.utc
 import json
 import re
 from pathlib import Path
@@ -136,7 +139,7 @@ def parse_tracker_last_updated(md_text: str) -> dt.date | None:
 def calculate_weekly_growth(rows: List[Dict[str, Any]], reference_date: dt.date | None = None) -> int:
     """Calculate total XP gained in the last 7 calendar days ending on reference_date."""
     total_growth = 0
-    anchor_date = reference_date or dt.datetime.now(dt.UTC).date()
+    anchor_date = reference_date or dt.datetime.now(dt.timezone.utc).date()
     seven_day_start = anchor_date - dt.timedelta(days=6)
     
     for row in rows:
@@ -181,12 +184,12 @@ def fetch_onchain_ages() -> Dict[str, str]:
         resp = requests.get(f"{API_BASE}/api/miners", verify=False, timeout=10)
         if resp.status_code == 200:
             miners = resp.json()
-            now = dt.datetime.now(dt.UTC)
+            now = dt.datetime.now(dt.timezone.utc)
             for m in miners:
                 miner_id = m.get("miner")
                 first = m.get("first_attest")
                 if miner_id and first:
-                    first_dt = dt.datetime.fromtimestamp(first, dt.UTC)
+                    first_dt = dt.datetime.fromtimestamp(first, dt.timezone.utc)
                     delta = now - first_dt
                     if delta.days > 365:
                         age_str = f"{delta.days // 365}y { (delta.days % 365) // 30 }m"
@@ -210,7 +213,7 @@ def main() -> None:
     md_text = tracker_path.read_text(encoding="utf-8")
     rows = parse_rows(md_text)
     tracker_last_updated = parse_tracker_last_updated(md_text)
-    reference_date = tracker_last_updated or dt.datetime.now(dt.UTC).date()
+    reference_date = tracker_last_updated or dt.datetime.now(dt.timezone.utc).date()
 
     total_xp = sum(int(row["xp"]) for row in rows)
     active_hunters = len(rows)

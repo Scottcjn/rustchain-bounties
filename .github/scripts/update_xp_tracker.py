@@ -10,6 +10,9 @@ v1 behavior:
 
 import argparse
 import datetime as dt
+# Compatibility: provide UTC alias expected by existing code (uses dt.UTC)
+if not hasattr(dt, "UTC"):
+    dt.UTC = dt.timezone.utc
 import re
 from pathlib import Path
 
@@ -193,7 +196,7 @@ def update_leaderboard(content: str, actor: str, gained_xp: int, action_note: st
 
 
 def append_latest_award(content: str, actor: str, xp: int, reason: str, issue_number: str):
-    stamp = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     note = f"- {stamp}: @{actor} +{xp} XP ({reason}) [#{issue_number}]"
 
     marker = "## Latest Awards"
