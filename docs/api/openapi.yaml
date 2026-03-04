@@ -1,0 +1,677 @@
+openapi: 3.0.3
+info:
+  title: RustChain Node API
+  description: |
+    RustChain Node API provides endpoints for interacting with the RustChain Proof-of-Antiquity blockchain.
+    
+    This API allows developers to:
+    - Check node health and status
+    - Query miner information and epoch data
+    - Submit hardware attestations
+    - Manage RTC balances and transfers
+    
+    **Note**: All monetary values are in RTC (RustChain Tokens) with 6 decimal places.
+  version: "2.2.1-rip200"
+  contact:
+    name: RustChain API Support
+    url: https://github.com/Scottcjn/Rustchain
+    email: support@rustchain.org
+servers:
+  - url: https://50.28.86.131
+    description: Production RustChain Node
+  - url: http://localhost:8080
+    description: Local Development Node
+paths:
+  /health:
+    get:
+      summary: Node health check
+      description: Returns the current health status of the RustChain node
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Node is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Node is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /ready:
+    get:
+      summary: Readiness probe
+      description: Returns readiness status for Kubernetes deployment
+      operationId: getReady
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Node is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+        '503':
+          description: Node is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/miners:
+    get:
+      summary: Get active miners list
+      description: Returns a list of all currently active miners
+      operationId: getMiners
+      tags:
+        - Miners
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of miners to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Number of miners to skip (for pagination)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Successfully retrieved miners list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MinersResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/epoch:
+    get:
+      summary: Get current epoch information
+      description: Returns detailed information about the current epoch
+      operationId: getEpoch
+      tags:
+        - Epoch
+      responses:
+        '200':
+          description: Successfully retrieved epoch information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpochResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/ledger:
+    get:
+      summary: Get rewards ledger
+      description: Returns the rewards ledger with payout history
+      operationId: getLedger
+      tags:
+        - Ledger
+      parameters:
+        - name: miner_id
+          in: query
+          description: Filter ledger entries by specific miner ID
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+        - name: limit
+          in: query
+          description: Maximum number of ledger entries to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Successfully retrieved ledger
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /attest/submit:
+    post:
+      summary: Submit hardware attestation
+      description: |
+        Submit a hardware fingerprint attestation for Proof-of-Antiquity consensus.
+        
+        This endpoint validates the hardware fingerprint and registers the miner
+        for epoch participation and reward distribution.
+      operationId: submitAttestation
+      tags:
+        - Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationRequest'
+      responses:
+        '201':
+          description: Attestation submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationResponse'
+        '400':
+          description: Invalid attestation data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Attestation already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/balance:
+    get:
+      summary: Get miner balance
+      description: Returns the current RTC balance for a specific miner
+      operationId: getBalance
+      tags:
+        - Balance
+      parameters:
+        - name: miner_id
+          in: query
+          description: The miner ID to query balance for
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+      responses:
+        '200':
+          description: Successfully retrieved balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '400':
+          description: Missing or invalid miner_id parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Miner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/transfer:
+    post:
+      summary: Execute signed transfer
+      description: |
+        Execute a signed RTC transfer between miners.
+        
+        Transfers require proper cryptographic signatures to prevent unauthorized transactions.
+        All transfers are recorded in the ledger and are irreversible.
+      operationId: executeTransfer
+      tags:
+        - Transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: Transfer executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Invalid transfer request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Source or destination miner not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          description: Overall health status
+        version:
+          type: string
+          description: Node version
+        uptime_seconds:
+          type: integer
+          description: Node uptime in seconds
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - status
+        - version
+        - uptime_seconds
+        - timestamp
+      example:
+        status: healthy
+        version: "2.2.1-rip200"
+        uptime_seconds: 12345
+        timestamp: "2026-03-04T09:30:00Z"
+    ReadyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ready, not_ready]
+          description: Readiness status
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - status
+        - timestamp
+      example:
+        status: ready
+        timestamp: "2026-03-04T09:30:00Z"
+    Miner:
+      type: object
+      properties:
+        miner_id:
+          type: string
+          description: Unique miner identifier
+        device_arch:
+          type: string
+          description: Hardware architecture (e.g., G4, x86_64)
+        last_attest_timestamp:
+          type: integer
+          description: Timestamp of last attestation
+        epoch_participation:
+          type: integer
+          description: Number of epochs participated in
+        antiquity_multiplier:
+          type: number
+          format: float
+          description: Antiquity-based reward multiplier
+        status:
+          type: string
+          enum: [active, inactive]
+          description: Current miner status
+      required:
+        - miner_id
+        - device_arch
+        - last_attest_timestamp
+        - epoch_participation
+        - antiquity_multiplier
+        - status
+    MinersResponse:
+      type: object
+      properties:
+        miners:
+          type: array
+          items:
+            $ref: '#/components/schemas/Miner'
+        total_count:
+          type: integer
+          description: Total number of active miners
+        limit:
+          type: integer
+          description: Requested limit
+        offset:
+          type: integer
+          description: Requested offset
+      required:
+        - miners
+        - total_count
+        - limit
+        - offset
+    EpochInfo:
+      type: object
+      properties:
+        epoch_number:
+          type: integer
+          description: Current epoch number
+        start_time:
+          type: integer
+          description: Epoch start timestamp
+        end_time:
+          type: integer
+          description: Epoch end timestamp
+        active_miners:
+          type: integer
+          description: Number of active miners in this epoch
+        total_rewards:
+          type: number
+          format: float
+          description: Total rewards allocated for this epoch
+        status:
+          type: string
+          enum: [active, completed, pending]
+          description: Epoch status
+      required:
+        - epoch_number
+        - start_time
+        - end_time
+        - active_miners
+        - total_rewards
+        - status
+    EpochResponse:
+      type: object
+      properties:
+        epoch:
+          $ref: '#/components/schemas/EpochInfo'
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - epoch
+        - timestamp
+    LedgerEntry:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          description: Unique transaction identifier
+        miner_id:
+          type: string
+          description: Miner who received the reward
+        amount_rtc:
+          type: number
+          format: float
+          description: Reward amount in RTC
+        epoch_number:
+          type: integer
+          description: Epoch number for this reward
+        timestamp:
+          type: integer
+          description: Transaction timestamp
+        transaction_type:
+          type: string
+          enum: [reward, transfer, fee]
+          description: Type of transaction
+      required:
+        - transaction_id
+        - miner_id
+        - amount_rtc
+        - epoch_number
+        - timestamp
+        - transaction_type
+    LedgerResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEntry'
+        total_count:
+          type: integer
+          description: Total number of ledger entries
+        limit:
+          type: integer
+          description: Requested limit
+      required:
+        - entries
+        - total_count
+        - limit
+    AttestationRequest:
+      type: object
+      properties:
+        miner_id:
+          type: string
+          description: Unique miner identifier
+        wallet_address:
+          type: string
+          description: RTC wallet address for rewards
+        hardware_fingerprint:
+          type: object
+          description: Hardware fingerprint data
+          properties:
+            cpu_brand:
+              type: string
+              description: CPU brand string
+            device_arch:
+              type: string
+              description: Device architecture
+            clock_drift_cv:
+              type: number
+              format: float
+              description: Clock drift coefficient of variation
+            memory_size_mb:
+              type: integer
+              description: Memory size in MB
+            vm_indicators:
+              type: array
+              items:
+                type: string
+              description: Virtual machine detection indicators
+          required:
+            - cpu_brand
+            - device_arch
+            - clock_drift_cv
+            - memory_size_mb
+            - vm_indicators
+        signature:
+          type: string
+          description: Cryptographic signature of the attestation
+      required:
+        - miner_id
+        - wallet_address
+        - hardware_fingerprint
+        - signature
+    AttestationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether attestation was successful
+        miner_id:
+          type: string
+          description: Registered miner ID
+        assigned_bucket:
+          type: string
+          description: Reward bucket assignment
+        antiquity_multiplier:
+          type: number
+          format: float
+          description: Calculated antiquity multiplier
+        message:
+          type: string
+          description: Status message
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - success
+        - miner_id
+        - assigned_bucket
+        - antiquity_multiplier
+        - message
+        - timestamp
+    BalanceResponse:
+      type: object
+      properties:
+        miner_id:
+          type: string
+          description: Miner ID
+        balance_rtc:
+          type: number
+          format: float
+          description: Current balance in RTC
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - miner_id
+        - balance_rtc
+        - timestamp
+    TransferRequest:
+      type: object
+      properties:
+        from_miner:
+          type: string
+          description: Source miner ID
+        to_miner:
+          type: string
+          description: Destination miner ID
+        amount_rtc:
+          type: number
+          format: float
+          description: Amount to transfer in RTC
+        signature:
+          type: string
+          description: Cryptographic signature authorizing the transfer
+        nonce:
+          type: integer
+          description: Transaction nonce to prevent replay attacks
+      required:
+        - from_miner
+        - to_miner
+        - amount_rtc
+        - signature
+        - nonce
+    TransferResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether transfer was successful
+        transaction_id:
+          type: string
+          description: Unique transaction identifier
+        from_miner:
+          type: string
+          description: Source miner ID
+        to_miner:
+          type: string
+          description: Destination miner ID
+        amount_rtc:
+          type: number
+          format: float
+          description: Transferred amount in RTC
+        new_balance_from:
+          type: number
+          format: float
+          description: New balance of source miner
+        new_balance_to:
+          type: number
+          format: float
+          description: New balance of destination miner
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - success
+        - transaction_id
+        - from_miner
+        - to_miner
+        - amount_rtc
+        - new_balance_from
+        - new_balance_to
+        - timestamp
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+      required:
+        - error
+        - code
+        - timestamp
+tags:
+  - name: Health
+    description: Node health and readiness endpoints
+  - name: Miners
+    description: Miner information and management
+  - name: Epoch
+    description: Epoch-related information
+  - name: Ledger
+    description: Rewards ledger and transaction history
+  - name: Attestation
+    description: Hardware attestation submission
+  - name: Balance
+    description: Balance queries
+  - name: Transfer
+    description: RTC transfers between miners
