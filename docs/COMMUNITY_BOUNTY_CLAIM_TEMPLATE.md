@@ -1,4 +1,6 @@
-# Community Support Bounty Claim Template (Issue #87)
+# Star Campaign Claim Template (Issue #478)
+
+Use this template to claim your RTC for starring Rustchain repos as part of the 5,000 Stars campaign (#478). Your comment will be auto-verified against GitHub’s API. Make sure to star the main repo first and include proof links.
 
 Use this template when claiming rewards from the community support bounty.
 
