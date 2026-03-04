@@ -112,6 +112,23 @@ DEFAULT_TARGETS = [
         "require_proof_link": True,
         "name": "BoTTube Star + Share Why",
     },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 559,
+        "min_account_age_days": 30,
+        "required_stars": [
+            "bottube",
+            "rustchain-bounties",
+            "legend-of-elya-n64",
+            "ram-coffers",
+        ],
+        "min_required_stars": 3,
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": False,
+        "name": "Follow + Star Key Repos",
+    },
 ]
 
 MARKER_START = "<!-- auto-triage-report:start -->"
@@ -281,6 +298,29 @@ def _status_label(blockers: List[str]) -> str:
     return "eligible" if not blockers else "needs-action"
 
 
+def _star_blockers(
+    user: str,
+    required_stars: List[str],
+    star_cache: Dict[str, Set[str]],
+    min_required_stars: Optional[int] = None,
+) -> List[str]:
+    repos = list(required_stars or [])
+    if not repos:
+        return []
+
+    if min_required_stars is None:
+        min_required_stars = len(repos)
+    min_required_stars = max(0, min(int(min_required_stars), len(repos)))
+
+    if min_required_stars >= len(repos):
+        return [f"missing_star:{repo}" for repo in repos if user not in star_cache.get(repo, set())]
+
+    starred_count = sum(1 for repo in repos if user in star_cache.get(repo, set()))
+    if starred_count < min_required_stars:
+        return [f"missing_star_count:{starred_count}/{min_required_stars}"]
+    return []
+
+
 @dataclass
 class ClaimResult:
     claim_id: str
@@ -444,6 +484,7 @@ def main() -> int:
         req_payout_target = bool(target.get("require_payout_target", False))
         req_proof = bool(target.get("require_proof_link", False))
         req_stars = list(target.get("required_stars", []))
+        min_required_stars = target.get("min_required_stars")
 
         issue_ref = f"{owner}/{repo}#{issue}"
         try:
@@ -523,9 +564,14 @@ def main() -> int:
             if req_proof and not _has_proof_link(merged_body):
                 blockers.append("missing_proof_link")
 
-            for star_repo in req_stars:
-                if user not in star_cache.get(star_repo, set()):
-                    blockers.append(f"missing_star:{star_repo}")
+            blockers.extend(
+                _star_blockers(
+                    user=user,
+                    required_stars=req_stars,
+                    star_cache=star_cache,
+                    min_required_stars=min_required_stars,
+                )
+            )
 
             rows.append(
                 ClaimResult(

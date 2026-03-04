@@ -8,6 +8,7 @@ from scripts.auto_triage_claims import (
     _extract_wallet,
     _has_proof_link,
     _looks_like_claim,
+    _star_blockers,
 )
 
 
@@ -79,6 +80,42 @@ class AutoTriageClaimsTests(unittest.TestCase):
         self.assertIn("#### Suspicious Claims", report)
         self.assertIn("@fresh-bot", report)
         self.assertIn("ACCOUNT_AGE", report)
+
+    def test_star_blockers_requires_every_repo_by_default(self):
+        blockers = _star_blockers(
+            user="alice",
+            required_stars=["repo-a", "repo-b"],
+            star_cache={"repo-a": {"alice"}, "repo-b": set()},
+        )
+        self.assertEqual(blockers, ["missing_star:repo-b"])
+
+    def test_star_blockers_supports_minimum_threshold(self):
+        blockers = _star_blockers(
+            user="alice",
+            required_stars=["repo-a", "repo-b", "repo-c", "repo-d"],
+            star_cache={
+                "repo-a": {"alice"},
+                "repo-b": {"alice"},
+                "repo-c": {"alice"},
+                "repo-d": set(),
+            },
+            min_required_stars=3,
+        )
+        self.assertEqual(blockers, [])
+
+    def test_star_blockers_reports_shortfall_when_below_threshold(self):
+        blockers = _star_blockers(
+            user="alice",
+            required_stars=["repo-a", "repo-b", "repo-c", "repo-d"],
+            star_cache={
+                "repo-a": {"alice"},
+                "repo-b": {"alice"},
+                "repo-c": set(),
+                "repo-d": set(),
+            },
+            min_required_stars=3,
+        )
+        self.assertEqual(blockers, ["missing_star_count:2/3"])
 
 
 if __name__ == "__main__":
