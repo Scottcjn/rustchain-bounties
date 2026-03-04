@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   triage:
-    if: github.event_name != 'issue_comment' || contains(fromJson('[74,47,87,103,122,157,158]'), github.event.issue.number)
+    if: github.event_name != 'issue_comment' || contains(fromJson('[74,47,87,103,122,157,158,553]'), github.event.issue.number)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,6 +24,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install requests PyGithub
+
       - name: Run Auto Triage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -31,4 +36,4 @@ jobs:
           LEDGER_REPO: "rustchain-bounties"
           LEDGER_ISSUE: "104"
         run: |
-          python3 scripts/auto_triage_claims.py
+          python3 .github/scripts/auto_triage_claims.py

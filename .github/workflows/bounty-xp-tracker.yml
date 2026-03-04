@@ -35,8 +35,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install requests
+          python3 -m pip install --upgrade pip
+          python3 -m pip install requests
 
       - name: Update XP tracker via GitHub API
         id: xp
