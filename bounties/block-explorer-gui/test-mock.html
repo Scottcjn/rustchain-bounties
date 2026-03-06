@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miner Dashboard - Test Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rustchain: {
+                            bg: '#1a1a2e',
+                            card: '#16213e',
+                            gold: '#f39c12',
+                            goldHover: '#d68910',
+                            text: '#ecf0f1',
+                            muted: '#95a5a6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        body { background-color: #1a1a2e; color: #ecf0f1; font-family: 'Inter', sans-serif; }
+        .architecture-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-g4 { background-color: #8e44ad; color: white; }
+        .badge-g5 { background-color: #9b59b6; color: white; }
+        .badge-power8 { background-color: #e74c3c; color: white; }
+        .badge-apple-silicon { background-color: #3498db; color: white; }
+        .badge-modern { background-color: #27ae60; color: white; }
+        .status-indicator { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.5rem; }
+        .status-online { background-color: #27ae60; box-shadow: 0 0 8px #27ae60; }
+        .status-offline { background-color: #e74c3c; }
+        .multiplier-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #f39c12, #d68910); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2); }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div x-data="minerDashboard()" x-init="init()" class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <div class="bg-yellow-600/20 border border-yellow-500 rounded-lg p-4 mb-4">
+                <p class="text-yellow-400 font-semibold">⚠️ TEST MODE - Using Mock Data</p>
+                <p class="text-yellow-300/80 text-sm mt-1">This page demonstrates the UI with sample data. For live data, open index.html</p>
+            </div>
+            <h1 class="text-3xl font-bold text-rustchain-gold mb-2">🔗 RustChain Block Explorer - Test</h1>
+            <p class="text-rustchain-muted">Miner Dashboard (Mock Data)</p>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Total Miners</div>
+                <div class="text-2xl font-bold font-mono text-rustchain-gold" x-text="miners.length"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Online</div>
+                <div class="text-2xl font-bold font-mono text-green-400" x-text="onlineCount"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Offline</div>
+                <div class="text-2xl font-bold font-mono text-red-400" x-text="offlineCount"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Avg Multiplier</div>
+                <div class="text-2xl font-bold font-mono text-rustchain-gold" x-text="avgMultiplier + 'x'"></div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="miner in miners" :key="miner.miner">
+                <div class="bg-rustchain-card rounded-lg p-5 card-hover border border-rustchain-gold/10">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-indicator" :class="isOnline(miner) ? 'status-online' : 'status-offline'"></span>
+                            <h3 class="font-mono font-semibold text-rustchain-gold" x-text="miner.miner"></h3>
+                        </div>
+                        <span class="architecture-badge" :class="getArchBadgeClass(miner)" x-text="getArchitecture(miner)"></span>
+                    </div>
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-rustchain-muted">Antiquity Multiplier</span>
+                            <span class="font-mono text-rustchain-gold" x-text="(miner.antiquity_multiplier || 0).toFixed(2) + 'x'"></span>
+                        </div>
+                        <div class="bg-rustchain-bg rounded-full overflow-hidden">
+                            <div class="multiplier-bar" :style="`width: ${Math.min((miner.antiquity_multiplier || 0) * 10, 100)}%`"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <div class="text-rustchain-muted text-xs">Last Attestation</div>
+                            <div class="font-mono text-rustchain-text" x-text="formatTime(miner.last_attest)"></div>
+                        </div>
+                        <div>
+                            <div class="text-rustchain-muted text-xs">Status</div>
+                            <div class="font-mono" :class="isOnline(miner) ? 'text-green-400' : 'text-red-400'" x-text="isOnline(miner) ? 'Online' : 'Offline'"></div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-rustchain-gold/10">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-rustchain-muted">Miner ID</span>
+                            <span class="font-mono text-rustchain-muted truncate max-w-[150px]" x-text="miner.miner"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+    <script>
+        function minerDashboard() {
+            return {
+                miners: [],
+                
+                init() {
+                    // Mock data based on actual API response
+                    const now = Math.floor(Date.now() / 1000);
+                    this.miners = [
+                        { miner: "g4-powerbook-115", antiquity_multiplier: 2.5, device_arch: "G4", device_family: "PowerPC", hardware_type: "PowerPC G4 (Vintage)", last_attest: now - 120 },
+                        { miner: "g5-selena-179", antiquity_multiplier: 2.0, device_arch: "G5", device_family: "PowerPC", hardware_type: "PowerPC G5 (Vintage)", last_attest: now - 180 },
+                        { miner: "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35", antiquity_multiplier: 1.2, device_arch: "M4", device_family: "Apple Silicon", hardware_type: "Apple Silicon (Modern)", last_attest: now - 60 },
+                        { miner: "claw-qinlingrongdeMacBook-Pro-48097", antiquity_multiplier: 1.0, device_arch: "apple_silicon", device_family: "arm", hardware_type: "Apple Silicon (Modern)", last_attest: now - 300 },
+                        { miner: "modern-sophiacore-3a168058", antiquity_multiplier: 1.0, device_arch: "modern", device_family: "x86_64", hardware_type: "x86-64 (Modern)", last_attest: now - 45 },
+                        { miner: "windows-gaming-121", antiquity_multiplier: 1.0, device_arch: "AMD64", device_family: "Windows", hardware_type: "Unknown/Other", last_attest: now - 90 },
+                        { miner: "cinder-b550-126", antiquity_multiplier: 1.0, device_arch: "modern", device_family: "x86_64", hardware_type: "x86-64 (Modern)", last_attest: now - 600 },
+                        { miner: "fraktaldefidao", antiquity_multiplier: 1.0, device_arch: "modern", device_family: "x86", hardware_type: "x86-64 (Modern)", last_attest: now - 240 }
+                    ];
+                },
+                
+                get onlineCount() {
+                    return this.miners.filter(m => this.isOnline(m)).length;
+                },
+                
+                get offlineCount() {
+                    return this.miners.filter(m => !this.isOnline(m)).length;
+                },
+                
+                get avgMultiplier() {
+                    if (this.miners.length === 0) return 0;
+                    const sum = this.miners.reduce((acc, m) => acc + (m.antiquity_multiplier || 0), 0);
+                    return (sum / this.miners.length).toFixed(2);
+                },
+                
+                isOnline(miner) {
+                    if (!miner.last_attest) return false;
+                    const now = Math.floor(Date.now() / 1000);
+                    const diffSeconds = now - miner.last_attest;
+                    return diffSeconds < 300; // 5 minutes
+                },
+                
+                getArchBadgeClass(miner) {
+                    const arch = (miner.device_arch || '').toLowerCase();
+                    const hwType = (miner.hardware_type || '').toLowerCase();
+                    const deviceFamily = (miner.device_family || '').toLowerCase();
+                    if (arch.includes('g4') || hwType.includes('g4')) return 'badge-g4';
+                    if (arch.includes('g5') || hwType.includes('g5')) return 'badge-g5';
+                    if (arch.includes('power8') || hwType.includes('power8')) return 'badge-power8';
+                    if (deviceFamily.includes('apple') || arch.includes('apple') || hwType.includes('apple silicon')) return 'badge-apple-silicon';
+                    return 'badge-modern';
+                },
+                
+                getArchitecture(miner) {
+                    if (miner.hardware_type) return miner.hardware_type;
+                    if (miner.device_family) return miner.device_family;
+                    return miner.device_arch || 'Unknown';
+                },
+                
+                formatTime(timestamp) {
+                    if (!timestamp) return 'N/A';
+                    const now = Math.floor(Date.now() / 1000);
+                    const diffSeconds = now - timestamp;
+                    if (diffSeconds < 60) return 'Just now';
+                    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+                    if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
+                    return new Date(timestamp * 1000).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

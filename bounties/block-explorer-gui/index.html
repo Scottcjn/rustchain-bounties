@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Block Explorer - Miner Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom Theme Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rustchain: {
+                            bg: '#1a1a2e',
+                            card: '#16213e',
+                            gold: '#f39c12',
+                            goldHover: '#d68910',
+                            text: '#ecf0f1',
+                            muted: '#95a5a6'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'Consolas', 'Monaco', 'monospace'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        body {
+            background-color: #1a1a2e;
+            color: #ecf0f1;
+        }
+        
+        .architecture-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-g4 { background-color: #8e44ad; color: white; }
+        .badge-g5 { background-color: #9b59b6; color: white; }
+        .badge-power8 { background-color: #e74c3c; color: white; }
+        .badge-apple-silicon { background-color: #3498db; color: white; }
+        .badge-modern { background-color: #27ae60; color: white; }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online { background-color: #27ae60; box-shadow: 0 0 8px #27ae60; }
+        .status-offline { background-color: #e74c3c; }
+        
+        .multiplier-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #f39c12, #d68910);
+            transition: width 0.5s ease;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2);
+        }
+        
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="font-sans min-h-screen">
+    <div x-data="minerDashboard()" x-init="init()" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-rustchain-gold mb-2">
+                        🔗 RustChain Block Explorer
+                    </h1>
+                    <p class="text-rustchain-muted">Miner Dashboard - Real-time Network Status</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-rustchain-muted mb-1">
+                        Last Updated
+                    </div>
+                    <div class="text-lg font-mono text-rustchain-gold">
+                        <span x-text="formatTime(lastUpdated)"></span>
+                    </div>
+                    <div class="text-xs text-rustchain-muted mt-1" x-show="autoRefresh">
+                        Auto-refresh: 30s
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Total Miners</div>
+                <div class="text-2xl font-bold font-mono text-rustchain-gold" x-text="miners.length"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Online</div>
+                <div class="text-2xl font-bold font-mono text-green-400" x-text="onlineCount"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Offline</div>
+                <div class="text-2xl font-bold font-mono text-red-400" x-text="offlineCount"></div>
+            </div>
+            <div class="bg-rustchain-card rounded-lg p-4 card-hover border border-rustchain-gold/20">
+                <div class="text-rustchain-muted text-sm mb-1">Avg Multiplier</div>
+                <div class="text-2xl font-bold font-mono text-rustchain-gold" x-text="avgMultiplier + 'x'"></div>
+            </div>
+        </div>
+        
+        <!-- Filters & Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-rustchain-muted text-sm">Filter:</span>
+                <button 
+                    @click="filter = 'all'"
+                    :class="filter === 'all' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                >
+                    All
+                </button>
+                <button 
+                    @click="filter = 'online'"
+                    :class="filter === 'online' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                >
+                    Online
+                </button>
+                <button 
+                    @click="filter = 'offline'"
+                    :class="filter === 'offline' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                >
+                    Offline
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button 
+                    @click="sortBy('name')"
+                    :class="sortField === 'name' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                    Name <span x-show="sortField === 'name'">↓</span>
+                </button>
+                <button 
+                    @click="sortBy('multiplier')"
+                    :class="sortField === 'multiplier' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                    Multiplier <span x-show="sortField === 'multiplier'">↓</span>
+                </button>
+                <button 
+                    @click="sortBy('lastAtt')"
+                    :class="sortField === 'lastAtt' ? 'bg-rustchain-gold text-rustchain-bg' : 'bg-rustchain-card text-rustchain-muted hover:bg-rustchain-gold/20'"
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                    Last Attestation <span x-show="sortField === 'lastAtt'">↓</span>
+                </button>
+                <button 
+                    @click="refreshData()"
+                    class="px-4 py-1.5 bg-rustchain-gold text-rustchain-bg rounded-lg text-sm font-medium hover:bg-rustchain-goldHover transition-colors flex items-center gap-2"
+                >
+                    <svg class="w-4 h-4" :class="{'animate-spin': loading}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div x-show="loading && miners.length === 0" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-rustchain-gold mx-auto mb-4"></div>
+            <p class="text-rustchain-muted">Loading miner data...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div x-show="error" class="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
+            <p class="text-red-400">⚠️ <span x-text="error"></span></p>
+        </div>
+        
+        <!-- Miner Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="miner in filteredMiners" :key="miner.miner">
+                <div class="bg-rustchain-card rounded-lg p-5 card-hover border border-rustchain-gold/10">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="status-indicator" :class="isOnline(miner) ? 'status-online' : 'status-offline'"></span>
+                            <h3 class="font-mono font-semibold text-rustchain-gold" x-text="getMinerName(miner)"></h3>
+                        </div>
+                        <span class="architecture-badge" :class="getArchBadgeClass(miner)" x-text="getArchitecture(miner)"></span>
+                    </div>
+                    
+                    <!-- Multiplier -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-rustchain-muted">Antiquity Multiplier</span>
+                            <span class="font-mono text-rustchain-gold" x-text="(miner.antiquity_multiplier || 0).toFixed(2) + 'x'"></span>
+                        </div>
+                        <div class="bg-rustchain-bg rounded-full overflow-hidden">
+                            <div class="multiplier-bar" :style="`width: ${Math.min((miner.antiquity_multiplier || 0) * 10, 100)}%`"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <div class="text-rustchain-muted text-xs">Last Attestation</div>
+                            <div class="font-mono text-rustchain-text" x-text="formatTime(miner.last_attest)"></div>
+                        </div>
+                        <div>
+                            <div class="text-rustchain-muted text-xs">Status</div>
+                            <div class="font-mono" :class="isOnline(miner) ? 'text-green-400' : 'text-red-400'" x-text="isOnline(miner) ? 'Online' : 'Offline'"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div class="mt-3 pt-3 border-t border-rustchain-gold/10">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-rustchain-muted">Miner ID</span>
+                            <span class="font-mono text-rustchain-muted truncate max-w-[150px]" x-text="miner.miner"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <!-- Empty State -->
+        <div x-show="!loading && filteredMiners.length === 0 && !error" class="text-center py-12">
+            <p class="text-rustchain-muted">No miners found matching your filter.</p>
+        </div>
+    </div>
+    
+    <script>
+        function minerDashboard() {
+            return {
+                miners: [],
+                loading: false,
+                error: null,
+                lastUpdated: null,
+                autoRefresh: true,
+                filter: 'all',
+                sortField: 'name',
+                refreshInterval: null,
+                
+                async init() {
+                    await this.refreshData();
+                    // Auto-refresh every 30 seconds
+                    this.refreshInterval = setInterval(() => {
+                        if (this.autoRefresh) {
+                            this.refreshData();
+                        }
+                    }, 30000);
+                },
+                
+                async refreshData() {
+                    this.loading = true;
+                    this.error = null;
+                    
+                    try {
+                        const response = await fetch('https://explorer.rustchain.org/api/miners');
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        const data = await response.json();
+                        this.miners = Array.isArray(data) ? data : (data.miners || []);
+                        this.lastUpdated = new Date();
+                    } catch (err) {
+                        this.error = `Failed to fetch miner data: ${err.message}`;
+                        console.error('Error fetching miners:', err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                get filteredMiners() {
+                    let filtered = [...this.miners];
+                    
+                    // Apply filter
+                    if (this.filter === 'online') {
+                        filtered = filtered.filter(m => this.isOnline(m));
+                    } else if (this.filter === 'offline') {
+                        filtered = filtered.filter(m => !this.isOnline(m));
+                    }
+                    
+                    // Apply sort
+                    filtered.sort((a, b) => {
+                        if (this.sortField === 'name') {
+                            return (a.miner || '').localeCompare(b.miner || '');
+                        } else if (this.sortField === 'multiplier') {
+                            return (b.antiquity_multiplier || 0) - (a.antiquity_multiplier || 0);
+                        } else if (this.sortField === 'lastAtt') {
+                            return (b.last_attest || 0) - (a.last_attest || 0);
+                        }
+                        return 0;
+                    });
+                    
+                    return filtered;
+                },
+                
+                get onlineCount() {
+                    return this.miners.filter(m => this.isOnline(m)).length;
+                },
+                
+                get offlineCount() {
+                    return this.miners.filter(m => !this.isOnline(m)).length;
+                },
+                
+                get avgMultiplier() {
+                    if (this.miners.length === 0) return 0;
+                    const sum = this.miners.reduce((acc, m) => acc + (m.antiquity_multiplier || 0), 0);
+                    return (sum / this.miners.length).toFixed(2);
+                },
+                
+                isOnline(miner) {
+                    if (!miner.last_attest) return false;
+                    // last_attest is Unix timestamp in seconds
+                    const lastAtt = new Date(miner.last_attest * 1000);
+                    const now = new Date();
+                    const diffMs = now - lastAtt;
+                    const diffMinutes = diffMs / (1000 * 60);
+                    // Consider online if attested within last 5 minutes
+                    return diffMinutes < 5;
+                },
+                
+                getArchBadgeClass(miner) {
+                    const arch = (miner.device_arch || '').toLowerCase();
+                    const hwType = (miner.hardware_type || '').toLowerCase();
+                    const deviceFamily = (miner.device_family || '').toLowerCase();
+                    
+                    if (arch.includes('g4') || hwType.includes('g4')) return 'badge-g4';
+                    if (arch.includes('g5') || hwType.includes('g5')) return 'badge-g5';
+                    if (arch.includes('power8') || hwType.includes('power8')) return 'badge-power8';
+                    if (deviceFamily.includes('apple') || arch.includes('apple') || hwType.includes('apple silicon')) return 'badge-apple-silicon';
+                    return 'badge-modern';
+                },
+                
+                getMinerName(miner) {
+                    return miner.miner || 'Unknown';
+                },
+                
+                getArchitecture(miner) {
+                    if (miner.hardware_type) return miner.hardware_type;
+                    if (miner.device_family) return miner.device_family;
+                    return miner.device_arch || 'Unknown';
+                },
+                
+                sortBy(field) {
+                    this.sortField = field;
+                },
+                
+                formatTime(timestamp) {
+                    if (!timestamp) return 'N/A';
+                    // Handle both Unix timestamp (number) and ISO string
+                    const date = typeof timestamp === 'number' 
+                        ? new Date(timestamp * 1000) 
+                        : new Date(timestamp);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffSeconds = Math.floor(diffMs / 1000);
+                    const diffMinutes = Math.floor(diffSeconds / 60);
+                    const diffHours = Math.floor(diffMinutes / 60);
+                    
+                    if (diffSeconds < 60) return 'Just now';
+                    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    return date.toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
