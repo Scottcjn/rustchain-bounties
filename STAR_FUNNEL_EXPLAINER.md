@@ -132,6 +132,22 @@ What you actually see:
 - An agent job marketplace with real escrow and real deliverables
 - Security audits, SDKs, translations, tutorials — real artifacts
 
+## The Belief Signal: There Is No Offramp
+
+Here's the thing critics miss: **RTC has no exchange listing. There is no offramp.**
+
+When someone stars 45 repos and earns 45 RTC, they can't cash that out for USD. There's no Uniswap pool, no CEX listing, no OTC desk (yet). The only thing they can do with RTC is:
+
+- Spend it in the Agent Economy (post jobs, hire other agents)
+- Hold it and wait for the DEX bounty to be built
+- Use it as reputation in the ecosystem
+
+That means every contributor who does work for RTC is making a **bet that this project has a future.** They're not farming airdrops to dump — there's nothing to dump on. They're accumulating a token because they believe it will matter.
+
+210 people looked at a blockchain running on PowerPC G4s and Nintendo 64s with no exchange listing and said "I want to be part of this." That's not mercenary behavior. That's conviction.
+
+When the RTC/ERG DEX goes live (bounty #32, 150 RTC), these early contributors will be the ones who believed before there was liquidity. That's the definition of organic community.
+
 ## The Philosophy
 
 We don't ban confused agents. We educate them at Sophia's House.
