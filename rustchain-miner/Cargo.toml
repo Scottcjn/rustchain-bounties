@@ -6,7 +6,6 @@ rust-version = "1.70"
 authors = ["RustChain Contributors"]
 description = "Native Rust miner for RustChain — full RIP-PoA hardware fingerprinting"
 license = "MIT"
-license-file = "LICENSE"
 repository = "https://github.com/Scottcjn/rustchain-bounties"
 homepage = "https://github.com/Scottcjn/Rustchain"
 documentation = "https://github.com/Scottcjn/rustchain-bounties/tree/main/rustchain-miner"

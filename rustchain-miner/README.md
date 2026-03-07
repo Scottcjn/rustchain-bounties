@@ -79,6 +79,61 @@ cross build --release --target aarch64-unknown-linux-musl
 cross build --release --target powerpc64-unknown-linux-gnu
 ```
 
+## Running as a Service (Linux)
+
+A sample systemd unit file is included in `contrib/rustchain-miner.service`:
+
+```bash
+# Install the binary
+sudo cp target/release/rustchain-miner /usr/local/bin/
+
+# Install the service file (edit YOUR_USERNAME and YOUR_MINER_ID first)
+sudo cp contrib/rustchain-miner.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now rustchain-miner
+
+# Check status
+sudo systemctl status rustchain-miner
+journalctl -u rustchain-miner -f
+```
+
+## Logging & Log Rotation
+
+The miner logs to stderr via `env_logger`. Control verbosity with `RUST_LOG`:
+
+```bash
+RUST_LOG=debug ./rustchain-miner --wallet my-wallet   # Verbose
+RUST_LOG=warn  ./rustchain-miner --wallet my-wallet   # Quiet
+```
+
+When running as a systemd service, logs go to journald (auto-rotated). For manual runs, pipe to a file with rotation:
+
+```bash
+# Using logrotate (create /etc/logrotate.d/rustchain-miner):
+/var/log/rustchain-miner.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+}
+
+# Then run with:
+./rustchain-miner --wallet my-wallet 2>&1 | tee -a /var/log/rustchain-miner.log
+```
+
+## TLS Certificate
+
+The node at `50.28.86.131` uses a self-signed certificate. By default the miner accepts it (matching the Python miner's `verify=False`). For stricter security, you can pin the node's certificate:
+
+```bash
+# Download the node's cert
+openssl s_client -connect 50.28.86.131:443 </dev/null 2>/dev/null | \
+  openssl x509 -outform PEM > rustchain-node.pem
+```
+
+Certificate pinning support via a `--tls-cert` flag is planned for a future release.
+
 ## License
 
 MIT
