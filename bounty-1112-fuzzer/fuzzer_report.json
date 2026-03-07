@@ -1,0 +1,421 @@
+{
+  "timestamp": "2026-03-08T00:04:41.652775",
+  "nodes_tested": [
+    "http://50.28.86.153:8099"
+  ],
+  "total_tests": 61,
+  "bugs_found": 59,
+  "results": [
+    {
+      "test": "empty_object",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "response": "<!doctype html>\n<html lang=en>\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the s",
+      "expected": "400 or validation error",
+      "issue": true
+    },
+    {
+      "test": "null_values",
+      "payload": "{'value': None}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "null_values",
+      "payload": "{'wallet': None, 'amount': 100}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "null_values",
+      "payload": "{'data': None, 'nested': {'key': None}}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'amount': 'not_a_number'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'amount': True}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'amount': []}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'amount': {}}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'wallet': 12345}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'wallet': True}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'active': 'true_string'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "type_confusion",
+      "payload": "{'count': '123'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': 0}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': -1}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': -999999999}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': 999999999999999}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': 1.7976931348623157e+308}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': inf}",
+      "node": "http://50.28.86.153:8099",
+      "status": -3,
+      "issue": false
+    },
+    {
+      "test": "boundary_values",
+      "payload": "{'amount': -inf}",
+      "node": "http://50.28.86.153:8099",
+      "status": -3,
+      "issue": false
+    },
+    {
+      "test": "deep_nesting_5",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "deep_nesting_10",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "deep_nesting_20",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "deep_nesting_50",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "deep_nesting_100",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "large_string_100",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "large_string_1000",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "large_string_10000",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "large_string_100000",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '\ud83e\udd80\ud83d\ude80\ud83d\udc8e'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '<script>alert(1)</script>'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': \"';--\"}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '\\\\x00\\\\x01\\\\x02'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '\u65e5\u672c\u8a9e\u30c6\u30b9\u30c8'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '\u0627\u0644\u0639\u0631\u0628\u064a\u0629'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "special_chars",
+      "payload": "{'text': '\ud83c\udd41\ud83c\udd44\ud83c\udd42\ud83c\udd43'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "array_instead_object",
+      "payload": "[]",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "array_instead_object",
+      "payload": "[1, 2, 3]",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "array_instead_object",
+      "payload": "['a', 'b', 'c']",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "array_instead_object",
+      "payload": "[{'key': 'value'}]",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "array_instead_object",
+      "payload": "[[1, 2], [3, 4]]",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "many_keys_10",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "many_keys_50",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "many_keys_100",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "many_keys_500",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "long_key_100",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "long_key_500",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "long_key_1000",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "long_key_5000",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'active': True}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'active': False}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'count': True}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'amount': False}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'wallet': True}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "boolean_values",
+      "payload": "{'true': True, 'false': False}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'': 'empty_key'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{' ': 'space_key'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'\\t': 'tab_key'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'\\n': 'newline_key'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'key': ''}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'key': ' '}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    },
+    {
+      "test": "edge_case_json",
+      "payload": "{'key': '\\n\\n\\n'}",
+      "node": "http://50.28.86.153:8099",
+      "status": 500,
+      "issue": true
+    }
+  ]
+}
