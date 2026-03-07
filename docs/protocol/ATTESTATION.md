@@ -57,6 +57,29 @@ The node performs the following validation:
 3. **Fingerprint Score**: Does the `fingerprint` data indicate a VM? (Node-side verification uses a weighted model).
 4. **Architecture Match**: Does the `cpu_brand` match the `device_arch`?
 
+## Fleet Detection & False Positive Mitigation
+RustChain's fleet detection system identifies coordinated mining operations using three signal vectors: IP similarity, hardware fingerprint similarity, and timing patterns. To reduce false positives in legitimate shared environments, the following adjustments are implemented:
+
+### Fleet Score Calculation
+Fleet score = (IP similarity weight × 0.4) + (Hardware similarity weight × 0.4) + (Timing correlation weight × 0.2)
+
+### False Positive Scenarios & Adjustments
+1. **University/Corporate Labs**: Multiple independent users on identical hardware behind a shared IP.
+   - **Mitigation**: If hardware fingerprints are identical but miner IDs/wallets are distinct, reduce IP similarity weight to 0.2 and require timing correlation >0.8 for fleet flag.
+2. **Internet Cafes/Public WiFi**: Different hardware sharing a public IP.
+   - **Mitigation**: If hardware fingerprints differ, IP similarity weight is reduced to 0.3.
+3. **Cloud Providers (Shared Subnets)**: Independent users in same /24 subnet.
+   - **Mitigation**: For IPs in known cloud ASNs, subnet similarity triggers only if hardware similarity >0.7 AND timing correlation >0.6.
+4. **Household/Family Mining**: Different machines in same household.
+   - **Mitigation**: If hardware fingerprints differ and miner IDs are personalized, IP similarity weight is reduced to 0.25.
+
+### Updated Fleet Thresholds
+- **Fleet Flag Threshold**: 0.45 (increased from 0.3)
+- **Reward Decay Activation**: 0.6 (increased from 0.45)
+- **Severe Penalty**: 0.8 (unchanged)
+
+These adjustments reduce false positives while maintaining detection of true coordinated fleets (which exhibit high scores across all three vectors).
+
 ## Security: Prevention of "Mining Farms"
 By requiring unique hardware serials and MAC addresses, RustChain prevents the use of cloud providers (AWS/GCP) or local virtualization clusters. The **Antiquity Multiplier** (see Tokenomics) further disincentivizes modern hardware farms by making vintage, harder-to-scale hardware more profitable.
 
