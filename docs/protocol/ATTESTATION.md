@@ -55,10 +55,33 @@ The node performs the following validation:
 1. **Nonce Verification**: Is the nonce fresh and issued by this node?
 2. **Commitment Check**: Does the hash match the provided entropy and wallet?
 3. **Fingerprint Score**: Does the `fingerprint` data indicate a VM? (Node-side verification uses a weighted model).
-4. **Architecture Match**: Does the `cpu_brand` match the `device_arch`?
+4. **Architecture Cross-Validation**: Does the `cpu_brand` match the `device_arch`? (Intel Xeon cannot claim PowerPC G4)
+5. **SIMD Evidence Verification**: For PowerPC claims, require AltiVec/vec_perm instruction evidence.
+6. **Cache Timing Profile Match**: Verify cache timing patterns match claimed architecture characteristics.
+7. **Server-Side Bucket Classification**: Classify miners into reward buckets based on verified server-side features, not client-reported architecture strings.
 
 ## Security: Prevention of "Mining Farms"
 By requiring unique hardware serials and MAC addresses, RustChain prevents the use of cloud providers (AWS/GCP) or local virtualization clusters. The **Antiquity Multiplier** (see Tokenomics) further disincentivizes modern hardware farms by making vintage, harder-to-scale hardware more profitable.
+
+## RIP-201 Bucket Normalization Fix
+To prevent architecture spoofing (e.g., Intel Xeon claiming to be PowerPC G4 for 2.5x multiplier):
+
+1. **CPU Brand vs Architecture Cross-Validation**:
+   - Reject submissions where CPU brand string contradicts claimed architecture
+   - Example: "Intel Xeon" + "G4" = REJECTED
+
+2. **SIMD Evidence Requirement**:
+   - For PowerPC claims: require AltiVec/vec_perm instruction execution proof
+   - Must pass SIMD unit identity check (Check 3) with architecture-specific patterns
+
+3. **Cache Timing Profile Matching**:
+   - Compare cache latency patterns against known PowerPC characteristics
+   - Modern x86 cache hierarchies have different timing signatures
+
+4. **Server-Side Bucket Classification**:
+   - Bucket assignment determined by server-verified features, not client strings
+   - Architecture classification based on multiple hardware fingerprints
+   - Prevents spoofing by ignoring client-reported `device.arch` for reward calculation
 
 ---
 *Next: See [Token Economics & Multipliers](./TOKENOMICS.md).*
