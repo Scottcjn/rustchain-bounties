@@ -67,6 +67,50 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 | [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
 | [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
 
+## 🎲 Lucky Star Lottery — March 2026
+
+**Every star is a lottery ticket!** Star repos and you're automatically entered.
+
+### 🎰 How It Works
+1. **Star any Scottcjn repo** = 1 lottery entry
+2. **Follow @Scottcjn** = 5 bonus entries
+3. **Star 50+ repos** = 10 bonus entries
+4. **Star 100+ repos** = 25 bonus entries
+
+### 🏆 Prizes
+
+| Prize | Amount | Winners |
+|-------|--------|---------|
+| 🥇 Grand Prize | **500 RTC** | 1 winner |
+| 🥈 Second Prize | **100 RTC** | 2 winners |
+| 🥉 Third Prize | **50 RTC** | 5 winners |
+| 🎁 Consolation | **10 RTC** | 10 winners |
+
+**Total Prize Pool: 1,000 RTC ($100 USD)**
+
+### 📅 Drawing Date
+**March 15, 2026** — Winners announced in [issue #1](https://github.com/Scottcjn/rustchain-bounties/issues/1)!
+
+Drawing uses RustChain's on-chain epoch hash as random seed — provably fair!
+
+### 📋 How to Enter
+1. **Star repos** at https://github.com/Scottcjn
+2. **Comment on [issue #1](https://github.com/Scottcjn/rustchain-bounties/issues/1)** with your GitHub username + RTC wallet address
+3. More stars = more entries = better odds!
+
+### ⚠️ Rules
+- Stars verified before drawing
+- Must have active stars at time of drawing (no unstar-restar)
+- One entry per GitHub account
+- Winners have 7 days to provide valid RTC wallet
+
+### 💰 Funding
+Paid from `founder_community` wallet
+
+---
+*RTC Reference Rate: 1 RTC = $0.10 USD*
+*Drawing uses deterministic on-chain randomness — provably fair!*
+
 ## Quick Links
 
 | Resource | Link |
