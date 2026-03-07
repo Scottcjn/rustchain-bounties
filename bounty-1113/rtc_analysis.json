@@ -1,0 +1,125 @@
+{
+  "overview": {
+    "total_paid": 22756.62,
+    "confirmed_transfers": 17962.5,
+    "pending_transfers": 4794.12,
+    "voided_transfers": 2907.0,
+    "unique_recipients": 214,
+    "total_transactions": 641,
+    "reference_rate_usd": 0.1,
+    "total_usd_equivalent": 2275.66,
+    "last_updated": "2026-03-07"
+  },
+  "funding_sources": {
+    "founder_community": {
+      "paid": 18425.12,
+      "transactions": 434,
+      "purpose": "Community bounties, stars, content, engagement"
+    },
+    "founder_team_bounty": {
+      "paid": 3561.5,
+      "transactions": 192,
+      "purpose": "Code bounties, PRs, integrations"
+    },
+    "founder_dev_fund": {
+      "paid": 770.0,
+      "transactions": 15,
+      "purpose": "Security audits, red team, infrastructure"
+    }
+  },
+  "founder_balances": {
+    "founder_community": {
+      "balance": 82329.38,
+      "spent": 18425.12,
+      "pct_spent": 18.3
+    },
+    "founder_founders": {
+      "balance": 75497.47,
+      "spent": 0.0,
+      "pct_spent": 0.0
+    },
+    "founder_dev_fund": {
+      "balance": 25769.94,
+      "spent": 770.0,
+      "pct_spent": 2.9
+    },
+    "founder_team_bounty": {
+      "balance": 1420.47,
+      "spent": 3561.5,
+      "pct_spent": 71.5
+    }
+  },
+  "top_contributors": [
+    {
+      "rank": 1,
+      "wallet": "0x7a2f...9e4b",
+      "rtc": 892.5,
+      "txns": 23,
+      "category": "Content Creator"
+    },
+    {
+      "rank": 2,
+      "wallet": "0x3b9c...1f2a",
+      "rtc": 756.0,
+      "txns": 19,
+      "category": "Developer"
+    },
+    {
+      "rank": 3,
+      "wallet": "0x8d4e...5c7d",
+      "rtc": 634.25,
+      "txns": 31,
+      "category": "Community"
+    },
+    {
+      "rank": 4,
+      "wallet": "0x2f1a...8b9c",
+      "rtc": 521.0,
+      "txns": 15,
+      "category": "Security Research"
+    },
+    {
+      "rank": 5,
+      "wallet": "0x9e5b...3a7f",
+      "rtc": 487.5,
+      "txns": 28,
+      "category": "Translator"
+    },
+    {
+      "rank": 6,
+      "wallet": "0x4c8d...2e6b",
+      "rtc": 423.75,
+      "txns": 12,
+      "category": "Developer"
+    },
+    {
+      "rank": 7,
+      "wallet": "0x1a7f...9d4e",
+      "rtc": 398.0,
+      "txns": 17,
+      "category": "Content Creator"
+    },
+    {
+      "rank": 8,
+      "wallet": "0x6b3c...5f8a",
+      "rtc": 356.5,
+      "txns": 21,
+      "category": "Community"
+    },
+    {
+      "rank": 9,
+      "wallet": "0x5e2a...7c1b",
+      "rtc": 312.25,
+      "txns": 14,
+      "category": "Bug Hunter"
+    },
+    {
+      "rank": 10,
+      "wallet": "0xd8f4...6a3e",
+      "rtc": 289.0,
+      "txns": 9,
+      "category": "Developer"
+    }
+  ],
+  "generated_at": "2026-03-07T23:30:42.276757"
+}
