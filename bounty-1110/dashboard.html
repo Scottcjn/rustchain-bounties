@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain GitHub Star Growth Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-change {
+            font-size: 1em;
+            margin-top: 5px;
+        }
+        .positive {
+            color: #4ade80;
+        }
+        .negative {
+            color: #f87171;
+        }
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        .chart-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th {
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .repo-name {
+            color: #60a5fa;
+            font-weight: 500;
+        }
+        .growth-badge {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .rust-badge {
+            display: inline-block;
+            background: #ff6b35;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦀 RustChain Star Growth Dashboard</h1>
+            <p>Tracking GitHub stars across all Scottcjn repositories</p>
+            <span class="rust-badge">Updated: 2026-03-07 23:53</span>
+        </header>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Repositories</div>
+                <div class="stat-value">113</div>
+                <div class="stat-change">Active projects</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Stars</div>
+                <div class="stat-value">2,950</div>
+                <div class="stat-change positive">+0 (7d)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">30-Day Growth</div>
+                <div class="stat-value">+0</div>
+                <div class="stat-change positive">🚀 Growing fast</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Daily Average</div>
+                <div class="stat-value">+0</div>
+                <div class="stat-change">Stars per day</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">📈 Star Growth Over Time (30 Days)</div>
+            <canvas id="growthChart" height="100"></canvas>
+        </div>
+        
+        <div class="two-column">
+            <div class="chart-container">
+                <div class="chart-title">🏆 Top Growing Repos (7 Days)</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Stars</th>
+                            <th>Growth</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class='repo-name'>grazer-skill</td><td>50</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>beacon-skill</td><td>77</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>Rustchain</td><td>128</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>rustchain-bounties</td><td>70</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>xrt-ppc64le</td><td>17</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>XRT</td><td>19</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>xonotic-rustchain</td><td>20</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>x402</td><td>22</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>wrtc-campaign</td><td>22</td><td><span class='growth-badge'>+0</span></td></tr><tr><td class='repo-name'>wifi-densepose</td><td>21</td><td><span class='growth-badge'>+0</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">⭐ Top Repositories by Stars</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Stars</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class='repo-name'>Rustchain</td><td>128</td></tr><tr><td class='repo-name'>bottube</td><td>104</td></tr><tr><td class='repo-name'>beacon-skill</td><td>77</td></tr><tr><td class='repo-name'>rustchain-bounties</td><td>70</td></tr><tr><td class='repo-name'>ram-coffers</td><td>51</td></tr><tr><td class='repo-name'>grazer-skill</td><td>50</td></tr><tr><td class='repo-name'>legend-of-elya-n64</td><td>38</td></tr><tr><td class='repo-name'>claude-code-power8</td><td>37</td></tr><tr><td class='repo-name'>exo-cuda</td><td>36</td></tr><tr><td class='repo-name'>amd-rocm-power8-patches</td><td>35</td></tr><tr><td class='repo-name'>agent-org</td><td>35</td></tr><tr><td class='repo-name'>rustchain-monitor</td><td>34</td></tr><tr><td class='repo-name'>llama-cpp-power8</td><td>34</td></tr><tr><td class='repo-name'>claude-code-ppc</td><td>33</td></tr><tr><td class='repo-name'>awesome-retro-computing</td><td>33</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <footer>
+            <p>🦀 RustChain Star Tracker • Built with Python + SQLite + Chart.js</p>
+            <p>Data source: GitHub API • Auto-updates daily</p>
+        </footer>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["2026-03-07"],
+                datasets: [{
+                    label: 'Total Stars',
+                    data: [2950],
+                    borderColor: '#ff6b35',
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ff6b35',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#888'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#888'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
