@@ -1,0 +1,65 @@
+{
+  "analysis_timestamp": "2026-03-08 00:10:49.056660",
+  "statistics": {
+    "total_wallets": 13,
+    "non_zero_wallets": 10,
+    "total_supply_rtc": 3431.806557,
+    "gini_coefficient": 0.8011775602582092,
+    "mean_balance": 263.9851197692308,
+    "median_balance": 7.828822
+  },
+  "all_wallets": [
+    {
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "balance_rtc": 1900.244653
+    },
+    {
+      "miner_id": "frozen-factorio-ryan",
+      "balance_rtc": 785.970322
+    },
+    {
+      "miner_id": "modern-sophiacore-3a168058",
+      "balance_rtc": 409.490434
+    },
+    {
+      "miner_id": "victus-x86-scott",
+      "balance_rtc": 281.673241
+    },
+    {
+      "miner_id": "fraktaldefidao",
+      "balance_rtc": 25.828822
+    },
+    {
+      "miner_id": "agentgubbins",
+      "balance_rtc": 14.07717
+    },
+    {
+      "miner_id": "claw-jojo-51658",
+      "balance_rtc": 7.828822
+    },
+    {
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "balance_rtc": 5.438143
+    },
+    {
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "balance_rtc": 0.828822
+    },
+    {
+      "miner_id": "windows-gaming-121",
+      "balance_rtc": 0.426128
+    },
+    {
+      "miner_id": "nox-ventures",
+      "balance_rtc": 0.0
+    },
+    {
+      "miner_id": "RTC",
+      "balance_rtc": 0.0
+    },
+    {
+      "miner_id": "RTCb0d52c2191707db1ce586efff64275fc91ff346c",
+      "balance_rtc": 0.0
+    }
+  ]
+}

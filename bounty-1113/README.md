@@ -1,60 +1,73 @@
-# RTC Token Distribution Analysis
+# Bounty #1113: RTC Token Distribution Analysis
 
-**Bounty #1113** - Analysis of RTC token distribution patterns on RustChain
+A comprehensive analysis of RustChain's RTC token distribution using the explorer API.
 
-## Overview
+## Features
 
-This project provides a comprehensive analysis of the RustChain Token (RTC) distribution across the bounty program, examining concentration metrics, funding sources, and contributor patterns.
+📊 **Distribution Metrics**
+- Total wallets and non-zero wallets
+- Total supply calculation
+- Mean, median, min, max balances
 
-## Key Findings
+📈 **Inequality Analysis**
+- Gini coefficient calculation (0.8012 - highly concentrated)
+- Top 10 holder concentration
+- Bottom 50% wealth share
 
-### 📊 Program Scale
-- **Total Paid**: 22,756.62 RTC (~$2,275.66 USD)
-- **Recipients**: 214 unique wallets
-- **Transactions**: 641 total payouts
-- **Average Payout**: 35.50 RTC per transaction
+📉 **Visualizations**
+- ASCII histogram of balance distribution
+- Lorenz curve showing wealth inequality
+- Comparison to other cryptocurrencies
 
-### 💰 Funding Distribution
-| Source | RTC Paid | % of Total | Purpose |
-|--------|----------|------------|---------|
-| Community Fund | 18,425.12 | 81.0% | Content, engagement, stars |
-| Team Bounty | 3,561.50 | 15.6% | Code, PRs, integrations |
-| Dev Fund | 770.00 | 3.4% | Security, audits |
+## Results Summary
 
-### 📉 Concentration Metrics
-- **Top 1**: 3.92% of all payouts
-- **Top 5**: 17.05% of all payouts  
-- **Top 10**: 22.75% of all payouts
-- **Gini Coefficient**: 0.147 (moderate equality)
+| Metric | Value |
+|--------|-------|
+| Total Wallets | 13 |
+| Non-Zero Wallets | 10 |
+| Total Supply | 3,431.81 RTC |
+| Gini Coefficient | **0.8012** |
+| Mean Balance | 263.99 RTC |
+| Median Balance | 7.83 RTC |
 
-### 🏦 Treasury Health
-- **Remaining**: 185,017.26 RTC (~$18,500)
-- **Spent**: 11.0% of treasury
-- **Runway**: ~8x historical payout volume remaining
+### Top 5 Holders
 
-## Files
+| Rank | Wallet | Balance | % of Supply |
+|------|--------|---------|-------------|
+| 1 | RTC1d48d... | 1,900.24 RTC | 55.37% |
+| 2 | frozen-factorio-ryan | 785.97 RTC | 22.90% |
+| 3 | modern-sophiacore-3a168058 | 409.49 RTC | 11.93% |
+| 4 | victus-x86-scott | 281.67 RTC | 8.21% |
+| 5 | fraktaldefidao | 25.83 RTC | 0.75% |
 
-- `rtc_distribution_analysis.py` - Main analysis script
-- `rtc_analysis.json` - Exported data in JSON format
-- `README.md` - This file
+### Key Findings
+
+1. **Highly Concentrated**: Gini coefficient of 0.80 indicates significant wealth concentration
+2. **Top Heavy**: Top 3 wallets control ~90% of the supply
+3. **Early Stage**: Distribution typical of new blockchain projects
+4. **Comparison**: More concentrated than Bitcoin (~0.65-0.85) and Ethereum (~0.70-0.90)
 
 ## Usage
 
 ```bash
-python3 rtc_distribution_analysis.py
+# Install dependencies
+pip install requests
+
+# Run analysis
+python3 token_analysis.py
 ```
 
-## Insights & Recommendations
+## Files
 
-1. **Healthy Distribution**: Top 10 control only 22.75% - good decentralization
-2. **Dev Fund Underutilized**: Only 2.9% spent - increase security investments
-3. **Team Fund Depleted**: 71.5% spent - may need replenishment soon
-4. **Strong Retention**: 3.0 transactions per recipient average
+- `token_analysis.py` - Main analysis script
+- `token_distribution_report.json` - Detailed JSON report
+- `README.md` - This file
 
-## Data Source
+## API Endpoints Used
 
-Analysis based on [RustChain Bounty Ledger](https://github.com/Scottcjn/rustchain-bounties/blob/main/BOUNTY_LEDGER.md) as of March 7, 2026.
+- `GET /api/miners` - List all miners
+- `GET /wallet/balance?miner_id={id}` - Get wallet balance
 
----
+## Wallet for RTC Payout
 
-**Wallet for RTC payout**: sovereign-agent
+**sovereign-agent**
