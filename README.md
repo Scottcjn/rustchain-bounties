@@ -17,6 +17,44 @@
 
 ---
 
+## 🚀 5,000 STARS CAMPAIGN - CLAUDE CODE OSS QUALIFICATION
+
+**Goal: Reach 5,000 stars on the main RustChain repository**
+
+### Current Status
+| Metric | Count |
+|--------|-------|
+| **Rustchain main repo stars** | **63** |
+| **Target** | **5,000** |
+| **Gap** | **4,937** |
+
+### Why This Matters
+- Claude Code Open Source requires **one repo with 5,000+ stars** for qualification
+- RustChain already has: 4 PyPI packages, novel consensus (Proof-of-Antiquity), production network, academic submission, live tokens
+- "If you maintain something the ecosystem quietly depends on, apply anyway and tell us about it." — Claude Code OSS criteria
+
+### 🎯 Bounty Pool: 5,000 RTC (~$500 USD)
+
+| Action | Reward |
+|--------|--------|
+| Star the main Rustchain repo | **2 RTC** |
+| Star main repo + 5 other repos | **3 RTC per repo** |
+| Star main repo + ALL 86 repos | **5 RTC per repo (430 RTC!)** |
+| Share campaign on social media | **+5 RTC bonus** |
+| Referral (get someone else to star) | **+2 RTC per referral** |
+
+### How to Claim
+1. Star https://github.com/Scottcjn/Rustchain (REQUIRED)
+2. Star additional repos for multiplied rewards
+3. Comment here with GitHub username + repos starred
+4. Receive RTC within 24 hours
+
+**Star page**: https://rustchain.org/stars.html
+
+*Pool funded from Community Fund (85,000+ RTC available)*
+
+---
+
 ## What is RTC?
 
 **RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/Rustchain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
