@@ -1,0 +1,18 @@
+{
+  "name": "base-erc20-wrtc",
+  "version": "1.0.0",
+  "description": "Wrapped RTC ERC-20 Token on Base L2",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:testnet": "python scripts/deploy.py testnet",
+    "deploy:mainnet": "python scripts/deploy.py mainnet"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0"
+  }
+}
