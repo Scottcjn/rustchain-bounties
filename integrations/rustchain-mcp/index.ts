@@ -89,6 +89,41 @@ const TOOLS: Tool[] = [
             required: ["signed_payload"],
         },
     },
+    {
+        name: "rustchain_ledger",
+        description: "Query the recent ledger activity, blocks, and transactions.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                limit: {
+                    type: "number",
+                    description: "Number of recent entries to fetch.",
+                },
+            },
+        },
+    },
+    {
+        name: "rustchain_register",
+        description: "Register a wallet/miner for the current epoch.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                wallet: {
+                    type: "string",
+                    description: "The wallet address or miner ID to register.",
+                },
+            },
+            required: ["wallet"],
+        },
+    },
+    {
+        name: "rustchain_bounties",
+        description: "Fetch a list of open bounties from the official RustChain repository.",
+        inputSchema: {
+            type: "object",
+            properties: {},
+        },
+    },
 ];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -191,6 +226,74 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return {
                     content: [{ type: "text", text: JSON.stringify(results, null, 2) }],
                 };
+            }
+
+            case "rustchain_ledger": {
+                const limit = (args?.limit as number) || 10;
+                for (const node of NODES) {
+                    try {
+                        // The explorer endpoint is documented to show ledger activity
+                        const response = await client.get(`${node}/explorer`);
+                        if (response.status === 200) {
+                            const data = response.data;
+                            // Basic filtering if the endpoint returns a large object
+                            const summary = Array.isArray(data) ? data.slice(0, limit) : data;
+                            return {
+                                content: [{ type: "text", text: JSON.stringify(summary, null, 2) }],
+                            };
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                throw new Error("Could not fetch ledger from any node.");
+            }
+
+            case "rustchain_register": {
+                const wallet = args?.wallet as string;
+                const results = await Promise.all(
+                    NODES.map(async (node) => {
+                        try {
+                            const response = await client.post(`${node}/epoch/enroll`, {
+                                miner_pubkey: wallet,
+                                miner_id: wallet,
+                                device: {
+                                    family: "AI-Agent",
+                                    arch: "virtual-node"
+                                }
+                            });
+                            return { node, status: response.status, data: response.data };
+                        } catch (e: any) {
+                            return { node, status: "Failed", error: e.message };
+                        }
+                    })
+                );
+                return {
+                    content: [{ type: "text", text: JSON.stringify(results, null, 2) }],
+                };
+            }
+
+            case "rustchain_bounties": {
+                try {
+                    const response = await axios.get("https://api.github.com/repos/Scottcjn/rustchain-bounties/issues?labels=bounty&state=open", {
+                        headers: {
+                            "Accept": "application/vnd.github+json",
+                            "User-Agent": "rustchain-mcp-server"
+                        }
+                    });
+                    const bounties = response.data.map((issue: any) => ({
+                        number: issue.number,
+                        title: issue.title,
+                        url: issue.html_url,
+                        reward_rtc: issue.title.match(/(\d+)\s*RTC/)?.[1] || "Variable",
+                        labels: issue.labels.map((l: any) => l.name)
+                    }));
+                    return {
+                        content: [{ type: "text", text: JSON.stringify(bounties, null, 2) }],
+                    };
+                } catch (error: any) {
+                    throw new Error(`Failed to fetch bounties: ${error.message}`);
+                }
             }
 
             default:
