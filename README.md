@@ -1,96 +1,85 @@
-<div align="center">
+# RustChain API Call Walkthrough
 
-# RustChain Bounties
+RustChain provides an API for interacting with the blockchain, including functionalities such as querying balances, initiating transfers, and more. This document will walk you through the first API call and show an example of how to sign a transfer request.
 
-### Earn RTC by contributing to the RustChain ecosystem
+## Making Your First API Call
 
-[![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=open%20bounties&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/Rustchain)
+To make an API call to the RustChain API, follow these steps:
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+1. **Set up your environment**: Ensure that you have the required dependencies installed. You'll need Python and `requests` library to interact with the API.
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [What is RustChain?](https://github.com/Scottcjn/Rustchain)
+2. **Get your API Key**: You'll need an API key to authenticate requests. You can obtain this from your RustChain account dashboard.
 
-</div>
+3. **Making a GET request**: You can start by querying the current blockchain status. The following Python code shows how to make a simple GET request to the RustChain API:
 
----
+```python
+import requests
 
-## What is RTC?
+url = 'https://api.rustchain.com/status'
+headers = {'Authorization': 'Bearer YOUR_API_KEY'}
+response = requests.get(url, headers=headers)
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/Rustchain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
+if response.status_code == 200:
+    print(response.json())
+else:
+    print('Error:', response.status_code)
+```
 
-Bounties are paid in RTC to your wallet address upon completion and verification.
+## Signed Transfer Example
 
-## How to Earn
+Now, let's go through an example of a signed transfer. To send a transaction, you need to create a signed message using your private key.
 
-### 1. Pick a Bounty
-Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) and find one that matches your skills.
+1. **Prepare your transaction**: Define the transfer details, including the sender, recipient, amount, and any other parameters.
 
-| Difficulty | Label | Typical Reward |
-|-----------|-------|---------------|
-| Beginner | `good first issue` | 1-5 RTC |
-| Standard | `standard` | 5-25 RTC |
-| Major | `major` | 25-100 RTC |
-| Critical | `critical`, `red-team` | 100-200 RTC |
+2. **Sign the transaction**: Using your private key, sign the transaction to ensure its authenticity. Here's an example of signing a transfer with Python:
 
-### 2. Claim It
-Comment on the issue: **"I would like to work on this"**
+```python
+import hashlib
+import base64
+import json
+from ecdsa import SECP256k1, SigningKey
 
-### 3. Submit Your Work
-- **Code bounties**: Open a PR to the relevant repo and link it in the issue
-- **Content bounties**: Post your content and link it in the issue
-- **Star/propagation bounties**: Follow the instructions in the issue
+# Transaction details
+transaction = {
+    'sender': '0xYourSenderAddress',
+    'recipient': '0xRecipientAddress',
+    'amount': 100,
+    'timestamp': 1640995200
+}
 
-### 4. Get Paid
-Once verified, RTC is sent to your wallet. First time? We will help you set one up.
+# Convert the transaction to a JSON string
+transaction_json = json.dumps(transaction)
+transaction_hash = hashlib.sha256(transaction_json.encode()).hexdigest()
 
-## Bounty Categories
+# Sign the hash using your private key
+private_key = b'YOUR_PRIVATE_KEY'
+sk = SigningKey.from_string(private_key, curve=SECP256k1)
+signature = sk.sign(transaction_hash.encode())
 
-| Category | Examples | Count |
-|----------|---------|-------|
-| **Community** | Star repos, share content, recruit contributors | 30+ |
-| **Code** | Bug fixes, features, integrations, tests | 40+ |
-| **Content** | Tutorials, articles, videos, documentation | 20+ |
-| **Red Team** | Security audits, penetration testing, exploit finding | 6 |
-| **Propagation** | Awesome-list PRs, social media, cross-posting | 15+ |
-| **Integration** | Bridge to new chains, exchange listings, DEX pools | 10+ |
+# Base64 encode the signature for transmission
+signature_b64 = base64.b64encode(signature).decode('utf-8')
 
-## Featured Bounties
+print(f'Signed Transaction: {signature_b64}')
+```
 
-| Bounty | Reward | Difficulty |
-|--------|--------|-----------|
-| [Rustchain to 500 Stars](https://github.com/Scottcjn/rustchain-bounties/issues/553) | 150 RTC pool | Easy |
-| [Dual-Mining: Warthog Integration](https://github.com/Scottcjn/rustchain-bounties/issues/550) | 25 RTC | Major |
-| [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
-| [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
-| [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
+3. **Send the transaction**: After signing the transaction, you can send it to the RustChain network using a POST request:
 
-## Quick Links
+```python
+url = 'https://api.rustchain.com/transfer'
+payload = {
+    'transaction': transaction,
+    'signature': signature_b64
+}
+response = requests.post(url, json=payload, headers=headers)
 
-| Resource | Link |
-|----------|------|
-| **RustChain** | [github.com/Scottcjn/Rustchain](https://github.com/Scottcjn/Rustchain) |
-| **Block Explorer** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
-| **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/Rustchain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
-| **Wallet Setup** | Comment on any bounty and we will help |
+if response.status_code == 200:
+    print('Transfer Successful:', response.json())
+else:
+    print('Error:', response.status_code)
+```
 
-## Stats
+This will send the signed transfer to the RustChain network and print the result of the transaction.
 
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.10 USD
+## Conclusion
 
----
-
-<div align="center">
-
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
-
-[⭐ Star Rustchain](https://github.com/Scottcjn/Rustchain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/Rustchain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
-
-</div>
+This guide provided a simple walkthrough of how to interact with the RustChain API. By following these steps, you can make API calls and sign transactions to perform transfers on the RustChain network.
