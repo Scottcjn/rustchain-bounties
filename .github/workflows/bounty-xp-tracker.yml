@@ -1,10 +1,6 @@
 name: Bounty XP Tracker and Leaderboard Updater
 
 on:
-  issues:
-    types: [closed]
-  pull_request:
-    types: [closed]
   workflow_dispatch:
 
 concurrency:
@@ -13,16 +9,10 @@ concurrency:
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
 
 jobs:
   update-xp:
     runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && github.event.action == 'closed') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
 
     steps:
       - name: Checkout repository
@@ -39,69 +29,19 @@ jobs:
           pip install requests
 
       - name: Update XP tracker via GitHub API
-        id: xp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          ACTOR: ${{ github.actor }}
-          EVENT_TYPE: ${{ github.event_name }}
-          EVENT_ACTION: ${{ github.event.action }}
-          ISSUE_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number || 0 }}
-          PR_MERGED: ${{ github.event.pull_request.merged || false }}
-          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
           TARGET_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
         run: |
           python .github/scripts/update_xp_tracker_api.py \
             --token "$GITHUB_TOKEN" \
             --repo "$GITHUB_REPOSITORY" \
-            --actor "$ACTOR" \
-            --event-type "$EVENT_TYPE" \
-            --event-action "$EVENT_ACTION" \
-            --issue-number "$ISSUE_NUMBER" \
-            --labels "$ISSUE_LABELS,$PR_LABELS" \
-            --pr-merged "$PR_MERGED" \
+            --actor "manual" \
+            --event-type "workflow_dispatch" \
+            --event-action "manual" \
+            --issue-number "0" \
+            --labels "" \
+            --pr-merged "false" \
             --branch "$TARGET_BRANCH" \
-            --tracker-path "bounties/XP_TRACKER.md" \
-            > xp_result.json
-
-          cat xp_result.json
-
-
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-
-          data = json.load(open("xp_result.json", "r", encoding="utf-8"))
-          for key in ("awarded_xp", "total_xp", "level", "title", "reason"):
-              value = data.get(key, "")
-              print(f"{key}={value}")
-          PY
-      - name: Comment XP update on issue
-        if: ${{ github.event_name == 'issues' && github.event.issue.number }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            🏆 XP update processed for @${{ github.actor }}
-
-            - Awarded: `+${{ steps.xp.outputs.awarded_xp }} XP`
-            - Reason: `${{ steps.xp.outputs.reason }}`
-            - New total: `${{ steps.xp.outputs.total_xp }} XP`
-            - Level: `${{ steps.xp.outputs.level }} - ${{ steps.xp.outputs.title }}`
-
-            Tracker: `bounties/XP_TRACKER.md`
-
-      - name: Comment XP update on PR
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            🏆 XP update processed for @${{ github.actor }}
-
-            - Awarded: `+${{ steps.xp.outputs.awarded_xp }} XP`
-            - Reason: `${{ steps.xp.outputs.reason }}`
-            - New total: `${{ steps.xp.outputs.total_xp }} XP`
-            - Level: `${{ steps.xp.outputs.level }} - ${{ steps.xp.outputs.title }}`
-
-            Tracker: `bounties/XP_TRACKER.md`
+            --tracker-path "bounties/XP_TRACKER.md"
