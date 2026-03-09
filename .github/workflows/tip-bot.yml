@@ -1,0 +1,46 @@
+name: RTC Tip Bot
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  tip:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.comment.body, '/tip')
+    
+    steps:
+      - name: Parse tip command
+        id: parse
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          # Parse /tip @user AMOUNT RTC [memo]
+          USER=$(echo "$COMMENT" | sed -n 's/.*\/tip *@\([^ ]*\).*/\1/p')
+          AMOUNT=$(echo "$COMMENT" | sed -n 's/.*\/tip *@[^ ]* *\([0-9]*\).*/\1/p')
+          MEMO=$(echo "$COMMENT" | sed -n 's/.*\/tip *@[^ ]* *[0-9]* *RTC *\(.*\)/\1/p')
+          
+          echo "user=$USER" >> $GITHUB_OUTPUT
+          echo "amount=$AMOUNT" >> $GITHUB_OUTPUT
+          echo "memo=$MEMO" >> $GITHUB_OUTPUT
+          
+      - name: Call RustChain API
+        id: transfer
+        run: |
+          RESPONSE=$(curl -s -X POST "https://${{ secrets.NODE_URL }}/wallet/transfer" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"from\": \"${{ secrets.ADMIN_WALLET }}\",
+              \"to\": \"${{ steps.parse.outputs.user }}\",
+              \"amount\": ${{ steps.parse.outputs.amount }},
+              \"memo\": \"${{ steps.parse.outputs.memo }}\"
+            }")
+          echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+          
+      - name: Post confirmation
+        run: |
+          curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"body\": \"✅ Tip Queued: ${{ steps.parse.outputs.amount }} RTC → ${{ steps.parse.outputs.user }}\\nFrom: ${{ steps.parse.outputs.user }}\\nMemo: ${{ steps.parse.outputs.memo }}\\nStatus: Pending\"
+            }"
