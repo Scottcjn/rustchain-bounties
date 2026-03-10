@@ -1,0 +1,187 @@
+# OpenAPI 3.0 specification for RustChain Node API
+info:
+  title: RustChain Node API
+  description: API documentation for the RustChain node
+  version: 1.0.0
+  contact:
+    name: RustChain Team
+    email: team@rustchain.com
+servers:
+  - url: https://api.rustchain.com/v1
+    description: Production server
+  - url: https://dev-api.rustchain.com/v1
+    description: Development server
+paths:
+  /nodes:
+    get:
+      summary: List all nodes
+      description: Retrieve a list of all registered nodes in the network
+      tags:
+        - Nodes
+      responses:
+        '200':
+          description: A list of nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+  /nodes/{nodeId}:
+    get:
+      summary: Get node details
+      description: Retrieve details for a specific node
+      tags:
+        - Nodes
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: ID of the node to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Node details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '404':
+          description: Node not found
+  /miners:
+    get:
+      summary: List miners
+      description: Retrieve a list of all miners in the network
+      tags:
+        - Miners
+      responses:
+        '200':
+          description: A list of miners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Miner'
+  /bounties:
+    get:
+      summary: List bounties
+      description: Retrieve a list of all available bounties
+      tags:
+        - Bounties
+      responses:
+        '200':
+          description: A list of bounties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bounty'
+  /bounties/{bountyId}:
+    get:
+      summary: Get bounty details
+      description: Retrieve details for a specific bounty
+      tags:
+        - Bounties
+      parameters:
+        - name: bountyId
+          in: path
+          required: true
+          description: ID of the bounty to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bounty details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+        '404':
+          description: Bounty not found
+components:
+  schemas:
+    Node:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the node
+        address:
+          type: string
+          description: Network address of the node
+        status:
+          type: string
+          enum: [active, inactive, pending]
+          description: Current status of the node
+        lastSeen:
+          type: string
+          format: date-time
+          description: Last timestamp the node was seen
+        reputation:
+          type: number
+          format: float
+          description: Node reputation score
+    Miner:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the miner
+        address:
+          type: string
+          description: Wallet address of the miner
+        hashRate:
+          type: number
+          format: float
+          description: Current hash rate in H/s
+        blocksMined:
+          type: integer
+          description: Total blocks mined
+        rewards:
+          type: number
+          format: float
+          description: Total rewards earned
+    Bounty:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the bounty
+        title:
+          type: string
+          description: Title of the bounty
+        description:
+          type: string
+          description: Detailed description of the bounty
+        reward:
+          type: number
+          format: float
+          description: Reward amount in RTC
+        status:
+          type: string
+          enum: [open, in_progress, completed, cancelled]
+          description: Current status of the bounty
+        createdAt:
+          type: string
+          format: date-time
+          description: When the bounty was created
+        deadline:
+          type: string
+          format: date-time
+          description: Deadline for bounty completion
+        requirements:
+          type: array
+          items:
+            type: string
+          description: List of requirements for the bounty
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+security:
+  - ApiKeyAuth: []
