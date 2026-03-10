@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   triage:
-    if: github.event_name != 'issue_comment' || contains(fromJson('[74,47,87,103,122,157,158,374,377]'), github.event.issue.number)
+    if: github.event_name != 'issue_comment' || contains(fromJson('[74,47,87,103,122,157,158,374,377,1585]'), github.event.issue.number)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -127,6 +127,22 @@ DEFAULT_TARGETS = [
         "require_proof_link": True,
         "name": "Beacon Mechanism Falsification",
     },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 1585,
+        "min_account_age_days": 30,
+        "required_stars": [],
+        "require_wallet": True,
+        "require_bottube_username": True,
+        "require_proof_link": True,
+        "funnel_type": "agent_onboarding",
+        "name": "Founding Agent Onboarding Loop",
+        # Pool cap: 150 RTC total, first-come first-served.
+        "pool_rtc": 150,
+        # Milestone C must occur within 7 days of Milestone B.
+        "milestone_c_deadline_days": 7,
+    },
 ]
 
 MARKER_START = "<!-- auto-triage-report:start -->"
@@ -292,8 +308,146 @@ def _looks_like_claim(body: str) -> bool:
     return any(t in text for t in tokens)
 
 
+def _extract_sponsor_ref(body: str) -> Optional[str]:
+    """Extract the sponsor GitHub username from 'sponsored by @username'."""
+    body = re.sub(r"[`*]", "", body)
+    patterns = [
+        r"(?i)sponsor(?:ed)?\s+by\s+@([A-Za-z0-9_-]{1,39})",
+        r"(?i)referr?(?:ed|er|al)\s*(?:by)?\s*[:：\-]?\s*@([A-Za-z0-9_-]{1,39})",
+    ]
+    for pat in patterns:
+        m = re.search(pat, body)
+        if m:
+            return m.group(1).strip()
+    return None
+
+
+def _extract_video_url(body: str) -> Optional[str]:
+    """Extract a BoTTube video URL from the body text."""
+    body = re.sub(r"[`*]", "", body)
+    patterns = [
+        # BoTTube video URLs.
+        r"(https?://(?:www\.)?bottube\.ai/(?:watch|video|v)/[A-Za-z0-9_\-]+)",
+        r"(https?://(?:www\.)?bottube\.ai/@[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+)",
+    ]
+    for pat in patterns:
+        m = re.search(pat, body)
+        if m:
+            return m.group(1)
+    return None
+
+
+def _has_agent_identity_proof(body: str) -> bool:
+    """Check for public proof of agent identity (GitHub repo, project page, etc.)."""
+    # Match GitHub repos, Beacon identity, project pages, or BoTTube profiles.
+    text = re.sub(r"[`*]", "", body)
+    agent_proof_patterns = [
+        r"https?://github\.com/[A-Za-z0-9_\-]+/[A-Za-z0-9_\-]+",
+        r"https?://(?:www\.)?bottube\.ai/(?:@|agent/)[A-Za-z0-9_\-]+",
+        r"(?i)\bbeacon\b.*https?://",
+        r"(?i)https?://\S*(?:agent|bot|beacon)",
+    ]
+    return any(re.search(pat, text) for pat in agent_proof_patterns)
+
+
+def _looks_like_sponsor_claim(body: str) -> bool:
+    """Detect if a comment is a sponsor registering an agent onboarding."""
+    text = body.lower()
+    sponsor_tokens = ["sponsor", "onboarding", "onboard", "referral", "referring"]
+    agent_tokens = ["agent", "bot"]
+    has_sponsor = any(t in text for t in sponsor_tokens)
+    has_agent = any(t in text for t in agent_tokens)
+    return has_sponsor and has_agent
+
+
+def _looks_like_agent_funnel_claim(body: str) -> bool:
+    """Detect if a comment is relevant to the agent onboarding funnel."""
+    text = body.lower()
+    tokens = [
+        "sponsored by",
+        "sponsor",
+        "agent",
+        "milestone",
+        "wallet",
+        "miner_id",
+        "bottube",
+        "rtc",
+        "claim",
+        "onboarding",
+        "video",
+        "proof",
+    ]
+    return any(t in text for t in tokens)
+
+
+def _has_rtc_native_action(body: str) -> bool:
+    """Check for proof of RTC-native agent action (Milestone C)."""
+    text = body.lower()
+    indicators = [
+        "rtc earning",
+        "rtc tip",
+        "rtc transfer",
+        "tipped",
+        "received rtc",
+        "sent rtc",
+        "beacon atlas",
+        "agent workflow",
+    ]
+    has_indicator = any(t in text for t in indicators)
+    has_link = _has_proof_link(body)
+    return has_indicator and has_link
+
+
+def _distinct_actors(sponsor: str, agent: str) -> bool:
+    """Anti-abuse: verify sponsor and agent appear to be distinct actors."""
+    if sponsor.lower() == agent.lower():
+        return False
+    # Flag if one username is a trivial suffix/prefix variant of the other.
+    s, a = sponsor.lower(), agent.lower()
+    if s.startswith(a) or a.startswith(s):
+        if abs(len(s) - len(a)) <= 3:
+            return False
+    return True
+
+
 def _status_label(blockers: List[str]) -> str:
     return "eligible" if not blockers else "needs-action"
+
+
+@dataclass
+class AgentFunnelPair:
+    """Tracks a sponsor + agent pair through milestones A/B/C."""
+    sponsor: str
+    agent: str
+    sponsor_wallet: Optional[str]
+    agent_wallet: Optional[str]
+    bottube_user: Optional[str]
+    sponsor_comment_url: str
+    agent_comment_url: str
+    milestone_a_blockers: List[str]
+    milestone_b_blockers: List[str]
+    milestone_c_blockers: List[str]
+    milestone_b_timestamp: Optional[str]
+
+    @property
+    def milestone_a_status(self) -> str:
+        return _status_label(self.milestone_a_blockers)
+
+    @property
+    def milestone_b_status(self) -> str:
+        return _status_label(self.milestone_b_blockers)
+
+    @property
+    def milestone_c_status(self) -> str:
+        return _status_label(self.milestone_c_blockers)
+
+    @property
+    def fully_activated(self) -> bool:
+        return (
+            not self.milestone_a_blockers
+            and not self.milestone_b_blockers
+            and not self.milestone_c_blockers
+        )
 
 
 @dataclass
@@ -312,10 +466,66 @@ class ClaimResult:
         return _status_label(self.blockers)
 
 
+def _build_funnel_report_section(
+    issue_ref: str,
+    pairs: List[AgentFunnelPair],
+) -> List[str]:
+    """Build the report section for agent onboarding funnel results."""
+    lines: List[str] = []
+    lines.append(f"#### {issue_ref} (Agent Onboarding Funnel)")
+    if not pairs:
+        lines.append("_No agent onboarding pairs found._")
+        lines.append("")
+        return lines
+
+    lines.append(
+        "| Sponsor | Agent | Sponsor Wallet | Agent Wallet | BoTTube | "
+        "A | B | C | Blockers |"
+    )
+    lines.append("|---|---|---|---|---|---|---|---|---|")
+    for p in pairs:
+        sw = p.sponsor_wallet or ""
+        aw = p.agent_wallet or ""
+        bt = p.bottube_user or ""
+        all_blockers = (
+            p.milestone_a_blockers + p.milestone_b_blockers + p.milestone_c_blockers
+        )
+        blockers_str = ", ".join(all_blockers) if all_blockers else ""
+        lines.append(
+            f"| @{p.sponsor} | @{p.agent} | `{sw}` | `{aw}` | `{bt}` | "
+            f"`{p.milestone_a_status}` | `{p.milestone_b_status}` | "
+            f"`{p.milestone_c_status}` | {blockers_str} |"
+        )
+
+    # Compounding sponsor bonus summary.
+    sponsor_counts: Dict[str, int] = {}
+    for p in pairs:
+        if p.fully_activated:
+            sponsor_counts[p.sponsor] = sponsor_counts.get(p.sponsor, 0) + 1
+    if sponsor_counts:
+        lines.append("")
+        lines.append("**Sponsor Bonus Status:**")
+        for sponsor, count in sorted(sponsor_counts.items()):
+            bonus_rtc = 0
+            if count >= 10:
+                bonus_rtc = 18  # 3 + 5 + 10
+            elif count >= 5:
+                bonus_rtc = 8  # 3 + 5
+            elif count >= 3:
+                bonus_rtc = 3
+            if bonus_rtc > 0:
+                lines.append(
+                    f"- @{sponsor}: {count} fully activated → +{bonus_rtc} RTC bonus"
+                )
+    lines.append("")
+    return lines
+
+
 def _build_report_md(
     generated_at: str,
     results_by_issue: Dict[str, List[ClaimResult]],
     since_hours: int,
+    funnel_results_by_issue: Optional[Dict[str, List[AgentFunnelPair]]] = None,
 ) -> str:
     lines: List[str] = []
     lines.append(f"### Auto-Triage Report ({generated_at})")
@@ -340,6 +550,11 @@ def _build_report_md(
                 f"| @{r.user} | `{r.status}` | {age} | `{wallet}` | `{bt}` | {blockers} | [link]({r.comment_url}) |"
             )
         lines.append("")
+
+    if funnel_results_by_issue:
+        for issue_ref, pairs in funnel_results_by_issue.items():
+            lines.extend(_build_funnel_report_section(issue_ref, pairs))
+
     return "\n".join(lines).strip()
 
 
@@ -354,6 +569,210 @@ def _ignored_users() -> Set[str]:
             if u:
                 ignored.add(u)
     return ignored
+
+
+def _triage_agent_funnel(
+    comments: List[Dict[str, Any]],
+    issue_ref: str,
+    min_age: int,
+    milestone_c_deadline_days: int,
+    cutoff: datetime,
+    ignored_users: Set[str],
+    user_cache: Dict[str, Dict[str, Any]],
+    token: str,
+) -> List[AgentFunnelPair]:
+    """Triage comments on an agent onboarding funnel issue into pairs.
+
+    Builds sponsor+agent pairs and validates milestones A, B, C per pair.
+
+    Claim flow (from the issue):
+    - Step 1: Sponsor comments with wallet + note about onboarding an agent.
+    - Step 2: Agent comments with "sponsored by @SPONSOR", wallet, BoTTube
+      profile, and proof of agent identity.
+    - Step 3: Either side comments with milestone B (video) / C (RTC action).
+    """
+    # Collect all relevant comments per user (no cutoff for funnel — we need
+    # full history to build pairs and track milestones across time).
+    per_user: Dict[str, Dict[str, Any]] = {}
+    for c in comments:
+        user = (c.get("user") or {}).get("login")
+        if not user:
+            continue
+        if user.lower() in ignored_users:
+            continue
+        created = c.get("created_at")
+        if not created:
+            continue
+
+        body = c.get("body") or ""
+        if not _looks_like_agent_funnel_claim(body):
+            continue
+
+        if user not in per_user:
+            per_user[user] = {
+                "bodies": [],
+                "timestamps": [],
+                "latest_url": c.get("html_url") or "",
+            }
+        per_user[user]["bodies"].append(body)
+        per_user[user]["timestamps"].append(created)
+        per_user[user]["latest_url"] = c.get("html_url") or ""
+
+    # Identify sponsors: users whose comments indicate they are onboarding
+    # an agent, and who have a wallet.
+    sponsors: Dict[str, Dict[str, Any]] = {}
+    for user, info in per_user.items():
+        merged = "\n\n".join(info["bodies"])
+        if _looks_like_sponsor_claim(merged):
+            wallet = _extract_wallet(merged)
+            sponsors[user] = {
+                "wallet": wallet,
+                "url": info["latest_url"],
+            }
+
+    # Identify agents: users who reference a sponsor via "sponsored by @X".
+    # An agent may also be posted by the sponsor on behalf of the agent.
+    agent_claims: Dict[str, Dict[str, Any]] = {}
+    for user, info in per_user.items():
+        merged = "\n\n".join(info["bodies"])
+        sponsor_ref = _extract_sponsor_ref(merged)
+        if sponsor_ref:
+            wallet = _extract_wallet(merged)
+            bottube_user = _extract_bottube_user(merged)
+            agent_claims[user] = {
+                "sponsor": sponsor_ref,
+                "wallet": wallet,
+                "bottube_user": bottube_user,
+                "merged_body": merged,
+                "timestamps": info["timestamps"],
+                "url": info["latest_url"],
+            }
+
+    # Build pairs.  One sponsor per agent (anti-abuse).
+    seen_agents: Set[str] = set()
+    pairs: List[AgentFunnelPair] = []
+    for agent_user, claim in agent_claims.items():
+        if agent_user.lower() in seen_agents:
+            continue
+        seen_agents.add(agent_user.lower())
+
+        sponsor_user = claim["sponsor"]
+        sponsor_info = sponsors.get(sponsor_user, {})
+        sponsor_wallet = sponsor_info.get("wallet")
+        sponsor_url = sponsor_info.get("url", "")
+
+        merged_body = claim["merged_body"]
+        agent_wallet = claim["wallet"]
+        bottube_user = claim["bottube_user"]
+
+        # --- Resolve user ages ---
+        for u in (sponsor_user, agent_user):
+            if u not in user_cache:
+                try:
+                    udata = _gh_request("GET", f"/users/{u}", token)
+                    created_at = udata.get("created_at")
+                    age_days = None
+                    if created_at:
+                        age_days = (_now_utc() - _parse_iso(created_at)).days
+                    user_cache[u] = {"age_days": age_days}
+                except urllib.error.HTTPError:
+                    user_cache[u] = {"age_days": None}
+
+        # --- Milestone A: Agent Identity + Profile ---
+        a_blockers: List[str] = []
+        agent_age = user_cache.get(agent_user, {}).get("age_days")
+        sponsor_age = user_cache.get(sponsor_user, {}).get("age_days")
+
+        if sponsor_age is not None and sponsor_age < min_age:
+            a_blockers.append(f"sponsor_account_age<{min_age}")
+        if sponsor_user not in sponsors:
+            a_blockers.append("sponsor_not_registered")
+        if not sponsor_wallet:
+            a_blockers.append("sponsor_missing_wallet")
+        if not agent_wallet:
+            a_blockers.append("agent_missing_wallet")
+        if agent_wallet and _wallet_looks_external(agent_wallet):
+            a_blockers.append("agent_wallet_external_format")
+        if sponsor_wallet and _wallet_looks_external(sponsor_wallet):
+            a_blockers.append("sponsor_wallet_external_format")
+        if not bottube_user:
+            a_blockers.append("agent_missing_bottube_profile")
+        if not _has_agent_identity_proof(merged_body):
+            a_blockers.append("agent_missing_identity_proof")
+        if not _distinct_actors(sponsor_user, agent_user):
+            a_blockers.append("sponsor_agent_not_distinct")
+
+        # --- Milestone B: First Agent Content (video) ---
+        # Check all comments from both sponsor and agent for video evidence.
+        all_bodies = list(claim.get("merged_body", "").splitlines())
+        sponsor_bodies = sponsors.get(sponsor_user, {})
+        combined_for_video = merged_body
+        if sponsor_user in per_user:
+            combined_for_video += "\n\n" + "\n\n".join(
+                per_user[sponsor_user]["bodies"]
+            )
+
+        b_blockers: List[str] = []
+        video_url = _extract_video_url(combined_for_video)
+        if not video_url:
+            b_blockers.append("missing_agent_video")
+
+        # Track when milestone B evidence appeared for deadline calculation.
+        milestone_b_ts: Optional[str] = None
+        if video_url:
+            # Use the latest timestamp from agent comments as milestone B date.
+            if claim["timestamps"]:
+                milestone_b_ts = max(claim["timestamps"])
+
+        # --- Milestone C: First RTC-Native Agent Action ---
+        c_blockers: List[str] = []
+        if not _has_rtc_native_action(combined_for_video):
+            c_blockers.append("missing_rtc_native_action")
+
+        # Check 7-day deadline from milestone B.
+        if not c_blockers and milestone_b_ts and claim["timestamps"]:
+            b_dt = _parse_iso(milestone_b_ts)
+            latest_ts = max(claim["timestamps"])
+            latest_dt = _parse_iso(latest_ts)
+            deadline = b_dt + timedelta(days=milestone_c_deadline_days)
+            if latest_dt > deadline:
+                c_blockers.append(
+                    f"milestone_c_after_deadline({milestone_c_deadline_days}d)"
+                )
+
+        # Milestone B must pass before C can be eligible.
+        if b_blockers:
+            if not c_blockers:
+                c_blockers.append("milestone_b_incomplete")
+
+        # Milestone A must pass before B can be eligible.
+        if a_blockers:
+            if not b_blockers:
+                b_blockers.append("milestone_a_incomplete")
+            if not c_blockers:
+                c_blockers.append("milestone_a_incomplete")
+
+        pairs.append(
+            AgentFunnelPair(
+                sponsor=sponsor_user,
+                agent=agent_user,
+                sponsor_wallet=sponsor_wallet,
+                agent_wallet=agent_wallet,
+                bottube_user=bottube_user,
+                sponsor_comment_url=sponsor_url,
+                agent_comment_url=claim["url"],
+                milestone_a_blockers=a_blockers,
+                milestone_b_blockers=b_blockers,
+                milestone_c_blockers=c_blockers,
+                milestone_b_timestamp=milestone_b_ts,
+            )
+        )
+
+    # Deterministic ordering: eligible pairs first, then by agent username.
+    pairs.sort(
+        key=lambda p: (not p.fully_activated, p.agent.lower()),
+    )
+    return pairs
 
 
 def main() -> int:
@@ -381,21 +800,41 @@ def main() -> int:
     cutoff = _now_utc() - timedelta(hours=since_hours)
 
     results_by_issue: Dict[str, List[ClaimResult]] = {}
+    funnel_results_by_issue: Dict[str, List[AgentFunnelPair]] = {}
+
     for target in targets:
         owner = target["owner"]
         repo = target["repo"]
         issue = int(target["issue"])
         min_age = int(target.get("min_account_age_days", 0))
-        req_wallet = bool(target.get("require_wallet", True))
-        req_bt = bool(target.get("require_bottube_username", False))
-        req_payout_target = bool(target.get("require_payout_target", False))
-        req_proof = bool(target.get("require_proof_link", False))
-        req_stars = list(target.get("required_stars", []))
+        funnel_type = target.get("funnel_type")
 
         issue_ref = f"{owner}/{repo}#{issue}"
         issue_obj = _gh_request("GET", f"/repos/{owner}/{repo}/issues/{issue}", token)
         comments_url = issue_obj["comments_url"]
         comments = _gh_paginated(comments_url, token)
+
+        if funnel_type == "agent_onboarding":
+            pairs = _triage_agent_funnel(
+                comments=comments,
+                issue_ref=issue_ref,
+                min_age=min_age,
+                milestone_c_deadline_days=int(
+                    target.get("milestone_c_deadline_days", 7)
+                ),
+                cutoff=cutoff,
+                ignored_users=ignored_users,
+                user_cache=user_cache,
+                token=token,
+            )
+            funnel_results_by_issue[issue_ref] = pairs
+            continue
+
+        req_wallet = bool(target.get("require_wallet", True))
+        req_bt = bool(target.get("require_bottube_username", False))
+        req_payout_target = bool(target.get("require_payout_target", False))
+        req_proof = bool(target.get("require_proof_link", False))
+        req_stars = list(target.get("required_stars", []))
 
         # Merge multi-comment claims per user (users often add follow-ups).
         per_user: Dict[str, Dict[str, Any]] = {}
@@ -484,7 +923,9 @@ def main() -> int:
         results_by_issue[issue_ref] = rows
 
     generated_at = _now_utc().isoformat().replace("+00:00", "Z")
-    report = _build_report_md(generated_at, results_by_issue, since_hours)
+    report = _build_report_md(
+        generated_at, results_by_issue, since_hours, funnel_results_by_issue
+    )
     print(report)
 
     ledger_repo = os.environ.get("LEDGER_REPO", "").strip()
