@@ -1,0 +1,9 @@
+You are working inside this repository.
+
+Read ISSUE.md and implement the issue.
+
+After finishing, show:
+1. changed files
+2. commit message
+3. PR title
+4. PR description
