@@ -1,0 +1,18 @@
+[package]
+name = "rustchain-attestation-fuzzer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libfuzzer-sys = "0.4"
+rustchain = { path = "../rustchain-miner" }
+
+[[bin]]
+name = "attestation_fuzzer"
+path = "fuzz_targets/attestation_fuzzer.rs"
+test = false
+bench = false
+
+[profile.release]
+lto = true
+panic = "abort"

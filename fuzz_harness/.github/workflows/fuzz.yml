@@ -1,0 +1,45 @@
+name: Fuzz Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Run weekly on Mondays at 2 AM UTC
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        components: rustfmt, clippy
+    
+    - name: Install cargo-fuzz
+      run: cargo install cargo-fuzz
+    
+    - name: Run fuzzing
+      run: |
+        cd fuzz_harness
+        cargo fuzz run attestation_fuzzer corpus/ -s 3600 -- -max_len=65536
+    
+    - name: Check for crashes
+      run: |
+        if [ -d fuzz_harness/fuzz/attestation_fuzzer ]; then
+          echo "Fuzzing complete. Check the fuzz/ directory for crashes."
+          ls -la fuzz_harness/fuzz/attestation_fuzzer/
+        fi
+    
+    - name: Upload crash reports
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: fuzz-crashes
+        path: fuzz_harness/fuzz/

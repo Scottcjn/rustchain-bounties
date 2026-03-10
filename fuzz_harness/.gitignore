@@ -1,0 +1,8 @@
+# Ignore corpus files that are too large
+corpus/*.txt
+# Ignore fuzz output
+fuzz/
+fuzz-*
+# Ignore binary artifacts
+**/*.rs.bpf*
+**/*.rs.preproc*
