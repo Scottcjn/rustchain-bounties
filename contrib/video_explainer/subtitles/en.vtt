@@ -1,0 +1,19 @@
+WEBVTT FILE
+
+00:00:00.000 --> 00:00:05.000
+Welcome to RustChain, a high-performance blockchain built with Rust for maximum safety and efficiency.
+
+00:00:05.000 --> 00:00:15.000
+RustChain leverages Rust's memory safety without garbage collection to create a secure, fast blockchain platform.
+
+00:00:15.000 --> 00:00:30.000
+Our unique consensus mechanism combines proof-of-stake with innovative verification techniques.
+
+00:00:30.000 --> 00:00:45.000
+Key features include atomic cross-chain transactions, WASM smart contract support, and modular architecture.
+
+00:00:45.000 --> 00:00:55.000
+RustChain provides developers with a robust environment for building decentralized applications.
+
+00:00:55.000 --> 00:01:00.000
+Join the RustChain ecosystem today. Visit our GitHub for documentation and start building.
