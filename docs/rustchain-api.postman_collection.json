@@ -1,0 +1,532 @@
+{
+	"info": {
+		"name": "RustChain API",
+		"description": "Complete Postman collection for the RustChain node API.\n\nBase URL: https://50.28.86.131\n\n**TLS note:** The node uses a self-signed certificate. Disable certificate verification in Postman settings (Settings → General → SSL certificate verification → OFF) or in the request settings.\n\n**Rate limiting:** If you receive HTTP 429, back off and retry with exponential delay (2 s, 4 s, 8 s …).\n\nSee the full API specification at docs/protocol/API_SPEC.md.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://50.28.86.131",
+			"type": "string",
+			"description": "RustChain node base URL"
+		},
+		{
+			"key": "minerId",
+			"value": "victus-x86-scott",
+			"type": "string",
+			"description": "Miner / wallet ID used for balance and eligibility queries"
+		}
+	],
+	"item": [
+		{
+			"name": "Network Health & Status",
+			"description": "Endpoints for checking node health and current epoch information.",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						},
+						"description": "Returns the status of the node, database, and blockchain tip.\n\nA healthy node returns `ok: true` along with uptime, backup freshness, and the current software version."
+					},
+					"response": [
+						{
+							"name": "Healthy Node",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/health",
+									"host": ["{{baseUrl}}"],
+									"path": ["health"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"backup_age_hours\": 0.08,\n  \"db_rw\": true,\n  \"ok\": true,\n  \"tip_age_slots\": 0,\n  \"uptime_s\": 24000,\n  \"version\": \"2.2.1-rip200\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Current Epoch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/epoch",
+							"host": ["{{baseUrl}}"],
+							"path": ["epoch"]
+						},
+						"description": "Returns the current slot number, epoch progress, enrolled miner count, and the reward pot for the active epoch.\n\nEpochs are approximately 10 minutes long (144 blocks per day)."
+					},
+					"response": [
+						{
+							"name": "Epoch Info",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/epoch",
+									"host": ["{{baseUrl}}"],
+									"path": ["epoch"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"blocks_per_epoch\": 144,\n  \"enrolled_miners\": 12,\n  \"epoch\": 73,\n  \"epoch_pot\": 1.5,\n  \"slot\": 10554\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Miners",
+			"description": "Endpoints for listing active miners on the network.",
+			"item": [
+				{
+					"name": "List Active Miners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/miners",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "miners"]
+						},
+						"description": "Returns a JSON array of all currently attested and active miners.\n\nEach entry includes the miner wallet address, hardware type, device architecture, device family, antiquity multiplier, last attestation timestamp, and entropy score."
+					},
+					"response": [
+						{
+							"name": "Active Miners List",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/miners",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "miners"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "[\n  {\n    \"miner\": \"victus-x86-scott\",\n    \"hardware_type\": \"x86_64\",\n    \"device_arch\": \"x86_64\",\n    \"device_family\": \"Modern x86\",\n    \"antiquity_multiplier\": 1.0,\n    \"last_attest\": 1771038696,\n    \"entropy_score\": 0.0045\n  },\n  {\n    \"miner\": \"g4-cube-retro\",\n    \"hardware_type\": \"PowerPC\",\n    \"device_arch\": \"g4\",\n    \"device_family\": \"PowerPC\",\n    \"antiquity_multiplier\": 2.5,\n    \"last_attest\": 1771038400,\n    \"entropy_score\": 0.0032\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Wallet",
+			"description": "Endpoints for querying RTC wallet balances.",
+			"item": [
+				{
+					"name": "Get Wallet Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/wallet/balance?miner_id={{minerId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["wallet", "balance"],
+							"query": [
+								{
+									"key": "miner_id",
+									"value": "{{minerId}}",
+									"description": "(Required) The miner / wallet ID to query"
+								}
+							]
+						},
+						"description": "Returns the current RTC balance for a specific miner/wallet ID.\n\nThe response includes both the raw integer amount (`amount_i64`) and the human-readable RTC value (`amount_rtc`)."
+					},
+					"response": [
+						{
+							"name": "Balance Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/wallet/balance?miner_id={{minerId}}",
+									"host": ["{{baseUrl}}"],
+									"path": ["wallet", "balance"],
+									"query": [
+										{
+											"key": "miner_id",
+											"value": "{{minerId}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"amount_i64\": 265420827,\n  \"amount_rtc\": 265.420827,\n  \"miner_id\": \"victus-x86-scott\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Attestation Flow (RIP-200)",
+			"description": "The RIP-200 Proof-of-Attestation flow: request a challenge nonce, submit hardware fingerprint proof, then enroll in the current epoch for reward distribution.\n\nThese endpoints must be called in order:\n1. POST /attest/challenge → get a nonce\n2. POST /attest/submit → submit proof with the nonce\n3. POST /epoch/enroll → enroll for rewards",
+			"item": [
+				{
+					"name": "Step 1 – Request Attestation Challenge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/attest/challenge",
+							"host": ["{{baseUrl}}"],
+							"path": ["attest", "challenge"]
+						},
+						"description": "Request a fresh nonce from the node.\n\nNonces are short-lived (typically 10 minutes) to prevent replay attacks. The returned nonce must be included in the attestation submission (Step 2)."
+					},
+					"response": [
+						{
+							"name": "Challenge Nonce",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/attest/challenge",
+									"host": ["{{baseUrl}}"],
+									"path": ["attest", "challenge"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"nonce\": \"a1b2c3d4e5f6...\",\n  \"server_time\": 1771038696,\n  \"expires_at\": 1771038996\n}"
+						}
+					]
+				},
+				{
+					"name": "Step 2 – Submit Attestation Proof",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"miner\": \"WALLET_ADDRESS_RTC\",\n  \"miner_id\": \"FRIENDLY_DEVICE_NAME\",\n  \"nonce\": \"SERVER_PROVIDED_NONCE\",\n  \"report\": {\n    \"commitment\": \"sha256(nonce + wallet + entropy_data)\",\n    \"entropy_score\": 0.0045,\n    \"derived\": {\n      \"mean_ns\": 25000,\n      \"variance_ns\": 450\n    }\n  },\n  \"device\": {\n    \"family\": \"PowerPC\",\n    \"arch\": \"g4\",\n    \"model\": \"PowerMac3,6\",\n    \"serial\": \"CK245...\"\n  },\n  \"fingerprint\": {\n    \"all_passed\": true,\n    \"checks\": {\n      \"clock_skew\": true,\n      \"cache_timing\": true,\n      \"simd_identity\": true,\n      \"thermal_drift\": true,\n      \"instruction_jitter\": true,\n      \"vm_detection\": true\n    }\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/attest/submit",
+							"host": ["{{baseUrl}}"],
+							"path": ["attest", "submit"]
+						},
+						"description": "Submit a hardware fingerprint and entropy report for attestation.\n\nThe payload must include the nonce from Step 1, the miner's wallet address, a cryptographic commitment (sha256 of nonce + wallet + entropy data), device information, and the results of all 6+1 hardware fingerprint checks.\n\nSee docs/protocol/ATTESTATION.md for the full payload specification and check descriptions."
+					},
+					"response": [
+						{
+							"name": "Attestation Accepted",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"miner\": \"WALLET_ADDRESS_RTC\",\n  \"miner_id\": \"FRIENDLY_DEVICE_NAME\",\n  \"nonce\": \"SERVER_PROVIDED_NONCE\",\n  \"report\": {\n    \"commitment\": \"sha256(nonce + wallet + entropy_data)\",\n    \"entropy_score\": 0.0045,\n    \"derived\": { \"mean_ns\": 25000, \"variance_ns\": 450 }\n  },\n  \"device\": {\n    \"family\": \"PowerPC\",\n    \"arch\": \"g4\",\n    \"model\": \"PowerMac3,6\",\n    \"serial\": \"CK245...\"\n  },\n  \"fingerprint\": {\n    \"all_passed\": true,\n    \"checks\": {}\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/attest/submit",
+									"host": ["{{baseUrl}}"],
+									"path": ["attest", "submit"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"status\": \"accepted\",\n  \"miner_id\": \"FRIENDLY_DEVICE_NAME\",\n  \"ttl_s\": 600\n}"
+						}
+					]
+				},
+				{
+					"name": "Step 3 – Enroll in Epoch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"miner_pubkey\": \"RTC_WALLET_ADDRESS\",\n  \"miner_id\": \"FRIENDLY_ID\",\n  \"device\": {\n    \"family\": \"PowerPC\",\n    \"arch\": \"g4\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/epoch/enroll",
+							"host": ["{{baseUrl}}"],
+							"path": ["epoch", "enroll"]
+						},
+						"description": "Enroll a miner in the current epoch for reward distribution.\n\nRequires a recent successful attestation (Step 2). If called without one, the node returns an error with `error: \"no_recent_attestation\"` and a TTL in seconds.\n\nThe device family and arch must match the values used during attestation."
+					},
+					"response": [
+						{
+							"name": "Enrollment Accepted",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"miner_pubkey\": \"RTC_WALLET_ADDRESS\",\n  \"miner_id\": \"FRIENDLY_ID\",\n  \"device\": {\n    \"family\": \"PowerPC\",\n    \"arch\": \"g4\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/epoch/enroll",
+									"host": ["{{baseUrl}}"],
+									"path": ["epoch", "enroll"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"status\": \"enrolled\",\n  \"epoch\": 73,\n  \"miner_id\": \"FRIENDLY_ID\"\n}"
+						},
+						{
+							"name": "No Recent Attestation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"miner_pubkey\": \"RTC_WALLET_ADDRESS\",\n  \"miner_id\": \"FRIENDLY_ID\",\n  \"device\": {\n    \"family\": \"PowerPC\",\n    \"arch\": \"g4\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/epoch/enroll",
+									"host": ["{{baseUrl}}"],
+									"path": ["epoch", "enroll"]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"error\": \"no_recent_attestation\",\n  \"ttl_s\": 600\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Lottery & Explorer",
+			"description": "Optional utility endpoints for lottery eligibility checks and the block explorer.",
+			"item": [
+				{
+					"name": "Check Lottery Eligibility",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/lottery/eligibility?miner_id={{minerId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["lottery", "eligibility"],
+							"query": [
+								{
+									"key": "miner_id",
+									"value": "{{minerId}}",
+									"description": "(Required) The miner / wallet ID to check"
+								}
+							]
+						},
+						"description": "Check whether a miner is eligible for the current epoch's lottery draw.\n\nEligibility typically requires a recent valid attestation and active enrollment."
+					},
+					"response": [
+						{
+							"name": "Eligible",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/lottery/eligibility?miner_id={{minerId}}",
+									"host": ["{{baseUrl}}"],
+									"path": ["lottery", "eligibility"],
+									"query": [
+										{
+											"key": "miner_id",
+											"value": "{{minerId}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"eligible\": true,\n  \"miner_id\": \"victus-x86-scott\",\n  \"epoch\": 73\n}"
+						}
+					]
+				},
+				{
+					"name": "Block Explorer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/explorer",
+							"host": ["{{baseUrl}}"],
+							"path": ["explorer"]
+						},
+						"description": "Redirects to the RustChain block explorer UI.\n\nThis endpoint returns an HTTP redirect (3xx). In Postman, disable \"Automatically follow redirects\" in settings to inspect the redirect location header."
+					},
+					"response": [
+						{
+							"name": "Redirect to Explorer UI",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/explorer",
+									"host": ["{{baseUrl}}"],
+									"path": ["explorer"]
+								}
+							},
+							"status": "Found",
+							"code": 302,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Location",
+									"value": "https://50.28.86.131/explorer/index.html"
+								}
+							],
+							"body": ""
+						}
+					]
+				}
+			]
+		}
+	]
+}
