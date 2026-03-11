@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: RustChain REST API
+  description: |
+    REST API endpoints for the RustChain blockchain platform.
+    This specification documents all available endpoints for interacting with the RustChain network.
+  version: 1.0.0
+  contact:
+    name: RustChain Team
+    url: https://rustchain.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.rustchain.org/v1
+    description: Production server
+  - url: https://testnet-api.rustchain.org/v1
+    description: Testnet server
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the node
+      tags:
+        - System
+      responses:
+        '200':
+          description: Node is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: integer
+                    example: 1640000000
+
+  /epoch:
+    get:
+      summary: Get current epoch
+      description: Returns information about the current epoch
+      tags:
+        - Blockchain
+      responses:
+        '200':
+          description: Current epoch information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  epoch:
+                    type: integer
+                    example: 123
+                  block_height:
+                    type: integer
+                    example: 456789
+                  timestamp:
+                    type: integer
+                    example: 1640000000
+
+  /api/miners:
+    get:
+      summary: List miners
+      description: Returns a list of active miners on the network
+      tags:
+        - Mining
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of miners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  miners:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                        hashrate:
+                          type: string
+                        blocks:
+                          type: integer
+                  total:
+                    type: integer
+
+  /wallet/balance:
+    get:
+      summary: Get wallet balance
+      description: Returns the balance of a specified wallet address
+      tags:
+        - Wallet
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "0x742d35Cc6634C0532925a3b844Bc9e7595f..."
+      responses:
+        '200':
+          description: Wallet balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    type: string
+                  balance:
+                    type: string
+                    example: "1.2345"
+                  balance_wei:
+                    type: string
+                    example: "1234500000000000000"
+
+  /attest/submit:
+    post:
+      summary: Submit attestation
+      description: Submit a new attestation to the network
+      tags:
+        - Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+                - signature
+              properties:
+                data:
+                  type: object
+                  description: The data to attest
+                signature:
+                  type: string
+                  description: Digital signature
+      responses:
+        '200':
+          description: Attestation submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx_hash:
+                    type: string
+                    example: "0xabc123..."
+                  status:
+                    type: string
+                    example: "submitted"
+
+  /transactions:
+    get:
+      summary: List transactions
+      description: Returns transactions for a given address
+      tags:
+        - Wallet
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        from:
+                          type: string
+                        to:
+                          type: string
+                        value:
+                          type: string
+                        timestamp:
+                          type: integer
+
+  /block/{block_number}:
+    get:
+      summary: Get block by number
+      description: Returns information about a specific block
+      tags:
+        - Blockchain
+      parameters:
+        - name: block_number
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 12345
+      responses:
+        '200':
+          description: Block information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  hash:
+                    type: string
+                  timestamp:
+                    type: integer
+                  transactions:
+                    type: array
+                    items:
+                      type: string
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+        details:
+          type: object
+
+    Transaction:
+      type: object
+      properties:
+        hash:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          type: string
+        gas:
+          type: string
+        gas_price:
+          type: string
+        nonce:
+          type: integer
+        timestamp:
+          type: integer
+
+    Block:
+      type: object
+      properties:
+        number:
+          type: integer
+        hash:
+          type: string
+        parent_hash:
+          type: string
+        timestamp:
+          type: integer
+        transactions:
+          type: array
+          items:
+            type: string
+        miner:
+          type: string
+        difficulty:
+          type: string
+        total_difficulty:
+          type: string
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Blockchain
+    description: Blockchain data endpoints
+  - name: Wallet
+    description: Wallet and transaction endpoints
+  - name: Mining
+    description: Mining-related endpoints
+  - name: Attestation
+    description: Attestation-related endpoints
