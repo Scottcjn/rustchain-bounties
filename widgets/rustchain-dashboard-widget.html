@@ -144,10 +144,13 @@
             cursor: pointer;
         }
 
-        .card:hover {
+        .card:hover,
+        .card:focus-visible {
             transform: translateY(-2px);
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
             border-color: var(--accent-blue);
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
         }
 
         .card-label {
@@ -234,9 +237,12 @@
             transition: all 0.3s;
         }
 
-        .miner-node:hover {
+        .miner-node:hover,
+        .miner-node:focus-visible {
             transform: scale(1.1);
             box-shadow: 0 0 20px var(--glow-blue);
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
         }
 
         .miner-node.active {
@@ -261,7 +267,9 @@
             border: 1px solid var(--border-color);
         }
 
-        .miner-node:hover .tooltip {
+        .miner-node:hover .tooltip,
+        .miner-node:focus .tooltip,
+        .miner-node:focus-visible .tooltip {
             opacity: 1;
         }
 
@@ -318,6 +326,11 @@
             text-decoration: underline;
         }
 
+        .footer a:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
         .loading {
             display: flex;
             align-items: center;
@@ -333,6 +346,25 @@
             padding: 40px;
             color: var(--accent-red);
             text-align: center;
+        }
+
+        /* Screen reader only utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        a.card {
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         /* Responsive Design */
@@ -383,72 +415,72 @@
     </style>
 </head>
 <body>
-    <div class="widget-container">
-        <div class="header">
+    <div class="widget-container" role="region" aria-label="RustChain Network Dashboard">
+        <header class="header">
             <div class="header-left">
-                <div class="logo">RC</div>
+                <div class="logo" aria-hidden="true">RC</div>
                 <div>
-                    <div class="title">RustChain Network</div>
+                    <h1 class="title">RustChain Network</h1>
                     <div class="refresh-info">
-                        <span class="refresh-icon">↻</span>
+                        <span class="refresh-icon" aria-hidden="true">↻</span>
                         <span id="last-updated">Loading...</span>
                     </div>
                 </div>
             </div>
-            <div class="status-badge status-online" id="network-status">
-                <span class="status-dot"></span>
+            <div class="status-badge status-online" id="network-status" role="status" aria-live="polite">
+                <span class="status-dot" aria-hidden="true"></span>
                 <span id="status-text">Online</span>
             </div>
-        </div>
+        </header>
 
-        <div id="loading" class="loading">
+        <div id="loading" class="loading" role="status" aria-live="polite">
             <span>Loading network data...</span>
         </div>
 
-        <div id="content" style="display: none;">
-            <div class="grid">
-                <div class="card" onclick="window.open('https://50.28.86.131/explorer', '_blank')">
+        <div id="content" style="display: none;" aria-live="polite">
+            <div class="grid" role="list" aria-label="Network statistics">
+                <a class="card" href="https://50.28.86.131/explorer" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Current Epoch — opens explorer in new window">
                     <div class="card-label">Current Epoch</div>
                     <div class="card-value accent" id="epoch-number">--</div>
-                </div>
+                </a>
 
-                <div class="card" onclick="window.open('https://50.28.86.131/api/miners', '_blank')">
+                <a class="card" href="https://50.28.86.131/api/miners" target="_blank" rel="noopener noreferrer" role="listitem" aria-label="Active Miners — opens miners API in new window">
                     <div class="card-label green">Active Miners</div>
                     <div class="card-value green" id="miner-count">--</div>
-                </div>
+                </a>
 
-                <div class="card">
+                <div class="card" role="listitem">
                     <div class="card-label">Epoch Slot</div>
                     <div class="card-value" id="slot-number">--<span class="unit">/144</span></div>
                 </div>
 
-                <div class="card">
+                <div class="card" role="listitem">
                     <div class="card-label">Node Uptime</div>
                     <div class="card-value" id="uptime">--<span class="unit">h</span></div>
                 </div>
             </div>
 
-            <div class="activity-section">
+            <section class="activity-section" aria-labelledby="miner-activity-heading">
                 <div class="section-header">
-                    <div class="section-title">Miner Activity</div>
-                    <div class="card-label" id="miner-count-display">-- miners</div>
+                    <h2 class="section-title" id="miner-activity-heading">Miner Activity</h2>
+                    <div class="card-label" id="miner-count-display" aria-live="polite">-- miners</div>
                 </div>
-                <div class="activity-grid" id="miner-grid">
+                <div class="activity-grid" id="miner-grid" role="list" aria-label="Active miners">
                     <!-- Miner nodes will be dynamically added here -->
                 </div>
-            </div>
+            </section>
 
-            <div class="footer">
-                <p>Powered by <a href="https://50.28.86.131/explorer" target="_blank">RustChain Network</a></p>
+            <footer class="footer">
+                <p>Powered by <a href="https://50.28.86.131/explorer" target="_blank" rel="noopener noreferrer">RustChain Network<span class="sr-only"> (opens in new window)</span></a></p>
                 <p style="margin-top: 8px; font-size: 10px; color: var(--text-secondary);">
                     Data refreshes every 60 seconds | Auto-refresh enabled
                 </p>
-            </div>
+            </footer>
         </div>
 
-        <div id="error" class="error" style="display: none;">
+        <div id="error" class="error" style="display: none;" role="alert" aria-live="assertive">
             <div>
-                <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
+                <div style="font-size: 24px; margin-bottom: 8px;" aria-hidden="true">⚠️</div>
                 <div>Failed to load network data</div>
                 <div style="margin-top: 8px; font-size: 12px;">Retrying in 60 seconds...</div>
             </div>
@@ -560,14 +592,24 @@
             miners.forEach((miner, index) => {
                 const node = document.createElement('div');
                 node.className = 'miner-node active';
+                node.setAttribute('role', 'listitem');
+                node.setAttribute('tabindex', '0');
 
-                // Add miner icon
+                // Accessible label for this miner
+                const minerLabel = `Miner: ${miner.device_family} (${miner.device_arch}), ${miner.hardware_type}`;
+                node.setAttribute('aria-label', minerLabel);
+
+                // Add miner icon (decorative)
+                const iconSpan = document.createElement('span');
+                iconSpan.setAttribute('aria-hidden', 'true');
                 const icon = MINER_ICONS[index % MINER_ICONS.length];
-                node.textContent = icon;
+                iconSpan.textContent = icon;
+                node.appendChild(iconSpan);
 
                 // Add hardware badge
                 const badge = document.createElement('div');
                 badge.className = 'hardware-badge';
+                badge.setAttribute('aria-hidden', 'true');
 
                 const hardwareType = miner.hardware_type;
                 if (hardwareType.includes('Vintage')) {
@@ -583,10 +625,14 @@
 
                 node.appendChild(badge);
 
-                // Add tooltip
+                // Add tooltip (linked via aria-describedby)
+                const tooltipId = `miner-tooltip-${index}`;
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
+                tooltip.id = tooltipId;
+                tooltip.setAttribute('role', 'tooltip');
                 tooltip.textContent = `${miner.device_family} (${miner.device_arch})`;
+                node.setAttribute('aria-describedby', tooltipId);
                 node.appendChild(tooltip);
 
                 // Stagger animations

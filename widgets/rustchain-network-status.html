@@ -163,7 +163,8 @@
             margin-top: 20px;
         }
         
-        .uptime-section h3 {
+        .uptime-section h3,
+        .uptime-section h4 {
             color: #a8b2d1;
             margin-bottom: 15px;
             font-size: 1.1em;
@@ -218,7 +219,8 @@
             margin-top: 20px;
         }
         
-        .response-time-section h3 {
+        .response-time-section h3,
+        .response-time-section h4 {
             color: #a8b2d1;
             margin-bottom: 15px;
             font-size: 1.1em;
@@ -276,6 +278,7 @@
             border: 1px solid rgba(102, 126, 234, 0.2);
         }
         
+        .global-stat h2,
         .global-stat h3 {
             color: #a8b2d1;
             font-size: 0.9em;
@@ -324,19 +327,38 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Screen reader only utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Focus styles for interactive elements */
+        .node-card:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
         @media (max-width: 768px) {
             .nodes-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             h1 {
                 font-size: 2em;
             }
-            
+
             .uptime-bars {
                 flex-direction: column;
             }
@@ -344,34 +366,34 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🌐 RustChain 网络状态监控</h1>
+    <div class="container" role="region" aria-label="RustChain 网络状态监控">
+        <h1><span aria-hidden="true">🌐 </span>RustChain 网络状态监控</h1>
         <p class="subtitle">实时监控所有 RustChain 节点的健康状态</p>
-        
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
+
+        <div id="loading" class="loading" role="status" aria-live="polite">
+            <div class="loading-spinner" aria-hidden="true"></div>
             <p>正在加载节点数据...</p>
         </div>
-        
-        <div id="dashboard" style="display: none;">
-            <div class="nodes-grid" id="nodes-grid">
+
+        <div id="dashboard" style="display: none;" aria-live="polite">
+            <div class="nodes-grid" id="nodes-grid" role="list" aria-label="节点状态">
             </div>
-            
-            <div class="global-stats">
+
+            <section class="global-stats" aria-label="全局统计">
                 <div class="global-stat">
-                    <h3>网络总体状态</h3>
-                    <div class="value" id="overall-status">-</div>
+                    <h2>网络总体状态</h2>
+                    <div class="value" id="overall-status" role="status" aria-live="polite">-</div>
                 </div>
                 <div class="global-stat">
-                    <h3>平均响应时间</h3>
+                    <h2>平均响应时间</h2>
                     <div class="value" id="avg-response-time">-</div>
                 </div>
                 <div class="global-stat">
-                    <h3>平均正常运行时间</h3>
+                    <h2>平均正常运行时间</h2>
                     <div class="value" id="avg-uptime">-</div>
                 </div>
-            </div>
-            
+            </section>
+
             <div class="last-updated">
                 最后更新: <span id="last-updated">-</span> | 自动刷新: 每 60 秒
             </div>
@@ -499,9 +521,10 @@
         }
         
         function createNodeCard(node, status) {
-            const card = document.createElement('div');
+            const card = document.createElement('article');
             card.className = 'node-card';
-            
+            card.setAttribute('role', 'listitem');
+
             if (!status) {
                 status = {
                     status: 'unknown',
@@ -509,7 +532,7 @@
                     error: '检查中...'
                 };
             }
-            
+
             // 确定状态类
             let statusClass = 'unknown';
             if (status.status === 'healthy') {
@@ -517,26 +540,38 @@
             } else if (status.status === 'down') {
                 statusClass = 'down';
             }
-            
+
+            // Status label for screen readers
+            const statusLabels = {
+                'healthy': '正常运行',
+                'slow': '响应较慢',
+                'down': '节点离线',
+                'unknown': '未知状态'
+            };
+            const statusAriaLabel = statusLabels[statusClass] || '未知状态';
+
             // 计算正常运行时间
             const uptime = uptimeHistory[node.name];
             const uptimePercent = uptime ? ((uptime.healthy / uptime.checks) * 100).toFixed(1) : '-';
-            
+
             // 计算平均响应时间
             const responseTimes = responseTimeHistory[node.name] || [];
-            const avgResponseTime = responseTimes.length > 0 
+            const avgResponseTime = responseTimes.length > 0
                 ? (responseTimes.reduce((sum, t) => sum + t, 0) / responseTimes.length).toFixed(0)
                 : '-';
-            
+
+            // Accessible aria-label on the card
+            card.setAttribute('aria-label', `${node.name} (${node.description}) — ${statusAriaLabel}`);
+
             card.innerHTML = `
                 <div class="node-header">
-                    <div class="node-name">${node.name}</div>
-                    <div class="status-indicator ${statusClass}"></div>
+                    <h3 class="node-name">${node.name}</h3>
+                    <div class="status-indicator ${statusClass}" role="img" aria-label="状态: ${statusAriaLabel}"></div>
                 </div>
-                <div class="status-text ${statusClass}">
-                    ${status.status === 'healthy' && status.responseTime > SLOW_THRESHOLD ? '⚠️ 响应较慢' : 
-                      status.status === 'healthy' ? '✅ 正常运行' : 
-                      status.status === 'down' ? '❌ 节点离线' : '⏳ 未知状态'}
+                <div class="status-text ${statusClass}" role="status">
+                    ${status.status === 'healthy' && status.responseTime > SLOW_THRESHOLD ? '<span aria-hidden="true">⚠️ </span>响应较慢' :
+                      status.status === 'healthy' ? '<span aria-hidden="true">✅ </span>正常运行' :
+                      status.status === 'down' ? '<span aria-hidden="true">❌ </span>节点离线' : '<span aria-hidden="true">⏳ </span>未知状态'}
                 </div>
                 <div class="stats-grid">
                     <div class="stat-item">
@@ -557,14 +592,14 @@
                     </div>
                 </div>
                 <div class="uptime-section">
-                    <h3>历史正常运行时间</h3>
+                    <h4>历史正常运行时间</h4>
                     <div class="uptime-bars">
                         <div class="uptime-bar">
                             <div class="uptime-bar-header">
                                 <span>最近24小时</span>
                             </div>
-                            <div class="uptime-bar-progress">
-                                <div class="uptime-bar-fill ${uptimePercent < 95 ? uptimePercent < 80 ? 'error' : 'warning' : ''}" 
+                            <div class="uptime-bar-progress" role="progressbar" aria-valuenow="${uptimePercent === '-' ? 0 : uptimePercent}" aria-valuemin="0" aria-valuemax="100" aria-label="最近24小时正常运行时间: ${uptimePercent}%">
+                                <div class="uptime-bar-fill ${uptimePercent < 95 ? uptimePercent < 80 ? 'error' : 'warning' : ''}"
                                      style="width: ${uptimePercent === '-' ? 0 : uptimePercent}%"></div>
                             </div>
                         </div>
@@ -572,7 +607,7 @@
                             <div class="uptime-bar-header">
                                 <span>最近7天</span>
                             </div>
-                            <div class="uptime-bar-progress">
+                            <div class="uptime-bar-progress" role="progressbar" aria-valuenow="${uptimePercent === '-' ? 0 : uptimePercent}" aria-valuemin="0" aria-valuemax="100" aria-label="最近7天正常运行时间: ${uptimePercent}%">
                                 <div class="uptime-bar-fill" style="width: ${uptimePercent === '-' ? 0 : uptimePercent}%"></div>
                             </div>
                         </div>
@@ -580,17 +615,17 @@
                 </div>
                 ${status.data ? `
                 <div class="response-time-section">
-                    <h3>节点信息</h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
-                        <div><strong>版本:</strong> ${status.data.version || '-'}</div>
-                        <div><strong>正常运行时间:</strong> ${formatUptime(status.data.uptime_s)}</div>
-                        <div><strong>数据库读写:</strong> ${status.data.db_rw ? '✅' : '❌'}</div>
-                        <div><strong>区块延迟:</strong> ${status.data.tip_age_slots !== undefined ? status.data.tip_age_slots + ' slots' : '-'}</div>
-                    </div>
+                    <h4>节点信息</h4>
+                    <dl style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
+                        <div><dt style="display:inline"><strong>版本:</strong></dt> <dd style="display:inline">${status.data.version || '-'}</dd></div>
+                        <div><dt style="display:inline"><strong>正常运行时间:</strong></dt> <dd style="display:inline">${formatUptime(status.data.uptime_s)}</dd></div>
+                        <div><dt style="display:inline"><strong>数据库读写:</strong></dt> <dd style="display:inline">${status.data.db_rw ? '<span aria-hidden="true">✅</span><span class="sr-only">正常</span>' : '<span aria-hidden="true">❌</span><span class="sr-only">异常</span>'}</dd></div>
+                        <div><dt style="display:inline"><strong>区块延迟:</strong></dt> <dd style="display:inline">${status.data.tip_age_slots !== undefined ? status.data.tip_age_slots + ' slots' : '-'}</dd></div>
+                    </dl>
                 </div>
                 ` : ''}
             `;
-            
+
             return card;
         }
         

@@ -56,6 +56,7 @@
             text-align: center;
         }
         
+        .stat-card h2,
         .stat-card h3 {
             color: #a8b2d1;
             font-size: 0.9em;
@@ -94,9 +95,15 @@
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
         
-        .btn:hover {
+        .btn:hover,
+        .btn:focus-visible {
             background: rgba(102, 126, 234, 0.2);
             transform: translateY(-2px);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
         }
         
         .btn.active {
@@ -128,8 +135,14 @@
             transition: background 0.3s ease;
         }
         
-        .leaderboard-table th:hover {
+        .leaderboard-table th:hover,
+        .leaderboard-table th:focus-visible {
             background: rgba(102, 126, 234, 0.3);
+        }
+
+        .leaderboard-table th:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: -2px;
         }
         
         .leaderboard-table th.sortable::after {
@@ -281,6 +294,19 @@
             border-radius: 10px;
         }
         
+        /* Screen reader only utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
         @media (max-width: 768px) {
             .stats-cards {
                 grid-template-columns: 1fr;
@@ -307,63 +333,63 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏆 RustChain 矿工排行榜</h1>
+    <div class="container" role="region" aria-label="RustChain 矿工排行榜">
+        <h1><span aria-hidden="true">🏆 </span>RustChain 矿工排行榜</h1>
         <p class="subtitle">顶级收益矿工与硬件展示</p>
-        
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
+
+        <div id="loading" class="loading" role="status" aria-live="polite">
+            <div class="loading-spinner" aria-hidden="true"></div>
             <p>正在加载矿工数据...</p>
         </div>
-        
-        <div id="dashboard" style="display: none;">
-            <div class="stats-cards">
+
+        <div id="dashboard" style="display: none;" aria-live="polite">
+            <section class="stats-cards" aria-label="矿工统计">
                 <div class="stat-card">
-                    <h3>总矿工数</h3>
+                    <h2>总矿工数</h2>
                     <div class="value" id="total-miners">-</div>
                     <div class="sub" id="total-epochs">活跃Epoch: -</div>
                 </div>
                 <div class="stat-card">
-                    <h3>总发放RTC</h3>
+                    <h2>总发放RTC</h2>
                     <div class="value" id="total-rtc">-</div>
                     <div class="sub">累计奖励</div>
                 </div>
                 <div class="stat-card">
-                    <h3>最稀有硬件</h3>
+                    <h2>最稀有硬件</h2>
                     <div class="value" id="rarest-hardware">-</div>
                     <div class="sub">最高乘数</div>
                 </div>
                 <div class="stat-card">
-                    <h3>最新矿工</h3>
+                    <h2>最新矿工</h2>
                     <div class="value" id="newest-miner">-</div>
                     <div class="sub" id="newest-miner-hardware">-</div>
                 </div>
-            </div>
-            
-            <div class="controls">
-                <button class="btn active" onclick="sortBy('multiplier')">按乘数排序</button>
-                <button class="btn" onclick="sortBy('epochs')">按活跃Epoch排序</button>
-                <button class="btn" onclick="sortBy('earnings')">按收益排序</button>
-                <button class="btn" onclick="loadData()">🔄 刷新数据</button>
-            </div>
-            
+            </section>
+
+            <nav class="controls" aria-label="排序控制">
+                <button class="btn active" onclick="sortBy('multiplier')" aria-pressed="true">按乘数排序</button>
+                <button class="btn" onclick="sortBy('epochs')" aria-pressed="false">按活跃Epoch排序</button>
+                <button class="btn" onclick="sortBy('earnings')" aria-pressed="false">按收益排序</button>
+                <button class="btn" onclick="loadData()"><span aria-hidden="true">🔄 </span>刷新数据</button>
+            </nav>
+
             <div class="leaderboard-container">
-                <table class="leaderboard-table">
+                <table class="leaderboard-table" aria-label="矿工排行榜">
                     <thead>
                         <tr>
-                            <th class="sortable" onclick="sortBy('multiplier')">排名</th>
+                            <th class="sortable" tabindex="0" role="columnheader button" onclick="sortBy('multiplier')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortBy('multiplier')}" aria-sort="descending">排名</th>
                             <th>矿工ID</th>
                             <th>硬件信息</th>
-                            <th class="sortable" onclick="sortBy('multiplier')">乘数</th>
-                            <th class="sortable" onclick="sortBy('epochs')">活跃Epoch</th>
-                            <th class="sortable" onclick="sortBy('earnings')">估计收益</th>
+                            <th class="sortable" tabindex="0" role="columnheader button" onclick="sortBy('multiplier')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortBy('multiplier')}" aria-sort="descending">乘数</th>
+                            <th class="sortable" tabindex="0" role="columnheader button" onclick="sortBy('epochs')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortBy('epochs')}" aria-sort="none">活跃Epoch</th>
+                            <th class="sortable" tabindex="0" role="columnheader button" onclick="sortBy('earnings')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortBy('earnings')}" aria-sort="none">估计收益</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body">
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="last-updated">
                 最后更新: <span id="last-updated">-</span>
             </div>
@@ -397,8 +423,10 @@
                 
             } catch (error) {
                 console.error('加载矿工数据失败:', error);
-                document.getElementById('loading').innerHTML = `
-                    <p style="color: #f5576c;">❌ 加载矿工数据失败</p>
+                const loadingEl = document.getElementById('loading');
+                loadingEl.setAttribute('role', 'alert');
+                loadingEl.innerHTML = `
+                    <p style="color: #f5576c;"><span aria-hidden="true">❌ </span>加载矿工数据失败</p>
                     <p style="color: #8892b0; margin-top: 10px;">请检查网络连接或稍后重试</p>
                     <button onclick="loadMinerData()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer;">重试</button>
                 `;
@@ -424,10 +452,20 @@
         }
         
         function sortBy(field) {
-            // 更新排序按钮状态
-            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
+            // 更新排序按钮状态 (visual + aria-pressed)
+            document.querySelectorAll('.controls .btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.hasAttribute('aria-pressed')) {
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+                if (event.target.hasAttribute('aria-pressed')) {
+                    event.target.setAttribute('aria-pressed', 'true');
+                }
+            }
+
             // 切换排序方向
             if (currentSort === field) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -435,11 +473,11 @@
                 currentSort = field;
                 sortDirection = 'desc';
             }
-            
+
             // 排序数据
             miners.sort((a, b) => {
                 let valueA, valueB;
-                
+
                 switch(field) {
                     case 'multiplier':
                         valueA = a.antiquity_multiplier || 1;
@@ -456,32 +494,44 @@
                     default:
                         return 0;
                 }
-                
+
                 if (sortDirection === 'asc') {
                     return valueA - valueB;
                 } else {
                     return valueB - valueA;
                 }
             });
-            
-            // 更新表头排序指示器
+
+            // 更新表头排序指示器 (visual + aria-sort)
             document.querySelectorAll('.leaderboard-table th').forEach(th => {
                 th.classList.remove('sort-asc', 'sort-desc');
+                if (th.hasAttribute('aria-sort')) {
+                    th.setAttribute('aria-sort', 'none');
+                }
             });
-            
+
             const headerIndex = {
                 'multiplier': 3,
                 'epochs': 4,
                 'earnings': 5
             }[field];
-            
+
             if (headerIndex !== undefined) {
                 const headerCell = document.querySelector(`.leaderboard-table th:nth-child(${headerIndex + 1})`);
                 if (headerCell) {
                     headerCell.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                    headerCell.setAttribute('aria-sort', sortDirection === 'asc' ? 'ascending' : 'descending');
+                }
+                // Rank column (index 0) mirrors the sort of 'multiplier'
+                if (field === 'multiplier') {
+                    const rankHeader = document.querySelector('.leaderboard-table th:nth-child(1)');
+                    if (rankHeader) {
+                        rankHeader.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                        rankHeader.setAttribute('aria-sort', sortDirection === 'asc' ? 'ascending' : 'descending');
+                    }
                 }
             }
-            
+
             updateLeaderboard();
         }
         
@@ -540,12 +590,15 @@
                 // 确定硬件图标emoji
                 const hardwareEmoji = getHardwareEmoji(miner.device_family, miner.device_arch);
                 
+                // Provide text rank labels for top-3 positions
+                const rankLabel = index === 0 ? ' (金牌)' : index === 1 ? ' (银牌)' : index === 2 ? ' (铜牌)' : '';
+
                 row.innerHTML = `
-                    <td class="rank rank-${index + 1}">${index + 1}</td>
+                    <td class="rank rank-${index + 1}">${index + 1}<span class="sr-only">${rankLabel}</span></td>
                     <td class="miner-id">${formatMinerId(miner.miner)}</td>
                     <td>
                         <div class="hardware-info">
-                            <div class="hardware-icon ${hardwareType}">
+                            <div class="hardware-icon ${hardwareType}" aria-hidden="true">
                                 ${hardwareEmoji}
                             </div>
                             <div class="hardware-details">
