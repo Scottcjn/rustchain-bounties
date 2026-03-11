@@ -59,6 +59,23 @@ python3 rustchain_miner.py --wallet YOUR_WALLET_ID --node https://50.28.86.131
 curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_WALLET_ID"
 ```
 
+### Demo Recordings
+
+Watch the full install → first attestation workflow in your terminal:
+
+```bash
+# Install asciinema (if not already installed)
+pip install asciinema
+
+# Watch: clone repo, start miner, first attestation
+asciinema play assets/demos/miner-install.cast
+
+# Watch: verify attestation, check balance
+asciinema play assets/demos/first-attestation.cast
+```
+
+See [`assets/demos/`](assets/demos/) for playback options and GIF conversion.
+
 ## Bounty Tiers
 
 | Tier | RTC Range | Typical Scope |

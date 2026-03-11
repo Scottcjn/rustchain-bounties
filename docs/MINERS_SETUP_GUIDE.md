@@ -2,6 +2,13 @@
 
 Step-by-step guide to run a RustChain miner on real hardware (RIP-200 Proof of Attestation).
 
+> **Demo recordings:** Watch the full install + first attestation flow in your terminal:
+> ```bash
+> asciinema play assets/demos/miner-install.cast
+> asciinema play assets/demos/first-attestation.cast
+> ```
+> See [`assets/demos/`](../assets/demos/) for playback options and GIF conversion.
+
 ## Prerequisites
 
 - Real hardware (no VMs). VMs may attest, but rewards can be penalized or denied.

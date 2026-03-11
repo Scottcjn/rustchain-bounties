@@ -19,6 +19,8 @@ files:
   - "tests/test_supply_chain_lint.py"
   # The allowlist file references patterns by name — not actual commands
   - ".github/supply-chain-allowlist.yml"
+  # Demo recording helper echoes instructions (not executable risky commands)
+  - "scripts/record_demos.sh"
 
 patterns:
   # Documentation lines that reference risky patterns as examples of what NOT to do.
