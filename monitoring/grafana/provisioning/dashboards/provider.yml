@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: MIT
+# Grafana dashboard provisioning — loads JSON dashboards on startup.
+apiVersion: 1
+
+providers:
+  - name: RustChain
+    orgId: 1
+    folder: RustChain
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

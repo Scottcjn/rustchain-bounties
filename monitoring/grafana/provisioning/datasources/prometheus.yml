@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT
+# Grafana datasource provisioning — auto-registers Prometheus.
+apiVersion: 1
+
+datasources:
+  - name: RustChain Prometheus
+    type: prometheus
+    uid: rustchain-prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: MIT
+# RustChain monitoring stack: Prometheus + Grafana + custom exporter.
+#
+# Usage:
+#   cd monitoring/
+#   docker compose up -d
+#
+# Grafana UI:  http://localhost:3000 (admin / admin)
+# Prometheus:  http://localhost:9090
+# Exporter:    http://localhost:9100/metrics
+#
+# Environment variables (exporter):
+#   RUSTCHAIN_NODE_URL   – node base URL  (default: https://50.28.86.131)
+#   SCRAPE_INTERVAL      – seconds        (default: 30)
+#   VERIFY_TLS           – "1" to verify  (default: 0)
+#   HTTP_TIMEOUT         – per-request timeout (default: 15)
+
+services:
+  exporter:
+    build:
+      context: ..
+      dockerfile: monitoring/Dockerfile.exporter
+    ports:
+      - "9100:9100"
+    environment:
+      RUSTCHAIN_NODE_URL: "${RUSTCHAIN_NODE_URL:-https://50.28.86.131}"
+      EXPORTER_PORT: "9100"
+      SCRAPE_INTERVAL: "${SCRAPE_INTERVAL:-30}"
+      VERIFY_TLS: "${VERIFY_TLS:-0}"
+      HTTP_TIMEOUT: "${HTTP_TIMEOUT:-15}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9100/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  prometheus:
+    # Pin to a release tag; verify digest before production use.
+    image: prom/prometheus:v2.51.2
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+    depends_on:
+      exporter:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    # Pin to a release tag; verify digest before production use.
+    image: grafana/grafana:10.4.2
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/rustchain.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:
