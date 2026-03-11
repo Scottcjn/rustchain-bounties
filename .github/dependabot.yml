@@ -1,0 +1,48 @@
+# Dependabot configuration for automated dependency updates
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+#
+# Ecosystems enabled:
+#   - github-actions : keeps CI action versions current
+#   - docker         : keeps base images in reproducible/Dockerfile current
+#
+# Note: pip ecosystem is not configured because the repo has no manifest
+# file (requirements.txt / pyproject.toml). If a manifest is added later,
+# add a pip entry here.
+
+version: 2
+
+updates:
+  # --- GitHub Actions ---------------------------------------------------
+  # Covers all workflows under .github/workflows/
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "America/New_York"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "BCOS-L1"
+    reviewers:
+      - "Scottcjn"
+    open-pull-requests-limit: 10
+
+  # --- Docker -----------------------------------------------------------
+  # Covers the reproducible build image in reproducible/Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/reproducible"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "America/New_York"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "BCOS-L1"
+      - "security"
+    reviewers:
+      - "Scottcjn"
+    open-pull-requests-limit: 5
