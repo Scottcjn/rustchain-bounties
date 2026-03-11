@@ -1,0 +1,159 @@
+# SPDX-License-Identifier: MIT
+#
+# RustChain API – Artillery load-test configuration.
+#
+# Usage:
+#   artillery run load_tests/artillery_config.yml
+#
+#   # With HTML report:
+#   artillery run --output load_tests/results/artillery_report.json \
+#       load_tests/artillery_config.yml
+#   artillery report --output load_tests/results/artillery_report.html \
+#       load_tests/results/artillery_report.json
+#
+#   # Or generate graphs with graph_reporter.py:
+#   python load_tests/graph_reporter.py --format artillery \
+#       load_tests/results/artillery_report.json
+
+config:
+  target: "https://50.28.86.131"
+  tls:
+    rejectUnauthorized: false    # self-signed certificate
+  phases:
+    # Warm-up: 5 VUs/sec for 30 s
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm-up"
+    # Ramp: 5 → 30 VUs/sec over 60 s
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 30
+      name: "Ramp-up"
+    # Sustained: 30 VUs/sec for 60 s
+    - duration: 60
+      arrivalRate: 30
+      name: "Sustained load"
+    # Cool-down: 30 → 5 VUs/sec over 30 s
+    - duration: 30
+      arrivalRate: 30
+      rampTo: 5
+      name: "Cool-down"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+  ensure:
+    thresholds:
+      - http.response_time.p95: 5000
+      - http.response_time.p99: 10000
+
+scenarios:
+  # -----------------------------------------------------------------------
+  # Scenario 1: Read-only health & epoch probes
+  # -----------------------------------------------------------------------
+  - name: "Health & Epoch reads"
+    weight: 30
+    flow:
+      - get:
+          url: "/health"
+          capture:
+            - json: "$.ok"
+              as: "health_ok"
+      - think: 1
+      - get:
+          url: "/epoch"
+          capture:
+            - json: "$.epoch"
+              as: "current_epoch"
+      - think: 1
+      - get:
+          url: "/api/miners"
+
+  # -----------------------------------------------------------------------
+  # Scenario 2: Wallet balance + lottery eligibility queries
+  # -----------------------------------------------------------------------
+  - name: "Wallet queries"
+    weight: 20
+    flow:
+      - function: "generateMinerId"
+      - get:
+          url: "/wallet/balance?miner_id={{ minerId }}"
+      - think: 1
+      - get:
+          url: "/lottery/eligibility?miner_id={{ minerId }}"
+
+  # -----------------------------------------------------------------------
+  # Scenario 3: Full attestation lifecycle
+  # -----------------------------------------------------------------------
+  - name: "Attestation lifecycle"
+    weight: 50
+    flow:
+      - function: "generateMinerId"
+      - post:
+          url: "/attest/challenge"
+          json: {}
+          capture:
+            - json: "$.nonce"
+              as: "nonce"
+      - think: 1
+      - function: "buildAttestPayload"
+      - post:
+          url: "/attest/submit"
+          json:
+            miner: "{{ wallet }}"
+            miner_id: "{{ minerId }}"
+            nonce: "{{ nonce }}"
+            report:
+              nonce: "{{ nonce }}"
+              commitment: "{{ commitment }}"
+              derived:
+                mean_ns: 25000
+                variance_ns: 250000
+                min_ns: 24000
+                max_ns: 26000
+                sample_count: 48
+              entropy_score: 250000
+            device:
+              family: "{{ deviceFamily }}"
+              arch: "{{ deviceArch }}"
+              model: "{{ deviceModel }}"
+              cpu: "{{ deviceModel }}"
+              cores: 4
+              memory_gb: 16
+              serial: "{{ serial }}"
+            signals:
+              macs:
+                - "{{ mac }}"
+              hostname: "host-{{ minerId }}"
+            fingerprint:
+              all_passed: true
+              checks:
+                anti_emulation:
+                  passed: true
+                  data:
+                    vm_indicators: []
+                cpu_features:
+                  passed: true
+                  data:
+                    flags:
+                      - "avx2"
+                io_latency:
+                  passed: true
+                  data:
+                    p95_ns: 250
+                serial_binding:
+                  passed: true
+                  data:
+                    serial: "{{ serial }}"
+      - think: 1
+      - post:
+          url: "/epoch/enroll"
+          json:
+            miner_pubkey: "{{ wallet }}"
+            miner_id: "{{ minerId }}"
+            device:
+              family: "{{ deviceFamily }}"
+              arch: "{{ deviceArch }}"
+
+# Custom JS helper functions referenced by {{ function }} steps above.
+# Artillery loads this from processor.js in the same directory.
+processor: "./artillery_processor.js"
