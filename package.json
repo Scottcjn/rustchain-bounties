@@ -1,0 +1,25 @@
+{
+  "name": "rustchain-mcp",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "axios": "^1.13.6",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/node": "^25.3.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
