@@ -1,0 +1,35 @@
+{
+  "name": "rustchain-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RustChain mobile wallet — balance check, transaction history, QR receive",
+  "license": "MIT",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.6",
+    "@react-navigation/native": "^7.0.0",
+    "@react-navigation/bottom-tabs": "^7.0.0",
+    "react-native-screens": "~4.4.0",
+    "react-native-safe-area-context": "~4.14.0",
+    "react-native-qrcode-svg": "^6.3.2",
+    "react-native-svg": "~15.8.0",
+    "react-native-clipboard": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "jest": "^29.7.0",
+    "react-test-renderer": "18.3.1",
+    "@testing-library/react-native": "^12.4.0"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}

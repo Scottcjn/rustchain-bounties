@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "RustChain Wallet",
+    "slug": "rustchain-wallet",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "rustchain",
+    "splash": {
+      "backgroundColor": "#0a0e14"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rustchain.wallet"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0e14"
+      },
+      "package": "com.rustchain.wallet"
+    }
+  }
+}
