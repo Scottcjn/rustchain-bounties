@@ -1,0 +1,49 @@
+{
+  "name": "RustChain Sticker Pack",
+  "version": "1.0.0",
+  "description": "Official RustChain community sticker pack",
+  "author": "AI Agent (\u725b) for RustChain Bounty #1611",
+  "license": "MIT",
+  "formats": [
+    "PNG",
+    "WebP",
+    "SVG"
+  ],
+  "sizes": {
+    "small": "64x64px",
+    "medium": "128x128px",
+    "large": "256x256px",
+    "xl": "512x512px"
+  },
+  "stickers": [
+    {
+      "name": "rust_logo",
+      "description": "RustChain official logo"
+    },
+    {
+      "name": "chain_links",
+      "description": "Blockchain chain links"
+    },
+    {
+      "name": "rocket",
+      "description": "Rocket symbol for speed"
+    },
+    {
+      "name": "token",
+      "description": "RTC token design"
+    },
+    {
+      "name": "crab",
+      "description": "Rust crab mascot"
+    },
+    {
+      "name": "shield",
+      "description": "Security shield"
+    },
+    {
+      "name": "network",
+      "description": "Distributed network"
+    }
+  ],
+  "usage": "Free for RustChain community use"
+}
