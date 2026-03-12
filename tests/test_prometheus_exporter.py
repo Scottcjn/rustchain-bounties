@@ -1,4 +1,4 @@
-# Auto-generated test for ./scripts/sybil_risk_scorer.py
+# Auto-generated test for ./scripts/prometheus_exporter.py
 import pytest
 import sys
 from pathlib import Path
@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 def test_module_imports():
     """Test that module imports without errors"""
     try:
-        import scripts.sybil_risk_scorer
+        import scripts.prometheus_exporter
         assert True
     except ImportError as e:
         pytest.skip(f"Module import failed: {e}")
