@@ -1,0 +1,273 @@
+/* 
+ * RustChain Brand Colors - CSS Variables
+ * 品牌颜色系统
+ * 
+ * Usage: var(--rust-primary), var(--bg-dark), etc.
+ */
+
+:root {
+  /* ===================================
+     PRIMARY COLORS - 主色调
+     =================================== */
+  
+  /* Rust Orange - 锈橙色 (主品牌色) */
+  --rust-primary: #B7410E;
+  --rust-primary-rgb: 183, 65, 14;
+  
+  /* Iron Oxide - 氧化铁色 (深色强调) */
+  --rust-dark: #8B3103;
+  --rust-dark-rgb: 139, 49, 3;
+  
+  /* Light Rust - 浅锈色 */
+  --rust-light: #D46428;
+  --rust-light-rgb: 212, 100, 40;
+  
+  /* ===================================
+     METALLIC COLORS - 金属色
+     =================================== */
+  
+  /* Metallic Silver - 金属银 */
+  --silver: #C0C0C0;
+  --silver-rgb: 192, 192, 192;
+  --silver-light: #E0E0E0;
+  --silver-dark: #A0A0A0;
+  
+  /* Vintage Gold - 复古金 */
+  --gold: #D4AF37;
+  --gold-rgb: 212, 175, 55;
+  --gold-light: #F4CF57;
+  --gold-dark: #B48F17;
+  
+  /* Aged Copper - 古铜色 */
+  --copper: #B87333;
+  --copper-rgb: 184, 115, 51;
+  --copper-light: #D89353;
+  --copper-dark: #985313;
+  
+  /* ===================================
+     BACKGROUND COLORS - 背景色
+     =================================== */
+  
+  /* Deep Space - 深空背景 */
+  --bg-dark: #1A1A2E;
+  --bg-dark-rgb: 26, 26, 46;
+  
+  /* Card Background - 卡片背景 */
+  --bg-card: #252542;
+  --bg-card-rgb: 37, 37, 66;
+  
+  /* Light Background - 浅背景 */
+  --bg-light: #2F2F5A;
+  --bg-light-rgb: 47, 47, 90;
+  
+  /* Surface - 表面层 */
+  --bg-surface: #3A3A6E;
+  --bg-surface-rgb: 58, 58, 110;
+  
+  /* ===================================
+     TEXT COLORS - 文字色
+     =================================== */
+  
+  /* Primary Text - 主文字 */
+  --text-primary: #FFFFFF;
+  --text-primary-rgb: 255, 255, 255;
+  
+  /* Secondary Text - 次要文字 */
+  --text-secondary: #C0C0C0;
+  --text-secondary-rgb: 192, 192, 192;
+  
+  /* Muted Text - 弱化文字 */
+  --text-muted: #808080;
+  --text-muted-rgb: 128, 128, 128;
+  
+  /* Text on Dark - 深色背景文字 */
+  --text-dark: #1A1A2E;
+  
+  /* ===================================
+     STATUS COLORS - 状态色
+     =================================== */
+  
+  /* Success - 成功 */
+  --success: #00A862;
+  --success-rgb: 0, 168, 98;
+  --success-light: #00C872;
+  --success-dark: #008852;
+  
+  /* Warning - 警告 */
+  --warning: #FFA500;
+  --warning-rgb: 255, 165, 0;
+  --warning-light: #FFB520;
+  --warning-dark: #DF9500;
+  
+  /* Error - 错误 */
+  --error: #DC3545;
+  --error-rgb: 220, 53, 69;
+  --error-light: #EC4555;
+  --error-dark: #BC2535;
+  
+  /* Info - 信息 */
+  --info: #17A2B8;
+  --info-rgb: 23, 162, 184;
+  --info-light: #27B2C8;
+  --info-dark: #0792A8;
+  
+  /* ===================================
+     GRADIENTS - 渐变
+     =================================== */
+  
+  /* Rust Gradient - 锈迹渐变 */
+  --gradient-rust: linear-gradient(135deg, #B7410E 0%, #8B3103 50%, #5C2002 100%);
+  --gradient-rust-horizontal: linear-gradient(90deg, #B7410E 0%, #8B3103 50%, #5C2002 100%);
+  
+  /* Metal Gradient - 金属渐变 */
+  --gradient-metal: linear-gradient(180deg, #E0E0E0 0%, #C0C0C0 50%, #A0A0A0 100%);
+  --gradient-metal-horizontal: linear-gradient(90deg, #E0E0E0 0%, #C0C0C0 50%, #A0A0A0 100%);
+  
+  /* Vintage Tech Gradient - 复古科技渐变 */
+  --gradient-vintage-tech: linear-gradient(135deg, #1A1A2E 0%, #B7410E 70%, #D4AF37 100%);
+  
+  /* Sunset Gradient - 日落渐变 */
+  --gradient-sunset: linear-gradient(135deg, #B7410E 0%, #D4AF37 100%);
+  
+  /* Deep Space Gradient - 深空渐变 */
+  --gradient-deep-space: linear-gradient(180deg, #1A1A2E 0%, #2F2F5A 100%);
+  
+  /* Card Gradient - 卡片渐变 */
+  --gradient-card: linear-gradient(145deg, #252542 0%, #1F1F3A 100%);
+  
+  /* ===================================
+     BORDERS & DIVIDERS - 边框和分隔线
+     =================================== */
+  
+  --border-light: rgba(192, 192, 192, 0.2);
+  --border-medium: rgba(192, 192, 192, 0.4);
+  --border-strong: rgba(192, 192, 192, 0.6);
+  --border-rust: rgba(183, 65, 14, 0.5);
+  --border-gold: rgba(212, 175, 55, 0.5);
+  
+  /* ===================================
+     SHADOWS - 阴影
+     =================================== */
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.5);
+  
+  --shadow-rust: 0 4px 12px rgba(183, 65, 14, 0.4);
+  --shadow-gold: 0 4px 12px rgba(212, 175, 55, 0.4);
+  
+  /* ===================================
+     OPACITY VARIANTS - 透明度变体
+     =================================== */
+  
+  --rust-primary-10: rgba(183, 65, 14, 0.1);
+  --rust-primary-20: rgba(183, 65, 14, 0.2);
+  --rust-primary-30: rgba(183, 65, 14, 0.3);
+  --rust-primary-50: rgba(183, 65, 14, 0.5);
+  --rust-primary-70: rgba(183, 65, 14, 0.7);
+  --rust-primary-90: rgba(183, 65, 14, 0.9);
+  
+  --gold-10: rgba(212, 175, 55, 0.1);
+  --gold-20: rgba(212, 175, 55, 0.2);
+  --gold-30: rgba(212, 175, 55, 0.3);
+  --gold-50: rgba(212, 175, 55, 0.5);
+  
+  /* ===================================
+     BREAKPOINTS - 响应式断点
+     =================================== */
+  
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+  
+  /* ===================================
+     SPACING - 间距
+     =================================== */
+  
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+  
+  /* ===================================
+     BORDER RADIUS - 圆角
+     =================================== */
+  
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+  
+  /* ===================================
+     TRANSITIONS - 过渡动画
+     =================================== */
+  
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+}
+
+/* ===================================
+   DARK MODE OVERRIDES - 暗黑模式
+   =================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗黑模式下默认已经是深色主题，无需调整 */
+  }
+}
+
+/* ===================================
+   UTILITY CLASSES - 工具类
+   =================================== */
+
+/* Background Colors */
+.bg-rust-primary { background-color: var(--rust-primary); }
+.bg-rust-dark { background-color: var(--rust-dark); }
+.bg-rust-light { background-color: var(--rust-light); }
+.bg-silver { background-color: var(--silver); }
+.bg-gold { background-color: var(--gold); }
+.bg-copper { background-color: var(--copper); }
+.bg-dark { background-color: var(--bg-dark); }
+.bg-card { background-color: var(--bg-card); }
+
+/* Text Colors */
+.text-rust { color: var(--rust-primary); }
+.text-gold { color: var(--gold); }
+.text-silver { color: var(--silver); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-success { color: var(--success); }
+.text-error { color: var(--error); }
+.text-warning { color: var(--warning); }
+
+/* Gradient Backgrounds */
+.bg-gradient-rust { background: var(--gradient-rust); }
+.bg-gradient-metal { background: var(--gradient-metal); }
+.bg-gradient-vintage-tech { background: var(--gradient-vintage-tech); }
+.bg-gradient-sunset { background: var(--gradient-sunset); }
+
+/* Borders */
+.border-rust { border-color: var(--rust-primary); }
+.border-gold { border-color: var(--gold); }
+.border-silver { border-color: var(--silver); }
+.border-light { border-color: var(--border-light); }
+.border-medium { border-color: var(--border-medium); }
+
+/* Shadows */
+.shadow-rust { box-shadow: var(--shadow-rust); }
+.shadow-gold { box-shadow: var(--shadow-gold); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }

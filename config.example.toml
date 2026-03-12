@@ -1,0 +1,21 @@
+# RustChain Miner Configuration Example
+# Copy this file to ~/.rustchain/config.toml and customize as needed
+
+# Path to Ed25519 private key (will be generated if not exists)
+key_path = "~/.rustchain/miner_key.bin"
+
+# RustChain node URL for attestation and work submission
+node_url = "http://localhost:8080"
+
+# Whether to submit attestations to the node
+# Set to false for local testing only
+submit_attestation = true
+
+# Epoch duration in seconds (how often to submit work)
+epoch_duration = 300
+
+# Log level: error, warn, info, debug, trace
+log_level = "info"
+
+# Cache directory for hardware fingerprints
+cache_path = "~/.rustchain/cache"
