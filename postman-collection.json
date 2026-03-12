@@ -1,0 +1,471 @@
+{
+  "info": {
+    "_postman_id": "rustchain-api-collection",
+    "name": "RustChain API",
+    "description": "Complete Postman collection for RustChain blockchain API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Returns the health status of the node including backup age, database status, uptime, and version."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has ok field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"ok\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Blockchain",
+      "item": [
+        {
+          "name": "Get Current Epoch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/epoch",
+              "host": ["{{base_url}}"],
+              "path": ["epoch"]
+            },
+            "description": "Returns information about the current epoch including slot number, blocks per epoch, and enrolled miners."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has epoch field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"epoch\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Block by Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/block/{{block_number}}",
+              "host": ["{{base_url}}"],
+              "path": ["block", "{{block_number}}"]
+            },
+            "description": "Returns information about a specific block including hash, timestamp, and transactions."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mining",
+      "item": [
+        {
+          "name": "List Active Miners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/miners?limit={{limit}}&offset={{offset}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "miners"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "{{limit}}",
+                  "description": "Number of miners to return (default: 20)"
+                },
+                {
+                  "key": "offset",
+                  "value": "{{offset}}",
+                  "description": "Offset for pagination (default: 0)"
+                }
+              ]
+            },
+            "description": "Returns a list of active miners on the network with their hardware info, antiquity multiplier, and last attestation timestamp."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Lottery Eligibility",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lottery/eligibility?miner_id={{miner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["lottery", "eligibility"],
+              "query": [
+                {
+                  "key": "miner_id",
+                  "value": "{{miner_id}}",
+                  "description": "Miner ID to check eligibility"
+                }
+              ]
+            },
+            "description": "Check lottery eligibility for a specific miner."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "Get Wallet Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wallet/balance?miner_id={{miner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["wallet", "balance"],
+              "query": [
+                {
+                  "key": "miner_id",
+                  "value": "{{miner_id}}",
+                  "description": "Miner ID / wallet address to query balance"
+                }
+              ]
+            },
+            "description": "Returns the RTC balance for a specified wallet address."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has amount_rtc field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"amount_rtc\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/transactions?address={{address}}&limit={{limit}}",
+              "host": ["{{base_url}}"],
+              "path": ["transactions"],
+              "query": [
+                {
+                  "key": "address",
+                  "value": "{{address}}",
+                  "description": "Wallet address to query transactions"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}",
+                  "description": "Number of transactions to return (default: 20)"
+                }
+              ]
+            },
+            "description": "Returns transactions for a given wallet address."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Attestation",
+      "item": [
+        {
+          "name": "Request Challenge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/attest/challenge",
+              "host": ["{{base_url}}"],
+              "path": ["attest", "challenge"]
+            },
+            "description": "Request a nonce challenge for attestation. Miners must fetch a nonce before submitting a proof."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has nonce field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"nonce\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit Attestation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"miner\": \"{{miner_id}}\",\n  \"nonce\": \"{{nonce}}\",\n  \"report\": {\n    \"hardware_fingerprint\": \"your_hardware_fingerprint\",\n    \"entropy\": 12345\n  },\n  \"device\": {\n    \"family\": \"x86\",\n    \"arch\": \"amd64\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/attest/submit",
+              "host": ["{{base_url}}"],
+              "path": ["attest", "submit"]
+            },
+            "description": "Submit hardware fingerprint and entropy report for attestation."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enroll in Epoch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"miner_pubkey\": \"{{miner_pubkey}}\",\n  \"miner_id\": \"{{miner_id}}\",\n  \"device\": {\n    \"family\": \"x86\",\n    \"arch\": \"amd64\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/epoch/enroll",
+              "host": ["{{base_url}}"],
+              "path": ["epoch", "enroll"]
+            },
+            "description": "Enroll in the current epoch after successful attestation to join reward distribution."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Explorer",
+      "item": [
+        {
+          "name": "Open Explorer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/explorer",
+              "host": ["{{base_url}}"],
+              "path": ["explorer"]
+            },
+            "description": "HTTP redirect to the explorer UI."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Redirect or success\", function () {",
+                  "    pm.expect([200, 301, 302]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://50.28.86.131",
+      "type": "string",
+      "description": "RustChain API base URL (uses self-signed certificate, enable 'Skip SSL verification' in Postman)"
+    },
+    {
+      "key": "miner_id",
+      "value": "YOUR_MINER_ID",
+      "type": "string",
+      "description": "Your miner ID / wallet address"
+    },
+    {
+      "key": "miner_pubkey",
+      "value": "YOUR_WALLET_PUBLIC_KEY",
+      "type": "string",
+      "description": "Your wallet public key for enrollment"
+    },
+    {
+      "key": "nonce",
+      "value": "",
+      "type": "string",
+      "description": "Nonce from /attest/challenge response"
+    },
+    {
+      "key": "block_number",
+      "value": "12345",
+      "type": "string",
+      "description": "Block number to query"
+    },
+    {
+      "key": "address",
+      "value": "YOUR_WALLET_ADDRESS",
+      "type": "string",
+      "description": "Wallet address for transaction queries"
+    },
+    {
+      "key": "limit",
+      "value": "20",
+      "type": "string",
+      "description": "Default limit for paginated responses"
+    },
+    {
+      "key": "offset",
+      "value": "0",
+      "type": "string",
+      "description": "Default offset for pagination"
+    }
+  ]
+}
