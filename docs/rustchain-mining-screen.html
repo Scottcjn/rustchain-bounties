@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Mining Screen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f6fa;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: #2d3436;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Mining Status Card */
+        .mining-status-card {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 25px;
+            color: white;
+            box-shadow: 0 10px 30px -10px rgba(67, 233, 123, 0.5);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .status-text {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .mining-amount {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .mining-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Mining Controls */
+        .mining-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 0 20px 20px;
+        }
+
+        .control-btn {
+            padding: 20px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .control-btn.start {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .control-btn.stop {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+        }
+
+        .control-btn.pause {
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            color: white;
+        }
+
+        .control-btn.settings {
+            background: white;
+            color: #2d3436;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-icon {
+            font-size: 24px;
+        }
+
+        /* Hardware Info */
+        .hardware-section {
+            padding: 0 20px 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .hardware-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .hardware-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .hardware-item:last-child {
+            border-bottom: none;
+        }
+
+        .hardware-label {
+            font-size: 14px;
+            color: #636e72;
+        }
+
+        .hardware-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .multiplier-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Earnings Chart */
+        .earnings-section {
+            padding: 0 20px 20px;
+        }
+
+        .earnings-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-placeholder {
+            height: 150px;
+            background: linear-gradient(180deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+
+        .chart-bar::after {
+            content: attr(data-day);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #636e72;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-top: 1px solid #dfe6e9;
+            padding-bottom: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item.inactive {
+            color: #b2bec3;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 🔋</span>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <h1>⛏️ 挖矿</h1>
+                <button class="settings-btn">⚙️</button>
+            </div>
+
+            <!-- Mining Status Card -->
+            <div class="mining-status-card">
+                <div class="status-header">
+                    <div class="status-dot"></div>
+                    <span class="status-text">正在挖矿</span>
+                </div>
+                <div class="mining-amount">3.2 RTC</div>
+                <div class="mining-label">今日收益</div>
+            </div>
+
+            <!-- Mining Controls -->
+            <div class="mining-controls">
+                <button class="control-btn start">
+                    <span class="control-icon">▶️</span>
+                    <span>开始</span>
+                </button>
+                <button class="control-btn pause">
+                    <span class="control-icon">⏸️</span>
+                    <span>暂停</span>
+                </button>
+                <button class="control-btn stop">
+                    <span class="control-icon">⏹️</span>
+                    <span>停止</span>
+                </button>
+                <button class="control-btn settings">
+                    <span class="control-icon">🔧</span>
+                    <span>设置</span>
+                </button>
+            </div>
+
+            <!-- Hardware Info -->
+            <div class="hardware-section">
+                <h2 class="section-title">🔌 硬件信息</h2>
+                <div class="hardware-card">
+                    <div class="hardware-item">
+                        <span class="hardware-label">设备类型</span>
+                        <span class="hardware-value">PowerMac G4</span>
+                    </div>
+                    <div class="hardware-item">
+                        <span class="hardware-label">CPU</span>
+                        <span class="hardware-value">PowerPC G4 1GHz</span>
+                    </div>
+                    <div class="hardware-item">
+                        <span class="hardware-label">内存</span>
+                        <span class="hardware-value">1.5 GB DDR</span>
+                    </div>
+                    <div class="hardware-item">
+                        <span class="hardware-label">系统</span>
+                        <span class="hardware-value">Yellow Dog Linux</span>
+                    </div>
+                    <div class="hardware-item">
+                        <span class="hardware-label"> antiquity 倍数</span>
+                        <span class="multiplier-badge">2.8x</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Chart -->
+            <div class="earnings-section">
+                <h2 class="section-title">📊 收益趋势</h2>
+                <div class="earnings-card">
+                    <div class="chart-placeholder">
+                        <div class="chart-bar" style="height: 60%;" data-day="一"></div>
+                        <div class="chart-bar" style="height: 80%;" data-day="二"></div>
+                        <div class="chart-bar" style="height: 45%;" data-day="三"></div>
+                        <div class="chart-bar" style="height: 90%;" data-day="四"></div>
+                        <div class="chart-bar" style="height: 70%;" data-day="五"></div>
+                        <div class="chart-bar" style="height: 100%;" data-day="六"></div>
+                        <div class="chart-bar" style="height: 75%;" data-day="日"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">首页</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-label">钱包</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-icon">⛏️</span>
+                    <span class="nav-label">挖矿</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🗳️</span>
+                    <span class="nav-label">治理</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">设置</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

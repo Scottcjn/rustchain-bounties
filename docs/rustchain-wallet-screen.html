@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Wallet Screen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f6fa;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: #2d3436;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .qr-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Wallet Tabs */
+        .wallet-tabs {
+            display: flex;
+            background: white;
+            margin: 10px 20px;
+            border-radius: 15px;
+            padding: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab.inactive {
+            color: #636e72;
+        }
+
+        /* Token List */
+        .token-list {
+            padding: 0 20px;
+        }
+
+        .token-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .token-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .token-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .token-icon.rtc { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+        }
+        .token-icon.wrtc-sol { 
+            background: linear-gradient(135deg, #99f2c8 0%, #1f4037 100%); 
+        }
+        .token-icon.wrtc-base { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+        }
+
+        .token-info {
+            flex: 1;
+        }
+
+        .token-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .token-symbol {
+            font-size: 12px;
+            color: #636e72;
+        }
+
+        .token-balance {
+            text-align: right;
+        }
+
+        .token-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .token-usd {
+            font-size: 12px;
+            color: #636e72;
+        }
+
+        /* Transaction History */
+        .transaction-section {
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .transaction-list {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+
+        .tx-icon.receive { background: #e8f5e9; }
+        .tx-icon.send { background: #ffebee; }
+        .tx-icon.mining { background: #e3f2fd; }
+        .tx-icon.swap { background: #f3e5f5; }
+
+        .tx-details {
+            flex: 1;
+        }
+
+        .tx-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+
+        .tx-date {
+            font-size: 11px;
+            color: #636e72;
+        }
+
+        .tx-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .tx-amount.positive {
+            color: #43e97b;
+        }
+
+        .tx-amount.negative {
+            color: #f5576c;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-top: 1px solid #dfe6e9;
+            padding-bottom: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item.inactive {
+            color: #b2bec3;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 🔋</span>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <h1>💼 我的钱包</h1>
+                <button class="qr-btn">📱 扫一扫</button>
+            </div>
+
+            <!-- Wallet Tabs -->
+            <div class="wallet-tabs">
+                <div class="tab active">全部</div>
+                <div class="tab inactive">RTC</div>
+                <div class="tab inactive">wRTC</div>
+            </div>
+
+            <!-- Token List -->
+            <div class="token-list">
+                <div class="token-card">
+                    <div class="token-header">
+                        <div class="token-icon rtc">🦀</div>
+                        <div class="token-info">
+                            <div class="token-name">RustChain</div>
+                            <div class="token-symbol">RTC</div>
+                        </div>
+                        <div class="token-balance">
+                            <div class="token-amount">2,847.50</div>
+                            <div class="token-usd">$284.75</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="token-card">
+                    <div class="token-header">
+                        <div class="token-icon wrtc-sol">◎</div>
+                        <div class="token-info">
+                            <div class="token-name">Wrapped RTC</div>
+                            <div class="token-symbol">wRTC (Solana)</div>
+                        </div>
+                        <div class="token-balance">
+                            <div class="token-amount">523.80</div>
+                            <div class="token-usd">$52.38</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="token-card">
+                    <div class="token-header">
+                        <div class="token-icon wrtc-base">⬡</div>
+                        <div class="token-info">
+                            <div class="token-name">Wrapped RTC</div>
+                            <div class="token-symbol">wRTC (Base)</div>
+                        </div>
+                        <div class="token-balance">
+                            <div class="token-amount">156.25</div>
+                            <div class="token-usd">$15.63</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-section">
+                <h2 class="section-title">📜 交易历史</h2>
+                <div class="transaction-list">
+                    <div class="transaction-item">
+                        <div class="tx-icon mining">⛏️</div>
+                        <div class="tx-details">
+                            <div class="tx-title">挖矿奖励</div>
+                            <div class="tx-date">今天 08:30</div>
+                        </div>
+                        <div class="tx-amount positive">+3.2 RTC</div>
+                    </div>
+
+                    <div class="transaction-item">
+                        <div class="tx-icon receive">⬇️</div>
+                        <div class="tx-details">
+                            <div class="tx-title">接收转账</div>
+                            <div class="tx-date">昨天 15:42</div>
+                        </div>
+                        <div class="tx-amount positive">+50.0 RTC</div>
+                    </div>
+
+                    <div class="transaction-item">
+                        <div class="tx-icon send">➤</div>
+                        <div class="tx-details">
+                            <div class="tx-title">发送转账</div>
+                            <div class="tx-date">3 月 10 日 10:15</div>
+                        </div>
+                        <div class="tx-amount negative">-25.0 RTC</div>
+                    </div>
+
+                    <div class="transaction-item">
+                        <div class="tx-icon swap">⇄</div>
+                        <div class="tx-details">
+                            <div class="tx-title">桥接兑换</div>
+                            <div class="tx-date">3 月 8 日 14:20</div>
+                        </div>
+                        <div class="tx-amount positive">+100.0 wRTC</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">首页</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-label">钱包</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⛏️</span>
+                    <span class="nav-label">挖矿</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🗳️</span>
+                    <span class="nav-label">治理</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">设置</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

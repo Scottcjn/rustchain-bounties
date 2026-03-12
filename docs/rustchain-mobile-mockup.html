@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Mobile App Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f6fa;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin: -30px 20px 20px;
+            padding: 25px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 30px -10px rgba(240, 147, 251, 0.5);
+        }
+
+        .balance-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .balance-usd {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 0 20px 20px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 10px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .action-icon.send { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .action-icon.receive { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .action-icon.swap { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .action-icon.stake { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .action-label {
+            font-size: 11px;
+            color: #2d3436;
+            font-weight: 500;
+        }
+
+        /* Mining Section */
+        .mining-section {
+            padding: 0 20px 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .mining-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .mining-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #43e97b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .mining-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #636e72;
+        }
+
+        /* Governance Section */
+        .governance-section {
+            padding: 0 20px 20px;
+        }
+
+        .proposal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .proposal-id {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .proposal-status {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #e8f5e9;
+            color: #43e97b;
+            font-weight: 600;
+        }
+
+        .proposal-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #dfe6e9;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+        }
+
+        .voting-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #636e72;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-top: 1px solid #dfe6e9;
+            padding-bottom: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item.inactive {
+            color: #b2bec3;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 🔋</span>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <h1>🦀 RustChain</h1>
+                <p>欢迎回来，矿工</p>
+            </div>
+
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <div class="balance-label">总余额</div>
+                <div class="balance-amount">2,847.50 RTC</div>
+                <div class="balance-usd">≈ $284.75 USD</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions">
+                <div class="action-btn">
+                    <div class="action-icon send">➤</div>
+                    <span class="action-label">发送</span>
+                </div>
+                <div class="action-btn">
+                    <div class="action-icon receive">⬇</div>
+                    <span class="action-label">接收</span>
+                </div>
+                <div class="action-btn">
+                    <div class="action-icon swap">⇄</div>
+                    <span class="action-label">兑换</span>
+                </div>
+                <div class="action-btn">
+                    <div class="action-icon stake">📊</div>
+                    <span class="action-label">质押</span>
+                </div>
+            </div>
+
+            <!-- Mining Section -->
+            <div class="mining-section">
+                <h2 class="section-title">⛏️ 挖矿状态</h2>
+                <div class="mining-card">
+                    <div class="mining-status">
+                        <div class="status-dot"></div>
+                        <span class="status-text">正在挖矿</span>
+                    </div>
+                    <div class="mining-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">3.2</div>
+                            <div class="stat-label">RTC/天</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2.8x</div>
+                            <div class="stat-label">倍数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">G4</div>
+                            <div class="stat-label">硬件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Governance Section -->
+            <div class="governance-section">
+                <h2 class="section-title">🗳️ 治理提案</h2>
+                <div class="proposal-card">
+                    <div class="proposal-header">
+                        <span class="proposal-id">提案 #1695</span>
+                        <span class="proposal-status">投票中</span>
+                    </div>
+                    <h3 class="proposal-title">RustChain 大使计划提案</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 67%"></div>
+                    </div>
+                    <div class="voting-info">
+                        <span>赞成：67%</span>
+                        <span>剩余 3 天</span>
+                    </div>
+                </div>
+                <div class="proposal-card">
+                    <div class="proposal-header">
+                        <span class="proposal-id">提案 #1692</span>
+                        <span class="proposal-status">投票中</span>
+                    </div>
+                    <h3 class="proposal-title">贡献者留存分析指南</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 82%"></div>
+                    </div>
+                    <div class="voting-info">
+                        <span>赞成：82%</span>
+                        <span>剩余 5 天</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">首页</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-label">钱包</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⛏️</span>
+                    <span class="nav-label">挖矿</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🗳️</span>
+                    <span class="nav-label">治理</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">设置</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

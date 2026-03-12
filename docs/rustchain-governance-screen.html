@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Governance Screen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f6fa;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: #2d3436;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .create-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Voting Power Card */
+        .voting-power-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 25px;
+            color: white;
+            box-shadow: 0 10px 30px -10px rgba(102, 126, 234, 0.5);
+        }
+
+        .power-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .power-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .power-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        /* Proposal Tabs */
+        .proposal-tabs {
+            display: flex;
+            background: white;
+            margin: 0 20px 15px;
+            border-radius: 15px;
+            padding: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab.inactive {
+            color: #636e72;
+        }
+
+        /* Proposal List */
+        .proposal-list {
+            padding: 0 20px;
+        }
+
+        .proposal-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .proposal-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .proposal-id {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .proposal-status {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .proposal-status.active {
+            background: #e8f5e9;
+            color: #43e97b;
+        }
+
+        .proposal-status.pending {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .proposal-status.closed {
+            background: #ffebee;
+            color: #f5576c;
+        }
+
+        .proposal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .proposal-description {
+            font-size: 12px;
+            color: #636e72;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .progress-section {
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #dfe6e9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .voting-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #636e72;
+        }
+
+        .vote-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .vote-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .vote-dot.for { background: #43e97b; }
+        .vote-dot.against { background: #f5576c; }
+
+        .vote-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .vote-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-top: 1px solid #dfe6e9;
+            padding-bottom: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-item.inactive {
+            color: #b2bec3;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Notch */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 🔋</span>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <h1>🗳️ 治理</h1>
+                <button class="create-btn">➕ 创建提案</button>
+            </div>
+
+            <!-- Voting Power Card -->
+            <div class="voting-power-card">
+                <div class="power-label">我的投票权</div>
+                <div class="power-amount">2,847 RTC</div>
+                <div class="power-details">
+                    <div class="detail-item">
+                        <div class="detail-value">2.8x</div>
+                        <div class="detail-label">硬件倍数</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">7,971</div>
+                        <div class="detail-label">加权票数</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">12</div>
+                        <div class="detail-label">已参与</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proposal Tabs -->
+            <div class="proposal-tabs">
+                <div class="tab active">进行中</div>
+                <div class="tab inactive">已结束</div>
+                <div class="tab inactive">我的</div>
+            </div>
+
+            <!-- Proposal List -->
+            <div class="proposal-list">
+                <!-- Proposal 1 -->
+                <div class="proposal-card">
+                    <div class="proposal-header">
+                        <span class="proposal-id">提案 #1695</span>
+                        <span class="proposal-status active">投票中</span>
+                    </div>
+                    <h3 class="proposal-title">RustChain 大使计划提案</span></h3>
+                    <p class="proposal-description">建立社区大使计划，通过社区驱动的宣传来发展生态系统。包含三个等级：青铜、白银、黄金大使。</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 67%"></div>
+                        </div>
+                        <div class="voting-stats">
+                            <div class="vote-option">
+                                <div class="vote-dot for"></div>
+                                <span>67% 赞成</span>
+                            </div>
+                            <div class="vote-option">
+                                <div class="vote-dot against"></div>
+                                <span>33% 反对</span>
+                            </div>
+                            <span>剩余 3 天</span>
+                        </div>
+                    </div>
+                    <button class="vote-btn">参与投票</button>
+                </div>
+
+                <!-- Proposal 2 -->
+                <div class="proposal-card">
+                    <div class="proposal-header">
+                        <span class="proposal-id">提案 #1692</span>
+                        <span class="proposal-status active">投票中</span>
+                    </div>
+                    <h3 class="proposal-title">贡献者留存分析指南</h3>
+                    <p class="proposal-description">创建全面的贡献者留存分析框架，帮助改善开源社区的参与者留存率。</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 82%"></div>
+                        </div>
+                        <div class="voting-stats">
+                            <div class="vote-option">
+                                <div class="vote-dot for"></div>
+                                <span>82% 赞成</span>
+                            </div>
+                            <div class="vote-option">
+                                <div class="vote-dot against"></div>
+                                <span>18% 反对</span>
+                            </div>
+                            <span>剩余 5 天</span>
+                        </div>
+                    </div>
+                    <button class="vote-btn">参与投票</button>
+                </div>
+
+                <!-- Proposal 3 -->
+                <div class="proposal-card">
+                    <div class="proposal-header">
+                        <span class="proposal-id">提案 #1686</span>
+                        <span class="proposal-status pending">待开始</span>
+                    </div>
+                    <h3 class="proposal-title">RustChain 发布清单</h3>
+                    <p class="proposal-description">创建全面的发布清单，包括发布前验证、发布执行和发布后验证步骤。</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="voting-stats">
+                            <span>尚未开始</span>
+                            <span>开始于 2 天后</span>
+                        </div>
+                    </div>
+                    <button class="vote-btn" style="opacity: 0.5;">等待开始</button>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item inactive">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">首页</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-label">钱包</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⛏️</span>
+                    <span class="nav-label">挖矿</span>
+                </div>
+                <div class="nav-item active">
+                    <span class="nav-icon">🗳️</span>
+                    <span class="nav-label">治理</span>
+                </div>
+                <div class="nav-item inactive">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">设置</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
