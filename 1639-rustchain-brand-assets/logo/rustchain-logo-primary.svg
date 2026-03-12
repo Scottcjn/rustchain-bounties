@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- RustChain Primary Logo -->
+  <!-- 主 Logo - 彩色版本 -->
+  
+  <!-- Background Hexagon -->
+  <path d="M256 20 L446 130 L446 350 L256 460 L66 350 L66 130 Z" 
+        fill="url(#rustGradient)" 
+        stroke="#8B3103" 
+        stroke-width="4"/>
+  
+  <!-- Gear Icon (centered) -->
+  <g transform="translate(256, 280)">
+    <!-- Outer Gear -->
+    <circle cx="0" cy="0" r="100" fill="none" stroke="#C0C0C0" stroke-width="8"/>
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#C0C0C0" stroke-width="8"/>
+    
+    <!-- Gear Teeth -->
+    <g stroke="#C0C0C0" stroke-width="12" stroke-linecap="round">
+      <line x1="0" y1="-110" x2="0" y2="-130"/>
+      <line x1="0" y1="110" x2="0" y2="130"/>
+      <line x1="-110" y1="0" x2="-130" y2="0"/>
+      <line x1="110" y1="0" x2="130" y2="0"/>
+      <line x1="-78" y1="-78" x2="-92" y2="-92"/>
+      <line x1="78" y1="78" x2="92" y2="92"/>
+      <line x1="-78" y1="78" x2="-92" y2="92"/>
+      <line x1="78" y1="-78" x2="92" y2="-92"/>
+    </g>
+    
+    <!-- Inner Circle -->
+    <circle cx="0" cy="0" r="50" fill="#D4AF37"/>
+    
+    <!-- RTC Letters -->
+    <text x="0" y="5" 
+          font-family="Arial, sans-serif" 
+          font-size="24" 
+          font-weight="bold" 
+          fill="#1A1A2E" 
+          text-anchor="middle">RTC</text>
+  </g>
+  
+  <!-- Rust Texture Overlay (subtle) -->
+  <path d="M256 20 L446 130 L446 350 L256 460 L66 350 L66 130 Z" 
+        fill="url(#rustTexture)" 
+        opacity="0.3"/>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="rustGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B7410E;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8B3103;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5C2002;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="rustTexture" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#D46428;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#8B3103;stop-opacity:0.6" />
+    </radialGradient>
+  </defs>
+</svg>
