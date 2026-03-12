@@ -1,0 +1,12 @@
+# RustChain API Load Test Suite - Dependencies
+# =============================================
+# Install dependencies for running load tests
+#
+# Usage:
+#   pip install -r requirements-loadtest.txt
+
+# Locust - Python load testing framework
+locust>=2.20.0
+
+# Additional utilities
+requests>=2.31.0
