@@ -1,0 +1,14 @@
+# RustChain Sigma 7 Miner - Dependencies
+
+Python 3.8+ required for gateway proxy.
+
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## Dependencies
+
+- pyserial>=3.5 - Serial communication
+- requests>=2.28.0 - HTTP/HTTPS API calls
