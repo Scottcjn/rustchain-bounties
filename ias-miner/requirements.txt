@@ -1,0 +1,14 @@
+# RustChain IAS Miner - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core dependencies (Python 3.7+)
+# No external dependencies required - uses only standard library!
+
+# Optional: For network attestation submission
+# aiohttp>=3.8.0
+
+# Optional: For enhanced timing precision
+# numpy>=1.20.0
+
+# Note: The IAS miner is designed to run with zero external dependencies
+# for maximum compatibility with vintage and minimal systems.
