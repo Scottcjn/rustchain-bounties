@@ -1,0 +1,5 @@
+# Intellivision CP1610 Miner Requirements
+# No external dependencies - uses Python standard library only
+
+# Optional: for development
+# pytest>=7.0.0
