@@ -1,0 +1,58 @@
+[package]
+name = "rustchain-miner"
+version = "0.1.0"
+edition = "2021"
+authors = ["RustChain Contributors"]
+description = "Native Rust implementation of RustChain miner with hardware fingerprinting"
+license = "MIT"
+
+[dependencies]
+# Cryptography
+ed25519-dalek = { version = "2.0", features = ["rand_core"] }
+rand = "0.8"
+sha2 = "0.10"
+hex = "0.4"
+
+# Hardware detection
+raw-cpuid = "11.0"
+sysinfo = "0.30"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# HTTP client for attestation submission
+reqwest = { version = "0.11", features = ["json"] }
+
+# Logging
+log = "0.4"
+env_logger = "0.10"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+dirs = "5.0"
+
+# Cross-compilation support
+[target.'cfg(target_arch = "powerpc64")'.dependencies]
+libc = "0.2"
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bin]]
+name = "rustchain-miner"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true

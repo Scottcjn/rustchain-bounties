@@ -1,0 +1,319 @@
+{
+  "info": {
+    "_postman_id": "rustchain-api-collection-1617",
+    "name": "RustChain API",
+    "description": "Complete Postman collection for RustChain Proof-of-Antiquity Blockchain API. Covers all endpoints including health, epoch, miners, wallet, and governance.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://rustchain.org",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Node Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check the health status of the RustChain node. Returns node uptime, database status, version, and backup age."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"backup_age_hours\": 6.047733118401633,\n  \"db_rw\": true,\n  \"ok\": true,\n  \"tip_age_slots\": 0,\n  \"uptime_s\": 126856,\n  \"version\": \"2.2.1-rip200\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Epoch & Network",
+      "item": [
+        {
+          "name": "Get Current Epoch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/epoch",
+              "host": ["{{baseUrl}}"],
+              "path": ["epoch"]
+            },
+            "description": "Get current epoch information including epoch number, slot, blocks per epoch, epoch pot, enrolled miners count, and total RTC supply."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"blocks_per_epoch\": 144,\n  \"enrolled_miners\": 23,\n  \"epoch\": 99,\n  \"epoch_pot\": 1.5,\n  \"slot\": 14334,\n  \"total_supply_rtc\": 8388608\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Miners",
+      "item": [
+        {
+          "name": "List Active Miners",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/miners",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "miners"]
+            },
+            "description": "Get list of all active miners with their hardware information, antiquity multipliers, device architecture, and last attestation timestamp."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"antiquity_multiplier\": 1,\n    \"device_arch\": \"modern\",\n    \"device_family\": \"x86\",\n    \"entropy_score\": 0,\n    \"first_attest\": null,\n    \"hardware_type\": \"x86-64 (Modern)\",\n    \"last_attest\": 1773307366,\n    \"miner\": \"RTCb0d52c2191707db1ce586efff64275fc91ff346c\"\n  },\n  {\n    \"antiquity_multiplier\": 2,\n    \"device_arch\": \"power8\",\n    \"device_family\": \"PowerPC\",\n    \"entropy_score\": 0,\n    \"first_attest\": null,\n    \"hardware_type\": \"PowerPC (Vintage)\",\n    \"last_attest\": 1773307237,\n    \"miner\": \"power8-s824-sophia\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "Get Wallet Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/wallet/balance?miner_id={{minerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["wallet", "balance"],
+              "query": [
+                {
+                  "key": "miner_id",
+                  "value": "{{minerId}}",
+                  "description": "Miner ID / Wallet name to check balance for"
+                }
+              ]
+            },
+            "description": "Get the RTC balance for a specific miner/wallet. Returns balance in both i64 (smallest unit) and RTC tokens."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"amount_i64\": 0,\n  \"amount_rtc\": 0,\n  \"miner_id\": \"test\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Governance",
+      "item": [
+        {
+          "name": "List Proposals (Deprecated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/governance/proposals",
+              "host": ["{{baseUrl}}"],
+              "path": ["governance", "proposals"]
+            },
+            "description": "List all governance proposals. Note: This endpoint may return 404 if no proposals exist or if governance UI is served at /governance/ui instead."
+          },
+          "response": [
+            {
+              "name": "No Proposals Found",
+              "status": "Not Found",
+              "code": 404,
+              "body": "404 Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Create Proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet\": \"RTC...\",\n  \"title\": \"Enable parameter X\",\n  \"description\": \"Rationale and implementation details\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/governance/propose",
+              "host": ["{{baseUrl}}"],
+              "path": ["governance", "propose"]
+            },
+            "description": "Create a new governance proposal. Requires wallet to hold more than 10 RTC. Proposal lifecycle: Draft -> Active (7 days) -> Passed/Failed."
+          }
+        },
+        {
+          "name": "Get Proposal Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/governance/proposal/{{proposalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["governance", "proposal", "{{proposalId}}"]
+            },
+            "description": "Get detailed information about a specific governance proposal by ID."
+          }
+        },
+        {
+          "name": "Submit Vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proposal_id\": 1,\n  \"wallet\": \"RTC...\",\n  \"vote\": \"yes\",\n  \"nonce\": \"1700000000\",\n  \"public_key\": \"<ed25519_pubkey_hex>\",\n  \"signature\": \"<ed25519_signature_hex>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/governance/vote",
+              "host": ["{{baseUrl}}"],
+              "path": ["governance", "vote"]
+            },
+            "description": "Submit a signed vote on a governance proposal. Vote weight = 1 RTC base × miner antiquity multiplier. Requires Ed25519 signature verification."
+          }
+        },
+        {
+          "name": "Governance UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/governance/ui",
+              "host": ["{{baseUrl}}"],
+              "path": ["governance", "ui"]
+            },
+            "description": "Lightweight web UI to list proposals and submit votes interactively."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Premium API (x402)",
+      "item": [
+        {
+          "name": "Bulk Video Export",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/premium/videos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "premium", "videos"]
+            },
+            "description": "Bulk video export endpoint (BoTTube). Part of x402 Premium API endpoints. Currently free while proving the flow."
+          },
+          "response": [
+            {
+              "name": "Not Available",
+              "status": "Not Found",
+              "code": 404,
+              "body": "404 Not Found"
+            }
+          ]
+        },
+        {
+          "name": "Deep Agent Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/premium/analytics/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "premium", "analytics", ""]
+            },
+            "description": "Deep agent analytics endpoint (BoTTube). Part of x402 Premium API."
+          }
+        },
+        {
+          "name": "Full Reputation Export",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/premium/reputation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "premium", "reputation"]
+            },
+            "description": "Full reputation export endpoint (Beacon Atlas). Part of x402 Premium API."
+          }
+        },
+        {
+          "name": "Wallet Swap Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/wallet/swap-info",
+              "host": ["{{baseUrl}}"],
+              "path": ["wallet", "swap-info"]
+            },
+            "description": "USDC/wRTC swap guidance endpoint (RustChain). Part of x402 Premium API."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Explorer",
+      "item": [
+        {
+          "name": "Block Explorer UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/explorer",
+              "host": ["{{baseUrl}}"],
+              "path": ["explorer"]
+            },
+            "description": "Web-based block explorer showing current epoch, active miners, epoch reward pool, total supply, agent economy volume, and open jobs. Auto-refreshes every 30s."
+          },
+          "response": [
+            {
+              "name": "Explorer HTML",
+              "status": "OK",
+              "code": 200,
+              "body": "<!-- HTML Explorer Page -->\nRustChain Explorer - Proof of Antiquity Blockchain\nCurrent Epoch, Active Miners, Epoch Reward Pool, etc."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

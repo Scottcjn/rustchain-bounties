@@ -1,0 +1,151 @@
+# RustChain API Load Test Suite - Artillery Version
+# ==================================================
+# Load testing suite for RustChain API endpoints using Artillery.
+# Tests performance, reliability, and rate limiting of the API.
+#
+# Bounty: #1614 - Create a load test suite for the RustChain API
+# Reward: 5 RTC
+#
+# Usage:
+#   artillery run artillery-loadtest.yml
+#   artillery run --target https://50.28.86.131 artillery-loadtest.yml
+#   artillery quick --count 10 --num 100 https://50.28.86.131/health
+
+config:
+  target: "https://50.28.86.131"
+  http:
+    timeout: 30
+    followRedirect: false
+    tls:
+      rejectUnauthorized: false  # Handle self-signed certificates
+  
+  # Test phases
+  phases:
+    # Ramp up phase
+    - duration: 30s
+      arrivalRate: 1
+      rampTo: 5
+      name: "Ramp up load"
+    
+    # Sustained load phase
+    - duration: 1m
+      arrivalRate: 5
+      name: "Sustained load"
+    
+    # Ramp down phase
+    - duration: 30s
+      arrivalRate: 5
+      rampTo: 1
+      name: "Ramp down"
+  
+  # Default headers
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      User-Agent: "RustChain-Artillery-LoadTest/1.0"
+  
+  # Variables for testing
+  variables:
+    test_miner_ids:
+      - "victus-x86-scott"
+      - "test-miner-001"
+      - "test-miner-002"
+  
+  # Performance thresholds
+  ensure:
+    - p95 < 1000  # 95th percentile response time < 1s
+    - p99 < 2000  # 99th percentile response time < 2s
+    - errorRate < 10  # Error rate < 10%
+
+scenarios:
+  # Main API testing scenario
+  - name: "API Health Check"
+    weight: 30  # 30% of requests
+    flow:
+      - get:
+          url: "/health"
+          capture:
+            - json: "$.ok"
+              as: "health_status"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: "ok"
+  
+  - name: "API Epoch Check"
+    weight: 30  # 30% of requests
+    flow:
+      - get:
+          url: "/epoch"
+          capture:
+            - json: "$.epoch"
+              as: "current_epoch"
+            - json: "$.slot"
+              as: "current_slot"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: "epoch"
+            - hasProperty: "slot"
+            - hasProperty: "blocks_per_epoch"
+            - hasProperty: "enrolled_miners"
+  
+  - name: "API Miners List"
+    weight: 20  # 20% of requests
+    flow:
+      - get:
+          url: "/api/miners"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - isList: true
+  
+  - name: "API Wallet Balance"
+    weight: 10  # 10% of requests
+    flow:
+      - loop:
+          - get:
+              url: "/wallet/balance?miner_id={{ $randomElement(test_miner_ids) }}"
+              expect:
+                - statusCode: [200, 404]  # Both are acceptable
+                - contentType: json
+        count: 1
+  
+  - name: "API Attestation Challenge"
+    weight: 5  # 5% of requests
+    flow:
+      - post:
+          url: "/attest/challenge"
+          json: {}
+          capture:
+            - json: "$.nonce"
+              as: "challenge_nonce"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: "nonce"
+            - hasProperty: "expires_at"
+  
+  - name: "API Explorer Redirect"
+    weight: 5  # 5% of requests
+    flow:
+      - get:
+          url: "/explorer"
+          expect:
+            - statusCode: [200, 301, 302]
+
+# Custom checks and validations
+plugins:
+  expect:
+    - kind: json
+      type: "isList"
+      test: "Array.isArray(value)"
+
+# Reporting configuration
+reporting:
+  - output:
+      - console
+  - output:
+      - file:
+          filename: "artillery-report.json"
+          format: "json"
