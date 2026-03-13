@@ -1,0 +1,8 @@
+# MANIAC II Miner Simulator Requirements
+# Python 3.7+
+
+# No external dependencies required!
+# Uses only Python standard library
+
+# Optional: For enhanced output formatting
+# colorama>=0.4.4
