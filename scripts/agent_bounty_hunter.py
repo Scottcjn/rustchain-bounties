@@ -114,6 +114,13 @@ def _extract_usd_amounts(text: str) -> List[float]:
 def parse_reward(body: str, title: str) -> Tuple[float, float]:
     text = f"{title}\n{body or ''}"
 
+    # Heuristic reward parsing is intentionally conservative:
+    # - Prefer explicit amounts in the title.
+    # - Avoid "pool/prize pool" numbers (shared budgets are not per-PR payouts).
+    # - Fall back to lines that look like reward declarations.
+    #
+    # This keeps scan ranking useful without inflating scores from marketing copy.
+    #
     # Prefer explicit title declaration, e.g. "(75 RTC)" / "($200)".
     title_rtc = _extract_amounts(title or "", r"RTC(?:\)|\b)") if "pool" not in (title or "").lower() else []
     title_usd = _extract_usd_amounts(title or "")

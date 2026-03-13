@@ -300,8 +300,7 @@ curl -s https://50.28.86.131/explorer
 # Query a specific wallet balance
 curl -s "https://50.28.86.131/wallet/balance?miner_id=YOUR_WALLET"
 
-# View pending transfers
-curl -s "https://50.28.86.131/wallet/pending?miner_id=YOUR_WALLET"
+# Pending transfers are listed in this ledger under "Pending Transfers" (and in the explorer UI above).
 ```
 
 ---

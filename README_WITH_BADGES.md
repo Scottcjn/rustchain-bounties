@@ -1,8 +1,8 @@
 # RustChain
 
-[![RTC Rewards](https://img.shields.io/badge/RTC-Rewards-orange)](https://rustchain.ai)
-[![Proof of Age](https://img.shields.io/badge/Consensus-Proof%20of%20Age-blue)](https://rustchain.ai)
-[![Hardware Mining](https://img.shields.io/badge/Mining-Hardware%20Friendly-green)](https://rustchain.ai)
+[![RTC Rewards](https://img.shields.io/badge/RTC-Rewards-orange)](https://rustchain.org)
+[![Proof of Age](https://img.shields.io/badge/Consensus-Proof%20of%20Age-blue)](https://rustchain.org)
+[![Hardware Mining](https://img.shields.io/badge/Mining-Hardware%20Friendly-green)](https://rustchain.org)
 
 The first blockchain that rewards vintage hardware for being old, not fast.
 
@@ -18,7 +18,7 @@ RustChain is a revolutionary Proof-of-Age blockchain that values hardware longev
 
 ## Links
 
-- Website: https://rustchain.ai
+- Website: https://rustchain.org
 - GitHub: https://github.com/Scottcjn/Rustchain
 - Discord: [Community](https://discord.gg/rustchain)
 
