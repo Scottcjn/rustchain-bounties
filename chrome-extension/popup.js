@@ -1,3 +1,4 @@
+// RustChain Balance Chrome Extension
 // Load saved wallet
 chrome.storage.local.get(['walletId'], (result) => {
   if (result.walletId) {
