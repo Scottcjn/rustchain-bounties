@@ -1,179 +1,158 @@
-# RustChain Miner - Native Rust Implementation
+# PDP-1 (1959) RustChain Miner
 
-[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Bounty](https://img.shields.io/badge/bounty-15%20RTC-green.svg)](https://github.com/Scottcjn/rustchain-bounties/issues/1601)
+**LEGENDARY Tier Bounty - 200 RTC**
 
-Native Rust port of the RustChain universal miner (`rustchain_universal_miner.py`) with hardware fingerprinting, Ed25519 signatures, and attestation support.
+Port of the RustChain miner to the PDP-1, DEC's first computer and the machine that launched the minicomputer revolution (1959).
 
-## Features
+## Overview
 
-### Hardware Fingerprinting (7 Checks)
+This project implements a RustChain miner on the PDP-1, the computer that made computing accessible to universities and research labs. The PDP-1 was revolutionary for its time - transistor-based, interactive, and affordable (relatively speaking).
 
-1. **Clock-Skew & Oscillator Drift** - Measures microscopic timing imperfections in the CPU oscillator
-2. **Cache Timing Fingerprint** - Creates unique "echo pattern" based on cache hierarchy (L1/L2/L3)
-3. **SIMD Unit Identity** - Detects SSE/AVX/AltiVec/NEON and measures instruction bias
-4. **Thermal Drift Entropy** - Measures performance changes as CPU heats up
-5. **Instruction Path Jitter** - Captures cycle-level jitter across different pipeline types
-6. **Device-Age Oracle** - Collects CPU model, release year, stepping metadata
-7. **Anti-Emulation Checks** - Detects VMs, hypervisors, and cloud providers
+### Key Specifications
 
-### Cryptography
+- **Year**: 1959 (first shipped)
+- **Word Size**: 18 bits
+- **Memory**: 4,096 words (9,216 bytes) magnetic-core
+- **Technology**: Transistors (~500) - no vacuum tubes!
+- **Clock Speed**: 5 MHz (200 ns cycle time)
+- **Performance**: 100,000-200,000 instructions/second
+- **I/O**: Type 30 CRT display, paper tape, typewriter (Flexowriter)
+- **Price**: $120,000 (1960) ≈ $1.2M today
 
-- **Ed25519** signatures for attestation
-- Secure key generation and storage
-- Signature verification
-
-### Cross-Platform Support
-
-- ✅ x86_64 (Linux, macOS, Windows)
-- ✅ ARM64 (Apple Silicon, Raspberry Pi)
-- ✅ PowerPC64 (legacy systems)
-- 🔄 Cross-compilation support for PowerPC/ARM (+10 RTC bonus)
-
-## Building
-
-### Prerequisites
-
-- Rust 1.70 or later (`rustup install stable`)
-- For cross-compilation: appropriate target toolchains
-
-### Build Commands
-
-```bash
-# Standard build
-cargo build --release
-
-# Build for current platform
-cargo build --release --target $(rustc -vV | grep host | cut -d' ' -f2)
-
-# Cross-compile for PowerPC64 (bonus target)
-rustup target add powerpc64-unknown-linux-gnu
-cargo build --release --target powerpc64-unknown-linux-gnu
-
-# Cross-compile for ARM64
-rustup target add aarch64-unknown-linux-gnu
-cargo build --release --target aarch64-unknown-linux-gnu
-```
-
-## Configuration
-
-Create `~/.rustchain/config.toml`:
-
-```toml
-key_path = "~/.rustchain/miner_key.bin"
-node_url = "http://localhost:8080"
-submit_attestation = true
-epoch_duration = 300
-log_level = "info"
-cache_path = "~/.rustchain/cache"
-```
-
-## Usage
-
-```bash
-# Run the miner
-./target/release/rustchain-miner
-
-# With custom config
-RUSTCHAIN_CONFIG=/path/to/config.toml ./target/release/rustchain-miner
-
-# Set log level
-RUST_LOG=debug ./target/release/rustchain-miner
-```
-
-## Testing
-
-```bash
-# Run tests
-cargo test
-
-# Run with hardware fingerprint validation
-cargo test -- --nocapture hardware
-
-# Benchmark
-cargo bench
-```
-
-## API Integration
-
-### Attestation Endpoint
-
-```rust
-POST /api/v1/attestation
-Content-Type: application/json
-
-{
-  "version": "1.0.0",
-  "timestamp": 1234567890,
-  "miner_public_key": "hex_encoded_public_key",
-  "fingerprint": { /* hardware fingerprint data */ },
-  "signature": "hex_encoded_signature"
-}
-```
-
-### Work Submission Endpoint
-
-```rust
-POST /api/v1/work
-Content-Type: application/json
-
-{
-  "fingerprint_hash": "hex_hash",
-  "work_proof": "hex_proof",
-  "timestamp": 1234567890,
-  "difficulty_met": true,
-  "miner_public_key": "hex_encoded_public_key",
-  "signature": "hex_encoded_signature"
-}
-```
-
-## Architecture
+## Project Structure
 
 ```
-src/
-├── main.rs          # Entry point and mining loop
-├── hardware.rs      # Hardware fingerprinting (7 checks)
-├── crypto.rs        # Ed25519 key management and signing
-├── attestation.rs   # Attestation creation and submission
-└── config.rs        # Configuration management
+pdp1-miner/
+├── README.md                 # This file
+├── pdp1-sim/                 # PDP-1 CPU simulator
+│   ├── pdp1_cpu.py           # CPU emulator
+│   ├── core_memory.py        # Magnetic-core memory model
+│   └── macro_assembler.py    # MACRO assembly
+├── pdp1-miner/               # Miner implementation
+│   ├── sha256_pdp1.mac       # SHA256 in PDP-1 assembly
+│   └── miner_main.mac        # Main miner program
+├── network-bridge/           # Network interface
+│   └── paper_tape_interface.py # Paper tape reader/punch interface
+└── docs/                     # Documentation
+    ├── architecture.md       # PDP-1 architecture reference
+    └── implementation.md     # Implementation details
 ```
 
-## Comparison with Python Version
+## Implementation Status
 
-| Feature | Python Version | Rust Version |
-|---------|---------------|--------------|
-| Lines of Code | ~800 | ~900 |
-| Performance | Baseline | 10-50x faster |
-| Memory Usage | ~100MB | ~10MB |
-| Binary Size | N/A (interpreted) | ~5MB |
-| Cross-compile | Limited | Full support |
-| Type Safety | Dynamic | Static |
+### Phase 1: Simulator Development (50 RTC)
 
-## Security Considerations
+- [x] PDP-1 CPU simulator created
+- [ ] MACRO assembler implementation
+- [ ] Debugging tools
 
-- Private keys stored with 0600 permissions (Unix)
-- No sensitive data in logs
-- Secure random number generation via `OsRng`
-- Constant-time signature verification
+### Phase 2: SHA256 Implementation (75 RTC)
 
-## Contributing
+- [ ] 18-bit arithmetic primitives
+- [ ] SHA256 message scheduling
+- [ ] SHA256 compression function
+- [ ] Test vector validation
 
-1. Fork the repository
-2. Create a feature branch
-3. Run `cargo clippy` and `cargo fmt`
-4. Submit a PR
+### Phase 3: Network Bridge (50 RTC)
 
-## License
+- [ ] Paper tape interface
+- [ ] Network protocol implementation
+- [ ] Error handling
 
-MIT License - see [LICENSE](LICENSE) for details.
+### Phase 4: Hardware Fingerprint (25 RTC)
+
+- [ ] Core memory timing signature
+- [ ] Transistor characteristics
+- [ ] Attestation protocol
+
+### Phase 5: Documentation & Verification (25 RTC)
+
+- [ ] Video documentation
+- [ ] Technical documentation
+- [ ] API verification
 
 ## Bounty Information
 
-- **Issue:** [#1601](https://github.com/Scottcjn/rustchain-bounties/issues/1601)
-- **Reward:** 15 RTC (base) + 10 RTC (PowerPC/ARM cross-compile bonus)
-- **Tags:** rust, systems-programming, miner, blockchain, bounty
+- **Issue**: #337 (PDP-1 Port)
+- **Total Bounty**: 200 RTC
+- **Multiplier**: 5.0x (Maximum)
+- **Wallet**: `RTC4325af95d26d59c3ef025963656d22af638bb96b`
 
-## Acknowledgments
+## Quick Start
 
-Original Python implementation by the RustChain team. This is a native Rust port with improved performance and cross-platform support.
+### Running the Simulator
+
+```bash
+cd pdp1-sim
+python pdp1_cpu.py
+```
+
+### Assembling Programs
+
+```bash
+python macro_assembler.py program.mac -o program.ptape
+```
+
+## Architecture Highlights
+
+### Registers
+
+- **AC**: 18-bit Accumulator
+- **IO**: 18-bit Input-Output register (extends AC for double-precision)
+- **PC**: 18-bit Program Counter
+- **MB**: 18-bit Memory Buffer
+- **MA**: 18-bit Memory Address
+
+### Instruction Format
+
+**Single Address Format (18 bits)**:
+```
+| 1-bit indirect | 3-bit opcode | 1-bit index | 12-bit address |
+| I              | OPCODE       | B          | ADDRESS        |
+```
+
+### Memory Layout
+
+```
+0x000-0x03F: Boot loader
+0x040-0x07F: SHA256 constants
+0x080-0x0FF: Hash state and working variables
+0x100-0x1FF: I/O buffer
+0x200-0x3FF: Stack
+0x400-0xFFF: Free space (90% available!)
+```
+
+## Historical Context
+
+The PDP-1 was a revolutionary machine:
+
+- **DEC's first computer** - launched the minicomputer industry
+- **First interactive computer** - users could type and see results immediately
+- **Spacewar! (1962)** - first video game, created on PDP-1
+- **Hacker culture birthplace** - MIT Tech Model Railroad Club
+- **Text editing pioneer** - first interactive text editor
+- **Music synthesis** - early computer music experiments
+- **53 units produced** between 1959-1966
+
+### Notable PDP-1 Moments
+
+- **Spacewar!**: Steve Russell created the first video game in 1962
+- **Ivan Sutherland's Sketchpad**: Early computer graphics (1963)
+- **First word processor**: Expensive Typewriter (1961)
+- **Music**: Music Macro Language experiments
+- **AI research**: Early artificial intelligence experiments
+
+## License
+
+MIT License - See LICENSE file for details.
+
+## Contact
+
+- GitHub: [Scottcjn/rustchain-bounties #337](https://github.com/Scottcjn/rustchain-bounties/issues/337)
+- Discord: RustChain Discord
+
+---
+
+**67 years of computing history. One blockchain. Infinite possibilities.**
+
+*The machine that started it all - DEC's first computer, the grandfather of personal computing.*

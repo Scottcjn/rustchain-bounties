@@ -1,0 +1,228 @@
+/ PDP-1 SHA256 Implementation
+/ DEC PDP-1 Assembly Language (MACRO)
+/ 
+/ This file contains the SHA256 hash function implemented
+/ for the PDP-1's 18-bit architecture.
+/
+/ Since SHA256 uses 32-bit words and the PDP-1 has 18-bit words,
+/ each 32-bit value is stored across two PDP-1 words:
+/   - Low word: bits 0-17
+/   - High word: bits 18-31 (in lower 14 bits)
+/
+/ Author: RustChain PDP-1 Miner Project
+/ Date: 2026-03-13
+/ License: MIT
+
+/ Memory Layout
+/ =============
+/ 0000-0077: K constants (64 words x 2 = 128 words)
+/ 0100-0117: Hash state H0-H7 (8 values x 2 = 16 words)
+/ 0120-0137: Working variables a-h (8 values x 2 = 16 words)
+/ 0140-0177: Message schedule W[0..63] (64 values x 2 = 128 words)
+/ 0200-0277: Temporary storage
+/ 0300-0377: I/O buffer
+/ 0400-: Program code
+
+        ORG 0400          / Start program at address 0400
+
+/ Main Entry Point
+START:  CLA               / Clear accumulator
+        CLL               / Clear link
+        JMP INIT          / Jump to initialization
+
+/ Initialize SHA256 Hash State
+INIT:   / Load initial hash values H0-H7
+        / H0 = 0x6a09e667
+        TAD H0_LOW
+        DCA 0100          / Store H0 low
+        TAD H0_HIGH
+        DCA 0101          / Store H0 high
+        
+        / H1 = 0xbb67ae85
+        TAD H1_LOW
+        DCA 0102
+        TAD H1_HIGH
+        DCA 0103
+        
+        / H2 = 0x3c6ef372
+        TAD H2_LOW
+        DCA 0104
+        TAD H2_HIGH
+        DCA 0105
+        
+        / H3 = 0xa54ff53a
+        TAD H3_LOW
+        DCA 0106
+        TAD H3_HIGH
+        DCA 0107
+        
+        / H4 = 0x510e527f
+        TAD H4_LOW
+        DCA 0110
+        TAD H4_HIGH
+        DCA 0111
+        
+        / H5 = 0x9b05688c
+        TAD H5_LOW
+        DCA 0112
+        TAD H5_HIGH
+        DCA 0113
+        
+        / H6 = 0x1f83d9ab
+        TAD H6_LOW
+        DCA 0114
+        TAD H6_HIGH
+        DCA 0115
+        
+        / H7 = 0x5be0cd19
+        TAD H7_LOW
+        DCA 0116
+        TAD H7_HIGH
+        DCA 0117
+        
+        JMP MAIN_LOOP     / Start main mining loop
+
+/ Main Mining Loop
+MAIN_LOOP:
+        / Get work from network (via paper tape)
+        JMS READ_WORK     / Read work data
+        
+        / Process block
+        JMS SHA256_PROCESS
+        
+        / Check if share found
+        JMS CHECK_SHARE
+        TAD FOUND         / Test if share found
+        SZA               / Skip if accumulator zero
+        JMP SHARE_FOUND   / Jump if share found
+        
+        / Increment nonce
+        TAD NONCE
+        IAC               / Increment accumulator
+        DCA NONCE
+        
+        JMP MAIN_LOOP     / Continue mining
+
+/ SHA256 Process Block
+/ Input: 64-byte message block at 0300
+SHA256_PROCESS:
+        0               / Return address storage
+        
+        / Prepare message schedule W[0..15]
+        / (Implementation would go here)
+        
+        / Extend to W[16..63]
+        / (Implementation would go here)
+        
+        / Initialize working variables
+        / a=H0, b=H1, c=H2, d=H3, e=H4, f=H5, g=H6, h=H7
+        
+        / 64 rounds of compression
+        / (Implementation would go here)
+        
+        / Update hash state
+        / H0 += a, H1 += b, etc.
+        
+        IAC             / Return success
+        JMP SHA256_PROCESS
+
+/ Check if hash meets difficulty
+CHECK_SHARE:
+        0               / Return address storage
+        
+        / Check leading zeros in hash
+        / (Implementation would go here)
+        
+        DCA FOUND       / Store result (0 or 1)
+        JMP CHECK_SHARE
+
+/ Share Found Handler
+SHARE_FOUND:
+        / Submit share to network
+        JMS SUBMIT_SHARE
+        
+        / Log success
+        JMS LOG_SUCCESS
+        
+        JMP MAIN_LOOP
+
+/ Read Work from Network
+READ_WORK:
+        0               / Return address storage
+        
+        / Read from paper tape or network interface
+        / (Implementation would go here)
+        
+        JMP READ_WORK
+
+/ Submit Share to Network
+SUBMIT_SHARE:
+        0               / Return address storage
+        
+        / Submit via paper tape or network interface
+        / (Implementation would go here)
+        
+        JMP SUBMIT_SHARE
+
+/ Log Success to Console
+LOG_SUCCESS:
+        0               / Return address storage
+        
+        / Print success message via Flexowriter
+        / (Implementation would go here)
+        
+        JMP LOG_SUCCESS
+
+/ SHA256 Constants (K[0..63])
+/ First 32 bits of fractional parts of cube roots of first 64 primes
+K_CONSTANTS:
+        / K[0] = 0x428a2f98
+        027450        / Low word (0x2f98)
+        010512        / High word (0x428a)
+        
+        / K[1] = 0x71374491
+        024441        / Low word (0x4491)
+        016227        / High word (0x7137)
+        
+        / K[2] = 0xb5c0fbcf
+        037557        / Low word (0xfbcf)
+        026540        / High word (0xb5c0)
+        
+        / K[3] = 0xe9b5dba5
+        033645        / Low word (0xdba5)
+        035235        / High word (0xe9b5)
+        
+        / ... (remaining K constants would go here)
+
+/ Initial Hash Values (H0-H7)
+/ First 32 bits of fractional parts of square roots of first 8 primes
+H0_LOW: 034627          / 0xe667
+H0_HIGH: 015204         / 0x6a09
+
+H1_LOW: 025705          / 0xae85
+H1_HIGH: 027543         / 0xbb67
+
+H2_LOW: 036342          / 0xf372
+H2_HIGH: 007456         / 0x3c6e
+
+H3_LOW: 036532          / 0xf53a
+H3_HIGH: 024524         / 0xa54f
+
+H4_LOW: 024237          / 0x527f
+H4_HIGH: 012216         / 0x510e
+
+H5_LOW: 030414          / 0x688c
+H5_HIGH: 023445         / 0x9b05
+
+H6_LOW: 033153          / 0xd9ab
+H6_HIGH: 003743         / 0x1f83
+
+H7_LOW: 031331          / 0xcd19
+H7_HIGH: 013560         / 0x5be0
+
+/ Variables
+NONCE:  0               / Current nonce value
+FOUND:  0               / Share found flag (0 or 1)
+
+/ End of Program
+        END START
