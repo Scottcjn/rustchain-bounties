@@ -108,6 +108,9 @@ def extract_links(text: str) -> Tuple[str, ...]:
 
 def _normalize_text(text: str) -> str:
     text = (text or "").lower()
+    # We want to detect "template reuse" in claim comments, not similarity in the
+    # user-specific fields. Strip URLs/mentions/structured claim lines so two
+    # otherwise-identical templates remain comparable.
     text = URL_RE.sub(" ", text)
     text = re.sub(r"@[a-z0-9_-]+", " user ", text)
     text = CLAIM_LINE_RE.sub(" ", text)
@@ -120,6 +123,10 @@ def _normalize_text(text: str) -> str:
 def _text_similarity(a: str, b: str) -> float:
     if not a or not b:
         return 0.0
+    # Use two similarity measures:
+    # 1) SequenceMatcher ratio: catches near-identical templates.
+    # 2) Jaccard overlap: catches re-ordered templates / small edits.
+    # Taking max biases toward flagging "same template" even if order changes.
     seq_ratio = SequenceMatcher(None, a, b).ratio()
     a_tokens = set(a.split())
     b_tokens = set(b.split())
@@ -181,6 +188,8 @@ def score_claims(
         for claim in claims
     ]
 
+    # Precompute per-user / per-wallet aggregates so a single claim can be scored
+    # against the surrounding "claim window" without extra API calls.
     user_claim_counts = {}
     user_repo_counts = {}
     wallet_users = {}
@@ -209,12 +218,16 @@ def score_claims(
                 signals.append(RiskSignal("ACCOUNT_AGE", 12, f"account age {age_days}d"))
 
         claim_count = user_claim_counts.get(claim.user, 0)
+        # Fast claim velocity is a common indicator of "bounty farming" (claiming
+        # many issues quickly without doing the work).
         if claim_count >= policy.high_velocity_claims:
             signals.append(RiskSignal("CLAIM_VELOCITY", 18, f"{claim_count} claims in window"))
         elif claim_count >= policy.medium_velocity_claims:
             signals.append(RiskSignal("CLAIM_VELOCITY", 8, f"{claim_count} claims in window"))
 
         repo_count = len(user_repo_counts.get(claim.user, set()))
+        # Spreading claims across many repos is suspicious mainly when combined
+        # with high velocity (spray-and-pray pattern).
         if repo_count >= policy.high_repo_spread:
             signals.append(RiskSignal("REPO_SPREAD", 10, f"claims span {repo_count} repos"))
         elif repo_count >= policy.medium_repo_spread and claim_count >= policy.medium_velocity_claims:
@@ -222,6 +235,8 @@ def score_claims(
 
         if claim.wallet:
             overlap = len(wallet_users.get(claim.wallet, set()))
+            # Multiple accounts claiming with the same payout wallet is a strong
+            # sybil / multi-account signal.
             if overlap >= 3:
                 signals.append(RiskSignal("WALLET_REUSE", 24, f"wallet reused by {overlap} accounts"))
             elif overlap >= 2:
@@ -233,6 +248,8 @@ def score_claims(
             if overlap >= 2:
                 duplicate_links.append((link, overlap))
         if duplicate_links:
+            # Reused "proof" (same tweet / same starred page / same screenshot link)
+            # is a high-signal indicator of low-effort or copied submissions.
             strongest_overlap = max(overlap for _link, overlap in duplicate_links)
             points = 20 if strongest_overlap >= 3 else 12
             signals.append(
@@ -252,6 +269,8 @@ def score_claims(
             for other in normalized_claims:
                 if other.claim_id == claim.claim_id:
                     continue
+                # Compare against other claims to detect shared templates across
+                # distinct accounts, and repeated boilerplate by the same user.
                 sim = _text_similarity(current_text, normalized_text.get(other.claim_id, ""))
                 if other.user == claim.user:
                     if other.issue_ref == claim.issue_ref:
