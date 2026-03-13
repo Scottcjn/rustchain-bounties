@@ -1,0 +1,10 @@
+# SWAC Miner 依赖
+
+# 串口通信
+pyserial>=3.5
+
+# 网络 (可选，用于矿池连接)
+# requests>=2.28.0
+
+# 测试
+pytest>=7.0.0
