@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 300px; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 20px; margin-bottom: 5px; }
+    .balance-card { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 25px; text-align: center; margin-bottom: 20px; }
+    .balance-label { font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+    .balance-amount { font-size: 36px; font-weight: bold; margin-bottom: 5px; }
+    .balance-usd { font-size: 16px; opacity: 0.8; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 12px; margin-bottom: 5px; opacity: 0.9; }
+    .input-group input { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 14px; background: rgba(255,255,255,0.9); }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-primary:hover { background: #45a049; }
+    .btn-secondary { background: rgba(255,255,255,0.2); color: white; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+    .status { text-align: center; font-size: 12px; margin-top: 10px; opacity: 0.8; }
+    .error { background: rgba(244,67,54,0.3); padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🦀 RustChain Balance</h1>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="balance-card">
+    <div class="balance-label">Balance</div>
+    <div class="balance-amount" id="balance">0.00 RTC</div>
+    <div class="balance-usd" id="balance-usd">≈ $0.00 USD</div>
+  </div>
+
+  <div class="input-group">
+    <label>Miner ID / Wallet Address</label>
+    <input type="text" id="minerId" placeholder="Enter your miner ID">
+  </div>
+
+  <button class="btn btn-primary" id="checkBalance">Check Balance</button>
+  <button class="btn btn-secondary" id="refresh">🔄 Refresh</button>
+
+  <div class="status" id="status">Last updated: Never</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

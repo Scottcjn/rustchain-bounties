@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "RustChain Balance Checker",
+  "version": "1.0.0",
+  "description": "Check your RustChain (RTC) balance in real-time",
+  "permissions": ["storage"],
+  "host_permissions": ["https://50.28.86.131/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
