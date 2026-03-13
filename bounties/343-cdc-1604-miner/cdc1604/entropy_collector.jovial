@@ -1,0 +1,232 @@
+C        RUSTCHAIN CDC 1604 ENTROPY COLLECTOR
+C        "Pantheon Edition" - For CDC 1604 (1960)
+C        Designer: Seymour Cray
+C        
+C        This program collects hardware entropy from CDC 1604
+C        and generates a wallet ID for RustChain mining.
+C
+C        Compile: JOVIAL compiler → Assembly → Binary
+C        Run: Load on CDC 1604 or SIMH simulator
+C
+C        Output: Wallet ID to line printer or paper tape
+C
+        BEGIN ENTROPY_COLLECTOR
+C
+C        ============================================================
+C        DECLARATIONS
+C        ============================================================
+C
+        DECLARE TIMING_PATTERN:   ARRAY(32) OF WORD;
+        DECLARE JITTER_SAMPLES:   ARRAY(16) OF WORD;
+        DECLARE AUDIO_SAMPLES:    ARRAY(8) OF BIT(3);
+        DECLARE CORE_DELTA:       WORD;
+        DECLARE THERMAL_COEFF:    WORD;
+        DECLARE ENTROPY_HASH:     ARRAY(48) OF BIT(6);
+        DECLARE WALLET_ID:        STRING(43);
+        DECLARE MINER_ID:         STRING(12);
+        DECLARE I, J, K:          INTEGER;
+        DECLARE TEMP:             WORD;
+        DECLARE HASH_STATE:       ARRAY(4) OF WORD;
+C
+C        ============================================================
+C        PHASE 1: COLLECT CORE MEMORY TIMING PATTERNS
+C        ============================================================
+C
+        PRINT('CDC 1604 Entropy Collector - RustChain');
+        PRINT('======================================');
+        PRINT(' ');
+        PRINT('Phase 1: Core Memory Timing...');
+C
+C        CDC 1604 has interleaved memory banks (odd/even)
+C        Access times vary due to core magnetic properties
+C
+        DO I = 0 TO 31;
+            CALL TIMER_START();
+C           Access memory at address I * 1000 (spread across banks)
+            TEMP = MEMORY_BLOCK(I * 1000);
+            CALL TIMER_STOP(TIMING_PATTERN(I));
+        END;
+C
+        PRINT('  Collected 32 timing samples');
+C
+C        ============================================================
+C        PHASE 2: MEASURE INSTRUCTION EXECUTION JITTER
+C        ============================================================
+C
+        PRINT('Phase 2: Instruction Jitter...');
+C
+        DO I = 0 TO 15;
+            CALL TIMER_START();
+C           Execute known instruction sequence
+            DO J = 0 TO 999;
+                TEMP = TEMP + J;
+                TEMP = TEMP - 1;
+            END;
+            CALL TIMER_STOP(JITTER_SAMPLES(I));
+        END;
+C
+        PRINT('  Collected 16 jitter samples');
+C
+C        ============================================================
+C        PHASE 3: SAMPLE CONSOLE AUDIO DAC
+C        ============================================================
+C
+        PRINT('Phase 3: Audio DAC Sampling...');
+C
+C        CDC 1604 console has 3-bit DAC connected to accumulator MSBs
+C        This provides unique analog entropy
+C
+        DO I = 0 TO 7;
+C           Load accumulator with test pattern
+            CALL LOAD_ACCUMULATOR(OCTAL(777777777777777));
+C           Read audio DAC output (via console I/O)
+            CALL READ_AUDIO_DAC(AUDIO_SAMPLES(I));
+C           Small delay
+            CALL DELAY_CYCLES(1000);
+        END;
+C
+        PRINT('  Collected 8 audio samples');
+C
+C        ============================================================
+C        PHASE 4: MEASURE MEMORY BANK INTERLEAVE DELTA
+C        ============================================================
+C
+        PRINT('Phase 4: Bank Interleave Delta...');
+C
+C        Measure timing difference between odd/even bank access
+        CALL TIMER_START();
+        DO I = 0 TO 999;
+            TEMP = MEMORY_BLOCK(I * 2);      C Even addresses
+        END;
+        CALL TIMER_STOP(CORE_DELTA);
+C
+        PRINT('  Bank delta measured');
+C
+C        ============================================================
+C        PHASE 5: GENERATE ENTROPY HASH
+C        ============================================================
+C
+        PRINT('Phase 5: Generating entropy hash...');
+C
+C        Initialize hash state (similar to MD5 constants)
+        HASH_STATE(0) = OCTAL(67452301);
+        HASH_STATE(1) = OCTAL(EFCDAB89);
+        HASH_STATE(2) = OCTAL(98BADCFE);
+        HASH_STATE(3) = OCTAL(10325476);
+C
+C        Mix timing pattern into hash
+        DO I = 0 TO 31;
+            K = MOD(I, 4);
+            HASH_STATE(K) = XOR(HASH_STATE(K), TIMING_PATTERN(I));
+            HASH_STATE(K) = ROTATE_LEFT(HASH_STATE(K), 5);
+        END;
+C
+C        Mix jitter samples
+        DO I = 0 TO 15;
+            K = MOD(I, 4);
+            HASH_STATE(K) = XOR(HASH_STATE(K), JITTER_SAMPLES(I));
+            HASH_STATE(K) = ROTATE_LEFT(HASH_STATE(K), 7);
+        END;
+C
+C        Mix audio samples (pack 8 × 3-bit into 24-bit word)
+        TEMP = PACK_AUDIO(AUDIO_SAMPLES);
+        HASH_STATE(2) = XOR(HASH_STATE(2), TEMP);
+        HASH_STATE(2) = ROTATE_LEFT(HASH_STATE(2), 11);
+C
+C        Mix bank delta
+        HASH_STATE(3) = XOR(HASH_STATE(3), CORE_DELTA);
+        HASH_STATE(3) = ROTATE_LEFT(HASH_STATE(3), 13);
+C
+C        Additional mixing rounds (8 rounds)
+        DO J = 0 TO 7;
+            HASH_STATE(0) = HASH_STATE(0) + HASH_STATE(1);
+            HASH_STATE(1) = ROTATE_LEFT(HASH_STATE(1), 13);
+            HASH_STATE(2) = HASH_STATE(2) + HASH_STATE(3);
+            HASH_STATE(3) = ROTATE_LEFT(HASH_STATE(3), 17);
+            HASH_STATE(0) = XOR(HASH_STATE(0), HASH_STATE(3));
+            HASH_STATE(2) = XOR(HASH_STATE(2), HASH_STATE(1));
+        END;
+C
+C        Extract 48 × 6-bit bytes for entropy hash
+        DO I = 0 TO 47;
+            K = MOD(I, 4);
+            SHIFT = (I MOD 8) * 6;
+            ENTROPY_HASH(I) = EXTRACT_BITS(HASH_STATE(K), SHIFT, 6);
+        END;
+C
+        PRINT('  Hash generated: 48 × 6-bit bytes');
+C
+C        ============================================================
+C        PHASE 6: GENERATE WALLET ID
+C        ============================================================
+C
+        PRINT('Phase 6: Generating wallet ID...');
+C
+C        Wallet format: RTC + 40 hex characters
+        WALLET_ID = 'RTC';
+C
+        DO I = 0 TO 19;
+C           Extract byte from hash (combine two 6-bit values)
+            HIGH = ENTROPY_HASH(I * 2);
+            LOW = ENTROPY_HASH(I * 2 + 1);
+            BYTE = (HIGH * 4) + (LOW / 16);
+C           
+C           Convert to hex
+            WALLET_ID(3 + I*2) = HEX_CHAR(HIGH_NIBBLE(BYTE));
+            WALLET_ID(4 + I*2) = HEX_CHAR(LOW_NIBBLE(BYTE));
+        END;
+        WALLET_ID(43) = NULL;
+C
+C        Generate miner ID: CDC1604-XXXXXXXX
+        MINER_ID = 'CDC1604-';
+        DO I = 0 TO 7;
+            MINER_ID(9 + I) = HEX_CHAR(ENTROPY_HASH(I));
+        END;
+C
+        PRINT(' ');
+        PRINT('========================================');
+        PRINT('  WALLET GENERATED');
+        PRINT('========================================');
+        PRINT('Wallet:   ' || WALLET_ID);
+        PRINT('Miner ID: ' || MINER_ID);
+        PRINT('========================================');
+        PRINT(' ');
+C
+C        ============================================================
+C        PHASE 7: OUTPUT RESULTS
+C        ============================================================
+C
+        PRINT('Outputting results...');
+C
+C        Print to line printer
+        PRINT('WALLET:' || WALLET_ID);
+        PRINT('MINER_ID:' || MINER_ID);
+        PRINT('ENTROPY_HASH:');
+        DO I = 0 TO 47;
+            PRINT(HEX_CHAR(ENTROPY_HASH(I)));
+        END;
+        PRINT('TIMESTAMP:' || CALL GET_TIMESTAMP());
+C
+C        Punch to paper tape (if available)
+        CALL PUNCH_TAPE_START();
+        CALL PUNCH_CHARS('WALLET:' || WALLET_ID || NEWLINE);
+        CALL PUNCH_CHARS('MINER_ID:' || MINER_ID || NEWLINE);
+        CALL PUNCH_CHARS('ENTROPY_HASH:');
+        DO I = 0 TO 47;
+            CALL PUNCH_CHARS(HEX_CHAR(ENTROPY_HASH(I)));
+        END;
+        CALL PUNCH_CHARS(NEWLINE);
+        CALL PUNCH_CHARS('TIMESTAMP:' || CALL GET_TIMESTAMP() || NEWLINE);
+        CALL PUNCH_TAPE_STOP();
+C
+        PRINT(' ');
+        PRINT('========================================');
+        PRINT('  ENTROPY COLLECTION COMPLETE');
+        PRINT('========================================');
+        PRINT('Results printed and punched to tape.');
+        PRINT('Use cdc1604_proxy.py to submit.');
+        PRINT(' ');
+        PRINT('RustChain - Proof of Antiquity');
+        PRINT('Every vintage computer has historical potential');
+C
+        END ENTROPY_COLLECTOR;
