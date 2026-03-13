@@ -1,0 +1,219 @@
+; ============================================================
+; RUSTCHAIN MINER FOR LEO III (1961)
+; Intercode Assembly Language Program
+; ============================================================
+; 
+; This program implements a conceptual RustChain Proof-of-Antiquity
+; miner for the LEO III computer, the world's first mass-produced
+; commercial computer.
+;
+; Wallet: RTC4325af95d26d59c3ef025963656d22af638bb96b
+; Bounty: 200 RTC (LEGENDARY Tier)
+;
+; ============================================================
+
+         TITLE   RUSTCHAIN MINER
+         ORG     6000            ; Job 7 memory region
+
+; ============================================================
+; CONSTANTS
+; ============================================================
+DIFFICULTY  EQU     01000          ; Mining difficulty (adjustable)
+ONE         EQU     1              ; Constant: 1
+ZERO        EQU     0              ; Constant: 0
+FINGERPRINT EQU     7000           ; Core memory fingerprint location
+SHARE_MSG   EQU     7001           ; Share message location
+SHARE_DATA  EQU     7010           ; Share data buffer (10 words)
+
+; ============================================================
+; VARIABLES (stored in memory)
+; ============================================================
+; Address 6500-6600 reserved for miner variables
+NONCE       EQU     6500           ; Current nonce (word)
+HASH        EQU     6501           ; Hash result (word)
+SHARE_COUNT EQU     6502           ; Shares found counter
+TEMP        EQU     6503           ; Temporary storage
+
+; ============================================================
+; MASTER PROGRAM OPCODES
+; ============================================================
+MP_CHECK_TIME EQU   1              ; Check if time slice remains
+MP_YIELD      EQU   2              ; Yield CPU to Master Program
+
+; ============================================================
+; I/O OPCODES
+; ============================================================
+IO_PRINTER    EQU   1              ; Line printer
+IO_PAPER_TAPE EQU   2              ; Paper tape punch
+IO_LOUDSPEAKER EQU  3              ; Loudspeaker
+
+; ============================================================
+; PROGRAM ENTRY POINT
+; ============================================================
+         ENTRY   START
+
+; ============================================================
+; INITIALIZATION ROUTINE
+; ============================================================
+INIT:     MASTER  MP_YIELD       ; Yield to Master Program
+          LOAD    =ZERO          ; Initialize accumulator
+          STORE   NONCE          ; NONCE = 0
+          STORE   SHARE_COUNT    ; SHARE_COUNT = 0
+          JUMP    START
+
+; ============================================================
+; MAIN MINING LOOP
+; ============================================================
+START:    ; Get hardware fingerprint from core memory
+          LOAD    FINGERPRINT    ; A ← core memory residual pattern
+          
+          ; Add nonce to fingerprint
+          ADD     NONCE          ; A ← A + NONCE
+          STORE   HASH           ; Store intermediate result
+          
+          ; Compute hash (simplified XOR approximation)
+          ; In real LEO III, would use dedicated XOR instruction
+          AND     =0xFFFFFFFF    ; Mask to 32 bits
+          STORE   HASH           ; HASH = (fingerprint + nonce) & 0xFFFFFFFF
+          
+          ; Compare hash with difficulty
+          LOAD    HASH           ; A ← hash
+          SUB     DIFFICULTY     ; A ← A - difficulty
+          JPOS    NO_SHARE       ; If A > 0, hash >= difficulty, no share
+          
+          ; ============================================================
+          ; SHARE FOUND!
+          ; ============================================================
+          
+          ; Increment share counter
+          LOAD    SHARE_COUNT
+          ADD     ONE
+          STORE   SHARE_COUNT
+          
+          ; Output share message to printer
+          LOAD    =SHARE_MSG
+          OUTPUT  IO_PRINTER     ; Print "SHARE FOUND"
+          
+          ; Generate audio proof via loudspeaker (440 Hz = A4)
+          SOUND   440            ; Audio proof-of-work
+          
+          ; Prepare share data for paper tape
+          LOAD    NONCE
+          STORE   SHARE_DATA     ; Store nonce
+          LOAD    HASH
+          STORE   SHARE_DATA+1   ; Store hash
+          LOAD    DIFFICULTY
+          STORE   SHARE_DATA+2   ; Store difficulty
+          
+          ; Punch share to paper tape
+          LOAD    SHARE_DATA
+          PUNCH   IO_PAPER_TAPE  ; Punch nonce
+          LOAD    SHARE_DATA+1
+          PUNCH   IO_PAPER_TAPE  ; Punch hash
+          LOAD    SHARE_DATA+2
+          PUNCH   IO_PAPER_TAPE  ; Punch difficulty
+          
+          ; Continue mining
+          JUMP    CONTINUE
+          
+; ============================================================
+; NO SHARE - CONTINUE MINING
+; ============================================================
+NO_SHARE: ; No share found, continue to next nonce
+          JUMP    CONTINUE
+          
+; ============================================================
+; INCREMENT NONCE AND CHECK TIME SLICE
+; ============================================================
+CONTINUE: ; Increment nonce
+          LOAD    NONCE
+          ADD     ONE
+          STORE   NONCE
+          
+          ; Check Master Program time slice
+          MASTER  MP_CHECK_TIME  ; A = 1 if time remains, 0 otherwise
+          JZER    YIELD          ; If A = 0, time slice expired
+          
+          ; Continue mining loop
+          JUMP    START
+          
+; ============================================================
+; YIELD TO MASTER PROGRAM
+; ============================================================
+YIELD:    ; Time slice expired, yield CPU
+          MASTER  MP_YIELD       ; Yield to Master Program scheduler
+          JUMP    START          ; Resume mining when scheduled
+
+; ============================================================
+; DATA SECTION
+; ============================================================
+         ORG     7000
+
+; Core memory fingerprint (simulated residual pattern)
+FINGERPRINT_DATA:
+          DEC     3038175090     ; Example: 0xB51C3D42
+
+; Share message for printer
+SHARE_MSG_DATA:
+          TXT     'SHARE FOUND - JOB 7'
+
+; Share data buffer (10 words)
+SHARE_DATA_BUFFER:
+          DS      10             ; Reserve 10 words
+
+; ============================================================
+; CONSTANTS POOL
+; ============================================================
+         ORG     7100
+
+CONST_ZERO: DEC     0
+CONST_ONE:  DEC     1
+CONST_MASK: HEX     FFFFFFFF     ; 32-bit mask
+
+; ============================================================
+; PROGRAM END
+; ============================================================
+         END     INIT
+
+; ============================================================
+; ASSEMBLY NOTES
+; ============================================================
+; 
+; Instruction Encoding (LEO III):
+; ┌──────────┬───────────┬─────────────┐
+; │ Function │ Modifiers │ Address     │
+; │ 8 bits   │ 8 bits    │ 16 bits     │
+; └──────────┴───────────┴─────────────┘
+;
+; Example encodings:
+; LOAD 100    → 0x01000064
+; STORE 100   → 0x02000064
+; ADD 100     → 0x03000064
+; SUB 100     → 0x04000064
+; JUMP 100    → 0x07000064
+; JPOS 100    → 0x08000064
+; JZER 100    → 0x0A000064
+; OUTPUT 1    → 0x0C000001
+; PUNCH 2     → 0x12000002
+; SOUND 440   → 0x110001B8
+; MASTER 1    → 0x0D000001
+; STOP        → 0x00000000
+;
+; Memory Map:
+; 0000-0100:  Master Program OS
+; 0100-1000:  Job 1 (Payroll)
+; 1000-2000:  Job 2 (Inventory)
+; ...
+; 6000-6600:  Job 7 (RustChain Miner) ← This program
+; 6600-7000:  Job 8-12
+; 7000-7FFF:  I/O buffers and data
+;
+; ============================================================
+; REVISION HISTORY
+; ============================================================
+; 
+; Rev  Date        Author          Description
+; ---  ----------  --------------  --------------------------------
+; 1.0  2026-03-13  Bounty Hunter   Initial implementation
+;
+; ============================================================

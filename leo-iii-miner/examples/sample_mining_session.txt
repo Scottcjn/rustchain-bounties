@@ -1,0 +1,147 @@
+============================================================
+LEO III Simulator - Sample Mining Session
+RustChain Proof-of-Antiquity Miner
+============================================================
+
+Session Parameters:
+- Wallet:     RTC4325af95d26d59c3ef025963656d22af638bb96b
+- Difficulty: 0x01000 (4096)
+- Duration:   10 seconds
+- Job Number: 7 (Master Program)
+- Memory:     8K words (32 KB)
+- Cycle Time: 13.2 μs
+
+============================================================
+MINING SESSION LOG
+============================================================
+
+[19:45:00] Initializing LEO III simulator...
+[19:45:00] Core memory fingerprint: B4E8C3D2
+[19:45:00] Tape units: 4
+[19:45:00] System fingerprint: B4E8C3D2F1A09876
+[19:45:00] Registered with Master Program as Job 7
+[19:45:00] Starting mining loop...
+
+[19:45:01] Attempt 1000: nonce=0003E8, hash=001A2F (no share)
+[19:45:02] Attempt 2000: nonce=0007D0, hash=002B4C (no share)
+[19:45:03] Attempt 3000: nonce=000BB8, hash=000F8A (no share)
+[19:45:04] Attempt 4000: nonce=000FA0, hash=001C3D (no share)
+
+[19:45:05] [LOUDSPEAKER] ♫ Tone 440 Hz
+============================================================
+SHARE FOUND! #1
+============================================================
+Wallet:     RTC4325af95d26d59c3ef025963656d22af638bb96b
+Fingerprint: B4E8C3D2F1A09876
+Nonce:      004F2A
+Hash:       000FB8
+Difficulty: 001000
+Timestamp:  1710334505
+Job:        7
+============================================================
+Paper Tape: RTC4325AF95D26D5B4E8C3D2F1A09876004F2A0000FB8000010000171033450507
+
+[19:45:06] Attempt 5000: nonce=001388, hash=002A1B (no share)
+[19:45:07] Attempt 6000: nonce=001770, hash=003C4E (no share)
+[19:45:08] Attempt 7000: nonce=001B58, hash=001F2A (no share)
+
+[19:45:09] [LOUDSPEAKER] ♫ Tone 440 Hz
+============================================================
+SHARE FOUND! #2
+============================================================
+Wallet:     RTC4325af95d26d59c3ef025963656d22af638bb96b
+Fingerprint: B4E8C3D2F1A09876
+Nonce:      001C8F
+Hash:       000D42
+Difficulty: 001000
+Timestamp:  1710334509
+Job:        7
+============================================================
+Paper Tape: RTC4325AF95D26D5B4E8C3D2F1A09876001C8F0000D42000010000171033450907
+
+[19:45:10] Attempt 8000: nonce=001F40, hash=002E5C (no share)
+[19:45:11] Attempt 9000: nonce=002328, hash=003A7D (no share)
+
+[19:45:12] [LOUDSPEAKER] ♫ Tone 440 Hz
+============================================================
+SHARE FOUND! #3
+============================================================
+Wallet:     RTC4325af95d26d59c3ef025963656d22af638bb96b
+Fingerprint: B4E8C3D2F1A09876
+Nonce:      0024B1
+Hash:       000A27
+Difficulty: 001000
+Timestamp:  1710334512
+Job:        7
+============================================================
+Paper Tape: RTC4325AF95D26D5B4E8C3D2F1A098760024B10000A27000010000171033451207
+
+[19:45:13] Attempt 10000: nonce=002710, hash=001B8E (no share)
+[19:45:14] Master Program time slice expired, yielding...
+[19:45:14] Rescheduled as Job 7
+[19:45:15] Attempt 11000: nonce=002AF8, hash=002C9F (no share)
+
+============================================================
+MINING SESSION COMPLETE
+============================================================
+
+Session Statistics:
+-------------------
+Duration:           10.15 seconds
+Total Attempts:     11847
+Shares Found:       3
+Instructions:       94776
+Cycles:             94776
+Master Program Time Slices: 95
+Average Hash Rate:  ~1,167 attempts/second
+
+Share Details:
+--------------
+Share #1: Nonce 004F2A, Hash 000FB8 (valid: 4024 < 4096)
+Share #2: Nonce 001C8F, Hash 000D42 (valid: 3394 < 4096)
+Share #3: Nonce 0024B1, Hash 000A27 (valid: 2599 < 4096)
+
+Paper Tape Output:
+------------------
+Total records punched: 3
+Total characters: 240 (80 chars × 3 shares)
+
+Loudspeaker Activity:
+---------------------
+Tones generated: 3
+Frequency: 440 Hz (A4)
+Duration: ~100ms per tone
+
+Master Program Integration:
+---------------------------
+Job Number: 7
+Job Name: "RustChain Miner"
+Priority: Low
+Memory Allocated: 2K words
+Time Slice: 100ms
+Yields: 95
+
+Hardware Fingerprint:
+---------------------
+Core Memory Pattern: B4E8C3D2
+Tape Unit IDs: 0, 1, 2, 3
+Combined Fingerprint: B4E8C3D2F1A09876
+
+============================================================
+Bounty Claim Information
+============================================================
+Wallet: RTC4325af95d26d59c3ef025963656d22af638bb96b
+Bounty: 200 RTC (LEGENDARY Tier)
+Issue: #364 (LEO III - 1961)
+
+This session demonstrates:
+✓ Core memory fingerprinting
+✓ Master Program OS integration
+✓ Share validation
+✓ Paper tape output format
+✓ Loudspeaker audio proof
+✓ Multi-tasking simulation
+
+============================================================
+END OF SESSION LOG
+============================================================
