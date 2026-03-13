@@ -427,7 +427,7 @@ class RustChainMiner:
             share = self.mine_share()
             
             if share:
-                print(f"\n[LOUDSPEAKER] ♫ Tone {self.computer.last_sound_frequency} Hz")
+                print(f"\n[LOUDSPEAKER] ~ Tone {self.computer.last_sound_frequency} Hz")
                 print("=" * 60)
                 print("SHARE FOUND!")
                 print("=" * 60)
