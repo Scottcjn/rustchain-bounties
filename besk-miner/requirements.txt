@@ -1,0 +1,16 @@
+# RustChain BESK Miner - Requirements
+# Python 3.8+
+
+# No external dependencies required!
+# The BESK miner uses only Python standard library:
+# - hashlib (SHA256)
+# - struct (binary packing)
+# - time (timing)
+# - random (entropy simulation)
+# - typing (type hints)
+# - dataclasses (data structures)
+# - enum (opcodes)
+
+# Optional dependencies for enhanced features:
+# numpy>=1.20.0  # Statistical analysis (optional)
+# requests>=2.25.0  # Network submission (optional)
