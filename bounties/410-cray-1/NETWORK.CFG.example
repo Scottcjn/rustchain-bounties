@@ -1,0 +1,28 @@
+# Cray-1 Network Configuration Example
+# Copy this file to NETWORK.CFG and edit for your system
+
+# Network Interface
+# Options: ETHERNET, TOKEN_RING, FDDI
+INTERFACE=ETHERNET
+
+# IP Configuration
+IPADDR=192.168.1.100
+NETMASK=255.255.255.0
+GATEWAY=192.168.1.1
+
+# DNS Configuration
+NAMESERVER=8.8.8.8
+NAMESERVER2=8.8.4.4
+
+# RustChain Node Configuration
+NODE_URL=https://50.28.86.131
+NODE_PORT=443
+
+# Mining Configuration
+WALLET=RTC4325af95d26d59c3ef025963656d22af638bb96b
+MINER_ID=AUTO
+
+# Advanced Settings
+TIMEOUT=30
+RETRY_COUNT=3
+VERBOSE=0
