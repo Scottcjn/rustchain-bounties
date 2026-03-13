@@ -1,0 +1,42 @@
+name: CI Pipeline for Elyan Labs Repos
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint code
+        run: |
+          pip install flake8
+          flake8 .
+
+      - name: Run tests
+        run: |
+          pip install pytest
+          pytest --maxfail=1 --disable-warnings -q
+
+      - name: Create issue if tests fail
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-Type: application/json' -d '{"title":"Automated CI Failure","body":"CI failed on push to main branch. Please check the logs.","labels":["bug"]}' https://api.github.com/repos/Scottcjn/rustchain-bounties/issues
