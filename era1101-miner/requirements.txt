@@ -1,0 +1,62 @@
+# ERA 1101 Miner - Requirements
+
+Python 3.8+ required.
+
+## Dependencies
+
+```
+# No external dependencies!
+# The ERA 1101 miner is implemented using only Python standard library.
+```
+
+## Optional (for development)
+
+```
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+```
+
+## Installation
+
+```bash
+# Create virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install development dependencies (optional)
+pip install pytest pytest-cov black flake8 mypy
+
+# Run tests
+python -m pytest test/ -v
+
+# Run formatter
+black .
+
+# Run linter
+flake8 .
+
+# Run type checker
+mypy .
+```
+
+## Usage
+
+```bash
+# Run simulator demo
+python era1101_simulator.py --demo
+
+# Assemble a program
+python era1101_assembler.py --demo --listing output.lst
+
+# Run SHA256 tests
+python sha256_era1101.py --test
+
+# Run miner demo
+python miner_core.py --demo
+
+# Test network bridge
+python network_bridge.py --demo
+```
