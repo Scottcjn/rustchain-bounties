@@ -1,0 +1,426 @@
+* RUSTCHAIN IBM 709 MINER - "Vacuum Edition"
+* For IBM 709 (1958) via SIMH IBM 7090 emulation
+* 
+* "Every vintage computer has historical potential"
+*
+* Dev Fee: 0.001 RTC/epoch -> founder_dev_fund
+* Antiquity Multiplier: 5.0x (LEGENDARY tier)
+*
+* Assembly: FAP (FORTRAN Assembly Program)
+* Assembler: IBM 709 FAP or SIMH macro assembler
+*
+* Memory Layout:
+*   0-777:     Zero page / vectors
+*   1000-1777: Code
+*   2000-2777: Data / entropy
+*   3000-3777: Wallet storage
+*   4000+:     Buffers
+
+         REMOTE  RUSTCHN
+         ENTRY   START
+
+* ============================================
+* CONSTANTS
+* ============================================
+
+ZERO     EQU     0
+ONE      EQU     1
+BLOCK_TIME EQU   600        / 10 minutes between attestations
+DEV_FEE  EQU     1          / 0.001 RTC (scaled)
+TAPE_UNIT EQU   0          / Tape unit 0 for output
+
+* ============================================
+* MAIN ENTRY POINT
+* ============================================
+
+START    CLA     ZERO          / Clear AC
+         TZE     INIT_WALLET   / Always init on cold start
+         
+* ============================================
+* WALLET INITIALIZATION
+* ============================================
+
+INIT_WALLET
+         LXA     SAVE_XR1,1    / Save index registers
+         LXA     SAVE_XR2,2
+         LXA     SAVE_XR4,4
+         
+         CLA     WALLET_FLAG   / Check if wallet exists
+         TZE     GEN_WALLET     / If zero, generate new wallet
+         TZE     LOAD_WALLET    / Otherwise load existing
+         
+* Generate new wallet from hardware entropy
+GEN_WALLET
+         JSUB    COLLECT_ENTROPY
+         JSUB    GEN_WALLET_ID
+         JSUB    SAVE_WALLET
+         TZE     MAIN_LOOP
+         
+* Load existing wallet
+LOAD_WALLET
+         JSUB    READ_WALLET
+         TZE     MAIN_LOOP
+
+* ============================================
+* MAIN MINING LOOP
+* ============================================
+
+MAIN_LOOP
+         LXA     SAVE_XR1,1
+         LXA     SAVE_XR2,2
+         LXA     SAVE_XR4,4
+         
+* Check block time
+CHECK_TIME
+         CLA     LAST_ATTEST
+         ADD     BLOCK_TIME
+         JSUB    GET_TIME       / Get current time (simulated)
+         SUB     ACCUM_TEMP
+         TPL     DO_ATTEST      / If positive, time to attest
+         
+* Wait loop - collect entropy
+WAIT_LOOP
+         JSUB    COLLECT_ENTROPY
+         JSUB    BURN_CYCLES    / Burn ~1 second
+         TZE     CHECK_TIME
+         
+* ============================================
+* ATTESTATION GENERATION
+* ============================================
+
+DO_ATTEST
+         LXA     SAVE_XR1,1
+         
+* Update timestamp
+         JSUB    GET_TIME
+         STO     LAST_ATTEST
+         
+* Collect fresh entropy
+         JSUB    COLLECT_ENTROPY
+         
+* Generate attestation hash
+         JSUB    GEN_ATTEST_HASH
+         
+* Write to tape (for modern host to submit)
+         JSUB    WRITE_TAPE
+         
+* Reset counter
+         CLA     ZERO
+         STO     ATTEST_COUNT
+         
+         TZE     MAIN_LOOP
+
+* ============================================
+* SUBROUTINE: COLLECT_ENTROPY
+* Collects hardware entropy from various sources
+* ============================================
+
+COLLECT_ENTROPY
+         SXA     SAVE_ENT,1
+         
+* Timer-based entropy (instruction timing variance)
+         CLA     ZERO
+         STO     TIMER_ACC
+         LXA     TIMER_COUNT,1
+TIMER_LOOP
+         CLA     TIMER_ACC
+         ADD     ONE
+         STO     TIMER_ACC
+         LXA     1,1            / Decrement counter
+         TZE     TIMER_LOOP
+         
+* Store timer result
+         CLA     TIMER_ACC
+         STO     ENTROPY_TIMER
+         
+* Core memory timing (read/write variance)
+         CLA     CORE_SAMPLE1
+         ADD     CORE_SAMPLE2
+         STO     ENTROPY_CORE
+         
+* Return
+         CLA     SAVE_ENT
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: GEN_WALLET_ID
+* Generates wallet ID from entropy hash
+* Format: RTC + 40 hex characters
+* ============================================
+
+GEN_WALLET_ID
+         SXA     SAVE_WAL,1
+         
+* Load entropy hash
+         CLA     ENTROPY_HASH1
+         STO     WALLET_HASH1
+         CLA     ENTROPY_HASH2
+         STO     WALLET_HASH2
+         CLA     ENTROPY_HASH3
+         STO     WALLET_HASH3
+         
+* Generate wallet ID (simplified - full version would convert to BCD)
+         CLA     ENTROPY_HASH1
+         ANA     MASK_20BIT
+         ADD     WALLET_BASE
+         STO     WALLET_ID1
+         
+         CLA     ENTROPY_HASH2
+         STO     WALLET_ID2
+         
+         CLA     ENTROPY_HASH3
+         STO     WALLET_ID3
+         
+* Set wallet flag
+         CLA     ONE
+         STO     WALLET_FLAG
+         
+* Return
+         CLA     SAVE_WAL
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: SAVE_WALLET
+* Saves wallet to tape/storage
+* ============================================
+
+SAVE_WALLET
+         SXA     SAVE_SV,1
+         
+* Write wallet to tape unit 0
+         LBT     TAPE_UNIT      / Load buffer tape
+         CLA     WALLET_ID1
+         WRT     TAPE_UNIT
+         CLA     WALLET_ID2
+         WRT     TAPE_UNIT
+         CLA     WALLET_ID3
+         WRT     TAPE_UNIT
+         CLA     WALLET_FLAG
+         WRT     TAPE_UNIT
+         DCT     TAPE_UNIT      / Disconnect tape
+         
+* Return
+         CLA     SAVE_SV
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: READ_WALLET
+* Loads wallet from tape/storage
+* ============================================
+
+READ_WALLET
+         SXA     SAVE_RD,1
+         
+* Read wallet from tape
+         LBT     TAPE_UNIT
+         RDT     TAPE_UNIT
+         STO     WALLET_ID1
+         RDT     TAPE_UNIT
+         STO     WALLET_ID2
+         RDT     TAPE_UNIT
+         STO     WALLET_ID3
+         RDT     TAPE_UNIT
+         STO     WALLET_FLAG
+         DCT     TAPE_UNIT
+         
+* Return
+         CLA     SAVE_RD
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: GEN_ATTEST_HASH
+* Generates attestation hash from current state
+* ============================================
+
+GEN_ATTEST_HASH
+         SXA     SAVE_HASH,1
+         
+* Mix entropy with timestamp
+         CLA     ENTROPY_TIMER
+         ADD     LAST_ATTEST
+         XOR     ENTROPY_CORE
+         STO     ATTEST_HASH1
+         
+         CLA     ENTROPY_HASH1
+         ADD     ENTROPY_HASH2
+         XOR     ENTROPY_HASH3
+         STO     ATTEST_HASH2
+         
+         CLA     WALLET_ID1
+         ADD     WALLET_ID2
+         XOR     WALLET_ID3
+         STO     ATTEST_HASH3
+         
+* Return
+         CLA     SAVE_HASH
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: WRITE_TAPE
+* Writes attestation to tape for host submission
+* ============================================
+
+WRITE_TAPE
+         SXA     SAVE_TAP,1
+         
+* Write attestation record to tape
+* Format: [MARKER][WALLET][TIME][HASH1][HASH2][HASH3][CHECKSUM]
+         LBT     TAPE_UNIT
+         
+* Marker word
+         CLA     ATTEST_MARKER
+         WRT     TAPE_UNIT
+         
+* Wallet ID
+         CLA     WALLET_ID1
+         WRT     TAPE_UNIT
+         CLA     WALLET_ID2
+         WRT     TAPE_UNIT
+         CLA     WALLET_ID3
+         WRT     TAPE_UNIT
+         
+* Timestamp
+         CLA     LAST_ATTEST
+         WRT     TAPE_UNIT
+         
+* Attestation hash
+         CLA     ATTEST_HASH1
+         WRT     TAPE_UNIT
+         CLA     ATTEST_HASH2
+         WRT     TAPE_UNIT
+         CLA     ATTEST_HASH3
+         WRT     TAPE_UNIT
+         
+* Checksum
+         CLA     ATTEST_HASH1
+         ADD     ATTEST_HASH2
+         ADD     ATTEST_HASH3
+         STO     CHECKSUM
+         CLA     CHECKSUM
+         WRT     TAPE_UNIT
+         
+         DCT     TAPE_UNIT
+         
+* Increment attestation count
+         CLA     ATTEST_COUNT
+         ADD     ONE
+         STO     ATTEST_COUNT
+         
+* Return
+         CLA     SAVE_TAP
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: GET_TIME
+* Returns simulated time (for SIMH)
+* In real hardware, would use clock or counter
+* ============================================
+
+GET_TIME
+         SXA     SAVE_TIME,1
+         
+* For simulation: use instruction counter as time proxy
+* In production, would read system clock
+         CLA     TIME_COUNTER
+         ADD     ONE
+         STO     TIME_COUNTER
+         STO     ACCUM_TEMP
+         
+* Return
+         CLA     SAVE_TIME
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* SUBROUTINE: BURN_CYCLES
+* Burns approximately 1 second of cycles
+* IBM 709: ~42,000 instructions/sec
+* ============================================
+
+BURN_CYCLES
+         SXA     SAVE_BURN,1
+         LXA     BURN_COUNT,1
+BURN_LOOP
+         CLA     ZERO
+         ADD     ONE
+         LXA     1,1
+         TZE     BURN_LOOP
+         
+* Return
+         CLA     SAVE_BURN
+         SXA     1,1
+         TRA     1,1
+
+* ============================================
+* DATA AREA
+* ============================================
+
+* Save areas for index registers
+SAVE_XR1 BSS     1
+SAVE_XR2 BSS     1
+SAVE_XR4 BSS     1
+
+* Save areas for subroutines
+SAVE_ENT BSS     1
+SAVE_WAL BSS     1
+SAVE_SV  BSS     1
+SAVE_RD  BSS     1
+SAVE_HASH BSS    1
+SAVE_TAP BSS     1
+SAVE_TIME BSS    1
+SAVE_BURN BSS    1
+
+* Entropy storage
+ENTROPY_TIMER BSS 1
+ENTROPY_CORE  BSS 1
+ENTROPY_HASH1 BSS 1
+ENTROPY_HASH2 BSS 1
+ENTROPY_HASH3 BSS 1
+
+* Timer collection
+TIMER_ACC BSS    1
+TIMER_COUNT DEC  1000          / Sample count
+
+* Core memory samples
+CORE_SAMPLE1 DEC 0
+CORE_SAMPLE2 DEC 0
+
+* Wallet storage
+WALLET_FLAG BSS  1
+WALLET_ID1  BSS  1
+WALLET_ID2  BSS  1
+WALLET_ID3  BSS  1
+WALLET_HASH1 BSS 1
+WALLET_HASH2 BSS 1
+WALLET_HASH3 BSS 1
+WALLET_BASE  OCT 1234567654321 / Base for wallet generation
+
+* Attestation data
+LAST_ATTEST BSS  1
+ATTEST_COUNT BSS 1
+ATTEST_MARKER OCT 777777777777 / Marker for attestation record
+ATTEST_HASH1 BSS 1
+ATTEST_HASH2 BSS 1
+ATTEST_HASH3 BSS 1
+CHECKSUM    BSS  1
+
+* Time tracking
+TIME_COUNTER BSS 1
+ACCUM_TEMP  BSS  1
+
+* Burn cycle counter
+BURN_COUNT  DEC  40000         / ~1 second at 42K instr/sec
+
+* Constants
+MASK_20BIT  OCT  777777777777  / 20-bit mask
+
+* Temporary storage
+ACCUM_TEMP2 BSS  1
+
+         END     START
