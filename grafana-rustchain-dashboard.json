@@ -1,0 +1,48 @@
+{
+    "title":  "RustChain Metrics Dashboard",
+    "schemaVersion":  38,
+    "uid":  "rustchain-metrics",
+    "panels":  [
+                   {
+                       "title":  "Miner Uptime",
+                       "id":  1,
+                       "type":  "stat",
+                       "targets":  [
+                                       {
+                                           "expr":  "rustchain_miner_uptime"
+                                       }
+                                   ]
+                   },
+                   {
+                       "title":  "Active Miners",
+                       "id":  2,
+                       "type":  "stat",
+                       "targets":  [
+                                       {
+                                           "expr":  "rustchain_active_miners"
+                                       }
+                                   ]
+                   },
+                   {
+                       "title":  "Current Epoch",
+                       "id":  3,
+                       "type":  "stat",
+                       "targets":  [
+                                       {
+                                           "expr":  "rustchain_epoch_number"
+                                       }
+                                   ]
+                   },
+                   {
+                       "title":  "RTC Total Supply",
+                       "id":  4,
+                       "type":  "stat",
+                       "targets":  [
+                                       {
+                                           "expr":  "rustchain_total_supply"
+                                       }
+                                   ]
+                   }
+               ],
+    "version":  1
+}
