@@ -1,0 +1,14 @@
+{
+  "name": "rustchain-web-dashboard",
+  "version": "1.0.0",
+  "description": "Web dashboard showing RustChain stats",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "live-server public",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "dependencies": {
+    "live-server": "^1.2.0"
+  },
+  "devDependencies": {}
+}
