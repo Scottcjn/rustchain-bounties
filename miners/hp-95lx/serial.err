@@ -1,0 +1,2 @@
+src\serial.c(81): Warning! W131: No prototype found for function 'outp'
+src\serial.c(84): Warning! W131: No prototype found for function 'inp'

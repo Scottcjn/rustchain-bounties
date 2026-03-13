@@ -1,0 +1,2 @@
+src\display.c(229): Warning! W131: No prototype found for function 'hw_95lx_get_cpu_name'
+src\display.c(233): Warning! W131: No prototype found for function 'hw_95lx_get_memory_kb'

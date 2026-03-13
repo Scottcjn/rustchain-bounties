@@ -1,0 +1,1 @@
+src\keyboard.c(120): Warning! W131: No prototype found for function 'get_timer_ticks'
