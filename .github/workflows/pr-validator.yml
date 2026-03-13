@@ -1,0 +1,188 @@
+name: PR Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to validate'
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate PR Title
+        id: title_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const title = pr ? pr.title : 'Manual trigger';
+            
+            // Check for conventional commit format
+            const conventionalPattern = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?:\s.+/;
+            const hasConventionalFormat = conventionalPattern.test(title);
+            
+            // Check for issue reference
+            const issuePattern = /(fixes|closes|resolves)\s+#\d+/i;
+            const hasIssueRef = issuePattern.test(title) || issuePattern.test(pr ? pr.body : '');
+            
+            // Check PR length
+            const body = pr ? pr.body : '';
+            const hasDescription = body && body.length > 20;
+            
+            console.log(`PR Title: ${title}`);
+            console.log(`Conventional Format: ${hasConventionalFormat}`);
+            console.log(`Issue Reference: ${hasIssueRef}`);
+            console.log(`Has Description: ${hasDescription}`);
+            
+            // Set outputs
+            core.setOutput('has_conventional_format', hasConventionalFormat);
+            core.setOutput('has_issue_ref', hasIssueRef);
+            core.setOutput('has_description', hasDescription);
+            
+            // Fail if critical checks don't pass
+            if (!hasConventionalFormat) {
+              core.setFailed('PR title should follow conventional commit format: feat/fix/docs/etc: description');
+            }
+            
+            if (!hasIssueRef && !title.includes('Manual trigger')) {
+              console.warn('⚠️ Consider adding "fixes #X" or "closes #X" to link to an issue');
+            }
+
+      - name: Check for Bounty Claims
+        id: bounty_check
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('Manual trigger - skipping bounty check');
+              return;
+            }
+            
+            const body = pr.body || '';
+            const title = pr.title;
+            
+            // Check if this is a bounty claim
+            const isBountyClaim = body.toLowerCase().includes('bounty') || 
+                                  title.toLowerCase().includes('bounty') ||
+                                  body.includes('RTC');
+            
+            console.log(`Is Bounty Claim: ${isBountyClaim}`);
+            core.setOutput('is_bounty_claim', isBountyClaim);
+            
+            if (isBountyClaim) {
+              // Check for required bounty claim info
+              const hasWallet = body.includes('wallet') || body.includes('RTC');
+              const hasIssueLink = body.includes('github.com') && body.includes('issues');
+              
+              console.log(`Has Wallet Info: ${hasWallet}`);
+              console.log(`Has Issue Link: ${hasIssueLink}`);
+              
+              if (!hasWallet) {
+                console.warn('⚠️ Bounty claims should include wallet address');
+              }
+            }
+
+      - name: Auto-label PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            
+            const labelsToAdd = [];
+            const title = pr.title.toLowerCase();
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+            
+            // Label by type
+            if (title.startsWith('feat:')) labelsToAdd.push('feature');
+            if (title.startsWith('fix:')) labelsToAdd.push('bug');
+            if (title.startsWith('docs:')) labelsToAdd.push('documentation');
+            if (title.startsWith('test:')) labelsToAdd.push('testing');
+            if (title.startsWith('refactor:')) labelsToAdd.push('refactoring');
+            
+            // Label by bounty
+            if (title.includes('bounty') || title.includes('[BOUNTY')) {
+              labelsToAdd.push('bounty');
+            }
+            
+            // Label by file changes
+            const fileNames = files.data.map(f => f.filename);
+            if (fileNames.some(f => f.endsWith('.md'))) labelsToAdd.push('documentation');
+            if (fileNames.some(f => f.endsWith('.py'))) labelsToAdd.push('python');
+            if (fileNames.some(f => f.endsWith('.rs'))) labelsToAdd.push('rust');
+            if (fileNames.some(f => f.endsWith('.yml') || f.endsWith('.yaml'))) labelsToAdd.push('github-actions');
+            if (fileNames.some(f => f.includes('docker'))) labelsToAdd.push('docker');
+            
+            // Remove duplicates
+            const uniqueLabels = [...new Set(labelsToAdd)];
+            
+            if (uniqueLabels.length > 0) {
+              console.log(`Adding labels: ${uniqueLabels.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: uniqueLabels
+              });
+            }
+
+      - name: Post Validation Summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('Manual trigger - no summary posted');
+              return;
+            }
+            
+            const titleCheck = '${{ steps.title_check.outputs.has_conventional_format }}';
+            const issueRef = '${{ steps.title_check.outputs.has_issue_ref }}';
+            const hasDesc = '${{ steps.title_check.outputs.has_description }}';
+            const isBounty = '${{ steps.bounty_check.outputs.is_bounty_claim }}';
+            
+            let summary = '## PR Validation Summary\n\n';
+            summary += '### ✅ Checks\n';
+            summary += `- Conventional Commit Format: ${titleCheck === 'true' ? '✅' : '❌'}\n`;
+            summary += `- Issue Reference: ${issueRef === 'true' ? '✅' : '⚠️ Optional'}\n`;
+            summary += `- Has Description: ${hasDesc === 'true' ? '✅' : '❌'}\n`;
+            
+            if (isBounty === 'true') {
+              summary += '\n### 🎁 Bounty Claim Detected\n';
+              summary += 'Please ensure you have included:\n';
+              summary += '- [ ] Your RTC wallet address\n';
+              summary += '- [ ] Link to the bounty issue\n';
+              summary += '- [ ] Brief description of work completed\n';
+            }
+            
+            summary += '\n---\n*Validated by PR Validator Action*';
+            
+            console.log(summary);
+            
+            // Post as comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: summary
+            });
