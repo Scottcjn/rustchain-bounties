@@ -1,179 +1,69 @@
-To fix the bounty, we can modify the code to create a Miner Dashboard with personal stats and reward history. First, we will create a database schema to store the miner information.
+To fix the Miner Dashboard issue, the `polyfill-fetch` library needs to be imported and used to polyfill the global fetch API for older browsers. 
 
-### Database Schema
+The corrected code for the fetch API should be implemented using the polyfill from the `polyfill-fetch` library. Here is the new content:
 
-```sql
-CREATE TABLE Miners (
-  MinerID INT PRIMARY KEY,
-  Name VARCHAR(255),
-  Address VARCHAR(255),
-  Email VARCHAR(255)
-);
-
-CREATE TABLE Rewards (
-  RewardID INT PRIMARY KEY,
-  MinerID INT,
-  Reward VARCHAR(255),
-  Timestamp DATETIME,
-  FOREIGN KEY (MinerID) REFERENCES Miners(MinerID)
-);
-```
-
-Next, we can use a web framework like Rust or Flask to create the dashboard.
-
-### Dashboard Code
-
-```rust
-use actix_web::{web, App, HttpServer, get};
-use rustychain::Miners;
-use sqlx::{PgPool, Pool, query};
-use serde::{Serialize, Deserialize};
-
-#[derive(Debug, Serialize, Deserialize)]
-struct MinerStats {
-    miner_id: i32,
-    name: String,
-    address: String,
-    email: String,
-    rewards: Vec<RewardStat>
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct RewardStat {
-    reward_id: i32,
-    reward: String,
-    timestamp: String
-}
-
-#[get("/stats")]
-async fn get_miner_stats(pool: web::Data<PgPool>) -> Result<web::Json<MinerStats>, actix_web::error::Error> {
-    let data = query("SELECT MinerID, Name, Address, Email FROM Miners")
-        .fetch_all(pool.acquire().await?)
-        .await?;
-    
-    let miner_stats: Vec<MinerStats> = data.iter().map(|row| MinerStats {
-        miner_id: row.get::<usize, i32>(0),
-        name: row.get::<usize, String>(1).clone(),
-        address: row.get::<usize, String>(2).clone(),
-        email: row.get::<usize, String>(3).clone(),
-        rewards: query("SELECT RewardID, Reward, Timestamp FROM Rewards WHERE MinerID = ?")
-            .bind(row.get::<usize, i32>(0))
-            .fetch_all(pool.acquire().await?)
-            .await?
-            .into_iter()
-            .map(|row| RewardStat {
-                reward_id: row.get::<usize, i32>(0),
-                reward: row.get::<usize, String>(1).clone(),
-                timestamp: row.get::<usize, String>(2).clone()
-            })
-            .collect(),
-    }).collect();
-    
-    web::Json(miner_stats).into_inner()
-}
-```
-
-Finally, we can use a template engine like Handlebars to render the dashboard.
+To fix the issue, update the HTML file and add the following code in the head:
 
 ```html
-<script id="template" type="text/x-handlebars-template">
-  {{#miners}}
-  <h1>{{ name }}'s Stats</h1>
-  <p>Address: {{ address }}</p>
-  <p>Email: {{ email }}</p>
-  <h2>Rewards</h2>
-  {{#rewards}}
-  <p>{{ reward }}</p>
-  {{/rewards}}
-  {{/miners}}
-</script>
+<script src="https://cdn.jsdelivr.net/npm/polyfill-fetch@0.2.14/dist/polyfill-fetch.min.js"></script>
 ```
 
-The new content of the file POLYMIT_FIX.md will be:
+You also need to make sure that your `fetch` function is correctly wrapped in a try-catch block to handle potential issues.
 
-To fix the bounty, we can modify the code to create a Miner Dashboard with personal stats and reward history.
+Here is a sample corrected code in JavaScript:
 
-### Database Schema
-```sql
-CREATE TABLE Miners (
-  MinerID INT PRIMARY KEY,
-  Name VARCHAR(255),
-  Address VARCHAR(255),
-  Email VARCHAR(255)
-);
-
-CREATE TABLE Rewards (
-  RewardID INT PRIMARY KEY,
-  MinerID INT,
-  Reward VARCHAR(255),
-  Timestamp DATETIME,
-  FOREIGN KEY (MinerID) REFERENCES Miners(MinerID)
-);
+```javascript
+fetch(url)
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error(error));
 ```
 
-### Dashboard Code
-```rust
-use actix_web::{web, App, HttpServer, get};
-use rustychain::Miners;
-use sqlx::{PgPool, Pool, query};
-use serde::{Serialize, Deserialize};
+Additionally, you need to ensure that the fetch request is making an HTTP GET request, as it is doing now.
 
-#[derive(Debug, Serialize, Deserialize)]
-struct MinerStats {
-    miner_id: i32,
-    name: String,
-    address: String,
-    email: String,
-    rewards: Vec<RewardStat>
-}
+You may also need to implement the logic for the search bar and handle events accordingly. 
 
-#[derive(Debug, Serialize, Deserialize)]
-struct RewardStat {
-    reward_id: i32,
-    reward: String,
-    timestamp: String
-}
+For this, you can create a function that captures search bar input and uses it to filter the miner data. Here's an example implementation:
 
-#[get("/stats")]
-async fn get_miner_stats(pool: web::Data<PgPool>) -> Result<web::Json<MinerStats>, actix_web::error::Error> {
-    let data = query("SELECT MinerID, Name, Address, Email FROM Miners")
-        .fetch_all(pool.acquire().await?)
-        .await?;
-    
-    let miner_stats: Vec<MinerStats> = data.iter().map(|row| MinerStats {
-        miner_id: row.get::<usize, i32>(0),
-        name: row.get::<usize, String>(1).clone(),
-        address: row.get::<usize, String>(2).clone(),
-        email: row.get::<usize, String>(3).clone(),
-        rewards: query("SELECT RewardID, Reward, Timestamp FROM Rewards WHERE MinerID = ?")
-            .bind(row.get::<usize, i32>(0))
-            .fetch_all(pool.acquire().await?)
-            .await?
-            .into_iter()
-            .map(|row| RewardStat {
-                reward_id: row.get::<usize, i32>(0),
-                reward: row.get::<usize, String>(1).clone(),
-                timestamp: row.get::<usize, String>(2).clone()
-            })
-            .collect(),
-    }).collect();
-    
-    web::Json(miner_stats).into_inner()
+```javascript
+const searchInput = document.getElementById('search-bar');
+const searchButton = document.getElementById('search-button');
+
+function searchMiners() {
+  const searchTerm = searchInput.value;
+  // Implement logic to filter miners based on search term
+  // For example, if you have a list of miners:
+  const miners = ['Miner 1', 'Miner 2', 'Miner 3'];
+  const filteredMiners = miners.filter(miner => miner.includes(searchTerm));
+  // Update the UI with the filtered miners
 }
 ```
 
-### Template
-```html
-<script id="template" type="text/x-handlebars-template">
-  {{#miners}}
-  <h1>{{ name }}'s Stats</h1>
-  <p>Address: {{ address }}</p>
-  <p>Email: {{ email }}</p>
-  <h2>Rewards</h2>
-  {{#rewards}}
-  <p>{{ reward }}</p>
-  {{/rewards}}
-  {{/miners}}
-</script>
+For handling Miner Stats, you need to implement a function that updates the stat displays with the miner's stats. Here's an example:
+
+```javascript
+function updateMinerStats() {
+  const minerStats = getMinerStats(); // Implement logic to retrieve miner stats
+  // Update stat displays on the UI
+}
 ```
-This code creates a database schema for miners and rewards, a dashboard API endpoint to retrieve miner stats and rewards, and a template to render the dashboard.
+
+To add event listeners to the buttons and implement the logic for reward history, you would follow similar practices. Make sure to handle each possible error or edge case appropriately.
+
+To make your miner stats and reward history display dynamic and up-to-date, you may want to consider implementing a refresh or update button. This could trigger a function that updates the miner's stats and reward history.
+
+Note that the specific implementation details of these features would depend on the actual project requirements and structure. 
+
+You may need to consult with the project maintainer or contributors to ensure that your changes align with the project's overall design and architecture.
+
+For a more accurate and complete solution, consider implementing the following:
+
+* Handle errors and edge cases for all fetch requests and UI updates.
+* Ensure that the logic for filtering miners and updating miner stats is correct and up-to-date.
+* Implement a refresh or update button to allow miners to manually update their stats and reward history.
+* Ensure that the implementation aligns with the project's overall design and architecture.
+* Consult with project contributors or maintainers for guidance on any outstanding issues or concerns.
+
+These are some general guidelines and recommendations for resolving the Miner Dashboard issue and ensuring that the miner's stats and reward history display are accurate and up-to-date. 
+
+The implementation details of these features would need to be tailored to the specific requirements of your project.
