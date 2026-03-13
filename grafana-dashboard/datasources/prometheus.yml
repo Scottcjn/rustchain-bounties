@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+  - name: RustChain Prometheus
+    type: prometheus
+    access: proxy
+    url: https://50.28.86.131/metrics
+    isDefault: true
+    editable: true

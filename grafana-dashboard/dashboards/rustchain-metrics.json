@@ -1,0 +1,62 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "rustchain-metrics",
+    "title": "RustChain Metrics Dashboard",
+    "tags": ["rustchain", "crypto", "mining"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Current Epoch",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rustchain_epoch",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Active Miners",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "rustchain_active_miners",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "type": "graph",
+        "title": "Network Hashrate",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rustchain_hashrate",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "type": "table",
+        "title": "Top Miners",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "topk(10, rustchain_miner_reward)",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  }
+}
