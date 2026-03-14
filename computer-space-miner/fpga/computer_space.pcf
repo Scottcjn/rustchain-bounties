@@ -1,0 +1,133 @@
+# Computer Space (1971) FPGA Pin Constraints
+# Lattice iCE40 UP5K - SG48 package
+#
+# This file maps logical signals to physical FPGA pins.
+# Used by nextpnr for place & route.
+
+# ============================================================================
+# CLOCK INPUT
+# ============================================================================
+# 5 MHz oscillator (or 12 MHz, adjust as needed)
+set_io CLK_5MHZ 35
+
+# ============================================================================
+# RESET
+# ============================================================================
+set_io RST 36
+
+# ============================================================================
+# BUTTON INPUTS (Original Computer Space Control Panel)
+# ============================================================================
+# These connect to the original arcade cabinet buttons
+set_io BTN_LEFT 37
+set_io BTN_RIGHT 38
+set_io BTN_FIRE 39
+set_io BTN_THRUST 40
+
+# ============================================================================
+# VIDEO OUTPUT (To CRT or modern display)
+# ============================================================================
+# HSYNC - Horizontal sync (TTL level)
+set_io HSYNC 41
+
+# VSYNC - Vertical sync (TTL level)
+set_io VSYNC 42
+
+# VIDEO_EN - Video enable (blanking signal)
+set_io VIDEO_EN 43
+
+# PIXEL - 2-bit grayscale video output
+set_io PIXEL[0] 44
+set_io PIXEL[1] 45
+
+# ============================================================================
+# SPI INTERFACE (To ESP32 Network Bridge)
+# ============================================================================
+# SPI Clock (from ESP32)
+set_io SPI_CLK 46
+
+# SPI MOSI (Master Out, Slave In - from ESP32)
+set_io SPI_MOSI 47
+
+# SPI MISO (Master In, Slave Out - to ESP32)
+set_io SPI_MISO 28
+
+# SPI Chip Select (active low)
+set_io SPI_CS 29
+
+# ============================================================================
+# STATUS LEDs
+# ============================================================================
+# LED_MINING - Blinks during mining operation
+set_io LED_MINING 30
+
+# LED_NETWORK - On when network connected
+set_io LED_NETWORK 31
+
+# LED_ERROR - On when error detected
+set_io LED_ERROR 32
+
+# ============================================================================
+# UNUSED PINS (Set to safe defaults)
+# ============================================================================
+# These pins are not used in this design
+# Configure as inputs with pull-ups to avoid floating
+
+# set_io UNUSED_1 1
+# set_io UNUSED_2 2
+# set_io UNUSED_3 3
+# set_io UNUSED_4 4
+# set_io UNUSED_5 5
+# set_io UNUSED_6 6
+# set_io UNUSED_7 7
+# set_io UNUSED_8 8
+# set_io UNUSED_9 9
+# set_io UNUSED_10 10
+# set_io UNUSED_11 11
+# set_io UNUSED_12 12
+# set_io UNUSED_13 13
+# set_io UNUSED_14 14
+# set_io UNUSED_15 15
+# set_io UNUSED_16 16
+# set_io UNUSED_17 17
+# set_io UNUSED_18 18
+# set_io UNUSED_19 19
+# set_io UNUSED_20 20
+# set_io UNUSED_21 21
+# set_io UNUSED_22 22
+# set_io UNUSED_23 23
+# set_io UNUSED_24 24
+# set_io UNUSED_25 25
+# set_io UNUSED_26 26
+# set_io UNUSED_27 27
+
+# ============================================================================
+# PIN CONFIGURATION NOTES
+# ============================================================================
+#
+# iCE40 UP5K Pinout (SG48 package):
+# - Total pins: 48
+# - Used: ~15 pins
+# - Available: ~33 pins for expansion
+#
+# Voltage Levels:
+# - All I/O: 3.3V LVTTL
+# - Original Computer Space used 5V TTL
+# - Use level shifters if connecting to original 5V logic
+#
+# Clock Options:
+# - Onboard 12 MHz oscillator (pin 35)
+# - External 5 MHz (for authentic timing)
+# - Can use PLL to generate exact 5 MHz from 12 MHz
+#
+# SPI Configuration:
+# - Mode 0 (CPOL=0, CPHA=0)
+# - Max frequency: 1 MHz (conservative)
+# - Can go up to 8 MHz if needed
+#
+# Video Output:
+# - 2-bit grayscale (4 levels)
+# - Original was 1-bit B&W
+# - Can drive composite video with DAC
+#
+# ============================================================================

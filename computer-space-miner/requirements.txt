@@ -1,0 +1,24 @@
+# Computer Space (1971) Miner - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Simulation & Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# FPGA Tooling (optional, for Python-based FPGA tools)
+# fusesoc>=2.0.0
+# cocotb>=1.7.0
+
+# RustChain API Client
+requests>=2.28.0
+
+# For ESP32 (MicroPython - not installed via pip)
+# See esp32/network_bridge.py for MicroPython code
+
+# Development
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Documentation
+markdown>=3.4.0
