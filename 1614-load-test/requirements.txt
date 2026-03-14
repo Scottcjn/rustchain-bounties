@@ -1,0 +1,2 @@
+requests>=2.31.0
+locust>=2.20.0
