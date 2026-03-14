@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  rustchain-miner:
+    build: .
+    container_name: rustchain-miner
+    restart: unless-stopped
+    environment:
+      - WALLET_ADDRESS=YOUR_WALLET_HERE
+      - RPC_URL=https://rpc.rustchain.com
+    volumes:
+      - miner-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  miner-data:
