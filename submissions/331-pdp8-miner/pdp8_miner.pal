@@ -1,0 +1,299 @@
+/ PDP-8 RustChain Miner
+/ =====================
+/ Bounty #394 - Port Miner to PDP-8 (1965)
+/ Wallet: RTC4325af95d26d59c3ef025963656d22af638bb96b
+/
+/ This is the main miner program in PAL-III assembly language
+/ Assemble with: pal3 pdp8_miner.pal
+/
+/ Memory Map:
+/   0000-0017 - Interrupt vectors and bootstrap
+/   0020-0037 - Wallet storage (10 words)
+/   0040-0057 - Entropy pool (24 words)
+/   0060-0077 - Attestation buffer (24 words)
+/   0100-0177 - Working variables
+/   0200-    - Program code
+/
+
+/ ============================================
+/ INTERRUPT VECTOR AND BOOTSTRAP
+/ ============================================
+
+*0000
+    JMP     START           / Jump to program start
+
+*0020
+WALLET:     0               / Wallet storage (10 words)
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+
+*0040
+ENTROPY:    0               / Entropy pool (24 words)
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+
+*0060
+ATTEST:     0               / Attestation buffer (24 words)
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+            0
+
+/ ============================================
+/ WORKING VARIABLES
+/ ============================================
+
+*0100
+COUNTER:    0               / Epoch counter
+TEMP:       0               / Temporary storage
+FINGERPRINT: 0              / Hardware fingerprint
+HASH:       0               / Attestation hash
+TIMER:      0               / Timer/RTC storage
+
+/ ============================================
+/ MAIN PROGRAM
+/ ============================================
+
+*0200
+START,  CLA                 / Clear AC
+        CLL                 / Clear Link
+        CLI                 / Clear Interrupt
+
+        / Initialize epoch counter
+        TAD     ONE
+        DCA     COUNTER
+
+        / Display startup message (via console)
+        JMS     PRINT_MSG
+
+        / Main mining loop
+MINING_LOOP,
+        / Collect entropy from hardware
+        JMS     COLLECT_ENTROPY
+        
+        / Generate hardware fingerprint
+        JMS     GEN_FINGERPRINT
+        
+        / Create attestation
+        JMS     CREATE_ATTESTATION
+        
+        / Increment epoch counter
+        TAD     COUNTER
+        TAD     ONE
+        DCA     COUNTER
+        
+        / Check if we should continue
+        TAD     COUNTER
+        DCA     TEMP
+        TAD     NEG_TEN
+        SZA                     / Skip if zero (10 epochs done)
+        JMP     MINING_LOOP
+        
+        / Mining complete - halt
+        HLT
+
+/ ============================================
+/ SUBROUTINES
+/ ============================================
+
+/ --------------------------------------------
+/ COLLECT_ENTROPY - Collect hardware entropy
+/ Returns: Entropy values in ENTROPY pool
+/ --------------------------------------------
+
+COLLECT_ENTROPY,
+        0                       / Return address
+        
+        CLA
+        CLL
+        
+        / Collect 24 entropy samples
+        TAD     ENTROPY
+        DCA     TEMP            / Pointer to entropy pool
+        
+        TAD     I TWO_FOUR      / Load 24
+        DCA     COUNTER         / Use as loop counter
+        
+ENTROPY_LOOP,
+        / Read from simulated hardware
+        / In real PDP-8, would use IOT instruction
+        IOT     6020            / Read RTC/entropy device
+        
+        / Store in entropy pool
+        DCA     I TEMP
+        
+        / Increment pointer
+        TAD     TEMP
+        TAD     ONE
+        DCA     TEMP
+        
+        / Decrement counter
+        TAD     COUNTER
+        TAD     I NEG_ONE
+        DCA     COUNTER
+        ISZ     COUNTER
+        JMP     ENTROPY_LOOP
+        
+        JMP     I COLLECT_ENTROPY
+
+/ --------------------------------------------
+/ GEN_FINGERPRINT - Generate hardware fingerprint
+/ Returns: Fingerprint in AC and FINGERPRINT
+/ --------------------------------------------
+
+GEN_FINGERPRINT,
+        0                       / Return address
+        
+        CLA
+        CLL
+        
+        / XOR all entropy values together
+        TAD     ENTROPY
+        DCA     FINGERPRINT
+        
+        TAD     I TWO_FOUR
+        DCA     COUNTER
+        
+        TAD     ENTROPY
+        DCA     TEMP            / Pointer
+        
+FP_LOOP,
+        TAD     I TEMP
+        XOR     FINGERPRINT     / XOR with accumulator
+        DCA     FINGERPRINT
+        
+        / Rotate left for mixing
+        RAL
+        RAL
+        RAL
+        
+        TAD     TEMP
+        TAD     ONE
+        DCA     TEMP
+        
+        ISZ     COUNTER
+        JMP     FP_LOOP
+        
+        TAD     FINGERPRINT
+        JMP     I GEN_FINGERPRINT
+
+/ --------------------------------------------
+/ CREATE_ATTESTATION - Create attestation record
+/ Uses: FINGERPRINT, ENTROPY pool
+/ --------------------------------------------
+
+CREATE_ATTESTATION,
+        0                       / Return address
+        
+        CLA
+        
+        / Copy fingerprint to attestation buffer
+        TAD     FINGERPRINT
+        DCA     ATTEST
+        
+        / Mix entropy into hash
+        TAD     ENTROPY
+        DCA     HASH
+        
+        TAD     I TWO_FOUR
+        DCA     COUNTER
+        TAD     ENTROPY
+        DCA     TEMP
+        
+HASH_LOOP,
+        TAD     I TEMP
+        RAL
+        RAL
+        RAL
+        RAL
+        RAL                     / Rotate left 5
+        DCA     HASH
+        
+        TAD     TEMP
+        TAD     ONE
+        DCA     TEMP
+        
+        ISZ     COUNTER
+        JMP     HASH_LOOP
+        
+        / Store hash in attestation
+        TAD     HASH
+        DCA     ATTEST+1
+        
+        JMP     I CREATE_ATTESTATION
+
+/ --------------------------------------------
+/ PRINT_MSG - Print message to console
+/ (Simplified - just halts for demo)
+/ --------------------------------------------
+
+PRINT_MSG,
+        0
+        / In real implementation, would use IOT
+        / to print characters via console
+        JMP     I PRINT_MSG
+
+/ ============================================
+/ CONSTANTS
+/ ============================================
+
+*0300
+ZERO:       0
+ONE:        1
+NEG_ONE:    -1
+TWO_FOUR:   24
+NEG_TEN:    -10
+
+/ ============================================
+/ END OF PROGRAM
+/ ============================================
+
+END,    HLT
+            $
