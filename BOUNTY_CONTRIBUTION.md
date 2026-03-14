@@ -1,9 +1,9 @@
 # Bounty Contribution
 
-This addresses issue #1601: [BOUNTY: 15 RTC] Port the RustChain miner to Rust
+This addresses issue #1600: [BOUNTY: 5 RTC] Build a web dashboard showing RustChain stats
 
 ## Description
-Port rustchain_universal_miner.py (~800 lines) to native Rust. Hardware detection, Ed25519, attestation. 15 RTC, +10 for PowerPC/ARM cross-compile. Tags: rust, systems-programming, miner, blockchain, bounty
+Web page with live epoch, miner count, supply, transactions. Auto-refresh. Any framework. 5 RTC, +3 for mobile responsive. Tags: frontend, dashboard, web, javascript, react, bounty, blockchain
 
 ## Payment
 0x4F666e7b4F63637223625FD4e9Ace6055fD6a847
