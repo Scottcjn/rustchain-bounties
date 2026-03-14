@@ -66,7 +66,7 @@ PR_TEMPLATE_REQUIRED_SECTION = "Supply-Chain Proof"
 # ---------------------------------------------------------------------------
 
 
-def load_allowlist(path):
+def load_allowlist(path: str) -> dict:
     """Load the allowlist file. Returns dict with 'files' and 'patterns' keys."""
     default = {"files": [], "patterns": []}
     if not os.path.exists(path):
@@ -96,7 +96,7 @@ def load_allowlist(path):
     }
 
 
-def is_allowlisted(filepath, line, allowlist):
+def is_allowlisted(filepath: str, line: str, allowlist: dict) -> bool:
     """Check if a specific finding is allowlisted."""
     rel = os.path.relpath(filepath, REPO_ROOT).replace("\\", "/")
     if rel in allowlist.get("files", []):
@@ -112,7 +112,7 @@ def is_allowlisted(filepath, line, allowlist):
 # ---------------------------------------------------------------------------
 
 
-def scan_risky_patterns(allowlist):
+def scan_risky_patterns(allowlist: dict) -> list:
     """Scan all eligible files for risky install patterns."""
     findings = []
     for dirpath, dirnames, filenames in os.walk(REPO_ROOT):
@@ -144,7 +144,7 @@ def scan_risky_patterns(allowlist):
     return findings
 
 
-def check_bounty_template():
+def check_bounty_template() -> list:
     """Verify bounty issue template has required fields."""
     template_path = os.path.join(
         REPO_ROOT, ".github", "ISSUE_TEMPLATE", "bounty.yml"
@@ -176,7 +176,7 @@ def check_bounty_template():
     return missing
 
 
-def check_pr_template():
+def check_pr_template() -> list:
     """Verify PR template includes Supply-Chain Proof section."""
     pr_path = os.path.join(
         REPO_ROOT, ".github", "PULL_REQUEST_TEMPLATE.md"
@@ -201,7 +201,7 @@ def check_pr_template():
 # ---------------------------------------------------------------------------
 
 
-def print_findings(title, findings, icon="!"):
+def print_findings(title: str, findings: list, icon: str = "!") -> int:
     """Print findings in a CI-friendly format."""
     if not findings:
         print(f"  PASS  {title}")
@@ -228,7 +228,7 @@ def print_findings(title, findings, icon="!"):
 # ---------------------------------------------------------------------------
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Supply-chain hygiene linter for RustChain bounties"
     )
