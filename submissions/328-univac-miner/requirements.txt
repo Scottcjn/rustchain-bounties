@@ -1,0 +1,43 @@
+# UNIVAC I Miner - RustChain Bounty #357
+
+Python 3.8+ required (no external dependencies - uses only standard library)
+
+## Requirements
+
+- Python 3.8 or higher
+- No external packages required (standard library only)
+
+## Optional
+
+For development:
+- pytest (for running tests with more features)
+- black (for code formatting)
+- mypy (for type checking)
+
+## Installation
+
+```bash
+# No installation needed - standard library only!
+# Just run directly:
+
+python univac_simulator.py    # Run simulator demo
+python univac_miner.py demo   # Run mining demo
+python univac_miner.py info   # Show architecture info
+python test_univac_miner.py   # Run tests
+```
+
+## Usage Examples
+
+```bash
+# Mine a block
+python univac_miner.py mine --block-number 1 --output solution.json
+
+# Verify a solution
+python univac_miner.py verify --input solution.json
+
+# Run assembler demo
+python univac_assembler.py demo --program hello
+
+# Run tests
+python test_univac_miner.py
+```

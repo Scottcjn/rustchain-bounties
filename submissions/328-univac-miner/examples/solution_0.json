@@ -1,0 +1,44 @@
+{
+  "miner_type": "UNIVAC_I_Simulated",
+  "miner_version": "1.0.0",
+  "wallet": "RTC4325af95d26d59c3ef025963656d22af638bb96b",
+  "block": {
+    "block_number": 1,
+    "prev_hash": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "timestamp": 1773426614,
+    "data": "Genesis Block - UNIVAC I Era",
+    "nonce": null,
+    "hash": null
+  },
+  "attestation": {
+    "architecture": "UNIVAC I (1951)",
+    "word_size_bits": 12,
+    "memory_words": 1000,
+    "memory_type": "mercury_delay_line",
+    "hash_function": "UNIVAC-12",
+    "hash_output_bits": 144,
+    "difficulty_words": 2,
+    "difficulty_bits": 24
+  },
+  "performance": {
+    "nonces_tried": 50000,
+    "real_time_sec": 1.8310143947601318,
+    "univac_estimated_time_sec": 0,
+    "univac_estimated_time_hours": 0
+  },
+  "timestamp": "2026-03-14T00:00:00Z",
+  "signature": "UNIVAC-I-MINER-1-SAMPLE"
+}
