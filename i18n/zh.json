@@ -1,0 +1,41 @@
+{
+  "errors": {
+    "network_timeout": "网络超时，请检查连接",
+    "invalid_response": "响应格式无效",
+    "authentication_failed": "认证失败，请检查凭证",
+    "insufficient_permissions": "权限不足",
+    "resource_not_found": "资源未找到",
+    "rate_limit_exceeded": "请求频率超限，请稍后重试",
+    "invalid_input": "输入无效",
+    "server_error": "服务器错误，请稍后重试",
+    "connection_refused": "连接被拒绝",
+    "ssl_error": "SSL 证书验证失败",
+    "parse_error": "解析错误",
+    "invalid_format": "格式无效",
+    "missing_required_field": "缺少必填字段",
+    "duplicate_entry": "重复条目",
+    "operation_failed": "操作失败",
+    "timeout_exceeded": "超时",
+    "invalid_state": "状态无效",
+    "unsupported_operation": "不支持的操作",
+    "memory_exhausted": "内存不足",
+    "disk_full": "磁盘已满",
+    "file_not_found": "文件未找到",
+    "permission_denied": "权限被拒绝",
+    "invalid_configuration": "配置无效",
+    "service_unavailable": "服务不可用",
+    "version_mismatch": "版本不匹配"
+  },
+  "warnings": {
+    "deprecated_feature": "此功能已废弃",
+    "low_disk_space": "磁盘空间不足",
+    "high_memory_usage": "内存使用率过高",
+    "slow_response": "响应缓慢"
+  },
+  "info": {
+    "operation_success": "操作成功",
+    "data_saved": "数据已保存",
+    "processing_complete": "处理完成",
+    "update_available": "有可用更新"
+  }
+}
