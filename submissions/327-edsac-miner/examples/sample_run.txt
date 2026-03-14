@@ -1,0 +1,27 @@
+============================================================
+EDSAC Mining Demonstration
+============================================================
+Block Header: 1234
+Target:       1638
+============================================================
+
+Python Reference Solution:
+  Nonce: 4
+  Hash:  114
+
+EDSAC Simulator:
+  Cycles:           5
+  Instructions:     100
+  Halt Reason:      HaltReason.SUCCESS
+  Nonce Found:      4
+  Hash Found:       114
+  Output:           ['4']
+
+Verification:
+  Computed Hash:  114
+  Target:         1638
+  Valid:          True [OK]
+
+============================================================
+Mining Complete!
+============================================================
