@@ -1,0 +1,89 @@
+{
+  "name": "Atari Breakout Arcade",
+  "manufacturer": "Atari, Inc.",
+  "release_date": "1976-05-13",
+  "cpu": {
+    "model": "MOS Technology 6502",
+    "architecture": "8-bit",
+    "clock_mhz": 1.512,
+    "transistors": 3510,
+    "process": "NMOS",
+    "voltage": 5.0,
+    "power_watts": 0.5,
+    "instructions": 56,
+    "addressing_modes": 9,
+    "registers": {
+      "A": "Accumulator (8-bit)",
+      "X": "X Index (8-bit)",
+      "Y": "Y Index (8-bit)",
+      "SP": "Stack Pointer (8-bit)",
+      "PC": "Program Counter (16-bit)",
+      "SR": "Status Register (8-bit)"
+    }
+  },
+  "memory": {
+    "total_kb": 8,
+    "map": {
+      "zero_page": {"start": "0x0000", "end": "0x00FF", "size": 256},
+      "stack": {"start": "0x0100", "end": "0x01FF", "size": 256},
+      "ram": {"start": "0x0200", "end": "0x1FFF", "size_kb": 7.5},
+      "io": {"start": "0xC000", "end": "0xCFFF", "size_kb": 4},
+      "rom": {"start": "0xF000", "end": "0xFFFF", "size_kb": 4}
+    }
+  },
+  "io_registers": {
+    "VBLANK_COUNTER": {"address": "0xC040", "size": 16, "access": "R"},
+    "PADDLE_POS": {"address": "0xC060", "size": 8, "access": "R"},
+    "GAME_STATE": {"address": "0xC061", "size": 8, "access": "R"},
+    "BALL_X": {"address": "0xC062", "size": 8, "access": "R"},
+    "BALL_Y": {"address": "0xC063", "size": 8, "access": "R"},
+    "BRICK_STATUS": {"address": "0xC080", "size": 256, "access": "R"},
+    "SCORE": {"address": "0xC100", "size": 16, "access": "RW"},
+    "LIVES": {"address": "0xC102", "size": 8, "access": "RW"},
+    "LED_CONTROL": {"address": "0xC200", "size": 8, "access": "RW"}
+  },
+  "display": {
+    "resolution": "280x192",
+    "colors": 4,
+    "refresh_hz": 60,
+    "scan_type": "interlaced"
+  },
+  "interrupts": {
+    "NMI": {
+      "vector": "0xFFFA",
+      "source": "VBLANK",
+      "frequency_hz": 60
+    },
+    "IRQ": {
+      "vector": "0xFFFE",
+      "source": "External",
+      "maskable": true
+    }
+  },
+  "entropy_sources": [
+    "VBLANK counter (16-bit, 60Hz)",
+    "Paddle position (8-bit analog)",
+    "Ball X position (8-bit)",
+    "Ball Y position (8-bit)",
+    "Brick status (256 bits)",
+    "Game state (8-bit)",
+    "Collision timing (cycle-accurate)"
+  ],
+  "miner_specs": {
+    "code_size_kb": 1.5,
+    "entropy_buffer_bytes": 256,
+    "wallet_storage_bytes": 64,
+    "attestation_bytes": 128,
+    "total_ram_kb": 2.2,
+    "proof_time_minutes": 10,
+    "power_consumption_watts": 5.5
+  },
+  "rustchain": {
+    "antiquity_multiplier": 5.0,
+    "era": "1976",
+    "tier": "LEGENDARY",
+    "bounty_rtc": 200,
+    "bounty_usd": 20,
+    "wallet_address": "RTC4325af95d26d59c3ef025963656d22af638bb96b"
+  }
+}

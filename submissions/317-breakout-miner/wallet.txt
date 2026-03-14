@@ -1,0 +1,8 @@
+RustChain Breakout Miner Wallet
+Generated: 2026-03-14 05:29:38
+Address: RTC95B7A698D4623C2EDCD9EA7BBA2C179B54FE1C58
+
+WARNING: Backup this wallet address!
+Hardware: Atari Breakout (1976)
+CPU: MOS 6502 @ 1.5 MHz
+Antiquity Multiplier: 5.0x (expected)
