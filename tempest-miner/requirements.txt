@@ -1,0 +1,9 @@
+# Tempest Miner - Python 依赖
+# RustChain Proof of Antiquity - Tempest Arcade Port (1981)
+
+# 核心依赖
+requests>=2.28.0
+
+# 可选依赖 (用于高级功能)
+# numpy>=1.21.0  # 用于矢量图形计算
+# pygame>=2.1.0  # 用于图形显示 (可选)
