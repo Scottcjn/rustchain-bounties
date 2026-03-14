@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "hardware": {
+    "platform": "Commodore PET",
+    "cpu": "MOS 6502",
+    "clock_hz": 1023000,
+    "memory_bytes": 8192,
+    "rom_bytes": 512,
+    "year": 1977,
+    "manufacturer": "Commodore Business Machines",
+    "designer": "Chuck Peddle",
+    "model": "PET 2001"
+  },
+  "fingerprint": {
+    "checks": {
+      "cycle_timing": {
+        "pass": true,
+        "signature": "1c35f4802b3c4277",
+        "description": "MOS 6502 @ 1.023 MHz (NTSC)"
+      },
+      "ieee488": {
+        "pass": true,
+        "signature": "d4f537875ae7a265",
+        "description": "IEEE-488 bus timing"
+      },
+      "thermal": {
+        "pass": true,
+        "signature": "538dd51db61b1ea8",
+        "description": "NMOS 1.5W CPU, 30W system"
+      },
+      "basic_rom": {
+        "pass": true,
+        "signature": "279354724e9f186e",
+        "description": "Commodore BASIC ROM"
+      },
+      "kernal_rom": {
+        "pass": true,
+        "signature": "9bfb344412e49c2f",
+        "description": "Kernal ROM with CBM DOS"
+      },
+      "display": {
+        "pass": true,
+        "signature": "44396fc0b79fcf21",
+        "description": "40x25 built-in display"
+      }
+    },
+    "all_passed": true,
+    "fingerprint_hash": "72c01572fdadc1e20ea515222ae187dd0190df318dfc74cad2772049a02ec7ad",
+    "platform": "Commodore PET",
+    "cpu": "MOS 6502",
+    "year": 1977
+  },
+  "antiquity_multiplier": 5.0,
+  "timestamp": 1773430928,
+  "epoch": 1,
+  "wallet": "RTC4325af95d26d59c3ef025963656d22af638bb96b",
+  "signature": "5be5a670233ea70915e200df1c78a131577886645ace5deb5743bb66a98ae5ab"
+}
