@@ -1,0 +1,12 @@
+# RustChain Galaga Miner - Python Dependencies
+
+# HTTP requests (optional, falls back to urllib)
+requests>=2.28.0
+
+# Image processing for display simulation (optional)
+Pillow>=9.0.0
+
+# For development/testing
+pytest>=7.0.0
+black>=22.0.0
+flake8>=4.0.0
