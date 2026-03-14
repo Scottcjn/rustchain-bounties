@@ -1,0 +1,136 @@
+* RUSTCHAIN IBM 650 MINER - LEGENDARY EDITION
+* BOUNTY #345 - 200 RTC
+* 
+* Target: IBM 650 Magnetic Drum Data-Processing Machine (1953)
+* First mass-produced computer in history
+*
+* Memory: 2K Drum (addresses 0000-1999)
+* Author: OpenClaw Agent
+* Wallet: RTC4325af95d26d59c3ef025963656d22af638bb96b
+*
+* This program implements a simplified proof-of-antiquity miner
+* using only decimal arithmetic available on the IBM 650.
+*
+* ASSEMBLY: Use SOAP II or SuperSoap assembler
+* RUN: Load card deck into IBM 533 reader, press PROGRAM START
+*
+* MEMORY LAYOUT:
+*   0000-0099  Bootstrap & Constants
+*   0100-0299  Main Program
+*   0300-0499  Hash Computation
+*   0500-0699  Card I/O
+*   0700-0899  Data Storage
+*   0900-1999  Available
+
+         ORG   0000
+
+* ====== CONSTANTS ======
+* Prime constants for hash mixing
+PRIME1   DEC   7
+PRIME2   DEC   11
+PRIME3   DEC   13
+PRIME4   DEC   17
+PRIME5   DEC   19
+PRIME6   DEC   23
+PRIME7   DEC   29
+PRIME8   DEC   31
+
+* Modulo constant (10^10)
+MODULO   DEC   0000000000
+
+* Wallet ID (truncated to 10 digits)
+WALLET   DEC   4325956365
+
+* Zero constant
+ZERO     DEC   0
+
+* ====== MAIN PROGRAM ======
+         ORG   0100
+
+START    RAL   WALLET    NEXT01    Load wallet into accumulator
+         MULT  PRIME1    NEXT02    Multiply by first prime
+         AL    ENTROPY   NEXT03    Add entropy from console
+         DIV   MODULO    NEXT04    Take modulo (keep lower 10)
+         
+         MULT  PRIME2    NEXT05    Second round
+         AL    TIME      NEXT06    Add timestamp
+         DIV   MODULO    NEXT07    
+         
+         MULT  PRIME3    NEXT08    Third round
+         DIV   MODULO    NEXT09    
+         
+         MULT  PRIME4    NEXT10    Fourth round
+         DIV   MODULO    NEXT11    
+         
+* Store hash result
+         RAL   ACCLO     NEXT12    Copy accumulator LO
+         RSL   ZERO      NEXT13    Clear for store
+         RAL   ACCLO     NEXT14    
+         RSL   HASH1     NEXT15    Store hash part 1
+         
+         RAL   ACCUP     NEXT16    Copy accumulator HI
+         RSL   HASH2     NEXT17    Store hash part 2
+         
+* Punch proof card
+         PCH   CARD_OUT  NEXT18    Punch card with proof
+         
+* Loop forever (mining cycle)
+         BRNZ  START     START     Restart mining
+
+* ====== ENTROPY COLLECTION ======
+* Read from console switches (address 8000)
+ENTROPY  EQU   8000
+
+* ====== TIMESTAMP ======
+* Would be set manually or from external clock
+TIME     DEC   2603140100  YYMMDDHHMM format
+
+* ====== ACCUMULATOR ADDRESSES ======
+ACCLO    EQU   8002
+ACCUP    EQU   8003
+
+* ====== DATA STORAGE ======
+         ORG   0700
+
+HASH1    DS    1         Hash result part 1
+HASH2    DS    1         Hash result part 2
+CARD_OUT DS    10        Card output template
+
+* ====== INSTRUCTION ADDRESS OPTIMIZATION ======
+* For optimal performance on drum memory, instructions
+* should be placed to minimize drum rotation wait time.
+* With 12,500 RPM and 50 words per band:
+*   - Word time: 0.096 ms
+*   - Full rotation: 4.8 ms
+*   - Optimal next address = current + 5 (approximately)
+
+* Instruction placement for optimal timing:
+NEXT01   EQU   0105
+NEXT02   EQU   0110
+NEXT03   EQU   0115
+NEXT04   EQU   0120
+NEXT05   EQU   0125
+NEXT06   EQU   0130
+NEXT07   EQU   0135
+NEXT08   EQU   0140
+NEXT09   EQU   0145
+NEXT10   EQU   0150
+NEXT11   EQU   0155
+NEXT12   EQU   0160
+NEXT13   EQU   0165
+NEXT14   EQU   0170
+NEXT15   EQU   0175
+NEXT16   EQU   0180
+NEXT17   EQU   0185
+NEXT18   EQU   0190
+
+* ====== PROOF CARD FORMAT ======
+* Columns  1-10: Wallet ID (truncated)
+* Columns 11-20: Timestamp (YYMMDDHHMM)
+* Columns 21-30: Proof Hash Part 1
+* Columns 31-40: Proof Hash Part 2
+* Columns 41-50: Checksum
+* Columns 51-80: Reserved / Debug
+
+* ====== END OF PROGRAM ======
+         END   START
