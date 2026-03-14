@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "RustChain Wallet",
+    "slug": "rustchain-wallet",
+    "version": "1.0.0",
+    "description": "Mobile wallet app for RustChain RTC token",
+    "platforms": ["ios", "android"],
+    "ios": { "bundleIdentifier": "com.rustchain.wallet" },
+    "android": { "package": "com.rustchain.wallet" }
+  }
+}
