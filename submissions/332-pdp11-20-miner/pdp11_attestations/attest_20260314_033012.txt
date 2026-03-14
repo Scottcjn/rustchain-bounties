@@ -1,0 +1,26 @@
+PDP11-ATTESTATION-V1
+Wallet: PDP11-CD5C36E13686-8DC4D67C1F61
+Miner: PDP11-MINER-D0C193E9
+Machine: PDP-11/20 (1970)
+Arch: 16-bit
+Endian: little-endian
+CoreMem: 0x642f
+Registers: 0x4cc
+UNIBUS: 0xa1c2
+Switches: 0x7377
+LineClk: 0xda05
+Timestamp: 2026-03-14T03:30:12.359039
+Signature: b19eb73d69ce655673280fa62087ee287dcfde11f2a1d7da15e236ea46897be0
+END
+
+PDP-11/20 MEMORY DUMP
+========================================
+001000  130636
+001002  133475
+001004  064716
+001006  062526
+001010  071450
+001012  007646
+001014  020207
+001016  167050
+========================================
