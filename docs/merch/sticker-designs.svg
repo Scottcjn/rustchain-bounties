@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 2400" width="2400" height="2400">
+  <defs>
+    <linearGradient id="rustOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E55A2B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f0f1a;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sheet background -->
+  <rect width="2400" height="2400" fill="#f5f5f0"/>
+
+  <!-- Cut line guides -->
+  <g stroke="#ccc" stroke-width="0.5" stroke-dasharray="8,4" fill="none">
+    <line x1="1200" y1="50" x2="1200" y2="2350"/>
+    <line x1="50" y1="1200" x2="2350" y2="1200"/>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- STICKER 1: RustChain Logo Badge (top-left) -->
+  <!-- ============================================ -->
+  <g transform="translate(600, 600)">
+    <!-- Circle sticker shape -->
+    <circle cx="0" cy="0" r="480" fill="url(#darkBg)" stroke="#FF6B35" stroke-width="6"/>
+    <circle cx="0" cy="0" r="450" fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.3"/>
+
+    <!-- Mini crab -->
+    <g transform="translate(0, -80)" filter="url(#glow)">
+      <ellipse cx="0" cy="0" rx="140" ry="100" fill="url(#rustOrange)"/>
+      <ellipse cx="-20" cy="-25" rx="80" ry="45" fill="#FF8C57" opacity="0.3"/>
+      <!-- Claws -->
+      <path d="M-160,-40 C-190,-80 -220,-85 -240,-60 C-250,-45 -240,0 -210,15 L-150,0 Z" fill="#FF6B35"/>
+      <path d="M160,-40 C190,-80 220,-85 240,-60 C250,-45 240,0 210,15 L150,0 Z" fill="#FF6B35"/>
+      <!-- Legs -->
+      <line x1="-120" y1="20" x2="-180" y2="60" stroke="#E55A2B" stroke-width="7" stroke-linecap="round"/>
+      <line x1="-110" y1="50" x2="-170" y2="100" stroke="#E55A2B" stroke-width="7" stroke-linecap="round"/>
+      <line x1="120" y1="20" x2="180" y2="60" stroke="#E55A2B" stroke-width="7" stroke-linecap="round"/>
+      <line x1="110" y1="50" x2="170" y2="100" stroke="#E55A2B" stroke-width="7" stroke-linecap="round"/>
+      <!-- Eyes -->
+      <circle cx="-45" cy="-50" r="20" fill="#fff"/>
+      <circle cx="45" cy="-50" r="20" fill="#fff"/>
+      <circle cx="-45" cy="-50" r="11" fill="#1a1a2e"/>
+      <circle cx="45" cy="-50" r="11" fill="#1a1a2e"/>
+      <circle cx="-41" cy="-54" r="4" fill="#fff"/>
+      <circle cx="49" cy="-54" r="4" fill="#fff"/>
+    </g>
+
+    <!-- Text -->
+    <text x="0" y="130" text-anchor="middle" font-family="'Courier New', monospace" font-size="80" font-weight="bold" letter-spacing="6" filter="url(#glow)">
+      <tspan fill="#FF6B35">RUST</tspan><tspan fill="#FFD700">CHAIN</tspan>
+    </text>
+
+    <!-- Chain links below text -->
+    <g fill="none" stroke="#FFD700" stroke-width="2.5" opacity="0.6">
+      <rect x="-200" y="160" width="40" height="22" rx="6"/>
+      <rect x="-150" y="160" width="40" height="22" rx="6"/>
+      <rect x="-100" y="160" width="40" height="22" rx="6"/>
+      <rect x="-50" y="160" width="40" height="22" rx="6"/>
+      <rect x="0" y="160" width="40" height="22" rx="6"/>
+      <rect x="50" y="160" width="40" height="22" rx="6"/>
+      <rect x="100" y="160" width="40" height="22" rx="6"/>
+      <rect x="150" y="160" width="40" height="22" rx="6"/>
+    </g>
+
+    <text x="0" y="230" text-anchor="middle" font-family="'Courier New', monospace" font-size="28" fill="#888" letter-spacing="8">
+      EST. 2024
+    </text>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- STICKER 2: Proof of Antiquity (top-right) -->
+  <!-- ============================================ -->
+  <g transform="translate(1800, 600)">
+    <!-- Rounded rectangle sticker -->
+    <rect x="-460" y="-460" width="920" height="920" rx="60" fill="url(#darkBg)" stroke="#FFD700" stroke-width="5"/>
+
+    <!-- Vintage seal design -->
+    <circle cx="0" cy="-60" r="200" fill="none" stroke="#FFD700" stroke-width="3" opacity="0.5"/>
+    <circle cx="0" cy="-60" r="180" fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.3"/>
+
+    <!-- Gear/cog teeth around circle -->
+    <g fill="#FFD700" opacity="0.4">
+      <rect x="-8" y="-268" width="16" height="30" rx="3"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(30, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(60, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(90, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(120, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(150, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(180, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(210, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(240, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(270, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(300, 0, -60)"/>
+      <rect x="-8" y="-268" width="16" height="30" rx="3" transform="rotate(330, 0, -60)"/>
+    </g>
+
+    <!-- Block icon in center -->
+    <rect x="-50" y="-110" width="100" height="100" rx="8" fill="none" stroke="#FF6B35" stroke-width="4"/>
+    <text x="0" y="-40" text-anchor="middle" font-family="'Courier New', monospace" font-size="48" fill="#FF6B35" font-weight="bold">#0</text>
+
+    <!-- Text -->
+    <text x="0" y="220" text-anchor="middle" font-family="'Courier New', monospace" font-size="52" fill="#FFD700" font-weight="bold" letter-spacing="6">
+      PROOF OF
+    </text>
+    <text x="0" y="300" text-anchor="middle" font-family="'Courier New', monospace" font-size="52" fill="#FFD700" font-weight="bold" letter-spacing="6">
+      ANTIQUITY
+    </text>
+
+    <!-- Decorative line -->
+    <line x1="-200" y1="340" x2="200" y2="340" stroke="#FF6B35" stroke-width="2" opacity="0.5"/>
+
+    <text x="0" y="390" text-anchor="middle" font-family="'Courier New', monospace" font-size="24" fill="#666" letter-spacing="4">
+      VERIFIED ON-CHAIN
+    </text>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- STICKER 3: "I Mine RTC" (bottom-left) -->
+  <!-- ============================================ -->
+  <g transform="translate(600, 1800)">
+    <!-- Die-cut hexagon shape -->
+    <polygon points="0,-480 416,-240 416,240 0,480 -416,240 -416,-240" fill="url(#darkBg)" stroke="#FF6B35" stroke-width="5"/>
+    <polygon points="0,-440 382,-220 382,220 0,440 -382,220 -382,-220" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.3"/>
+
+    <!-- Pickaxe icon -->
+    <g transform="translate(0, -100)" filter="url(#glow)">
+      <!-- Handle -->
+      <line x1="0" y1="0" x2="0" y2="160" stroke="#8B6914" stroke-width="14" stroke-linecap="round"/>
+      <!-- Axe head -->
+      <path d="M-80,-20 C-60,-80 0,-100 60,-80 L20,0 Z" fill="#c0c0c0" stroke="#999" stroke-width="2"/>
+      <!-- Sparkles -->
+      <circle cx="-30" cy="-60" r="4" fill="#FFD700"/>
+      <circle cx="20" cy="-80" r="3" fill="#FFD700"/>
+      <circle cx="-50" cy="-30" r="3" fill="#FFD700"/>
+    </g>
+
+    <!-- Text -->
+    <text x="0" y="130" text-anchor="middle" font-family="'Courier New', monospace" font-size="72" fill="#ffffff" font-weight="bold" letter-spacing="4">
+      I MINE
+    </text>
+    <text x="0" y="230" text-anchor="middle" font-family="'Courier New', monospace" font-size="110" fill="#FF6B35" font-weight="bold" letter-spacing="8" filter="url(#glow)">
+      RTC
+    </text>
+
+    <!-- Small block icons -->
+    <g fill="none" stroke="#FFD700" stroke-width="2" opacity="0.4">
+      <rect x="-160" y="270" width="30" height="30" rx="4"/>
+      <rect x="-120" y="270" width="30" height="30" rx="4"/>
+      <rect x="-80" y="270" width="30" height="30" rx="4"/>
+      <rect x="-40" y="270" width="30" height="30" rx="4"/>
+      <rect x="0" y="270" width="30" height="30" rx="4"/>
+      <rect x="40" y="270" width="30" height="30" rx="4"/>
+      <rect x="80" y="270" width="30" height="30" rx="4"/>
+      <rect x="120" y="270" width="30" height="30" rx="4"/>
+    </g>
+
+    <text x="0" y="360" text-anchor="middle" font-family="'Courier New', monospace" font-size="22" fill="#888" letter-spacing="6">
+      HASH POWER
+    </text>
+  </g>
+
+  <!-- ============================================ -->
+  <!-- STICKER 4: Crab + Code (bottom-right) -->
+  <!-- ============================================ -->
+  <g transform="translate(1800, 1800)">
+    <!-- Rounded square sticker -->
+    <rect x="-460" y="-460" width="920" height="920" rx="80" fill="#0a0a14" stroke="#33ff33" stroke-width="4"/>
+
+    <!-- Terminal header bar -->
+    <rect x="-420" y="-420" width="840" height="50" rx="8" fill="#1a1a2e"/>
+    <circle cx="-380" cy="-395" r="10" fill="#ff5f56"/>
+    <circle cx="-348" cy="-395" r="10" fill="#ffbd2e"/>
+    <circle cx="-316" cy="-395" r="10" fill="#27c93f"/>
+    <text x="0" y="-385" text-anchor="middle" font-family="'Courier New', monospace" font-size="20" fill="#666">
+      rustchain-terminal
+    </text>
+
+    <!-- Code content -->
+    <g font-family="'Courier New', monospace" font-size="30" filter="url(#glow)">
+      <text x="-380" y="-310" fill="#c586c0">fn</text>
+      <text x="-310" y="-310" fill="#dcdcaa"> mine_block</text>
+      <text x="-50" y="-310" fill="#d4d4d4">(</text>
+      <text x="-30" y="-310" fill="#9cdcfe">chain</text>
+      <text x="120" y="-310" fill="#d4d4d4">: &amp;</text>
+      <text x="180" y="-310" fill="#4ec9b0">RustChain</text>
+      <text x="400" y="-310" fill="#d4d4d4">)</text>
+
+      <text x="-380" y="-260" fill="#d4d4d4">  {</text>
+
+      <text x="-380" y="-210" fill="#6a9955">    // Proof of Antiquity</text>
+
+      <text x="-380" y="-160" fill="#c586c0">    let</text>
+      <text x="-290" y="-160" fill="#9cdcfe"> block</text>
+      <text x="-170" y="-160" fill="#d4d4d4"> =</text>
+      <text x="-140" y="-160" fill="#4ec9b0"> Block</text>
+      <text x="-30" y="-160" fill="#d4d4d4">::new(</text>
+
+      <text x="-380" y="-110" fill="#9cdcfe">      chain</text>
+      <text x="-210" y="-110" fill="#d4d4d4">.latest_hash(),</text>
+
+      <text x="-380" y="-60" fill="#9cdcfe">      nonce</text>
+      <text x="-210" y="-60" fill="#d4d4d4">,</text>
+
+      <text x="-380" y="-10" fill="#d4d4d4">    );</text>
+
+      <text x="-380" y="40" fill="#c586c0">    assert!</text>
+      <text x="-190" y="40" fill="#d4d4d4">(block.</text>
+      <text x="-80" y="40" fill="#dcdcaa">is_valid</text>
+      <text x="100" y="40" fill="#d4d4d4">());</text>
+
+      <text x="-380" y="90" fill="#9cdcfe">    chain</text>
+      <text x="-210" y="90" fill="#d4d4d4">.</text>
+      <text x="-190" y="90" fill="#dcdcaa">push</text>
+      <text x="-100" y="90" fill="#d4d4d4">(block);</text>
+
+      <text x="-380" y="140" fill="#d4d4d4">  }</text>
+    </g>
+
+    <!-- Crab watermark -->
+    <g transform="translate(280, 300)" opacity="0.15">
+      <ellipse cx="0" cy="0" rx="100" ry="70" fill="#FF6B35"/>
+      <circle cx="-30" cy="-35" r="14" fill="#fff"/>
+      <circle cx="30" cy="-35" r="14" fill="#fff"/>
+      <circle cx="-30" cy="-35" r="8" fill="#0a0a14"/>
+      <circle cx="30" cy="-35" r="8" fill="#0a0a14"/>
+      <path d="M-110,-30 C-140,-60 -160,-65 -170,-45 C-175,-35 -165,0 -145,10 L-100,0 Z" fill="#FF6B35"/>
+      <path d="M110,-30 C140,-60 160,-65 170,-45 C175,-35 165,0 145,10 L100,0 Z" fill="#FF6B35"/>
+    </g>
+
+    <!-- Bottom label -->
+    <text x="0" y="400" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" fill="#33ff33" letter-spacing="6" opacity="0.6">
+      MEMORY SAFE. THREAD SAFE. CHAIN SAFE.
+    </text>
+  </g>
+
+  <!-- Sheet labels -->
+  <text x="600" y="80" text-anchor="middle" font-family="'Courier New', monospace" font-size="18" fill="#999">STICKER 1: Logo Badge (3" circle)</text>
+  <text x="1800" y="80" text-anchor="middle" font-family="'Courier New', monospace" font-size="18" fill="#999">STICKER 2: Proof of Antiquity (3" square)</text>
+  <text x="600" y="1280" text-anchor="middle" font-family="'Courier New', monospace" font-size="18" fill="#999">STICKER 3: I Mine RTC (3" hexagon)</text>
+  <text x="1800" y="1280" text-anchor="middle" font-family="'Courier New', monospace" font-size="18" fill="#999">STICKER 4: Code Terminal (3" square)</text>
+</svg>
