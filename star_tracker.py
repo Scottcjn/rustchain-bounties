@@ -171,11 +171,18 @@ def get_stats(conn):
         delta = stars - yesterday_stars
         top_with_delta.append((name, stars, delta))
     
+    # Main repo stats for Claude Code OSS Campaign
+    cursor.execute("SELECT stars FROM repos WHERE name = 'Rustchain'")
+    main_row = cursor.fetchone()
+    main_stars = main_row[0] if main_row else 0
+
     return {
         "total_stars": total_stars,
         "total_repos": total_repos,
         "top_repos": top_with_delta,
-        "yesterday": yesterday
+        "yesterday": yesterday,
+        "main_stars": main_stars,
+        "target_stars": 5000
     }
 
 
@@ -189,6 +196,12 @@ def print_dashboard(conn):
     print(f"Total Stars: ⭐ {stats['total_stars']}")
     print(f"Total Repos: 📁 {stats['total_repos']}")
     print()
+    
+    # Claude Code OSS Campaign Progress
+    gap = stats['target_stars'] - stats['main_stars']
+    print("🚀 Claude Code OSS Campaign Progress:")
+    print(f"Rustchain Main Repo: {stats['main_stars']} / {stats['target_stars']} ⭐ (Gap: {max(0, gap)})\n")
+
     print("🏆 Top 10 Repos by Stars:")
     print("-"*50)
     print(f"{'Repo':<35} {'Stars':>8} {'Delta':>8}")
@@ -246,6 +259,14 @@ def generate_html_report(conn):
         <div class="stat-label">Total Repos 📁</div>
     </div>
     
+    <h2>🚀 Claude Code OSS Campaign Progress</h2>
+    <table>
+        <tr><th>Metric</th><th>Count</th></tr>
+        <tr><td><strong>Rustchain main repo stars</strong></td><td><strong>{stats['main_stars']}</strong></td></tr>
+        <tr><td><strong>Target</strong></td><td><strong>{stats['target_stars']}</strong></td></tr>
+        <tr><td><strong>Gap</strong></td><td><strong>{stats['target_stars'] - stats['main_stars']}</strong></td></tr>
+    </table>
+
     <h2>🏆 Top 10 Repos</h2>
     <table>
         <tr><th>Repo</th><th>Stars</th><th>24h Change</th></tr>
