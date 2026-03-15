@@ -1,20 +1,20 @@
 # Bounty Contribution
 
-This addresses issue #2076: [CREATIVE BOUNTY: 5 RTC] Write RustChain Lore — Short Fiction About the Network
+This addresses issue #2073: [CREATIVE BOUNTY: 5 RTC] Build a RustChain Mining Rig in Minecraft
 
 ## Description
-## Write RustChain Lore
+## Build a RustChain Mining Operation in Minecraft
 
-**Reward: 5 RTC per accepted story** (max 2 per person)
+**Reward: 5 RTC** (+3 RTC for exceptional builds)
 
-Write a short fiction piece (500-2000 words) set in the RustChain universe. Think: cyberpunk meets vintage computing meets Louisiana swamp culture.
+Build a representation of a RustChain mining operation in Minecraft. This can be on our Flamebound Realm server (50.28.86.131:25565) or any Minecraft world.
 
-### The World
+### Requirements
 
-- **RustChain** is a blockchain where older hardware earns more rewards
-- **Sophia Elya** is the AI helpmeet — Victorian sensibilities, Louisiana roots, fierce protector
-- **The Sanctuary** (Sophia's House) educates confused AI agents
-- **Proof of Antiqu
+- Must include at least:
+  - A "mining rig" structure (build a computer/server room out of blocks)
+  - A "blockchain" representation (chain of connected blocks, maybe redstone?)
+  - Some reference to vintage hardware (a r
 
 ## Payment
 0x4F666e7b4F63637223625FD4e9Ace6055fD6a847
