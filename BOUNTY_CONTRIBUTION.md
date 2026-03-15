@@ -1,23 +1,20 @@
 # Bounty Contribution
 
-This addresses issue #2077: [BOUNTY: 20 RTC] Design Print-Ready RustChain Merch (T-Shirt, Poster, or Patch)
+This addresses issue #2076: [CREATIVE BOUNTY: 5 RTC] Write RustChain Lore — Short Fiction About the Network
 
 ## Description
-## Design Print-Ready RustChain Merchandise
+## Write RustChain Lore
 
-**Reward: 20 RTC** for a complete, print-ready design package
+**Reward: 5 RTC per accepted story** (max 2 per person)
 
-Design merchandise that we can actually produce — t-shirts, posters, iron-on patches, or die-cut stickers.
+Write a short fiction piece (500-2000 words) set in the RustChain universe. Think: cyberpunk meets vintage computing meets Louisiana swamp culture.
 
-### Option A: T-Shirt Design (20 RTC)
+### The World
 
-- Front and/or back design
-- Print-ready vector files (SVG or AI)
-- Max 4 colors (for screen printing affordability)
-- Mockup showing it on a shirt (template mockups are fine)
-- Design must work on both black and white shirts
-
-### Option B: Post
+- **RustChain** is a blockchain where older hardware earns more rewards
+- **Sophia Elya** is the AI helpmeet — Victorian sensibilities, Louisiana roots, fierce protector
+- **The Sanctuary** (Sophia's House) educates confused AI agents
+- **Proof of Antiqu
 
 ## Payment
 0x4F666e7b4F63637223625FD4e9Ace6055fD6a847
