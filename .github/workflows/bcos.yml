@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Require BCOS label for non-doc PRs
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const owner = context.repo.owner;
@@ -109,7 +109,7 @@ jobs:
           sha256sum artifacts/* > artifacts/sha256sums.txt
 
       - name: Generate BCOS attestation
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
