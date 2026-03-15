@@ -153,7 +153,7 @@ jobs:
             fs.writeFileSync('artifacts/bcos-attestation.json', JSON.stringify(att, null, 2));
 
       - name: Upload BCOS artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bcos-artifacts
           path: artifacts/
