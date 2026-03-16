@@ -21,8 +21,18 @@ class MeatFinder:
     """
 
     def __init__(self):
-        self.found_tasks = []
+        self.found_tasks: List[Dict] = []
         self._seen_ids = set()
+
+    def _log(self, msg: str) -> None:
+        try:
+            ts = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            line = f"[{ts}] {msg}\n"
+            with open(MEAT_LOG, "a", encoding="utf-8") as f:
+                f.write(line)
+        except Exception:
+            # Best-effort logging; never raise from logger.
+            pass
 
     def _github_headers(self) -> Dict[str, str]:
         headers = {
@@ -71,234 +81,138 @@ class MeatFinder:
 
             # Retry transient/rate-limit style statuses.
             if resp.status_code in (403, 429, 500, 502, 503, 504) and attempt < max_attempts:
-                last_err = f"status={resp.status_code}"
+                last_err = f"status={resp.status_code} attempt={attempt} url={url}"
                 time.sleep(self._retry_delay_seconds(resp, attempt))
                 continue
 
-            return resp, f"status={resp.status_code}"
+            # Non-retriable or exhausted attempts
+            try:
+                body = resp.json()
+                snippet = json.dumps(body)[:200]
+            except Exception:
+                snippet = (resp.text or "")[:200]
+            last_err = f"status={resp.status_code} url={url} body={snippet}"
+            return None, last_err
 
         return None, last_err
 
-    def _parse_reward_number(self, num_raw: str, unit_suffix: str) -> Optional[int]:
-        normalized = (
-            num_raw.replace(",", "")
-            .replace("，", "")
-            .replace("_", "")
-            .strip()
-        )
-        try:
-            base = float(normalized)
-        except ValueError:
+    def _extract_bounty_usd(self, text: str) -> Optional[float]:
+        if not text:
+            return None
+        t = text.lower()
+
+        # Normalize numbers like $1,500.50 or 1 500 usd
+        patterns = [
+            r"\$?\s*([0-9]{1,3}(?:[, ]?[0-9]{3})*(?:\.[0-9]{1,2})?)\s*(?:usd|us\$|\$)?",
+            r"(?:usd|us\$)\s*([0-9]{1,3}(?:[, ]?[0-9]{3})*(?:\.[0-9]{1,2})?)",
+            r"bounty:\s*\$?\s*([0-9]{1,3}(?:[, ]?[0-9]{3})*(?:\.[0-9]{1,2})?)",
+        ]
+        for pat in patterns:
+            for m in re.finditer(pat, t, flags=re.IGNORECASE):
+                amt_s = m.group(1)
+                if not amt_s:
+                    continue
+                try:
+                    amt = float(amt_s.replace(",", "").replace(" ", ""))
+                    if amt > 0:
+                        return amt
+                except Exception:
+                    continue
+        return None
+
+    def _matches_keywords(self, title: str, body: str) -> bool:
+        hay = f"{title or ''}\n{body or ''}".lower()
+        return any(k.lower() in hay for k in KEYWORDS)
+
+    def _issue_is_pull_request(self, issue: Dict) -> bool:
+        # GitHub issues API includes PRs if 'pull_request' key present
+        return "pull_request" in issue
+
+    def _fetch_repo_issues(self, repo: str) -> Tuple[List[Dict], Optional[str]]:
+        issues: List[Dict] = []
+        url = f"https://api.github.com/repos/{repo}/issues?state=open&per_page=100&sort=created&direction=desc"
+        while url:
+            resp, err = self._github_get_with_retry(url)
+            if err:
+                return issues, err
+            try:
+                page_items = resp.json()
+                if isinstance(page_items, list):
+                    issues.extend(page_items)
+                else:
+                    return issues, f"unexpected response shape for {repo}"
+            except Exception as e:
+                return issues, f"json decode error for {repo}: {e}"
+            url = self._next_link(resp.headers.get("Link"))
+        return issues, None
+
+    def _task_from_issue(self, repo: str, issue: Dict) -> Optional[Dict]:
+        if self._issue_is_pull_request(issue):
+            return None
+        title = issue.get("title") or ""
+        body = issue.get("body") or ""
+        if not self._matches_keywords(title, body):
+            return None
+        bounty = self._extract_bounty_usd(f"{title}\n{body}")
+        if bounty is None or bounty < MIN_BOUNTY_USD:
             return None
 
-        suffix = (unit_suffix or "").lower()
-        if suffix == "k":
-            base *= 1000
-        elif suffix == "m":
-            base *= 1_000_000
-        elif suffix in ("w", "万"):
-            base *= 10_000
-        elif suffix == "千":
-            base *= 1_000
+        task_id = f"github:{repo}#{issue.get('number')}"
+        if task_id in self._seen_ids:
+            return None
+        self._seen_ids.add(task_id)
 
-        return int(base)
+        return {
+            "id": task_id,
+            "platform": "github",
+            "repo": repo,
+            "number": issue.get("number"),
+            "title": title,
+            "url": issue.get("html_url"),
+            "bounty_usd": bounty,
+            "labels": [l.get("name") for l in issue.get("labels", []) if isinstance(l, dict)],
+            "created_at": issue.get("created_at"),
+            "updated_at": issue.get("updated_at"),
+        }
 
-    def _extract_rtc_reward(self, text: str) -> int:
-        """Best-effort RTC reward extraction from title/body for payout-first ranking.
+    def scan_github(self, repos: Optional[List[str]] = None) -> List[Dict]:
+        repos = repos or self._default_repos()
+        results: List[Dict] = []
 
-        Supports forms like: 500 RTC, ~500 RTC, 500+ RTC, 1,200 RTC, 1，200 RTC, 1k RTC, 2.5k RTC, 1.2M RTC, 3w RTC, 2万 RTC, 2千 RTC, RTC 500, and RTC~2k.
-        """
-        rewards: List[int] = []
-        patterns = [
-            re.compile(r"[~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmMwW万千])?\+?\s*RTC", re.IGNORECASE),
-            re.compile(r"RTC\s*[:：\-~≈]?\s*(\d{1,3}(?:[，,]\d{3})+|\d+(?:\.\d+)?)\s*([kKmMwW万千])?\+?", re.IGNORECASE),
-        ]
-        for pattern in patterns:
-            for num_raw, k_suffix in pattern.findall(text):
-                parsed = self._parse_reward_number(num_raw, k_suffix)
-                if parsed is not None:
-                    rewards.append(parsed)
-        if not rewards:
-            return 0
-        return max(rewards)
-
-    def _max_report_results(self) -> int:
-        raw = os.getenv("MEAT_MAX_RESULTS", "30")
-        try:
-            return max(1, int(raw))
-        except ValueError:
-            return 30
-
-    def _min_reward_rtc(self) -> int:
-        """Optional payout floor to suppress low/no-value matches in report output."""
-        raw = os.getenv("MEAT_MIN_RTC", "0")
-        try:
-            return max(0, int(raw))
-        except ValueError:
-            return 0
-
-    def _github_repos(self) -> List[str]:
-        """Optional repo override for faster, payout-first scanning.
-
-        Env format: MEAT_GITHUB_REPOS="owner/repo,owner/repo2"
-        """
-        raw = os.getenv("MEAT_GITHUB_REPOS", "").strip()
-        if not raw:
-            return list(DEFAULT_GITHUB_REPOS)
-
-        repos: List[str] = []
-        for candidate in (part.strip() for part in raw.split(",")):
-            if not candidate:
-                continue
-            if "/" not in candidate:
-                continue
-            repos.append(candidate)
-
-        return repos or list(DEFAULT_GITHUB_REPOS)
-
-    def _keywords(self) -> List[str]:
-        """Optional keyword override for tuning bounty matching.
-
-        Env format: MEAT_KEYWORDS="python,automation,agent"
-        Empty/invalid values gracefully fall back to defaults.
-        """
-        raw = os.getenv("MEAT_KEYWORDS", "").strip()
-        if not raw:
-            return list(KEYWORDS)
-
-        parsed = [part.strip().lower() for part in raw.split(",") if part.strip()]
-        return parsed or list(KEYWORDS)
-
-    def _text_matches_keywords(self, text: str, keywords: List[str]) -> bool:
-        """Keyword matcher with boundary-aware logic for short tokens.
-
-        Prevents false positives like matching `bot` inside `bottube`.
-        """
-        haystack = (text or "").lower()
-        if not haystack:
-            return False
-
-        for kw in keywords:
-            token = (kw or "").strip().lower()
-            if not token:
-                continue
-            if len(token) <= 3 and token.isalnum():
-                if re.search(rf"(?<![a-z0-9]){re.escape(token)}(?![a-z0-9])", haystack):
-                    return True
-            elif token in haystack:
-                return True
-        return False
-
-    def scan_github_elyan(self):
-        """Scans Scottcjn's repos for open bounties."""
-        repos = self._github_repos()
-        keywords = self._keywords()
         for repo in repos:
-            url = f"https://api.github.com/repos/{repo}/issues?state=open&labels=bounty&per_page=100"
-            while url:
-                try:
-                    resp, err = self._github_get_with_retry(url)
-                    if resp is None:
-                        print(f"GitHub scan warning for {repo}: request failed ({err})")
-                        break
-                    if err:
-                        print(f"GitHub scan warning for {repo}: {err}")
-                        break
-                    issues = resp.json()
-                    if not isinstance(issues, list):
-                        message = issues.get("message") if isinstance(issues, dict) else str(issues)
-                        print(f"GitHub scan warning for {repo}: unexpected payload ({message})")
-                        break
-                    if not issues:
-                        break
+            issues, err = self._fetch_repo_issues(repo)
+            if err:
+                self._log(f"ERR fetch issues {repo}: {err}")
+                continue
+            for it in issues:
+                task = self._task_from_issue(repo, it)
+                if task:
+                    results.append(task)
+        return results
 
-                    for issue in issues:
-                        # GitHub issues API returns PRs too; skip them explicitly.
-                        if issue.get("pull_request"):
-                            continue
+    def _default_repos(self) -> List[str]:
+        # Allow override via env: GH_REPOS="owner1/repo1,owner2/repo2"
+        env_val = os.getenv("GH_REPOS")
+        if env_val:
+            parts = [p.strip() for p in env_val.split(",") if p.strip()]
+            if parts:
+                return parts
+        return list(DEFAULT_GITHUB_REPOS)
 
-                        title = issue.get("title", "").lower()
-                        body = issue.get("body", "").lower()
-                        if self._text_matches_keywords(f"{title}\n{body}", keywords):
-                            task_id = f"{repo}#{issue['number']}"
-                            if task_id in self._seen_ids:
-                                continue
-                            self._seen_ids.add(task_id)
-                            reward_rtc = self._extract_rtc_reward(
-                                f"{issue.get('title', '')}\n{issue.get('body', '')}"
-                            )
-                            self.found_tasks.append({
-                                "platform": "GitHub",
-                                "id": task_id,
-                                "title": issue["title"],
-                                "url": issue["html_url"],
-                                "tags": [l["name"] for l in issue.get("labels", [])],
-                                "reward_rtc": reward_rtc,
-                            })
+    def find_meat(self) -> List[Dict]:
+        found = []
+        try:
+            gh = self.scan_github()
+            found.extend(gh)
+        except Exception as e:
+            self._log(f"ERR scan_github: {e}")
 
-                    # Follow GitHub Link headers for robust pagination.
-                    url = self._next_link(resp.headers.get("Link"))
-                except Exception as e:
-                    print(f"GitHub scan error for {repo}: {e}")
-                    break
+        # Extend here with other platforms (Bountycaster/Apify) as needed.
+        self.found_tasks = found
+        return found
 
-    def scan_bountycaster_proxy(self):
-        """
-        Since direct scrape is blocked, we use search results or public feeds.
-        Placeholder for logic that uses public hubs or searchcaster mirrors.
-        """
-        # Note: In a real run, this would query nemes.farcaster.xyz if reachable
-        pass
-
-    def scan_apify_ideas(self):
-        """Placeholder for Apify Ideas scraping."""
-        pass
-
-    def report(self):
-        """Returns a summary of newly found tasks."""
-        if not self.found_tasks:
-            return "No new 'meat' found in this cycle."
-        
-        report_lines = ["🥩 **Found New Meat!**"]
-        ordered_tasks = sorted(
-            self.found_tasks,
-            key=lambda t: (-int(t.get("reward_rtc", 0)), t.get("id", "")),
-        )
-
-        min_reward = self._min_reward_rtc()
-        if min_reward > 0:
-            ordered_tasks = [
-                t for t in ordered_tasks if int(t.get("reward_rtc", 0)) >= min_reward
-            ]
-
-        if not ordered_tasks:
-            return "No new 'meat' found in this cycle."
-
-        limit = self._max_report_results()
-        visible_tasks = ordered_tasks[:limit]
-        for task in visible_tasks:
-            reward = int(task.get("reward_rtc", 0))
-            reward_suffix = f" [~{reward} RTC]" if reward > 0 else ""
-            line = f"- [{task['platform']}] {task['title']}{reward_suffix} ({task['url']})"
-            report_lines.append(line)
-
-        hidden_count = len(ordered_tasks) - len(visible_tasks)
-        if hidden_count > 0:
-            report_lines.append(f"…and {hidden_count} more matches (set MEAT_MAX_RESULTS to adjust output size).")
-
-        return "\n".join(report_lines)
-
-    def save_log(self):
-        log_dir = os.path.dirname(MEAT_LOG)
-        if log_dir:
-            os.makedirs(log_dir, exist_ok=True)
-        with open(MEAT_LOG, "a") as f:
-            f.write(f"--- Scan at {time.ctime()} ---\n")
-            f.write(json.dumps(self.found_tasks, indent=2))
-            f.write("\n")
 
 if __name__ == "__main__":
-    finder = MeatFinder()
-    finder.scan_github_elyan()
-    print(finder.report())
-    finder.save_log()
+    mf = MeatFinder()
+    tasks = mf.find_meat()
+    print(json.dumps({"count": len(tasks), "tasks": tasks}, indent=2))
