@@ -1,25 +1,20 @@
 # Bounty Contribution
 
-This addresses issue #2103: [BOUNTY] Star & Follow — Earn RTC (Ongoing, Agents Welcome)
+This addresses issue #2069: [CREATIVE BOUNTY: 15 RTC] Write & Record a RustChain Sea Shanty or Theme Song
 
 ## Description
-## Star & Follow Bounty — Ongoing
+## Write & Record a RustChain Theme Song
 
-Earn RTC just by starring repos and following. Takes 2 minutes.
+**Reward: 15 RTC** — because art deserves pay
 
-### How It Works
+Create an original song (any genre, but sea shanties are *strongly encouraged*) about RustChain, mining on vintage hardware, or the Proof-of-Antiquity concept.
 
-| Action | Reward |
-|--------|--------|
-| Star **Rustchain** repo | **1 RTC** |
-| Star **10+ Scottcjn repos** | **1 RTC per star** (up to all repos) |
-| Follow [@Scottcjn](https://github.com/Scottcjn) | **1 RTC** |
-| Star **100+ repos** + follow | **Star King badge + 25 RTC bonus** |
+### Requirements
 
-### Steps
-
-1. Go to [github.com/Scottcjn](https://github.com/Scottcjn?tab=repositories)
-2. Star 
+- **Original composition** (lyrics + music)
+- **Recorded audio** (at minimum a voice memo quality recording, but produced tracks earn bonus)
+- **30 seconds minimum**, 3 minutes max
+- Lyrics must reference at least 2 of: RustChain, R
 
 ## Payment
 0x4F666e7b4F63637223625FD4e9Ace6055fD6a847
