@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoTTube SDK Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background-color: #000;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BoTTube JavaScript SDK Integration Example</h1>
+        
+        <div class="video-container">
+            <iframe id="botTubeVideo" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+        
+        <div class="controls">
+            <button id="loadVideoBtn">Load Video</button>
+            <button id="playBtn">Play</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="getInfoBtn">Get Video Info</button>
+        </div>
+        
+        <div id="status" class="status">
+            <p>Ready to load BoTTube video...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@bot-tube/sdk@latest/dist/bot-tube.min.js"></script>
+    <script>
+        // Initialize BoTTube SDK
+        const botTube = new BoTTubeSDK({
+            apiKey: 'YOUR_API_KEY_HERE', // Replace with your actual API key
+            playerId: 'botTubeVideo'
+        });
+        
+        // DOM elements
+        const loadVideoBtn = document.getElementById('loadVideoBtn');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const getInfoBtn = document.getElementById('getInfoBtn');
+        const statusDiv = document.getElementById('status');
+        
+        // Sample video ID (replace with actual video ID)
+        const sampleVideoId = 'sample-video-id-123';
+        
+        // Update status message
+        function updateStatus(message) {
+            statusDiv.innerHTML = `<p>${message}</p>`;
+        }
+        
+        // Load video
+        loadVideoBtn.addEventListener('click', () => {
+            updateStatus('Loading video...');
+            botTube.loadVideo(sampleVideoId)
+                .then(() => {
+                    updateStatus('Video loaded successfully!');
+                })
+                .catch(error => {
+                    updateStatus(`Error loading video: ${error.message}`);
+                });
+        });
+        
+        // Play video
+        playBtn.addEventListener('click', () => {
+            updateStatus('Playing video...');
+            botTube.play()
+                .then(() => {
+                    updateStatus('Video is playing.');
+                })
+                .catch(error => {
+                    updateStatus(`Error playing video: ${error.message}`);
+                });
+        });
+        
+        // Pause video
+        pauseBtn.addEventListener('click', () => {
+            updateStatus('Pausing video...');
+            botTube.pause()
+                .then(() => {
+                    updateStatus('Video paused.');
+                })
+                .catch(error => {
+                    updateStatus(`Error pausing video: ${error.message}`);
+                });
+        });
+        
+        // Get video info
+        getInfoBtn.addEventListener('click', () => {
+            updateStatus('Fetching video information...');
+            botTube.getVideoInfo()
+                .then(info => {
+                    updateStatus(`Video Info: ${JSON.stringify(info, null, 2)}`);
+                })
+                .catch(error => {
+                    updateStatus(`Error getting video info: ${error.message}`);
+                });
+        });
+        
+        // Listen for SDK events
+        botTube.on('ready', () => {
+            updateStatus('BoTTube SDK is ready!');
+        });
+        
+        botTube.on('error', (error) => {
+            updateStatus(`SDK Error: ${error.message}`);
+        });
+        
+        botTube.on('stateChange', (state) => {
+            updateStatus(`Video state changed to: ${state}`);
+        });
+    </script>
+</body>
+</html>
