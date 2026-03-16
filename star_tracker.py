@@ -111,206 +111,65 @@ def save_repos(conn, repos):
     print(f"Saved {len(repos)} repos")
 
 
-def record_snapshot(conn):
-    """Record current star counts"""
+def record_snapshot(conn, repos, when=None):
+    """Record a daily snapshot of stars for each repo.
+    
+    If a snapshot already exists for the same repo on the same date, update it.
+    """
     cursor = conn.cursor()
-    now = datetime.now().isoformat()
-    
-    cursor.execute("SELECT name, stars FROM repos")
-    repos = cursor.fetchall()
-    
-    for name, stars in repos:
-        cursor.execute("""
-            INSERT INTO snapshots (repo_name, stars, recorded_at)
-            VALUES (?, ?, ?)
-        """, (name, stars, now))
-    
+
+    # Normalize date to YYYY-MM-DD string (daily granularity)
+    if when is None:
+        day = date.today().isoformat()
+    else:
+        if isinstance(when, datetime):
+            day = when.date().isoformat()
+        elif isinstance(when, date):
+            day = when.isoformat()
+        else:
+            # Accept string-like; use only the date portion if present
+            day = str(when)[:10]
+
+    count = 0
+    for repo in repos:
+        name = repo.get("name")
+        stars = repo.get("stargazers_count")
+
+        if name is None or stars is None:
+            continue
+
+        # Check if a snapshot already exists for this repo on this date
+        cursor.execute(
+            "SELECT id FROM snapshots WHERE repo_name = ? AND recorded_at = ?",
+            (name, day)
+        )
+        row = cursor.fetchone()
+        if row:
+            cursor.execute(
+                "UPDATE snapshots SET stars = ? WHERE id = ?",
+                (stars, row[0])
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO snapshots (repo_name, stars, recorded_at) VALUES (?, ?, ?)",
+                (name, stars, day)
+            )
+        count += 1
+
     conn.commit()
-    print(f"Recorded snapshot for {len(repos)} repos at {now}")
+    print(f"Recorded snapshot for {count} repos on {day}")
 
 
-def get_stats(conn):
-    """Get statistics"""
-    cursor = conn.cursor()
-    
-    # Total stars
-    cursor.execute("SELECT SUM(stars) FROM repos")
-    total_stars = cursor.fetchone()[0] or 0
-    
-    # Total repos
-    cursor.execute("SELECT COUNT(*) FROM repos")
-    total_repos = cursor.fetchone()[0]
-    
-    # Latest snapshot for each repo
-    cursor.execute("""
-        SELECT r.name, r.stars, s.recorded_at
-        FROM repos r
-        JOIN (
-            SELECT repo_name, MAX(recorded_at) as max_date
-            FROM snapshots
-            GROUP BY repo_name
-        ) latest ON r.name = latest.repo_name
-        JOIN snapshots s ON r.name = s.repo_name AND s.recorded_at = latest.max_date
-        ORDER BY r.stars DESC
-        LIMIT 10
-    """)
-    top_repos = cursor.fetchall()
-    
-    # Get yesterday's stars for delta
-    cursor.execute("""
-        SELECT repo_name, stars
-        FROM snapshots
-        WHERE date(recorded_at) = date('now', '-1 day')
-    """)
-    yesterday = {row[0]: row[1] for row in cursor.fetchall()}
-    
-    # Calculate deltas
-    top_with_delta = []
-    for name, stars, _ in top_repos:
-        yesterday_stars = yesterday.get(name, stars)
-        delta = stars - yesterday_stars
-        top_with_delta.append((name, stars, delta))
-    
-    # Main repo stats for Claude Code OSS Campaign
-    cursor.execute("SELECT stars FROM repos WHERE name = 'Rustchain'")
-    main_row = cursor.fetchone()
-    main_stars = main_row[0] if main_row else 0
-
-    return {
-        "total_stars": total_stars,
-        "total_repos": total_repos,
-        "top_repos": top_with_delta,
-        "yesterday": yesterday,
-        "main_stars": main_stars,
-        "target_stars": 5000
-    }
-
-
-def print_dashboard(conn):
-    """Print CLI dashboard"""
-    stats = get_stats(conn)
-    
-    print("\n" + "="*60)
-    print(f"📊 GitHub Star Tracker - {OWNER}")
-    print("="*60)
-    print(f"Total Stars: ⭐ {stats['total_stars']}")
-    print(f"Total Repos: 📁 {stats['total_repos']}")
-    print()
-    
-    # Claude Code OSS Campaign Progress
-    gap = stats['target_stars'] - stats['main_stars']
-    print("🚀 Claude Code OSS Campaign Progress:")
-    print(f"Rustchain Main Repo: {stats['main_stars']} / {stats['target_stars']} ⭐ (Gap: {max(0, gap)})\n")
-
-    print("🏆 Top 10 Repos by Stars:")
-    print("-"*50)
-    print(f"{'Repo':<35} {'Stars':>8} {'Delta':>8}")
-    print("-"*50)
-    
-    for name, stars, delta in stats['top_repos']:
-        delta_str = f"+{delta}" if delta > 0 else str(delta)
-        print(f"{name:<35} {stars:>8} {delta_str:>8}")
-    
-    print("="*60)
-
-
-def generate_html_report(conn):
-    """Generate HTML report with chart"""
-    cursor = conn.cursor()
-    
-    # Get historical data for chart
-    cursor.execute("""
-        SELECT date(recorded_at) as day, SUM(stars) as total
-        FROM snapshots
-        GROUP BY day
-        ORDER BY day
-        LIMIT 30
-    """)
-    history = cursor.fetchall()
-    
-    html = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>GitHub Star Tracker - {OWNER}</title>
-    <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-               max-width: 900px; margin: 0 auto; padding: 20px; 
-               background: #0d1117; color: #c9d1d9; }}
-        h1 {{ color: #58a6ff; }}
-        .stat {{ display: inline-block; margin: 10px 20px; }}
-        .stat-value {{ font-size: 2em; font-weight: bold; color: #58a6ff; }}
-        .stat-label {{ color: #8b949e; }}
-        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
-        th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }}
-        th {{ color: #8b949e; }}
-        .delta-pos {{ color: #3fb950; }}
-        .delta-neg {{ color: #f85149; }}
-    </style>
-</head>
-<body>
-    <h1>📊 GitHub Star Tracker - {OWNER}</h1>
-    
-    <div class="stat">
-        <div class="stat-value">{stats['total_stars']}</div>
-        <div class="stat-label">Total Stars ⭐</div>
-    </div>
-    <div class="stat">
-        <div class="stat-value">{stats['total_repos']}</div>
-        <div class="stat-label">Total Repos 📁</div>
-    </div>
-    
-    <h2>🚀 Claude Code OSS Campaign Progress</h2>
-    <table>
-        <tr><th>Metric</th><th>Count</th></tr>
-        <tr><td><strong>Rustchain main repo stars</strong></td><td><strong>{stats['main_stars']}</strong></td></tr>
-        <tr><td><strong>Target</strong></td><td><strong>{stats['target_stars']}</strong></td></tr>
-        <tr><td><strong>Gap</strong></td><td><strong>{stats['target_stars'] - stats['main_stars']}</strong></td></tr>
-    </table>
-
-    <h2>🏆 Top 10 Repos</h2>
-    <table>
-        <tr><th>Repo</th><th>Stars</th><th>24h Change</th></tr>
-"""
-    
-    for name, stars, delta in stats['top_repos']:
-        delta_class = "delta-pos" if delta >= 0 else "delta-neg"
-        delta_str = f"+{delta}" if delta >= 0 else str(delta)
-        html += f"<tr><td>{name}</td><td>{stars}</td><td class='{delta_class}'>{delta_str}</td></tr>\n"
-    
-    html += """
-    </table>
-    
-    <p>Generated at: """ + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + """</p>
-</body>
-</html>"""
-    
-    with open("star_tracker.html", "w") as f:
-        f.write(html)
-    
-    print("Generated: star_tracker.html")
+def main():
+    conn = init_db()
+    repos = get_all_repos()
+    if not repos:
+        print("No repositories fetched. Exiting.")
+        return
+    save_repos(conn, repos)
+    record_snapshot(conn, repos)
+    conn.close()
 
 
 if __name__ == "__main__":
-    import sys
-    
-    conn = init_db()
-    
-    # Fetch and save repos
-    print("Fetching repos...")
-    repos = get_all_repos()
-    print(f"Found {len(repos)} repos")
-    save_repos(conn, repos)
-    
-    # Record snapshot
-    print("Recording snapshot...")
-    record_snapshot(conn)
-    
-    # Show dashboard
-    print_dashboard(conn)
-    
-    # Generate HTML
-    stats = get_stats(conn)
-    generate_html_report(conn)
-    
-    conn.close()
-    print("\nDone!")
+    main()
