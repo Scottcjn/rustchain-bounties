@@ -18,7 +18,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -63,71 +63,93 @@ def clean_user(value: str) -> str:
 
 
 def parse_ledger_table(body: str, source: str = "body") -> List[LedgerEntry]:
-    """Parse issue body active table rows only."""
+    """Parse markdown table rows that match the known ledger header."""
     lines = body.splitlines()
     out: List[LedgerEntry] = []
 
     in_table = False
     for line in lines:
-        if line.strip().startswith("| Date (UTC) | Bounty Ref | GitHub User"):
+        stripped = line.strip()
+        if stripped.startswith("| Date (UTC) | Bounty Ref | GitHub User"):
             in_table = True
             continue
         if not in_table:
             continue
-        if line.strip().startswith("|---"):
+        if stripped.startswith("|---"):
+            # header separator row
             continue
-        if not line.strip().startswith("|"):
+        if not stripped.startswith("|"):
+            # end of table when a non-table line is encountered
             if out:
                 break
             continue
 
-        cells = [c.strip() for c in line.strip().split("|")[1:-1]]
+        cells = [c.strip() for c in stripped.split("|")[1:-1]]
+        # Expected columns: Date | Ref | User | Desc | Amount | Status | Pending | Tx | Note
         if len(cells) < 9:
             continue
 
         user_cell = cells[2]
-        if not user_cell.startswith("@"):
+        if not user_cell or not user_cell.strip().startswith("@"):
             continue
 
-        out.append(
-            LedgerEntry(
-                user=clean_user(user_cell),
-                amount=parse_amount(cells[4]),
-                status=cells[5].strip().lower(),
-                pending_id=cells[6].strip().strip("`"),
-                tx_hash=cells[7].strip().strip("`"),
-                source=source,
-            )
+        entry = LedgerEntry(
+            user=clean_user(user_cell),
+            amount=parse_amount(cells[4]),
+            status=cells[5].strip().lower(),
+            pending_id=cells[6].strip().strip("`"),
+            tx_hash=cells[7].strip().strip("`"),
+            source=source,
         )
+        out.append(entry)
 
     return out
 
 
-def parse_table_like_rows(text: str, source: str) -> List[LedgerEntry]:
-    """Parse inline markdown table rows in comments."""
+def parse_bullet_block(body: str, source: str = "comments") -> List[LedgerEntry]:
+    """Parse loose bullet evidence blocks in comments.
+
+    Tries to extract @user, amount (RTC), status, pending id, tx hash from lines
+    that start with '-' or '*'.
+    """
     out: List[LedgerEntry] = []
-    for line in text.splitlines():
-        if not line.strip().startswith("|"):
+    for raw in body.splitlines():
+        line = raw.strip()
+        if not (line.startswith("-") or line.startswith("*")):
             continue
-        cells = [c.strip() for c in line.strip().split("|")[1:-1]]
-        if len(cells) < 9:
-            continue
+        text = line.lstrip("-* ").strip()
 
-        status = cells[5].strip().lower()
-        if status not in {"pending", "confirmed", "voided"}:
+        # Find user (first @mention)
+        mu = re.search(r"@([A-Za-z0-9][A-Za-z0-9-]+)", text)
+        if not mu:
             continue
+        user = mu.group(1)
 
-        user = clean_user(cells[2]) if cells[2].strip().startswith("@") else ""
-        amount = parse_amount(cells[4])
-        pending_id = cells[6].strip().strip("`")
-        tx_hash = cells[7].strip().strip("`")
-
-        if not user or not pending_id or amount <= 0:
+        # Find amount like "12.3 RTC"
+        ma = re.search(r"(\d+(?:\.\d+)?)\s*RTC\b", text, re.I)
+        if not ma:
+            # If there's no amount, skip
             continue
+        amount = float(ma.group(1))
+
+        # Find status key=value-ish or words like 'Voided'/'Paid' following 'status'
+        ms = re.search(r"status\s*[:=]\s*([A-Za-z]+)", text, re.I)
+        status = ms.group(1).lower() if ms else ""
+
+        # Pending ID
+        mp = re.search(r"(?:pending[_\s-]*id|pid)\s*[:=]\s*`?([A-Za-z0-9._-]+)`?", text, re.I)
+        pending_id = mp.group(1) if mp else ""
+
+        # Tx hash
+        mt = (
+            re.search(r"(?:tx|transaction)[\s_-]*hash\s*[:=]\s*`?([A-Fa-f0-9x]+)`?", text, re.I)
+            or re.search(r"\b0x[a-fA-F0-9]{6,}\b", text)
+        )
+        tx_hash = mt.group(1) if mt else ""
 
         out.append(
             LedgerEntry(
-                user=user,
+                user=clean_user(user),
                 amount=amount,
                 status=status,
                 pending_id=pending_id,
@@ -135,220 +157,148 @@ def parse_table_like_rows(text: str, source: str) -> List[LedgerEntry]:
                 source=source,
             )
         )
+
     return out
 
 
-def split_bullet_blocks(text: str) -> List[str]:
-    """Collect multiline markdown bullet blocks."""
-    blocks: List[str] = []
-    cur: List[str] = []
-
-    for raw in text.splitlines():
-        s = raw.strip()
-        if s.startswith("- "):
-            if cur:
-                blocks.append("\n".join(cur))
-            cur = [s[2:].strip()]
-            continue
-        if cur:
-            cur.append(s)
-
-    if cur:
-        blocks.append("\n".join(cur))
-
-    return [b for b in blocks if b.strip()]
+def load_issue_body(issue_json_path: Path) -> str:
+    data = json.loads(issue_json_path.read_text(encoding="utf-8"))
+    # Support both gh api output (object) and raw body string
+    if isinstance(data, dict) and "body" in data:
+        return data["body"] or ""
+    if isinstance(data, str):
+        return data
+    return ""
 
 
-def parse_pending_ids(block: str) -> List[str]:
-    return re.findall(
-        r"\bpending(?:_id|\s+id)?\s*(?:#|:)?\s*`?(\d+)`?\b",
-        block,
-        flags=re.IGNORECASE,
-    )
+def load_comments_bodies(comments_json_path: Path) -> List[str]:
+    data = json.loads(comments_json_path.read_text(encoding="utf-8"))
+    bodies: List[str] = []
+    if isinstance(data, list):
+        for c in data:
+            if isinstance(c, dict) and "body" in c and c["body"]:
+                bodies.append(c["body"])
+            elif isinstance(c, str):
+                bodies.append(c)
+    elif isinstance(data, dict) and "comments" in data and isinstance(data["comments"], list):
+        for c in data["comments"]:
+            if isinstance(c, dict) and "body" in c and c["body"]:
+                bodies.append(c["body"])
+    return bodies
 
 
-def parse_bullet_entry(block: str, source: str) -> List[LedgerEntry]:
-    """Parse a single bullet block if it contains payout evidence."""
-    pending_ids = parse_pending_ids(block)
-    if not pending_ids:
-        return []
+def unique_key(entry: LedgerEntry) -> Tuple[str, str, str, float]:
+    """Build a key to deduplicate entries from multiple sources."""
+    # Prefer pending_id or tx_hash when present, otherwise fall back to user+amount+status
+    pid = entry.pending_id or ""
+    tx = entry.tx_hash or ""
+    return (entry.user.lower(), pid or tx, entry.status.lower(), float(entry.amount))
 
-    amount_m = re.search(r"(\d+(?:\.\d+)?)\s*RTC", block, flags=re.IGNORECASE)
-    amount = float(amount_m.group(1)) if amount_m else 0.0
-    if amount <= 0:
-        return []
 
-    user = ""
-    m = re.search(r"(?:->|to)\s*`?([A-Za-z0-9_.:@-]+)`?", block, flags=re.IGNORECASE)
-    if m:
-        user = clean_user(m.group(1))
-    if not user:
-        mention = re.search(r"@([A-Za-z0-9_.-]+)", block)
-        if mention:
-            user = clean_user(mention.group(1))
-    if not user:
-        return []
+def collect_entries(
+    issue_body: Optional[str], comment_bodies: List[str], include_body: bool
+) -> List[LedgerEntry]:
+    entries: List[LedgerEntry] = []
 
-    tx_m = re.search(
-        r"\btx(?:_hash| hash)?\b\s*[: ]\s*`?([a-fA-F0-9]{16,64})`?",
-        block,
-        flags=re.IGNORECASE,
-    )
-    tx_hash = tx_m.group(1) if tx_m else ""
+    if include_body and issue_body:
+        entries.extend(parse_ledger_table(issue_body, source="body"))
 
-    status = "voided" if "voided" in block.lower() else "pending"
-    if "confirmed" in block.lower() and status != "voided":
-        status = "confirmed"
+    for i, body in enumerate(comment_bodies):
+        # Parse any tables in comment
+        entries.extend(parse_ledger_table(body, source=f"comment#{i+1}"))
+        # Parse bullet blocks
+        entries.extend(parse_bullet_block(body, source=f"comment#{i+1}"))
 
+    # Deduplicate
+    uniq: Dict[Tuple[str, str, str, float], LedgerEntry] = {}
+    for e in entries:
+        uniq[unique_key(e)] = e
+
+    return list(uniq.values())
+
+
+def filter_non_void(entries: List[LedgerEntry]) -> List[LedgerEntry]:
     out: List[LedgerEntry] = []
-    for pending_id in pending_ids:
-        out.append(
-            LedgerEntry(
-                user=user,
-                amount=amount,
-                status=status,
-                pending_id=pending_id,
-                tx_hash=tx_hash,
-                source=source,
-            )
-        )
-    return out
-
-
-def parse_comment_payouts(comments: List[dict]) -> List[LedgerEntry]:
-    out: List[LedgerEntry] = []
-    for c in comments:
-        body = c.get("body", "")
-        source = f"comment:{c.get('id', 'unknown')}"
-        out.extend(parse_table_like_rows(body, source=source))
-        for block in split_bullet_blocks(body):
-            out.extend(parse_bullet_entry(block, source=source))
-    return out
-
-
-def dedupe_entries(entries: List[LedgerEntry]) -> List[LedgerEntry]:
-    dedup: Dict[str, LedgerEntry] = {}
-    for entry in entries:
-        key = entry.pending_id or entry.tx_hash or f"{entry.user}:{entry.amount}:{entry.status}"
-        existing = dedup.get(key)
-        if not existing:
-            dedup[key] = entry
+    for e in entries:
+        st = (e.status or "").strip().lower()
+        if st == "voided" or st == "void":
             continue
-        if not existing.tx_hash and entry.tx_hash:
-            dedup[key] = entry
-        elif existing.user.lower() == "unknown" and entry.user.lower() != "unknown":
-            dedup[key] = entry
-    return list(dedup.values())
+        out.append(e)
+    return out
 
 
-def apply_xp(entry: LedgerEntry, tracker: str, dry_run: bool) -> None:
-    if "voided" in entry.status:
-        return
+def apply_xp(entries: List[LedgerEntry], tracker: Path, dry_run: bool = False) -> None:
+    """Apply XP awards using update_xp_tracker_api.py in local mode.
 
-    tier = tier_for_amount(entry.amount)
-    labels = f"{tier},ledger"
+    Falls back to printing the plan if the updater script is missing.
+    """
+    script_path = (Path(__file__).parent / "update_xp_tracker_api.py").resolve()
+    has_updater = script_path.exists()
 
-    cmd = [
-        "python3",
-        ".github/scripts/update_xp_tracker_api.py",
-        "--actor",
-        entry.user,
-        "--event-type",
-        "workflow_dispatch",
-        "--event-action",
-        "ledger-backfill",
-        "--issue-number",
-        "104",
-        "--labels",
-        labels,
-        "--pr-merged",
-        "false",
-        "--local-file",
-        tracker,
-    ]
+    for e in entries:
+        tier = tier_for_amount(e.amount)
+        note = f"rustchain-bounties#104:{e.source}"
+        if e.pending_id:
+            note += f":{e.pending_id}"
+        elif e.tx_hash:
+            note += f":{e.tx_hash}"
 
-    if dry_run:
-        print("DRY", " ".join(cmd))
-        return
+        cmd = [
+            "python3",
+            str(script_path),
+            "--local",
+            "--tracker",
+            str(tracker),
+            "award",
+            "--user",
+            e.user,
+            "--tier",
+            tier,
+            "--note",
+            note,
+        ]
 
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+        if dry_run or not has_updater:
+            print(f"[DRY-RUN]" if dry_run else "[NO-UPDATER]", "Would run:", " ".join(cmd))
+            continue
 
-
-def ensure_maintainer_row(tracker: str, dry_run: bool) -> None:
-    text = Path(tracker).read_text(encoding="utf-8")
-    if "| @Scottcjn |" in text:
-        return
-
-    cmd = [
-        "python3",
-        ".github/scripts/update_xp_tracker_api.py",
-        "--actor",
-        "Scottcjn",
-        "--event-type",
-        "pull_request",
-        "--event-action",
-        "closed",
-        "--issue-number",
-        "105",
-        "--labels",
-        "maintainer",
-        "--pr-merged",
-        "true",
-        "--local-file",
-        tracker,
-    ]
-
-    if dry_run:
-        print("DRY", " ".join(cmd))
-        return
-
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+        try:
+            subprocess.run(cmd, check=True)
+        except FileNotFoundError:
+            print("[WARN] update_xp_tracker_api.py not found; printing plan instead.")
+            print("[PLAN]", " ".join(cmd))
+        except subprocess.CalledProcessError as ex:
+            print(f"[ERROR] Failed to apply XP for {e.user} ({tier}) from {e.source}: {ex}")
 
 
 def main() -> None:
     args = parse_args()
-    issue = json.loads(Path(args.issue_json).read_text(encoding="utf-8"))
+    issue_path = Path(args.issue_json)
+    comments_path = Path(args.comments_json)
+    tracker_path = Path(args.tracker)
 
-    entries: List[LedgerEntry] = []
-    if not args.comments_only:
-        entries.extend(parse_ledger_table(issue.get("body", ""), source="body"))
+    issue_body = ""
+    if not args.comments_only and issue_path.exists():
+        issue_body = load_issue_body(issue_path)
 
-    if Path(args.comments_json).exists():
-        comments = json.loads(Path(args.comments_json).read_text(encoding="utf-8"))
-        comment_entries = parse_comment_payouts(comments)
-        if not args.comments_only and entries:
-            body_ids = {e.pending_id for e in entries if e.pending_id}
-            comment_entries = [e for e in comment_entries if e.pending_id not in body_ids]
-        entries.extend(comment_entries)
+    comment_bodies: List[str] = []
+    if comments_path.exists():
+        comment_bodies = load_comments_bodies(comments_path)
 
-    entries = dedupe_entries(entries)
+    entries = collect_entries(issue_body, comment_bodies, include_body=not args.comments_only)
+    entries = filter_non_void(entries)
 
-    ensure_maintainer_row(args.tracker, args.dry_run)
+    # Display summary
+    print(f"Collected {len(entries)} non-voided entries.")
+    by_user: Dict[str, List[LedgerEntry]] = {}
+    for e in entries:
+        by_user.setdefault(e.user, []).append(e)
+    for user, items in sorted(by_user.items()):
+        total = sum(i.amount for i in items)
+        tiers = [tier_for_amount(i.amount) for i in items]
+        print(f" - {user}: {len(items)} entries, total {total:.2f} RTC, tiers={','.join(tiers)}")
 
-    applied = 0
-    skipped = 0
-    by_source: Dict[str, int] = {}
-    for entry in entries:
-        if "voided" in entry.status:
-            skipped += 1
-            continue
-        apply_xp(entry, args.tracker, args.dry_run)
-        applied += 1
-        by_source[entry.source] = by_source.get(entry.source, 0) + 1
-
-    print(
-        json.dumps(
-            {
-                "entries": len(entries),
-                "applied": applied,
-                "skipped": skipped,
-                "comments_file": str(Path(args.comments_json)),
-                "sources_used": len(by_source),
-                "mode": "comments-only" if args.comments_only else "body+comments",
-            },
-            indent=2,
-        )
-    )
+    apply_xp(entries, tracker=tracker_path, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
