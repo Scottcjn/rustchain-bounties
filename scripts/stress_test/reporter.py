@@ -54,17 +54,17 @@ Generated on: `{self.timestamp}`
 
         md += """
 ## ⏱️ Latency Distribution (Total Session)
-"""
-- **P50 (Median):** `{p50:.3f}s`
-- **P95:** `{p95:.3f}s`
-- **P99:** `{p99:.3f}s`
+
+- **P50 (Median):** """ + f"`{p50:.3f}s`" + """
+- **P95:** """ + f"`{p95:.3f}s`" + """
+- **P99:** """ + f"`{p99:.3f}s`" + """
 
 ## 🧩 Step Breakdown (Average)
 | Step | Avg Latency |
 |------|-------------|
 """
         for step in ["challenge", "submit", "enroll"]:
-            step_times = [r["steps"][step] for r in self.results if step in r["steps"]]
+            step_times = [r["steps"][step] for r in self.results if "steps" in r and step in r["steps"]]
             avg = sum(step_times)/len(step_times) if step_times else 0
             md += f"| {step.capitalize()} | {avg:.3f}s |\n"
 
