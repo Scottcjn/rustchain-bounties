@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Profile | Hall of Fame</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .crt-container {
+            background: radial-gradient(ellipse at center, #001100 0%, #000000 70%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .crt-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.03) 50%),
+                linear-gradient(rgba(0, 255, 0, 0.02) 50%, transparent 50%);
+            background-size: 2px 2px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .crt-container::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .terminal {
+            background: rgba(0, 20, 0, 0.9);
+            border: 3px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .terminal-header {
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-button {
+            background: transparent;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 5px 15px;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #00ff00;
+            color: #000;
+            text-shadow: none;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .machine-profile {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .profile-section {
+            background: rgba(0, 40, 0, 0.3);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .profile-section h2 {
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 5px;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 3px 0;
+            border-bottom: 1px dotted #004400;
+        }
+
+        .stat-label {
+            color: #00cc00;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .rust-score {
+            font-size: 2em !important;
+            color: #ff6600 !important;
+            text-shadow: 0 0 10px rgba(255, 102, 0, 0.8) !important;
+            font-weight: bold;
+        }
+
+        .status-active {
+            color: #00ff00;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        .status-deceased {
+            color: #ff0000;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+            animation: flicker 3s infinite;
+        }
+
+        .memorial-banner {
+            background: linear-gradient(45deg, #330000, #660000);
+            border: 2px solid #ff0000;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .memorial-banner h3 {
+            color: #ff0000;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .attestation-history {
+            grid-column: 1 / -1;
+        }
+
+        .attestation-timeline {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #00ff00;
+            background: rgba(0, 20, 0, 0.5);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .attestation-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dotted #004400;
+            margin-bottom: 8px;
+        }
+
+        .attestation-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .attestation-date {
+            color: #00cccc;
+            font-size: 0.9em;
+        }
+
+        .attestation-score {
+            color: #ff6600;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 102, 0, 0.6);
+        }
+
+        .achievements {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 40, 0, 0.3);
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #004400, #008800);
+            border: 1px solid #00ff00;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .machine-specs {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .ascii-art {
+            color: #008800;
+            font-size: 0.8em;
+            line-height: 1;
+            text-align: center;
+            margin: 20px 0;
+            white-space: pre;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+            75% { opacity: 0.8; }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scanline 3s linear infinite;
+            z-index: 3;
+        }
+
+        @media (max-width: 768px) {
+            .machine-profile {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .terminal {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="crt-container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <a href="index.html" class="back-button">← BACK TO HALL OF FAME</a>
+                <div style="color: #00ff00; font-size: 0.9em;">MACHINE PROFILE v2.1.0</div>
+            </div>
+
+            <div id="memorial-banner" class="memorial-banner" style="display: none;">
+                <h3>⚠ DECEASED MACHINE ⚠</h3>
+                <p>This machine has ceased operations. Memorial record preserved for historical reference.</p>
+            </div>
+
+            <h1 id="machine-name">LOADING MACHINE DATA...</h1>
+
+            <div class="ascii-art" id="ascii-display">
+    ██████╗ ██╗   ██╗███████╗████████╗
+    ██╔══██╗██║   ██║██╔════╝╚══██╔══╝
+    ██████╔╝██║   ██║███████╗   ██║   
+    ██╔══██╗██║   ██║╚════██║   ██║   
+    ██║  ██║╚██████╔╝███████║   ██║   
+    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝   
+            </div>
+
+            <div class="machine-profile">
+                <div class="profile-section">
+                    <h2>Machine Statistics</h2>
+                    <div class="stat-line">
+                        <span class="stat-label">Machine ID:</span>
+                        <span class="stat-value" id="machine-id">RST-0000</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Current Rust Score:</span>
+                        <span class="stat-value rust-score" id="rust-score">0.0000</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Status:</span>
+                        <span class="stat-value" id="status">UNKNOWN</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Rank:</span>
+                        <span class="stat-value" id="rank">#0</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Total Attestations:</span>
+                        <span class="stat-value" id="total-attestations">0</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">First Seen:</span>
+                        <span class="stat-value" id="first-seen">UNKNOWN</span>
+                    </div>
+                    <div class="stat-line">
+                        <span class="stat-label">Last Activity:</span>
+                        <span class="stat-value" id="last-activity">UNKNOWN</span>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h2>Machine Specifications</h2>
+                    <div class="machine-specs">
+                        <div class="stat-line">
+                            <span class="stat-label">Architecture:</span>
+                            <span class="stat-value" id="architecture">x86_64</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">OS:</span>
+                            <span class="stat-value" id="os">Linux</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Rust Version:</span>
+                            <span class="stat-value" id="rust-version">1.70.0</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Location:</span>
+                            <span class="stat-value" id="location">Unknown</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Network:</span>
+                            <span class="stat-value" id="network">Mainnet</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-label">Uptime:</span>
+                            <span class="stat-value" id="uptime">0 days</span>
+                        </div>
+                    </div>
+
+                    <div class="achievements" id="achievements">
+                        <h3 style="color: #00ffff; margin-bottom: 10px;">Achievements</h3>
+                        <div id="achievement-list">
+                            <span class="achievement-badge">First Boot</span>
+                            <span class="achievement-badge">Rust Champion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section attestation-history">
+                    <h2>Attestation History</h2>
+                    <div class="attestation-timeline" id="attestation-timeline">
+                        <div class="attestation-entry">
+                            <span class="attestation-date">2024-01-15 14:23:17 UTC</span>
+                            <span class="attestation-score">0.8756</span>
+                        </div>
+                        <div class="attestation-entry">
+                            <span class="attestation-date">2024-01-14 14:23:12 UTC</span>
+                            <span class="attestation-score">0.8743</span>
+                        </div>
+                        <div class="attestation-entry">
+                            <span class="attestation-date">2024-01-13 14:23:08 UTC</span>
+                            <span class="attestation-score">0.8721</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extract machine ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const machineId = urlParams.get('id') || 'RST-0000';
+
+        // Mock machine data - in real implementation, this would come from API
+        const mockMachines = {
+            'RST-0001': {
+                name: 'MACHINE RST-0001',
+                id: 'RST-0001',
+                rustScore: '0.9876',
+                status: 'ACTIVE',
+                rank: '#1',
+                totalAttestations: '156',
+                firstSeen: '2024-01-01 00:00:00 UTC',
+                lastActivity: '2024-01-15 14:23:17 UTC',
+                architecture: 'x86_64',
+                os: 'Ubuntu 22.04 LTS',
+                rustVersion: '1.75.0',
+                location: 'San Francisco, CA',
+                network: 'Mainnet',
+                uptime: '15 days',
+                deceased: false,
+                achievements: ['First Boot', 'Rust Champion', 'Top Performer', 'Marathon Runner']
+            },
+            'RST-0042': {
+                name: 'MACHINE RST-0042',
+                id: 'RST-0042',
+                rustScore: '0.7234',
+                status: 'DECEASED',
+                rank: '#42',
+                totalAttestations: '89',
+                firstSeen: '2023-12-15 10:30:45 UTC',
+                lastActivity: '2024-01-10 08:15:22 UTC',
+                architecture: 'ARM64',
+                os: 'Debian 11',
+                rustVersion: '1.70.0',
+                location: 'Tokyo, JP',
+                network: 'Mainnet',
+                uptime: '26 days',
+                deceased: true,
+                achievements: ['First Boot', 'Dedication Badge', 'International Node']
+            }
+        };
+
+        function loadMachineData() {
+            const machine = mockMachines[machineId] || mockMachines['RST-0001'];
+            
+            // Update machine name and basic info
+            document.getElementById('machine-name').textContent = machine.name;
+            document.getElementById('machine-id').textContent = machine.id;
+            document.getElementById('rust-score').textContent = machine.rustScore;
+            document.getElementById('rank').textContent = machine.rank;
+            document.getElementById('total-attestations').textContent = machine.totalAttestations;
+            document.getElementById('first-seen').textContent = machine.firstSeen;
+            document.getElementById('last-activity').textContent = machine.lastActivity;
+            
+            // Update specifications
+            document.getElementById('architecture').textContent = machine.architecture;
+            document.getElementById('os').textContent = machine.os;
+            document.getElementById('rust-version').textContent = machine.rustVersion;
+            document.getElementById('location').textContent = machine.location;
+            document.getElementById('network').textContent = machine.network;
+            document.getElementById('uptime').textContent = machine.uptime;
+            
+            // Update status and memorial styling
+            const statusElement = document.getElementById('status');
+            const memorialBanner = document.getElementById('memorial-banner');
+            
+            if (machine.deceased) {
+                statusElement.textContent = 'DECEASED';
+                statusElement.className = 'stat-value status-deceased';
+                memorialBanner.style.display = 'block';
+                
+                // Update ASCII art for deceased machines
+                document.getElementById('ascii-display').innerHTML = `
+    ██████╗ ██╗██████╗ 
+    ██╔══██╗██║██╔══██╗
+    ██████╔╝██║██████╔╝
+    ██╔══██╗██║██╔═══╝ 
+    ██║  ██║██║██║     
+    ╚═╝  ╚═╝╚═╝╚═╝     
+    
+    1983 - 2024`;
+            } else {
+                statusElement.textContent = 'ACTIVE';
+                statusElement.className = 'stat-value status-active';
+            }
+            
+            // Update achievements
+            const achievementList = document.getElementById('achievement-list');
+            achievementList.innerHTML = machine.achievements
+                .map(achievement => `<span class="achievement-badge">${achievement}</span>`)
+                .join('');
+            
+            // Generate attestation history
+            generateAttestationHistory(machine);
+        }
+
+        function generateAttestationHistory(machine) {
+            const timeline = document.getElementById('attestation-timeline');
+            const attestations = [];
+            
+            // Generate mock attestation data
+            const baseScore = parseFloat(machine.rustScore);
+            const totalAttestations = parseInt(machine.totalAttestations);
+            
+            for (let i = 0; i < Math.min(50, totalAttestations); i++) {
+                const date = new Date();
+                date.setHours(date.getHours() - i * 24);
+                const score = (baseScore - (Math.random() * 0.02)).toFixed(4);
+                
+                attestations.push({
+                    date: date.toISOString().replace('T', ' ').substring(0, 19) + ' UTC',
+                    score: score
+                });
+            }
+            
+            timeline.innerHTML = attestations
+                .map(att => `
+                    <div class="attestation-entry">
+                        <span class="attestation-date">${att.date}</span>
+                        <span class="attestation-score">${att.score}</span>
+                    </div>
+                `).join('');
+        }
+
+        // Load machine data when page loads
+        document.addEventListener('DOMContentLoaded', loadMachineData);
+    </script>
+</body>
+</html>
