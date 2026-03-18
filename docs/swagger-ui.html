@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node API Documentation - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .swagger-ui .topbar {
+            background-color: #89bf04;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper .download-url-button {
+            background-color: #547f00;
+            border-color: #547f00;
+        }
+
+        .swagger-ui .info .title {
+            color: #3b4151;
+        }
+
+        .swagger-ui .scheme-container {
+            background: #fff;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,.15);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 1rem 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        #swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin: 1rem;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .container, #swagger-ui {
+                padding: 0 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Node API Documentation</h1>
+            <p>RESTful API endpoints for the Node.js application</p>
+        </div>
+    </div>
+
+    <div id="swagger-ui">
+        <div class="loading">Loading API documentation...</div>
+    </div>
+
+    <div class="footer">
+        <p>Generated with Swagger UI • <a href="../openapi.yaml" target="_blank">View OpenAPI Spec</a></p>
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Determine the spec URL based on current location
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.replace('/docs/swagger-ui.html', '');
+            const specUrl = `${window.location.origin}${basePath}/openapi.yaml`;
+
+            try {
+                const ui = SwaggerUIBundle({
+                    url: specUrl,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "StandaloneLayout",
+                    defaultModelsExpandDepth: 1,
+                    defaultModelExpandDepth: 1,
+                    defaultModelRendering: 'schema',
+                    displayRequestDuration: true,
+                    docExpansion: 'list',
+                    filter: true,
+                    showExtensions: true,
+                    showCommonExtensions: true,
+                    tryItOutEnabled: true,
+                    requestInterceptor: function(request) {
+                        // Add any request interceptors here if needed
+                        return request;
+                    },
+                    responseInterceptor: function(response) {
+                        // Add any response interceptors here if needed
+                        return response;
+                    },
+                    onComplete: function() {
+                        console.log('Swagger UI loaded successfully');
+                    },
+                    onFailure: function(error) {
+                        console.error('Failed to load Swagger UI:', error);
+                        document.getElementById('swagger-ui').innerHTML = 
+                            '<div class="error">' +
+                            '<h3>Failed to Load API Documentation</h3>' +
+                            '<p>Could not load the OpenAPI specification from: <code>' + specUrl + '</code></p>' +
+                            '<p>Please ensure the API server is running and the OpenAPI spec is available.</p>' +
+                            '</div>';
+                    },
+                    validatorUrl: null, // Disable online validator
+                    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
+                });
+
+                window.ui = ui;
+            } catch (error) {
+                console.error('Error initializing Swagger UI:', error);
+                document.getElementById('swagger-ui').innerHTML = 
+                    '<div class="error">' +
+                    '<h3>Error Initializing Documentation</h3>' +
+                    '<p>There was an error loading the Swagger UI. Please refresh the page or contact support.</p>' +
+                    '</div>';
+            }
+        };
+
+        // Handle potential CORS issues with a fallback
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('CORS')) {
+                document.getElementById('swagger-ui').innerHTML = 
+                    '<div class="error">' +
+                    '<h3>CORS Error</h3>' +
+                    '<p>Unable to load API documentation due to CORS restrictions.</p>' +
+                    '<p>Please ensure the API server allows CORS requests from this domain.</p>' +
+                    '</div>';
+            }
+        });
+    </script>
+</body>
+</html>
