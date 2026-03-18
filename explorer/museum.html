@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTC Museum - Block Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .museum-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .artifact-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .artifact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        
+        .artifact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .artifact-type {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .artifact-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .artifact-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .artifact-details {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .hash-value {
+            word-break: break-all;
+            max-width: 200px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #fab1a0;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .page-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover,
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .stats-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🏛️ RTC Museum</h1>
+            <p class="subtitle">Explore the History of RiptideCoin Blockchain</p>
+        </header>
+        
+        <div class="stats-bar">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalBlocks">-</span>
+                    <span class="stat-label">Total Blocks</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalTx">-</span>
+                    <span class="stat-label">Total Transactions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalAddresses">-</span>
+                    <span class="stat-label">Active Addresses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="currentDifficulty">-</span>
+                    <span class="stat-label">Current Difficulty</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by block hash, transaction ID, or address...">
+                <button class="search-btn" onclick="performSearch()">🔍 Search</button>
+            </div>
+            <div class="filters">
+                <select class="filter-select" id="typeFilter">
+                    <option value="all">All Types</option>
+                    <option value="block">Blocks</option>
+                    <option value="transaction">Transactions</option>
+                    <option value="address">Addresses</option>
+                </select>
+                <select class="filter-select" id="timeFilter">
+                    <option value="all">All Time</option>
+                    <option value="24h">Last 24 Hours</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                </select>
+                <select class="filter-select" id="sortFilter">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="value">By Value</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="loadingIndicator" class="loading" style="display: none;">
+            Loading museum artifacts...
+        </div>
+        
+        <div id="errorContainer"></div>
+        
+        <div class="museum-grid" id="museumGrid">
+            <!-- Museum artifacts will be populated here -->
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 12;
+        let museumData = [];
+        let filteredData = [];
+
+        // Sanitization function
+        function sanitizeText(text) {
+            if (typeof text !== 'string') {
+                return String(text || '');
+            }
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Safe element creation
+        function createSafeElement(tag, className = '', textContent = '') {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+
+        // API call with CORS handling
+        async function fetchWithCORS(url, options = {}) {
+            const defaultOptions = {
+                mode: 'cors',
+                credentials: 'omit',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            };
+            
+            return fetch(url, { ...defaultOptions, ...options });
+        }
+
+        async function loadMuseumData() {
+            showLoading(true);
+            clearError();
+            
+            try {
+                const [blocksRes, statsRes] = await Promise.all([
+                    fetchWithCORS('/api/blocks?limit=50'),
+                    fetchWithCORS('/api/stats')
+                ]);
+
+                if (!blocksRes.ok) throw new Error(`HTTP ${blocksRes.status}: ${blocksRes.statusText}`);
+                if (!statsRes.ok) throw new Error(`HTTP ${statsRes.status}: ${statsRes.statusText}`);
+
+                const blocksData = await blocksRes.json();
+                const statsData = await statsRes.json();
+
+                // Sanitize all data
+                museumData = (blocksData.blocks || []).map(sanitizeBlockData);
+                filteredData = [...museumData];
+
+                updateStats(statsData);
+                renderMuseum();
+                renderPagination();
+                
+            } catch (error) {
+                console.error('Failed to load museum data:', error);
+                showError(`Failed to load museum data: ${sanitizeText(error.message)}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function sanitizeBlockData(block) {
+            return {
+                hash: sanitizeText(block.hash),
+                height: parseInt(block.height) || 0,
+                timestamp: parseInt(block.timestamp) || Date.now(),
+                difficulty: parseFloat(block.difficulty) || 0,
+                nonce: parseInt(block.nonce) || 0,
+                merkleRoot: sanitizeText(block.merkleRoot),
+                previousHash: sanitizeText(block.previousHash),
+                transactionCount: parseInt(block.transactionCount) || 0,
+                size: parseInt(block.size) || 0,
+                reward: parseFloat(block.reward) || 0
+            };
+        }
+
+        function updateStats(stats) {
+            const elements = {
+                totalBlocks: document.getElementById('totalBlocks'),
+                totalTx: document.getElementById('totalTx'),
+                totalAddresses: document.getElementById('totalAddresses'),
+                currentDifficulty: document.getElementById('currentDifficulty')
+            };
+
+            // Safely update stats with sanitized data
+            if (elements.totalBlocks) {
+                elements.totalBlocks.textContent = parseInt(stats.totalBlocks) || 0;
+            }
+            if (elements.totalTx) {
+                elements.totalTx.textContent = parseInt(stats.totalTransactions) || 0;
+            }
+            if (elements.totalAddresses) {
+                elements.totalAddresses.textContent = parseInt(stats.activeAddresses) || 0;
+            }
+            if (elements.currentDifficulty) {
+                elements.currentDifficulty.textContent = parseFloat(stats.difficulty)?.toFixed(2) || '0.00';
+            }
+        }
+
+        function renderMuseum() {
+            const grid = document.getElementById('museumGrid');
+            grid.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            pageData.forEach(item => {
+                const card = createArtifactCard(item);
+                grid.appendChild(card);
+            });
+
+            if (pageData.length === 0) {
+                const noData = createSafeElement('div', 'no-data', 'No artifacts found matching your criteria.');
+                grid.appendChild(noData);
+            }
+        }
+
+        function createArtifactCard(block) {
+            const card = createSafeElement('div', 'artifact-card');
+
+            const header = createSafeElement('div', 'artifact-header');
+            const typeTag = createSafeElement('span', 'artifact-type', 'BLOCK');
+            const dateSpan = createSafeElement('span', 'artifact-date', new Date(block.timestamp).toLocaleDateString());
+            
+            header.appendChild(typeTag);
+            header.appendChild(dateSpan);
+
+            const title = createSafeElement('h3', 'artifact-title', `Block #${block.height}`);
+
+            const details = createSafeElement('div', 'artifact-details');
+            
+            const detailsData = [
+                ['Hash', block.hash.substring(0, 20) + '...'],
+                ['Height', block.height.toString()],
+                ['Transactions', block.transactionCount.toString()],
+                ['Difficulty', block.difficulty.toFixed(4)],
+                ['Nonce', block.nonce.toString()],
+                ['Size', `${(block.size / 1024).toFixed(2)} KB`],
+                ['Reward', `${block.reward.toFixed(8)} RTC`]
+            ];
+
+            detailsData.forEach(([label, value]) => {
+                const row = createSafeElement('div', 'detail-row');
+                const labelSpan = createSafeElement('span', 'detail-label', label + ':');
+                const valueSpan = createSafeElement('span', 'detail-value', value);
+                
+                if (label === 'Hash') {
+                    valueSpan.className += ' hash-value';
+                }
+                
+                row.appendChild(labelSpan);
+                row.appendChild(valueSpan);
+                details.appendChild(row);
+            });
+
+            card.appendChild(header);
+            card.appendChild(title);
+            card.appendChild(details);
+
+            return card;
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            if (totalPages <= 1) return;
+
+            // Previous button
+            if (currentPage > 1) {
+                const prevBtn = createSafeElement('button', 'page-btn', '← Previous');
+                prevBtn.onclick = () => goToPage(currentPage - 1);
+                pagination.appendChild(prevBtn);
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = createSafeElement('button', 'page-btn', i.toString());
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.onclick = () => goToPage(i);
+                pagination.appendChild(pageBtn);
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+                const nextBtn = createSafeElement('button', 'page-btn', 'Next →');
+                nextBtn.onclick = () => goToPage(currentPage + 1);
+                pagination.appendChild(nextBtn);
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderMuseum();
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function applyFilters() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const timeFilter = document.getElementById('timeFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+
+            filteredData = [...museumData];
+
+            // Apply time filter
+            if (timeFilter !== 'all') {
+                const now = Date.now();
+                const timeThresholds = {
+                    '24h': 24 * 60 * 60 * 1000,
+                    '7d': 7 * 24 * 60 * 60 * 1000,
+                    '30d': 30 * 24 * 60 * 60 * 1000
+                };
+                
+                const threshold = now - timeThresholds[timeFilter];
+                filteredData = filteredData.filter(item => item.timestamp >= threshold);
+            }
+
+            // Apply sorting
+            filteredData.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'oldest':
+                        return a.timestamp - b.timestamp;
+                    case 'value':
+                        return b.reward - a.reward;
+                    case 'newest':
+                    default:
+                        return b.timestamp - a.timestamp;
+                }
+            });
+
+            currentPage = 1;
+            renderMuseum();
+            renderPagination();
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                filteredData = [...museumData];
+                currentPage = 1;
+                renderMuseum();
+                renderPagination();
+                return;
+            }
+
+            showLoading(true);
+            clearError();
+
+            try {
+                const response = await fetchWithCORS(`/api/search?q=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Search failed: ${response.statusText}`);
+                }
+
+                const results = await response.json();
+                
+                // Sanitize search results
+                filteredData = (results.data || []).map(item => {
+                    if (item.type === 'block') {
+                        return sanitizeBlockData(item);
+                    }
+                    return item; // Handle other types as needed
+                });
+
+                currentPage = 1;
+                renderMuseum();
+                renderPagination();
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showError(`Search failed: ${sanitizeText(error.message)}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loadingIndicator');
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const container = document.getElementById('errorContainer');
+            const errorDiv = createSafeElement('div', 'error', message);
+            container.innerHTML = '';
+            container.appendChild(errorDiv);
+        }
+
+        function clearError() {
+            document.getElementById('errorContainer').innerHTML = '';
+        }
+
+        // Event listeners
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        document.getElementById('timeFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMuseumData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadMuseumData, 30000);
+        });
+    </script>
+</body>
+</html>
