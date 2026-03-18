@@ -33,4 +33,12 @@ Total: 50-75 RTC (depending on bonus criteria)
 2. Set RUSTCHAIN_NODE_URL to your node
 3. Run the bot
 
+## Files:
+- `verify_bot.py` - Main bot code (10,929 bytes)
+- `README.md` - Usage and setup guide (1,366 bytes)
+- `requirements.txt` - Dependencies (requests>=2.32.4)
+
+## Status: MVP COMPLETED
+Ready to run against RustChain #747 issue.
+
 For more info: https://github.com/Scottcjn/rustchain-bounties/issues/747
