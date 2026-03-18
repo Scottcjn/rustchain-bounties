@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Governance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+               background: #0d1117; color: #c9d1d9; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #58a6ff; margin-bottom: 10px; }
+        h2 { color: #8b949e; margin: 20px 0 10px; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; 
+                padding: 20px; margin-bottom: 20px; }
+        .proposal { border-left: 4px solid #58a6ff; }
+        .proposal.passed { border-left-color: #3fb950; }
+        .proposal.failed { border-left-color: #f85149; }
+        .proposal.expired { border-left-color: #8b949e; }
+        .status { display: inline-block; padding: 2px 8px; border-radius: 12px; 
+                  font-size: 12px; font-weight: bold; }
+        .status.active { background: #238636; color: #fff; }
+        .status.passed { background: #3fb950; color: #fff; }
+        .status.failed { background: #f85149; color: #fff; }
+        .status.expired { background: #484f58; color: #fff; }
+        .vote-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; 
+                    font-weight: bold; margin-right: 10px; }
+        .vote-for { background: #238636; color: #fff; }
+        .vote-against { background: #f85149; color: #fff; }
+        .vote-abstain { background: #484f58; color: #fff; }
+        .vote-btn:hover { opacity: 0.9; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-card { background: #21262d; padding: 15px; border-radius: 6px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #58a6ff; }
+        .stat-label { font-size: 14px; color: #8b949e; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px;
+                                  background: #0d1117; border: 1px solid #30363d; 
+                                  border-radius: 6px; color: #c9d1d9; }
+        button.submit { background: #238636; color: #fff; padding: 12px 24px; 
+                        border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .vote-info { font-size: 14px; color: #8b949e; margin-top: 10px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: #21262d; border: none; border-radius: 6px; 
+               color: #8b949e; cursor: pointer; }
+        .tab.active { background: #58a6ff; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⛓️ RustChain Governance</h1>
+        <p>On-chain governance for RTC holders - Propose and vote on network changes</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('proposals')">Proposals</button>
+            <button class="tab" onclick="showTab('create')">Create Proposal</button>
+            <button class="tab" onclick="showTab('stats')">Statistics</button>
+        </div>
+
+        <div id="statsTab" style="display: none;">
+            <div class="stats" style="margin: 20px 0;">
+                <div class="stat-card">
+                    <div class="stat-number" id="activeCount">-</div>
+                    <div class="stat-label">Active Proposals</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="passedCount">-</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="failedCount">-</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="minersCount">-</div>
+                    <div class="stat-label">Active Miners</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="createTab" style="display: none;">
+            <div class="card">
+                <h2>📋 Create Proposal</h2>
+                <form id="proposalForm">
+                    <input type="text" id="wallet" placeholder="Your wallet address" required>
+                    <input type="text" id="title" placeholder="Proposal title" required>
+                    <select id="proposalType">
+                        <option value="RIP">RIP (RustChain Improvement Proposal)</option>
+                        <option value="bounty">Bounty</option>
+                        <option value="parameter_change">Parameter Change</option>
+                        <option value="feature_activation">Feature Activation</option>
+                        <option value="emergency">Emergency</option>
+                    </select>
+                    <textarea id="description" placeholder="Describe your proposal in detail..." rows="4" required></textarea>
+                    <input type="text" id="parameterKey" placeholder="Parameter key (optional, for parameter_change)">
+                    <button type="submit" class="submit">Create Proposal (10+ RTC required)</button>
+                </form>
+                <div id="proposalResult"></div>
+            </div>
+        </div>
+
+        <div id="proposalsTab">
+            <h2>📜 All Proposals</h2>
+            <div id="proposalsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        
+        function showTab(tab) {
+            document.getElementById('proposalsTab').style.display = tab === 'proposals' ? 'block' : 'none';
+            document.getElementById('createTab').style.display = tab === 'create' ? 'block' : 'none';
+            document.getElementById('statsTab').style.display = tab === 'stats' ? 'block' : 'none';
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'stats') loadStats();
+            else loadProposals();
+        }
+
+        async function loadStats() {
+            try {
+                const resp = await fetch(API_BASE + '/governance/stats');
+                const data = await resp.json();
+                document.getElementById('activeCount').textContent = data.proposal_counts?.active || 0;
+                document.getElementById('passedCount').textContent = data.proposal_counts?.passed || 0;
+                document.getElementById('failedCount').textContent = data.proposal_counts?.failed || 0;
+                document.getElementById('minersCount').textContent = data.active_miners || 0;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadProposals() {
+            try {
+                const resp = await fetch(API_BASE + '/governance/proposals');
+                const data = await resp.json();
+                const container = document.getElementById('proposalsList');
+                
+                if (!data.proposals || data.proposals.length === 0) {
+                    container.innerHTML = '<p>No proposals yet. Be the first to create one!</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.proposals.map(p => `
+                    <div class="card proposal ${p.status}">
+                        <h3>${p.title} <span class="status ${p.status}">${p.status}</span></h3>
+                        <p style="color: #8b949e; font-size: 14px;">
+                            by ${p.proposer_wallet} · ${new Date(p.created_at * 1000).toLocaleDateString()} · Type: ${p.proposal_type}
+                        </p>
+                        <p>${p.description.substring(0, 300)}${p.description.length > 300 ? '...' : ''}</p>
+                        <div style="margin: 15px 0;">
+                            <strong>Votes:</strong> 
+                            👍 ${p.votes_for.toFixed(1)} | 
+                            👎 ${p.votes_against.toFixed(1)} | 
+                            ⬜ ${p.votes_abstain.toFixed(1)}
+                        </div>
+                        <div class="vote-info">
+                            Hardware-weighted voting: G4 = 2.5x, G5 = 2.5x, SPARC = 2.5x-2.9x | 7-day voting window | 33% quorum required
+                        </div>
+                        ${p.status === 'active' ? `
+                        <div style="margin-top: 15px;">
+                            <button class="vote-btn vote-for" onclick="vote(${p.id}, 'for')">Vote For</button>
+                            <button class="vote-btn vote-against" onclick="vote(${p.id}, 'against')">Vote Against</button>
+                            <button class="vote-btn vote-abstain" onclick="vote(${p.id}, 'abstain')">Abstain</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch(e) { 
+                console.error(e);
+                document.getElementById('proposalsList').innerHTML = '<p>Error loading proposals. Make sure the governance API is running.</p>';
+            }
+        }
+
+        async function vote(proposalId, choice) {
+            const wallet = prompt('Enter your wallet address to vote:');
+            if (!wallet) return;
+            
+            try {
+                const resp = await fetch(API_BASE + '/governance/vote', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        wallet: wallet,
+                        proposal_id: proposalId,
+                        vote: choice
+                    })
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    alert(`Vote cast successfully! Weight: ${data.weight}x (${data.hardware})`);
+                    loadProposals();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+        document.getElementById('proposalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const result = document.getElementById('proposalResult');
+            result.textContent = 'Creating proposal...';
+            result.style.color = '#8b949e';
+            
+            try {
+                const resp = await fetch(API_BASE + '/governance/propose', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        wallet: document.getElementById('wallet').value,
+                        title: document.getElementById('title').value,
+                        proposal_type: document.getElementById('proposalType').value,
+                        description: document.getElementById('description').value,
+                        parameter_key: document.getElementById('parameterKey').value || undefined
+                    })
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    result.textContent = '✓ Proposal created successfully! ID: ' + data.proposal_id;
+                    result.style.color = '#3fb950';
+                    document.getElementById('proposalForm').reset();
+                    showTab('proposals');
+                } else {
+                    result.textContent = 'Error: ' + data.error;
+                    result.style.color = '#f85149';
+                }
+            } catch(e) { 
+                result.textContent = 'Error: ' + e.message; 
+                result.style.color = '#f85149';
+            }
+        });
+
+        // Load initial data
+        loadStats();
+        loadProposals();
+    </script>
+</body>
+</html>
