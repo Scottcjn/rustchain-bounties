@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beacon Atlas · 3D Agent World</title>
+  <style>
+    :root {
+      --bg: #030810;
+      --panel: #07101f;
+      --grid: #0d2040;
+      --accent: #00c8ff;
+      --accent2: #7b2fff;
+      --txt: #c8e8ff;
+      --muted: #5a8aaa;
+      --online: #00ff9d;
+      --offline: #ff4466;
+      --idle: #ffcc00;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--txt);
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+      height: 100vh;
+    }
+    #canvas { display: block; position: fixed; inset: 0; }
+    #hud {
+      position: fixed; top: 0; left: 0; right: 0;
+      padding: 14px 18px;
+      background: linear-gradient(180deg, rgba(3,8,16,.95) 0%, transparent 100%);
+      display: flex; justify-content: space-between; align-items: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #hud h1 { font-size: 16px; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+    #hud .stats { display: flex; gap: 18px; font-size: 12px; color: var(--muted); }
+    #hud .stats span { color: var(--accent); }
+    #detail {
+      position: fixed; right: -340px; top: 60px; width: 300px;
+      background: rgba(7,16,31,.97);
+      border: 1px solid var(--grid);
+      border-radius: 10px;
+      padding: 18px;
+      transition: right .3s ease;
+      z-index: 20;
+      box-shadow: 0 0 40px rgba(0,200,255,.08);
+    }
+    #detail.open { right: 14px; }
+    #detail h2 { font-size: 14px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    #detail .field { margin: 8px 0; }
+    #detail .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    #detail .v { font-size: 13px; color: var(--txt); word-break: break-all; }
+    #detail .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; border: 1px solid; }
+    .badge.online { color: var(--online); border-color: var(--online); }
+    .badge.offline { color: var(--offline); border-color: var(--offline); }
+    .badge.idle { color: var(--idle); border-color: var(--idle); }
+    #detail .close-btn {
+      position: absolute; top: 10px; right: 12px;
+      background: none; border: none; color: var(--muted);
+      font-size: 18px; cursor: pointer; line-height: 1;
+    }
+    #detail .close-btn:hover { color: var(--accent); }
+    #legend {
+      position: fixed; bottom: 14px; left: 14px;
+      background: rgba(7,16,31,.9);
+      border: 1px solid var(--grid);
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 11px; z-index: 10;
+    }
+    #legend h3 { color: var(--accent); font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .08em; }
+    #legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    #legend .row { color: var(--muted); margin: 3px 0; }
+    #loading {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: var(--bg); z-index: 100;
+    }
+    #loading .spinner {
+      width: 40px; height: 40px; border: 3px solid var(--grid);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      background: var(--bg); z-index: 100; color: var(--offline); font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      #detail { width: 260px; }
+      #hud h1 { font-size: 13px; }
+      #legend { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+  <h1>⬡ Beacon Atlas · 3D Agent World</h1>
+  <div class="stats">
+    <div>AGENTS <span id="agentCount">—</span></div>
+    <div>ONLINE <span id="onlineCount" style="color:var(--online)">—</span></div>
+    <div>EPOCH <span id="epochNum" style="color:var(--accent2)">—</span></div>
+  </div>
+</div>
+
+<div id="detail">
+  <button class="close-btn" onclick="closeDetail()">×</button>
+  <h2>Agent Profile</h2>
+  <div class="field"><div class="k">Agent ID</div><div class="v" id="d-id"></div></div>
+  <div class="field"><div class="k">Name</div><div class="v" id="d-name"></div></div>
+  <div class="field"><div class="k">Status</div><div class="v"><span id="d-status" class="badge"></span></div></div>
+  <div class="field"><div class="k">Reputation</div><div class="v" id="d-rep"></div></div>
+  <div class="field"><div class="k">Registered</div><div class="v" id="d-created"></div></div>
+  <div class="field"><div class="k">Last Seen</div><div class="v" id="d-updated"></div></div>
+  <div class="field"><div class="k">PubKey</div><div class="v" id="d-pubkey" style="font-size:10px"></div></div>
+</div>
+
+<div id="legend">
+  <h3>Agent Status</h3>
+  <div class="row"><span class="dot" style="background:var(--online)"></span> Online</div>
+  <div class="row"><span class="dot" style="background:var(--idle)"></span> Idle</div>
+  <div class="row"><span class="dot" style="background:var(--offline)"></span> Offline</div>
+  <div class="row"><span class="dot" style="background:var(--accent2)"></span> You (agent)</div>
+</div>
+
+<div id="loading"><div class="spinner"></div></div>
+<div id="error">Failed to load agents — API unavailable</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+let agents = [];
+let meshes = {};
+let scene, camera, renderer, raycaster, mouse;
+let clock = new THREE.Clock();
+let selectedMesh = null;
+let frameId;
+let myAgentId = null;
+
+// ── Init ───────────────────────────────────────────────────────────────
+async function init() {
+  initThree();
+  window.addEventListener('resize', onResize);
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('mousemove', onMouseMove);
+  await loadAgents();
+  document.getElementById('loading').style.display = 'none';
+  animate();
+}
+
+// ── Three.js Setup ────────────────────────────────────────────────────
+function initThree() {
+  const canvas = document.getElementById('canvas');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x030810);
+
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x030810, 0.012);
+
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 28, 28);
+  camera.lookAt(0, 0, 0);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Ambient + directional light
+  scene.add(new THREE.AmbientLight(0x0d2040, 1.2));
+  const dir = new THREE.DirectionalLight(0x00c8ff, 0.8);
+  dir.position.set(10, 20, 10);
+  scene.add(dir);
+
+  // Ground grid
+  buildGroundGrid();
+  // Star field
+  buildStars();
+  // Axis beacons (corner pillars)
+  buildCornerPillars();
+}
+
+function buildGroundGrid() {
+  const size = 40;
+  const divs = 20;
+  const grid = new THREE.GridHelper(size, divs, 0x0d2040, 0x091830);
+  grid.position.y = 0;
+  scene.add(grid);
+
+  // Ground plane
+  const geo = new THREE.PlaneGeometry(size, size);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x030810, transparent: true, opacity: 0.8
+  });
+  const plane = new THREE.Mesh(geo, mat);
+  plane.rotation.x = -Math.PI / 2;
+  plane.position.y = -0.02;
+  scene.add(plane);
+
+  // Center beacon pillar
+  const pillar = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.08, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0x00c8ff, emissive: 0x00c8ff, emissiveIntensity: 0.6 })
+  );
+  pillar.position.y = 2;
+  scene.add(pillar);
+
+  // Glowing ring
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1.5, 0.03, 8, 64),
+    new THREE.MeshStandardMaterial({ color: 0x00c8ff, emissive: 0x00c8ff, emissiveIntensity: 1, transparent: true, opacity: 0.6 })
+  );
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 0.05;
+  scene.add(ring);
+}
+
+function buildStars() {
+  const geo = new THREE.BufferGeometry();
+  const n = 800;
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 400;
+    pos[i * 3 + 1] = Math.random() * 150 + 10;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 400;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x4488bb, size: 0.25 })));
+}
+
+function buildCornerPillars() {
+  const corners = [[-18, -18], [-18, 18], [18, -18], [18, 18]];
+  corners.forEach(([x, z]) => {
+    const h = 3;
+    const p = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, h, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0x7b2fff, emissive: 0x7b2fff, emissiveIntensity: 0.4 })
+    );
+    p.position.set(x, h / 2, z);
+    scene.add(p);
+    // Label beacon
+    const b = new THREE.Mesh(
+      new THREE.SphereGeometry(0.25, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0x7b2fff, emissive: 0x7b2fff, emissiveIntensity: 0.8 })
+    );
+    b.position.set(x, h + 0.5, z);
+    scene.add(b);
+  });
+}
+
+// ── Agent Loading ──────────────────────────────────────────────────────
+async function loadAgents() {
+  try {
+    const r = await fetch('/api/agents');
+    if (!r.ok) throw new Error('API error ' + r.status);
+    agents = await r.json();
+    document.getElementById('agentCount').textContent = agents.length;
+    document.getElementById('onlineCount').textContent = agents.filter(a => a.status === 'online').length;
+
+    // Check for epoch
+    fetchEpoch();
+
+    // Distribute agents on grid
+    distributeAgents();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'flex';
+  }
+}
+
+async function fetchEpoch() {
+  try {
+    const r = await fetch('/api/hall_of_fame');
+    if (r.ok) {
+      const data = await r.json();
+      if (data.epoch) document.getElementById('epochNum').textContent = data.epoch.current || '—';
+    }
+  } catch (_) {}
+}
+
+function distributeAgents() {
+  // Place agents on a 3D grid, sorted by agent_id for consistency
+  const cols = Math.ceil(Math.sqrt(agents.length));
+  const spacing = 3;
+  agents.forEach((agent, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = (col - cols / 2) * spacing + (Math.random() - 0.5) * 0.5;
+    const z = (row - cols / 2) * spacing + (Math.random() - 0.5) * 0.5;
+    addAgentMesh(agent, x, z);
+  });
+}
+
+function addAgentMesh(agent, x, z) {
+  const color = agent.status === 'online' ? 0x00ff9d :
+                agent.status === 'idle'   ? 0xffcc00 : 0xff4466;
+  const size  = agent.status === 'online' ? 0.45 : 0.3;
+
+  const geo = agent.status === 'online'
+    ? new THREE.OctahedronGeometry(size, 0)
+    : new THREE.BoxGeometry(size, size * 1.4, size);
+
+  const mat = new THREE.MeshStandardMaterial({
+    color, emissive: color, emissiveIntensity: agent.status === 'online' ? 0.8 : 0.3
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, size + 0.3, z);
+  mesh.userData = { agent };
+  scene.add(mesh);
+
+  // Ground ring indicator
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(size * 1.2, size * 1.6, 32),
+    new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.4 })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(x, 0.02, z);
+  ring.userData = { agent };
+  scene.add(ring);
+
+  meshes[agent.agent_id] = { mesh, ring, mat };
+}
+
+// ── Interaction ─────────────────────────────────────────────────────────
+function onCanvasClick(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(scene.children, false)
+    .filter(h => h.object.userData && h.object.userData.agent);
+  if (hits.length) {
+    openDetail(hits[0].object.userData.agent);
+  } else {
+    closeDetail();
+  }
+}
+
+function onMouseMove(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function openDetail(agent) {
+  document.getElementById('d-id').textContent = agent.agent_id;
+  document.getElementById('d-name').textContent = agent.name || '(unnamed)';
+  const sb = document.getElementById('d-status');
+  sb.className = 'badge ' + (agent.status || 'offline');
+  sb.textContent = (agent.status || 'offline').toUpperCase();
+  document.getElementById('d-created').textContent = ts(agent.created_at);
+  document.getElementById('d-updated').textContent = ts(agent.updated_at);
+  document.getElementById('d-pubkey').textContent = agent.pubkey_hex
+    ? agent.pubkey_hex.slice(0, 24) + '…'
+    : '—';
+  // Fetch reputation
+  fetchReputation(agent.agent_id);
+  document.getElementById('detail').classList.add('open');
+}
+
+async function fetchReputation(agentId) {
+  document.getElementById('d-rep').textContent = 'Loading…';
+  try {
+    const r = await fetch(`/api/reputation/${agentId}`);
+    if (r.ok) {
+      const d = await r.json();
+      document.getElementById('d-rep').textContent = d.reputation
+        ? `${d.reputation.jobs_completed_as_worker || 0} jobs, trust ${d.reputation.trust_level || '—'}`
+        : 'No reputation data';
+    } else {
+      document.getElementById('d-rep').textContent = '—';
+    }
+  } catch (_) {
+    document.getElementById('d-rep').textContent = '—';
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detail').classList.remove('open');
+}
+
+function ts(unix) {
+  if (!unix) return '—';
+  try { return new Date(unix * 1000).toISOString().slice(0, 10); }
+  catch { return '—'; }
+}
+
+// ── Animation ──────────────────────────────────────────────────────────
+function animate() {
+  frameId = requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Pulse agents
+  Object.values(meshes).forEach(({ mesh, mat }) => {
+    const agent = mesh.userData.agent;
+    if (agent.status === 'online') {
+      mesh.position.y = 0.3 + 0.45 + Math.sin(t * 2 + mesh.id) * 0.15;
+      mesh.rotation.y += 0.015;
+    } else if (agent.status === 'idle') {
+      mesh.position.y = 0.3 + 0.3 + Math.sin(t * 1 + mesh.id) * 0.08;
+      mesh.rotation.y += 0.005;
+    }
+  });
+
+  // Gentle camera orbit
+  const r = 40;
+  camera.position.x = Math.sin(t * 0.08) * r;
+  camera.position.z = Math.cos(t * 0.08) * r;
+  camera.position.y = 28 + Math.sin(t * 0.05) * 3;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+init();
+</script>
+</body>
+</html>
