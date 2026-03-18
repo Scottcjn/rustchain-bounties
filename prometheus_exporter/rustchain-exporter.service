@@ -1,0 +1,37 @@
+[Unit]
+Description=RustChain Prometheus Exporter
+Documentation=https://github.com/your-org/rustchain
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=rustchain
+Group=rustchain
+WorkingDirectory=/opt/rustchain-exporter
+ExecStart=/opt/rustchain-exporter/rustchain-exporter --config /etc/rustchain-exporter/config.yml
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rustchain-exporter
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/rustchain-exporter
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Environment
+Environment=RUST_LOG=info
+Environment=RUSTCHAIN_EXPORTER_CONFIG=/etc/rustchain-exporter/config.yml
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=512M
+
+[Install]
+WantedBy=multi-user.target
