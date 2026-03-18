@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Wallet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="logo">
+                <img src="../assets/logo.png" alt="RustChain" width="64" height="64">
+                <h2>RustChain Wallet</h2>
+            </div>
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen hidden">
+            <div class="logo">
+                <img src="../assets/logo.png" alt="RustChain" width="64" height="64">
+                <h2>Welcome to RustChain</h2>
+                <p>Your decentralized wallet for the RustChain network</p>
+            </div>
+            <div class="button-group">
+                <button id="create-wallet-btn" class="btn btn-primary">Create New Wallet</button>
+                <button id="import-wallet-btn" class="btn btn-secondary">Import Existing Wallet</button>
+            </div>
+        </div>
+
+        <!-- Create Wallet Screen -->
+        <div id="create-wallet-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-create" class="btn-back">←</button>
+                <h3>Create New Wallet</h3>
+            </div>
+            <form id="create-wallet-form">
+                <div class="form-group">
+                    <label for="wallet-name">Wallet Name</label>
+                    <input type="text" id="wallet-name" placeholder="My RustChain Wallet" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter a strong password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms-checkbox" required>
+                    <label for="terms-checkbox">I agree to the Terms of Service and Privacy Policy</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Wallet</button>
+            </form>
+        </div>
+
+        <!-- Import Wallet Screen -->
+        <div id="import-wallet-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-import" class="btn-back">←</button>
+                <h3>Import Wallet</h3>
+            </div>
+            <div class="tab-container">
+                <div class="tabs">
+                    <button class="tab active" data-tab="mnemonic">Seed Phrase</button>
+                    <button class="tab" data-tab="private-key">Private Key</button>
+                </div>
+                <div class="tab-content">
+                    <div id="mnemonic-tab" class="tab-panel active">
+                        <form id="import-mnemonic-form">
+                            <div class="form-group">
+                                <label for="mnemonic-input">Seed Phrase</label>
+                                <textarea id="mnemonic-input" rows="3" placeholder="Enter your 12 or 24 word seed phrase" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="import-password">Password</label>
+                                <input type="password" id="import-password" placeholder="Create a password for this wallet" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Import Wallet</button>
+                        </form>
+                    </div>
+                    <div id="private-key-tab" class="tab-panel">
+                        <form id="import-private-key-form">
+                            <div class="form-group">
+                                <label for="private-key-input">Private Key</label>
+                                <input type="password" id="private-key-input" placeholder="Enter your private key" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="import-pk-password">Password</label>
+                                <input type="password" id="import-pk-password" placeholder="Create a password for this wallet" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Import Wallet</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seed Phrase Display -->
+        <div id="seed-phrase-screen" class="screen hidden">
+            <div class="header">
+                <h3>Your Seed Phrase</h3>
+            </div>
+            <div class="warning">
+                <p>⚠️ Write down these words in order and keep them safe. This is the only way to recover your wallet.</p>
+            </div>
+            <div id="seed-phrase-display" class="seed-phrase-grid"></div>
+            <div class="button-group">
+                <button id="copy-seed-btn" class="btn btn-secondary">Copy to Clipboard</button>
+                <button id="continue-to-wallet" class="btn btn-primary">I've Saved My Seed Phrase</button>
+            </div>
+        </div>
+
+        <!-- Main Wallet Screen -->
+        <div id="wallet-screen" class="screen hidden">
+            <div class="wallet-header">
+                <div class="account-info">
+                    <div class="account-name">Account 1</div>
+                    <div class="account-address" id="wallet-address">0x...</div>
+                </div>
+                <div class="wallet-actions">
+                    <button id="copy-address-btn" class="btn-icon" title="Copy Address">📋</button>
+                    <button id="settings-btn" class="btn-icon" title="Settings">⚙️</button>
+                </div>
+            </div>
+
+            <div class="network-selector">
+                <select id="network-select">
+                    <option value="mainnet">RustChain Mainnet</option>
+                    <option value="testnet">RustChain Testnet</option>
+                    <option value="local">Local Network</option>
+                </select>
+            </div>
+
+            <div class="balance-section">
+                <div class="balance-display">
+                    <div class="balance-amount" id="balance-amount">0.00</div>
+                    <div class="balance-currency">RTC</div>
+                </div>
+                <div class="balance-fiat" id="balance-fiat">$0.00 USD</div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="send-btn" class="btn btn-primary">Send</button>
+                <button id="receive-btn" class="btn btn-secondary">Receive</button>
+                <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+            </div>
+
+            <div class="transactions-section">
+                <h4>Recent Transactions</h4>
+                <div id="transactions-list" class="transactions-list">
+                    <div class="no-transactions">No transactions yet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send Transaction Screen -->
+        <div id="send-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-send" class="btn-back">←</button>
+                <h3>Send RTC</h3>
+            </div>
+            <form id="send-form">
+                <div class="form-group">
+                    <label for="recipient-address">To Address</label>
+                    <input type="text" id="recipient-address" placeholder="0x..." required>
+                    <button type="button" id="scan-qr-btn" class="btn-icon">📷</button>
+                </div>
+                <div class="form-group">
+                    <label for="send-amount">Amount</label>
+                    <div class="amount-input-group">
+                        <input type="number" id="send-amount" placeholder="0.0" step="0.000001" min="0" required>
+                        <span class="currency-label">RTC</span>
+                    </div>
+                    <div class="max-amount">
+                        <button type="button" id="max-amount-btn">Max</button>
+                        <span>Available: <span id="available-balance">0.00</span> RTC</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="gas-fee">Gas Fee</label>
+                    <select id="gas-fee">
+                        <option value="slow">Slow (Low fee)</option>
+                        <option value="standard" selected>Standard</option>
+                        <option value="fast">Fast (High fee)</option>
+                    </select>
+                    <div class="fee-estimate" id="fee-estimate">Fee: ~0.001 RTC</div>
+                </div>
+                <div class="transaction-summary">
+                    <div class="summary-row">
+                        <span>Amount:</span>
+                        <span id="summary-amount">0.00 RTC</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Fee:</span>
+                        <span id="summary-fee">0.001 RTC</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="summary-total">0.001 RTC</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Transaction</button>
+            </form>
+        </div>
+
+        <!-- Receive Screen -->
+        <div id="receive-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-receive" class="btn-back">←</button>
+                <h3>Receive RTC</h3>
+            </div>
+            <div class="receive-content">
+                <div class="qr-code-container">
+                    <canvas id="qr-code"></canvas>
+                </div>
+                <div class="receive-address">
+                    <label>Your Address:</label>
+                    <div class="address-display" id="receive-address-display">0x...</div>
+                    <button id="copy-receive-address" class="btn btn-secondary">Copy Address</button>
+                </div>
+                <div class="receive-note">
+                    <p>Send only RustChain (RTC) tokens to this address. Sending other tokens may result in permanent loss.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Confirmation -->
+        <div id="confirm-transaction-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-confirm" class="btn-back">←</button>
+                <h3>Confirm Transaction</h3>
+            </div>
+            <div class="confirmation-details">
+                <div class="detail-row">
+                    <span>To:</span>
+                    <span id="confirm-recipient" class="address-text">0x...</span>
+                </div>
+                <div class="detail-row">
+                    <span>Amount:</span>
+                    <span id="confirm-amount">0.00 RTC</span>
+                </div>
+                <div class="detail-row">
+                    <span>Gas Fee:</span>
+                    <span id="confirm-fee">0.001 RTC</span>
+                </div>
+                <div class="detail-row total">
+                    <span>Total Cost:</span>
+                    <span id="confirm-total-cost">0.001 RTC</span>
+                </div>
+            </div>
+            <div class="password-verification">
+                <div class="form-group">
+                    <label for="transaction-password">Enter Password</label>
+                    <input type="password" id="transaction-password" placeholder="Enter your wallet password" required>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="cancel-transaction" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-transaction" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen hidden">
+            <div class="header">
+                <button id="back-from-settings" class="btn-back">←</button>
+                <h3>Settings</h3>
+            </div>
+            <div class="settings-menu">
+                <div class="setting-item" id="view-seed-phrase">
+                    <span>Reveal Seed Phrase</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="setting-item" id="export-private-key">
+                    <span>Export Private Key</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="setting-item" id="change-password">
+                    <span>Change Password</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="setting-item" id="reset-wallet">
+                    <span>Reset Wallet</span>
+                    <span class="arrow">→</span>
+                </div>
+                <div class="setting-item" id="about">
+                    <span>About</span>
+                    <span class="arrow">→</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="toast" class="toast hidden">
+            <span id="toast-message"></span>
+            <button id="toast-close">×</button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="overlay hidden">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <div id="loading-message">Processing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
