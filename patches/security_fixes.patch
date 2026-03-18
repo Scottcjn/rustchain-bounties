@@ -1,0 +1,342 @@
+diff --git a/rtc_client/client.py b/rtc_client/client.py
+index 1a2b3c4..8f7e9a0 100644
+--- a/rtc_client/client.py
++++ b/rtc_client/client.py
+@@ -15,6 +15,11 @@ import requests
+ import json
+ import logging
+ from typing import Optional, Dict, Any
++import ssl
++import urllib.parse
++import re
++from cryptography.fernet import Fernet
++import os
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -23,11 +28,23 @@ class RTCClient:
+     Base client for RTC API interactions with enhanced security
+     """
+     
+-    def __init__(self, api_key: str, base_url: str = "https://api.rtc.com"):
++    def __init__(self, api_key: str, base_url: str = "https://api.rtc.com", verify_ssl: bool = True):
++        # Validate API key format
++        if not self._validate_api_key(api_key):
++            raise ValueError("Invalid API key format")
++            
++        # Validate base URL
++        if not self._validate_url(base_url):
++            raise ValueError("Invalid base URL format")
++            
+         self.api_key = api_key
+         self.base_url = base_url.rstrip('/')
++        self.verify_ssl = verify_ssl
++        
+         self.session = requests.Session()
+-        self.session.headers.update({
++        
++        # Enhanced SSL configuration
++        if verify_ssl:
++            self.session.verify = True
++            # Create SSL context with secure defaults
++            ssl_context = ssl.create_default_context()
++            ssl_context.check_hostname = True
++            ssl_context.verify_mode = ssl.CERT_REQUIRED
++            ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
++            
++        # Secure headers
++        default_headers = {
+             'Authorization': f'Bearer {self.api_key}',
+             'Content-Type': 'application/json',
+-            'User-Agent': 'RTC-Python-SDK/1.0'
+-        })
++            'User-Agent': 'RTC-Python-SDK/1.0',
++            'X-Content-Type-Options': 'nosniff',
++            'X-Frame-Options': 'DENY',
++            'X-XSS-Protection': '1; mode=block'
++        }
++        self.session.headers.update(default_headers)
++        
++        # Request timeout configuration
++        self.timeout = (5, 30)  # (connect timeout, read timeout)
++    
++    def _validate_api_key(self, api_key: str) -> bool:
++        """Validate API key format"""
++        if not isinstance(api_key, str):
++            return False
++        if len(api_key) < 16:  # Minimum length check
++            return False
++        # Check for basic format (alphanumeric and allowed special chars)
++        if not re.match(r'^[a-zA-Z0-9\-_\.]+$', api_key):
++            return False
++        return True
++    
++    def _validate_url(self, url: str) -> bool:
++        """Validate URL format and scheme"""
++        try:
++            parsed = urllib.parse.urlparse(url)
++            return all([
++                parsed.scheme in ('https',),  # Only allow HTTPS
++                parsed.netloc,
++                not any(char in url for char in ['<', '>', '"', ' '])  # Basic XSS prevention
++            ])
++        except Exception:
++            return False
++    
++    def _sanitize_input(self, data: Any) -> Any:
++        """Sanitize input data to prevent injection attacks"""
++        if isinstance(data, str):
++            # Remove potentially dangerous characters
++            data = re.sub(r'[<>"\']', '', data)
++            # Limit string length
++            data = data[:1000]
++        elif isinstance(data, dict):
++            data = {k: self._sanitize_input(v) for k, v in data.items()}
++        elif isinstance(data, list):
++            data = [self._sanitize_input(item) for item in data]
++        return data
+     
+     def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
+         """
+         Make HTTP request with enhanced security
+         """
++        # Sanitize input data
++        if data:
++            data = self._sanitize_input(data)
++            
++        # Validate endpoint
++        if not re.match(r'^[a-zA-Z0-9\-_/]+$', endpoint):
++            raise ValueError("Invalid endpoint format")
++            
+         url = f"{self.base_url}/{endpoint.lstrip('/')}"
+         
++        # Additional URL validation
++        if not self._validate_url(url):
++            raise ValueError("Constructed URL failed validation")
++            
+         try:
+             response = self.session.request(
+                 method=method.upper(),
+                 url=url,
+-                json=data if data else None
++                json=data if data else None,
++                timeout=self.timeout,
++                verify=self.verify_ssl
+             )
+             
++            # Check for suspicious response headers
++            suspicious_headers = ['x-powered-by', 'server']
++            for header in suspicious_headers:
++                if header in response.headers:
++                    logger.warning(f"Potentially sensitive header detected: {header}")
++            
+             response.raise_for_status()
+             return response.json()
+             
+@@ -68,6 +135,10 @@ class RTCClient:
+             logger.error(f"Request failed: {e}")
+             raise
++        except requests.exceptions.SSLError as e:
++            logger.error(f"SSL verification failed: {e}")
++            raise
++        except requests.exceptions.Timeout as e:
++            logger.error(f"Request timeout: {e}")
++            raise
+         except Exception as e:
+             logger.error(f"Unexpected error: {e}")
+             raise
+diff --git a/telegram_bot/bot.py b/telegram_bot/bot.py
+index 2c5d8e1..7f9e4a2 100644
+--- a/telegram_bot/bot.py
++++ b/telegram_bot/bot.py
+@@ -1,6 +1,12 @@
+ import os
+ import logging
++import re
++import hashlib
++import hmac
++import time
+ from telegram import Update
+ from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
++from functools import wraps
++import json
+ 
+ logging.basicConfig(
+     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+@@ -9,16 +15,70 @@ logging.basicConfig(
+ 
+ logger = logging.getLogger(__name__)
+ 
++# Rate limiting storage (in production, use Redis or database)
++user_request_counts = {}
++RATE_LIMIT_REQUESTS = 10
++RATE_LIMIT_WINDOW = 60  # seconds
++
++def rate_limit(func):
++    """Rate limiting decorator"""
++    @wraps(func)
++    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
++        user_id = update.effective_user.id
++        current_time = time.time()
++        
++        # Clean old entries
++        if user_id in user_request_counts:
++            user_request_counts[user_id] = [
++                timestamp for timestamp in user_request_counts[user_id] 
++                if current_time - timestamp < RATE_LIMIT_WINDOW
++            ]
++        else:
++            user_request_counts[user_id] = []
++        
++        # Check rate limit
++        if len(user_request_counts[user_id]) >= RATE_LIMIT_REQUESTS:
++            await update.message.reply_text(
++                "Rate limit exceeded. Please wait before sending more requests."
++            )
++            return
++        
++        # Add current request
++        user_request_counts[user_id].append(current_time)
++        
++        return await func(update, context)
++    return wrapper
++
++def validate_input(text: str, max_length: int = 1000) -> str:
++    """Validate and sanitize user input"""
++    if not isinstance(text, str):
++        raise ValueError("Input must be a string")
++    
++    # Remove potentially dangerous characters
++    text = re.sub(r'[<>"\'\(\){}[\]\\]', '', text)
++    
++    # Limit length
++    text = text[:max_length]
++    
++    # Remove excessive whitespace
++    text = ' '.join(text.split())
++    
++    return text
++
++def validate_webhook(token: str, data: dict, signature: str) -> bool:
++    """Validate webhook signature to prevent tampering"""
++    expected_signature = hmac.new(
++        token.encode('utf-8'),
++        json.dumps(data, sort_keys=True).encode('utf-8'),
++        hashlib.sha256
++    ).hexdigest()
++    
++    return hmac.compare_digest(expected_signature, signature)
++
+ class RTCTelegramBot:
+     def __init__(self, token: str):
+-        self.token = token
++        # Validate token format
++        if not self._validate_bot_token(token):
++            raise ValueError("Invalid bot token format")
++            
++        self.token = token
+         self.application = Application.builder().token(token).build()
+         self._setup_handlers()
++    
++    def _validate_bot_token(self, token: str) -> bool:
++        """Validate Telegram bot token format"""
++        # Telegram bot token format: {bot_id}:{token}
++        pattern = r'^\d+:[a-zA-Z0-9_-]{35}$'
++        return bool(re.match(pattern, token))
+     
+     def _setup_handlers(self):
+         """Setup bot command and message handlers"""
+@@ -28,23 +88,50 @@ class RTCTelegramBot:
+         # Add handlers
+         self.application.add_handler(start_handler)
+         self.application.add_handler(echo_handler)
++        
++        # Add error handler
++        self.application.add_error_handler(self.error_handler)
++    
++    async def error_handler(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
++        """Handle errors"""
++        logger.error(f"Exception while handling an update: {context.error}")
++        
++        # Don't expose internal errors to users
++        if isinstance(update, Update) and update.effective_message:
++            await update.effective_message.reply_text(
++                "An error occurred while processing your request. Please try again later."
++            )
+     
++    @rate_limit
+     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+         """Send a message when the command /start is issued"""
++        # Log user interaction for monitoring
++        user = update.effective_user
++        logger.info(f"User {user.id} ({user.username}) started the bot")
++        
+         await update.message.reply_text(
+-            'Hi! I\'m your RTC bot assistant. Send me a message and I\'ll echo it back!'
++            'Hi! I\'m your RTC bot assistant. Send me a message and I\'ll process it safely!'
+         )
+     
++    @rate_limit
+     async def echo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+         """Echo the user message with validation"""
+-        message_text = update.message.text
+-        
+-        # Basic validation
+-        if len(message_text) > 1000:
+-            await update.message.reply_text("Message too long. Please keep it under 1000 characters.")
+-            return
++        try:
++            # Validate and sanitize input
++            message_text = validate_input(update.message.text)
++            
++            if not message_text.strip():
++                await update.message.reply_text("Please send a valid message.")
++                return
++            
++            # Log the interaction
++            user = update.effective_user
++            logger.info(f"User {user.id} sent message: {message_text[:50]}...")
++            
++            await update.message.reply_text(f"You said: {message_text}")
+         
+-        await update.message.reply_text(f"You said: {message_text}")
++        except Exception as e:
++            logger.error(f"Error processing message: {e}")
++            await update.message.reply_text("Sorry, I couldn't process your message.")
+     
+     def run(self):
+         """Start the bot"""
+diff --git a/telegram_bot/config.py b/telegram_bot/config.py
+index 5f8c9a1..8b2e9e1 100644
+--- a/telegram_bot/config.py
++++ b/telegram_bot/config.py
+@@ -1,8 +1,25 @@
+ import os
++import logging
+ from typing import Optional
++import re
++
++logger = logging.getLogger(__name__)
+ 
+ class Config:
+     """Configuration settings for the Telegram bot"""
+     
+-    TELEGRAM_BOT_TOKEN: Optional[str] = os.getenv('TELEGRAM_BOT_TOKEN')
+-    RTC_API_KEY: Optional[str] = os.getenv('RTC_API_KEY')
++    @staticmethod
++    def _validate_env_var(value: Optional[str], name: str, pattern: Optional[str] = None) -> Optional[str]:
++        """Validate environment variable"""
++        if not value:
++            logger.warning(f"Environment variable {name} not set")
++            return None
++            
++        if pattern and not re.match(pattern, value):
++            logger.error(f"Invalid format for {name}")
++            return None
++            
++        return value
++    
++    TELEGRAM_BOT_TOKEN: Optional[str] = _validate_env_var(
++        os.getenv('TELEGRAM_BOT_TOKEN'), 'TELEGRAM_BOT_TOKEN', r'^\d+:[a-zA-Z0-9_-]{35}$')
++    RTC_API_KEY: Optional[str] = _validate_env_var(
++        os.getenv('RTC_API_KEY'), 'RTC_API_KEY', r'^[a-zA-Z0-9\-_\.]{16,}$')
