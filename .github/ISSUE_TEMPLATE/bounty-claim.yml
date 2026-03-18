@@ -1,0 +1,66 @@
+name: Bounty Claim
+description: Submit a claim for a completed bounty
+title: "[BOUNTY CLAIM] "
+labels: ["bounty-claim"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bounty Claim Submission
+        Please provide all required information to claim your bounty reward.
+  
+  - type: input
+    id: github_username
+    attributes:
+      label: GitHub Username
+      description: Your GitHub username for reward delivery
+      placeholder: "@yourusername"
+    validations:
+      required: true
+  
+  - type: input
+    id: project_used
+    attributes:
+      label: Project Used
+      description: Which flagship project did you submit to the awesome list/directory?
+      placeholder: "e.g., RTC Toolkit, Project Name"
+    validations:
+      required: true
+  
+  - type: input
+    id: placement_url
+    attributes:
+      label: Placement URL
+      description: Direct link to where your submission appears in the awesome list or directory
+      placeholder: "https://example.com/awesome-list#your-project"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: proof_details
+    attributes:
+      label: Proof Details
+      description: |
+        Provide additional proof of your submission:
+        - Link to your PR/submission
+        - Screenshots if applicable
+        - Any other relevant documentation
+      placeholder: |
+        - PR Link: https://github.com/owner/repo/pull/123
+        - Screenshot: [attached]
+        - Additional context: [description]
+    validations:
+      required: true
+  
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      description: Please confirm the following
+      options:
+        - label: I have successfully added a flagship project to an awesome list or public tool directory
+          required: true
+        - label: The placement is publicly visible and accessible
+          required: true
+        - label: I have provided accurate proof of completion
+          required: true
