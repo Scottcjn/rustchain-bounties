@@ -1,27 +1,25 @@
 openapi: 3.0.3
 info:
-  title: RustChain REST API
-  description: |
-    REST API endpoints for the RustChain blockchain platform.
-    This specification documents all available endpoints for interacting with the RustChain network.
+  title: RustChain Node API
+  description: API specification for RustChain blockchain node operations
   version: 1.0.0
   contact:
-    name: RustChain Team
-    url: https://rustchain.org
+    name: RustChain Development Team
+    url: https://github.com/rustchain/rustchain
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://api.rustchain.org/v1
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.rustchain.network
     description: Production server
-  - url: https://testnet-api.rustchain.org/v1
-    description: Testnet server
 
 paths:
   /health:
     get:
-      summary: Health check
+      summary: Health check endpoint
       description: Returns the health status of the node
       tags:
         - System
@@ -31,220 +29,311 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: healthy
-                  version:
-                    type: string
-                    example: 1.0.0
-                  timestamp:
-                    type: integer
-                    example: 1640000000
+                $ref: '#/components/schemas/HealthResponse'
 
-  /epoch:
+  /blocks:
     get:
-      summary: Get current epoch
-      description: Returns information about the current epoch
+      summary: Get blocks
+      description: Retrieve a list of blocks with pagination
       tags:
         - Blockchain
-      responses:
-        '200':
-          description: Current epoch information
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  epoch:
-                    type: integer
-                    example: 123
-                  block_height:
-                    type: integer
-                    example: 456789
-                  timestamp:
-                    type: integer
-                    example: 1640000000
-
-  /api/miners:
-    get:
-      summary: List miners
-      description: Returns a list of active miners on the network
-      tags:
-        - Mining
       parameters:
         - name: limit
           in: query
           schema:
             type: integer
-            default: 20
+            minimum: 1
+            maximum: 100
+            default: 10
         - name: offset
           in: query
           schema:
             type: integer
+            minimum: 0
             default: 0
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
       responses:
         '200':
-          description: List of miners
+          description: Successfully retrieved blocks
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  miners:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        address:
-                          type: string
-                        hashrate:
-                          type: string
-                        blocks:
-                          type: integer
-                  total:
-                    type: integer
+                $ref: '#/components/schemas/BlockListResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /wallet/balance:
+  /blocks/{blockHash}:
     get:
-      summary: Get wallet balance
-      description: Returns the balance of a specified wallet address
+      summary: Get block by hash
+      description: Retrieve a specific block by its hash
       tags:
-        - Wallet
+        - Blockchain
       parameters:
-        - name: address
-          in: query
+        - name: blockHash
+          in: path
           required: true
           schema:
             type: string
-          example: "0x742d35Cc6634C0532925a3b844Bc9e7595f..."
+            pattern: '^[a-fA-F0-9]{64}$'
       responses:
         '200':
-          description: Wallet balance
+          description: Block found
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  address:
-                    type: string
-                  balance:
-                    type: string
-                    example: "1.2345"
-                  balance_wei:
-                    type: string
-                    example: "1234500000000000000"
+                $ref: '#/components/schemas/Block'
+        '404':
+          description: Block not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /attest/submit:
-    post:
-      summary: Submit attestation
-      description: Submit a new attestation to the network
+  /blocks/height/{height}:
+    get:
+      summary: Get block by height
+      description: Retrieve a specific block by its height
       tags:
-        - Attestation
+        - Blockchain
+      parameters:
+        - name: height
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: Block found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Block'
+        '404':
+          description: Block not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions:
+    get:
+      summary: Get transactions
+      description: Retrieve a list of transactions with pagination
+      tags:
+        - Transactions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: address
+          in: query
+          description: Filter by address
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, failed]
+      responses:
+        '200':
+          description: Successfully retrieved transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionListResponse'
+
+    post:
+      summary: Submit transaction
+      description: Submit a new transaction to the network
+      tags:
+        - Transactions
+      security:
+        - ApiKeyAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - data
-                - signature
-              properties:
-                data:
-                  type: object
-                  description: The data to attest
-                signature:
-                  type: string
-                  description: Digital signature
+              $ref: '#/components/schemas/SubmitTransactionRequest'
       responses:
-        '200':
-          description: Attestation submitted successfully
+        '201':
+          description: Transaction submitted successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  tx_hash:
-                    type: string
-                    example: "0xabc123..."
-                  status:
-                    type: string
-                    example: "submitted"
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Invalid transaction data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /transactions:
+  /transactions/{txHash}:
     get:
-      summary: List transactions
-      description: Returns transactions for a given address
+      summary: Get transaction by hash
+      description: Retrieve a specific transaction by its hash
       tags:
-        - Wallet
+        - Transactions
       parameters:
-        - name: address
-          in: query
+        - name: txHash
+          in: path
           required: true
           schema:
             type: string
+            pattern: '^[a-fA-F0-9]{64}$'
+      responses:
+        '200':
+          description: Transaction found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{address}:
+    get:
+      summary: Get account information
+      description: Retrieve account details including balance
+      tags:
+        - Accounts
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9]{34,44}$'
+      responses:
+        '200':
+          description: Account information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{address}/balance:
+    get:
+      summary: Get account balance
+      description: Retrieve the current balance of an account
+      tags:
+        - Accounts
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9]{34,44}$'
+      responses:
+        '200':
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+
+  /network/info:
+    get:
+      summary: Get network information
+      description: Retrieve general network information
+      tags:
+        - Network
+      responses:
+        '200':
+          description: Network information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkInfo'
+
+  /network/peers:
+    get:
+      summary: Get network peers
+      description: Retrieve list of connected peers
+      tags:
+        - Network
+      responses:
+        '200':
+          description: Peer list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeerListResponse'
+
+  /mempool:
+    get:
+      summary: Get mempool status
+      description: Retrieve current mempool information
+      tags:
+        - Mempool
+      responses:
+        '200':
+          description: Mempool status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MempoolStatus'
+
+  /mempool/transactions:
+    get:
+      summary: Get pending transactions
+      description: Retrieve transactions currently in mempool
+      tags:
+        - Mempool
+      parameters:
         - name: limit
           in: query
           schema:
             type: integer
-            default: 20
+            minimum: 1
+            maximum: 100
+            default: 10
       responses:
         '200':
-          description: List of transactions
+          description: Pending transactions retrieved
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  transactions:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        hash:
-                          type: string
-                        from:
-                          type: string
-                        to:
-                          type: string
-                        value:
-                          type: string
-                        timestamp:
-                          type: integer
-
-  /block/{block_number}:
-    get:
-      summary: Get block by number
-      description: Returns information about a specific block
-      tags:
-        - Blockchain
-      parameters:
-        - name: block_number
-          in: path
-          required: true
-          schema:
-            type: integer
-            example: 12345
-      responses:
-        '200':
-          description: Block information
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  number:
-                    type: integer
-                  hash:
-                    type: string
-                  timestamp:
-                    type: integer
-                  transactions:
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/TransactionListResponse'
 
 components:
   securitySchemes:
@@ -252,73 +341,302 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
 
   schemas:
-    Error:
+    HealthResponse:
       type: object
       properties:
-        code:
-          type: integer
-          example: 400
-        message:
+        status:
           type: string
-        details:
-          type: object
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: integer
+          description: Uptime in seconds
+
+    Block:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: Block hash
+        height:
+          type: integer
+          description: Block height
+        previous_hash:
+          type: string
+          description: Previous block hash
+        timestamp:
+          type: integer
+          description: Block timestamp
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        merkle_root:
+          type: string
+          description: Merkle root of transactions
+        nonce:
+          type: integer
+          description: Proof of work nonce
+        difficulty:
+          type: integer
+          description: Mining difficulty
+        size:
+          type: integer
+          description: Block size in bytes
+
+    BlockListResponse:
+      type: object
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Block'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
 
     Transaction:
       type: object
       properties:
         hash:
           type: string
+          description: Transaction hash
         from:
           type: string
+          description: Sender address
         to:
           type: string
-        value:
+          description: Recipient address
+        amount:
           type: string
-        gas:
+          description: Transaction amount
+        fee:
           type: string
+          description: Transaction fee
+        timestamp:
+          type: integer
+          description: Transaction timestamp
+        status:
+          type: string
+          enum: [pending, confirmed, failed]
+        block_hash:
+          type: string
+          description: Block hash containing this transaction
+          nullable: true
+        block_height:
+          type: integer
+          description: Block height containing this transaction
+          nullable: true
+        gas_used:
+          type: integer
+          description: Gas used by transaction
         gas_price:
           type: string
+          description: Gas price
         nonce:
           type: integer
-        timestamp:
-          type: integer
+          description: Transaction nonce
 
-    Block:
+    TransactionListResponse:
       type: object
       properties:
-        number:
-          type: integer
-        hash:
-          type: string
-        parent_hash:
-          type: string
-        timestamp:
-          type: integer
         transactions:
           type: array
           items:
-            type: string
-        miner:
+            $ref: '#/components/schemas/Transaction'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    SubmitTransactionRequest:
+      type: object
+      required:
+        - from
+        - to
+        - amount
+        - signature
+      properties:
+        from:
           type: string
+          description: Sender address
+        to:
+          type: string
+          description: Recipient address
+        amount:
+          type: string
+          description: Transaction amount
+        fee:
+          type: string
+          description: Transaction fee
+        gas_limit:
+          type: integer
+          description: Gas limit
+        gas_price:
+          type: string
+          description: Gas price
+        nonce:
+          type: integer
+          description: Transaction nonce
+        signature:
+          type: string
+          description: Transaction signature
+        public_key:
+          type: string
+          description: Sender's public key
+
+    TransactionResponse:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: Transaction hash
+        status:
+          type: string
+          enum: [submitted, rejected]
+        message:
+          type: string
+          description: Status message
+
+    Account:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Account address
+        balance:
+          type: string
+          description: Account balance
+        nonce:
+          type: integer
+          description: Account nonce
+        created_at:
+          type: integer
+          description: Account creation timestamp
+        transaction_count:
+          type: integer
+          description: Total number of transactions
+
+    BalanceResponse:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Account address
+        balance:
+          type: string
+          description: Current balance
+        currency:
+          type: string
+          default: RTC
+
+    NetworkInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Network name
+        version:
+          type: string
+          description: Network version
+        block_height:
+          type: integer
+          description: Current block height
         difficulty:
+          type: integer
+          description: Current difficulty
+        hash_rate:
           type: string
-        total_difficulty:
+          description: Network hash rate
+        peer_count:
+          type: integer
+          description: Number of connected peers
+        mempool_size:
+          type: integer
+          description: Current mempool size
+
+    Peer:
+      type: object
+      properties:
+        id:
           type: string
+          description: Peer ID
+        address:
+          type: string
+          description: Peer IP address
+        port:
+          type: integer
+          description: Peer port
+        version:
+          type: string
+          description: Peer version
+        connected_at:
+          type: integer
+          description: Connection timestamp
+        latency:
+          type: integer
+          description: Latency in milliseconds
+
+    PeerListResponse:
+      type: object
+      properties:
+        peers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Peer'
+        total:
+          type: integer
+
+    MempoolStatus:
+      type: object
+      properties:
+        size:
+          type: integer
+          description: Number of transactions in mempool
+        bytes:
+          type: integer
+          description: Total size in bytes
+        min_fee_rate:
+          type: string
+          description: Minimum fee rate
+        max_fee_rate:
+          type: string
+          description: Maximum fee rate
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+        timestamp:
+          type: string
+          format: date-time
 
 tags:
   - name: System
     description: System health and status endpoints
   - name: Blockchain
-    description: Blockchain data endpoints
-  - name: Wallet
-    description: Wallet and transaction endpoints
-  - name: Mining
-    description: Mining-related endpoints
-  - name: Attestation
-    description: Attestation-related endpoints
+    description: Blockchain and block-related operations
+  - name: Transactions
+    description: Transaction management and queries
+  - name: Accounts
+    description: Account information and balances
+  - name: Network
+    description: Network information and peer management
+  - name: Mempool
+    description: Transaction pool operations
