@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Hardware Museum 3D</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="vintage-crt">
+                <div class="scan-line"></div>
+                <div class="loading-text">LOADING MUSEUM...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <canvas id="museum-canvas"></canvas>
+
+    <!-- UI Overlay -->
+    <div id="ui-overlay">
+        <!-- Header -->
+        <header id="museum-header">
+            <h1>Vintage Hardware Museum</h1>
+            <div class="header-controls">
+                <button id="info-btn" class="ui-btn">ℹ️ Info</button>
+                <button id="settings-btn" class="ui-btn">⚙️ Settings</button>
+                <button id="fullscreen-btn" class="ui-btn">🔲 Fullscreen</button>
+            </div>
+        </header>
+
+        <!-- Navigation Controls -->
+        <div id="navigation-controls">
+            <div class="control-group">
+                <h3>Navigation</h3>
+                <div class="control-buttons">
+                    <button id="walk-mode" class="nav-btn active">🚶 Walk</button>
+                    <button id="fly-mode" class="nav-btn">✈️ Fly</button>
+                    <button id="orbit-mode" class="nav-btn">🔄 Orbit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exhibit Info Panel -->
+        <div id="exhibit-info" class="info-panel hidden">
+            <button class="close-btn" id="close-info">×</button>
+            <h2 id="exhibit-title">Select an exhibit</h2>
+            <div id="exhibit-image"></div>
+            <div id="exhibit-description">
+                <p>Click on any exhibit to learn more about vintage computing hardware.</p>
+            </div>
+            <div id="exhibit-specs"></div>
+            <div class="interaction-hint">
+                <p>💡 Use WASD or arrow keys to move around</p>
+                <p>🖱️ Click and drag to look around</p>
+                <p>🔍 Click on exhibits for detailed information</p>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="info-panel hidden">
+            <button class="close-btn" id="close-settings">×</button>
+            <h2>Settings</h2>
+            <div class="settings-group">
+                <label>
+                    <span>Graphics Quality</span>
+                    <select id="quality-select">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <span>Movement Speed</span>
+                    <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1">
+                    <span id="speed-value">1.0</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <span>Mouse Sensitivity</span>
+                    <input type="range" id="sensitivity-slider" min="0.1" max="2" step="0.1" value="1">
+                    <span id="sensitivity-value">1.0</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="ambient-sound" checked>
+                    <span>Ambient Sounds</span>
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="auto-rotate" checked>
+                    <span>Auto-rotate Exhibits</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Minimap -->
+        <div id="minimap">
+            <canvas id="minimap-canvas" width="200" height="150"></canvas>
+            <div class="minimap-controls">
+                <button id="toggle-minimap">📍</button>
+            </div>
+        </div>
+
+        <!-- Exhibit List -->
+        <div id="exhibit-list">
+            <h3>Exhibits</h3>
+            <div class="exhibit-items">
+                <div class="exhibit-item" data-exhibit="apple2">
+                    <span class="exhibit-icon">🍎</span>
+                    <span class="exhibit-name">Apple II</span>
+                </div>
+                <div class="exhibit-item" data-exhibit="commodore64">
+                    <span class="exhibit-icon">💾</span>
+                    <span class="exhibit-name">Commodore 64</span>
+                </div>
+                <div class="exhibit-item" data-exhibit="ibm5150">
+                    <span class="exhibit-icon">💻</span>
+                    <span class="exhibit-name">IBM PC 5150</span>
+                </div>
+                <div class="exhibit-item" data-exhibit="atari2600">
+                    <span class="exhibit-icon">🕹️</span>
+                    <span class="exhibit-name">Atari 2600</span>
+                </div>
+                <div class="exhibit-item" data-exhibit="mac128k">
+                    <span class="exhibit-icon">🖥️</span>
+                    <span class="exhibit-name">Macintosh 128K</span>
+                </div>
+                <div class="exhibit-item" data-exhibit="trs80">
+                    <span class="exhibit-icon">📟</span>
+                    <span class="exhibit-name">TRS-80</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Controls -->
+        <div id="audio-controls">
+            <button id="mute-btn" class="audio-btn">🔊</button>
+            <div class="volume-control">
+                <input type="range" id="volume-slider" min="0" max="100" value="50">
+            </div>
+        </div>
+
+        <!-- Performance Stats -->
+        <div id="performance-stats" class="hidden">
+            <div>FPS: <span id="fps-counter">60</span></div>
+            <div>Triangles: <span id="triangle-count">0</span></div>
+            <div>Draw Calls: <span id="draw-calls">0</span></div>
+        </div>
+
+        <!-- Instructions -->
+        <div id="instructions" class="instructions-overlay">
+            <div class="instructions-content">
+                <h2>Welcome to the Vintage Hardware Museum</h2>
+                <div class="instruction-grid">
+                    <div class="instruction-item">
+                        <strong>Movement</strong>
+                        <p>WASD or Arrow Keys</p>
+                    </div>
+                    <div class="instruction-item">
+                        <strong>Look Around</strong>
+                        <p>Mouse or Touch & Drag</p>
+                    </div>
+                    <div class="instruction-item">
+                        <strong>Interact</strong>
+                        <p>Click on Exhibits</p>
+                    </div>
+                    <div class="instruction-item">
+                        <strong>Zoom</strong>
+                        <p>Mouse Wheel or Pinch</p>
+                    </div>
+                </div>
+                <button id="start-tour" class="start-btn">Start Your Tour</button>
+                <label class="skip-checkbox">
+                    <input type="checkbox" id="skip-instructions">
+                    Don't show this again
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <ul>
+            <li data-action="inspect">🔍 Inspect Exhibit</li>
+            <li data-action="rotate">🔄 Auto Rotate</li>
+            <li data-action="focus">📍 Focus View</li>
+            <li data-action="share">📤 Share</li>
+        </ul>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/FirstPersonControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/FlyControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/loaders/TextureLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    
+    <script src="js/exhibits.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/museum.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
