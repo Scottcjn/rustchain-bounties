@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTC Network Explorer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(103, 126, 234, 0.1);
+            border-bottom: 1px solid rgba(103, 126, 234, 0.2);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-button:hover {
+            background: rgba(103, 126, 234, 0.1);
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table th {
+            background: rgba(103, 126, 234, 0.1);
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .data-table tr:hover {
+            background: rgba(103, 126, 234, 0.05);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-mining {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-bar i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .block-item {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .block-item:hover {
+            transform: translateX(5px);
+        }
+
+        .block-hash {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(103, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(103, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .tab-nav {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                padding: 15px;
+                font-size: 1rem;
+            }
+
+            .data-table {
+                font-size: 0.9rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cube"></i> RTC Network Explorer</h1>
+            <p>Real-time blockchain analytics and network monitoring</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-cubes"></i>
+                <h3 id="blockHeight">Loading...</h3>
+                <p>Current Block Height</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-pickaxe"></i>
+                <h3 id="activeMiners">Loading...</h3>
+                <p>Active Miners</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-robot"></i>
+                <h3 id="activeAgents">Loading...</h3>
+                <p>Active Agents</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <h3 id="hashRate">Loading...</h3>
+                <p>Network Hash Rate</p>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="showTab('blocks')">
+                    <i class="fas fa-cubes"></i>
+                    Block Explorer
+                </button>
+                <button class="tab-button" onclick="showTab('miners')">
+                    <i class="fas fa-pickaxe"></i>
+                    Miners
+                </button>
+                <button class="tab-button" onclick="showTab('agents')">
+                    <i class="fas fa-robot"></i>
+                    Agents
+                </button>
+            </div>
+
+            <div id="blocks" class="tab-content active">
+                <div class="search-bar">
+                    <input type="text" id="blockSearch" placeholder="Search by block hash, height, or transaction...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div id="blocksList">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Loading blocks...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="miners" class="tab-content">
+                <div class="search-bar">
+                    <input type="text" id="minerSearch" placeholder="Search miners by address or status...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Miner ID</th>
+                            <th>Status</th>
+                            <th>Hash Rate</th>
+                            <th>Blocks Mined</th>
+                            <th>Last Activity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="minersTable">
+                        <tr>
+                            <td colspan="5">
+                                <div class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <p>Loading miners...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="agents" class="tab-content">
+                <div class="search-bar">
+                    <input type="text" id="agentSearch" placeholder="Search agents by ID or status...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Agent ID</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Transactions</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agentsTable">
+                        <tr>
+                            <td colspan="5">
+                                <div class="loading">
+                                    <i class="fas fa-spinner"></i>
+                                    <p>Loading agents...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-button" onclick="refreshData()" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script>
+        let currentTab = 'blocks';
+        let refreshInterval;
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            currentTab = tabName;
+            
+            loadTabData(tabName);
+        }
+
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'blocks':
+                    loadBlocks();
+                    break;
+                case 'miners':
+                    loadMiners();
+                    break;
+                case 'agents':
+                    loadAgents();
+                    break;
+            }
+        }
+
+        function loadStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('blockHeight').textContent = data.blockHeight || '0';
+                    document.getElementById('activeMiners').textContent = data.activeMiners || '0';
+                    document.getElementById('activeAgents').textContent = data.activeAgents || '0';
+                    document.getElementById('hashRate').textContent = (data.hashRate || '0') + ' H/s';
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        function loadBlocks() {
+            fetch('/api/blocks')
+                .then(response => response.json())
+                .then(blocks => {
+                    const blocksList = document.getElementById('blocksList');
+                    if (blocks.length === 0) {
+                        blocksList.innerHTML = '<div class="loading"><p>No blocks found</p></div>';
+                        return;
+                    }
+                    
+                    blocksList.innerHTML = blocks.map(block => `
+                        <div class="block-item">
+                            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                                <h4>Block #${block.height}</h4>
+                                <span style="color: #999; font-size: 0.9rem;">${new Date(block.timestamp).toLocaleString()}</span>
+                            </div>
+                            <div class="block-hash">Hash: ${block.hash}</div>
+                            <div style="margin-top: 10px; display: flex; gap: 20px;">
+                                <span><i class="fas fa-exchange-alt"></i> ${block.transactions} tx</span>
+                                <span><i class="fas fa-weight"></i> ${block.size} bytes</span>
+                                <span><i class="fas fa-user"></i> ${block.miner}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading blocks:', error);
+                    document.getElementById('blocksList').innerHTML = '<div class="loading"><p>Error loading blocks</p></div>';
+                });
+        }
+
+        function loadMiners() {
+            fetch('/api/miners')
+                .then(response => response.json())
+                .then(miners => {
+                    const minersTable = document.getElementById('minersTable');
+                    if (miners.length === 0) {
+                        minersTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No miners found</td></tr>';
+                        return;
+                    }
+                    
+                    minersTable.innerHTML = miners.map(miner => `
+                        <tr>
+                            <td>${miner.id}</td>
+                            <td><span class="status-badge ${miner.status === 'online' ? 'status-online' : miner.status === 'mining' ? 'status-mining' : 'status-offline'}">${miner.status}</span></td>
+                            <td>${miner.hashRate} H/s</td>
+                            <td>${miner.blocksMined}</td>
+                            <td>${new Date(miner.lastActivity).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading miners:', error);
+                    document.getElementById('minersTable').innerHTML = '<tr><td colspan="5" style="text-align: center;">Error loading miners</td></tr>';
+                });
+        }
+
+        function loadAgents() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(agents => {
+                    const agentsTable = document.getElementById('agentsTable');
+                    if (agents.length === 0) {
+                        agentsTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No agents found</td></tr>';
+                        return;
+                    }
+                    
+                    agentsTable.innerHTML = agents.map(agent => `
+                        <tr>
+                            <td>${agent.id}</td>
+                            <td><span class="status-badge ${agent.status === 'active' ? 'status-online' : 'status-offline'}">${agent.status}</span></td>
+                            <td>${agent.type}</td>
+                            <td>${agent.transactions}</td>
+                            <td>${new Date(agent.lastSeen).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error loading agents:', error);
+                    document.getElementById('agentsTable').innerHTML = '<tr><td colspan="5" style="text-align: center;">Error loading agents</td></tr>';
+                });
+        }
+
+        function refreshData() {
+            const button = document.querySelector('.refresh-button i');
+            button.style.animation = 'spin 1s linear infinite';
+            
+            loadStats();
+            loadTabData(currentTab);
+            
+            setTimeout(() => {
+                button.style.animation = '';
+            }, 1000);
+        }
+
+        function initializeAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadStats();
+                loadTabData(currentTab);
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        // Search functionality
+        document.getElementById('blockSearch').addEventListener('input', function(e) {
+            // Implement block search filter
+        });
+
+        document.getElementById('minerSearch').addEventListener('input', function(e) {
+            // Implement miner search filter
+        });
+
+        document.getElementById('agentSearch').addEventListener('input', function(e) {
+            // Implement agent search filter
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadBlocks();
+            initializeAutoRefresh();
+        });
+
+        // Cleanup interval on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
