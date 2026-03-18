@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Hardware Museum 3D</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading Museum...</p>
+    </div>
+
+    <canvas id="museum-canvas"></canvas>
+
+    <div id="ui-overlay">
+        <header class="museum-header">
+            <h1>Vintage Hardware Museum</h1>
+            <div class="controls">
+                <button id="toggle-info" class="ui-button">Info</button>
+                <button id="reset-view" class="ui-button">Reset View</button>
+                <button id="toggle-sound" class="ui-button">Sound</button>
+            </div>
+        </header>
+
+        <div id="info-panel" class="info-panel hidden">
+            <div class="info-content">
+                <h2>Welcome to the Vintage Hardware Museum</h2>
+                <p>Explore classic computing hardware from the past decades.</p>
+                <h3>Controls:</h3>
+                <ul>
+                    <li><strong>Mouse:</strong> Look around</li>
+                    <li><strong>WASD:</strong> Move forward/backward/left/right</li>
+                    <li><strong>Click:</strong> Interact with exhibits</li>
+                    <li><strong>E:</strong> Examine objects up close</li>
+                </ul>
+                <button id="close-info" class="ui-button">Close</button>
+            </div>
+        </div>
+
+        <div id="exhibit-info" class="exhibit-info hidden">
+            <div class="exhibit-content">
+                <h3 id="exhibit-title"></h3>
+                <p id="exhibit-description"></p>
+                <div id="exhibit-specs"></div>
+                <button id="close-exhibit" class="ui-button">Close</button>
+            </div>
+        </div>
+
+        <div id="minimap" class="minimap">
+            <canvas id="minimap-canvas" width="200" height="150"></canvas>
+        </div>
+
+        <div class="navigation-hints">
+            <div class="hint" id="movement-hint">
+                <span class="key">WASD</span>
+                <span class="description">Move</span>
+            </div>
+            <div class="hint" id="mouse-hint">
+                <span class="key">Mouse</span>
+                <span class="description">Look</span>
+            </div>
+            <div class="hint" id="interact-hint">
+                <span class="key">Click</span>
+                <span class="description">Interact</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="crosshair"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <script src="js/museum.js"></script>
+    <script src="js/exhibits.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
