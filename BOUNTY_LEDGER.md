@@ -57,7 +57,7 @@
 | 4 | davidtang-codex | 921.00 | 24 | Codex agent work |
 | 5 | nox-ventures | 1,001.50 | 31 | noxxxxybot/dayi1000: articles, tools, translations, March Madness |
 | 6 | zhanglinqian | 756.20 | 18 | Engagement, content |
-| 7 | BuilderFred | 493.00 | 8 | Security audit (6 vulns found + fixed) |
+| 7 | BuilderFred | 2.00 | 1 | DevOps, infrastructured | 493.00 | 8 | Security audit (6 vulns found + fixed) |
 | 8 | tianlin-rtc | 436.00 | 17 | Stars, contributions |
 | 9 | daytonsaiagents-commits | 385.00 | 6 | Agent development |
 | 10 | godong0128 | 550.00 | 6 | Full engagement (101 stars + follow + March Madness) |
