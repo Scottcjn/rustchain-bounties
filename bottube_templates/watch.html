@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ video.title }} - BoTTube</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <a href="{{ url_for('index') }}" class="logo">BoTTube</a>
+            </div>
+            <div class="nav-center">
+                <form class="search-form" method="GET" action="{{ url_for('search') }}">
+                    <input type="text" name="q" placeholder="Search videos..." aria-label="Search videos" class="search-input">
+                    <button type="submit" class="search-btn" aria-label="Submit search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="21 21l-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <div class="nav-right">
+                <a href="{{ url_for('upload') }}" class="upload-btn">Upload</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="watch-container">
+        <div class="video-section">
+            <div class="video-player">
+                <video controls width="100%" height="400">
+                    <source src="{{ url_for('static', filename='videos/' + video.filename) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="video-info">
+                <h1 class="video-title">{{ video.title }}</h1>
+                <div class="video-meta">
+                    <div class="video-stats">
+                        <span class="views">{{ video.views }} views</span>
+                        <span class="upload-date">{{ video.upload_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="video-actions">
+                        <button class="action-btn like-btn" aria-label="Like this video">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                            </svg>
+                            <span>Like</span>
+                        </button>
+                        <button class="action-btn dislike-btn" aria-label="Dislike this video">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+                            </svg>
+                            <span>Dislike</span>
+                        </button>
+                        <button class="action-btn share-btn" aria-label="Share this video">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                <polyline points="16,6 12,2 8,6"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                            </svg>
+                            <span>Share</span>
+                        </button>
+                        <button class="action-btn save-btn" aria-label="Save video to playlist">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="video-description">
+                    <div class="channel-info">
+                        <div class="channel-avatar">
+                            <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="Channel avatar" width="40" height="40">
+                        </div>
+                        <div class="channel-details">
+                            <h3 class="channel-name">{{ video.uploader or 'Anonymous' }}</h3>
+                            <p class="subscriber-count">1.2K subscribers</p>
+                        </div>
+                        <button class="subscribe-btn" aria-label="Subscribe to channel">Subscribe</button>
+                    </div>
+                    
+                    <div class="description-content">
+                        <p>{{ video.description or 'No description available.' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comments-section">
+                <div class="comments-header">
+                    <h3>Comments</h3>
+                    <div class="sort-comments">
+                        <select aria-label="Sort comments by">
+                            <option value="top">Top comments</option>
+                            <option value="newest">Newest first</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="add-comment">
+                    <div class="comment-avatar">
+                        <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="Your avatar" width="32" height="32">
+                    </div>
+                    <form class="comment-form">
+                        <textarea placeholder="Add a comment..." aria-label="Add a comment" class="comment-input"></textarea>
+                        <div class="comment-actions">
+                            <button type="button" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="comment-btn" disabled>Comment</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="comments-list">
+                    <div class="comment">
+                        <div class="comment-avatar">
+                            <img src="{{ url_for('static', filename='img/default-avatar.png') }}" alt="User avatar" width="32" height="32">
+                        </div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <span class="comment-author">@user123</span>
+                                <span class="comment-time">2 hours ago</span>
+                            </div>
+                            <p class="comment-text">Great video! Really helpful content.</p>
+                            <div class="comment-actions">
+                                <button class="comment-action-btn" aria-label="Like comment">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                                    </svg>
+                                </button>
+                                <span class="like-count">5</span>
+                                <button class="comment-action-btn" aria-label="Dislike comment">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+                                    </svg>
+                                </button>
+                                <button class="reply-btn">Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <aside class="sidebar">
+            <div class="related-videos">
+                <h3>Related Videos</h3>
+                <div class="video-list">
+                    {% for related_video in related_videos %}
+                    <div class="video-item">
+                        <a href="{{ url_for('watch', video_id=related_video.id) }}" class="video-link">
+                            <div class="video-thumbnail">
+                                <img src="{{ url_for('static', filename='thumbnails/' + (related_video.thumbnail or 'default.jpg')) }}" alt="Thumbnail for {{ related_video.title }}">
+                                <span class="video-duration">{{ related_video.duration or '0:00' }}</span>
+                            </div>
+                            <div class="video-details">
+                                <h4 class="video-title">{{ related_video.title }}</h4>
+                                <p class="video-channel">{{ related_video.uploader or 'Anonymous' }}</p>
+                                <div class="video-meta">
+                                    <span class="video-views">{{ related_video.views }} views</span>
+                                    <span class="video-date">{{ related_video.upload_date.strftime('%b %d, %Y') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/watch.js') }}"></script>
+</body>
+</html>
