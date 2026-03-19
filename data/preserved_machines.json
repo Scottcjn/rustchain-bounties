@@ -1,0 +1,40 @@
+{
+  "machines": [
+    {
+      "id": "001",
+      "name": "IBM ThinkPad T42",
+      "year": 2004,
+      "architecture": "x86",
+      "power_draw": 45,
+      "purpose": "Legacy software testing",
+      "miner_id": "retro_dev_01",
+      "date_added": "2024-01-15",
+      "status": "active"
+    },
+    {
+      "id": "002", 
+      "name": "Power Mac G4 Cube",
+      "year": 2000,
+      "architecture": "PowerPC",
+      "power_draw": 85,
+      "purpose": "Classic Mac OS development",
+      "miner_id": "mac_collector_42",
+      "date_added": "2024-01-18",
+      "status": "active"
+    },
+    {
+      "id": "003",
+      "name": "Dell OptiPlex GX280",
+      "year": 2005,
+      "architecture": "x86",
+      "power_draw": 120,
+      "purpose": "Windows XP preservation",
+      "miner_id": "vintage_pc_enthusiast",
+      "date_added": "2024-01-22",
+      "status": "maintenance"
+    }
+  ],
+  "total_machines": 3,
+  "total_power_saved": 250,
+  "last_updated": "2024-01-22T10:30:00Z"
+}
