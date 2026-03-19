@@ -1,0 +1,51 @@
+{
+  "machines": [
+    {
+      "id": 1,
+      "name": "ThinkPad T420",
+      "model": "Lenovo ThinkPad T420",
+      "year": 2011,
+      "architecture": "x86_64",
+      "power": "65W",
+      "purpose": "Development workstation",
+      "miner_id": "dev001",
+      "photo": null
+    },
+    {
+      "id": 2,
+      "name": "MacBook Pro 2013",
+      "model": "Apple MacBook Pro 13-inch Mid 2013",
+      "year": 2013,
+      "architecture": "x86_64",
+      "power": "60W",
+      "purpose": "Design and multimedia",
+      "miner_id": "design002",
+      "photo": "macbook_2013.jpg"
+    },
+    {
+      "id": 3,
+      "name": "Dell OptiPlex 9020",
+      "model": "Dell OptiPlex 9020 SFF",
+      "year": 2014,
+      "architecture": "x86_64",
+      "power": "240W",
+      "purpose": "Home server",
+      "miner_id": "server003",
+      "photo": null
+    }
+  ],
+  "schema": {
+    "version": "1.0",
+    "fields": {
+      "id": "number (unique identifier)",
+      "name": "string (display name)",
+      "model": "string (full model name)",
+      "year": "number (manufacturing year)",
+      "architecture": "string (CPU architecture)",
+      "power": "string (power consumption)",
+      "purpose": "string (current use case)",
+      "miner_id": "string (owner identifier)",
+      "photo": "string|null (photo filename or null)"
+    }
+  }
+}
