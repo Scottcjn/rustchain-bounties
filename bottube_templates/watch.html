@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ video.title }} - BoTTube</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+        }
+        
+        .video-info {
+            padding: 20px 0;
+        }
+        
+        .video-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .video-meta {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .description {
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        
+        .keyboard-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .keyboard-overlay.show {
+            opacity: 1;
+        }
+        
+        .keyboard-shortcuts {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            max-width: 300px;
+            display: none;
+        }
+        
+        .shortcuts-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 999;
+        }
+        
+        .shortcuts-toggle:hover {
+            background: #0056b3;
+        }
+        
+        .fullscreen-container {
+            position: relative;
+        }
+        
+        .fullscreen-container:fullscreen .video-player,
+        .fullscreen-container:-webkit-full-screen .video-player,
+        .fullscreen-container:-moz-full-screen .video-player {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fab fa-youtube"></i> BoTTube
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="fullscreen-container">
+                    <div class="video-container">
+                        <video id="videoPlayer" class="video-player" controls>
+                            <source src="{{ video.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+                
+                <div class="video-info">
+                    <h1 class="video-title">{{ video.title }}</h1>
+                    <div class="video-meta">
+                        <span>{{ video.views }} views</span>
+                        <span class="ms-3">{{ video.upload_date }}</span>
+                        {% if video.duration %}
+                        <span class="ms-3">{{ video.duration }}</span>
+                        {% endif %}
+                    </div>
+                    {% if video.description %}
+                    <div class="description">{{ video.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <h5>Related Videos</h5>
+                {% if related_videos %}
+                {% for related in related_videos %}
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            <img src="{{ related.thumbnail }}" class="img-fluid rounded-start" alt="{{ related.title }}">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body p-2">
+                                <h6 class="card-title">
+                                    <a href="/watch?v={{ related.id }}" class="text-decoration-none">
+                                        {{ related.title }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">{{ related.views }} views</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">No related videos found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Keyboard Overlay -->
+    <div id="keyboardOverlay" class="keyboard-overlay"></div>
+    
+    <!-- Shortcuts Toggle Button -->
+    <button id="shortcutsToggle" class="shortcuts-toggle" title="Keyboard Shortcuts">
+        <i class="fas fa-keyboard"></i>
+    </button>
+    
+    <!-- Keyboard Shortcuts Panel -->
+    <div id="keyboardShortcuts" class="keyboard-shortcuts">
+        <h6>Keyboard Shortcuts</h6>
+        <div><strong>Space/K:</strong> Play/Pause</div>
+        <div><strong>J:</strong> Seek backward 10s</div>
+        <div><strong>L:</strong> Seek forward 10s</div>
+        <div><strong>←/→:</strong> Seek ±5s</div>
+        <div><strong>↑/↓:</strong> Volume ±5%</div>
+        <div><strong>M:</strong> Mute/Unmute</div>
+        <div><strong>F:</strong> Fullscreen</div>
+        <div><strong>0-9:</strong> Jump to %</div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class VideoKeyboardController {
+            constructor() {
+                this.video = document.getElementById('videoPlayer');
+                this.overlay = document.getElementById('keyboardOverlay');
+                this.shortcutsPanel = document.getElementById('keyboardShortcuts');
+                this.shortcutsToggle = document.getElementById('shortcutsToggle');
+                this.fullscreenContainer = document.querySelector('.fullscreen-container');
+                
+                this.overlayTimeout = null;
+                this.volumeStep = 0.05;
+                this.seekStep = 5;
+                this.longSeekStep = 10;
+                
+                this.init();
+            }
+            
+            init() {
+                document.addEventListener('keydown', this.handleKeydown.bind(this));
+                this.shortcutsToggle.addEventListener('click', this.toggleShortcuts.bind(this));
+                
+                // Hide shortcuts panel when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.shortcutsPanel.contains(e.target) && !this.shortcutsToggle.contains(e.target)) {
+                        this.shortcutsPanel.style.display = 'none';
+                    }
+                });
+            }
+            
+            isInputFocused() {
+                const activeElement = document.activeElement;
+                const inputTypes = ['input', 'textarea', 'select'];
+                return inputTypes.includes(activeElement.tagName.toLowerCase()) ||
+                       activeElement.contentEditable === 'true';
+            }
+            
+            handleKeydown(e) {
+                // Ignore if user is typing in an input field
+                if (this.isInputFocused()) {
+                    return;
+                }
+                
+                const key = e.key.toLowerCase();
+                let handled = true;
+                
+                switch(key) {
+                    case ' ':
+                    case 'k':
+                        e.preventDefault();
+                        this.togglePlayPause();
+                        break;
+                        
+                    case 'j':
+                        e.preventDefault();
+                        this.seekBackward();
+                        break;
+                        
+                    case 'l':
+                        e.preventDefault();
+                        this.seekForward();
+                        break;
+                        
+                    case 'arrowleft':
+                        e.preventDefault();
+                        this.seekBackwardShort();
+                        break;
+                        
+                    case 'arrowright':
+                        e.preventDefault();
+                        this.seekForwardShort();
+                        break;
+                        
+                    case 'arrowup':
+                        e.preventDefault();
+                        this.volumeUp();
+                        break;
+                        
+                    case 'arrowdown':
+                        e.preventDefault();
+                        this.volumeDown();
+                        break;
+                        
+                    case 'm':
+                        e.preventDefault();
+                        this.toggleMute();
+                        break;
+                        
+                    case 'f':
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                        break;
+                        
+                    default:
+                        // Handle number keys (0-9) for jumping to percentage
+                        if (/^[0-9]$/.test(key)) {
+                            e.preventDefault();
+                            this.jumpToPercentage(parseInt(key));
+                        } else {
+                            handled = false;
+                        }
+                }
+                
+                if (handled) {
+                    e.stopPropagation();
+                }
+            }
+            
+            togglePlayPause() {
+                if (this.video.paused) {
+                    this.video.play();
+                    this.showOverlay('▶ Playing');
+                } else {
+                    this.video.pause();
+                    this.showOverlay('⏸ Paused');
+                }
+            }
+            
+            seekBackward() {
+                this.video.currentTime = Math.max(0, this.video.currentTime - this.longSeekStep);
+                this.showOverlay(`⏪ -${this.longSeekStep}s`);
+            }
+            
+            seekForward() {
+                this.video.currentTime = Math.min(this.video.duration, this.video.currentTime + this.longSeekStep);
+                this.showOverlay(`⏩ +${this.longSeekStep}s`);
+            }
+            
+            seekBackwardShort() {
+                this.video.currentTime = Math.max(0, this.video.currentTime - this.seekStep);
+                this.showOverlay(`⏪ -${this.seekStep}s`);
+            }
+            
+            seekForwardShort() {
+                this.video.currentTime = Math.min(this.video.duration, this.video.currentTime + this.seekStep);
+                this.showOverlay(`⏩ +${this.seekStep}s`);
+            }
+            
+            volumeUp() {
+                const newVolume = Math.min(1, this.video.volume + this.volumeStep);
+                this.video.volume = newVolume;
+                this.showOverlay(`🔊 ${Math.round(newVolume * 100)}%`);
+            }
+            
+            volumeDown() {
+                const newVolume = Math.max(0, this.video.volume - this.volumeStep);
+                this.video.volume = newVolume;
+                this.showOverlay(`🔉 ${Math.round(newVolume * 100)}%`);
+            }
+            
+            toggleMute() {
+                this.video.muted = !this.video.muted;
+                this.showOverlay(this.video.muted ? '🔇 Muted' : '🔊 Unmuted');
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    this.fullscreenContainer.requestFullscreen().then(() => {
+                        this.showOverlay('⛶ Fullscreen');
+                    }).catch(() => {
+                        this.showOverlay('❌ Fullscreen not available');
+                    });
+                } else {
+                    document.exitFullscreen().then(() => {
+                        this.showOverlay('⛶ Exit Fullscreen');
+                    });
+                }
+            }
+            
+            jumpToPercentage(percentage) {
+                const targetTime = (this.video.duration * percentage) / 10;
+                this.video.currentTime = targetTime;
+                this.showOverlay(`⏭ ${percentage * 10}%`);
+            }
+            
+            showOverlay(text) {
+                this.overlay.textContent = text;
+                this.overlay.classList.add('show');
+                
+                if (this.overlayTimeout) {
+                    clearTimeout(this.overlayTimeout);
+                }
+                
+                this.overlayTimeout = setTimeout(() => {
+                    this.overlay.classList.remove('show');
+                }, 1000);
+            }
+            
+            toggleShortcuts() {
+                const isVisible = this.shortcutsPanel.style.display === 'block';
+                this.shortcutsPanel.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+        
+        // Initialize keyboard controller when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VideoKeyboardController();
+        });
+    </script>
+</body>
+</html>
