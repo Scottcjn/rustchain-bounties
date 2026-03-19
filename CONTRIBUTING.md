@@ -49,8 +49,8 @@ Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/Rustchain.git
-cd Rustchain
+git clone https://github.com/YOUR_USERNAME/rustchain-bounties.git
+cd rustchain-bounties
 
 # Install dependencies
 npm install  # or cargo build (for Rust components)
