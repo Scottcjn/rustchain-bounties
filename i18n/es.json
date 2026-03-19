@@ -1,0 +1,59 @@
+{
+  "errors": {
+    "network": {
+      "connection_failed": "Error de conexión: No se pudo conectar al servidor",
+      "timeout": "Tiempo de espera agotado: La solicitud tardó demasiado tiempo",
+      "server_unavailable": "Servidor no disponible: Inténtelo de nuevo más tarde",
+      "invalid_response": "Respuesta del servidor inválida",
+      "network_unreachable": "Red no accesible: Verifique su conexión a internet",
+      "dns_resolution_failed": "Error de resolución DNS: No se pudo resolver el nombre del servidor"
+    },
+    "validation": {
+      "invalid_address": "Dirección de billetera inválida",
+      "invalid_amount": "Cantidad inválida: Debe ser un número positivo",
+      "insufficient_balance": "Saldo insuficiente para completar la transacción",
+      "invalid_private_key": "Clave privada inválida",
+      "invalid_public_key": "Clave pública inválida",
+      "invalid_signature": "Firma digital inválida",
+      "transaction_too_large": "Transacción demasiado grande",
+      "invalid_fee": "Tarifa de transacción inválida"
+    },
+    "mining": {
+      "mining_failed": "Error en la minería: No se pudo minar el bloque",
+      "invalid_difficulty": "Dificultad de minería inválida",
+      "mining_stopped": "La minería se ha detenido inesperadamente",
+      "hardware_error": "Error de hardware detectado durante la minería",
+      "temperature_warning": "Advertencia: Temperatura del equipo muy alta",
+      "power_insufficient": "Energía insuficiente para continuar minando"
+    },
+    "wallet": {
+      "wallet_locked": "Billetera bloqueada: Ingrese su contraseña",
+      "incorrect_password": "Contraseña incorrecta",
+      "wallet_not_found": "Archivo de billetera no encontrado",
+      "wallet_corrupted": "Archivo de billetera corrupto",
+      "backup_failed": "Error al crear respaldo de la billetera",
+      "restore_failed": "Error al restaurar la billetera desde el respaldo"
+    },
+    "general": {
+      "unknown_error": "Error desconocido",
+      "operation_cancelled": "Operación cancelada por el usuario",
+      "permission_denied": "Permiso denegado",
+      "file_not_found": "Archivo no encontrado",
+      "disk_full": "Espacio en disco insuficiente"
+    }
+  },
+  "messages": {
+    "success": {
+      "transaction_sent": "Transacción enviada exitosamente",
+      "wallet_created": "Billetera creada correctamente",
+      "backup_created": "Respaldo creado exitosamente",
+      "mining_started": "Minería iniciada correctamente"
+    },
+    "info": {
+      "syncing_blockchain": "Sincronizando cadena de bloques...",
+      "connecting_peers": "Conectando con otros nodos...",
+      "updating_balance": "Actualizando saldo...",
+      "preparing_transaction": "Preparando transacción..."
+    }
+  }
+}
