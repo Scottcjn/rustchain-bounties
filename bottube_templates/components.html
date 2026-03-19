@@ -1,0 +1,125 @@
+<div class="video-card" role="article">
+    <div class="video-thumbnail">
+        <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy">
+        <span class="duration">{{ video.duration }}</span>
+    </div>
+    <div class="video-info">
+        <h3 class="video-title">
+            <a href="/video/{{ video.id }}">{{ video.title }}</a>
+        </h3>
+        <p class="video-description">{{ video.description }}</p>
+        <div class="video-meta">
+            <span class="channel-name">{{ video.channel }}</span>
+            <span class="view-count">{{ video.views }} views</span>
+            <span class="upload-date">{{ video.date }}</span>
+        </div>
+        <div class="video-actions">
+            <button class="subscribe-btn" aria-label="Subscribe to {{ video.channel }}">
+                Subscribe
+            </button>
+            <button class="tip-btn" aria-label="Send tip to {{ video.channel }}">
+                Tip
+            </button>
+            <div class="vote-buttons">
+                <button class="vote-up" aria-label="Vote up this video">
+                    <span class="vote-count">{{ video.upvotes }}</span>
+                    ▲
+                </button>
+                <button class="vote-down" aria-label="Vote down this video">
+                    <span class="vote-count">{{ video.downvotes }}</span>
+                    ▼
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="channel-card" role="article">
+    <div class="channel-avatar">
+        <img src="{{ channel.avatar }}" alt="{{ channel.name }} avatar">
+    </div>
+    <div class="channel-info">
+        <h3 class="channel-name">
+            <a href="/channel/{{ channel.id }}">{{ channel.name }}</a>
+        </h3>
+        <p class="channel-description">{{ channel.description }}</p>
+        <div class="channel-stats">
+            <span class="subscriber-count">{{ channel.subscribers }} subscribers</span>
+            <span class="video-count">{{ channel.video_count }} videos</span>
+        </div>
+        <button class="subscribe-btn" aria-label="Subscribe to {{ channel.name }}">
+            Subscribe
+        </button>
+    </div>
+</div>
+
+<div class="comment-component" role="region" aria-label="Comments section">
+    <div class="comment-form">
+        <textarea placeholder="Add a comment..." aria-label="Write a comment"></textarea>
+        <button type="submit" aria-label="Post comment">Post</button>
+    </div>
+    <div class="comments-list">
+        {% for comment in comments %}
+        <div class="comment" role="article">
+            <div class="comment-avatar">
+                <img src="{{ comment.user.avatar }}" alt="{{ comment.user.name }} avatar">
+            </div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-author">{{ comment.user.name }}</span>
+                    <span class="comment-date">{{ comment.date }}</span>
+                </div>
+                <p class="comment-text">{{ comment.text }}</p>
+                <div class="comment-actions">
+                    <button class="vote-up" aria-label="Vote up comment by {{ comment.user.name }}">
+                        ▲ {{ comment.upvotes }}
+                    </button>
+                    <button class="vote-down" aria-label="Vote down comment by {{ comment.user.name }}">
+                        ▼ {{ comment.downvotes }}
+                    </button>
+                    <button class="reply-btn" aria-label="Reply to {{ comment.user.name }}">
+                        Reply
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="navigation-component" role="navigation" aria-label="Main navigation">
+    <ul class="nav-list">
+        <li><a href="/" aria-label="Go to home page">Home</a></li>
+        <li><a href="/trending" aria-label="View trending videos">Trending</a></li>
+        <li><a href="/subscriptions" aria-label="View your subscriptions">Subscriptions</a></li>
+        <li><a href="/library" aria-label="View your library">Library</a></li>
+        <li><a href="/history" aria-label="View watch history">History</a></li>
+    </ul>
+</div>
+
+<div class="search-component" role="search">
+    <form class="search-form">
+        <input type="search" placeholder="Search videos..." aria-label="Search for videos">
+        <button type="submit" aria-label="Search">
+            🔍
+        </button>
+    </form>
+</div>
+
+<div class="video-player-controls" role="region" aria-label="Video player controls">
+    <button class="play-pause" aria-label="Play or pause video">
+        ⏯️
+    </button>
+    <div class="progress-bar" role="slider" aria-label="Video progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-fill"></div>
+    </div>
+    <span class="time-display" aria-label="Current time and duration">
+        <span class="current-time">0:00</span> / <span class="total-time">0:00</span>
+    </span>
+    <button class="volume-btn" aria-label="Mute or unmute video">
+        🔊
+    </button>
+    <button class="fullscreen-btn" aria-label="Enter fullscreen mode">
+        ⛶
+    </button>
+</div>
