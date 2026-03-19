@@ -16,11 +16,11 @@ Thank you for your interest in contributing to Rustchain! Every contribution hel
 All merged contributions earn RTC tokens! See the bounty tiers:
 
 | Tier | Reward | Examples |
-| ---- | ------ | -------- |
-| Micro | 1-10 RTC | Typo fix, small docs, simple test |
-| Standard | 20-50 RTC | Feature, refactor, new endpoint |
-| Major | 75-100 RTC | Security fix, consensus improvement |
-| Critical | 100-150 RTC | Vulnerability patch, protocol upgrade |
+|------|--------|----------|
+| Micro | 1-10 RTC | Typo fixes, small documentation updates, simple tests |
+| Standard | 20-50 RTC | New features, refactoring, new API endpoints |
+| Major | 75-100 RTC | Security fixes, consensus improvements |
+| Critical | 100-150 RTC | Vulnerability patches, protocol upgrades |
 
 Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to find tasks with specific RTC rewards.
 
@@ -28,114 +28,104 @@ Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to
 
 ### Code
 - Bug fixes and feature implementations
-- Performance improvements
+- Performance optimizations
 - Test coverage improvements
 - CI/CD pipeline enhancements
 
 ### Documentation
 - README improvements
-- API documentation
+- API documentation updates
 - Tutorials and guides
 - Code comments and docstrings
 - Translations (Spanish, Chinese, Japanese, etc.)
 
 ### Community
-- Bug reports with reproduction steps
-- Feature requests with use cases
-- Code reviews on open PRs
+- Bug reports with clear reproduction steps
+- Feature requests with detailed use cases
+- Code reviews on open pull requests
 - Helping others in [Discord](https://discord.gg/VqVVS2CW9Q)
 
 ## 🔧 Development Setup
 
+### Prerequisites
+- Rust 1.70+ installed via [rustup](https://rustup.rs/)
+- Git version control
+- A code editor (VS Code with rust-analyzer recommended)
+
+### Getting Started
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/Rustchain.git
-cd Rustchain
+git clone https://github.com/YOUR_USERNAME/rustchain.git
+cd rustchain
 
-# Install dependencies
-npm install  # or cargo build (for Rust components)
+# Build the project
+cargo build
 
 # Run tests
-npm test     # or cargo test
+cargo test
+
+# Run with logging
+RUST_LOG=debug cargo run
 ```
 
-## 📝 Commit Message Convention
+## 📝 Contribution Guidelines
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+### Code Style
+- Follow Rust naming conventions
+- Use `cargo fmt` to format your code
+- Run `cargo clippy` to catch common mistakes
+- Add tests for new functionality
 
+### Commit Messages
+Use clear, descriptive commit messages:
 ```
-<type>(<scope>): <description>
-
-[optional body]
-[optional footer]
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks (CI, dependencies)
-- `security`: Security-related changes
-
-**Examples:**
-```
-feat(bridge): add wRTC balance verification endpoint
-fix(consensus): correct PoA difficulty adjustment calculation
-docs(readme): add POWER8 hardware requirements section
-test(api): add integration tests for mining endpoints
+feat: add transaction validation endpoint
+fix: resolve memory leak in block processing
+docs: update API documentation for /blocks endpoint
 ```
 
-## 🔍 Pull Request Guidelines
+### Pull Request Process
+1. Ensure all tests pass locally
+2. Update documentation for any API changes
+3. Fill out the pull request template completely
+4. Reference any related issues or bounties
+5. Be responsive to code review feedback
 
-### Before Submitting
-- [ ] Code follows the project's style guidelines
-- [ ] Self-review of your changes completed
-- [ ] Tests pass locally
-- [ ] New code includes appropriate tests
-- [ ] Documentation updated if needed
+## 🐛 Reporting Issues
 
-### PR Description Template
-```markdown
-## What does this PR do?
-Brief description of changes.
+When reporting bugs, please include:
+- **Environment details** (OS, Rust version, etc.)
+- **Steps to reproduce** the issue
+- **Expected vs actual behavior**
+- **Relevant logs or error messages**
 
-## Why?
-Motivation and context.
+## 🎯 Finding Issues to Work On
 
-## How to test?
-Steps to verify the changes work.
+- Look for issues labeled `good first issue` for beginners
+- Check `help wanted` labels for priority tasks
+- Browse [bounty issues](https://github.com/Scottcjn/rustchain-bounties/issues) for RTC rewards
+- Join our [Discord](https://discord.gg/VqVVS2CW9Q) to discuss potential contributions
 
-## Related Issues
-Closes #<issue_number>
-```
+## 🔐 Security Considerations
 
-### Review Process
-1. A maintainer will review your PR within 48-72 hours
-2. Address any requested changes
-3. Once approved, a maintainer will merge your PR
-4. RTC tokens will be distributed after merge
+- **Never commit secrets** or private keys
+- Report security vulnerabilities privately via Discord DM
+- Follow secure coding practices
+- Test edge cases and error conditions
 
-## 🎯 Good First Issues
+## 📞 Getting Help
 
-New to Rustchain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
+Need assistance? Reach out:
+- **Discord**: [Join our community](https://discord.gg/VqVVS2CW9Q)
+- **Issues**: Open a GitHub issue for bugs or questions
+- **Discussions**: Use GitHub Discussions for general topics
 
-## ⚖️ Code of Conduct
+## 📜 Code of Conduct
 
-By participating in this project, you agree to maintain a respectful, inclusive, and harassment-free environment. Be kind, be constructive, and help each other grow.
+We are committed to providing a welcoming and inclusive environment. Please:
+- Be respectful and constructive in all interactions
+- Focus on technical merit in discussions
+- Help create a positive community experience
+- Report any inappropriate behavior to the maintainers
 
-## 📬 Getting Help
-
-- **Discord**: [Join our server](https://discord.gg/VqVVS2CW9Q)
-- **GitHub Issues**: For bugs and feature requests
-- **Discussions**: For questions and ideas
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the same license as the project (Apache 2.0).
-
----
-
-**Happy contributing! Every PR brings Rustchain closer to its vision.** 🦀⛓️
+Thank you for contributing to Rustchain! 🚀
