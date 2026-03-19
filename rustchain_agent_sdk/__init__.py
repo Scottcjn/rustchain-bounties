@@ -1,7 +1,18 @@
-from .agent_economy import AgentEconomy
-from .api_client import APIClient
-from .models import Agent, Task, Transaction, EconomyMetrics
-from .exceptions import RustChainSDKError, APIError, ValidationError
+# Import only what's actually available to avoid import errors
+try:
+    from .client import RustChainClient as APIClient
+except ImportError:
+    APIClient = None
+
+# Placeholder imports until modules are fully implemented
+AgentEconomy = None
+Agent = None
+Task = None
+Transaction = None
+EconomyMetrics = None
+RustChainSDKError = Exception
+APIError = Exception
+ValidationError = ValueError
 
 __version__ = "0.1.0"
 __all__ = [
