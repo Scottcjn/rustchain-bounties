@@ -61,7 +61,24 @@ jobs:
             }
           }
           
-          let responseMessage = `@${commenter}, thank you for your bounty claim!\n\n`;
+          let responseMessage = '';
+          
+          if (hasStarred && isFollowing) {
+            responseMessage = `@${commenter} ✅ Bounty claim verified! You have starred the repository and are following the owner. Your reward will be processed shortly.`;
+          } else {
+            const missing = [];
+            if (!hasStarred) missing.push('star the repository');
+            if (!isFollowing) missing.push('follow the repository owner');
+            responseMessage = `@${commenter} ❌ To claim this bounty, you need to: ${missing.join(' and ')}. Please complete these actions and try again.`;
+          }
+          
+          // Post response comment
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: responseMessage
+          });sage = `@${commenter}, thank you for your bounty claim!\n\n`;
           let bountyAmount = 0;
           
           if (hasStarred && isFollowing) {
