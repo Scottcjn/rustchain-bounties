@@ -47,95 +47,258 @@ Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to
 
 ## 🔧 Development Setup
 
+### Prerequisites
+- **Rust** (latest stable) - Install via [rustup](https://rustup.rs/)
+- **Git** for version control
+- **Node.js** (16+) for frontend components (if applicable)
+- **Docker** (optional, for containerized development)
+
+### Local Environment Setup
+
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/Rustchain.git
-cd Rustchain
+git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
+cd REPO_NAME
 
-# Install dependencies
-npm install  # or cargo build (for Rust components)
+# Install Rust dependencies
+cargo build
 
-# Run tests
-npm test     # or cargo test
+# Run tests to ensure everything works
+cargo test
+
+# Start development server (if applicable)
+cargo run
+
+# For frontend development (if applicable)
+npm install
+npm run dev
 ```
 
-## 📝 Commit Message Convention
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-[optional footer]
+### Environment Variables
+Create a `.env` file in the project root with:
+```env
+# Example environment variables
+RUST_LOG=debug
+DATABASE_URL=sqlite://data.db
+RPC_PORT=8545
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks (CI, dependencies)
-- `security`: Security-related changes
+## 🎯 Bounty-Specific Contribution Process
 
-**Examples:**
-```
-feat(bridge): add wRTC balance verification endpoint
-fix(consensus): correct PoA difficulty adjustment calculation
-docs(readme): add POWER8 hardware requirements section
-test(api): add integration tests for mining endpoints
-```
+### Finding Bounties
+1. Check [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues)
+2. Look for issues labeled with `bounty:` tags
+3. Read the full issue description for requirements
+4. Comment "I'd like to work on this" to claim it
 
-## 🔍 Pull Request Guidelines
+### Working on Bounties
+1. **Claim the bounty** by commenting on the issue
+2. **Fork and clone** the repository
+3. **Create a branch** named after the bounty: `bounty/issue-number-description`
+4. **Follow the specific requirements** in the bounty description
+5. **Test thoroughly** - bounties require working solutions
+6. **Submit PR** with reference to the bounty issue
+
+### Bounty Review Process
+- All bounty submissions are reviewed within 48 hours
+- RTC rewards are distributed after PR merge
+- Incomplete or non-functional submissions may be rejected
+- You can resubmit with fixes if needed
+
+## 📝 Pull Request Guidelines
 
 ### Before Submitting
-- [ ] Code follows the project's style guidelines
-- [ ] Self-review of your changes completed
-- [ ] Tests pass locally
-- [ ] New code includes appropriate tests
-- [ ] Documentation updated if needed
+- [ ] Code compiles without warnings
+- [ ] All tests pass (`cargo test`)
+- [ ] New features have tests
+- [ ] Documentation is updated
+- [ ] Code follows project style guidelines
+
+### PR Title Format
+Use conventional commit format:
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `test:` - Adding tests
+- `refactor:` - Code refactoring
+- `perf:` - Performance improvements
+- `chore:` - Maintenance tasks
+
+Examples:
+- `feat: add stake delegation endpoint`
+- `fix: resolve memory leak in consensus module`
+- `docs: update API documentation for v2.0`
 
 ### PR Description Template
 ```markdown
-## What does this PR do?
-Brief description of changes.
+## Description
+Brief description of changes
 
-## Why?
-Motivation and context.
+## Related Issue
+Closes #[issue number]
 
-## How to test?
-Steps to verify the changes work.
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Documentation update
+- [ ] Performance improvement
+- [ ] Other (specify)
 
-## Related Issues
-Closes #<issue_number>
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+- [ ] No breaking changes (or documented)
 ```
 
-### Review Process
-1. A maintainer will review your PR within 48-72 hours
-2. Address any requested changes
-3. Once approved, a maintainer will merge your PR
-4. RTC tokens will be distributed after merge
+## 📐 Code Style Standards
 
-## 🎯 Good First Issues
+### Rust Guidelines
+- Follow [official Rust style guide](https://doc.rust-lang.org/nightly/style-guide/)
+- Use `cargo fmt` for automatic formatting
+- Run `cargo clippy` for linting
+- Maximum line length: 100 characters
+- Use meaningful variable and function names
 
-New to Rustchain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
+### Code Organization
+```
+src/
+├── lib.rs          # Main library entry
+├── config/         # Configuration modules
+├── consensus/      # Consensus algorithm
+├── network/        # P2P networking
+├── storage/        # Database and file storage
+├── api/           # REST API endpoints
+├── cli/           # Command line interface
+└── utils/         # Utility functions
+```
 
-## ⚖️ Code of Conduct
+### Documentation Standards
+- All public functions must have rustdoc comments
+- Include examples in documentation
+- Document error conditions and panics
+- Use `#[doc(hidden)]` for internal APIs
 
-By participating in this project, you agree to maintain a respectful, inclusive, and harassment-free environment. Be kind, be constructive, and help each other grow.
+Example:
+```rust
+/// Validates a blockchain transaction
+///
+/// # Arguments
+/// * `tx` - The transaction to validate
+/// * `context` - Current blockchain state
+///
+/// # Returns
+/// * `Ok(())` if valid
+/// * `Err(ValidationError)` if invalid
+///
+/// # Example
+/// ```
+/// let result = validate_transaction(&tx, &context);
+/// assert!(result.is_ok());
+/// ```
+pub fn validate_transaction(tx: &Transaction, context: &BlockchainState) -> Result<(), ValidationError> {
+    // Implementation
+}
+```
 
-## 📬 Getting Help
+### Testing Requirements
+- Unit tests for all public functions
+- Integration tests for major features
+- Property-based tests for consensus logic
+- Benchmark tests for performance-critical code
 
-- **Discord**: [Join our server](https://discord.gg/VqVVS2CW9Q)
-- **GitHub Issues**: For bugs and feature requests
-- **Discussions**: For questions and ideas
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-## License
+    #[test]
+    fn test_transaction_validation() {
+        // Test implementation
+    }
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (Apache 2.0).
+    #[tokio::test]
+    async fn test_async_function() {
+        // Async test implementation
+    }
+}
+```
+
+## 🧪 Testing Guidelines
+
+### Running Tests
+```bash
+# Run all tests
+cargo test
+
+# Run specific test module
+cargo test consensus
+
+# Run with output
+cargo test -- --nocapture
+
+# Run benchmarks
+cargo bench
+```
+
+### Test Categories
+- **Unit tests**: Test individual functions and modules
+- **Integration tests**: Test component interactions
+- **End-to-end tests**: Test complete workflows
+- **Performance tests**: Benchmark critical paths
+
+## 🚀 Deployment and Release
+
+### Version Management
+- Follow [Semantic Versioning](https://semver.org/)
+- Update `Cargo.toml` version before release
+- Tag releases with `git tag v1.2.3`
+
+### Release Process
+1. Update version numbers
+2. Update CHANGELOG.md
+3. Run full test suite
+4. Create release PR
+5. Tag and publish after merge
+
+## 🤝 Community Guidelines
+
+### Communication
+- Be respectful and inclusive
+- Provide constructive feedback
+- Help newcomers get started
+- Use [Discord](https://discord.gg/VqVVS2CW9Q) for real-time discussion
+
+### Code Review Etiquette
+- Review code, not the person
+- Suggest improvements with examples
+- Approve when ready, request changes when needed
+- Respond to feedback promptly
+
+## 🆘 Getting Help
+
+### Resources
+- [Project Documentation](./docs/)
+- [Discord Community](https://discord.gg/VqVVS2CW9Q)
+- [GitHub Discussions](https://github.com/Scottcjn/rustchain/discussions)
+- [Bounty Tracker](https://github.com/Scottcjn/rustchain-bounties)
+
+### Reporting Issues
+When reporting bugs, include:
+- Rust version (`rustc --version`)
+- Operating system
+- Steps to reproduce
+- Expected vs actual behavior
+- Error messages and logs
+
+### Security Issues
+Report security vulnerabilities privately to [security@rustchain.io](mailto:security@rustchain.io)
 
 ---
 
-**Happy contributing! Every PR brings Rustchain closer to its vision.** 🦀⛓️
+**Ready to contribute?** Check out our [good first issues](https://github.com/Scottcjn/rustchain/labels/good%20first%20issue) or browse available [bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to start earning RTC tokens today!
