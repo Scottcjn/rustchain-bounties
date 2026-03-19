@@ -33,6 +33,79 @@ class GreenTrackerUpdater:
     def validate_submission(self, submission: Dict[str, Any]) -> List[str]:
         """Validate a new machine submission."""
         errors = []
+        required_fields = ['name', 'model', 'year', 'architecture', 'power', 'purpose', 'miner_id']
+        
+        for field in required_fields:
+            if field not in submission:
+                errors.append(f"Missing required field: {field}")
+        
+        # Validate year is reasonable (1970-current year)
+        if 'year' in submission:
+            current_year = datetime.now().year
+            if not isinstance(submission['year'], int) or submission['year'] < 1970 or submission['year'] > current_year:
+                errors.append(f"Invalid year: {submission['year']}")
+        
+        # Validate miner_id format (alphanumeric with optional numbers)
+        if 'miner_id' in submission:
+            if not re.match(r'^[a-zA-Z][a-zA-Z0-9]*$', submission['miner_id']):
+                errors.append(f"Invalid miner_id format: {submission['miner_id']}")
+        
+        return errors
+    
+    def add_machine(self, submission: Dict[str, Any]) -> bool:
+        """Add a validated machine to the tracker."""
+        errors = self.validate_submission(submission)
+        if errors:
+            print(f"Validation errors: {', '.join(errors)}")
+            return False
+        
+        # Generate new ID
+        max_id = max([m.get('id', 0) for m in self.data['machines']], default=0)
+        submission['id'] = max_id + 1
+        
+        # Add to machines list
+        self.data['machines'].append(submission)
+        
+        # Update statistics
+        self.data['statistics']['total_machines'] = len(self.data['machines'])
+        self.data['statistics']['last_updated'] = datetime.now().isoformat()
+        
+        return True
+    
+    def save_data(self) -> None:
+        """Save the updated data to file."""
+        with open(self.data_file, 'w', encoding='utf-8') as f:
+            json.dump(self.data, f, indent=2, ensure_ascii=False)
+
+def main():
+    """Main function to handle command line usage."""
+    if len(sys.argv) < 2:
+        print("Usage: python update_green_tracker.py <submission_file>")
+        sys.exit(1)
+    
+    submission_file = sys.argv[1]
+    if not os.path.exists(submission_file):
+        print(f"Error: Submission file {submission_file} not found")
+        sys.exit(1)
+    
+    try:
+        with open(submission_file, 'r', encoding='utf-8') as f:
+            submission = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        sys.exit(1)
+    
+    updater = GreenTrackerUpdater()
+    if updater.add_machine(submission):
+        updater.save_data()
+        print(f"Successfully added machine: {submission.get('name', 'Unknown')}")
+    else:
+        print("Failed to add machine due to validation errors")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()ew machine submission."""
+        errors = []
         required_fields = [
             "machine_type", "brand", "model", "year_rescued",
             "rescue_story", "current_use", "submitter_name"
