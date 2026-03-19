@@ -1,0 +1,27 @@
+{
+  "name": "discord-trending-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that fetches trending videos using BoTTube SDK",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "bottube",
+    "trending",
+    "videos"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "@bottube/sdk": "^1.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
