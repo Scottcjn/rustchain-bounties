@@ -1,0 +1,210 @@
+name: Star Follow Tracker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+
+jobs:
+  track-stars-follows:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm install @octokit/rest
+          
+      - name: Track Stars and Follows
+        run: |
+          cat > track_activity.js << 'EOF'
+          const { Octokit } = require('@octokit/rest');
+          const fs = require('fs');
+          
+          const octokit = new Octokit({
+            auth: process.env.GITHUB_TOKEN
+          });
+          
+          async function trackActivity() {
+            try {
+              console.log('Starting star/follow tracking...');
+              
+              // Get repository stars
+              const stars = await octokit.paginate(octokit.rest.activity.listStargazersForRepo, {
+                owner: 'RebornTraderToken',
+                repo: 'RebornTraderToken',
+                per_page: 100
+              });
+              
+              // Get repository watchers
+              const watchers = await octokit.paginate(octokit.rest.activity.listWatchersForRepo, {
+                owner: 'RebornTraderToken',
+                repo: 'RebornTraderToken',
+                per_page: 100
+              });
+              
+              // Load existing tracking data
+              let trackingData = {};
+              try {
+                trackingData = JSON.parse(fs.readFileSync('.github/data/star-follow-tracker.json', 'utf8'));
+              } catch (e) {
+                console.log('No existing tracking data found, starting fresh');
+                trackingData = { stars: {}, watchers: {}, processed: [] };
+              }
+              
+              const now = new Date().toISOString();
+              let newActivity = [];
+              
+              // Track new stars
+              for (const star of stars) {
+                if (!trackingData.stars[star.user.login]) {
+                  trackingData.stars[star.user.login] = {
+                    starred_at: star.starred_at || now,
+                    user_id: star.user.id,
+                    avatar_url: star.user.avatar_url
+                  };
+                  
+                  newActivity.push({
+                    type: 'star',
+                    username: star.user.login,
+                    user_id: star.user.id,
+                    timestamp: star.starred_at || now,
+                    reward_amount: 100
+                  });
+                  
+                  console.log(`New star from: ${star.user.login}`);
+                }
+              }
+              
+              // Track new watchers (follows)
+              for (const watcher of watchers) {
+                if (!trackingData.watchers[watcher.login]) {
+                  trackingData.watchers[watcher.login] = {
+                    watched_at: now,
+                    user_id: watcher.id,
+                    avatar_url: watcher.avatar_url
+                  };
+                  
+                  newActivity.push({
+                    type: 'follow',
+                    username: watcher.login,
+                    user_id: watcher.id,
+                    timestamp: now,
+                    reward_amount: 50
+                  });
+                  
+                  console.log(`New follow from: ${watcher.login}`);
+                }
+              }
+              
+              // Save updated tracking data
+              fs.writeFileSync('.github/data/star-follow-tracker.json', JSON.stringify(trackingData, null, 2));
+              
+              // Create bounty claims for new activity
+              if (newActivity.length > 0) {
+                let bountyReport = `# Star/Follow Bounty Activity Report\n\n`;
+                bountyReport += `Generated on: ${now}\n\n`;
+                
+                let totalRewards = 0;
+                
+                bountyReport += `## New Activity (${newActivity.length} actions)\n\n`;
+                bountyReport += `| Type | Username | User ID | Timestamp | Reward (RTC) |\n`;
+                bountyReport += `|------|----------|---------|-----------|-------------|\n`;
+                
+                for (const activity of newActivity) {
+                  bountyReport += `| ${activity.type} | [@${activity.username}](https://github.com/${activity.username}) | ${activity.user_id} | ${activity.timestamp} | ${activity.reward_amount} |\n`;
+                  totalRewards += activity.reward_amount;
+                }
+                
+                bountyReport += `\n**Total Rewards to Distribute: ${totalRewards} RTC**\n\n`;
+                
+                bountyReport += `## Summary\n`;
+                bountyReport += `- Total Stars: ${Object.keys(trackingData.stars).length}\n`;
+                bountyReport += `- Total Watchers: ${Object.keys(trackingData.watchers).length}\n`;
+                bountyReport += `- New Stars: ${newActivity.filter(a => a.type === 'star').length}\n`;
+                bountyReport += `- New Follows: ${newActivity.filter(a => a.type === 'follow').length}\n\n`;
+                
+                bountyReport += `## Reward Distribution\n`;
+                bountyReport += `- Star Reward: 100 RTC each\n`;
+                bountyReport += `- Follow Reward: 50 RTC each\n\n`;
+                
+                bountyReport += `## Next Steps\n`;
+                bountyReport += `1. Verify all activities are legitimate\n`;
+                bountyReport += `2. Process RTC token distribution\n`;
+                bountyReport += `3. Update community leaderboard\n`;
+                
+                // Save report
+                fs.writeFileSync('.github/reports/star-follow-activity.md', bountyReport);
+                
+                console.log(`Generated report with ${newActivity.length} new activities`);
+                console.log(`Total rewards to distribute: ${totalRewards} RTC`);
+              } else {
+                console.log('No new star/follow activity detected');
+              }
+              
+            } catch (error) {
+              console.error('Error tracking activity:', error);
+              process.exit(1);
+            }
+          }
+          
+          trackActivity();
+          EOF
+          
+          node track_activity.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Create data directory
+        run: mkdir -p .github/data .github/reports
+        
+      - name: Commit tracking updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .github/data/star-follow-tracker.json
+          git add .github/reports/star-follow-activity.md
+          if ! git diff --staged --quiet; then
+            git commit -m "Update star/follow tracking data [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Create Issue for New Activity
+        if: hashFiles('.github/reports/star-follow-activity.md') != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const reportContent = fs.readFileSync('.github/reports/star-follow-activity.md', 'utf8');
+              
+              // Check if report has new activity
+              if (reportContent.includes('New Activity (0 actions)')) {
+                console.log('No new activity to report');
+                return;
+              }
+              
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🌟 Star/Follow Bounty Claims - ${new Date().toISOString().split('T')[0]}`,
+                body: reportContent,
+                labels: ['bounty', 'automated', 'star-follow-tracker']
+              });
+              
+              console.log('Created issue for new star/follow activity');
+            } catch (error) {
+              console.log('No report file found or error creating issue:', error.message);
+            }
