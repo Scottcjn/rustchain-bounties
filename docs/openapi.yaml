@@ -13,7 +13,8 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local development server
-  - url: https://api.rustchain.network
+  - url: https://api.rustchain.org/v1
+    description: Production server/api.rustchain.network
     description: Production server
 
 paths:
