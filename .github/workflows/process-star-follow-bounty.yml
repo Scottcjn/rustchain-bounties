@@ -1,0 +1,118 @@
+name: Process Star & Follow Bounty
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  process-bounty:
+    if: contains(github.event.issue.title, '[BOUNTY] Star & Follow') && contains(github.event.comment.body, 'claim')
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install @octokit/rest
+        
+    - name: Process bounty claim
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { Octokit } = require('@octokit/rest');
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+          
+          const commenter = context.payload.comment.user.login;
+          const commentBody = context.payload.comment.body.toLowerCase();
+          
+          // Check if user has starred the repo
+          let hasStarred = false;
+          try {
+            await octokit.rest.activity.getRepoSubscription({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: commenter
+            });
+            hasStarred = true;
+          } catch (error) {
+            if (error.status !== 404) {
+              console.log('Error checking star status:', error);
+            }
+          }
+          
+          // Check if user is following the repo owner
+          let isFollowing = false;
+          try {
+            await octokit.rest.users.checkPersonIsFollowedByAuthenticated({
+              username: context.repo.owner,
+              follower: commenter
+            });
+            isFollowing = true;
+          } catch (error) {
+            if (error.status !== 404) {
+              console.log('Error checking follow status:', error);
+            }
+          }
+          
+          let responseMessage = `@${commenter}, thank you for your bounty claim!\n\n`;
+          let bountyAmount = 0;
+          
+          if (hasStarred && isFollowing) {
+            bountyAmount = 100;
+            responseMessage += `✅ **Bounty Approved!** You have successfully:\n`;
+            responseMessage += `- ⭐ Starred this repository\n`;
+            responseMessage += `- 👤 Followed @${context.repo.owner}\n\n`;
+            responseMessage += `**Reward:** ${bountyAmount} RTC tokens\n\n`;
+            responseMessage += `Your tokens will be distributed within 24-48 hours. Please ensure your wallet address is in your GitHub profile or DM us with your wallet details.\n\n`;
+            responseMessage += `Thank you for supporting the project! 🚀`;
+          } else {
+            responseMessage += `❌ **Requirements not met.** Please ensure you have:\n`;
+            if (!hasStarred) {
+              responseMessage += `- ⭐ Star this repository\n`;
+            }
+            if (!isFollowing) {
+              responseMessage += `- 👤 Follow @${context.repo.owner}\n`;
+            }
+            responseMessage += `\nOnce completed, comment "claim" again to receive your bounty.`;
+          }
+          
+          // Post response comment
+          await octokit.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: responseMessage
+          });
+          
+          // If approved, add label and create tracking issue
+          if (bountyAmount > 0) {
+            await octokit.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['bounty-approved']
+            });
+            
+            // Create tracking comment for internal use
+            const trackingComment = `<!-- BOUNTY_TRACKING -->
+            User: ${commenter}
+            Amount: ${bountyAmount} RTC
+            Date: ${new Date().toISOString()}
+            Type: Star & Follow Bounty
+            Status: Approved
+            <!-- END_BOUNTY_TRACKING -->`;
+            
+            await octokit.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: trackingComment
+            });
+          }
