@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Tracker - Machines Preserved from E-Waste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .stats-overview {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            min-width: 180px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #c8e6c9;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .machines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .machine-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .machine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .machine-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .machine-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #c8e6c9;
+            margin-bottom: 5px;
+        }
+        
+        .machine-owner {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .preservation-date {
+            font-size: 0.8rem;
+            background: rgba(76, 175, 80, 0.3);
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-left: auto;
+        }
+        
+        .machine-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .spec-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 3px;
+        }
+        
+        .spec-value {
+            font-weight: 500;
+            color: #e8f5e8;
+        }
+        
+        .environmental-impact {
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .impact-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c8e6c9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .impact-title::before {
+            content: "🌱";
+            margin-right: 8px;
+        }
+        
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .impact-item {
+            text-align: center;
+        }
+        
+        .impact-value {
+            font-weight: bold;
+            color: #a5d6a7;
+            display: block;
+            font-size: 1.1rem;
+        }
+        
+        .impact-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .add-machine-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-machine-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+        
+        .add-machine-btn::before {
+            content: "+";
+            font-size: 1.2rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.7;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .machines-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-overview {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .machine-specs {
+                grid-template-columns: 1fr;
+            }
+            
+            .add-machine-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌱 Green Tracker</h1>
+        <p>Machines Preserved from E-Waste</p>
+    </div>
+    
+    <div class="stats-overview">
+        <div class="stat-card">
+            <span class="stat-number" id="total-machines">{{ total_machines or 0 }}</span>
+            <div class="stat-label">Machines Preserved</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="total-co2">{{ total_co2_saved or 0 }}</span>
+            <div class="stat-label">kg CO₂ Saved</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="total-waste">{{ total_waste_diverted or 0 }}</span>
+            <div class="stat-label">kg E-Waste Diverted</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="total-energy">{{ total_energy_saved or 0 }}</span>
+            <div class="stat-label">kWh Energy Saved</div>
+        </div>
+    </div>
+    
+    <div class="machines-grid">
+        {% if machines %}
+            {% for machine in machines %}
+            <div class="machine-card">
+                <div class="machine-header">
+                    <div>
+                        <div class="machine-name">{{ machine.name }}</div>
+                        <div class="machine-owner">Owned by {{ machine.owner }}</div>
+                    </div>
+                    <div class="preservation-date">
+                        Preserved {{ machine.date_preserved.strftime('%b %Y') if machine.date_preserved else 'Recently' }}
+                    </div>
+                </div>
+                
+                <div class="machine-specs">
+                    <div class="spec-item">
+                        <div class="spec-label">CPU</div>
+                        <div class="spec-value">{{ machine.cpu or 'Not specified' }}</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">RAM</div>
+                        <div class="spec-value">{{ machine.ram or 'Not specified' }}</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Storage</div>
+                        <div class="spec-value">{{ machine.storage or 'Not specified' }}</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Operating System</div>
+                        <div class="spec-value">{{ machine.operating_system or 'Not specified' }}</div>
+                    </div>
+                </div>
+                
+                <div class="environmental-impact">
+                    <div class="impact-title">Environmental Impact</div>
+                    <div class="impact-stats">
+                        <div class="impact-item">
+                            <span class="impact-value">{{ machine.co2_saved or 25 }}</span>
+                            <div class="impact-label">kg CO₂ Saved</div>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-value">{{ machine.waste_diverted or 15 }}</span>
+                            <div class="impact-label">kg Waste Diverted</div>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-value">{{ machine.energy_saved or 180 }}</span>
+                            <div class="impact-label">kWh Energy Saved</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h3>No machines preserved yet</h3>
+                <p>Be the first to add your machine to the Green Tracker and help fight e-waste!</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <a href="/add-machine" class="add-machine-btn">Add Your Machine</a>
+    
+    <script>
+        // Add some subtle animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.machine-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .machine-card {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
