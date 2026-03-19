@@ -1,0 +1,34 @@
+<div class="video-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+  <div class="relative">
+    <img src="{{ video.thumbnail_url }}" 
+         alt="{{ video.title }} - Video thumbnail showing {{ video.description|truncate:100 }}"
+         class="w-full h-48 object-cover">
+    <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+      {{ video.duration }}
+    </div>
+  </div>
+  
+  <div class="p-4">
+    <h3 class="font-semibold text-lg mb-2 line-clamp-2">
+      <a href="{% url 'video_detail' video.id %}" class="text-gray-900 hover:text-blue-600">
+        {{ video.title }}
+      </a>
+    </h3>
+    
+    <div class="flex items-center mb-2">
+      <img src="{{ video.channel.avatar_url }}" 
+           alt="{{ video.channel.name }} channel avatar"
+           class="w-8 h-8 rounded-full mr-3">
+      <a href="{% url 'channel_detail' video.channel.id %}" 
+         class="text-sm text-gray-600 hover:text-gray-900">
+        {{ video.channel.name }}
+      </a>
+    </div>
+    
+    <div class="text-sm text-gray-500">
+      <span>{{ video.view_count|floatformat:0 }} views</span>
+      <span class="mx-1">•</span>
+      <span>{{ video.published_at|timesince }} ago</span>
+    </div>
+  </div>
+</div>
