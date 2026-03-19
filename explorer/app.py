@@ -89,6 +89,47 @@ def background_updater():
         time.sleep(UPDATE_INTERVAL)
 
 @app.route('/')
+def dashboard():
+    """Main dashboard page"""
+    return render_template('dashboard.html')
+
+@app.route('/api/dashboard')
+def api_dashboard():
+    """API endpoint for dashboard data"""
+    return jsonify(dashboard_data)
+
+@app.route('/api/refresh')
+def api_refresh():
+    """Manually refresh dashboard data"""
+    update_dashboard_data()
+    return jsonify({'status': 'success', 'last_update': dashboard_data['last_update']})
+
+if __name__ == '__main__':
+    # Start background updater thread
+    updater_thread = threading.Thread(target=background_updater, daemon=True)
+    updater_thread.start()
+    
+    # Initialize dashboard data
+    update_dashboard_data()
+    
+    app.run(debug=True, port=5001)te_dashboard_data():
+    """Update dashboard data from API endpoints"""
+    global dashboard_data
+    
+    dashboard_data['network_stats'] = fetch_network_stats()
+    dashboard_data['miners'] = fetch_miners()
+    dashboard_data['agents'] = fetch_agents()
+    dashboard_data['blocks'] = fetch_recent_blocks()
+    dashboard_data['transactions'] = fetch_recent_transactions()
+    dashboard_data['last_update'] = datetime.now().isoformat()
+
+def background_updater():
+    """Background thread to update dashboard data"""
+    while True:
+        update_dashboard_data()
+        time.sleep(UPDATE_INTERVAL)
+
+@app.route('/')
 def index():
     """Main dashboard page"""
     return render_template('dashboard.html')
