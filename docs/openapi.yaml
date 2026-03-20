@@ -258,6 +258,36 @@ components:
       bearerFormat: JWT
 
   schemas:
+    SophiaInspection:
+      type: object
+      description: "RIP-306: Sophia Elya inspection result"
+      properties:
+        miner_id:
+          type: string
+        verdict:
+          type: string
+          enum: [APPROVED, CAUTIOUS, SUSPICIOUS, REJECTED]
+        confidence:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+        reasoning:
+          type: string
+        flags:
+          type: array
+          items:
+            type: string
+        emoji:
+          type: string
+        phase:
+          type: string
+          example: advisory
+        effective_verdict:
+          type: string
+          description: Override verdict if present, else original verdict
+        created_at:
+          type: string
+
     Error:
       type: object
       properties:
@@ -311,6 +341,253 @@ components:
         total_difficulty:
           type: string
 
+  # ── SophiaCore Attestation Inspector (RIP-306) ────────────────────
+
+  /sophia/inspect:
+    post:
+      summary: Inspect miner fingerprint
+      description: Submit a fingerprint bundle for Sophia Elya semantic analysis. Returns verdict, confidence, reasoning, and anomaly flags.
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - miner_id
+                - fingerprint
+              properties:
+                miner_id:
+                  type: string
+                fingerprint:
+                  type: object
+                hardware:
+                  type: object
+                epoch:
+                  type: integer
+      responses:
+        '200':
+          description: Inspection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/status/{miner_id}:
+    get:
+      summary: Latest inspection for miner
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest inspection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SophiaInspection'
+        '404':
+          description: No inspections found
+
+  /sophia/history/{miner_id}:
+    get:
+      summary: Inspection history for miner
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of inspections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  miner_id:
+                    type: string
+                  count:
+                    type: integer
+                  inspections:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/stats:
+    get:
+      summary: Aggregate inspection statistics
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_inspections:
+                    type: integer
+                  by_verdict:
+                    type: object
+                  avg_confidence:
+                    type: number
+                  pending_reviews:
+                    type: integer
+
+  /sophia/pending:
+    get:
+      summary: Get verdicts awaiting human review
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Pending reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  reviews:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/override:
+    post:
+      summary: Admin override verdict
+      description: Requires HTTP Basic Auth (if configured)
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - inspection_id
+                - verdict
+                - reason
+              properties:
+                inspection_id:
+                  type: integer
+                verdict:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+                reason:
+                  type: string
+                admin:
+                  type: string
+      responses:
+        '200':
+          description: Override recorded
+        '401':
+          description: Authentication required
+        '403':
+          description: Invalid credentials
+
+  /sophia/batch-status:
+    post:
+      summary: Batch lookup of latest verdicts
+      description: Returns the latest verdict for each miner ID (max 100)
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - miner_ids
+              properties:
+                miner_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Batch results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: object
+
+  /sophia/trigger/{miner_id}:
+    post:
+      summary: Trigger immediate inspection
+      description: Used by sybil risk scorer. Requires Bearer token auth.
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inspection result
+        '403':
+          description: Invalid trigger secret
+
+  /sophia/health:
+    get:
+      summary: SophiaCore service health
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Service health including Ollama host status
+
+  /sophia/metrics:
+    get:
+      summary: Prometheus metrics
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Prometheus-format metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /sophia/dashboard:
+    get:
+      summary: Admin spot-check dashboard
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: HTML dashboard page
+          content:
+            text/html:
+              schema:
+                type: string
+
 tags:
   - name: System
     description: System health and status endpoints
@@ -322,3 +599,5 @@ tags:
     description: Mining-related endpoints
   - name: Attestation
     description: Attestation-related endpoints
+  - name: SophiaCore
+    description: "RIP-306: SophiaCore Attestation Inspector — AI-powered hardware validation (Phase 1: Advisory)"
