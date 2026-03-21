@@ -1,0 +1,22 @@
+Add formal verification test suite for epoch settlement (issue #2275)
+
+Property-based test suite verifying calculate_epoch_rewards_time_aged():
+- Conservation: total distributed == total_reward_urtc
+- Non-negative: no miner receives negative rewards
+- Proportionality: rewards proportional to weights
+- Idempotency: deterministic for identical inputs
+- Empty set: zero miners returns empty dict
+- Single miner: gets full reward
+- Precision: 1000+ miners conserve total correctly
+- Time decay: multipliers decay monotonically
+- Dust handling: low-weight miners get non-zero rewards
+- Large multiplier sums: no floating-point overflow
+- Warthog bonus: correctly scales rewards
+
+33/33 tests pass. 1 bug confirmed: ZeroDivisionError when all
+miners have fingerprint_passed=0 (total_weight=0 not guarded).
+
+test_epoch_settlement_formal.py: 1121 lines (Hypothesis + unittest)
+quick_test.py: 331 lines (standalone verification, no deps)
+
+Bounty: #2275 (200 RTC)
