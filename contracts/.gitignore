@@ -1,0 +1,9 @@
+node_modules/
+cache/
+artifacts/
+typechain-types/
+coverage/
+deployments/
+.env
+.env.*
+!.env.example

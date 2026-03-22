@@ -1,0 +1,22 @@
+{
+  "name": "@rustchain/wrtc-base",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RIP-305 Track B — wRTC ERC-20 on Base (capped, AccessControl)",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:baseSepolia": "hardhat run scripts/deploy.ts --network baseSepolia",
+    "deploy:base": "hardhat run scripts/deploy.ts --network base",
+    "handover:baseSepolia": "hardhat run scripts/handover-roles.ts --network baseSepolia",
+    "handover:base": "hardhat run scripts/handover-roles.ts --network base"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "@openzeppelin/contracts": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.28.0",
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2"
+  }
+}
