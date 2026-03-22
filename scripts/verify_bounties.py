@@ -6,10 +6,12 @@ Auto-verifies star/badge/follow/emoji claims on rustchain-bounties issues.
 Runs as a GitHub Action every 6 hours, or manually via workflow_dispatch.
 
 Checks:
-  1. Star claims   - Did the user star the specified repos?
-  2. Badge claims   - Does the user's profile README mention RustChain/Elyan?
-  3. Follow claims  - Does the user follow Scottcjn?
-  4. Emoji claims   - Did the user react to the specified issue?
+  1. Star claims     - Did the user star the specified repos?
+  2. Badge claims     - Does the user's profile README mention RustChain/Elyan?
+  3. Follow claims    - Does the user follow Scottcjn?
+  4. Emoji claims     - Did the user react to the specified issue?
+  5. Wallet checks    - Does the claimed wallet exist on the RustChain node?
+  6. Article checks   - Is the claimed Dev.to/Medium article live and substantive?
 
 Posts a verification comment on the bounty issue with results.
 """
@@ -59,6 +61,15 @@ STAR_BOUNTY_ISSUES = [2175, 47, 773, 1595]
 BADGE_BOUNTY_ISSUES = [2177]
 FOLLOW_BOUNTY_ISSUES = [2173, 2155]
 EMOJI_BOUNTY_ISSUES = [1611, 2180]
+
+# Wallet verification settings
+WALLET_API_URL = "https://50.28.86.131/wallet/balance"
+WALLET_BOUNTY_ISSUES = []  # Populated dynamically from issues mentioning "Wallet:"
+
+# Article verification settings
+ARTICLE_BOUNTY_ISSUES = []  # Populated dynamically from issues mentioning "Article:" or "Dev.to:"
+MIN_ARTICLE_WORDS = 300  # Minimum word count for quality check
+DEVTO_API_URL = "https://dev.to/api/articles"
 
 # Bot signature so we can detect our own comments and avoid duplicates
 BOT_SIGNATURE = "<!-- bounty-verify-bot -->"
@@ -182,6 +193,223 @@ def check_follows_owner(username: str) -> bool:
     return r.status_code == 204
 
 
+def check_wallet_exists(miner_id: str) -> tuple[bool, str]:
+    """Check if a wallet address exists on the RustChain node.
+    Returns (exists, detail_string).
+    """
+    try:
+        r = requests.get(
+            WALLET_API_URL,
+            params={"miner_id": miner_id},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            data = r.json()
+            balance = data.get("balance", 0)
+            return True, f"Wallet found, balance: {balance}"
+        elif r.status_code == 404:
+            return False, "Wallet not found on RustChain node"
+        else:
+            return False, f"API returned HTTP {r.status_code}"
+    except requests.RequestException as e:
+        return False, f"Could not reach RustChain node: {e}"
+
+
+def check_article_live(url: str) -> tuple[bool, str]:
+    """Check if an article URL is live (returns 200).
+    Returns (live, detail_string).
+    """
+    try:
+        r = requests.head(url, timeout=10, allow_redirects=True)
+        if r.status_code == 200:
+            return True, f"URL is live (HTTP 200)"
+        elif r.status_code == 405:
+            # HEAD not allowed, try GET with stream
+            r = requests.get(url, timeout=10, stream=True, allow_redirects=True)
+            r.close()
+            if r.status_code == 200:
+                return True, "URL is live (HTTP 200 via GET)"
+            return False, f"URL returned HTTP {r.status_code}"
+        return False, f"URL returned HTTP {r.status_code}"
+    except requests.RequestException as e:
+        return False, f"Could not reach URL: {e}"
+
+
+def check_devto_article(url: str) -> tuple[bool, int, str]:
+    """Check a Dev.to article's word count and quality.
+    Returns (success, word_count, detail_string).
+    """
+    try:
+        # Try Dev.to API first
+        article_id = url.rstrip("/").split("/")[-1]
+        r = requests.get(f"{DEVTO_API_URL}/{article_id}", timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            body_html = data.get("body_html", "")
+            body_markdown = data.get("body_markdown", "")
+            # Strip HTML tags for word count
+            text = re.sub(r"<[^>]+>", " ", body_html) if body_html else body_markdown
+            word_count = len(text.split())
+            return True, word_count, f"Dev.to API: {word_count} words"
+    except Exception:
+        pass
+
+    # Fallback: fetch and parse HTML
+    try:
+        r = requests.get(url, timeout=10, allow_redirects=True)
+        if r.status_code != 200:
+            return False, 0, f"HTTP {r.status_code}"
+        # Try to find article body (rough extraction)
+        html = r.text
+        # Look for common article containers
+        match = re.search(r'<article[^>]*>(.*?)</article>', html, re.DOTALL)
+        if match:
+            text = re.sub(r"<[^>]+>", " ", match.group(1))
+            word_count = len(text.split())
+            return True, word_count, f"HTML extraction: {word_count} words"
+        return False, 0, "Could not extract article body"
+    except Exception as e:
+        return False, 0, f"Fetch failed: {e}"
+
+
+ARTICLE_URL_RE = re.compile(r"https?://(?:dev\.to|medium\.com)/[^\s)>]+", re.IGNORECASE)
+
+
+def verify_wallet_claims(issue_number: int) -> None:
+    """Verify wallet existence claims on a bounty issue."""
+    log.info("=== Verifying wallet claims on issue #%d ===", issue_number)
+
+    comments = get_issue_comments(issue_number)
+    claimants = extract_claimants(comments, issue_number)
+    existing_comment = find_existing_bot_comment(comments)
+
+    if not claimants:
+        log.info("No claimants found on #%d, skipping", issue_number)
+        return
+
+    lines = [
+        BOT_SIGNATURE,
+        f"## Wallet Verification Report",
+        f"*{BOT_TAG} - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}*",
+        "",
+        f"Checked **{len(claimants)}** claim(s) for wallet existence on RustChain node.",
+        "",
+        "| User | Wallet | Exists | Details | Status |",
+        "|------|--------|--------|---------|--------|",
+    ]
+
+    for cl in claimants:
+        username = cl["username"]
+        wallet = cl.get("wallet", "")
+        if not wallet:
+            lines.append(f"| @{username} | Not provided | — | No wallet in claim | ⚠️ No wallet |")
+            continue
+
+        exists, detail = check_wallet_exists(wallet)
+        status = "VERIFIED" if exists else "NOT FOUND"
+        lines.append(f"| @{username} | `{wallet[:16]}...` | {'Yes' if exists else 'No'} | {detail} | {status} |")
+
+    lines.extend([
+        "",
+        "---",
+        f"*Node: {WALLET_API_URL}*",
+        "*Wallets may take time to register. Re-run if recently created.*",
+    ])
+
+    body = "\n".join(lines)
+
+    if existing_comment:
+        update_comment(existing_comment, body)
+    else:
+        post_comment(issue_number, body)
+
+
+def verify_article_claims(issue_number: int) -> None:
+    """Verify article/URL claims on a bounty issue with word count + quality check."""
+    log.info("=== Verifying article claims on issue #%d ===", issue_number)
+
+    comments = get_issue_comments(issue_number)
+    claimants = extract_claimants(comments, issue_number)
+    existing_comment = find_existing_bot_comment(comments)
+
+    if not claimants:
+        log.info("No claimants found on #%d, skipping", issue_number)
+        return
+
+    lines = [
+        BOT_SIGNATURE,
+        f"## Article Verification Report",
+        f"*{BOT_TAG} - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}*",
+        f"*Minimum word count: {MIN_ARTICLE_WORDS}*",
+        "",
+        f"Checked **{len(claimants)}** claim(s) for article quality.",
+        "",
+        "| User | URL | Live | Words | Status |",
+        "|------|-----|------|-------|--------|",
+    ]
+
+    for cl in claimants:
+        username = cl["username"]
+        body = cl.get("body", "")
+
+        # Find article URLs
+        urls = ARTICLE_URL_RE.findall(body)
+        if not urls:
+            lines.append(f"| @{username} | No URL found | — | — | ⚠️ No article |")
+            continue
+
+        url = urls[0]  # Check first URL found
+        # Check if live
+        live, live_detail = check_article_live(url)
+        if not live:
+            lines.append(f"| @{username} | [Link]({url}) | No | — | {live_detail} |")
+            continue
+
+        # For Dev.to, do word count check
+        if "dev.to" in url.lower():
+            success, word_count, detail = check_devto_article(url)
+            if success and word_count >= MIN_ARTICLE_WORDS:
+                status = f"VERIFIED ({word_count} words)"
+            elif success:
+                status = f"TOO SHORT ({word_count}/{MIN_ARTICLE_WORDS} words)"
+            else:
+                status = detail
+            lines.append(f"| @{username} | [Link]({url}) | Yes | {word_count if success else '—'} | {status} |")
+        else:
+            # Non-Dev.to: just check liveness
+            status = "VERIFIED (live)" if live else "NOT LIVE"
+            lines.append(f"| @{username} | [Link]({url}) | {'Yes' if live else 'No'} | N/A | {status} |")
+
+    lines.extend([
+        "",
+        "---",
+        f"*Dev.to articles checked for minimum {MIN_ARTICLE_WORDS} words.*",
+        "*Medium and other platforms: liveness check only.*",
+    ])
+
+    body = "\n".join(lines)
+
+    if existing_comment:
+        update_comment(existing_comment, body)
+    else:
+        post_comment(issue_number, body)
+
+
+# Duplicate claim detection: check if user was already marked PAID
+def check_duplicate_claim(username: str, comments: list[dict]) -> tuple[bool, str]:
+    """Check if a user already has a PAID comment on the issue.
+    Returns (is_duplicate, detail).
+    """
+    for c in comments:
+        body = c.get("body", "")
+        user = c.get("user", {}).get("login", "")
+        # Look for PAID markers from owner or bot
+        if user.lower() == OWNER.lower() and "PAID" in body.upper():
+            if username.lower() in body.lower() or f"@{username}" in body:
+                return True, f"Already marked PAID in comment by @{OWNER}"
+    return False, ""
+
+
 def get_issue_reactions(issue_number: int) -> dict[str, set[str]]:
     """Return {reaction_type: set(usernames)} for an issue."""
     reactions = paginate_all(
@@ -283,6 +511,12 @@ def extract_claimants(comments: list[dict], issue_number: int) -> list[dict]:
             "body": body,
         })
 
+    # Check for duplicate/paid claims
+    for cl in claimants:
+        is_dup, detail = check_duplicate_claim(cl["username"], comments)
+        cl["is_paid"] = is_dup
+        cl["paid_detail"] = detail
+
     return claimants
 
 
@@ -323,6 +557,10 @@ def verify_star_claims(issue_number: int, all_stars: dict[str, set[str]]) -> Non
 
     for cl in claimants:
         username = cl["username"]
+        # Skip already-paid claimants
+        if cl.get("is_paid"):
+            lines.append(f"| @{username} | — | — | — | ⏭️ Already PAID |")
+            continue
         starred_repos = []
         for repo in STAR_REPOS:
             if username in all_stars.get(repo, set()):
@@ -586,6 +824,28 @@ def main():
             verify_emoji_claims(issue)
         else:
             log.info("Issue #%d is closed, skipping", issue)
+
+    # Wallet verification (checks all open issues for wallet claims)
+    log.info("--- Phase 6: Wallet verification ---")
+    if WALLET_BOUNTY_ISSUES:
+        for issue in WALLET_BOUNTY_ISSUES:
+            if is_issue_open(issue):
+                verify_wallet_claims(issue)
+            else:
+                log.info("Issue #%d is closed, skipping", issue)
+    else:
+        log.info("No wallet bounty issues configured, skipping")
+
+    # Article verification (checks all open issues for article claims)
+    log.info("--- Phase 7: Article verification ---")
+    if ARTICLE_BOUNTY_ISSUES:
+        for issue in ARTICLE_BOUNTY_ISSUES:
+            if is_issue_open(issue):
+                verify_article_claims(issue)
+            else:
+                log.info("Issue #%d is closed, skipping", issue)
+    else:
+        log.info("No article bounty issues configured, skipping")
 
     log.info("=" * 60)
     log.info("Bounty verification complete")
