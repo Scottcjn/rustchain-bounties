@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boot Chime Proof-of-Iron | RustChain Acoustic Attestation</title>
+<style>
+  :root {
+    --bg:         #0a0e17;
+    --bg-card:    #111827;
+    --bg-hover:   #1a2332;
+    --border:     #1e293b;
+    --accent:     #f97316;
+    --accent-dim: #9a3412;
+    --green:      #22c55e;
+    --red:        #ef4444;
+    --yellow:     #eab308;
+    --cyan:       #06b6d4;
+    --text:       #e2e8f0;
+    --text-dim:   #94a3b8;
+    --text-muted: #64748b;
+    --mono:       'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    --sans:       'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 span { color: var(--text-dim); font-weight: 400; }
+
+  .header p {
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-bounty {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-title .icon {
+    font-size: 1.2rem;
+  }
+
+  /* Upload Area */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(249, 115, 22, 0.05);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .upload-zone .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .upload-zone p { color: var(--text-dim); }
+  .upload-zone .formats { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+  /* Recording */
+  .record-section {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover { background: #ea580c; }
+
+  .btn-green {
+    background: #15803d;
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .btn-green:hover { background: #166534; }
+
+  .btn-red {
+    background: #991b1b;
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.8rem; }
+
+  /* Status indicator */
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 0.3rem;
+  }
+
+  .status-dot.green  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.red    { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .status-dot.yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+
+  /* Progress */
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 1rem 0;
+    display: none;
+  }
+
+  .progress-bar .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .progress-bar.active { display: block; }
+
+  /* Results */
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .result-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .result-item .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .result-item .value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+
+  .result-item .value.green  { color: var(--green); }
+  .result-item .value.red    { color: var(--red); }
+  .result-item .value.yellow { color: var(--yellow); }
+  .result-item .value.cyan   { color: var(--cyan); }
+  .result-item .value.accent { color: var(--accent); }
+
+  /* Score bar */
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.5rem 0;
+  }
+
+  .score-bar .bar-label {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    min-width: 140px;
+    text-align: right;
+  }
+
+  .score-bar .bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .score-bar .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease;
+  }
+
+  .score-bar .bar-value {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--text);
+    min-width: 3rem;
+  }
+
+  /* Match list */
+  .match-list {
+    list-style: none;
+  }
+
+  .match-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .match-item:hover { background: var(--bg-hover); }
+
+  .match-item:last-child { border-bottom: none; }
+
+  .match-rank {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    min-width: 1.5rem;
+  }
+
+  .match-name {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .match-name .mfr {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .match-conf {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .match-tag {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .match-tag.matched {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  /* Spectrogram */
+  .spectrogram-container {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .spectrogram-container img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* Attestation section */
+  .attestation-hash {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    word-break: break-all;
+    background: var(--bg);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    margin: 0.75rem 0;
+  }
+
+  /* Chime gallery */
+  .gallery-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .gallery-item:hover { background: var(--bg-hover); }
+  .gallery-item:last-child { border-bottom: none; }
+
+  .gallery-meta {
+    flex: 1;
+  }
+
+  .gallery-meta .name {
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .gallery-meta .sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* Profiles table */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .profile-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .profile-card h4 {
+    color: var(--accent);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .profile-card .meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .profile-card p {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* Canvas for live waveform */
+  #waveform-canvas {
+    width: 100%;
+    height: 100px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--text-dim); }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Hidden */
+  .hidden { display: none !important; }
+
+  /* Animation */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .analyzing { animation: pulse 1.5s infinite; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  .footer a { color: var(--accent); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .container { padding: 1rem; }
+    .header h1 { font-size: 1.4rem; }
+    .result-grid { grid-template-columns: 1fr; }
+    .score-bar .bar-label { min-width: 100px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Boot Chime Proof-of-Iron <span>| RustChain</span></h1>
+    <p>Acoustic hardware attestation for vintage iron</p>
+    <div style="margin-top:0.5rem">
+      <span class="badge badge-bounty">Bounty #2307 - 95 RTC</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="analyze">Analyze</button>
+    <button class="tab-btn" data-tab="gallery">Gallery</button>
+    <button class="tab-btn" data-tab="profiles">Known Profiles</button>
+  </div>
+
+  <!-- TAB: Analyze -->
+  <div id="tab-analyze" class="tab-content active">
+
+    <!-- Upload Card -->
+    <div class="card">
+      <div class="card-title"><span class="icon">&#127925;</span> Upload Boot Chime</div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept=".wav,.mp3,.ogg,.flac">
+        <div class="upload-icon">&#128266;</div>
+        <p>Drop a boot chime audio file here or click to browse</p>
+        <div class="formats">WAV (16-bit PCM) recommended  |  Max 10 MB</div>
+      </div>
+
+      <div class="record-section">
+        <span style="color:var(--text-muted);font-size:0.85rem">-- or --</span>
+        <button class="btn" id="btn-record"><span class="status-dot red"></span> Record from Mic</button>
+        <button class="btn btn-red hidden" id="btn-stop">Stop Recording</button>
+      </div>
+
+      <canvas id="waveform-canvas"></canvas>
+
+      <div class="progress-bar" id="progress-bar">
+        <div class="fill" id="progress-fill"></div>
+      </div>
+
+      <div id="status-msg" style="text-align:center;margin-top:0.75rem;font-size:0.85rem;color:var(--text-dim)"></div>
+    </div>
+
+    <!-- Results (hidden until analysis complete) -->
+    <div id="results-section" class="hidden">
+
+      <!-- Overview -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128200;</span> Analysis Results</div>
+        <div class="result-grid" id="result-overview"></div>
+      </div>
+
+      <!-- Analog Assessment -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128295;</span> Analog Assessment</div>
+        <div id="analog-bars"></div>
+        <div style="margin-top:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <div>
+            <span style="font-size:0.8rem;color:var(--text-muted)">COMPOSITE SCORE</span><br>
+            <span id="analog-composite" style="font-family:var(--mono);font-size:1.5rem;font-weight:700"></span>
+          </div>
+          <div>
+            <span style="font-size:0.8rem;color:var(--text-muted)">VERDICT</span><br>
+            <span id="analog-verdict" style="font-family:var(--mono);font-size:1.2rem;font-weight:700"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hardware Match -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128187;</span> Hardware Match</div>
+        <ul class="match-list" id="match-list"></ul>
+      </div>
+
+      <!-- Spectrogram -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#127912;</span> Spectrogram</div>
+        <div class="spectrogram-container">
+          <img id="spectrogram-img" alt="Spectrogram">
+        </div>
+      </div>
+
+      <!-- Attestation -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128279;</span> On-Chain Attestation</div>
+        <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.5rem">
+          Submit this acoustic fingerprint to the RustChain ledger as Proof-of-Iron.
+        </p>
+        <div class="attestation-hash" id="att-hash"></div>
+        <div id="att-status" style="margin:0.5rem 0;font-size:0.85rem"></div>
+        <button class="btn btn-green" id="btn-attest">Submit Attestation</button>
+        <div id="att-result" class="hidden" style="margin-top:1rem"></div>
+      </div>
+
+      <!-- Fingerprint -->
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128477;</span> Spectral Fingerprint</div>
+        <pre id="fingerprint-json" style="font-family:var(--mono);font-size:0.8rem;color:var(--cyan);white-space:pre-wrap;word-break:break-all;background:var(--bg);padding:1rem;border-radius:8px;border:1px solid var(--border)"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TAB: Gallery -->
+  <div id="tab-gallery" class="tab-content">
+    <div class="card">
+      <div class="card-title"><span class="icon">&#127926;</span> Chime Gallery</div>
+      <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:1rem">
+        All analyzed boot chimes registered on this node.
+      </p>
+      <div id="gallery-list">
+        <p style="color:var(--text-muted);text-align:center;padding:2rem">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Profiles -->
+  <div id="tab-profiles" class="tab-content">
+    <div class="card">
+      <div class="card-title"><span class="icon">&#128218;</span> Known Boot Chime Profiles</div>
+      <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.5rem">
+        Reference spectral profiles used for hardware identification.
+        Real hardware carries analog artifacts that emulators cannot reproduce:
+        capacitor aging, speaker-cone wear, transformer hiss, and mains hum.
+      </p>
+      <div class="profile-grid" id="profile-grid">
+        <p style="color:var(--text-muted)">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Boot Chime Proof-of-Iron v1.0.0  |
+    <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2307" target="_blank">Bounty #2307</a>  |
+    RustChain Acoustic Attestation
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // -- State -----------------------------------------------------------------
+  let currentChimeId = null;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let analyserNode = null;
+  let animFrameId = null;
+
+  // -- DOM refs --------------------------------------------------------------
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+
+  const fileInput     = $('#file-input');
+  const uploadZone    = $('#upload-zone');
+  const btnRecord     = $('#btn-record');
+  const btnStop       = $('#btn-stop');
+  const progressBar   = $('#progress-bar');
+  const progressFill  = $('#progress-fill');
+  const statusMsg     = $('#status-msg');
+  const resultsSection = $('#results-section');
+  const resultOverview = $('#result-overview');
+  const analogBars    = $('#analog-bars');
+  const analogComp    = $('#analog-composite');
+  const analogVerdict = $('#analog-verdict');
+  const matchList     = $('#match-list');
+  const specImg       = $('#spectrogram-img');
+  const attHash       = $('#att-hash');
+  const attStatus     = $('#att-status');
+  const btnAttest     = $('#btn-attest');
+  const attResult     = $('#att-result');
+  const fpJson        = $('#fingerprint-json');
+  const galleryList   = $('#gallery-list');
+  const profileGrid   = $('#profile-grid');
+  const waveCanvas    = $('#waveform-canvas');
+
+  // -- Tabs ------------------------------------------------------------------
+  $$('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.tab-btn').forEach(b => b.classList.remove('active'));
+      $$('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      $(`#tab-${tab}`).classList.add('active');
+      if (tab === 'gallery') loadGallery();
+      if (tab === 'profiles') loadProfiles();
+    });
+  });
+
+  // -- Upload ----------------------------------------------------------------
+  uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) uploadFile(fileInput.files[0]);
+  });
+
+  function uploadFile(file) {
+    showProgress('Uploading...');
+    const form = new FormData();
+    form.append('file', file);
+
+    fetch('/api/chimes', { method: 'POST', body: form })
+      .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
+      .then(({ ok, data }) => {
+        hideProgress();
+        if (!ok) {
+          setStatus(data.error || 'Upload failed', 'red');
+          return;
+        }
+        setStatus('Analysis complete!', 'green');
+        currentChimeId = data.id;
+        renderResults(data);
+      })
+      .catch(err => {
+        hideProgress();
+        setStatus('Network error: ' + err.message, 'red');
+      });
+  }
+
+  // -- Recording -------------------------------------------------------------
+  btnRecord.addEventListener('click', startRecording);
+  btnStop.addEventListener('click', stopRecording);
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        stopWaveform();
+        const blob = new Blob(audioChunks, { type: 'audio/wav' });
+        const file = new File([blob], 'recording.wav', { type: 'audio/wav' });
+        uploadFile(file);
+      };
+
+      mediaRecorder.start();
+      btnRecord.classList.add('hidden');
+      btnStop.classList.remove('hidden');
+      setStatus('Recording... (capture boot chime now)', 'yellow');
+      startWaveform(stream);
+    } catch (err) {
+      setStatus('Microphone access denied: ' + err.message, 'red');
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    btnStop.classList.add('hidden');
+    btnRecord.classList.remove('hidden');
+    setStatus('Processing recording...', '');
+  }
+
+  // -- Live waveform ---------------------------------------------------------
+  function startWaveform(stream) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaStreamSource(stream);
+    analyserNode = ctx.createAnalyser();
+    analyserNode.fftSize = 2048;
+    src.connect(analyserNode);
+
+    waveCanvas.style.display = 'block';
+    const canvasCtx = waveCanvas.getContext('2d');
+    const bufLen = analyserNode.frequencyBinCount;
+    const dataArr = new Uint8Array(bufLen);
+
+    function draw() {
+      animFrameId = requestAnimationFrame(draw);
+      analyserNode.getByteTimeDomainData(dataArr);
+      const W = waveCanvas.width = waveCanvas.clientWidth;
+      const H = waveCanvas.height = waveCanvas.clientHeight;
+      canvasCtx.fillStyle = '#0a0e17';
+      canvasCtx.fillRect(0, 0, W, H);
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = '#f97316';
+      canvasCtx.beginPath();
+      const sliceW = W / bufLen;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = dataArr[i] / 128.0;
+        const y = v * H / 2;
+        if (i === 0) canvasCtx.moveTo(x, y);
+        else canvasCtx.lineTo(x, y);
+        x += sliceW;
+      }
+      canvasCtx.lineTo(W, H / 2);
+      canvasCtx.stroke();
+    }
+    draw();
+  }
+
+  function stopWaveform() {
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    waveCanvas.style.display = 'none';
+  }
+
+  // -- Render Results --------------------------------------------------------
+  function renderResults(data) {
+    resultsSection.classList.remove('hidden');
+
+    // Overview
+    const dur = data.duration_sec || 0;
+    const freqs = (data.analysis.dominant_frequencies_hz || []).slice(0, 3).map(f => f.toFixed(0) + ' Hz').join(', ');
+    const nf = (data.analysis.noise_floor_dbfs || 0).toFixed(1);
+    const humF = data.analysis.mains_hum ? data.analysis.mains_hum.frequency_hz : 0;
+    const humA = data.analysis.mains_hum ? data.analysis.mains_hum.amplitude_dbfs.toFixed(1) : '?';
+    const bestMatch = data.hardware_match.best_match;
+    const bestConf = (data.hardware_match.confidence * 100).toFixed(1);
+
+    resultOverview.innerHTML = `
+      <div class="result-item">
+        <div class="label">Duration</div>
+        <div class="value">${dur.toFixed(2)}s</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Dominant Frequencies</div>
+        <div class="value cyan">${freqs || 'N/A'}</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Noise Floor</div>
+        <div class="value">${nf} dBFS</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Mains Hum</div>
+        <div class="value">${humF} Hz @ ${humA} dB</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Best Match</div>
+        <div class="value accent">${bestMatch}</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Confidence</div>
+        <div class="value ${bestConf >= 70 ? 'green' : bestConf >= 50 ? 'yellow' : 'red'}">${bestConf}%</div>
+      </div>
+    `;
+
+    // Analog bars
+    const scores = data.analog_assessment.scores || {};
+    const barColors = { noise_floor: '#22c55e', mains_hum: '#06b6d4', spectral_roughness: '#f97316', hf_rolloff: '#a855f7' };
+    analogBars.innerHTML = '';
+    for (const [key, val] of Object.entries(scores)) {
+      const pct = (val * 100).toFixed(0);
+      const color = barColors[key] || '#e2e8f0';
+      const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      analogBars.innerHTML += `
+        <div class="score-bar">
+          <span class="bar-label">${label}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <span class="bar-value">${val.toFixed(2)}</span>
+        </div>
+      `;
+    }
+
+    analogComp.textContent = data.analog_assessment.composite.toFixed(4);
+    const v = data.analog_assessment.verdict;
+    analogVerdict.textContent = v;
+    analogVerdict.style.color = v === 'REAL_HARDWARE' ? 'var(--green)' : v === 'LIKELY_EMULATOR' ? 'var(--red)' : 'var(--yellow)';
+
+    // Matches
+    matchList.innerHTML = '';
+    (data.hardware_match.all_matches || []).forEach((m, i) => {
+      const conf = (m.confidence * 100).toFixed(1);
+      const confColor = conf >= 70 ? 'var(--green)' : conf >= 50 ? 'var(--yellow)' : 'var(--text-muted)';
+      matchList.innerHTML += `
+        <li class="match-item">
+          <span class="match-rank">#${i + 1}</span>
+          <div class="match-name">${m.profile}<span class="mfr">${m.manufacturer} (${m.years})</span></div>
+          <span class="match-conf" style="color:${confColor}">${conf}%</span>
+          ${m.matched ? '<span class="match-tag matched">MATCH</span>' : ''}
+        </li>
+      `;
+    });
+
+    // Spectrogram
+    specImg.src = data.spectrogram_url;
+
+    // Attestation
+    attHash.textContent = data.attestation.hash;
+    attStatus.innerHTML = data.attestation.submitted
+      ? '<span class="status-dot green"></span> Already attested'
+      : '<span class="status-dot yellow"></span> Not yet submitted';
+    attResult.classList.add('hidden');
+    btnAttest.disabled = data.attestation.submitted;
+
+    // Fingerprint
+    fpJson.textContent = JSON.stringify(data.fingerprint, null, 2);
+
+    // scroll to results
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // -- Attestation -----------------------------------------------------------
+  btnAttest.addEventListener('click', () => {
+    if (!currentChimeId) return;
+    btnAttest.disabled = true;
+    btnAttest.textContent = 'Submitting...';
+
+    fetch(`/api/verify/${currentChimeId}`, { method: 'POST' })
+      .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          attResult.innerHTML = `<p style="color:var(--red)">${data.error}</p>`;
+          attResult.classList.remove('hidden');
+          btnAttest.textContent = 'Submit Attestation';
+          btnAttest.disabled = false;
+          return;
+        }
+        attStatus.innerHTML = '<span class="status-dot green"></span> Attested on-chain';
+        btnAttest.textContent = 'Attested';
+        attResult.classList.remove('hidden');
+        attResult.innerHTML = `
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="label">Block</div>
+              <div class="value cyan">${data.attestation.block}</div>
+            </div>
+            <div class="result-item">
+              <div class="label">TX ID</div>
+              <div class="value" style="font-size:0.75rem">${data.attestation.tx_id}</div>
+            </div>
+            <div class="result-item">
+              <div class="label">Timestamp</div>
+              <div class="value">${data.attestation.timestamp}</div>
+            </div>
+            <div class="result-item">
+              <div class="label">Verdict</div>
+              <div class="value green">${data.summary.analog_verdict}</div>
+            </div>
+          </div>
+        `;
+      })
+      .catch(err => {
+        attResult.innerHTML = `<p style="color:var(--red)">Error: ${err.message}</p>`;
+        attResult.classList.remove('hidden');
+        btnAttest.textContent = 'Submit Attestation';
+        btnAttest.disabled = false;
+      });
+  });
+
+  // -- Gallery ---------------------------------------------------------------
+  function loadGallery() {
+    fetch('/api/chimes')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.chimes || data.chimes.length === 0) {
+          galleryList.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem">No chimes analyzed yet.  Upload one to get started.</p>';
+          return;
+        }
+        galleryList.innerHTML = '';
+        data.chimes.forEach(c => {
+          const verdictColor = c.analog_verdict === 'REAL_HARDWARE' ? 'var(--green)' : c.analog_verdict === 'LIKELY_EMULATOR' ? 'var(--red)' : 'var(--yellow)';
+          const conf = (c.confidence * 100).toFixed(1);
+          galleryList.innerHTML += `
+            <div class="gallery-item" onclick="loadChime('${c.id}')">
+              <div style="font-size:1.5rem">&#127925;</div>
+              <div class="gallery-meta">
+                <div class="name">${c.original_name}</div>
+                <div class="sub">${c.best_match} (${conf}%) &middot; ${c.duration_sec}s &middot; ${c.created_at}</div>
+              </div>
+              <span style="font-family:var(--mono);font-size:0.85rem;color:${verdictColor}">${c.analog_verdict}</span>
+              ${c.attested ? '<span class="badge badge-bounty" style="font-size:0.65rem">ATTESTED</span>' : ''}
+            </div>
+          `;
+        });
+      })
+      .catch(() => {
+        galleryList.innerHTML = '<p style="color:var(--red);text-align:center;padding:2rem">Failed to load gallery</p>';
+      });
+  }
+
+  // expose for inline onclick
+  window.loadChime = function(id) {
+    fetch(`/api/chimes/${id}`)
+      .then(r => r.json())
+      .then(data => {
+        // switch to analyze tab and render
+        $$('.tab-btn').forEach(b => b.classList.remove('active'));
+        $$('.tab-content').forEach(c => c.classList.remove('active'));
+        $$('.tab-btn')[0].classList.add('active');
+        $('#tab-analyze').classList.add('active');
+        currentChimeId = data.id;
+        renderResults(data);
+      });
+  };
+
+  // -- Profiles --------------------------------------------------------------
+  function loadProfiles() {
+    fetch('/api/profiles')
+      .then(r => r.json())
+      .then(data => {
+        profileGrid.innerHTML = '';
+        (data.profiles || []).forEach(p => {
+          const freqs = p.dominant_freqs.map(f => f.toFixed(0) + ' Hz').join(', ');
+          profileGrid.innerHTML += `
+            <div class="profile-card">
+              <h4>${p.name}</h4>
+              <div class="meta">${p.manufacturer} &middot; ${p.years}</div>
+              <p>${p.description}</p>
+              <div style="margin-top:0.5rem;font-family:var(--mono);font-size:0.75rem;color:var(--text-muted)">
+                Peaks: ${freqs}<br>
+                Noise floor: ${p.expected_noise_floor_db} dBFS &middot; Hum: ${p.expected_hum_freq} Hz
+              </div>
+            </div>
+          `;
+        });
+      })
+      .catch(() => {
+        profileGrid.innerHTML = '<p style="color:var(--red)">Failed to load profiles</p>';
+      });
+  }
+
+  // -- Helpers ---------------------------------------------------------------
+  function showProgress(msg) {
+    progressBar.classList.add('active');
+    progressFill.style.width = '0%';
+    setStatus(msg, '');
+    // animate indeterminate
+    let w = 0;
+    const iv = setInterval(() => {
+      w += 3;
+      if (w > 90) w = 90;
+      progressFill.style.width = w + '%';
+    }, 100);
+    progressBar.dataset.iv = iv;
+  }
+
+  function hideProgress() {
+    progressFill.style.width = '100%';
+    const iv = progressBar.dataset.iv;
+    if (iv) clearInterval(parseInt(iv));
+    setTimeout(() => progressBar.classList.remove('active'), 500);
+  }
+
+  function setStatus(msg, color) {
+    statusMsg.textContent = msg;
+    if (color === 'green') statusMsg.style.color = 'var(--green)';
+    else if (color === 'red') statusMsg.style.color = 'var(--red)';
+    else if (color === 'yellow') statusMsg.style.color = 'var(--yellow)';
+    else statusMsg.style.color = 'var(--text-dim)';
+  }
+
+})();
+</script>
+
+</body>
+</html>
