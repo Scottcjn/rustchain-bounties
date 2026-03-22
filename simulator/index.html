@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Mining Simulator — Try Before You Mine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦀 RustChain Mining Simulator</h1>
+            <p class="subtitle">Try Before You Mine — No Hardware Required</p>
+        </header>
+
+        <!-- Hardware Selection Section -->
+        <section class="hardware-section">
+            <h2>📱 Select Your Hardware</h2>
+            <p class="section-desc">Choose your virtual mining hardware to see how different architectures perform:</p>
+            
+            <div class="hardware-grid">
+                <div class="hardware-card" data-arch="g4" data-multiplier="2.5">
+                    <div class="hardware-icon">🍎</div>
+                    <h3>PowerBook G4</h3>
+                    <p class="cpu-type">PowerPC 7450/7447/7455</p>
+                    <div class="multiplier-badge">2.5x Multiplier</div>
+                    <p class="hardware-desc">Vintage Apple hardware with AltiVec. Highest rewards for true antiquity.</p>
+                    <ul class="features-list">
+                        <li>✓ AltiVec SIMD Unit</li>
+                        <li>✓ mftb Time Base Register</li>
+                        <li>✓ Big-Endian Architecture</li>
+                        <li>✓ High Timing Entropy</li>
+                    </ul>
+                </div>
+
+                <div class="hardware-card" data-arch="g5" data-multiplier="2.0">
+                    <div class="hardware-icon">🖥️</div>
+                    <h3>Power Mac G5</h3>
+                    <p class="cpu-type">PowerPC 970</p>
+                    <div class="multiplier-badge">2.0x Multiplier</div>
+                    <p class="hardware-desc">64-bit PowerPC powerhouse. Strong antiquity score.</p>
+                    <ul class="features-list">
+                        <li>✓ AltiVec SIMD</li>
+                        <li>✓ 64-bit PowerPC</li>
+                        <li>✓ mftb Timing</li>
+                        <li>✓ Thermal Drift</li>
+                    </ul>
+                </div>
+
+                <div class="hardware-card" data-arch="x86" data-multiplier="1.0">
+                    <div class="hardware-icon">💻</div>
+                    <h3>Modern x86</h3>
+                    <p class="cpu-type">Intel/AMD 64-bit</p>
+                    <div class="multiplier-badge">1.0x Multiplier</div>
+                    <p class="hardware-desc">Standard modern hardware. Baseline rewards.</p>
+                    <ul class="features-list">
+                        <li>✓ SSE/AVX SIMD</li>
+                        <li>✓ rdtsc Timing</li>
+                        <li>✓ Little-Endian</li>
+                        <li>✓ Stable Thermals</li>
+                    </ul>
+                </div>
+
+                <div class="hardware-card vm-warning" data-arch="vm" data-multiplier="0.000000001">
+                    <div class="hardware-icon">☁️</div>
+                    <h3>Virtual Machine</h3>
+                    <p class="cpu-type">AWS/VMware/VirtualBox</p>
+                    <div class="multiplier-badge danger">0.000000001x</div>
+                    <p class="hardware-desc">⚠️ VMs are detected and heavily penalized!</p>
+                    <ul class="features-list">
+                        <li>✗ Detected by Anti-Emulation</li>
+                        <li>✗ Low timing entropy</li>
+                        <li>✗ Hypervisor signatures</li>
+                        <li>✗ ~0 rewards</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mining Simulation Section -->
+        <section class="simulation-section" id="simulation-section">
+            <h2>⛏️ Mining Loop Simulation</h2>
+            <p class="section-desc">Watch the complete mining loop in action:</p>
+
+            <div class="mining-steps">
+                <!-- Step 1: Hardware Detection -->
+                <div class="step-card" id="step-1">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h3>Hardware Detection</h3>
+                        <span class="step-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="fingerprint-checks">
+                            <div class="check-item" id="check-1">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">Clock-Skew & Oscillator Drift</span>
+                                <span class="check-detail"></span>
+                            </div>
+                            <div class="check-item" id="check-2">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">Cache Timing Fingerprint</span>
+                                <span class="check-detail"></span>
+                            </div>
+                            <div class="check-item" id="check-3">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">SIMD Unit Identity</span>
+                                <span class="check-detail"></span>
+                            </div>
+                            <div class="check-item" id="check-4">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">Thermal Drift Entropy</span>
+                                <span class="check-detail"></span>
+                            </div>
+                            <div class="check-item" id="check-5">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">Instruction Path Jitter</span>
+                                <span class="check-detail"></span>
+                            </div>
+                            <div class="check-item" id="check-6">
+                                <span class="check-icon">⏸️</span>
+                                <span class="check-name">Anti-Emulation Check</span>
+                                <span class="check-detail"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Attestation Submission -->
+                <div class="step-card" id="step-2">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h3>Attestation Submission</h3>
+                        <span class="step-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="payload-display">
+                            <div class="payload-header">
+                                <span>📤 Attestation Payload</span>
+                            </div>
+                            <pre class="payload-json" id="attestation-payload">{
+  "nonce": "...",
+  "wallet": "your-wallet",
+  "device_arch": "...",
+  "fingerprint": {
+    "clock_skew": null,
+    "cache_timing": null,
+    "simd_unit": null,
+    "thermal_entropy": null,
+    "path_jitter": null,
+    "anti_emulation": null
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Epoch Participation -->
+                <div class="step-card" id="step-3">
+                    <div class="step-header">
+                        <span class="step-number">3</span>
+                        <h3>Epoch Participation</h3>
+                        <span class="step-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="epoch-info">
+                            <div class="epoch-stat">
+                                <span class="epoch-label">Current Epoch:</span>
+                                <span class="epoch-value" id="epoch-number">--</span>
+                            </div>
+                            <div class="epoch-stat">
+                                <span class="epoch-label">Enrolled Miners:</span>
+                                <span class="epoch-value" id="enrolled-count">--</span>
+                            </div>
+                            <div class="epoch-stat">
+                                <span class="epoch-label">Your Position:</span>
+                                <span class="epoch-value" id="your-position">--</span>
+                            </div>
+                            <div class="round-robin-viz" id="round-robin-viz">
+                                <!-- Round-robin visualization will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Reward Calculation -->
+                <div class="step-card" id="step-4">
+                    <div class="step-header">
+                        <span class="step-number">4</span>
+                        <h3>Reward Calculation</h3>
+                        <span class="step-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="step-content">
+                        <div class="reward-breakdown">
+                            <div class="reward-row">
+                                <span class="reward-label">Base Reward:</span>
+                                <span class="reward-value" id="base-reward">--</span>
+                            </div>
+                            <div class="reward-row">
+                                <span class="reward-label">Architecture Multiplier:</span>
+                                <span class="reward-value" id="arch-multiplier">--</span>
+                            </div>
+                            <div class="reward-row">
+                                <span class="reward-label">Antiquity Bonus:</span>
+                                <span class="reward-value" id="antiquity-bonus">--</span>
+                            </div>
+                            <div class="reward-row total">
+                                <span class="reward-label">Total Reward:</span>
+                                <span class="reward-value" id="total-reward">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn-primary" id="start-simulation">▶️ Start Simulation</button>
+                <button class="btn-secondary" id="reset-simulation">🔄 Reset</button>
+            </div>
+        </section>
+
+        <!-- Real-time Comparison Section -->
+        <section class="comparison-section">
+            <h2>📊 Real-Time Reward Comparison</h2>
+            <p class="section-desc">See how different hardware stacks up:</p>
+            
+            <div class="comparison-chart">
+                <div class="chart-bar" data-arch="g4">
+                    <div class="bar-fill" style="width: 0%;" id="bar-g4"></div>
+                    <div class="bar-label">
+                        <span class="arch-name">PowerBook G4</span>
+                        <span class="arch-value" id="value-g4">0 RTC/epoch</span>
+                    </div>
+                </div>
+                <div class="chart-bar" data-arch="g5">
+                    <div class="bar-fill" style="width: 0%;" id="bar-g5"></div>
+                    <div class="bar-label">
+                        <span class="arch-name">Power Mac G5</span>
+                        <span class="arch-value" id="value-g5">0 RTC/epoch</span>
+                    </div>
+                </div>
+                <div class="chart-bar" data-arch="x86">
+                    <div class="bar-fill" style="width: 0%;" id="bar-x86"></div>
+                    <div class="bar-label">
+                        <span class="arch-name">Modern x86</span>
+                        <span class="arch-value" id="value-x86">0 RTC/epoch</span>
+                    </div>
+                </div>
+                <div class="chart-bar" data-arch="vm">
+                    <div class="bar-fill" style="width: 0%;" id="bar-vm"></div>
+                    <div class="bar-label">
+                        <span class="arch-name">Virtual Machine</span>
+                        <span class="arch-value" id="value-vm">0 RTC/epoch</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-note">
+                <p>💡 <strong>Note:</strong> Vintage hardware earns 2-2.5x more rewards due to the <strong>Proof-of-Antiquity</strong> consensus mechanism. Older, rarer hardware provides unique timing fingerprints that are harder to forge.</p>
+            </div>
+        </section>
+
+        <!-- Calculator Section (Bonus) -->
+        <section class="calculator-section">
+            <h2>🧮 What Would You Earn?</h2>
+            <p class="section-desc">Calculate your potential earnings based on your hardware:</p>
+            
+            <div class="calculator-form">
+                <div class="form-group">
+                    <label for="calc-hardware">Select Hardware:</label>
+                    <select id="calc-hardware">
+                        <option value="g4">PowerBook G4 (2.5x)</option>
+                        <option value="g5">Power Mac G5 (2.0x)</option>
+                        <option value="x86">Modern x86 (1.0x)</option>
+                        <option value="vm">Virtual Machine (0.000000001x)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="calc-epochs">Number of Epochs:</label>
+                    <input type="number" id="calc-epochs" value="24" min="1" max="720">
+                    <span class="input-hint">(1 epoch ≈ 1 hour)</span>
+                </div>
+                <div class="form-group">
+                    <label for="calc-network-hash">Network Hash Power (miners):</label>
+                    <input type="number" id="calc-network-hash" value="100" min="1" max="10000">
+                    <span class="input-hint">Estimated active miners</span>
+                </div>
+                <button class="btn-calculate" id="calculate-earnings">💰 Calculate Earnings</button>
+            </div>
+            
+            <div class="calculator-results" id="calculator-results" style="display: none;">
+                <div class="result-card">
+                    <h4>Estimated Earnings</h4>
+                    <div class="result-value" id="calc-total-rtc">-- RTC</div>
+                    <p class="result-note">Based on your inputs and current network parameters</p>
+                </div>
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span>Per Epoch:</span>
+                        <span id="calc-per-epoch">-- RTC</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Chance per Epoch:</span>
+                        <span id="calc-chance">--%</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Effective Multiplier:</span>
+                        <span id="calc-effective-mult">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download Section -->
+        <section class="download-section">
+            <h2>🚀 Ready to Mine for Real?</h2>
+            <p class="section-desc">Download the actual RustChain miner and start earning RTC:</p>
+            
+            <div class="download-options">
+                <a href="https://github.com/Scottcjn/rustchain-bounties/tree/main/rustchain-miner" class="download-btn" target="_blank">
+                    <span class="download-icon">📦</span>
+                    <span class="download-text">
+                        <strong>RustChain Miner</strong>
+                        <small>Native Rust binary for your architecture</small>
+                    </span>
+                </a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties" class="download-btn" target="_blank">
+                    <span class="download-icon">📂</span>
+                    <span class="download-text">
+                        <strong>Full Repository</strong>
+                        <small>Source code and documentation</small>
+                    </span>
+                </a>
+            </div>
+            
+            <div class="download-note">
+                <p>⚠️ <strong>Important:</strong> You'll need real vintage hardware (PowerPC G4/G5) or a modern x86/aarch64 system to mine. Virtual machines will not work!</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Made with 🦀 for the RustChain community | <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2301">Issue #2301</a></p>
+        </footer>
+    </div>
+
+    <script src="simulator.js"></script>
+</body>
+</html>
