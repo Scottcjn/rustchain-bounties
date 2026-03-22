@@ -1,0 +1,45 @@
+[
+  {
+    "captured_at": 1774164300,
+    "epoch": 1201,
+    "source": "sample-seed",
+    "miners": [
+      {"miner": "power8-s824-sophia", "device_arch": "power8", "device_family": "powerpc", "hardware_type": "PowerPC (Vintage)", "entropy_score": 0.94, "fingerprint_quality": 0.96, "rtc_earned": 1.8},
+      {"miner": "m2-mac-mini-sophia", "device_arch": "apple_silicon", "device_family": "arm", "hardware_type": "Apple Silicon (Modern)", "entropy_score": 0.78, "fingerprint_quality": 0.83, "rtc_earned": 1.0},
+      {"miner": "modern-sophiacore-3a168058", "device_arch": "modern", "device_family": "x86", "hardware_type": "x86-64 (Modern)", "entropy_score": 0.67, "fingerprint_quality": 0.71, "rtc_earned": 0.9}
+    ]
+  },
+  {
+    "captured_at": 1774164600,
+    "epoch": 1202,
+    "source": "sample-seed",
+    "miners": [
+      {"miner": "power8-s824-sophia", "device_arch": "power8", "device_family": "powerpc", "hardware_type": "PowerPC (Vintage)", "entropy_score": 0.95, "fingerprint_quality": 0.97, "rtc_earned": 1.9},
+      {"miner": "trashcan-d500-scott", "device_arch": "ivy_bridge", "device_family": "x86", "hardware_type": "x86-64 (Modern)", "entropy_score": 0.72, "fingerprint_quality": 0.79, "rtc_earned": 1.1},
+      {"miner": "claw-qinlingrongdeMacBook-Pro-48097", "device_arch": "apple_silicon", "device_family": "arm", "hardware_type": "Apple Silicon (Modern)", "entropy_score": 0.79, "fingerprint_quality": 0.84, "rtc_earned": 1.1},
+      {"miner": "claw-jojo-51658", "device_arch": "aarch64", "device_family": "ARM", "hardware_type": "Unknown/Other", "entropy_score": 0.42, "fingerprint_quality": 0.54, "rtc_earned": 0.2}
+    ]
+  },
+  {
+    "captured_at": 1774164900,
+    "epoch": 1203,
+    "source": "sample-seed",
+    "miners": [
+      {"miner": "power8-s824-sophia", "device_arch": "power8", "device_family": "powerpc", "hardware_type": "PowerPC (Vintage)", "entropy_score": 0.96, "fingerprint_quality": 0.98, "rtc_earned": 2.0},
+      {"miner": "m2-mac-mini-sophia", "device_arch": "apple_silicon", "device_family": "arm", "hardware_type": "Apple Silicon (Modern)", "entropy_score": 0.80, "fingerprint_quality": 0.85, "rtc_earned": 1.1},
+      {"miner": "ForestLee", "device_arch": "modern", "device_family": "x86", "hardware_type": "x86-64 (Modern)", "entropy_score": 0.69, "fingerprint_quality": 0.76, "rtc_earned": 0.8},
+      {"miner": "terramaster-nas-arm64", "device_arch": "aarch64", "device_family": "ARM", "hardware_type": "Unknown/Other", "entropy_score": 0.44, "fingerprint_quality": 0.57, "rtc_earned": 0.25}
+    ]
+  },
+  {
+    "captured_at": 1774165200,
+    "epoch": 1204,
+    "source": "sample-seed",
+    "miners": [
+      {"miner": "power8-s824-sophia", "device_arch": "power8", "device_family": "powerpc", "hardware_type": "PowerPC (Vintage)", "entropy_score": 0.96, "fingerprint_quality": 0.98, "rtc_earned": 2.0},
+      {"miner": "m2-mac-mini-sophia", "device_arch": "apple_silicon", "device_family": "arm", "hardware_type": "Apple Silicon (Modern)", "entropy_score": 0.81, "fingerprint_quality": 0.86, "rtc_earned": 1.15},
+      {"miner": "stepehenreed", "device_arch": "modern", "device_family": "x86", "hardware_type": "x86-64 (Modern)", "entropy_score": 0.70, "fingerprint_quality": 0.77, "rtc_earned": 0.85},
+      {"miner": "tianlin-rtc", "device_arch": "modern", "device_family": "arm", "hardware_type": "Unknown/Other", "entropy_score": 0.48, "fingerprint_quality": 0.59, "rtc_earned": 0.3}
+    ]
+  }
+]
