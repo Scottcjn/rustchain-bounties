@@ -31,7 +31,7 @@ class MinerSimulator:
         raw = f"{self.miner_id}-{time.time()}-{random.random()}"
         return hashlib.sha256(raw.encode()).hexdigest()[:38] + "RTC"
 
-    def generate_entropy_report(self, nonce):
+    def generate_entropy_report(self, nonce, node_url):
         """Simulates CPU timing entropy collection."""
         # In a real miner, this measures tight loops.
         # Here we simulate valid-looking stats.
@@ -47,8 +47,10 @@ class MinerSimulator:
             "samples_preview": samples
         }
 
+        # Commitment includes node_url so the payload is bound to the target
+        # node and cannot be replayed to a different node.
         commitment = hashlib.sha256(
-            (nonce + self.wallet + json.dumps(entropy, sort_keys=True)).encode()
+            (nonce + self.wallet + node_url + json.dumps(entropy, sort_keys=True)).encode()
         ).hexdigest()
 
         return {
@@ -58,14 +60,15 @@ class MinerSimulator:
             "entropy_score": entropy["variance_ns"]
         }
 
-    def build_attestation_payload(self, nonce):
+    def build_attestation_payload(self, nonce, node_url):
         """Constructs the full JSON payload for /attest/submit."""
-        report = self.generate_entropy_report(nonce)
+        report = self.generate_entropy_report(nonce, node_url)
 
         return {
             "miner": self.wallet,
             "miner_id": self.miner_id,
             "nonce": nonce,
+            "node_url": node_url,
             "report": report,
             "device": {
                 "family": self.profile["family"],
@@ -102,9 +105,9 @@ class MinerSimulator:
             }
         }
 
-    def build_malformed_payload(self, nonce):
+    def build_malformed_payload(self, nonce, node_url):
         """Constructs an intentionally broken payload for security testing."""
-        payload = self.build_attestation_payload(nonce)
+        payload = self.build_attestation_payload(nonce, node_url)
         choice = random.choice(["missing_nonce", "bad_commitment", "wrong_arch", "corrupt_json"])
 
         if choice == "missing_nonce":

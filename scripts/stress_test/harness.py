@@ -40,7 +40,7 @@ class StressHarness:
                 nonce = nonce_data.get("nonce")
 
                 # 2. Submit Attestation
-                payload = simulator.build_malformed_payload(nonce) if malformed else simulator.build_attestation_payload(nonce)
+                payload = simulator.build_malformed_payload(nonce, self.node_url) if malformed else simulator.build_attestation_payload(nonce, self.node_url)
                 res = await self._perform_step_with_retry("submit", f"{self.node_url}/attest/submit", payload, stats)
 
                 if malformed:

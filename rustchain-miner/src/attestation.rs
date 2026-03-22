@@ -76,7 +76,7 @@ pub fn run(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     // ── Build payload ───────────────────────────────────────────────────
     // For show-payload / dry-run, we use a placeholder nonce
     let placeholder_nonce = payload::generate_local_nonce();
-    let attest_payload = payload::build_payload(wallet, &placeholder_nonce, &hw, &fp);
+    let attest_payload = payload::build_payload(wallet, &placeholder_nonce, &cli.node, &hw, &fp);
 
     // ── Show-payload mode ───────────────────────────────────────────────
     if cli.show_payload {
@@ -128,7 +128,7 @@ pub fn run(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
         let fp = fingerprint::run_all_checks();
 
         // 3. Build attestation payload with real nonce
-        let attest_payload = payload::build_payload(wallet, &nonce, &hw, &fp);
+        let attest_payload = payload::build_payload(wallet, &nonce, &cli.node, &hw, &fp);
 
         // 4. Submit attestation
         print!("  Submitting attestation... ");

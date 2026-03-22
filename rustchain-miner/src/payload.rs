@@ -9,12 +9,18 @@ use rand::RngCore;
 /// Build the attestation payload as a serde_json::Value.
 ///
 /// This matches the exact schema required by POST /attest/submit.
+///
+/// `node_url` is included in the payload so the receiving node can verify
+/// the attestation was intended for it and reject cross-node replay attacks.
 pub fn build_payload(
     wallet: &str,
     nonce: &str,
+    node_url: &str,
     hw: &HardwareInfo,
     fp: &FingerprintResult,
 ) -> serde_json::Value {
+    use sha2::{Digest, Sha256};
+
     // Convert fingerprint checks to the expected nested format
     let mut checks = serde_json::Map::new();
     for (name, result) in &fp.checks {
@@ -27,10 +33,17 @@ pub fn build_payload(
         );
     }
 
+    // Commitment binds the nonce to the specific target node so a payload
+    // captured from one node cannot be replayed to a different node.
+    let commitment_input = format!("{}{}{}", nonce, wallet, node_url);
+    let commitment = hex::encode(Sha256::digest(commitment_input.as_bytes()));
+
     serde_json::json!({
         "miner": wallet,
         "miner_id": wallet,
         "nonce": nonce,
+        "node_url": node_url,
+        "commitment": commitment,
         "report": {
             "cpu_model": hw.cpu_model,
             "cpu_cores": hw.cpu_cores,
