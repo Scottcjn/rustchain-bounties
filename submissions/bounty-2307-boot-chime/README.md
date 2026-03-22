@@ -2,194 +2,188 @@
 
 **RustChain Bounty #2307 (95 RTC)**
 
-No one else has done acoustic hardware attestation. The boot chime is a physical artifact of real iron -- unique to each machine as it ages. Recapped capacitors change the sound. Speaker cone wear changes the sound. This is unforgeable without possessing the actual hardware.
+Acoustic hardware attestation system that captures spectral fingerprints from
+boot chime audio, compares them against known vintage hardware profiles, detects
+analog artifacts vs emulator perfection, and folds results into anti-emulation
+scoring for the RustChain attestation layer.
 
-## What It Does
+> No one else has done acoustic hardware attestation. The boot chime is a
+> physical artifact of real iron -- unique to each machine as it ages.
+> Recapped capacitors change the sound. Speaker cone wear changes the sound.
+> This is unforgeable without possessing the actual hardware.
 
-A server that captures spectral fingerprints from authentic startup sounds on Power Macs, Amigas, SGI workstations, Sun SparcStations, and other vintage hardware. It compares waveforms against known profiles and folds the result into anti-emulation scoring.
+## Features
 
-**Emulators produce digitally perfect audio.** Real hardware carries analog artifacts:
-- Capacitor aging shifts frequency response
-- Speaker-cone wear alters resonance peaks
-- Transformer hiss raises the noise floor
-- 50/60 Hz mains hum bleeds through analog paths
-- Oscillator drift shifts fundamental frequencies
+### Spectral Fingerprinting
+- FFT-based spectral analysis of boot chime audio
+- Dominant frequency peak detection with harmonic ratio extraction
+- Hann-windowed DFT on 4096-sample windows
+- Compact SHA-256 fingerprint hash for rapid matching
 
-The system scores all of these and issues a hardware-authenticity verdict.
+### Known Hardware Profiles (9 profiles across 4 families)
+
+| Family | Profile | Frequencies | Duration |
+|--------|---------|-------------|----------|
+| **Mac** | Quadra (1991) | C5-E5-G5 major chord | 1800ms |
+| **Mac** | Power Mac G3/G4 (1999) | C5-E5-G5-C6 | 2200ms |
+| **Mac** | G4 MDD (2002) | Extended chord | 2000ms |
+| **Mac** | Mac Pro Intel (2006) | Lower register | 2400ms |
+| **Amiga** | Kickstart (1985-1993) | A4-A5 Paula chip | 400ms |
+| **Amiga** | A1200 (1992) | A4-E5-A5 AGA | 500ms |
+| **SGI** | IRIX Boot Chime | D5-G5-D6 ethereal | 1200ms |
+| **Sun** | SparcStation Click-Buzz | 1-2-3 kHz harmonics | 300ms |
+| **Sun** | Ultra Workstation | 0.8-1.6-2.4 kHz | 450ms |
+
+### Anti-Emulation Detection
+Emulators produce digitally perfect audio. Real hardware has analog artifacts:
+- **Capacitor aging**: frequency drift over decades of use
+- **Speaker cone wear**: amplitude jitter in the output
+- **Analog noise floor**: characteristic hiss from aged components
+- **Harmonic spread**: non-ideal resonance from physical enclosures
+
+The system scores each chime on an analog artifact scale (0.0-1.0):
+- Score > 0.35 with match > 0.5 = **GENUINE_HARDWARE**
+- Score < 0.15 = **LIKELY_EMULATOR**
+- Otherwise = **UNCERTAIN**
+
+### Hardware Identity
+- Reads CPU model, machine ID, DMI board info, memory size
+- SHA-256 hash ties the attestation to specific physical hardware
+- Combined with audio fingerprint for full proof-of-iron
+
+### Chime Gallery (BoTTube Bonus)
+- Browse all attested boot chimes with spectral visualization
+- Each entry shows waveform, FFT peaks, match score, and verdict
+- Click to replay any chime through Web Audio API
+
+### Web Audio API Visualization
+- Real-time animated FFT spectrum during chime playback
+- Static spectral peak display with frequency labels
+- Waveform view with envelope overlay
+- Noise floor indicator line
 
 ## Architecture
 
 ```
-                    WAV Upload / Mic Recording
-                            |
-                    +-------v--------+
-                    |   Flask Server  |
-                    |   (server.py)   |
-                    +-------+--------+
-                            |
-              +-------------+-------------+
-              |             |             |
-        FFT Analysis   Profile Match  Analog Scoring
-              |             |             |
-              v             v             v
-        Spectral       Known Chime    Noise Floor
-        Envelope       Database       Mains Hum
-        Dominant       (7 profiles)   HF Rolloff
-        Frequencies                   Spectral Roughness
-              |             |             |
-              +------+------+------+------+
-                     |             |
-               Spectrogram   Attestation Hash
-                 (PNG)        (SHA-256)
-                     |             |
-                     v             v
-                  SQLite        On-Chain
-                  Storage       Submission
+server.py (aiohttp + aiosqlite)
+  |
+  +-- Audio Synthesis Engine
+  |     Generate WAV from profile (with analog variance)
+  |
+  +-- Spectral Fingerprint Extractor
+  |     DFT -> peak detection -> harmonic ratios -> hash
+  |
+  +-- Profile Matcher
+  |     Compare against 9 known hardware profiles
+  |     Frequency similarity + harmonic ratios + noise floor
+  |
+  +-- Anti-Emulation Scorer
+  |     Analog artifact detection (genuine vs emulator)
+  |
+  +-- Attestation Builder
+  |     Package fingerprint + match + hardware ID + signature
+  |
+  +-- SQLite Persistence
+  |     boot_chimes + chime_gallery tables
+  |
+  +-- REST API (11 endpoints)
+  |
+  +-- Embedded HTML Dashboard
+        Web Audio API playback + canvas visualization
 ```
-
-## Known Boot Chime Profiles
-
-| Profile | Manufacturer | Years | Key Feature |
-|---------|-------------|-------|-------------|
-| Mac Startup Chime | Apple | 1999-2016 | F# major chord, ASC chip |
-| Mac Quadra / Early PowerMac | Apple | 1991-1998 | Brighter timbre |
-| Amiga Kickstart Boot Tone | Commodore | 1985-1994 | Paula chip 8-bit PCM |
-| SGI IRIX Boot Chime | Silicon Graphics | 1992-2006 | HAL2/AD1843 crystalline |
-| Sun SparcStation Click-Buzz | Sun Microsystems | 1989-2001 | AMD79C30A codec |
-| NeXT Boot Sound | NeXT | 1988-1993 | DSP56001 orchestral hit |
-| IBM PS/2 POST Beep | IBM | 1987-1995 | 8254 PIT square wave |
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/chimes` | Upload boot-sound WAV for analysis |
-| `GET` | `/api/chimes` | List all registered boot chimes |
-| `GET` | `/api/chimes/:id` | Get full analysis result |
-| `POST` | `/api/verify/:id` | Submit acoustic attestation on-chain |
-| `GET` | `/api/spectrogram/:id` | Get spectrogram PNG |
-| `GET` | `/api/profiles` | List known reference profiles |
-| `GET` | `/health` | Health check |
+| `GET` | `/` | Web dashboard with visualization |
+| `GET` | `/api/profiles` | List known hardware chime profiles |
+| `POST` | `/api/chime/generate` | Generate chime from profile, attest |
+| `POST` | `/api/chime/upload` | Upload WAV for fingerprinting |
+| `GET` | `/api/chime/{id}` | Get full chime detail + attestation |
+| `GET` | `/api/chime/{id}/verify` | Re-verify stored chime integrity |
+| `GET` | `/api/chime/{id}/replay` | Get WAV audio (base64) |
+| `GET` | `/api/chimes` | List all chimes (paginated) |
+| `POST` | `/api/gallery` | Add chime to BoTTube gallery |
+| `GET` | `/api/gallery` | List gallery entries |
+| `GET` | `/api/stats` | Aggregate attestation statistics |
 
-## Quick Start
+## Setup
+
+### Requirements
+
+```
+Python 3.8+
+aiohttp
+aiosqlite
+```
+
+### Install
 
 ```bash
-cd submissions/bounty-2307-boot-chime
-pip install flask
+pip install aiohttp aiosqlite
+```
+
+### Run
+
+```bash
 python server.py
-# Open http://localhost:5307
 ```
 
-### CLI Analysis
+Server starts on `http://0.0.0.0:8307` by default.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BOOTCHIME_DB` | `bootchime.db` | SQLite database path |
+| `BOOTCHIME_HOST` | `0.0.0.0` | Bind address |
+| `BOOTCHIME_PORT` | `8307` | HTTP port |
+
+## Usage Examples
+
+### Generate a Boot Chime
 
 ```bash
-python server.py --analyze boot-chime.wav
+curl -X POST http://localhost:8307/api/chime/generate \
+  -H "Content-Type: application/json" \
+  -d '{"profile_key": "mac_1999", "analog_variance": 0.4}'
 ```
 
-Output:
-```
-======================================================================
-  Boot Chime Proof-of-Iron  --  Acoustic Hardware Attestation
-======================================================================
+### Upload Real Audio
 
-  File: boot-chime.wav
-  Duration: 2.50s  |  Sample Rate: 44100 Hz
-
-  --- Spectral Analysis ---
-  Dominant Frequencies: 370.0 Hz, 740.0 Hz, 1108.7 Hz, 1480.0 Hz
-  Harmonic Ratios (H2/H1, H3/H1): 0.847, 0.612
-
-  --- Analog Assessment ---
-           noise_floor: 0.80  [################    ]
-             mains_hum: 0.70  [##############      ]
-    spectral_roughness: 0.60  [############        ]
-            hf_rolloff: 0.90  [##################  ]
-             Composite: 0.7450
-               Verdict: REAL_HARDWARE
-
-  --- Hardware Match ---
-  1. Mac Startup Chime                        89.2% (spectral=0.91 freq=0.87 harmonic=0.84) <<< MATCH
-  2. Mac Quadra / Early PowerMac Chime        42.1% (spectral=0.45 freq=0.38 harmonic=0.40)
-  3. NeXT Boot Sound                          28.7% (spectral=0.31 freq=0.25 harmonic=0.27)
-
-  --- Attestation ---
-  Hash: a3f8c91d...
-  PoA-Signature: poa_chime2307_a3f8c91d4e7b2f01
-======================================================================
+```bash
+curl -X POST http://localhost:8307/api/chime/upload \
+  -F "file=@my_mac_boot.wav"
 ```
 
-## Web UI Features
+### Verify Attestation
 
-- **Audio upload** -- drag-and-drop or file picker (WAV, 16-bit PCM)
-- **Live microphone recording** -- capture boot chimes in real time with waveform visualization
-- **Spectrogram display** -- FFT-based frequency-vs-time visualization
-- **Hardware match results** -- ranked list with confidence scores
-- **Analog assessment bars** -- visual breakdown of noise floor, mains hum, spectral roughness, HF rolloff
-- **Attestation submission** -- one-click on-chain attestation
-- **Chime gallery** -- browse all analyzed chimes
-- **Profile browser** -- view all known reference profiles
-- **Dark theme** -- designed for terminal-native users
-
-## Technical Details
-
-### FFT Implementation
-
-Pure-Python Cooley-Tukey radix-2 decimation-in-time FFT. No numpy/scipy required. The 4096-point FFT gives ~10.7 Hz frequency resolution at 44.1 kHz sample rate.
-
-### Analog Scoring Algorithm
-
-Four independent scores are weighted to produce a composite:
-
-| Factor | Weight | What It Detects |
-|--------|--------|-----------------|
-| Noise Floor | 30% | Broadband noise from analog circuits |
-| Mains Hum | 25% | 50/60 Hz mains bleed-through |
-| Spectral Roughness | 25% | Speaker resonance peaks |
-| HF Rolloff | 20% | Natural speaker frequency limits |
-
-- **REAL_HARDWARE**: composite >= 0.50
-- **INCONCLUSIVE**: composite 0.30 - 0.50
-- **LIKELY_EMULATOR**: composite < 0.30
-
-### Spectrogram Generation
-
-Pure-Python PNG generation using zlib compression. No PIL/Pillow needed. Viridis-like colormap for frequency magnitude visualization.
-
-### Profile Matching
-
-Three-axis matching with weighted combination:
-- **Spectral similarity** (50%): Cosine similarity of 256-bin normalized envelopes
-- **Frequency match** (30%): Proximity of dominant frequency peaks
-- **Harmonic match** (20%): Ratio comparison of first harmonics
-
-## Dependencies
-
-- Python 3.8+
-- Flask (`pip install flask`)
-- Everything else uses Python stdlib (wave, struct, zlib, sqlite3, hashlib)
-
-## File Structure
-
+```bash
+curl http://localhost:8307/api/chime/chime_abc123def456/verify
 ```
-bounty-2307-boot-chime/
-  server.py       -- Flask server + FFT engine + profile database
-  chime.html      -- Web UI (single-file, no build step)
-  README.md       -- This file
-  uploads/        -- Uploaded audio files (auto-created)
-  spectrograms/   -- Generated spectrogram PNGs (auto-created)
-  chimes.db       -- SQLite database (auto-created)
-```
+
+## How Matching Works
+
+1. **Frequency Matching (45% weight)**: Each detected peak is compared against
+   the profile's known frequencies with 5% tolerance for analog drift.
+
+2. **Harmonic Ratio Matching (30% weight)**: The relative amplitudes of
+   harmonics are compared. Real hardware produces consistent but imperfect
+   harmonic relationships.
+
+3. **Noise Floor Matching (25% weight)**: The estimated noise floor is compared
+   against the profile's expected analog noise level. Different hardware
+   families have characteristically different noise floors.
+
+4. **Anti-Emulation Assessment**: The analog artifact score combines noise
+   floor magnitude, frequency spread patterns, and peak count to distinguish
+   genuine analog output from digitally perfect emulator audio.
 
 ## RTC Wallet
 
-`RTC_WALLET_ELROM_2307`
+`RTC_WALLET_ADDRESS_HERE`
 
 ## License
 
-MIT
-
----
-
-*PoA-Signature: poa_chime2307_acoustic_attestation*
-
-*"Most chains try to silence hardware. RustChain can use the literal voice of old machines as part of trust."*
+MIT -- Built for the RustChain network.

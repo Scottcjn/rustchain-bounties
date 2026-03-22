@@ -1,1314 +1,1961 @@
 #!/usr/bin/env python3
 """
-Boot Chime Proof-of-Iron  --  Acoustic Hardware Attestation for RustChain
-=========================================================================
-Bounty #2307 (95 RTC)
+Boot Chime Proof-of-Iron — Acoustic Hardware Attestation for RustChain
 
-Captures spectral fingerprints from authentic startup sounds on Power Macs,
-Amigas, SGIs, Sun SparcStations, and other vintage iron.  Compares waveforms
-against known profiles and folds the result into anti-emulation scoring.
+Generates spectral fingerprints from boot chime audio, compares against
+known hardware profiles (Power Mac, Amiga, SGI, Sun), detects analog
+artifacts vs emulator perfection, and folds results into anti-emulation
+scoring for the RustChain attestation layer.
 
-Emulators produce digitally-perfect audio.  Real hardware carries analog
-artifacts: capacitor aging, speaker-cone wear, transformer hiss, and
-60 Hz mains hum.  This is unforgeable without possessing the actual machine.
-
-Endpoints
----------
-POST   /api/chimes          Upload boot-sound WAV/MP3 for analysis
-GET    /api/chimes           List all registered boot chimes
-GET    /api/chimes/:id       Get analysis result for a specific chime
-POST   /api/verify/:id       Submit acoustic attestation on-chain
-GET    /api/spectrogram/:id  Serve spectrogram PNG for a chime
-GET    /                     Serve the web UI (chime.html)
-GET    /health               Health check
-
-Dependencies (stdlib + pure-Python only -- no numpy/scipy wheels needed):
-    pip install flask
-Everything else (FFT, WAV parsing, image generation) uses the stdlib.
-
-Author: ElromEvedElElyon
-License: MIT
+Bounty: rustchain-bounties#2307 (95 RTC)
 """
 
-from __future__ import annotations
-
-import array
-import base64
+import asyncio
 import hashlib
-import io
 import json
 import math
 import os
-import sqlite3
+import random
 import struct
-import tempfile
 import time
 import uuid
 import wave
-import zlib
-from contextlib import contextmanager
-from dataclasses import asdict, dataclass, field
+import io
+import base64
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
 
-from flask import (
-    Flask,
-    Response,
-    jsonify,
-    request,
-    send_file,
-    send_from_directory,
-)
+import aiohttp
+from aiohttp import web
+import aiosqlite
+
+DB_PATH = os.environ.get("BOOTCHIME_DB", "bootchime.db")
+HOST = os.environ.get("BOOTCHIME_HOST", "0.0.0.0")
+PORT = int(os.environ.get("BOOTCHIME_PORT", "8307"))
 
 # ---------------------------------------------------------------------------
-# Configuration
+# Known hardware chime profiles — spectral signatures
+# Each profile defines dominant frequency peaks, harmonic ratios, expected
+# duration, and characteristic analog artifacts for genuine hardware.
 # ---------------------------------------------------------------------------
-
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "chimes.db"
-UPLOAD_DIR = BASE_DIR / "uploads"
-SPECTROGRAM_DIR = BASE_DIR / "spectrograms"
-
-UPLOAD_DIR.mkdir(exist_ok=True)
-SPECTROGRAM_DIR.mkdir(exist_ok=True)
-
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
-ALLOWED_EXTENSIONS = {".wav", ".mp3", ".ogg", ".flac", ".raw"}
-SAMPLE_RATE = 44100  # resample target
-FFT_SIZE = 4096
-HOP_SIZE = 512
-MATCH_THRESHOLD = 0.70  # minimum cosine similarity for a positive match
-
-app = Flask(__name__, static_folder=str(BASE_DIR))
-
-
-# ---------------------------------------------------------------------------
-# Known Boot-Chime Reference Profiles
-# ---------------------------------------------------------------------------
-# Each profile stores a normalized FFT magnitude envelope (256 bins covering
-# 0-22 050 Hz) and key harmonic ratios measured from reference recordings.
-# Real recordings were taken from multiple exemplars; the stored profile is
-# the centroid with a per-bin tolerance band.
-
-
-@dataclass
-class ChimeProfile:
-    """Reference spectral profile for a known boot chime."""
-
-    name: str
-    manufacturer: str
-    years: str
-    description: str
-    # 256-element normalized magnitude spectrum (0..1)
-    spectral_centroid: list[float]
-    # dominant frequency peaks in Hz
-    dominant_freqs: list[float]
-    # ratio of first three harmonics (H2/H1, H3/H1)
-    harmonic_ratios: list[float]
-    # expected analog artifact indicators
-    expected_noise_floor_db: float  # broadband noise floor dBFS
-    expected_hum_freq: float  # mains hum fundamental (50 or 60 Hz)
-    tolerance: float = 0.15  # per-bin tolerance for matching
-
-
-def _generate_synthetic_profile(
-    fundamental: float,
-    harmonics: list[tuple[float, float]],
-    noise_floor: float = -60.0,
-    hum: float = 60.0,
-    num_bins: int = 256,
-) -> list[float]:
-    """Build a synthetic 256-bin spectral envelope from harmonic description."""
-    nyquist = SAMPLE_RATE / 2
-    bins = [0.0] * num_bins
-    for freq, amplitude in [(fundamental, 1.0)] + harmonics:
-        bin_idx = int(freq / nyquist * num_bins)
-        if 0 <= bin_idx < num_bins:
-            # Gaussian spread across neighboring bins
-            for offset in range(-3, 4):
-                idx = bin_idx + offset
-                if 0 <= idx < num_bins:
-                    spread = math.exp(-0.5 * (offset / 1.2) ** 2)
-                    bins[idx] += amplitude * spread
-    # normalize to [0..1]
-    mx = max(bins) if max(bins) > 0 else 1.0
-    return [b / mx for b in bins]
-
-
-# -- Mac Startup Chime (1999-2016, F-sharp major chord) --------------------
-_mac_harmonics = [
-    (739.99, 0.85),   # F#5
-    (1108.73, 0.60),  # C#6
-    (1479.98, 0.45),  # F#6
-    (2217.46, 0.30),  # C#7
-    (2959.96, 0.15),  # F#7
-]
-MAC_CHIME = ChimeProfile(
-    name="Mac Startup Chime",
-    manufacturer="Apple",
-    years="1999-2016",
-    description="F-sharp major chord synthesized by the ASC chip, "
-    "routed through onboard speakers. Each Mac model has slightly "
-    "different speaker resonance and capacitor aging.",
-    spectral_centroid=_generate_synthetic_profile(369.99, _mac_harmonics),
-    dominant_freqs=[369.99, 739.99, 1108.73, 1479.98],
-    harmonic_ratios=[0.85, 0.60],
-    expected_noise_floor_db=-55.0,
-    expected_hum_freq=60.0,
-    tolerance=0.18,
-)
-
-# -- Mac Quadra / early PowerMac (1991-1998) --------------------------------
-_mac_quadra_harmonics = [
-    (783.99, 0.80),
-    (1174.66, 0.55),
-    (1567.98, 0.35),
-]
-MAC_QUADRA_CHIME = ChimeProfile(
-    name="Mac Quadra / Early PowerMac Chime",
-    manufacturer="Apple",
-    years="1991-1998",
-    description="Earlier, simpler chord before the iconic 1999 chime. "
-    "Slightly brighter timbre with more high-frequency content.",
-    spectral_centroid=_generate_synthetic_profile(
-        392.00, _mac_quadra_harmonics, noise_floor=-50.0
-    ),
-    dominant_freqs=[392.00, 783.99, 1174.66],
-    harmonic_ratios=[0.80, 0.55],
-    expected_noise_floor_db=-50.0,
-    expected_hum_freq=60.0,
-    tolerance=0.20,
-)
-
-# -- Amiga Kickstart Boot Tone ---------------------------------------------
-_amiga_harmonics = [
-    (880.0, 0.70),
-    (1320.0, 0.40),
-    (1760.0, 0.25),
-]
-AMIGA_CHIME = ChimeProfile(
-    name="Amiga Kickstart Boot Tone",
-    manufacturer="Commodore",
-    years="1985-1994",
-    description="Paula chip 8-bit PCM click followed by a short sine burst. "
-    "The Amiga's audio path introduces distinct aliasing artifacts from "
-    "the 3.5 MHz DMA clock.",
-    spectral_centroid=_generate_synthetic_profile(
-        440.0, _amiga_harmonics, noise_floor=-45.0, hum=50.0
-    ),
-    dominant_freqs=[440.0, 880.0, 1320.0],
-    harmonic_ratios=[0.70, 0.40],
-    expected_noise_floor_db=-45.0,
-    expected_hum_freq=50.0,
-    tolerance=0.22,
-)
-
-# -- SGI IRIX Chime ---------------------------------------------------------
-_sgi_harmonics = [
-    (1046.50, 0.75),
-    (1567.98, 0.50),
-    (2093.00, 0.30),
-    (3135.96, 0.15),
-]
-SGI_CHIME = ChimeProfile(
-    name="SGI IRIX Boot Chime",
-    manufacturer="Silicon Graphics",
-    years="1992-2006",
-    description="Crystalline two-note sequence generated by the HAL2 or "
-    "AD1843 audio subsystem.  Indigo2 and Octane models are especially "
-    "distinctive due to their analog output stage.",
-    spectral_centroid=_generate_synthetic_profile(
-        523.25, _sgi_harmonics, noise_floor=-58.0
-    ),
-    dominant_freqs=[523.25, 1046.50, 1567.98],
-    harmonic_ratios=[0.75, 0.50],
-    expected_noise_floor_db=-58.0,
-    expected_hum_freq=60.0,
-    tolerance=0.16,
-)
-
-# -- Sun SparcStation Click-Buzz -------------------------------------------
-_sun_harmonics = [
-    (200.0, 0.90),
-    (400.0, 0.65),
-    (600.0, 0.40),
-    (1200.0, 0.20),
-]
-SUN_CHIME = ChimeProfile(
-    name="Sun SparcStation Click-Buzz",
-    manufacturer="Sun Microsystems",
-    years="1989-2001",
-    description="Characteristic relay click followed by a low-frequency "
-    "buzz from the onboard speaker.  The AMD79C30A codec on early models "
-    "produces a distinctive 8 kHz bandwidth limitation.",
-    spectral_centroid=_generate_synthetic_profile(
-        100.0, _sun_harmonics, noise_floor=-42.0
-    ),
-    dominant_freqs=[100.0, 200.0, 400.0, 600.0],
-    harmonic_ratios=[0.90, 0.65],
-    expected_noise_floor_db=-42.0,
-    expected_hum_freq=60.0,
-    tolerance=0.25,
-)
-
-# -- NeXT Boot Sound -------------------------------------------------------
-_next_harmonics = [
-    (659.25, 0.80),
-    (987.77, 0.55),
-    (1318.51, 0.35),
-]
-NEXT_CHIME = ChimeProfile(
-    name="NeXT Boot Sound",
-    manufacturer="NeXT",
-    years="1988-1993",
-    description="Short orchestral hit sample played through the onboard "
-    "DSP56001.  The 44.1 kHz Sigma-Delta DAC gives it a warm, rounded "
-    "character unique among workstations of the era.",
-    spectral_centroid=_generate_synthetic_profile(
-        329.63, _next_harmonics, noise_floor=-52.0
-    ),
-    dominant_freqs=[329.63, 659.25, 987.77],
-    harmonic_ratios=[0.80, 0.55],
-    expected_noise_floor_db=-52.0,
-    expected_hum_freq=60.0,
-    tolerance=0.18,
-)
-
-# -- IBM PS/2 POST Beep ----------------------------------------------------
-_ibm_harmonics = [
-    (2000.0, 0.50),
-    (3000.0, 0.20),
-]
-IBM_CHIME = ChimeProfile(
-    name="IBM PS/2 POST Beep",
-    manufacturer="IBM",
-    years="1987-1995",
-    description="Single-frequency square-wave beep from the 8254 PIT "
-    "routed through the onboard piezo speaker.  The square wave is "
-    "recognizable by its strong odd harmonics.",
-    spectral_centroid=_generate_synthetic_profile(
-        1000.0, _ibm_harmonics, noise_floor=-40.0
-    ),
-    dominant_freqs=[1000.0, 2000.0, 3000.0],
-    harmonic_ratios=[0.50, 0.20],
-    expected_noise_floor_db=-40.0,
-    expected_hum_freq=60.0,
-    tolerance=0.20,
-)
-
-KNOWN_PROFILES: list[ChimeProfile] = [
-    MAC_CHIME,
-    MAC_QUADRA_CHIME,
-    AMIGA_CHIME,
-    SGI_CHIME,
-    SUN_CHIME,
-    NEXT_CHIME,
-    IBM_CHIME,
-]
-
+KNOWN_PROFILES = {
+    "mac_1991": {
+        "name": "Macintosh Quadra (1991)",
+        "family": "mac",
+        "dominant_hz": [523.25, 659.25, 783.99],  # C5-E5-G5 major chord
+        "harmonic_ratios": [1.0, 0.78, 0.62],
+        "duration_ms": 1800,
+        "decay_rate": 0.35,
+        "analog_noise_floor_db": -42,
+        "description": "Classic Mac startup chord — C major triad, warm analog character",
+    },
+    "mac_1999": {
+        "name": "Power Mac G3/G4 (1999)",
+        "family": "mac",
+        "dominant_hz": [523.25, 659.25, 783.99, 1046.50],
+        "harmonic_ratios": [1.0, 0.82, 0.65, 0.40],
+        "duration_ms": 2200,
+        "decay_rate": 0.28,
+        "analog_noise_floor_db": -48,
+        "description": "Extended Mac chord with octave — cleaner but still analog",
+    },
+    "mac_2002": {
+        "name": "Power Mac G4 MDD (2002)",
+        "family": "mac",
+        "dominant_hz": [523.25, 659.25, 783.99, 1046.50],
+        "harmonic_ratios": [1.0, 0.85, 0.70, 0.45],
+        "duration_ms": 2000,
+        "decay_rate": 0.30,
+        "analog_noise_floor_db": -45,
+        "description": "MDD chime — slightly brighter, notorious for loud fans masking decay",
+    },
+    "mac_2006": {
+        "name": "Mac Pro Intel (2006)",
+        "family": "mac",
+        "dominant_hz": [261.63, 329.63, 392.00, 523.25],
+        "harmonic_ratios": [1.0, 0.88, 0.72, 0.55],
+        "duration_ms": 2400,
+        "decay_rate": 0.22,
+        "analog_noise_floor_db": -52,
+        "description": "Intel Mac chime — lower register, longer sustain",
+    },
+    "amiga_kickstart": {
+        "name": "Amiga Kickstart Boot (1985-1993)",
+        "family": "amiga",
+        "dominant_hz": [440.00, 880.00],
+        "harmonic_ratios": [1.0, 0.55],
+        "duration_ms": 400,
+        "decay_rate": 0.70,
+        "analog_noise_floor_db": -35,
+        "description": "Short click-pop from Paula chip — very analog, high noise floor",
+    },
+    "amiga_1200": {
+        "name": "Amiga 1200 (1992)",
+        "family": "amiga",
+        "dominant_hz": [440.00, 660.00, 880.00],
+        "harmonic_ratios": [1.0, 0.45, 0.50],
+        "duration_ms": 500,
+        "decay_rate": 0.65,
+        "analog_noise_floor_db": -38,
+        "description": "A1200 boot — Paula chip with AGA, slightly cleaner",
+    },
+    "sgi_irix": {
+        "name": "SGI IRIX Boot Chime",
+        "family": "sgi",
+        "dominant_hz": [587.33, 783.99, 1174.66],
+        "harmonic_ratios": [1.0, 0.72, 0.48],
+        "duration_ms": 1200,
+        "decay_rate": 0.40,
+        "analog_noise_floor_db": -46,
+        "description": "SGI IRIX startup — ethereal D-based chord, distinctive reverb",
+    },
+    "sun_sparc": {
+        "name": "Sun SparcStation Click-Buzz",
+        "family": "sun",
+        "dominant_hz": [1000.00, 2000.00, 3000.00],
+        "harmonic_ratios": [1.0, 0.60, 0.30],
+        "duration_ms": 300,
+        "decay_rate": 0.80,
+        "analog_noise_floor_db": -32,
+        "description": "Sparc click-buzz — sharp transient, high harmonics, very short",
+    },
+    "sun_ultra": {
+        "name": "Sun Ultra Workstation",
+        "family": "sun",
+        "dominant_hz": [800.00, 1600.00, 2400.00],
+        "harmonic_ratios": [1.0, 0.55, 0.35],
+        "duration_ms": 450,
+        "decay_rate": 0.72,
+        "analog_noise_floor_db": -36,
+        "description": "Ultra series — slightly lower than Sparc, more defined buzz",
+    },
+}
 
 # ---------------------------------------------------------------------------
-# Pure-Python FFT (Cooley-Tukey radix-2 DIT)
+# Audio synthesis — generate chime waveforms for known profiles
 # ---------------------------------------------------------------------------
 
-def _bit_reverse(x: int, bits: int) -> int:
-    result = 0
-    for _ in range(bits):
-        result = (result << 1) | (x & 1)
-        x >>= 1
-    return result
 
+def generate_chime_wav(profile_key: str, sample_rate: int = 44100,
+                       analog_variance: float = 0.0) -> bytes:
+    """Synthesize a boot chime WAV from a known profile.
 
-def fft(signal: list[complex]) -> list[complex]:
-    """Radix-2 decimation-in-time FFT.  len(signal) must be a power of 2."""
-    n = len(signal)
-    if n == 1:
-        return signal[:]
-
-    bits = int(math.log2(n))
-    # bit-reversal permutation
-    result = [signal[_bit_reverse(i, bits)] for i in range(n)]
-
-    length = 2
-    while length <= n:
-        angle = -2.0 * math.pi / length
-        wn = complex(math.cos(angle), math.sin(angle))
-        half = length // 2
-        for start in range(0, n, length):
-            w = complex(1.0, 0.0)
-            for j in range(half):
-                u = result[start + j]
-                t = w * result[start + j + half]
-                result[start + j] = u + t
-                result[start + j + half] = u - t
-                w *= wn
-        length <<= 1
-
-    return result
-
-
-def compute_magnitude_spectrum(
-    samples: list[float], fft_size: int = FFT_SIZE
-) -> list[float]:
-    """Return magnitude spectrum (first fft_size//2 bins) in dBFS."""
-    # zero-pad or truncate
-    padded = samples[:fft_size] + [0.0] * max(0, fft_size - len(samples))
-    # apply Hann window
-    windowed = [
-        s * 0.5 * (1.0 - math.cos(2.0 * math.pi * i / (fft_size - 1)))
-        for i, s in enumerate(padded)
-    ]
-    spectrum = fft([complex(s) for s in windowed])
-    half = fft_size // 2
-    magnitudes = []
-    for k in range(half):
-        mag = abs(spectrum[k]) / half
-        db = 20.0 * math.log10(mag + 1e-12)
-        magnitudes.append(db)
-    return magnitudes
-
-
-def compute_normalized_envelope(
-    samples: list[float], num_bins: int = 256
-) -> list[float]:
-    """Compute a normalized spectral envelope with `num_bins` frequency bins."""
-    mag = compute_magnitude_spectrum(samples)
-    # resample to num_bins via linear interpolation
-    ratio = len(mag) / num_bins
-    envelope = []
-    for i in range(num_bins):
-        src = i * ratio
-        lo = int(src)
-        hi = min(lo + 1, len(mag) - 1)
-        frac = src - lo
-        envelope.append(mag[lo] * (1.0 - frac) + mag[hi] * frac)
-    # shift to [0..1]
-    mn = min(envelope)
-    mx = max(envelope)
-    rng = mx - mn if mx - mn > 0 else 1.0
-    return [(v - mn) / rng for v in envelope]
-
-
-def compute_dominant_frequencies(
-    samples: list[float], top_n: int = 6
-) -> list[float]:
-    """Return the top-N frequency peaks from the magnitude spectrum."""
-    mag = compute_magnitude_spectrum(samples)
-    freq_per_bin = SAMPLE_RATE / FFT_SIZE
-    # find local maxima
-    peaks: list[tuple[float, float]] = []
-    for i in range(1, len(mag) - 1):
-        if mag[i] > mag[i - 1] and mag[i] > mag[i + 1]:
-            peaks.append((mag[i], i * freq_per_bin))
-    peaks.sort(reverse=True)
-    return [freq for _, freq in peaks[:top_n]]
-
-
-def compute_harmonic_ratios(
-    samples: list[float], fundamental: float
-) -> list[float]:
-    """Compute amplitude ratios H2/H1 and H3/H1 relative to fundamental."""
-    mag = compute_magnitude_spectrum(samples)
-    freq_per_bin = SAMPLE_RATE / FFT_SIZE
-
-    def _bin_amplitude(freq: float) -> float:
-        idx = int(freq / freq_per_bin)
-        if 0 <= idx < len(mag):
-            return mag[idx]
-        return -120.0
-
-    h1 = _bin_amplitude(fundamental)
-    h2 = _bin_amplitude(fundamental * 2)
-    h3 = _bin_amplitude(fundamental * 3)
-    if h1 <= -100:
-        return [0.0, 0.0]
-    # convert from dB difference to linear ratio
-    r2 = 10.0 ** ((h2 - h1) / 20.0)
-    r3 = 10.0 ** ((h3 - h1) / 20.0)
-    return [min(r2, 1.0), min(r3, 1.0)]
-
-
-def estimate_noise_floor(samples: list[float]) -> float:
-    """Estimate broadband noise floor in dBFS from the quietest 10% of bins."""
-    mag = compute_magnitude_spectrum(samples)
-    mag_sorted = sorted(mag)
-    n = max(1, len(mag_sorted) // 10)
-    return sum(mag_sorted[:n]) / n
-
-
-def detect_mains_hum(samples: list[float]) -> tuple[float, float]:
-    """Detect 50 Hz or 60 Hz mains hum.  Returns (freq, amplitude_db)."""
-    mag = compute_magnitude_spectrum(samples)
-    freq_per_bin = SAMPLE_RATE / FFT_SIZE
-    idx_50 = int(50.0 / freq_per_bin)
-    idx_60 = int(60.0 / freq_per_bin)
-    amp_50 = mag[idx_50] if idx_50 < len(mag) else -120.0
-    amp_60 = mag[idx_60] if idx_60 < len(mag) else -120.0
-    if amp_50 > amp_60:
-        return (50.0, amp_50)
-    return (60.0, amp_60)
-
-
-# ---------------------------------------------------------------------------
-# Analog Artifact Scoring
-# ---------------------------------------------------------------------------
-
-def compute_analog_score(
-    samples: list[float],
-    noise_floor_db: float,
-    hum_freq: float,
-    hum_amplitude_db: float,
-) -> dict[str, Any]:
+    analog_variance [0.0-1.0] adds simulated analog imperfections:
+      - frequency drift from aging capacitors
+      - amplitude jitter from speaker cone wear
+      - low-level hiss from analog noise floor
     """
-    Score analog artifacts to distinguish real hardware from emulators.
+    profile = KNOWN_PROFILES.get(profile_key)
+    if not profile:
+        raise ValueError(f"Unknown profile: {profile_key}")
 
-    Emulators produce digitally perfect audio:
-      - Very low noise floor (below -80 dBFS)
-      - No mains hum
-      - No speaker resonance coloring
-      - Perfect frequency precision
+    duration_s = profile["duration_ms"] / 1000.0
+    n_samples = int(sample_rate * duration_s)
+    decay = profile["decay_rate"]
+    freqs = profile["dominant_hz"]
+    ratios = profile["harmonic_ratios"]
+    noise_db = profile["analog_noise_floor_db"]
+    noise_amp = 10 ** (noise_db / 20.0)
 
-    Real hardware shows:
-      - Higher noise floor (-30 to -55 dBFS)
-      - Mains hum at 50/60 Hz with harmonics
-      - Speaker resonance peaks
-      - Slight frequency drift from aging oscillators
+    samples = []
+    for i in range(n_samples):
+        t = i / sample_rate
+        envelope = math.exp(-decay * t * 4)
+
+        val = 0.0
+        for freq, ratio in zip(freqs, ratios):
+            # Apply analog drift if requested — simulates capacitor aging
+            drift = 0.0
+            if analog_variance > 0:
+                drift = (analog_variance * 2.0
+                         * math.sin(2 * math.pi * 0.3 * t)
+                         * freq * 0.002)
+            val += ratio * math.sin(2 * math.pi * (freq + drift) * t) * envelope
+
+        # Analog noise floor — hiss from aged components
+        if analog_variance > 0:
+            val += random.gauss(0, noise_amp * analog_variance * 3)
+
+        # Amplitude jitter — speaker cone wear
+        if analog_variance > 0:
+            val *= 1.0 + random.gauss(0, analog_variance * 0.01)
+
+        samples.append(val)
+
+    # Normalize to 16-bit PCM
+    peak = max(abs(s) for s in samples) or 1.0
+    scale = 32000 / peak
+    pcm = b"".join(
+        struct.pack("<h", max(-32768, min(32767, int(s * scale))))
+        for s in samples
+    )
+
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(pcm)
+    return buf.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Spectral fingerprint extraction (FFT-based)
+# ---------------------------------------------------------------------------
+
+
+def extract_spectral_fingerprint(wav_bytes: bytes) -> dict:
+    """Extract spectral fingerprint from WAV audio data.
+
+    Returns dominant frequencies, harmonic ratios, noise floor estimate,
+    and a compact hash for matching.
     """
-    scores: dict[str, float] = {}
-
-    # 1. Noise floor -- real hardware has more noise
-    if noise_floor_db > -35:
-        scores["noise_floor"] = 1.0  # very noisy = definitely real
-    elif noise_floor_db > -50:
-        scores["noise_floor"] = 0.8
-    elif noise_floor_db > -65:
-        scores["noise_floor"] = 0.5
-    elif noise_floor_db > -75:
-        scores["noise_floor"] = 0.2
-    else:
-        scores["noise_floor"] = 0.0  # suspiciously clean
-
-    # 2. Mains hum presence
-    if hum_amplitude_db > -40:
-        scores["mains_hum"] = 1.0
-    elif hum_amplitude_db > -55:
-        scores["mains_hum"] = 0.7
-    elif hum_amplitude_db > -70:
-        scores["mains_hum"] = 0.3
-    else:
-        scores["mains_hum"] = 0.0  # no hum = emulator
-
-    # 3. Spectral irregularity -- real speakers have resonance peaks
-    envelope = compute_normalized_envelope(samples)
-    diffs = [abs(envelope[i] - envelope[i - 1]) for i in range(1, len(envelope))]
-    avg_diff = sum(diffs) / len(diffs) if diffs else 0
-    if avg_diff > 0.08:
-        scores["spectral_roughness"] = 1.0
-    elif avg_diff > 0.04:
-        scores["spectral_roughness"] = 0.6
-    else:
-        scores["spectral_roughness"] = 0.2
-
-    # 4. High-frequency roll-off (real speakers roll off; emulators don't)
-    upper_quarter = envelope[len(envelope) * 3 // 4 :]
-    avg_upper = sum(upper_quarter) / len(upper_quarter) if upper_quarter else 0
-    if avg_upper < 0.15:
-        scores["hf_rolloff"] = 0.9  # natural speaker roll-off
-    elif avg_upper < 0.30:
-        scores["hf_rolloff"] = 0.5
-    else:
-        scores["hf_rolloff"] = 0.1  # flat response = digital
-
-    # weighted composite
-    weights = {
-        "noise_floor": 0.30,
-        "mains_hum": 0.25,
-        "spectral_roughness": 0.25,
-        "hf_rolloff": 0.20,
-    }
-    total = sum(scores[k] * weights[k] for k in scores)
-
-    verdict = "REAL_HARDWARE"
-    if total < 0.3:
-        verdict = "LIKELY_EMULATOR"
-    elif total < 0.5:
-        verdict = "INCONCLUSIVE"
-
-    return {
-        "scores": scores,
-        "composite": round(total, 4),
-        "verdict": verdict,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Profile Matching
-# ---------------------------------------------------------------------------
-
-def cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Cosine similarity between two vectors."""
-    dot = sum(x * y for x, y in zip(a, b))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(x * x for x in b))
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return dot / (norm_a * norm_b)
-
-
-def match_against_profiles(
-    envelope: list[float],
-    dominant_freqs: list[float],
-    harmonic_ratios: list[float],
-) -> list[dict[str, Any]]:
-    """Match a chime against all known profiles.  Returns sorted results."""
-    results = []
-    for profile in KNOWN_PROFILES:
-        # spectral similarity
-        spectral_sim = cosine_similarity(envelope, profile.spectral_centroid)
-
-        # frequency match score
-        freq_score = 0.0
-        for pf in profile.dominant_freqs:
-            best = min(
-                (abs(df - pf) / pf for df in dominant_freqs),
-                default=1.0,
-            )
-            freq_score += max(0, 1.0 - best * 5)
-        freq_score /= max(len(profile.dominant_freqs), 1)
-
-        # harmonic ratio score
-        hr_score = 0.0
-        for i, pr in enumerate(profile.harmonic_ratios):
-            if i < len(harmonic_ratios):
-                diff = abs(harmonic_ratios[i] - pr)
-                hr_score += max(0, 1.0 - diff * 3)
-        hr_score /= max(len(profile.harmonic_ratios), 1)
-
-        composite = spectral_sim * 0.50 + freq_score * 0.30 + hr_score * 0.20
-        results.append(
-            {
-                "profile": profile.name,
-                "manufacturer": profile.manufacturer,
-                "years": profile.years,
-                "confidence": round(composite, 4),
-                "spectral_similarity": round(spectral_sim, 4),
-                "frequency_match": round(freq_score, 4),
-                "harmonic_match": round(hr_score, 4),
-                "matched": composite >= MATCH_THRESHOLD,
-            }
-        )
-    results.sort(key=lambda r: r["confidence"], reverse=True)
-    return results
-
-
-# ---------------------------------------------------------------------------
-# WAV Parser (stdlib only)
-# ---------------------------------------------------------------------------
-
-def read_wav_samples(filepath: str) -> tuple[list[float], int]:
-    """Read a WAV file and return normalized float samples + sample rate."""
-    with wave.open(filepath, "rb") as wf:
-        nchannels = wf.getnchannels()
+    buf = io.BytesIO(wav_bytes)
+    with wave.open(buf, "rb") as wf:
+        n_channels = wf.getnchannels()
         sampwidth = wf.getsampwidth()
         framerate = wf.getframerate()
-        nframes = wf.getnframes()
-        raw = wf.readframes(nframes)
+        n_frames = wf.getnframes()
+        raw = wf.readframes(n_frames)
 
-    if sampwidth == 1:
-        fmt = f"{nframes * nchannels}B"
-        data = struct.unpack(fmt, raw)
-        samples = [(s - 128) / 128.0 for s in data]
-    elif sampwidth == 2:
-        fmt = f"<{nframes * nchannels}h"
-        data = struct.unpack(fmt, raw)
-        samples = [s / 32768.0 for s in data]
-    elif sampwidth == 3:
-        samples = []
-        for i in range(0, len(raw), 3):
-            val = raw[i] | (raw[i + 1] << 8) | (raw[i + 2] << 16)
-            if val >= 0x800000:
-                val -= 0x1000000
-            samples.append(val / 8388608.0)
-    elif sampwidth == 4:
-        fmt = f"<{nframes * nchannels}i"
-        data = struct.unpack(fmt, raw)
-        samples = [s / 2147483648.0 for s in data]
+    # Convert to float samples (mono)
+    if sampwidth == 2:
+        fmt = f"<{n_frames * n_channels}h"
+        int_samples = struct.unpack(fmt, raw)
+    elif sampwidth == 1:
+        int_samples = [s - 128 for s in raw]
     else:
-        raise ValueError(f"Unsupported sample width: {sampwidth}")
+        int_samples = list(raw)
 
-    # mix to mono
-    if nchannels > 1:
-        mono = []
-        for i in range(0, len(samples), nchannels):
-            mono.append(sum(samples[i : i + nchannels]) / nchannels)
-        samples = mono
-
-    return samples, framerate
-
-
-def resample_linear(
-    samples: list[float], src_rate: int, dst_rate: int
-) -> list[float]:
-    """Simple linear interpolation resampler."""
-    if src_rate == dst_rate:
-        return samples
-    ratio = src_rate / dst_rate
-    out_len = int(len(samples) / ratio)
-    result = []
-    for i in range(out_len):
-        src_pos = i * ratio
-        lo = int(src_pos)
-        hi = min(lo + 1, len(samples) - 1)
-        frac = src_pos - lo
-        result.append(samples[lo] * (1.0 - frac) + samples[hi] * frac)
-    return result
-
-
-# ---------------------------------------------------------------------------
-# Spectrogram Generator (pure-Python PNG)
-# ---------------------------------------------------------------------------
-
-def _create_png(width: int, height: int, pixels: list[list[tuple[int, int, int]]]) -> bytes:
-    """Create a minimal PNG from RGB pixel data.  No external deps."""
-
-    def _chunk(chunk_type: bytes, data: bytes) -> bytes:
-        c = chunk_type + data
-        crc = zlib.crc32(c) & 0xFFFFFFFF
-        return struct.pack(">I", len(data)) + c + struct.pack(">I", crc)
-
-    # IHDR
-    ihdr_data = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    ihdr = _chunk(b"IHDR", ihdr_data)
-
-    # IDAT
-    raw_rows = bytearray()
-    for row in pixels:
-        raw_rows.append(0)  # filter: None
-        for r, g, b in row:
-            raw_rows.extend([r, g, b])
-    compressed = zlib.compress(bytes(raw_rows), 9)
-    idat = _chunk(b"IDAT", compressed)
-
-    # IEND
-    iend = _chunk(b"IEND", b"")
-
-    return b"\x89PNG\r\n\x1a\n" + ihdr + idat + iend
-
-
-def _viridis_colormap(value: float) -> tuple[int, int, int]:
-    """Attempt at a viridis-like colormap.  value in [0..1]."""
-    # simplified 5-stop gradient
-    stops = [
-        (0.0, (68, 1, 84)),
-        (0.25, (59, 82, 139)),
-        (0.5, (33, 145, 140)),
-        (0.75, (94, 201, 98)),
-        (1.0, (253, 231, 37)),
-    ]
-    value = max(0.0, min(1.0, value))
-    for i in range(len(stops) - 1):
-        t0, c0 = stops[i]
-        t1, c1 = stops[i + 1]
-        if value <= t1:
-            frac = (value - t0) / (t1 - t0) if t1 > t0 else 0
-            r = int(c0[0] + (c1[0] - c0[0]) * frac)
-            g = int(c0[1] + (c1[1] - c0[1]) * frac)
-            b = int(c0[2] + (c1[2] - c0[2]) * frac)
-            return (r, g, b)
-    return stops[-1][1]
-
-
-def generate_spectrogram(
-    samples: list[float],
-    width: int = 800,
-    height: int = 400,
-) -> bytes:
-    """Generate a spectrogram PNG from audio samples."""
-    n_frames = max(1, (len(samples) - FFT_SIZE) // HOP_SIZE)
-    half = FFT_SIZE // 2
-
-    # compute STFT magnitudes
-    spec_data: list[list[float]] = []
-    for frame_idx in range(n_frames):
-        start = frame_idx * HOP_SIZE
-        chunk = samples[start : start + FFT_SIZE]
-        if len(chunk) < FFT_SIZE:
-            chunk = chunk + [0.0] * (FFT_SIZE - len(chunk))
-        # Hann window
-        windowed = [
-            s * 0.5 * (1.0 - math.cos(2.0 * math.pi * i / (FFT_SIZE - 1)))
-            for i, s in enumerate(chunk)
+    # Mix to mono if stereo
+    if n_channels == 2:
+        mono = [
+            (int_samples[i] + int_samples[i + 1]) / 2
+            for i in range(0, len(int_samples), 2)
         ]
-        spectrum = fft([complex(s) for s in windowed])
-        mags = [abs(spectrum[k]) / half for k in range(half)]
-        db = [20.0 * math.log10(m + 1e-12) for m in mags]
-        spec_data.append(db)
+    else:
+        mono = list(int_samples)
 
-    if not spec_data:
-        # empty spectrogram
-        pixels = [[(0, 0, 0)] * width for _ in range(height)]
-        return _create_png(width, height, pixels)
+    # Normalize
+    peak = max(abs(s) for s in mono) or 1.0
+    samples = [s / peak for s in mono]
 
-    # flatten to find range
-    all_vals = [v for row in spec_data for v in row]
-    db_min = max(min(all_vals), -100)
-    db_max = max(all_vals)
-    db_range = db_max - db_min if db_max > db_min else 1.0
+    # DFT on first 4096 samples for fingerprinting
+    N = min(4096, len(samples))
+    # Hann window to reduce spectral leakage
+    window = [0.5 * (1 - math.cos(2 * math.pi * i / (N - 1))) for i in range(N)]
+    windowed = [samples[i] * window[i] for i in range(N)]
 
-    # resample to image dimensions
-    pixels: list[list[tuple[int, int, int]]] = []
-    for y in range(height):
-        row: list[tuple[int, int, int]] = []
-        freq_idx = int((1.0 - y / height) * half)
-        freq_idx = max(0, min(freq_idx, half - 1))
-        for x in range(width):
-            frame_idx = int(x / width * len(spec_data))
-            frame_idx = max(0, min(frame_idx, len(spec_data) - 1))
-            val = (spec_data[frame_idx][freq_idx] - db_min) / db_range
-            row.append(_viridis_colormap(val))
-        pixels.append(row)
+    # Compute magnitude spectrum
+    n_bins = N // 2
+    magnitudes = []
+    for k in range(n_bins):
+        re = sum(windowed[n] * math.cos(2 * math.pi * k * n / N) for n in range(N))
+        im = sum(windowed[n] * math.sin(2 * math.pi * k * n / N) for n in range(N))
+        mag = math.sqrt(re * re + im * im) / N
+        magnitudes.append(mag)
 
-    return _create_png(width, height, pixels)
+    # Find dominant peaks
+    freq_resolution = framerate / N
+    peak_indices = sorted(
+        range(len(magnitudes)),
+        key=lambda i: magnitudes[i],
+        reverse=True,
+    )[:8]
+    peak_freqs = [round(i * freq_resolution, 2) for i in peak_indices if i > 0]
+    peak_mags = [round(magnitudes[i], 6) for i in peak_indices if i > 0]
 
+    # Harmonic ratios relative to strongest
+    top_mag = peak_mags[0] if peak_mags else 1.0
+    harmonic_ratios = [round(m / top_mag, 4) for m in peak_mags]
 
-# ---------------------------------------------------------------------------
-# On-chain Attestation (simulated)
-# ---------------------------------------------------------------------------
-
-def compute_attestation_hash(
-    chime_id: str,
-    fingerprint: dict,
-    analog_score: dict,
-    matches: list[dict],
-) -> str:
-    """Compute a PoA (Proof-of-Audio) attestation hash."""
-    payload = json.dumps(
-        {
-            "chime_id": chime_id,
-            "fingerprint": fingerprint,
-            "analog_score": analog_score,
-            "top_match": matches[0] if matches else None,
-            "timestamp": int(time.time()),
-        },
-        sort_keys=True,
+    # Noise floor estimate (average of bottom 50% of spectrum)
+    sorted_mags = sorted(magnitudes)
+    noise_floor = (
+        sum(sorted_mags[: len(sorted_mags) // 2])
+        / max(len(sorted_mags) // 2, 1)
     )
-    return hashlib.sha256(payload.encode()).hexdigest()
+    noise_floor_db = round(20 * math.log10(max(noise_floor, 1e-10)), 2)
 
+    # Duration
+    duration_ms = round(len(samples) / framerate * 1000, 1)
 
-# ---------------------------------------------------------------------------
-# Database
-# ---------------------------------------------------------------------------
+    # Analog artifact score: real hardware has higher noise, frequency spread
+    artifact_spread = (
+        sum(
+            abs(f1 - f2)
+            for f1, f2 in zip(peak_freqs[:-1], peak_freqs[1:])
+        )
+        if len(peak_freqs) > 1
+        else 0
+    )
+    analog_score = min(
+        1.0,
+        round(
+            (0.4 * min(1.0, abs(noise_floor_db) / 60.0))
+            + (0.3 * min(1.0, artifact_spread / 5000.0))
+            + (0.3 * min(1.0, len(peak_freqs) / 6.0)),
+            4,
+        ),
+    )
 
-def get_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    return conn
+    # Compact fingerprint hash
+    fp_data = f"{peak_freqs}{harmonic_ratios}{noise_floor_db}{duration_ms}"
+    fp_hash = hashlib.sha256(fp_data.encode()).hexdigest()[:32]
 
-
-def init_db():
-    with get_db() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS chimes (
-                id TEXT PRIMARY KEY,
-                filename TEXT NOT NULL,
-                original_name TEXT,
-                file_size INTEGER,
-                sample_rate INTEGER,
-                duration_sec REAL,
-                created_at TEXT DEFAULT (datetime('now')),
-                -- analysis results
-                dominant_freqs TEXT,
-                harmonic_ratios TEXT,
-                noise_floor_db REAL,
-                hum_freq REAL,
-                hum_amplitude_db REAL,
-                analog_score REAL,
-                analog_verdict TEXT,
-                analog_details TEXT,
-                -- matching
-                best_match TEXT,
-                best_confidence REAL,
-                match_results TEXT,
-                -- attestation
-                attestation_hash TEXT,
-                attestation_submitted INTEGER DEFAULT 0,
-                attestation_block TEXT,
-                attestation_timestamp TEXT,
-                -- spectrogram
-                spectrogram_path TEXT,
-                -- full fingerprint JSON
-                fingerprint TEXT
-            )
-        """)
-        conn.commit()
-
-
-init_db()
-
-
-# ---------------------------------------------------------------------------
-# Analysis Pipeline
-# ---------------------------------------------------------------------------
-
-@dataclass
-class AnalysisResult:
-    chime_id: str
-    filename: str
-    original_name: str
-    file_size: int
-    sample_rate: int
-    duration_sec: float
-    dominant_freqs: list[float]
-    harmonic_ratios: list[float]
-    noise_floor_db: float
-    hum_freq: float
-    hum_amplitude_db: float
-    analog_score: float
-    analog_verdict: str
-    analog_details: dict
-    best_match: str
-    best_confidence: float
-    match_results: list[dict]
-    attestation_hash: str
-    spectrogram_path: str
-    fingerprint: dict
-
-
-def analyze_chime(filepath: str, original_name: str) -> AnalysisResult:
-    """Full analysis pipeline for an uploaded boot chime."""
-    chime_id = str(uuid.uuid4())
-
-    # read audio
-    samples, src_rate = read_wav_samples(filepath)
-
-    # resample to standard rate
-    if src_rate != SAMPLE_RATE:
-        samples = resample_linear(samples, src_rate, SAMPLE_RATE)
-
-    duration = len(samples) / SAMPLE_RATE
-    file_size = os.path.getsize(filepath)
-
-    # spectral analysis
-    envelope = compute_normalized_envelope(samples)
-    dom_freqs = compute_dominant_frequencies(samples)
-    fundamental = dom_freqs[0] if dom_freqs else 440.0
-    harm_ratios = compute_harmonic_ratios(samples, fundamental)
-    noise_floor = estimate_noise_floor(samples)
-    hum_freq, hum_amp = detect_mains_hum(samples)
-
-    # analog scoring
-    analog = compute_analog_score(samples, noise_floor, hum_freq, hum_amp)
-
-    # profile matching
-    matches = match_against_profiles(envelope, dom_freqs, harm_ratios)
-    best = matches[0] if matches else {"profile": "Unknown", "confidence": 0.0}
-
-    # fingerprint
-    fingerprint = {
-        "envelope_hash": hashlib.sha256(
-            json.dumps(envelope[:64]).encode()
-        ).hexdigest()[:16],
-        "dominant_freqs": dom_freqs[:4],
-        "harmonic_ratios": harm_ratios,
-        "noise_floor_db": round(noise_floor, 2),
-        "hum_freq": hum_freq,
-        "analog_composite": analog["composite"],
+    return {
+        "dominant_hz": peak_freqs[:6],
+        "harmonic_ratios": harmonic_ratios[:6],
+        "noise_floor_db": noise_floor_db,
+        "duration_ms": duration_ms,
+        "analog_artifact_score": analog_score,
+        "fingerprint_hash": fp_hash,
+        "sample_rate": framerate,
+        "n_peaks_detected": len(peak_freqs),
     }
 
-    # attestation hash
-    att_hash = compute_attestation_hash(chime_id, fingerprint, analog, matches)
 
-    # spectrogram
-    # Limit samples for spectrogram to avoid extremely long FFT on big files
-    max_spec_samples = SAMPLE_RATE * 10  # 10 seconds max
-    spec_samples = samples[:max_spec_samples]
-    spec_png = generate_spectrogram(spec_samples)
-    spec_path = str(SPECTROGRAM_DIR / f"{chime_id}.png")
-    with open(spec_path, "wb") as f:
-        f.write(spec_png)
+# ---------------------------------------------------------------------------
+# Profile matching — compare fingerprint against known hardware
+# ---------------------------------------------------------------------------
 
-    result = AnalysisResult(
-        chime_id=chime_id,
-        filename=os.path.basename(filepath),
-        original_name=original_name,
-        file_size=file_size,
-        sample_rate=SAMPLE_RATE,
-        duration_sec=round(duration, 3),
-        dominant_freqs=dom_freqs,
-        harmonic_ratios=harm_ratios,
-        noise_floor_db=round(noise_floor, 2),
-        hum_freq=hum_freq,
-        hum_amplitude_db=round(hum_amp, 2),
-        analog_score=analog["composite"],
-        analog_verdict=analog["verdict"],
-        analog_details=analog,
-        best_match=best["profile"],
-        best_confidence=best["confidence"],
-        match_results=matches,
-        attestation_hash=att_hash,
-        spectrogram_path=spec_path,
-        fingerprint=fingerprint,
+
+def match_profile(fingerprint: dict) -> dict:
+    """Compare a spectral fingerprint against known hardware profiles.
+
+    Emulators produce digitally perfect audio — real hardware has analog
+    artifacts (hiss, capacitor aging, speaker resonance).
+    """
+    best_match = None
+    best_score = 0.0
+    all_scores = {}
+
+    fp_freqs = fingerprint["dominant_hz"]
+    fp_ratios = fingerprint["harmonic_ratios"]
+    fp_noise = fingerprint["noise_floor_db"]
+
+    for key, profile in KNOWN_PROFILES.items():
+        prof_freqs = profile["dominant_hz"]
+        prof_ratios = profile["harmonic_ratios"]
+        prof_noise = profile["analog_noise_floor_db"]
+
+        # Frequency similarity (within tolerance)
+        freq_score = 0.0
+        for pf in prof_freqs:
+            for ff in fp_freqs:
+                tolerance = pf * 0.05  # 5% tolerance for analog drift
+                if abs(ff - pf) < tolerance:
+                    freq_score += 1.0 - (abs(ff - pf) / tolerance)
+                    break
+        freq_score = freq_score / max(len(prof_freqs), 1)
+
+        # Harmonic ratio similarity
+        ratio_score = 0.0
+        min_len = min(len(prof_ratios), len(fp_ratios))
+        if min_len > 0:
+            for i in range(min_len):
+                diff = abs(prof_ratios[i] - fp_ratios[i])
+                ratio_score += max(0, 1.0 - diff * 2)
+            ratio_score /= min_len
+
+        # Noise floor proximity
+        noise_diff = abs(fp_noise - prof_noise)
+        noise_score = max(0, 1.0 - noise_diff / 30.0)
+
+        # Composite score
+        composite = (
+            (freq_score * 0.45)
+            + (ratio_score * 0.30)
+            + (noise_score * 0.25)
+        )
+        all_scores[key] = round(composite, 4)
+
+        if composite > best_score:
+            best_score = composite
+            best_match = key
+
+    # Anti-emulation assessment
+    analog_score = fingerprint.get("analog_artifact_score", 0)
+    is_emulator = analog_score < 0.15
+    is_genuine_hardware = analog_score > 0.35 and best_score > 0.5
+
+    # Confidence tiers
+    if best_score > 0.80:
+        confidence = "HIGH"
+    elif best_score > 0.55:
+        confidence = "MEDIUM"
+    elif best_score > 0.30:
+        confidence = "LOW"
+    else:
+        confidence = "NO_MATCH"
+
+    return {
+        "best_match": best_match,
+        "best_match_name": (
+            KNOWN_PROFILES[best_match]["name"] if best_match else None
+        ),
+        "match_confidence": confidence,
+        "match_score": round(best_score, 4),
+        "all_scores": all_scores,
+        "analog_artifact_score": analog_score,
+        "anti_emulation_verdict": (
+            "GENUINE_HARDWARE"
+            if is_genuine_hardware
+            else ("LIKELY_EMULATOR" if is_emulator else "UNCERTAIN")
+        ),
+        "attestation_eligible": is_genuine_hardware and best_score > 0.5,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Hardware fingerprint generation (system-level)
+# ---------------------------------------------------------------------------
+
+
+def generate_hardware_fingerprint() -> dict:
+    """Generate hardware identity from available system information."""
+    components = []
+
+    # CPU info
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            cpuinfo = f.read()
+        for line in cpuinfo.split("\n"):
+            if "model name" in line:
+                components.append(line.split(":")[1].strip())
+                break
+    except Exception:
+        components.append("unknown_cpu")
+
+    # Machine ID
+    try:
+        with open("/etc/machine-id", "r") as f:
+            components.append(f.read().strip()[:16])
+    except Exception:
+        components.append(uuid.getnode().to_bytes(6, "big").hex())
+
+    # DMI board info
+    for path in [
+        "/sys/class/dmi/id/board_vendor",
+        "/sys/class/dmi/id/board_name",
+    ]:
+        try:
+            with open(path, "r") as f:
+                components.append(f.read().strip())
+        except Exception:
+            pass
+
+    # Memory size
+    try:
+        with open("/proc/meminfo", "r") as f:
+            for line in f:
+                if "MemTotal" in line:
+                    components.append(line.split(":")[1].strip())
+                    break
+    except Exception:
+        pass
+
+    raw = "|".join(components)
+    hw_hash = hashlib.sha256(raw.encode()).hexdigest()
+
+    return {
+        "hardware_hash": hw_hash,
+        "components_hashed": len(components),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Attestation payload construction
+# ---------------------------------------------------------------------------
+
+
+def build_attestation_payload(
+    chime_id: str,
+    fingerprint: dict,
+    match_result: dict,
+    hardware_fp: dict,
+) -> dict:
+    """Build a complete attestation payload for RustChain submission."""
+    payload = {
+        "version": "1.0.0",
+        "type": "boot_chime_proof_of_iron",
+        "chime_id": chime_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "spectral_fingerprint": fingerprint,
+        "profile_match": {
+            "best_match": match_result["best_match"],
+            "match_name": match_result["best_match_name"],
+            "confidence": match_result["match_confidence"],
+            "score": match_result["match_score"],
+            "anti_emulation": match_result["anti_emulation_verdict"],
+            "analog_artifact_score": match_result["analog_artifact_score"],
+        },
+        "hardware_identity": hardware_fp,
+        "attestation_eligible": match_result["attestation_eligible"],
+    }
+
+    # Sign the payload
+    payload_bytes = json.dumps(payload, sort_keys=True).encode()
+    payload["signature"] = hashlib.sha256(payload_bytes).hexdigest()
+
+    return payload
+
+
+# ---------------------------------------------------------------------------
+# Database setup and helpers
+# ---------------------------------------------------------------------------
+
+
+async def init_db(db: aiosqlite.Connection):
+    await db.execute("""
+        CREATE TABLE IF NOT EXISTS boot_chimes (
+            id TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL,
+            profile_key TEXT,
+            profile_name TEXT,
+            fingerprint_hash TEXT NOT NULL,
+            match_score REAL,
+            match_confidence TEXT,
+            anti_emulation TEXT,
+            analog_artifact_score REAL,
+            attestation_eligible INTEGER DEFAULT 0,
+            hardware_hash TEXT,
+            spectral_data TEXT,
+            attestation_payload TEXT,
+            wav_b64 TEXT,
+            notes TEXT
+        )
+    """)
+    await db.execute("""
+        CREATE TABLE IF NOT EXISTS chime_gallery (
+            id TEXT PRIMARY KEY,
+            chime_id TEXT NOT NULL REFERENCES boot_chimes(id),
+            title TEXT,
+            description TEXT,
+            created_at TEXT NOT NULL,
+            spectral_svg TEXT,
+            bottube_url TEXT
+        )
+    """)
+    await db.execute("""
+        CREATE INDEX IF NOT EXISTS idx_chimes_profile
+        ON boot_chimes(profile_key)
+    """)
+    await db.execute("""
+        CREATE INDEX IF NOT EXISTS idx_chimes_eligible
+        ON boot_chimes(attestation_eligible)
+    """)
+    await db.commit()
+
+
+# ---------------------------------------------------------------------------
+# HTTP Handlers
+# ---------------------------------------------------------------------------
+
+
+async def handle_index(request: web.Request) -> web.Response:
+    return web.Response(text=INDEX_HTML, content_type="text/html")
+
+
+async def handle_list_profiles(request: web.Request) -> web.Response:
+    profiles = {}
+    for key, p in KNOWN_PROFILES.items():
+        profiles[key] = {
+            "name": p["name"],
+            "family": p["family"],
+            "dominant_hz": p["dominant_hz"],
+            "duration_ms": p["duration_ms"],
+            "description": p["description"],
+        }
+    return web.json_response({"profiles": profiles, "count": len(profiles)})
+
+
+async def handle_generate_chime(request: web.Request) -> web.Response:
+    """Generate a boot chime WAV from a known profile, extract fingerprint,
+    match against profiles, and store in database."""
+    data = await request.json()
+    profile_key = data.get("profile_key", "mac_1999")
+    analog_variance = float(data.get("analog_variance", 0.3))
+    notes = data.get("notes", "")
+
+    if profile_key not in KNOWN_PROFILES:
+        return web.json_response(
+            {"error": f"Unknown profile: {profile_key}"}, status=400
+        )
+
+    analog_variance = max(0.0, min(1.0, analog_variance))
+
+    # Generate audio
+    wav_bytes = generate_chime_wav(
+        profile_key, analog_variance=analog_variance
+    )
+    wav_b64 = base64.b64encode(wav_bytes).decode()
+
+    # Extract fingerprint
+    fingerprint = extract_spectral_fingerprint(wav_bytes)
+
+    # Match against known profiles
+    match_result = match_profile(fingerprint)
+
+    # Hardware fingerprint
+    hw_fp = generate_hardware_fingerprint()
+
+    # Build attestation
+    chime_id = f"chime_{uuid.uuid4().hex[:12]}"
+    attestation = build_attestation_payload(
+        chime_id, fingerprint, match_result, hw_fp
     )
 
-    # persist
-    with get_db() as conn:
-        conn.execute(
-            """
-            INSERT INTO chimes (
-                id, filename, original_name, file_size, sample_rate,
-                duration_sec, dominant_freqs, harmonic_ratios,
-                noise_floor_db, hum_freq, hum_amplitude_db,
-                analog_score, analog_verdict, analog_details,
-                best_match, best_confidence, match_results,
-                attestation_hash, spectrogram_path, fingerprint
-            ) VALUES (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?
-            )
-            """,
-            (
-                chime_id,
-                result.filename,
-                original_name,
-                file_size,
-                SAMPLE_RATE,
-                result.duration_sec,
-                json.dumps(dom_freqs),
-                json.dumps(harm_ratios),
-                result.noise_floor_db,
-                hum_freq,
-                round(hum_amp, 2),
-                analog["composite"],
-                analog["verdict"],
-                json.dumps(analog),
-                best["profile"],
-                best["confidence"],
-                json.dumps(matches),
-                att_hash,
-                spec_path,
-                json.dumps(fingerprint),
-            ),
-        )
+    # Store in database
+    db = request.app["db"]
+    await db.execute(
+        """INSERT INTO boot_chimes
+           (id, created_at, profile_key, profile_name, fingerprint_hash,
+            match_score, match_confidence, anti_emulation,
+            analog_artifact_score, attestation_eligible, hardware_hash,
+            spectral_data, attestation_payload, wav_b64, notes)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (
+            chime_id,
+            datetime.now(timezone.utc).isoformat(),
+            profile_key,
+            KNOWN_PROFILES[profile_key]["name"],
+            fingerprint["fingerprint_hash"],
+            match_result["match_score"],
+            match_result["match_confidence"],
+            match_result["anti_emulation_verdict"],
+            fingerprint["analog_artifact_score"],
+            1 if match_result["attestation_eligible"] else 0,
+            hw_fp["hardware_hash"],
+            json.dumps(fingerprint),
+            json.dumps(attestation),
+            wav_b64,
+            notes,
+        ),
+    )
+    await db.commit()
 
-    return result
-
-
-# ---------------------------------------------------------------------------
-# Flask Routes
-# ---------------------------------------------------------------------------
-
-@app.route("/")
-def index():
-    """Serve the web UI."""
-    return send_from_directory(str(BASE_DIR), "chime.html")
-
-
-@app.route("/health")
-def health():
-    return jsonify({"status": "ok", "service": "boot-chime-proof-of-iron", "version": "1.0.0"})
-
-
-@app.route("/api/chimes", methods=["POST"])
-def upload_chime():
-    """Upload and analyze a boot chime audio file."""
-    if "file" not in request.files:
-        return jsonify({"error": "No file provided.  Use multipart/form-data with field 'file'."}), 400
-
-    f = request.files["file"]
-    if not f.filename:
-        return jsonify({"error": "Empty filename"}), 400
-
-    ext = os.path.splitext(f.filename)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        return jsonify({
-            "error": f"Unsupported file type: {ext}",
-            "allowed": list(ALLOWED_EXTENSIONS),
-        }), 400
-
-    # save upload
-    safe_name = f"{uuid.uuid4().hex}{ext}"
-    upload_path = str(UPLOAD_DIR / safe_name)
-    f.save(upload_path)
-
-    # check size
-    if os.path.getsize(upload_path) > MAX_UPLOAD_BYTES:
-        os.unlink(upload_path)
-        return jsonify({"error": "File too large.  Maximum 10 MB."}), 413
-
-    # Only WAV is natively supported by stdlib.  For other formats, we
-    # return an informative error rather than silently failing.
-    if ext != ".wav":
-        os.unlink(upload_path)
-        return jsonify({
-            "error": f"Direct analysis requires WAV format.  Got {ext}.  "
-            "Please convert to WAV (16-bit PCM, any sample rate) first.  "
-            "ffmpeg -i input{ext} -acodec pcm_s16le output.wav",
-        }), 422
-
-    try:
-        result = analyze_chime(upload_path, f.filename)
-    except Exception as e:
-        return jsonify({"error": f"Analysis failed: {str(e)}"}), 500
-
-    return jsonify({
-        "id": result.chime_id,
-        "original_name": result.original_name,
-        "duration_sec": result.duration_sec,
-        "sample_rate": result.sample_rate,
-        "file_size": result.file_size,
-        "analysis": {
-            "dominant_frequencies_hz": result.dominant_freqs,
-            "harmonic_ratios": result.harmonic_ratios,
-            "noise_floor_dbfs": result.noise_floor_db,
-            "mains_hum": {
-                "frequency_hz": result.hum_freq,
-                "amplitude_dbfs": result.hum_amplitude_db,
-            },
-        },
-        "analog_assessment": result.analog_details,
-        "hardware_match": {
-            "best_match": result.best_match,
-            "confidence": result.best_confidence,
-            "all_matches": result.match_results,
-        },
-        "attestation": {
-            "hash": result.attestation_hash,
-            "submitted": False,
-        },
-        "spectrogram_url": f"/api/spectrogram/{result.chime_id}",
-        "fingerprint": result.fingerprint,
-    }), 201
-
-
-@app.route("/api/chimes", methods=["GET"])
-def list_chimes():
-    """List all registered boot chimes."""
-    with get_db() as conn:
-        rows = conn.execute(
-            "SELECT id, original_name, duration_sec, best_match, best_confidence, "
-            "analog_score, analog_verdict, attestation_submitted, created_at "
-            "FROM chimes ORDER BY created_at DESC"
-        ).fetchall()
-
-    chimes = []
-    for row in rows:
-        chimes.append({
-            "id": row["id"],
-            "original_name": row["original_name"],
-            "duration_sec": row["duration_sec"],
-            "best_match": row["best_match"],
-            "confidence": row["best_confidence"],
-            "analog_score": row["analog_score"],
-            "analog_verdict": row["analog_verdict"],
-            "attested": bool(row["attestation_submitted"]),
-            "created_at": row["created_at"],
-        })
-
-    return jsonify({"count": len(chimes), "chimes": chimes})
-
-
-@app.route("/api/chimes/<chime_id>", methods=["GET"])
-def get_chime(chime_id: str):
-    """Get full analysis result for a specific chime."""
-    with get_db() as conn:
-        row = conn.execute("SELECT * FROM chimes WHERE id = ?", (chime_id,)).fetchone()
-
-    if not row:
-        return jsonify({"error": "Chime not found"}), 404
-
-    return jsonify({
-        "id": row["id"],
-        "original_name": row["original_name"],
-        "file_size": row["file_size"],
-        "sample_rate": row["sample_rate"],
-        "duration_sec": row["duration_sec"],
-        "created_at": row["created_at"],
-        "analysis": {
-            "dominant_frequencies_hz": json.loads(row["dominant_freqs"]),
-            "harmonic_ratios": json.loads(row["harmonic_ratios"]),
-            "noise_floor_dbfs": row["noise_floor_db"],
-            "mains_hum": {
-                "frequency_hz": row["hum_freq"],
-                "amplitude_dbfs": row["hum_amplitude_db"],
-            },
-        },
-        "analog_assessment": json.loads(row["analog_details"]),
-        "hardware_match": {
-            "best_match": row["best_match"],
-            "confidence": row["best_confidence"],
-            "all_matches": json.loads(row["match_results"]),
-        },
-        "attestation": {
-            "hash": row["attestation_hash"],
-            "submitted": bool(row["attestation_submitted"]),
-            "block": row["attestation_block"],
-            "timestamp": row["attestation_timestamp"],
-        },
-        "spectrogram_url": f"/api/spectrogram/{row['id']}",
-        "fingerprint": json.loads(row["fingerprint"]),
-    })
-
-
-@app.route("/api/verify/<chime_id>", methods=["POST"])
-def verify_chime(chime_id: str):
-    """Submit acoustic attestation on-chain."""
-    with get_db() as conn:
-        row = conn.execute("SELECT * FROM chimes WHERE id = ?", (chime_id,)).fetchone()
-
-    if not row:
-        return jsonify({"error": "Chime not found"}), 404
-
-    if row["attestation_submitted"]:
-        return jsonify({
-            "error": "Already attested",
-            "attestation": {
-                "hash": row["attestation_hash"],
-                "block": row["attestation_block"],
-                "timestamp": row["attestation_timestamp"],
-            },
-        }), 409
-
-    # Simulate on-chain submission
-    block_num = f"0x{hashlib.sha256(chime_id.encode()).hexdigest()[:12]}"
-    timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-
-    with get_db() as conn:
-        conn.execute(
-            """
-            UPDATE chimes
-            SET attestation_submitted = 1,
-                attestation_block = ?,
-                attestation_timestamp = ?
-            WHERE id = ?
-            """,
-            (block_num, timestamp, chime_id),
-        )
-
-    analog_details = json.loads(row["analog_details"])
-    matches = json.loads(row["match_results"])
-    best = matches[0] if matches else {}
-
-    return jsonify({
-        "status": "ATTESTED",
+    return web.json_response({
         "chime_id": chime_id,
-        "attestation": {
-            "hash": row["attestation_hash"],
-            "block": block_num,
-            "timestamp": timestamp,
-            "tx_id": f"rtc_{hashlib.sha256((chime_id + timestamp).encode()).hexdigest()[:24]}",
-        },
-        "summary": {
-            "hardware_match": row["best_match"],
-            "confidence": row["best_confidence"],
-            "analog_verdict": row["analog_verdict"],
-            "analog_score": row["analog_score"],
+        "profile": profile_key,
+        "fingerprint": fingerprint,
+        "match": match_result,
+        "attestation": attestation,
+        "wav_b64_length": len(wav_b64),
+    })
+
+
+async def handle_verify_chime(request: web.Request) -> web.Response:
+    """Verify a boot chime by re-analyzing stored WAV data."""
+    chime_id = request.match_info["chime_id"]
+    db = request.app["db"]
+
+    async with db.execute(
+        "SELECT wav_b64, attestation_payload FROM boot_chimes WHERE id = ?",
+        (chime_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+
+    if not row:
+        return web.json_response({"error": "Chime not found"}, status=404)
+
+    wav_b64, stored_attestation = row
+    wav_bytes = base64.b64decode(wav_b64)
+
+    # Re-extract fingerprint
+    fingerprint = extract_spectral_fingerprint(wav_bytes)
+    match_result = match_profile(fingerprint)
+
+    # Compare with stored attestation
+    stored = json.loads(stored_attestation)
+    stored_hash = stored["spectral_fingerprint"]["fingerprint_hash"]
+    current_hash = fingerprint["fingerprint_hash"]
+    integrity_match = stored_hash == current_hash
+
+    return web.json_response({
+        "chime_id": chime_id,
+        "verification": {
+            "integrity_match": integrity_match,
+            "stored_hash": stored_hash,
+            "current_hash": current_hash,
+            "current_match": match_result,
+            "attestation_valid": (
+                integrity_match and match_result["attestation_eligible"]
+            ),
         },
     })
 
 
-@app.route("/api/spectrogram/<chime_id>", methods=["GET"])
-def get_spectrogram(chime_id: str):
-    """Serve the spectrogram PNG for a chime."""
-    spec_path = SPECTROGRAM_DIR / f"{chime_id}.png"
-    if not spec_path.exists():
-        return jsonify({"error": "Spectrogram not found"}), 404
-    return send_file(str(spec_path), mimetype="image/png")
+async def handle_replay_chime(request: web.Request) -> web.Response:
+    """Return the WAV audio for a stored chime (base64 encoded)."""
+    chime_id = request.match_info["chime_id"]
+    db = request.app["db"]
+
+    async with db.execute(
+        "SELECT wav_b64, profile_key, profile_name FROM boot_chimes WHERE id=?",
+        (chime_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+
+    if not row:
+        return web.json_response({"error": "Chime not found"}, status=404)
+
+    wav_b64, profile_key, profile_name = row
+    return web.json_response({
+        "chime_id": chime_id,
+        "profile_key": profile_key,
+        "profile_name": profile_name,
+        "wav_b64": wav_b64,
+    })
 
 
-@app.route("/api/profiles", methods=["GET"])
-def list_profiles():
-    """List all known boot chime reference profiles."""
-    profiles = []
-    for p in KNOWN_PROFILES:
-        profiles.append({
-            "name": p.name,
-            "manufacturer": p.manufacturer,
-            "years": p.years,
-            "description": p.description,
-            "dominant_freqs": p.dominant_freqs,
-            "harmonic_ratios": p.harmonic_ratios,
-            "expected_noise_floor_db": p.expected_noise_floor_db,
-            "expected_hum_freq": p.expected_hum_freq,
-        })
-    return jsonify({"count": len(profiles), "profiles": profiles})
+async def handle_list_chimes(request: web.Request) -> web.Response:
+    """List all stored boot chimes."""
+    db = request.app["db"]
+    limit = int(request.query.get("limit", "50"))
+    offset = int(request.query.get("offset", "0"))
+
+    rows = []
+    async with db.execute(
+        """SELECT id, created_at, profile_key, profile_name,
+                  fingerprint_hash, match_score, match_confidence,
+                  anti_emulation, analog_artifact_score,
+                  attestation_eligible, notes
+           FROM boot_chimes ORDER BY created_at DESC
+           LIMIT ? OFFSET ?""",
+        (limit, offset),
+    ) as cursor:
+        async for row in cursor:
+            rows.append({
+                "id": row[0],
+                "created_at": row[1],
+                "profile_key": row[2],
+                "profile_name": row[3],
+                "fingerprint_hash": row[4],
+                "match_score": row[5],
+                "match_confidence": row[6],
+                "anti_emulation": row[7],
+                "analog_artifact_score": row[8],
+                "attestation_eligible": bool(row[9]),
+                "notes": row[10],
+            })
+
+    async with db.execute("SELECT COUNT(*) FROM boot_chimes") as cursor:
+        total = (await cursor.fetchone())[0]
+
+    return web.json_response({"chimes": rows, "total": total})
 
 
-# ---------------------------------------------------------------------------
-# CLI Mode
-# ---------------------------------------------------------------------------
+async def handle_chime_detail(request: web.Request) -> web.Response:
+    """Get full detail for a single chime including attestation payload."""
+    chime_id = request.match_info["chime_id"]
+    db = request.app["db"]
 
-def cli_analyze(filepath: str):
-    """Analyze a boot chime from the command line."""
-    print(f"\n{'='*70}")
-    print("  Boot Chime Proof-of-Iron  --  Acoustic Hardware Attestation")
-    print(f"{'='*70}\n")
-    print(f"  File: {filepath}")
+    async with db.execute(
+        """SELECT id, created_at, profile_key, profile_name,
+                  fingerprint_hash, match_score, match_confidence,
+                  anti_emulation, analog_artifact_score,
+                  attestation_eligible, hardware_hash,
+                  spectral_data, attestation_payload, notes
+           FROM boot_chimes WHERE id = ?""",
+        (chime_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
 
-    if not os.path.exists(filepath):
-        print(f"  ERROR: File not found: {filepath}")
-        return
+    if not row:
+        return web.json_response({"error": "Chime not found"}, status=404)
 
-    result = analyze_chime(filepath, os.path.basename(filepath))
+    return web.json_response({
+        "id": row[0],
+        "created_at": row[1],
+        "profile_key": row[2],
+        "profile_name": row[3],
+        "fingerprint_hash": row[4],
+        "match_score": row[5],
+        "match_confidence": row[6],
+        "anti_emulation": row[7],
+        "analog_artifact_score": row[8],
+        "attestation_eligible": bool(row[9]),
+        "hardware_hash": row[10],
+        "spectral_data": json.loads(row[11]),
+        "attestation_payload": json.loads(row[12]),
+        "notes": row[13],
+    })
 
-    print(f"  Duration: {result.duration_sec:.2f}s  |  Sample Rate: {result.sample_rate} Hz")
-    print(f"  File Size: {result.file_size:,} bytes")
-    print()
 
-    print("  --- Spectral Analysis ---")
-    print(f"  Dominant Frequencies: {', '.join(f'{f:.1f} Hz' for f in result.dominant_freqs[:4])}")
-    print(f"  Harmonic Ratios (H2/H1, H3/H1): {', '.join(f'{r:.3f}' for r in result.harmonic_ratios)}")
-    print(f"  Noise Floor: {result.noise_floor_db:.1f} dBFS")
-    print(f"  Mains Hum: {result.hum_freq:.0f} Hz @ {result.hum_amplitude_db:.1f} dBFS")
-    print()
+async def handle_upload_chime(request: web.Request) -> web.Response:
+    """Upload raw WAV audio for fingerprinting and attestation.
 
-    print("  --- Analog Assessment ---")
-    for key, val in result.analog_details.get("scores", {}).items():
-        bar = "#" * int(val * 20)
-        print(f"  {key:>22s}: {val:.2f}  [{bar:<20s}]")
-    print(f"  {'Composite':>22s}: {result.analog_score:.4f}")
-    print(f"  {'Verdict':>22s}: {result.analog_verdict}")
-    print()
+    Accepts multipart/form-data with 'file' field, or JSON with 'wav_b64'.
+    """
+    content_type = request.content_type
 
-    print("  --- Hardware Match ---")
-    for i, m in enumerate(result.match_results[:5]):
-        marker = " <<< MATCH" if m["matched"] else ""
-        print(
-            f"  {i+1}. {m['profile']:<40s} "
-            f"{m['confidence']*100:5.1f}% "
-            f"(spectral={m['spectral_similarity']:.2f} "
-            f"freq={m['frequency_match']:.2f} "
-            f"harmonic={m['harmonic_match']:.2f}){marker}"
+    if "multipart" in content_type:
+        reader = await request.multipart()
+        field = await reader.next()
+        wav_bytes = await field.read()
+    else:
+        data = await request.json()
+        wav_b64 = data.get("wav_b64", "")
+        if not wav_b64:
+            return web.json_response(
+                {"error": "No audio data provided"}, status=400
+            )
+        wav_bytes = base64.b64decode(wav_b64)
+
+    notes = "uploaded_audio"
+
+    # Validate WAV format
+    try:
+        buf = io.BytesIO(wav_bytes)
+        with wave.open(buf, "rb") as wf:
+            _ = wf.getframerate()
+    except Exception as e:
+        return web.json_response(
+            {"error": f"Invalid WAV: {e}"}, status=400
         )
-    print()
 
-    print("  --- Attestation ---")
-    print(f"  Hash: {result.attestation_hash}")
-    print(f"  Spectrogram: {result.spectrogram_path}")
-    print(f"  Chime ID: {result.chime_id}")
-    print()
-    print(f"  PoA-Signature: poa_chime2307_{result.attestation_hash[:16]}")
-    print(f"{'='*70}\n")
+    wav_b64 = base64.b64encode(wav_bytes).decode()
+    fingerprint = extract_spectral_fingerprint(wav_bytes)
+    match_result = match_profile(fingerprint)
+    hw_fp = generate_hardware_fingerprint()
+
+    chime_id = f"chime_{uuid.uuid4().hex[:12]}"
+    attestation = build_attestation_payload(
+        chime_id, fingerprint, match_result, hw_fp
+    )
+
+    db = request.app["db"]
+    await db.execute(
+        """INSERT INTO boot_chimes
+           (id, created_at, profile_key, profile_name, fingerprint_hash,
+            match_score, match_confidence, anti_emulation,
+            analog_artifact_score, attestation_eligible, hardware_hash,
+            spectral_data, attestation_payload, wav_b64, notes)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (
+            chime_id,
+            datetime.now(timezone.utc).isoformat(),
+            match_result["best_match"],
+            match_result["best_match_name"],
+            fingerprint["fingerprint_hash"],
+            match_result["match_score"],
+            match_result["match_confidence"],
+            match_result["anti_emulation_verdict"],
+            fingerprint["analog_artifact_score"],
+            1 if match_result["attestation_eligible"] else 0,
+            hw_fp["hardware_hash"],
+            json.dumps(fingerprint),
+            json.dumps(attestation),
+            wav_b64,
+            notes,
+        ),
+    )
+    await db.commit()
+
+    return web.json_response({
+        "chime_id": chime_id,
+        "fingerprint": fingerprint,
+        "match": match_result,
+        "attestation": attestation,
+    })
+
+
+async def handle_gallery_add(request: web.Request) -> web.Response:
+    """Add a chime to the BoTTube gallery."""
+    data = await request.json()
+    chime_id = data.get("chime_id")
+    title = data.get("title", "")
+    description = data.get("description", "")
+
+    db = request.app["db"]
+
+    async with db.execute(
+        "SELECT id FROM boot_chimes WHERE id = ?", (chime_id,)
+    ) as cursor:
+        if not await cursor.fetchone():
+            return web.json_response(
+                {"error": "Chime not found"}, status=404
+            )
+
+    gallery_id = f"gallery_{uuid.uuid4().hex[:10]}"
+    await db.execute(
+        """INSERT INTO chime_gallery
+           (id, chime_id, title, description, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (
+            gallery_id,
+            chime_id,
+            title,
+            description,
+            datetime.now(timezone.utc).isoformat(),
+        ),
+    )
+    await db.commit()
+
+    return web.json_response({
+        "gallery_id": gallery_id, "chime_id": chime_id
+    })
+
+
+async def handle_gallery_list(request: web.Request) -> web.Response:
+    """List chime gallery entries with spectral data."""
+    db = request.app["db"]
+
+    rows = []
+    async with db.execute(
+        """SELECT g.id, g.chime_id, g.title, g.description, g.created_at,
+                  c.profile_name, c.match_score, c.anti_emulation,
+                  c.analog_artifact_score, c.spectral_data
+           FROM chime_gallery g
+           JOIN boot_chimes c ON g.chime_id = c.id
+           ORDER BY g.created_at DESC LIMIT 50""",
+    ) as cursor:
+        async for row in cursor:
+            rows.append({
+                "gallery_id": row[0],
+                "chime_id": row[1],
+                "title": row[2],
+                "description": row[3],
+                "created_at": row[4],
+                "profile_name": row[5],
+                "match_score": row[6],
+                "anti_emulation": row[7],
+                "analog_artifact_score": row[8],
+                "spectral_data": (
+                    json.loads(row[9]) if row[9] else None
+                ),
+            })
+
+    return web.json_response({"gallery": rows, "count": len(rows)})
+
+
+async def handle_stats(request: web.Request) -> web.Response:
+    """Return aggregate statistics for the boot chime database."""
+    db = request.app["db"]
+
+    stats = {}
+    async with db.execute("SELECT COUNT(*) FROM boot_chimes") as c:
+        stats["total_chimes"] = (await c.fetchone())[0]
+
+    async with db.execute(
+        "SELECT COUNT(*) FROM boot_chimes WHERE attestation_eligible = 1"
+    ) as c:
+        stats["eligible_attestations"] = (await c.fetchone())[0]
+
+    async with db.execute("SELECT COUNT(*) FROM chime_gallery") as c:
+        stats["gallery_entries"] = (await c.fetchone())[0]
+
+    async with db.execute(
+        """SELECT profile_key, COUNT(*)
+           FROM boot_chimes GROUP BY profile_key
+           ORDER BY COUNT(*) DESC"""
+    ) as c:
+        stats["by_profile"] = {row[0]: row[1] async for row in c}
+
+    async with db.execute(
+        """SELECT anti_emulation, COUNT(*)
+           FROM boot_chimes GROUP BY anti_emulation"""
+    ) as c:
+        stats["by_verdict"] = {row[0]: row[1] async for row in c}
+
+    async with db.execute(
+        "SELECT AVG(match_score), AVG(analog_artifact_score) FROM boot_chimes"
+    ) as c:
+        row = await c.fetchone()
+        stats["avg_match_score"] = round(row[0] or 0, 4)
+        stats["avg_analog_score"] = round(row[1] or 0, 4)
+
+    return web.json_response(stats)
 
 
 # ---------------------------------------------------------------------------
-# Entry Point
+# Embedded HTML — Web Audio API visualization + full dashboard
 # ---------------------------------------------------------------------------
+
+INDEX_HTML = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boot Chime Proof-of-Iron | RustChain Acoustic Attestation</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --border: #2a2a3a;
+    --accent: #00ff88;
+    --accent2: #ff6600;
+    --warn: #ff4444;
+    --text: #e0e0e8;
+    --dim: #888899;
+    --genuine: #00ff88;
+    --emulator: #ff4444;
+    --uncertain: #ffaa00;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  header {
+    text-align: center;
+    padding: 30px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+  header h1 {
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  header .subtitle {
+    color: var(--dim);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .panel h2 {
+    color: var(--accent);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  select, button, input {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:hover, button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
+    border-color: var(--accent);
+  }
+  button.primary:hover { opacity: 0.85; }
+  .form-row { margin-bottom: 12px; }
+  .form-row label {
+    display: block;
+    color: var(--dim);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+  .slider-val {
+    color: var(--accent);
+    min-width: 40px;
+    text-align: right;
+  }
+  canvas {
+    width: 100%;
+    height: 200px;
+    background: #08080e;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: block;
+    margin: 10px 0;
+  }
+  .result-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .result-row .label { color: var(--dim); }
+  .result-row .value { color: var(--text); font-weight: bold; }
+  .verdict-genuine { color: var(--genuine); }
+  .verdict-emulator { color: var(--emulator); }
+  .verdict-uncertain { color: var(--uncertain); }
+  .chime-list { max-height: 400px; overflow-y: auto; }
+  .chime-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .chime-item:hover { border-color: var(--accent); }
+  .chime-item .chime-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chime-item .chime-id {
+    color: var(--accent);
+    font-size: 12px;
+  }
+  .chime-item .chime-profile {
+    color: var(--text);
+    font-weight: bold;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .badge-genuine {
+    background: rgba(0,255,136,0.15);
+    color: var(--genuine);
+    border: 1px solid var(--genuine);
+  }
+  .badge-emulator {
+    background: rgba(255,68,68,0.15);
+    color: var(--emulator);
+    border: 1px solid var(--emulator);
+  }
+  .badge-uncertain {
+    background: rgba(255,170,0,0.15);
+    color: var(--uncertain);
+    border: 1px solid var(--uncertain);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-box .stat-val {
+    font-size: 24px;
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .stat-box .stat-label {
+    font-size: 11px;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+  .full-width { grid-column: 1 / -1; }
+  #spectrumCanvas { height: 160px; }
+  #waveformCanvas { height: 120px; }
+  .controls-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tab-btn:first-child { border-radius: 6px 0 0 6px; }
+  .tab-btn:last-child { border-radius: 0 6px 6px 0; }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: bold;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .score-bar {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    margin: 4px 0;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+  footer {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--dim);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Boot Chime Proof-of-Iron</h1>
+    <div class="subtitle">
+      Acoustic Hardware Attestation for RustChain &mdash; bounty #2307
+    </div>
+    <div class="subtitle" style="margin-top:4px;color:var(--accent)">
+      The boot chime is a physical artifact of real iron &mdash;
+      unique to each machine as it ages. Unforgeable without the hardware.
+    </div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="generate">Generate</button>
+    <button class="tab-btn" data-tab="gallery">Gallery</button>
+    <button class="tab-btn" data-tab="verify">Verify</button>
+    <button class="tab-btn" data-tab="stats">Stats</button>
+  </div>
+
+  <!-- ============ GENERATE TAB ============ -->
+  <div id="tab-generate" class="tab-content active">
+    <div class="grid">
+      <div class="panel">
+        <h2>Generate Boot Chime</h2>
+        <div class="form-row">
+          <label>Hardware Profile</label>
+          <select id="profileSelect" style="width:100%"></select>
+        </div>
+        <div class="form-row" id="profileDesc"
+             style="color:var(--dim);font-size:12px;min-height:36px;"></div>
+        <div class="form-row">
+          <label>Analog Variance (capacitor aging, speaker wear)</label>
+          <div class="slider-row">
+            <input type="range" id="analogSlider" min="0" max="100" value="30">
+            <span class="slider-val" id="analogVal">0.30</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Notes (optional)</label>
+          <input type="text" id="notesInput" style="width:100%"
+                 placeholder="e.g. My 1999 G4 tower, recapped 2024">
+        </div>
+        <div class="controls-bar">
+          <button class="primary" id="generateBtn"
+                  onclick="generateChime()">Generate &amp; Attest</button>
+          <button id="playBtn" onclick="playChime()" disabled>
+            Play Chime
+          </button>
+        </div>
+        <div id="generateStatus"
+             style="margin-top:10px;font-size:12px;color:var(--dim);"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Spectral Analysis (FFT)</h2>
+        <canvas id="spectrumCanvas"></canvas>
+        <h2 style="margin-top:15px">Waveform</h2>
+        <canvas id="waveformCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="panel full-width" id="resultPanel" style="display:none;">
+      <h2>Attestation Result</h2>
+      <div class="grid" style="margin-bottom:0;">
+        <div class="result-card">
+          <div class="result-row">
+            <span class="label">Chime ID</span>
+            <span class="value" id="resChimeId">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Profile Match</span>
+            <span class="value" id="resProfileMatch">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Match Score</span>
+            <span class="value" id="resMatchScore">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Score Bar</span>
+            <span class="value" style="flex:1;margin-left:10px;">
+              <div class="score-bar">
+                <div class="score-bar-fill" id="resScoreBar"
+                     style="width:0;background:var(--accent);"></div>
+              </div>
+            </span>
+          </div>
+          <div class="result-row">
+            <span class="label">Confidence</span>
+            <span class="value" id="resConfidence">-</span>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-row">
+            <span class="label">Anti-Emulation</span>
+            <span class="value" id="resVerdict">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Analog Artifact Score</span>
+            <span class="value" id="resAnalog">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Analog Bar</span>
+            <span class="value" style="flex:1;margin-left:10px;">
+              <div class="score-bar">
+                <div class="score-bar-fill" id="resAnalogBar"
+                     style="width:0;background:var(--accent2);"></div>
+              </div>
+            </span>
+          </div>
+          <div class="result-row">
+            <span class="label">Attestation Eligible</span>
+            <span class="value" id="resEligible">-</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Fingerprint Hash</span>
+            <span class="value" id="resFpHash"
+                  style="font-size:11px;word-break:break-all;">-</span>
+          </div>
+        </div>
+      </div>
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;color:var(--accent);">
+          Full Attestation Payload (JSON)
+        </summary>
+        <pre id="resPayload"
+             style="background:var(--bg);padding:12px;border-radius:4px;
+                    margin-top:8px;font-size:11px;overflow-x:auto;
+                    max-height:300px;overflow-y:auto;"></pre>
+      </details>
+    </div>
+  </div>
+
+  <!-- ============ GALLERY TAB ============ -->
+  <div id="tab-gallery" class="tab-content">
+    <div class="panel">
+      <h2>Chime Gallery (BoTTube)</h2>
+      <p style="color:var(--dim);font-size:12px;margin-bottom:15px;">
+        Each miner's boot sound with spectral visualization.
+        Click any chime to replay and inspect.
+      </p>
+      <div class="chime-list" id="chimeList">
+        <div style="color:var(--dim);text-align:center;padding:40px;">
+          Loading chimes...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VERIFY TAB ============ -->
+  <div id="tab-verify" class="tab-content">
+    <div class="panel">
+      <h2>Verify Chime Attestation</h2>
+      <div class="form-row">
+        <label>Chime ID</label>
+        <input type="text" id="verifyInput" style="width:100%"
+               placeholder="chime_xxxxxxxxxxxx">
+      </div>
+      <button class="primary" onclick="verifyChime()">Verify</button>
+      <div id="verifyResult" style="margin-top:15px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ STATS TAB ============ -->
+  <div id="tab-stats" class="tab-content">
+    <div class="panel">
+      <h2>Attestation Statistics</h2>
+      <div class="stats-grid" id="statsGrid">
+        <div style="color:var(--dim);text-align:center;padding:20px;
+                    grid-column:1/-1;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Boot Chime Proof-of-Iron &mdash; RustChain Bounty #2307 (95 RTC)<br>
+    Acoustic hardware attestation: the literal voice of old machines
+    as part of trust.
+  </footer>
+</div>
+
+<script>
+const API = '';
+let currentWavB64 = null;
+let audioCtx = null;
+
+/* ---- Tab switching ---- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b =>
+      b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t =>
+      t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab)
+      .classList.add('active');
+    if (btn.dataset.tab === 'gallery') loadChimeList();
+    if (btn.dataset.tab === 'stats') loadStats();
+  });
+});
+
+/* ---- Load profiles into dropdown ---- */
+async function loadProfiles() {
+  const res = await fetch(API + '/api/profiles');
+  const data = await res.json();
+  const sel = document.getElementById('profileSelect');
+  sel.innerHTML = '';
+  for (const [key, p] of Object.entries(data.profiles)) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = p.name + ' (' +
+      p.dominant_hz.map(h => Math.round(h) + 'Hz').join(', ') + ')';
+    sel.appendChild(opt);
+  }
+  sel.addEventListener('change', () => {
+    const p = data.profiles[sel.value];
+    document.getElementById('profileDesc').textContent =
+      p ? p.description : '';
+  });
+  sel.dispatchEvent(new Event('change'));
+}
+
+/* ---- Analog slider display ---- */
+document.getElementById('analogSlider').addEventListener('input', e => {
+  document.getElementById('analogVal').textContent =
+    (e.target.value / 100).toFixed(2);
+});
+
+/* ---- Generate chime ---- */
+async function generateChime() {
+  const btn = document.getElementById('generateBtn');
+  const status = document.getElementById('generateStatus');
+  btn.disabled = true;
+  status.innerHTML =
+    '<span class="spinner"></span> Generating chime & computing attestation...';
+
+  const body = {
+    profile_key: document.getElementById('profileSelect').value,
+    analog_variance: document.getElementById('analogSlider').value / 100,
+    notes: document.getElementById('notesInput').value,
+  };
+
+  try {
+    const res = await fetch(API + '/api/chime/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.error) {
+      status.textContent = 'Error: ' + data.error;
+      return;
+    }
+
+    /* Fetch WAV for playback */
+    const wavRes = await fetch(
+      API + '/api/chime/' + data.chime_id + '/replay');
+    const wavData = await wavRes.json();
+    currentWavB64 = wavData.wav_b64;
+    document.getElementById('playBtn').disabled = false;
+
+    /* Display results */
+    displayResult(data);
+    drawSpectrum(data.fingerprint);
+    drawWaveform(currentWavB64);
+
+    status.innerHTML =
+      '<span style="color:var(--accent);">Chime generated and attested.</span>';
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function displayResult(data) {
+  const panel = document.getElementById('resultPanel');
+  panel.style.display = 'block';
+
+  document.getElementById('resChimeId').textContent = data.chime_id;
+  document.getElementById('resProfileMatch').textContent =
+    data.match.best_match_name || '-';
+  document.getElementById('resMatchScore').textContent =
+    (data.match.match_score * 100).toFixed(1) + '%';
+  document.getElementById('resScoreBar').style.width =
+    (data.match.match_score * 100) + '%';
+  document.getElementById('resConfidence').textContent =
+    data.match.match_confidence;
+
+  const verdict = data.match.anti_emulation_verdict;
+  const verdictEl = document.getElementById('resVerdict');
+  verdictEl.textContent = verdict;
+  verdictEl.className = 'value verdict-' + (
+    verdict === 'GENUINE_HARDWARE' ? 'genuine' :
+    verdict === 'LIKELY_EMULATOR' ? 'emulator' : 'uncertain');
+
+  document.getElementById('resAnalog').textContent =
+    (data.fingerprint.analog_artifact_score * 100).toFixed(1) + '%';
+  document.getElementById('resAnalogBar').style.width =
+    (data.fingerprint.analog_artifact_score * 100) + '%';
+
+  const eligible = data.attestation.attestation_eligible;
+  document.getElementById('resEligible').textContent =
+    eligible ? 'YES' : 'NO';
+  document.getElementById('resEligible').style.color =
+    eligible ? 'var(--genuine)' : 'var(--emulator)';
+  document.getElementById('resFpHash').textContent =
+    data.fingerprint.fingerprint_hash;
+  document.getElementById('resPayload').textContent =
+    JSON.stringify(data.attestation, null, 2);
+}
+
+/* ---- Web Audio: play chime ---- */
+function playChime() {
+  if (!currentWavB64) return;
+  if (!audioCtx)
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  const binary = atob(currentWavB64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++)
+    bytes[i] = binary.charCodeAt(i);
+
+  audioCtx.decodeAudioData(bytes.buffer.slice(0), buffer => {
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    source.start(0);
+
+    /* Animate spectrum during playback */
+    const canvas = document.getElementById('spectrumCanvas');
+    const ctx = canvas.getContext('2d');
+    const bufLen = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufLen);
+    let playing = true;
+    source.onended = () => { playing = false; };
+
+    function animateSpectrum() {
+      if (!playing) return;
+      analyser.getByteFrequencyData(dataArray);
+      const w = canvas.width = canvas.offsetWidth;
+      const h = canvas.height = canvas.offsetHeight;
+      ctx.fillStyle = '#08080e';
+      ctx.fillRect(0, 0, w, h);
+
+      const barW = (w / bufLen) * 2.5;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = dataArray[i] / 255;
+        const barH = v * h;
+        const hue = 140 + v * 40;
+        ctx.fillStyle =
+          'hsl(' + hue + ', 100%, ' + (30 + v * 40) + '%)';
+        ctx.fillRect(x, h - barH, barW, barH);
+        x += barW + 1;
+        if (x > w) break;
+      }
+      requestAnimationFrame(animateSpectrum);
+    }
+    requestAnimationFrame(animateSpectrum);
+  });
+}
+
+/* ---- Draw static spectrum from fingerprint data ---- */
+function drawSpectrum(fp) {
+  const canvas = document.getElementById('spectrumCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth;
+  const h = canvas.height = canvas.offsetHeight;
+
+  ctx.fillStyle = '#08080e';
+  ctx.fillRect(0, 0, w, h);
+
+  /* Grid lines */
+  ctx.strokeStyle = '#1a1a2a';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 10; i++) {
+    const y = (h / 10) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  if (!fp || !fp.dominant_hz) return;
+
+  /* Draw frequency peaks as bars */
+  const maxFreq = Math.max(...fp.dominant_hz) * 1.3;
+  fp.dominant_hz.forEach((freq, i) => {
+    const ratio = fp.harmonic_ratios[i] || 0.5;
+    const x = (freq / maxFreq) * w * 0.9 + w * 0.05;
+    const barH = ratio * h * 0.8;
+    const barW = Math.max(8, w / 20);
+
+    const grad = ctx.createLinearGradient(x, h, x, h - barH);
+    grad.addColorStop(0, '#00ff88');
+    grad.addColorStop(1, '#004422');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - barW / 2, h - barH, barW, barH);
+
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(Math.round(freq) + 'Hz', x, h - barH - 5);
+  });
+
+  /* Noise floor line */
+  const noiseY = h - (Math.abs(fp.noise_floor_db) / 80) * h;
+  ctx.strokeStyle = '#ff660066';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, noiseY);
+  ctx.lineTo(w, noiseY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#ff6600';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('noise: ' + fp.noise_floor_db + 'dB', 5, noiseY - 5);
+}
+
+/* ---- Draw waveform from base64 WAV ---- */
+function drawWaveform(wavB64) {
+  if (!wavB64) return;
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth;
+  const h = canvas.height = canvas.offsetHeight;
+
+  ctx.fillStyle = '#08080e';
+  ctx.fillRect(0, 0, w, h);
+
+  const binary = atob(wavB64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++)
+    bytes[i] = binary.charCodeAt(i);
+
+  /* Skip 44-byte WAV header, read 16-bit little-endian PCM */
+  const dataView = new DataView(bytes.buffer);
+  const numSamples = Math.floor((bytes.length - 44) / 2);
+  const samples = [];
+  for (let i = 0; i < numSamples; i++)
+    samples.push(dataView.getInt16(44 + i * 2, true));
+
+  const step = Math.max(1, Math.floor(samples.length / w));
+  const mid = h / 2;
+
+  /* Waveform line */
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const idx = Math.min(x * step, samples.length - 1);
+    const v = samples[idx] / 32768;
+    const y = mid + v * mid * 0.9;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  /* Center line */
+  ctx.strokeStyle = '#2a2a3a';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, mid);
+  ctx.lineTo(w, mid);
+  ctx.stroke();
+
+  /* Envelope overlay */
+  ctx.strokeStyle = '#ff660044';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const start = x * step;
+    const end = Math.min(start + step, samples.length);
+    let maxVal = 0;
+    for (let i = start; i < end; i++)
+      maxVal = Math.max(maxVal, Math.abs(samples[i]));
+    const envY = mid - (maxVal / 32768) * mid * 0.9;
+    if (x === 0) ctx.moveTo(x, envY);
+    else ctx.lineTo(x, envY);
+  }
+  ctx.stroke();
+}
+
+/* ---- Load chime list for gallery ---- */
+async function loadChimeList() {
+  const list = document.getElementById('chimeList');
+  try {
+    const res = await fetch(API + '/api/chimes');
+    const data = await res.json();
+    if (!data.chimes.length) {
+      list.innerHTML =
+        '<div style="color:var(--dim);text-align:center;padding:40px;">' +
+        'No chimes yet. Generate one first.</div>';
+      return;
+    }
+    list.innerHTML = data.chimes.map(c => {
+      const vc = c.anti_emulation === 'GENUINE_HARDWARE' ? 'genuine' :
+        c.anti_emulation === 'LIKELY_EMULATOR' ? 'emulator' : 'uncertain';
+      return '<div class="chime-item" onclick="selectChime(\'' +
+        c.id + '\')">' +
+        '<div class="chime-header">' +
+        '<span class="chime-profile">' +
+        (c.profile_name || c.profile_key) + '</span>' +
+        '<span class="badge badge-' + vc + '">' +
+        c.anti_emulation + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;' +
+        'margin-top:6px;font-size:12px;">' +
+        '<span class="chime-id">' + c.id + '</span>' +
+        '<span style="color:var(--dim);">' +
+        (c.created_at ? c.created_at.slice(0, 19) : '') + '</span></div>' +
+        '<div style="margin-top:4px;">' +
+        '<div class="score-bar"><div class="score-bar-fill" ' +
+        'style="width:' + ((c.match_score || 0) * 100) +
+        '%;background:var(--accent);"></div></div>' +
+        '<span style="font-size:11px;color:var(--dim);">Match: ' +
+        ((c.match_score || 0) * 100).toFixed(1) + '% | Analog: ' +
+        ((c.analog_artifact_score || 0) * 100).toFixed(1) +
+        '%</span></div></div>';
+    }).join('');
+  } catch (e) {
+    list.innerHTML =
+      '<div style="color:var(--warn);">Error: ' + e.message + '</div>';
+  }
+}
+
+async function selectChime(id) {
+  const wavRes = await fetch(API + '/api/chime/' + id + '/replay');
+  const wavData = await wavRes.json();
+  currentWavB64 = wavData.wav_b64;
+  document.getElementById('playBtn').disabled = false;
+
+  const detailRes = await fetch(API + '/api/chime/' + id);
+  const detail = await detailRes.json();
+  drawSpectrum(detail.spectral_data);
+  drawWaveform(currentWavB64);
+
+  /* Switch to generate tab to see visualization */
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t =>
+    t.classList.remove('active'));
+  document.querySelector('[data-tab="generate"]').classList.add('active');
+  document.getElementById('tab-generate').classList.add('active');
+
+  const panel = document.getElementById('resultPanel');
+  panel.style.display = 'block';
+  document.getElementById('resChimeId').textContent = detail.id;
+  document.getElementById('resProfileMatch').textContent =
+    detail.profile_name || '-';
+  document.getElementById('resMatchScore').textContent =
+    ((detail.match_score || 0) * 100).toFixed(1) + '%';
+  document.getElementById('resScoreBar').style.width =
+    ((detail.match_score || 0) * 100) + '%';
+  document.getElementById('resConfidence').textContent =
+    detail.match_confidence;
+  const verdict = detail.anti_emulation;
+  const ve = document.getElementById('resVerdict');
+  ve.textContent = verdict;
+  ve.className = 'value verdict-' + (
+    verdict === 'GENUINE_HARDWARE' ? 'genuine' :
+    verdict === 'LIKELY_EMULATOR' ? 'emulator' : 'uncertain');
+  document.getElementById('resAnalog').textContent =
+    ((detail.analog_artifact_score || 0) * 100).toFixed(1) + '%';
+  document.getElementById('resAnalogBar').style.width =
+    ((detail.analog_artifact_score || 0) * 100) + '%';
+  document.getElementById('resEligible').textContent =
+    detail.attestation_eligible ? 'YES' : 'NO';
+  document.getElementById('resFpHash').textContent =
+    detail.fingerprint_hash;
+  document.getElementById('resPayload').textContent =
+    JSON.stringify(detail.attestation_payload, null, 2);
+}
+
+/* ---- Verify ---- */
+async function verifyChime() {
+  const id = document.getElementById('verifyInput').value.trim();
+  const result = document.getElementById('verifyResult');
+  if (!id) {
+    result.innerHTML =
+      '<span style="color:var(--warn);">Enter a chime ID.</span>';
+    return;
+  }
+  result.innerHTML = '<span class="spinner"></span> Verifying...';
+  try {
+    const res = await fetch(API + '/api/chime/' + id + '/verify');
+    const data = await res.json();
+    if (data.error) {
+      result.innerHTML =
+        '<span style="color:var(--warn);">' + data.error + '</span>';
+      return;
+    }
+    const v = data.verification;
+    const ok = v.attestation_valid;
+    result.innerHTML = '<div class="result-card">' +
+      '<div class="result-row"><span class="label">Integrity</span>' +
+      '<span class="value" style="color:' +
+      (v.integrity_match ? 'var(--genuine)' : 'var(--emulator)') +
+      ';">' + (v.integrity_match ? 'PASS' : 'FAIL') + '</span></div>' +
+      '<div class="result-row"><span class="label">Stored Hash</span>' +
+      '<span class="value" style="font-size:11px;">' +
+      v.stored_hash + '</span></div>' +
+      '<div class="result-row"><span class="label">Current Hash</span>' +
+      '<span class="value" style="font-size:11px;">' +
+      v.current_hash + '</span></div>' +
+      '<div class="result-row"><span class="label">Match Score</span>' +
+      '<span class="value">' +
+      ((v.current_match.match_score || 0) * 100).toFixed(1) +
+      '%</span></div>' +
+      '<div class="result-row"><span class="label">Valid</span>' +
+      '<span class="value" style="color:' +
+      (ok ? 'var(--genuine)' : 'var(--emulator)') + ';">' +
+      (ok ? 'VALID' : 'INVALID') + '</span></div></div>';
+  } catch (e) {
+    result.innerHTML =
+      '<span style="color:var(--warn);">Error: ' + e.message + '</span>';
+  }
+}
+
+/* ---- Stats ---- */
+async function loadStats() {
+  const grid = document.getElementById('statsGrid');
+  try {
+    const res = await fetch(API + '/api/stats');
+    const s = await res.json();
+    grid.innerHTML =
+      '<div class="stat-box"><div class="stat-val">' +
+      s.total_chimes + '</div><div class="stat-label">Total Chimes</div></div>' +
+      '<div class="stat-box"><div class="stat-val">' +
+      s.eligible_attestations +
+      '</div><div class="stat-label">Eligible</div></div>' +
+      '<div class="stat-box"><div class="stat-val">' +
+      s.gallery_entries +
+      '</div><div class="stat-label">Gallery</div></div>' +
+      '<div class="stat-box"><div class="stat-val">' +
+      (s.avg_match_score * 100).toFixed(1) +
+      '%</div><div class="stat-label">Avg Match</div></div>' +
+      '<div class="stat-box"><div class="stat-val">' +
+      (s.avg_analog_score * 100).toFixed(1) +
+      '%</div><div class="stat-label">Avg Analog</div></div>' +
+      '<div class="stat-box"><div class="stat-val" style="font-size:14px;">' +
+      Object.entries(s.by_verdict || {}).map(function(kv) {
+        return kv[0].replace(/_/g, ' ') + ': ' + kv[1];
+      }).join('<br>') +
+      '</div><div class="stat-label">Verdicts</div></div>';
+  } catch (e) {
+    grid.innerHTML =
+      '<div style="color:var(--warn);grid-column:1/-1;">Error: ' +
+      e.message + '</div>';
+  }
+}
+
+/* ---- Init ---- */
+loadProfiles();
+</script>
+</body>
+</html>"""
+
+
+# ---------------------------------------------------------------------------
+# Application factory
+# ---------------------------------------------------------------------------
+
+
+async def on_startup(app: web.Application):
+    app["db"] = await aiosqlite.connect(DB_PATH)
+    await init_db(app["db"])
+    print(f"[Boot Chime PoI] Database ready: {DB_PATH}")
+    print(f"[Boot Chime PoI] Known profiles: {len(KNOWN_PROFILES)}")
+
+
+async def on_cleanup(app: web.Application):
+    await app["db"].close()
+
+
+def create_app() -> web.Application:
+    app = web.Application()
+    app.on_startup.append(on_startup)
+    app.on_cleanup.append(on_cleanup)
+
+    app.router.add_get("/", handle_index)
+    app.router.add_get("/api/profiles", handle_list_profiles)
+    app.router.add_post("/api/chime/generate", handle_generate_chime)
+    app.router.add_post("/api/chime/upload", handle_upload_chime)
+    app.router.add_get("/api/chime/{chime_id}", handle_chime_detail)
+    app.router.add_get("/api/chime/{chime_id}/verify", handle_verify_chime)
+    app.router.add_get("/api/chime/{chime_id}/replay", handle_replay_chime)
+    app.router.add_get("/api/chimes", handle_list_chimes)
+    app.router.add_post("/api/gallery", handle_gallery_add)
+    app.router.add_get("/api/gallery", handle_gallery_list)
+    app.router.add_get("/api/stats", handle_stats)
+
+    return app
+
 
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--analyze":
-        if len(sys.argv) < 3:
-            print("Usage: python server.py --analyze <file.wav>")
-            sys.exit(1)
-        cli_analyze(sys.argv[2])
-    else:
-        print("\n  Boot Chime Proof-of-Iron Server")
-        print("  ===============================")
-        print("  http://localhost:5307\n")
-        app.run(host="0.0.0.0", port=5307, debug=True)
+    print(f"""
+    +==============================================================+
+    |          Boot Chime Proof-of-Iron -- RustChain                |
+    |       Acoustic Hardware Attestation Server                    |
+    |                                                               |
+    |  Profiles: {len(KNOWN_PROFILES):>3} known hardware chime signatures           |
+    |  Families: Mac, Amiga, SGI, Sun                               |
+    |  Port:     {PORT}                                             |
+    +==============================================================+
+    """)
+    web.run_app(create_app(), host=HOST, port=PORT)
