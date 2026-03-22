@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "RustChain Wallet",
+    "slug": "rustchain-wallet",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": { "backgroundColor": "#0A0A0A", "resizeMode": "contain" },
+    "ios": { "supportsTablet": false, "bundleIdentifier": "ai.rustchain.wallet" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#0A0A0A" }, "package": "ai.rustchain.wallet" },
+    "extra": { "apiUrl": "https://50.28.86.131" }
+  }
+}
