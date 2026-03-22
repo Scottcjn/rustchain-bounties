@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost in the Machine — RustChain Pre-2000 Hardware Resurrection</title>
+    <style>
+        /* ── Reset & Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-panel: #111118;
+            --bg-card: #1a1a24;
+            --bg-input: #0d0d14;
+            --border: #2a2a3a;
+            --border-glow: #00ff8855;
+            --text: #c8c8d4;
+            --text-dim: #666680;
+            --text-bright: #e8e8f0;
+            --green: #00ff88;
+            --green-dim: #00cc66;
+            --amber: #ffaa00;
+            --red: #ff4444;
+            --cyan: #00ddff;
+            --purple: #aa66ff;
+            --font-mono: 'IBM Plex Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            --font-sans: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── Scanline overlay for CRT effect ─────────────────────── */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── Header ──────────────────────────────────────────────── */
+        header {
+            background: linear-gradient(135deg, var(--bg-panel) 0%, #0f0f1a 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+        }
+
+        .logo-ascii {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--green);
+            white-space: pre;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        header h1 {
+            font-family: var(--font-mono);
+            font-size: 1.4rem;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .bounty-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--green-dim), var(--green));
+            color: var(--bg-dark);
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        /* ── Navigation ──────────────────────────────────────────── */
+        nav {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem 2rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav button {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        nav button:hover, nav button.active {
+            background: var(--green);
+            color: var(--bg-dark);
+            border-color: var(--green);
+        }
+
+        /* ── Main Content ────────────────────────────────────────── */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        h2 {
+            font-family: var(--font-mono);
+            color: var(--green);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-family: var(--font-mono);
+            color: var(--cyan);
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        /* ── Cards ───────────────────────────────────────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-family: var(--font-mono);
+            color: var(--text-bright);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-meta span {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .tag-era-pre85 { background: #ff444430; color: var(--red); border: 1px solid var(--red); }
+        .tag-era-85 { background: #aa66ff30; color: var(--purple); border: 1px solid var(--purple); }
+        .tag-era-90 { background: #ffaa0030; color: var(--amber); border: 1px solid var(--amber); }
+        .tag-era-95 { background: #00ddff30; color: var(--cyan); border: 1px solid var(--cyan); }
+
+        .multiplier {
+            font-family: var(--font-mono);
+            color: var(--green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .bonus {
+            font-family: var(--font-mono);
+            color: var(--amber);
+            font-weight: 700;
+        }
+
+        /* ── Forms ───────────────────────────────────────────────── */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            background: var(--bg-input);
+            color: var(--text-bright);
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+        }
+
+        button.btn {
+            background: var(--green);
+            color: var(--bg-dark);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button.btn:hover {
+            background: var(--green-dim);
+            transform: translateY(-1px);
+        }
+
+        button.btn-secondary {
+            background: var(--bg-card);
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+
+        button.btn-secondary:hover {
+            background: var(--green);
+            color: var(--bg-dark);
+        }
+
+        /* ── Results Panel ───────────────────────────────────────── */
+        .result-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .result-panel.success { border-color: var(--green); }
+        .result-panel.warning { border-color: var(--amber); }
+        .result-panel.error { border-color: var(--red); }
+
+        pre {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--green);
+        }
+
+        /* ── Benchmark Chart ─────────────────────────────────────── */
+        .bench-bar-container {
+            margin: 0.3rem 0;
+        }
+
+        .bench-bar-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.15rem;
+        }
+
+        .bench-bar {
+            height: 20px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bench-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s ease-out;
+            background: linear-gradient(90deg, var(--green-dim), var(--green));
+        }
+
+        .bench-bar-fill.amber { background: linear-gradient(90deg, #cc8800, var(--amber)); }
+        .bench-bar-fill.red { background: linear-gradient(90deg, #cc2222, var(--red)); }
+        .bench-bar-fill.cyan { background: linear-gradient(90deg, #0099bb, var(--cyan)); }
+        .bench-bar-fill.purple { background: linear-gradient(90deg, #7744cc, var(--purple)); }
+
+        /* ── Guide Steps ─────────────────────────────────────────── */
+        .step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 3.5rem;
+        }
+
+        .step-number {
+            position: absolute;
+            left: 1rem;
+            top: 1.2rem;
+            width: 2rem;
+            height: 2rem;
+            background: var(--green);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step h4 {
+            font-family: var(--font-mono);
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .step ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step li {
+            padding: 0.3rem 0;
+            padding-left: 1.2rem;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .step li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-family: var(--font-mono);
+        }
+
+        /* ── Era Payout Table ────────────────────────────────────── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 0.7rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: var(--bg-card);
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        td { color: var(--text); }
+
+        /* ── Config Download ─────────────────────────────────────── */
+        .download-area {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .download-area:hover { border-color: var(--green); }
+
+        /* ── Loading / Spinner ────────────────────────────────────── */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading { color: var(--text-dim); font-family: var(--font-mono); }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        footer a { color: var(--green); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ── Responsive ──────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .logo-ascii { font-size: 0.4rem; }
+            header h1 { font-size: 1rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            main { padding: 1rem; }
+            nav { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-ascii">
+ ██████  ██   ██  ██████  ███████ ████████     ██ ███    ██
+██       ██   ██ ██    ██ ██         ██        ██ ████   ██
+██   ███ ███████ ██    ██ ███████    ██        ██ ██ ██  ██
+██    ██ ██   ██ ██    ██      ██    ██        ██ ██  ██ ██
+ ██████  ██   ██  ██████  ███████    ██        ██ ██   ████
+████████ ██   ██ ███████     ███    ███  █████  ██████ ██   ██ ██ ███    ██ ███████
+   ██    ██   ██ ██         ██ ██  ██ ██ ██     ██   ██ ██   ██ ██ ████   ██ ██
+   ██    ███████ █████     ██   ████   ██ ██    ██████  ███████ ██ ██ ██  ██ █████
+   ██    ██   ██ ██       ████  ██ ██  ██ ██    ██   ██ ██   ██ ██ ██  ██ ██ ██
+   ██    ██   ██ ███████ ██  ██ ██  ██  ██  ██  ██   ██ ██   ██ ██ ██   ████ ███████</div>
+    <h1>Pre-2000 Hardware Resurrection Toolkit</h1>
+    <p>Resurrect vintage iron. Mine RustChain. Earn the antiquity bonus.</p>
+    <span class="bounty-badge">BOUNTY #2314 &mdash; 100+ RTC</span>
+</header>
+
+<nav>
+    <button class="active" onclick="showSection('wizard')">Resurrection Wizard</button>
+    <button onclick="showSection('profiles')">Hardware Profiles</button>
+    <button onclick="showSection('benchmarks')">Benchmarks</button>
+    <button onclick="showSection('guides')">Guides</button>
+    <button onclick="showSection('config')">Config Generator</button>
+    <button onclick="showSection('detect')">Detect Hardware</button>
+    <button onclick="showSection('api')">API Reference</button>
+</nav>
+
+<main>
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- WIZARD SECTION                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-wizard" class="section active">
+        <h2>> Resurrection Wizard</h2>
+        <p style="margin-bottom:1rem;">Identify your vintage hardware, check compatibility, and get a complete mining configuration.</p>
+
+        <div class="form-group">
+            <label>Step 1: What hardware do you have?</label>
+            <select id="wizard-platform" onchange="wizardStep1()">
+                <option value="">-- Select your hardware --</option>
+            </select>
+        </div>
+
+        <div id="wizard-result" style="display:none;"></div>
+
+        <div id="wizard-step2" style="display:none;">
+            <div class="form-group">
+                <label>Step 2: Enter your RTC wallet name</label>
+                <input type="text" id="wizard-wallet" placeholder="e.g., My-Vintage-SPARCstation" />
+            </div>
+            <button class="btn" onclick="wizardGenerate()">Generate Mining Config</button>
+            <button class="btn btn-secondary" style="margin-left:0.5rem;" onclick="wizardBenchmark()">Run Benchmark</button>
+        </div>
+
+        <div id="wizard-config" style="display:none;"></div>
+        <div id="wizard-benchmark" style="display:none;"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- PROFILES SECTION                                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-profiles" class="section">
+        <h2>> Hardware Profiles Database</h2>
+        <div style="margin-bottom:1rem;">
+            <label>Filter by era:</label>
+            <select id="filter-era" onchange="loadProfiles()">
+                <option value="">All Eras</option>
+                <option value="pre-1985">Pre-1985 (300 RTC)</option>
+                <option value="1985-1989">1985-1989 (200 RTC)</option>
+                <option value="1990-1994">1990-1994 (150 RTC)</option>
+                <option value="1995-1999">1995-1999 (100 RTC)</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Era</th><th>Bonus</th><th>Multiplier</th><th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="tag tag-era-95">1995-1999</td><td class="bonus">100 RTC</td><td class="multiplier">1.5-2.5x</td><td>Classic late-90s hardware</td></tr>
+                <tr><td class="tag tag-era-90">1990-1994</td><td class="bonus">150 RTC</td><td class="multiplier">3.0-3.5x</td><td>Early-90s workstations</td></tr>
+                <tr><td class="tag tag-era-85">1985-1989</td><td class="bonus">200 RTC</td><td class="multiplier">3.5-4.0x</td><td>Cold War era hardware</td></tr>
+                <tr><td class="tag tag-era-pre85">Pre-1985</td><td class="bonus">300 RTC</td><td class="multiplier">5.0x</td><td>Eternal glory. Legends only.</td></tr>
+            </tbody>
+        </table>
+
+        <div id="profiles-grid" class="card-grid">
+            <div class="loading"><span class="spinner"></span> Loading hardware profiles...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- BENCHMARKS SECTION                                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-benchmarks" class="section">
+        <h2>> Performance Benchmarks</h2>
+        <p>Simulated benchmarks comparing vintage hardware against a modern x86_64 baseline (3.5 GHz, 50K hashes/sec).</p>
+        <button class="btn" onclick="runAllBenchmarks()" style="margin: 1rem 0;">Run All Benchmarks</button>
+        <div id="benchmark-results">
+            <div class="loading"><span class="spinner"></span> Select a profile or run all benchmarks...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- GUIDES SECTION                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-guides" class="section">
+        <h2>> Resurrection Guides</h2>
+        <p>Step-by-step guides for bringing vintage hardware back to life for RustChain mining.</p>
+        <div class="form-group">
+            <label>Select hardware family:</label>
+            <select id="guide-family" onchange="loadGuide()">
+                <option value="">-- Select family --</option>
+                <option value="sparc">SPARC (Sun SPARCstation, Ultra)</option>
+                <option value="68k">Motorola 68K (Amiga, Mac, NeXT, Atari)</option>
+                <option value="mips">MIPS (SGI Indy, O2, DECstation)</option>
+                <option value="alpha">DEC Alpha (AlphaStation, AlphaServer)</option>
+                <option value="parisc">PA-RISC (HP 9000)</option>
+                <option value="6502">6502/65C816 (C64, Apple II, IIGS)</option>
+            </select>
+        </div>
+        <div id="guide-content"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CONFIG SECTION                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-config" class="section">
+        <h2>> Mining Config Generator</h2>
+        <p>Generate a ready-to-use mining configuration for your vintage hardware.</p>
+
+        <div class="form-group">
+            <label>Hardware profile:</label>
+            <select id="config-profile" onchange="previewConfig()">
+                <option value="">-- Select hardware --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Wallet name:</label>
+            <input type="text" id="config-wallet" placeholder="e.g., My-Vintage-Miner" value="" />
+        </div>
+
+        <button class="btn" onclick="downloadConfig()">Download Config (JSON)</button>
+
+        <div id="config-preview" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- DETECT SECTION                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-detect" class="section">
+        <h2>> Hardware Detection</h2>
+        <p>Detect the hardware of the machine running this server.</p>
+        <button class="btn" onclick="detectHardware()">Detect Local Hardware</button>
+        <div id="detect-result" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- API SECTION                                                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="section-api" class="section">
+        <h2>> REST API Reference</h2>
+        <table>
+            <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>/api/health</td><td>GET</td><td>Service health check and version info</td></tr>
+                <tr><td>/api/profiles</td><td>GET</td><td>List all hardware profiles (filter: ?era=, ?family=, ?arch=)</td></tr>
+                <tr><td>/api/profile?key=</td><td>GET</td><td>Get detailed profile for a specific hardware</td></tr>
+                <tr><td>/api/detect</td><td>GET</td><td>Detect local machine hardware</td></tr>
+                <tr><td>/api/compatibility?profile=</td><td>GET</td><td>Check mining compatibility for a profile</td></tr>
+                <tr><td>/api/benchmark?profile=</td><td>GET</td><td>Run benchmark (omit profile for all)</td></tr>
+                <tr><td>/api/config?profile=</td><td>GET</td><td>Generate mining configuration JSON</td></tr>
+                <tr><td>/api/guide?family=</td><td>GET</td><td>Get resurrection guide for a hardware family</td></tr>
+                <tr><td>/api/guides</td><td>GET</td><td>List all available resurrection guides</td></tr>
+                <tr><td>/api/eras</td><td>GET</td><td>Get era classification and RTC payouts</td></tr>
+                <tr><td>/api/benchmarks</td><td>GET</td><td>Get stored benchmark history</td></tr>
+                <tr><td>/api/stats</td><td>GET</td><td>Get database statistics</td></tr>
+                <tr><td>/api/poa-signature</td><td>GET</td><td>Generate Proof-of-Antiquity signature</td></tr>
+                <tr><td>/api/log-resurrection</td><td>POST</td><td>Log a resurrection attempt</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Example Usage</h3>
+        <pre>
+# List all SPARC profiles
+curl http://localhost:8314/api/profiles?family=sparc
+
+# Check compatibility for SGI Indy
+curl http://localhost:8314/api/compatibility?profile=sgi_indy
+
+# Generate mining config
+curl http://localhost:8314/api/config?profile=commodore_64
+
+# Run benchmark for all profiles
+curl http://localhost:8314/api/benchmark
+
+# Get resurrection guide
+curl http://localhost:8314/api/guide?family=68k
+        </pre>
+    </div>
+</main>
+
+<footer>
+    Ghost in the Machine v1.0.0 &mdash; RustChain Bounty #2314<br>
+    <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2314" target="_blank">Issue #2314</a> |
+    <a href="https://github.com/ElromEvedElElyon" target="_blank">ElromEvedElElyon</a><br>
+    Proof-of-Antiquity: Where older hardware earns higher rewards.
+</footer>
+
+<script>
+const API = window.location.origin;
+
+// ── Section Navigation ──────────────────────────────────────────
+function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (name === 'profiles') loadProfiles();
+}
+
+// ── API Fetch Helper ────────────────────────────────────────────
+async function apiFetch(endpoint) {
+    try {
+        const resp = await fetch(API + endpoint);
+        return await resp.json();
+    } catch (err) {
+        console.error('API error:', err);
+        return { error: err.message };
+    }
+}
+
+// ── Era Tag Generator ───────────────────────────────────────────
+function eraTag(era) {
+    const cls = {
+        'pre-1985': 'tag-era-pre85',
+        '1985-1989': 'tag-era-85',
+        '1990-1994': 'tag-era-90',
+        '1995-1999': 'tag-era-95',
+    }[era] || 'tag-era-95';
+    return '<span class="tag ' + cls + '">' + era + '</span>';
+}
+
+// ── Populate Dropdowns ──────────────────────────────────────────
+async function populateDropdowns() {
+    const data = await apiFetch('/api/profiles');
+    if (data.error) return;
+
+    const selects = ['wizard-platform', 'config-profile'];
+    selects.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        while (sel.options.length > 1) sel.remove(1);
+        data.profiles.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.key;
+            opt.textContent = p.name + ' (' + p.year + ') - ' + p.cpu + ' [' + p.era + ']';
+            sel.appendChild(opt);
+        });
+    });
+}
+
+// ── Wizard ──────────────────────────────────────────────────────
+async function wizardStep1() {
+    const key = document.getElementById('wizard-platform').value;
+    if (!key) {
+        document.getElementById('wizard-result').style.display = 'none';
+        document.getElementById('wizard-step2').style.display = 'none';
+        return;
+    }
+
+    const data = await apiFetch('/api/compatibility?profile=' + key);
+    const panel = document.getElementById('wizard-result');
+    panel.style.display = 'block';
+    document.getElementById('wizard-step2').style.display = 'block';
+
+    let issuesHtml = '';
+    if (data.issues && data.issues.length > 0) {
+        issuesHtml = '<h3>Issues</h3><ul>' +
+            data.issues.map(function(i){ return '<li style="color:var(--amber);">' + i + '</li>'; }).join('') + '</ul>';
+    }
+
+    let recsHtml = '';
+    if (data.recommendations && data.recommendations.length > 0) {
+        recsHtml = '<h3>Recommendations</h3><ul>' +
+            data.recommendations.map(function(r){ return '<li>' + r + '</li>'; }).join('') + '</ul>';
+    }
+
+    let perfHtml = '';
+    if (data.estimated_performance) {
+        const ep = data.estimated_performance;
+        perfHtml = '<h3>Estimated Performance</h3>' +
+            '<div class="bench-bar-container">' +
+            '<div class="bench-bar-label"><span>Effective Hash Rate</span><span>' + ep.effective_hash_rate + ' h/s (' + ep.rtc_multiplier + 'x multiplier)</span></div>' +
+            '<div class="bench-bar"><div class="bench-bar-fill" style="width:' + Math.min(ep.effective_hash_rate / 500, 100) + '%"></div></div>' +
+            '</div>' +
+            '<div class="bench-bar-container">' +
+            '<div class="bench-bar-label"><span>RTC per Epoch (est)</span><span>' + ep.rtc_per_epoch_estimate + '</span></div>' +
+            '<div class="bench-bar"><div class="bench-bar-fill amber" style="width:' + Math.min(ep.rtc_per_epoch_estimate * 10, 100) + '%"></div></div>' +
+            '</div>';
+    }
+
+    panel.innerHTML = '<div class="result-panel ' + (data.compatible ? 'success' : 'warning') + '">' +
+        '<h3>' + data.name + ' - Compatibility: ' + (data.compatible ? 'COMPATIBLE' : 'LIMITED') + '</h3>' +
+        issuesHtml + recsHtml + perfHtml + '</div>';
+}
+
+async function wizardGenerate() {
+    const key = document.getElementById('wizard-platform').value;
+    const wallet = document.getElementById('wizard-wallet').value || 'vintage-miner';
+    if (!key) return;
+
+    const data = await apiFetch('/api/config?profile=' + key);
+    if (data.rustchain) data.rustchain.wallet = wallet;
+
+    const panel = document.getElementById('wizard-config');
+    panel.style.display = 'block';
+    panel.innerHTML = '<div class="result-panel success">' +
+        '<h3>Mining Configuration Generated</h3>' +
+        '<pre>' + JSON.stringify(data, null, 2) + '</pre>' +
+        '<div class="download-area" style="margin-top:1rem;">' +
+        '<button class="btn" onclick="downloadJSON(\'' + btoa(JSON.stringify(data, null, 2)) + '\', \'rtc-mining-config-' + key + '.json\')">' +
+        'Download Config File</button></div></div>';
+}
+
+async function wizardBenchmark() {
+    const key = document.getElementById('wizard-platform').value;
+    if (!key) return;
+
+    const panel = document.getElementById('wizard-benchmark');
+    panel.style.display = 'block';
+    panel.innerHTML = '<div class="loading"><span class="spinner"></span> Running benchmark...</div>';
+
+    const data = await apiFetch('/api/benchmark?profile=' + key);
+    const b = data.benchmark;
+    const c = data.comparison;
+
+    panel.innerHTML = '<div class="result-panel success">' +
+        '<h3>Benchmark: ' + data.name + ' (' + data.era + ')</h3>' +
+        '<div class="bench-bar-container"><div class="bench-bar-label"><span>Raw Hash Rate</span><span>' + b.raw_hash_rate + ' h/s</span></div>' +
+        '<div class="bench-bar"><div class="bench-bar-fill cyan" style="width:' + Math.min(b.raw_hash_rate / 500, 100) + '%"></div></div></div>' +
+        '<div class="bench-bar-container"><div class="bench-bar-label"><span>Effective Rate (' + c.rtc_multiplier + 'x multiplier)</span><span>' + b.effective_hash_rate + ' h/s</span></div>' +
+        '<div class="bench-bar"><div class="bench-bar-fill" style="width:' + Math.min(b.effective_hash_rate / 500, 100) + '%"></div></div></div>' +
+        '<div class="bench-bar-container"><div class="bench-bar-label"><span>vs Modern (raw)</span><span>' + c.vs_modern_raw + '</span></div>' +
+        '<div class="bench-bar"><div class="bench-bar-fill amber" style="width:' + parseFloat(c.vs_modern_raw) + '%"></div></div></div>' +
+        '<div class="bench-bar-container"><div class="bench-bar-label"><span>vs Modern (effective)</span><span>' + c.vs_modern_effective + '</span></div>' +
+        '<div class="bench-bar"><div class="bench-bar-fill purple" style="width:' + parseFloat(c.vs_modern_effective) + '%"></div></div></div>' +
+        '<p style="margin-top:1rem;"><strong>Score:</strong> <span class="multiplier">' + data.score + '</span></p>' +
+        '<p style="margin-top:0.5rem;"><strong>Bonus:</strong> <span class="bonus">' + c.rtc_bonus + ' RTC</span></p>' +
+        '<p style="margin-top:0.5rem;">' + data.verdict + '</p></div>';
+}
+
+// ── Profiles ────────────────────────────────────────────────────
+async function loadProfiles() {
+    const era = document.getElementById('filter-era').value;
+    const endpoint = era ? '/api/profiles?era=' + era : '/api/profiles';
+    const data = await apiFetch(endpoint);
+    const grid = document.getElementById('profiles-grid');
+
+    if (data.error) {
+        grid.innerHTML = '<div class="result-panel error">' + data.error + '</div>';
+        return;
+    }
+
+    grid.innerHTML = data.profiles.map(function(p) {
+        return '<div class="card" onclick="showProfileDetail(\'' + p.key + '\')">' +
+            '<div class="card-title">' + p.name + '</div>' +
+            '<div class="card-meta"><span>' + p.manufacturer + ' (' + p.year + ')</span><span>' + p.cpu + '</span></div>' +
+            '<div class="card-meta">' + eraTag(p.era) +
+            '<span class="multiplier" style="margin-left:0.5rem;">' + p.rtc_multiplier + 'x</span>' +
+            '<span class="bonus" style="margin-left:0.5rem;">' + p.rtc_bonus + ' RTC</span></div></div>';
+    }).join('');
+}
+
+async function showProfileDetail(key) {
+    const data = await apiFetch('/api/profile?key=' + key);
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center;padding:2rem;';
+    modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+    modal.innerHTML = '<div class="result-panel" style="max-width:600px;max-height:80vh;overflow-y:auto;background:var(--bg-panel);">' +
+        '<h3>' + data.name + '</h3><table>' +
+        '<tr><td>Manufacturer</td><td>' + data.manufacturer + '</td></tr>' +
+        '<tr><td>Year</td><td>' + data.year + '</td></tr>' +
+        '<tr><td>CPU</td><td>' + data.cpu + '</td></tr>' +
+        '<tr><td>Architecture</td><td>' + data.arch + ' (' + data.family + ')</td></tr>' +
+        '<tr><td>Typical RAM</td><td>' + data.ram_typical_mb + ' MB</td></tr>' +
+        '<tr><td>Era</td><td>' + eraTag(data.era) + '</td></tr>' +
+        '<tr><td>RTC Multiplier</td><td><span class="multiplier">' + data.rtc_multiplier + 'x</span></td></tr>' +
+        '<tr><td>RTC Bonus</td><td><span class="bonus">' + data.rtc_bonus + ' RTC</span></td></tr>' +
+        '<tr><td>OS Options</td><td>' + (data.os_options || []).join(', ') + '</td></tr>' +
+        '<tr><td>Network</td><td>' + (data.network_options || []).join(', ') + '</td></tr>' +
+        '<tr><td>Mining Viable</td><td style="color:' + (data.mining_viable ? 'var(--green)' : 'var(--red)') + '">' + (data.mining_viable ? 'YES' : 'NO') + '</td></tr>' +
+        '</table><p style="margin-top:1rem;">' + (data.notes || '') + '</p>' +
+        '<button class="btn" style="margin-top:1rem;" onclick="this.closest(\'div[style]\').remove()">Close</button></div>';
+    document.body.appendChild(modal);
+}
+
+// ── Benchmarks ──────────────────────────────────────────────────
+async function runAllBenchmarks() {
+    const container = document.getElementById('benchmark-results');
+    container.innerHTML = '<div class="loading"><span class="spinner"></span> Running benchmarks for all profiles...</div>';
+
+    const data = await apiFetch('/api/benchmark');
+    if (data.error) {
+        container.innerHTML = '<div class="result-panel error">' + data.error + '</div>';
+        return;
+    }
+
+    container.innerHTML = data.benchmarks.map(function(b) {
+        var barWidth = Math.min(b.score, 100);
+        var barClass = b.score > 30 ? '' : b.score > 10 ? 'amber' : 'red';
+        return '<div class="bench-bar-container" style="margin-bottom:0.8rem;">' +
+            '<div class="bench-bar-label"><span>' + b.name + ' (' + b.era + ')</span>' +
+            '<span>Score: ' + b.score + ' | ' + b.comparison.rtc_multiplier + 'x | ' + b.comparison.rtc_bonus + ' RTC</span></div>' +
+            '<div class="bench-bar"><div class="bench-bar-fill ' + barClass + '" style="width:' + barWidth + '%"></div></div></div>';
+    }).join('');
+}
+
+// ── Guides ──────────────────────────────────────────────────────
+async function loadGuide() {
+    const family = document.getElementById('guide-family').value;
+    if (!family) {
+        document.getElementById('guide-content').innerHTML = '';
+        return;
+    }
+
+    const data = await apiFetch('/api/guide?family=' + family);
+    if (data.error) {
+        document.getElementById('guide-content').innerHTML =
+            '<div class="result-panel error">' + data.error + '</div>';
+        return;
+    }
+
+    var html = '<div class="result-panel success">' +
+        '<h3>' + data.title + '</h3>' +
+        '<p><strong>Platforms:</strong> ' + data.platforms.join(', ') + '</p>' +
+        '<p><strong>Difficulty:</strong> ' + data.difficulty + ' | <strong>Time:</strong> ' + data.time_estimate + '</p></div>';
+
+    data.steps.forEach(function(s) {
+        html += '<div class="step"><div class="step-number">' + s.step + '</div>' +
+            '<h4>' + s.title + '</h4><ul>' +
+            s.details.map(function(d){ return '<li>' + d + '</li>'; }).join('') +
+            '</ul></div>';
+    });
+
+    document.getElementById('guide-content').innerHTML = html;
+}
+
+// ── Config Generator ────────────────────────────────────────────
+async function previewConfig() {
+    const key = document.getElementById('config-profile').value;
+    if (!key) {
+        document.getElementById('config-preview').innerHTML = '';
+        return;
+    }
+
+    const data = await apiFetch('/api/config?profile=' + key);
+    const wallet = document.getElementById('config-wallet').value;
+    if (wallet && data.rustchain) data.rustchain.wallet = wallet;
+
+    document.getElementById('config-preview').innerHTML =
+        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+}
+
+function downloadConfig() {
+    const key = document.getElementById('config-profile').value;
+    if (!key) { alert('Select a hardware profile first.'); return; }
+
+    apiFetch('/api/config?profile=' + key).then(function(data) {
+        const wallet = document.getElementById('config-wallet').value;
+        if (wallet && data.rustchain) data.rustchain.wallet = wallet;
+        downloadJSON(btoa(JSON.stringify(data, null, 2)), 'rtc-mining-config-' + key + '.json');
+    });
+}
+
+function downloadJSON(b64content, filename) {
+    const content = atob(b64content);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Hardware Detection ──────────────────────────────────────────
+async function detectHardware() {
+    const container = document.getElementById('detect-result');
+    container.innerHTML = '<div class="loading"><span class="spinner"></span> Detecting hardware...</div>';
+
+    const data = await apiFetch('/api/detect');
+    container.innerHTML = '<div class="result-panel ' + (data.is_vintage ? 'success' : 'warning') + '">' +
+        '<h3>Detected Hardware</h3><table>' +
+        '<tr><td>Hostname</td><td>' + data.hostname + '</td></tr>' +
+        '<tr><td>System</td><td>' + data.system + '</td></tr>' +
+        '<tr><td>Machine</td><td>' + data.machine + '</td></tr>' +
+        '<tr><td>Processor</td><td>' + data.processor + '</td></tr>' +
+        '<tr><td>Architecture</td><td>' + data.detected_arch + '</td></tr>' +
+        '<tr><td>Family</td><td>' + data.detected_family + '</td></tr>' +
+        '<tr><td>Vintage</td><td style="color:' + (data.is_vintage ? 'var(--green)' : 'var(--amber)') + '">' +
+        (data.is_vintage ? 'YES - Eligible for antiquity bonus!' : 'NO - Modern hardware detected') + '</td></tr>' +
+        (data.cpu_detail ? '<tr><td>CPU Detail</td><td>' + data.cpu_detail + '</td></tr>' : '') +
+        '</table></div>';
+}
+
+// ── Initialize ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    populateDropdowns();
+});
+</script>
+
+</body>
+</html>
