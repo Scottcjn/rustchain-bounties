@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Block Explorer — Live Feed</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',monospace;background:#0a0a0a;color:#e0e0e0;min-height:100vh}
+.header{background:#111;border-bottom:1px solid #333;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:18px;color:#ff6b00}
+.header h1 span{color:#666}
+.status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+.status-dot.connected{background:#00ff41;box-shadow:0 0 6px #00ff41}
+.status-dot.disconnected{background:#ff0040;box-shadow:0 0 6px #ff0040}
+.status-dot.connecting{background:#ffaa00;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.conn-status{display:flex;align-items:center;font-size:13px;color:#888}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:#111;border:1px solid #222;border-radius:6px;padding:16px;text-align:center}
+.stat-card .label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px}
+.stat-card .value{font-size:28px;font-weight:bold;color:#ff6b00;margin-top:4px}
+.stat-card .value.green{color:#00ff41}
+.stat-card .value.yellow{color:#ffaa00}
+.feed-container{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.feed{background:#111;border:1px solid #222;border-radius:6px;overflow:hidden}
+.feed-header{background:#1a1a1a;padding:10px 16px;border-bottom:1px solid #222;font-size:13px;color:#ff6b00;display:flex;justify-content:space-between}
+.feed-body{max-height:400px;overflow-y:auto;padding:8px}
+.feed-item{padding:8px 12px;border-bottom:1px solid #1a1a1a;font-size:12px;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.feed-item .time{color:#555;margin-right:8px}
+.feed-item .block-num{color:#ff6b00;font-weight:bold}
+.feed-item .hash{color:#00ff41;font-family:monospace}
+.feed-item .miners{color:#ffaa00}
+.node-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
+.node-card{background:#111;border:1px solid #222;border-radius:6px;padding:16px}
+.node-card.up{border-color:#00ff4133}
+.node-card.down{border-color:#ff004033}
+.node-card .node-name{font-size:14px;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.node-card .node-meta{font-size:11px;color:#666;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.node-card .node-meta span{color:#999}
+.sparkline{margin-top:12px}
+.sparkline canvas{width:100%;height:40px}
+.epoch-alert{position:fixed;top:20px;right:20px;background:#ff6b00;color:#000;padding:12px 20px;border-radius:6px;font-weight:bold;animation:slideIn .3s;z-index:100;display:none}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.footer{text-align:center;margin-top:30px;padding:16px;color:#333;font-size:11px}
+@media(max-width:768px){.stats-bar{grid-template-columns:repeat(2,1fr)}.feed-container,.node-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>RUSTCHAIN <span>EXPLORER</span> — LIVE</h1>
+  <div class="conn-status"><span class="status-dot connecting" id="connDot"></span><span id="connText">Connecting...</span></div>
+</div>
+
+<div class="container">
+  <div class="stats-bar">
+    <div class="stat-card"><div class="label">Current Epoch</div><div class="value" id="epoch">—</div></div>
+    <div class="stat-card"><div class="label">Active Miners</div><div class="value green" id="miners">—</div></div>
+    <div class="stat-card"><div class="label">Nodes Online</div><div class="value yellow" id="nodesUp">—/4</div></div>
+    <div class="stat-card"><div class="label">Last Update</div><div class="value" id="lastUpdate" style="font-size:14px">—</div></div>
+  </div>
+
+  <div class="feed-container">
+    <div class="feed">
+      <div class="feed-header"><span>Live Block Feed</span><span id="blockCount">0 blocks</span></div>
+      <div class="feed-body" id="blockFeed"></div>
+    </div>
+    <div class="feed">
+      <div class="feed-header"><span>Attestation Feed</span><span id="attestCount">0 attestations</span></div>
+      <div class="feed-body" id="attestFeed"></div>
+    </div>
+  </div>
+
+  <div class="node-grid" id="nodeGrid"></div>
+
+  <div class="sparkline" id="sparklineContainer">
+    <canvas id="minerSparkline" height="40"></canvas>
+  </div>
+</div>
+
+<div class="epoch-alert" id="epochAlert">NEW EPOCH SETTLED</div>
+<div class="footer">RustChain Block Explorer v1.0 — WebSocket Feed by ElromEvedElElyon</div>
+
+<script>
+const WS_URL = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.hostname + ':8765';
+let ws, reconnectTimer, blockCount = 0, attestCount = 0;
+const minerHistory = [];
+const MAX_FEED = 50;
+
+function connect() {
+  setConnStatus('connecting');
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => { setConnStatus('connected'); startPing(); };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'initial_state') handleInitial(msg);
+    else if (msg.type === 'node_update') handleUpdate(msg);
+    else if (msg.type === 'pong') {};
+  };
+
+  ws.onclose = () => { setConnStatus('disconnected'); scheduleReconnect(); };
+  ws.onerror = () => { ws.close(); };
+}
+
+function setConnStatus(s) {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connText');
+  dot.className = 'status-dot ' + s;
+  txt.textContent = s === 'connected' ? 'Connected' : s === 'disconnected' ? 'Disconnected — retrying...' : 'Connecting...';
+}
+
+function scheduleReconnect() { clearTimeout(reconnectTimer); reconnectTimer = setTimeout(connect, 3000); }
+
+function startPing() { setInterval(() => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({type:'ping'})); }, 30000); }
+
+function handleInitial(msg) {
+  document.getElementById('epoch').textContent = msg.epoch || '—';
+  document.getElementById('miners').textContent = msg.miner_count || '—';
+}
+
+function handleUpdate(msg) {
+  document.getElementById('epoch').textContent = msg.epoch;
+  document.getElementById('miners').textContent = msg.miner_count;
+  document.getElementById('lastUpdate').textContent = new Date(msg.timestamp).toLocaleTimeString();
+
+  let up = 0;
+  const grid = document.getElementById('nodeGrid');
+  grid.innerHTML = '';
+  (msg.nodes || []).forEach(n => {
+    if (n.status === 'up') up++;
+    const card = document.createElement('div');
+    card.className = 'node-card ' + n.status;
+    card.innerHTML = `
+      <div class="node-name"><span class="status-dot ${n.status === 'up' ? 'connected' : 'disconnected'}"></span>${n.name} (${n.location})</div>
+      <div class="node-meta">
+        <span>Status: ${n.status.toUpperCase()}</span>
+        <span>Latency: ${n.response_time_ms || '—'}ms</span>
+        ${n.data ? `<span>Miners: ${n.data.active_miners || n.data.miners || '—'}</span><span>Epoch: ${n.data.epoch || n.data.current_epoch || '—'}</span>` : `<span>Error: ${(n.error||'').slice(0,30)}</span><span>—</span>`}
+      </div>`;
+    grid.appendChild(card);
+
+    // Add block to feed
+    if (n.status === 'up' && n.data) {
+      addFeedItem('blockFeed', `Block from <span class="block-num">${n.name}</span> — epoch ${n.data.epoch || n.data.current_epoch || '?'}`);
+      blockCount++;
+      if (n.data.active_miners || n.data.miners) {
+        addFeedItem('attestFeed', `<span class="miners">${n.data.active_miners || n.data.miners}</span> miners attesting on ${n.name}`);
+        attestCount++;
+      }
+    }
+  });
+
+  document.getElementById('nodesUp').textContent = up + '/4';
+  document.getElementById('blockCount').textContent = blockCount + ' blocks';
+  document.getElementById('attestCount').textContent = attestCount + ' attestations';
+
+  minerHistory.push(msg.miner_count);
+  if (minerHistory.length > 60) minerHistory.shift();
+  drawSparkline();
+
+  if (msg.new_epoch) showEpochAlert();
+}
+
+function addFeedItem(containerId, html) {
+  const feed = document.getElementById(containerId);
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  const now = new Date().toLocaleTimeString();
+  item.innerHTML = `<span class="time">${now}</span> ${html}`;
+  feed.insertBefore(item, feed.firstChild);
+  while (feed.children.length > MAX_FEED) feed.removeChild(feed.lastChild);
+}
+
+function showEpochAlert() {
+  const el = document.getElementById('epochAlert');
+  el.style.display = 'block';
+  if ('Notification' in window && Notification.permission === 'granted') new Notification('RustChain: New Epoch Settled!');
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+  try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH+Jl5yYkIB0').play(); } catch(e) {}
+}
+
+function drawSparkline() {
+  const canvas = document.getElementById('minerSparkline');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 40;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (minerHistory.length < 2) return;
+  const max = Math.max(...minerHistory, 1);
+  const step = canvas.width / (minerHistory.length - 1);
+  ctx.beginPath();
+  ctx.strokeStyle = '#ff6b00';
+  ctx.lineWidth = 1.5;
+  minerHistory.forEach((v, i) => {
+    const x = i * step, y = canvas.height - (v / max) * (canvas.height - 4);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+connect();
+</script>
+</body>
+</html>
