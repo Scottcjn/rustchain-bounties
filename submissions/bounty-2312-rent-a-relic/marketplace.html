@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent-a-Relic Market — Authenticated Vintage Compute</title>
+    <style>
+        /* ================================================================
+           Rent-a-Relic Market — Dark Theme Marketplace UI
+           Mobile-responsive, production-quality single-page application
+           ================================================================ */
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2235;
+            --bg-card-hover: #1f2a42;
+            --bg-input: #0f1623;
+            --border: #2d3a52;
+            --border-active: #4a7dff;
+            --text-primary: #e8edf5;
+            --text-secondary: #8b95a8;
+            --text-muted: #5a6478;
+            --accent: #4a7dff;
+            --accent-hover: #6090ff;
+            --accent-glow: rgba(74, 125, 255, 0.2);
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --gold: #fbbf24;
+            --purple: #a78bfa;
+            --rtc-color: #22d3ee;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ---- Header ---- */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #0d1424 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .rtc-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: var(--radius-sm);
+            color: var(--rtc-color);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* ---- Main Content ---- */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ---- Views ---- */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ---- Catalog View ---- */
+        .catalog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .catalog-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .catalog-title span {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .filter-bar select:focus, .filter-bar input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ---- Machine Cards Grid ---- */
+        .machines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .machine-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .machine-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg), 0 0 20px var(--accent-glow);
+        }
+
+        .card-photo {
+            height: 160px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-photo .arch-icon {
+            font-size: 3.5rem;
+            opacity: 0.3;
+        }
+
+        .card-photo .poa-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            background: var(--success-bg);
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            color: var(--success);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-photo .year-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            color: var(--gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .card-photo .status-dot {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .status-available { color: var(--success); background: var(--success); }
+        .status-reserved { color: var(--warning); background: var(--warning); }
+        .status-maintenance { color: var(--danger); background: var(--danger); }
+        .status-offline { color: var(--text-muted); background: var(--text-muted); }
+
+        .card-body {
+            padding: 1rem 1.25rem;
+        }
+
+        .card-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-arch {
+            font-size: 0.8rem;
+            color: var(--purple);
+            font-family: var(--font-mono);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .spec-item {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .spec-item strong {
+            color: var(--text-primary);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-price {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--rtc-color);
+            font-size: 1rem;
+        }
+
+        .card-price span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .card-location {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ---- Booking Modal ---- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: var(--text-primary); }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .slot-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .slot-option {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .slot-option:hover {
+            border-color: var(--accent);
+        }
+
+        .slot-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .slot-option .duration {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .slot-option .unit {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .slot-option .cost {
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            color: var(--rtc-color);
+            margin-top: 0.5rem;
+        }
+
+        .booking-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .booking-summary .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.85rem;
+        }
+
+        .booking-summary .row.total {
+            border-top: 1px solid var(--border);
+            margin-top: 0.5rem;
+            padding-top: 0.6rem;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .booking-summary .rtc-amount {
+            color: var(--rtc-color);
+            font-family: var(--font-mono);
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* ---- Dashboard View ---- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .dash-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .dash-card h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ---- Bookings Table ---- */
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bookings-table th {
+            text-align: left;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bookings-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+        .status-badge.pending { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+        .status-badge.completed { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+        .status-badge.cancelled { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
+
+        /* ---- Health Monitor ---- */
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .health-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+        }
+
+        .health-card .machine-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .health-bar {
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            margin: 0.3rem 0;
+            overflow: hidden;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        .health-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ---- Leaderboard ---- */
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .leaderboard-rank {
+            font-size: 1.2rem;
+            font-weight: 700;
+            min-width: 2.5rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .leaderboard-rank.top-1 { color: var(--gold); }
+        .leaderboard-rank.top-2 { color: #c0c0c0; }
+        .leaderboard-rank.top-3 { color: #cd7f32; }
+
+        .leaderboard-info { flex: 1; }
+
+        .leaderboard-name {
+            font-weight: 600;
+        }
+
+        .leaderboard-arch {
+            font-size: 0.75rem;
+            color: var(--purple);
+            font-family: var(--font-mono);
+        }
+
+        .leaderboard-stats {
+            text-align: right;
+            font-family: var(--font-mono);
+        }
+
+        .leaderboard-bookings {
+            font-weight: 700;
+        }
+
+        .leaderboard-rtc {
+            font-size: 0.8rem;
+            color: var(--rtc-color);
+        }
+
+        /* ---- Payment Flow ---- */
+        .payment-flow {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .payment-steps {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .payment-step {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            position: relative;
+        }
+
+        .payment-step.done {
+            border-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .payment-step.current {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .payment-step .step-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .payment-step.done .step-num { color: var(--success); }
+        .payment-step.current .step-num { color: var(--accent); }
+
+        .payment-step .step-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* ---- Provenance Receipt ---- */
+        .receipt-card {
+            background: linear-gradient(135deg, var(--bg-card), #1a2540);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .receipt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--purple), var(--rtc-color));
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .receipt-header h3 {
+            font-size: 1.1rem;
+            color: var(--gold);
+        }
+
+        .receipt-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .receipt-field .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .receipt-field .value {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            max-width: 60%;
+            word-break: break-all;
+            text-align: right;
+        }
+
+        /* ---- Calendar View ---- */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 1rem;
+        }
+
+        .calendar-day-header {
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            padding: 0.5rem;
+            min-height: 80px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .calendar-day .day-num {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .calendar-day .slot {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.3rem;
+            border-radius: 3px;
+            margin-bottom: 2px;
+        }
+
+        .calendar-day .slot.open {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .calendar-day .slot.booked {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        /* ---- Toast notifications ---- */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        .toast.success { background: var(--success-bg); border: 1px solid var(--success); color: var(--success); }
+        .toast.error { background: var(--danger-bg); border: 1px solid var(--danger); color: var(--danger); }
+        .toast.info { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ---- Loading ---- */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---- Empty State ---- */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 768px) {
+            .header { padding: 0.75rem 1rem; }
+            .header-inner { flex-direction: column; align-items: stretch; }
+            .header-nav { justify-content: center; }
+            .main { padding: 1rem; }
+            .machines-grid { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .slot-options { grid-template-columns: 1fr; }
+            .payment-steps { flex-direction: column; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .calendar-grid { grid-template-columns: repeat(7, 1fr); }
+            .calendar-day { min-height: 50px; padding: 0.3rem; }
+            .catalog-header { flex-direction: column; }
+        }
+
+        @media (max-width: 480px) {
+            .card-specs { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; }
+            .filter-bar select, .filter-bar input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">R</div>
+                <div>
+                    <div class="logo-text">Rent-a-Relic Market</div>
+                    <div class="logo-sub">Authenticated Vintage Compute on RustChain</div>
+                </div>
+            </div>
+            <nav class="header-nav">
+                <button class="nav-btn active" onclick="showView('catalog')">Catalog</button>
+                <button class="nav-btn" onclick="showView('calendar')">Calendar</button>
+                <button class="nav-btn" onclick="showView('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="showView('health')">Health</button>
+                <button class="nav-btn" onclick="showView('leaderboard')">Leaderboard</button>
+            </nav>
+            <div class="rtc-badge">
+                <span>RTC</span>
+                <span id="walletBalance">0.00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <!-- Catalog View -->
+        <section id="catalogView" class="view active">
+            <div class="catalog-header">
+                <div class="catalog-title">
+                    Vintage Hardware Catalog
+                    <span id="machineCount"></span>
+                </div>
+                <div class="filter-bar">
+                    <select id="archFilter" onchange="loadRelics()">
+                        <option value="">All Architectures</option>
+                    </select>
+                    <select id="statusFilter" onchange="loadRelics()">
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="reserved">Reserved</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                    <select id="sortFilter" onchange="loadRelics()">
+                        <option value="name">Sort: Name</option>
+                        <option value="year">Sort: Year</option>
+                        <option value="hourly_rate_rtc">Sort: Price</option>
+                        <option value="ram_gb">Sort: RAM</option>
+                        <option value="uptime_hours">Sort: Uptime</option>
+                    </select>
+                </div>
+            </div>
+            <div class="machines-grid" id="machinesGrid">
+                <div class="loading"><div class="spinner"></div><p>Loading vintage hardware...</p></div>
+            </div>
+        </section>
+
+        <!-- Calendar View -->
+        <section id="calendarView" class="view">
+            <div class="catalog-header">
+                <div class="catalog-title">Availability Calendar</div>
+                <select id="calendarMachine" onchange="loadCalendar()">
+                    <option value="">Select a machine...</option>
+                </select>
+            </div>
+            <div id="calendarContent">
+                <div class="empty-state">
+                    <div class="icon">&#128197;</div>
+                    <p>Select a machine to view its availability calendar</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard View -->
+        <section id="dashboardView" class="view">
+            <div class="catalog-title" style="margin-bottom: 1.5rem;">Rental Session Dashboard</div>
+
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <h3>Your Statistics</h3>
+                    <div class="stat-grid">
+                        <div class="stat-box">
+                            <div class="stat-value" style="color: var(--accent)" id="statTotalBookings">0</div>
+                            <div class="stat-label">Total Bookings</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" style="color: var(--success)" id="statActive">0</div>
+                            <div class="stat-label">Active Sessions</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" style="color: var(--rtc-color)" id="statRtcSpent">0</div>
+                            <div class="stat-label">RTC Spent</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" style="color: var(--purple)" id="statHoursUsed">0</div>
+                            <div class="stat-label">Hours Used</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-card">
+                    <h3>RTC Payment Flow</h3>
+                    <div class="payment-steps" id="paymentSteps">
+                        <div class="payment-step">
+                            <div class="step-num">1</div>
+                            <div class="step-label">Select Relic</div>
+                        </div>
+                        <div class="payment-step">
+                            <div class="step-num">2</div>
+                            <div class="step-label">Choose Slot</div>
+                        </div>
+                        <div class="payment-step">
+                            <div class="step-num">3</div>
+                            <div class="step-label">Lock RTC</div>
+                        </div>
+                        <div class="payment-step">
+                            <div class="step-num">4</div>
+                            <div class="step-label">Compute</div>
+                        </div>
+                        <div class="payment-step">
+                            <div class="step-num">5</div>
+                            <div class="step-label">Receipt</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-card" style="margin-top: 1.5rem;">
+                <h3>Your Bookings</h3>
+                <div id="bookingsTable">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+
+            <div id="receiptSection"></div>
+        </section>
+
+        <!-- Health View -->
+        <section id="healthView" class="view">
+            <div class="catalog-title" style="margin-bottom: 1.5rem;">Hardware Health Monitor</div>
+            <div class="health-grid" id="healthGrid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </section>
+
+        <!-- Leaderboard View -->
+        <section id="leaderboardView" class="view">
+            <div class="catalog-title" style="margin-bottom: 1.5rem;">Most-Rented Machines</div>
+            <div class="dash-card">
+                <ul class="leaderboard-list" id="leaderboardList">
+                    <div class="loading"><div class="spinner"></div></div>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Book Vintage Hardware</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalRelicInfo"></div>
+
+                <div class="form-group">
+                    <label>Your User ID</label>
+                    <input type="text" id="bookingUserId" placeholder="agent_001 or your wallet address" />
+                </div>
+
+                <div class="form-group">
+                    <label>Rental Duration</label>
+                    <div class="slot-options" id="slotOptions"></div>
+                </div>
+
+                <div class="booking-summary" id="bookingSummary" style="display:none;">
+                    <div class="row">
+                        <span>Machine</span>
+                        <span id="summaryMachine"></span>
+                    </div>
+                    <div class="row">
+                        <span>Architecture</span>
+                        <span id="summaryArch"></span>
+                    </div>
+                    <div class="row">
+                        <span>Duration</span>
+                        <span id="summaryDuration"></span>
+                    </div>
+                    <div class="row">
+                        <span>Hourly Rate</span>
+                        <span class="rtc-amount" id="summaryRate"></span>
+                    </div>
+                    <div class="row total">
+                        <span>Total RTC (Escrow)</span>
+                        <span class="rtc-amount" id="summaryTotal"></span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="confirmBooking" onclick="confirmBooking()" disabled>
+                    Lock RTC &amp; Reserve Machine
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Session Modal -->
+    <div class="modal-overlay" id="completeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Complete Rental Session</h2>
+                <button class="modal-close" onclick="closeCompleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Output Hash (optional)</label>
+                    <input type="text" id="outputHash" placeholder="SHA-256 hash of your computation output" />
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Completing the session will generate a provenance receipt signed by the machine's
+                    Ed25519 key, proving your computation ran on this specific hardware.
+                </p>
+                <button class="btn btn-success" onclick="doCompleteSession()" style="width:100%;">
+                    Complete Session &amp; Generate Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* =================================================================
+       Rent-a-Relic Market — Frontend Application Logic
+       ================================================================= */
+
+    const API = window.location.origin;
+    let relicsCache = [];
+    let selectedRelic = null;
+    let selectedSlot = null;
+    let completingBookingId = null;
+
+    const USER_ID = 'agent_' + Math.random().toString(36).slice(2, 8);
+
+    // Architecture display icons (text-based for zero-dependency)
+    const ARCH_ICONS = {
+        'POWER8': '[P8]',
+        'PowerPC G5': '[G5]',
+        'SPARC': '[SP]',
+        'VAX': '[VX]',
+        'Cray Vector': '[CR]',
+        'Alpha': '[AL]',
+        'MIPS': '[MI]',
+        'Motorola 68k': '[68]',
+    };
+
+    // ---- View Management ----
+    function showView(viewName) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(viewName + 'View').classList.add('active');
+        event.target.classList.add('active');
+
+        switch(viewName) {
+            case 'catalog': loadRelics(); break;
+            case 'calendar': break;
+            case 'dashboard': loadDashboard(); break;
+            case 'health': loadHealth(); break;
+            case 'leaderboard': loadLeaderboard(); break;
+        }
+    }
+
+    // ---- Toast Notifications ----
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    // ---- API Helpers ----
+    async function api(path, options = {}) {
+        try {
+            const resp = await fetch(API + path, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options,
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                throw new Error(data.error || `HTTP ${resp.status}`);
+            }
+            return data;
+        } catch (err) {
+            showToast(err.message, 'error');
+            throw err;
+        }
+    }
+
+    // ---- Load Relics / Catalog ----
+    async function loadRelics() {
+        const grid = document.getElementById('machinesGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading vintage hardware...</p></div>';
+
+        const arch = document.getElementById('archFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const sort = document.getElementById('sortFilter').value;
+
+        let url = `/api/relics?sort=${sort}&limit=50`;
+        if (arch) url += `&architecture=${encodeURIComponent(arch)}`;
+        if (status) url += `&status=${status}`;
+
+        try {
+            const data = await api(url);
+            relicsCache = data.relics;
+            document.getElementById('machineCount').textContent = `(${data.total} machines)`;
+
+            // Populate architecture filter (once)
+            const archFilter = document.getElementById('archFilter');
+            if (archFilter.options.length <= 1) {
+                const archs = [...new Set(data.relics.map(r => r.architecture))].sort();
+                archs.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a;
+                    opt.textContent = a;
+                    archFilter.appendChild(opt);
+                });
+            }
+
+            // Populate calendar dropdown
+            const calSelect = document.getElementById('calendarMachine');
+            if (calSelect.options.length <= 1) {
+                data.relics.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.textContent = `${r.name} (${r.architecture})`;
+                    calSelect.appendChild(opt);
+                });
+            }
+
+            renderCatalog(data.relics);
+        } catch (err) {
+            grid.innerHTML = '<div class="empty-state"><div class="icon">!</div><p>Failed to load hardware catalog</p></div>';
+        }
+    }
+
+    function renderCatalog(relics) {
+        const grid = document.getElementById('machinesGrid');
+        if (relics.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><div class="icon">&#128187;</div><p>No machines found matching your filters</p></div>';
+            return;
+        }
+
+        grid.innerHTML = relics.map(r => `
+            <div class="machine-card" onclick="openBooking('${r.id}')">
+                <div class="card-photo">
+                    <span class="arch-icon">${ARCH_ICONS[r.architecture] || '[HW]'}</span>
+                    ${r.poa_verified ? '<span class="poa-badge">PoA Verified</span>' : ''}
+                    <span class="year-badge">${r.year}</span>
+                    <span class="status-dot status-${r.status}"></span>
+                </div>
+                <div class="card-body">
+                    <div class="card-name">${escapeHtml(r.name)}</div>
+                    <div class="card-arch">${escapeHtml(r.architecture)} &mdash; ${escapeHtml(r.cpu)}</div>
+                    <div class="card-specs">
+                        <div class="spec-item"><strong>${formatRam(r.ram_gb)}</strong> RAM</div>
+                        <div class="spec-item"><strong>${r.storage_gb} GB</strong> Storage</div>
+                        <div class="spec-item"><strong>${r.attestation_count}</strong> Attestations</div>
+                        <div class="spec-item"><strong>${r.uptime_hours.toFixed(0)}h</strong> Uptime</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-price">${r.hourly_rate_rtc} RTC <span>/hr</span></div>
+                        <div class="card-location">${escapeHtml(r.location)}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatRam(gb) {
+        if (gb >= 1) return gb + ' GB';
+        return Math.round(gb * 1024) + ' MB';
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ---- Booking Modal ----
+    function openBooking(relicId) {
+        selectedRelic = relicsCache.find(r => r.id === relicId);
+        if (!selectedRelic) return;
+
+        selectedSlot = null;
+
+        document.getElementById('modalTitle').textContent = `Book: ${selectedRelic.name}`;
+        document.getElementById('bookingUserId').value = USER_ID;
+
+        document.getElementById('modalRelicInfo').innerHTML = `
+            <div style="background: var(--bg-card); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+                <div style="font-weight: 700; margin-bottom: 0.25rem;">${escapeHtml(selectedRelic.name)}</div>
+                <div style="font-size: 0.8rem; color: var(--purple); font-family: var(--font-mono);">${escapeHtml(selectedRelic.architecture)} &mdash; ${escapeHtml(selectedRelic.cpu)}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">${escapeHtml(selectedRelic.description)}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">${escapeHtml(selectedRelic.location)} &middot; ${selectedRelic.year}</div>
+            </div>
+        `;
+
+        const rate = selectedRelic.hourly_rate_rtc;
+        document.getElementById('slotOptions').innerHTML = [1, 4, 24].map(hours => `
+            <div class="slot-option" onclick="selectSlot(${hours}, this)">
+                <div class="duration">${hours}</div>
+                <div class="unit">${hours === 1 ? 'hour' : 'hours'}</div>
+                <div class="cost">${(rate * hours).toFixed(2)} RTC</div>
+            </div>
+        `).join('');
+
+        document.getElementById('bookingSummary').style.display = 'none';
+        document.getElementById('confirmBooking').disabled = true;
+        document.getElementById('bookingModal').classList.add('active');
+    }
+
+    function selectSlot(hours, el) {
+        selectedSlot = hours;
+        document.querySelectorAll('.slot-option').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+
+        const rate = selectedRelic.hourly_rate_rtc;
+        const total = rate * hours;
+
+        document.getElementById('summaryMachine').textContent = selectedRelic.name;
+        document.getElementById('summaryArch').textContent = selectedRelic.architecture;
+        document.getElementById('summaryDuration').textContent = hours + (hours === 1 ? ' hour' : ' hours');
+        document.getElementById('summaryRate').textContent = rate.toFixed(2) + ' RTC/hr';
+        document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' RTC';
+        document.getElementById('bookingSummary').style.display = 'block';
+        document.getElementById('confirmBooking').disabled = false;
+    }
+
+    function closeModal() {
+        document.getElementById('bookingModal').classList.remove('active');
+        selectedRelic = null;
+        selectedSlot = null;
+    }
+
+    async function confirmBooking() {
+        if (!selectedRelic || !selectedSlot) return;
+
+        const userId = document.getElementById('bookingUserId').value.trim();
+        if (!userId) {
+            showToast('Please enter your User ID', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('confirmBooking');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+            const data = await api('/relic/reserve', {
+                method: 'POST',
+                body: JSON.stringify({
+                    relic_id: selectedRelic.id,
+                    user_id: userId,
+                    slot_hours: selectedSlot,
+                }),
+            });
+
+            showToast(data.message, 'success');
+            closeModal();
+            loadRelics();
+        } catch (err) {
+            // Error already shown by api()
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Lock RTC & Reserve Machine';
+        }
+    }
+
+    // ---- Calendar ----
+    async function loadCalendar() {
+        const relicId = document.getElementById('calendarMachine').value;
+        const container = document.getElementById('calendarContent');
+
+        if (!relicId) {
+            container.innerHTML = '<div class="empty-state"><div class="icon">&#128197;</div><p>Select a machine to view its availability calendar</p></div>';
+            return;
+        }
+
+        container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+        try {
+            const data = await api(`/api/relics/${relicId}`);
+            renderCalendar(data, container);
+        } catch (err) {
+            container.innerHTML = '<div class="empty-state"><p>Failed to load calendar</p></div>';
+        }
+    }
+
+    function renderCalendar(relic, container) {
+        const now = new Date();
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        let html = `<div style="margin-bottom: 1rem;">
+            <strong>${escapeHtml(relic.name)}</strong> &mdash;
+            <span style="color: var(--rtc-color); font-family: var(--font-mono);">${relic.hourly_rate_rtc} RTC/hr</span>
+        </div>`;
+
+        html += '<div class="calendar-grid">';
+
+        // Day headers
+        days.forEach(d => {
+            html += `<div class="calendar-day-header">${d}</div>`;
+        });
+
+        // Fill empty cells before first day
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            html += '<div class="calendar-day" style="opacity: 0.3;"></div>';
+        }
+
+        // Slots by day
+        const slotsByDay = {};
+        (relic.available_slots || []).forEach(slot => {
+            const day = new Date(slot.start).toDateString();
+            if (!slotsByDay[day]) slotsByDay[day] = 0;
+            slotsByDay[day]++;
+        });
+
+        // Booked slots by day
+        const bookedByDay = {};
+        (relic.bookings || []).forEach(b => {
+            if (b.start_time) {
+                const day = new Date(b.start_time).toDateString();
+                if (!bookedByDay[day]) bookedByDay[day] = 0;
+                bookedByDay[day]++;
+            }
+        });
+
+        // Render 14 days
+        for (let d = 0; d < 14; d++) {
+            const date = new Date(now);
+            date.setDate(date.getDate() + d);
+            const dayStr = date.toDateString();
+            const openSlots = slotsByDay[dayStr] || 0;
+            const bookedSlots = bookedByDay[dayStr] || 0;
+
+            html += `<div class="calendar-day">
+                <div class="day-num">${date.getDate()}</div>
+                ${openSlots > 0 ? `<div class="slot open">${openSlots} open</div>` : ''}
+                ${bookedSlots > 0 ? `<div class="slot booked">${bookedSlots} booked</div>` : ''}
+                ${openSlots === 0 && bookedSlots === 0 ? '<div class="slot" style="color: var(--text-muted);">--</div>' : ''}
+            </div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // ---- Dashboard ----
+    async function loadDashboard() {
+        try {
+            const data = await api(`/api/bookings?user_id=${USER_ID}`);
+            const bookings = data.bookings || [];
+
+            // Stats
+            const active = bookings.filter(b => b.status === 'active').length;
+            const completed = bookings.filter(b => b.status === 'completed').length;
+            const totalRtc = bookings.reduce((sum, b) => sum + (b.rtc_deposit || 0), 0);
+            const totalHours = bookings.reduce((sum, b) => sum + (b.slot_hours || 0), 0);
+
+            document.getElementById('statTotalBookings').textContent = bookings.length;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statRtcSpent').textContent = totalRtc.toFixed(1);
+            document.getElementById('statHoursUsed').textContent = totalHours;
+
+            // Update wallet
+            document.getElementById('walletBalance').textContent = (1000 - totalRtc).toFixed(2);
+
+            // Update payment flow visual
+            if (active > 0) {
+                highlightPaymentStep(3);
+            }
+
+            renderBookingsTable(bookings);
+        } catch (err) {
+            document.getElementById('bookingsTable').innerHTML = '<div class="empty-state"><p>Failed to load bookings</p></div>';
+        }
+    }
+
+    function highlightPaymentStep(stepNum) {
+        const steps = document.querySelectorAll('#paymentSteps .payment-step');
+        steps.forEach((step, i) => {
+            step.classList.remove('done', 'current');
+            if (i < stepNum) step.classList.add('done');
+            if (i === stepNum) step.classList.add('current');
+        });
+    }
+
+    function renderBookingsTable(bookings) {
+        const container = document.getElementById('bookingsTable');
+        if (bookings.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>No bookings yet. Visit the catalog to rent your first relic.</p></div>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Relic</th>
+                        <th>Duration</th>
+                        <th>RTC</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${bookings.map(b => `
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-size: 0.75rem;">${b.id}</td>
+                            <td>${b.relic_id}</td>
+                            <td>${b.slot_hours}h</td>
+                            <td style="color: var(--rtc-color); font-family: var(--font-mono);">${b.rtc_deposit} RTC</td>
+                            <td><span class="status-badge ${b.status}">${b.status}</span></td>
+                            <td>
+                                ${b.status === 'active' ? `<button class="btn btn-success" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="openCompleteModal('${b.id}')">Complete</button>` : ''}
+                                ${b.status === 'completed' ? `<button class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="viewReceipt('${b.id}')">Receipt</button>` : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // ---- Complete Session ----
+    function openCompleteModal(bookingId) {
+        completingBookingId = bookingId;
+        document.getElementById('outputHash').value = '';
+        document.getElementById('completeModal').classList.add('active');
+    }
+
+    function closeCompleteModal() {
+        document.getElementById('completeModal').classList.remove('active');
+        completingBookingId = null;
+    }
+
+    async function doCompleteSession() {
+        if (!completingBookingId) return;
+
+        try {
+            const outputHash = document.getElementById('outputHash').value.trim();
+            const body = outputHash ? { output_hash: outputHash } : {};
+
+            const data = await api(`/api/bookings/${completingBookingId}/complete`, {
+                method: 'PUT',
+                body: JSON.stringify(body),
+            });
+
+            showToast('Session completed! Provenance receipt generated.', 'success');
+            closeCompleteModal();
+            loadDashboard();
+            loadRelics();
+
+            // Show receipt
+            if (data.receipt) {
+                renderReceipt(data.receipt);
+            }
+        } catch (err) {
+            // Error shown by api()
+        }
+    }
+
+    async function viewReceipt(bookingId) {
+        try {
+            const data = await api(`/relic/receipt/${bookingId}`);
+            if (data.receipt) {
+                renderReceipt(data.receipt);
+            }
+        } catch (err) {
+            // Error shown by api()
+        }
+    }
+
+    function renderReceipt(receipt) {
+        const section = document.getElementById('receiptSection');
+        section.innerHTML = `
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <h3>PROVENANCE RECEIPT</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Signed by machine Ed25519 key</div>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Receipt ID</span>
+                    <span class="value">${receipt.id}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Machine Passport</span>
+                    <span class="value">${receipt.machine_passport_id}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Session Duration</span>
+                    <span class="value">${receipt.session_duration_s}s</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Output Hash</span>
+                    <span class="value" style="font-size: 0.7rem;">${receipt.output_hash}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Attestation Proof</span>
+                    <span class="value" style="font-size: 0.7rem;">${receipt.attestation_proof}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Signature</span>
+                    <span class="value" style="font-size: 0.7rem;">${receipt.signature}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Signed By (Public Key)</span>
+                    <span class="value" style="font-size: 0.7rem;">${receipt.signed_by_key}</span>
+                </div>
+                <div class="receipt-field">
+                    <span class="label">Timestamp</span>
+                    <span class="value">${receipt.created_at}</span>
+                </div>
+            </div>
+        `;
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ---- Health Monitor ----
+    async function loadHealth() {
+        const grid = document.getElementById('healthGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+        try {
+            const data = await api('/api/health');
+            if (data.health.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><p>No active sessions to monitor. Book a machine first.</p></div>';
+                return;
+            }
+
+            grid.innerHTML = data.health.map(h => `
+                <div class="health-card">
+                    <div class="machine-name">${escapeHtml(h.relic_name)} <span style="color: var(--purple); font-size: 0.75rem;">${escapeHtml(h.architecture)}</span></div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="status-badge ${h.status === 'healthy' ? 'active' : h.status === 'warning' ? 'pending' : 'cancelled'}">${h.status}</span>
+                    </div>
+                    <div class="health-label"><span>CPU</span><span>${h.cpu_pct}%</span></div>
+                    <div class="health-bar"><div class="health-bar-fill" style="width: ${h.cpu_pct}%; background: ${getHealthColor(h.cpu_pct)};"></div></div>
+                    <div class="health-label"><span>Memory</span><span>${h.mem_pct}%</span></div>
+                    <div class="health-bar"><div class="health-bar-fill" style="width: ${h.mem_pct}%; background: ${getHealthColor(h.mem_pct)};"></div></div>
+                    <div class="health-label"><span>Disk</span><span>${h.disk_pct}%</span></div>
+                    <div class="health-bar"><div class="health-bar-fill" style="width: ${h.disk_pct}%; background: ${getHealthColor(h.disk_pct)};"></div></div>
+                    <div class="health-label" style="margin-top: 0.5rem;"><span>Temperature</span><span>${h.temperature}&deg;C</span></div>
+                </div>
+            `).join('');
+        } catch (err) {
+            grid.innerHTML = '<div class="empty-state"><p>Failed to load health data</p></div>';
+        }
+    }
+
+    function getHealthColor(pct) {
+        if (pct < 50) return 'var(--success)';
+        if (pct < 80) return 'var(--warning)';
+        return 'var(--danger)';
+    }
+
+    // ---- Leaderboard ----
+    async function loadLeaderboard() {
+        const list = document.getElementById('leaderboardList');
+        list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+        try {
+            const data = await api('/api/leaderboard');
+            if (data.leaderboard.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No rental data yet</p></div>';
+                return;
+            }
+
+            list.innerHTML = data.leaderboard.map((item, i) => `
+                <li class="leaderboard-item">
+                    <div class="leaderboard-rank ${i < 3 ? 'top-' + (i + 1) : ''}">#${i + 1}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">${escapeHtml(item.name)}</div>
+                        <div class="leaderboard-arch">${escapeHtml(item.architecture)} (${item.year})</div>
+                    </div>
+                    <div class="leaderboard-stats">
+                        <div class="leaderboard-bookings">${item.total_bookings} bookings</div>
+                        <div class="leaderboard-rtc">${item.total_rtc_earned.toFixed(1)} RTC earned</div>
+                    </div>
+                </li>
+            `).join('');
+        } catch (err) {
+            list.innerHTML = '<div class="empty-state"><p>Failed to load leaderboard</p></div>';
+        }
+    }
+
+    // ---- Initialize ----
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('walletBalance').textContent = '1000.00';
+        loadRelics();
+    });
+    </script>
+</body>
+</html>
