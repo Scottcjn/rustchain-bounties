@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/click/parser.py
+# hypothesis_version: 6.151.9
+
+['-', '--', '=', 'Context', 'CoreArgument', 'CoreOption', 'CoreParameter', 'ParsingState', 'V', 'append', 'append_const', 'count', 'store', 'store_const', 'te.Deque[V]']

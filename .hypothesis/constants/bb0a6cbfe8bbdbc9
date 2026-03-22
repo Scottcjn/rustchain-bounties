@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/_collections.py
+# hypothesis_version: 6.151.9
+
+[', ', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-Location', 'Content-Type', 'Digest', 'HTTPHeaderDict', 'Last-Modified', '_DT', '_KT', '_VT', '__getitem__', 'keys', 'latin-1']

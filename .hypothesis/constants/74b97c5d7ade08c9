@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/chardistribution.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 0.99, 127, 129, 136, 157, 159, 160, 161, 164, 176, 188, 196, 212, 224, 239, 256, 512, 1024]

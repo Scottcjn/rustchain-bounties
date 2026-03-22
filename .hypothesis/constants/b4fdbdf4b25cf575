@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/connection.py
+# hypothesis_version: 6.151.9
+
+[b'%x\r\n%b\r\n', b'0\r\n\r\n', 0.0, 443, 2022, 16384, '%', "', '", '.', 'Content-Length', 'Transfer-Encoding', 'User-Agent', '[]', '[^a-z]', 'accept-encoding', 'audit', 'chunked', 'content-length', 'host', 'http', 'http.client.connect', 'https', 'load_default_certs', 'transfer-encoding', 'unknown protocol', 'user-agent', 'utf-8', 'wrong version number']

@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/_internal_utils.py
+# hypothesis_version: 6.151.9
+
+[b'^[^:\\s][^:\\r\\n]*$', b'^\\S[^\\r\\n]*$|^$', '^[^:\\s][^:\\r\\n]*$', '^\\S[^\\r\\n]*$|^$', 'ascii']

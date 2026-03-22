@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/segment.py
+# hypothesis_version: 6.151.9
+
+[1024, 'Console', 'ConsoleOptions', 'RenderResult', 'Segment', '__main__', 'control', 'python', 'rich', 'rich.Segment']

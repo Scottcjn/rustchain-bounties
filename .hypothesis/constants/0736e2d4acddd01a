@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/error.py
+# hypothesis_version: 6.151.9
+
+['\x00\r\n\x85\u2028\u2029', ' ... ', ':\n', 'Mark', 'MarkedYAMLError', 'YAMLError', '^']

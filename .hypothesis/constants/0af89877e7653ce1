@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/cookies.py
+# hypothesis_version: 6.151.9
+
+['"', '.', '/', 'Cookie', 'Host', 'HttpOnly', '\\"', '_cookies_lock', '_original_response', 'comment', 'comment_url', 'copy', 'discard', 'domain', 'domain_initial_dot', 'domain_specified', 'expires', 'httponly', 'max-age', 'name', 'path', 'path_specified', 'port', 'port_specified', 'rest', 'rfc2109', 'secure', 'startswith', 'utf-8', 'value', 'version']

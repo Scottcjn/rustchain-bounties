@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/apport_python_hook.py
+# hypothesis_version: 6.151.9
+
+[416, 2047, ' (deleted)', '-sx', '/', '/etc/default/apport', '/proc/self/cwd', '/var/crash', 'APPORT_REPORT_DIR', 'D-BUS Service', 'DbusErrorAnalysis', 'Exec', 'ExecutablePath', 'ExecutableTimestamp', 'Name', 'PYTHONHOME', 'PYTHONPATH', 'PythonArgs', 'Traceback', 'UTF-8', '_', '_HooksRun', 'get_dbus_name', 'no', 'pidof', 'provided by', 'utf-8', 'wb']

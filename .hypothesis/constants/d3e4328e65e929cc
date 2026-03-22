@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/util/ssl_.py
+# hypothesis_version: 6.151.9
+
+[16384, 131072, 16777216, 33554432, 269488335, ':', 'CERT_', 'ENCRYPTED', 'OpenSSL ', 'PROTOCOL_', 'SSLKEYLOGFILE', 'TLSv1', 'TLSv1_1', 'TLSv1_2', 'ascii', 'cpython', 'http/1.1', 'keylog_filename', 'load_default_certs', 'post_handshake_auth', 'pypy']

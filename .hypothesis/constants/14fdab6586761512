@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/universaldetector.py
+# hypothesis_version: 6.151.9
+
+[b'\x00\x00\xff\xfe', b'(\x1b|~{)', b'[\x80-\x9f]', b'[\x80-\xff]', b'\xfe\xff\x00\x00', 0.0, 0.2, 1.0, 'CP949', 'GB18030', 'ISO-8859-11', 'UTF-16', 'UTF-32', 'UTF-8-SIG', 'Windows-1250', 'Windows-1251', 'Windows-1252', 'Windows-1253', 'Windows-1254', 'Windows-1255', 'Windows-1256', 'Windows-1257', 'ascii', 'confidence', 'encoding', 'euc-kr', 'gb2312', 'iso-8859', 'iso-8859-1', 'iso-8859-13', 'iso-8859-2', 'iso-8859-5', 'iso-8859-6', 'iso-8859-7', 'iso-8859-8', 'iso-8859-9', 'language', 'no data received!', 'tis-620', 'utf-16le']

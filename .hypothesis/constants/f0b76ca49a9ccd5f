@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/protocol.py
+# hypothesis_version: 6.151.9
+
+['RenderableType', '__rich__', '__rich_console__']

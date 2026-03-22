@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/panel.py
+# hypothesis_version: 6.151.9
+
+['Console', 'ConsoleOptions', 'Hello, World!', 'Measurement', 'Panel', 'RenderResult', 'RenderableType', '__main__', 'center', 'left', 'none', 'rich.Panel', 'white on blue']

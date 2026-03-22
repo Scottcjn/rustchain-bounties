@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/_wrap.py
+# hypothesis_version: 6.151.9
+
+['\\s*\\S+\\s*', '__main__', 'アプリケーションは1670万色を使用でき']

@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/latin1prober.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 0.73, 20.0, 'ISO-8859-1']

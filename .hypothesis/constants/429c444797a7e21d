@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/models.py
+# hypothesis_version: 6.151.9
+
+[128, 400, 500, 512, 600, 1024, '*', '.', '/', '0', ':', '?', '@', 'Content-Length', 'Content-Type', 'Cookie', 'GET', 'HEAD', 'Transfer-Encoding', '__iter__', '_content', '_content_consumed', 'application/json', 'chunked', 'content-type', 'cookies', 'elapsed', 'encoding', 'headers', 'history', 'http', 'iso-8859-1', 'link', 'location', 'raw', 'read', 'reason', 'rel', 'release_conn', 'replace', 'request', 'status_code', 'stream', 'tell', 'url', 'utf-8', 'utf8']

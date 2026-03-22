@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/click/utils.py
+# hypothesis_version: 6.151.9
+
+[b'\n', '\x08', '-', '.', '...', 'APPDATA', 'KeepOpenFile', 'LOCALAPPDATA', 'LazyFile', 'P', 'P.args', 'P.kwargs', 'R', 'XDG_CONFIG_HOME', '__main__', '__package__', 'darwin', 'nt', 'os.PathLike[str]', 'r', 'replace', 'strict', 'surrogateescape', 't.Callable[P, R]', 'utf-8', '~', '~/.config']

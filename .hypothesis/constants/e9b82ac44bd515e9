@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/filesize.py
+# hypothesis_version: 6.151.9
+
+[1000, '1 byte', 'EB', 'GB', 'MB', 'PB', 'TB', 'YB', 'ZB', 'decimal', 'kB', '{:,} bytes']

@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/utf1632prober.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.8, 0.85, 0.94, 1.0, 2.0, 4.0, 216, 219, 220, 223, 1024, 'utf-16', 'utf-16be', 'utf-16le', 'utf-32be', 'utf-32le']

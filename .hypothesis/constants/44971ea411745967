@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/serializer.py
+# hypothesis_version: 6.151.9
+
+['Serializer', 'SerializerError', 'id%03d', 'serializer is closed']

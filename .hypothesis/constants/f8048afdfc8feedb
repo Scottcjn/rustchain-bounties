@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/rich/repr.py
+# hypothesis_version: 6.151.9
+
+['Angular repr', 'Build a rich repr', 'Return repr(self)', 'Standard repr', 'T', '__main__', '__rich_repr__', 'angular', 'bar', 'buy', 'eggs', 'foo', 'ham', 'hand sanitizer', 'pineapple', 'shopping']

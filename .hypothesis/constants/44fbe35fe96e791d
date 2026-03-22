@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/sessions.py
+# hypothesis_version: 6.151.9
+
+[443, '//', ':', 'Authorization', 'CURL_CA_BUNDLE', 'Content-Length', 'Content-Type', 'Cookie', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'Proxy-Authorization', 'REQUESTS_CA_BUNDLE', 'Transfer-Encoding', 'adapters', 'allow_redirects', 'auth', 'cert', 'cookies', 'headers', 'hooks', 'http', 'http://', 'https', 'https://', 'latin1', 'location', 'max_redirects', 'no_proxy', 'params', 'proxies', 'response', 'stream', 'timeout', 'trust_env', 'utf8', 'verify', 'win32']

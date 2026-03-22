@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/escsm.py
+# hypothesis_version: 6.151.9
+
+['Chinese', 'HZ-GB-2312', 'ISO-2022-CN', 'ISO-2022-JP', 'ISO-2022-KR', 'Japanese', 'Korean', 'char_len_table', 'class_factor', 'class_table', 'language', 'name', 'state_table']

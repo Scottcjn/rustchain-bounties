@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/resolver.py
+# hypothesis_version: 6.151.9
+
+['!&*', '-+0123456789', '-+0123456789.', '0123456789', '<', '=', 'BaseResolver', 'N', 'Resolver', '^(?:!|&|\\*)$', '^(?:<<)$', '^(?:=)$', 'n', 'yYnNtTfFoO', 'yaml_path_resolvers', '~']

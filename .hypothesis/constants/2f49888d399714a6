@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/tokens.py
+# hypothesis_version: 6.151.9
+
+['%s(%s)', '%s=%r', ',', ', ', '-', ':', '<alias>', '<anchor>', '<block end>', '<directive>', '<document end>', '<document start>', '<scalar>', '<stream end>', '<stream start>', '<tag>', '?', '[', ']', '_mark', '{', '}']

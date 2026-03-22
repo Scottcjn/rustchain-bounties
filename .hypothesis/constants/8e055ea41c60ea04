@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/response.py
+# hypothesis_version: 6.151.9
+
+[b'\n', b'\r\n', b';', 100, 200, 204, 301, 302, 303, 304, 307, 308, ',', 'HEAD', 'Read timed out.', '^([0-9]+)\\.([0-9]+)', '_decompress', 'br', 'buffer is empty', 'chunked', 'closed', 'content-encoding', 'content-length', 'decompress', 'deflate', 'fileno', 'flush', 'fp', 'gzip', 'isclosed', 'location', 'n should be > 0', 'needs_input', 'read', 'transfer-encoding', 'utf-8', 'zstd']

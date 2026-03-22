@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/utils.py
+# hypothesis_version: 6.151.9
+
+[443, 4294967295, '\x00', ' \'"', "!#$%&'()*+,/:;=?@[]~", "!#$&'()*+,/:;=?@[]~", '"', '"\' ', '%', '\'"', '*', '*/*', ',', ', ', ', *<', ',\\s*', '.', '.*', '.netrc', '/', '0123456789-._~', '://', ';', '<', '<> \'"', '<local>', '=', '=L', '>', '>I', '?', '@', 'Accept', 'Accept-Encoding', 'Connection', 'ISO-8859-1', 'NETRC', 'ProxyEnable', 'ProxyOverride', 'User-Agent', '\\', '\\"', '\\.', '\\\\', '__len__', '_netrc', 'accept-encoding', 'all', 'all://', 'application/json', 'ascii', 'b', 'charset', 'content-type', 'fileno', 'http', 'https', 'items', 'keep-alive', 'len', 'name', 'no_proxy', 'python-requests', 'replace', 'seek', 'tell', 'text', 'url', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le', 'utf-8', 'utf-8-sig', 'value', 'wb', 'win32']

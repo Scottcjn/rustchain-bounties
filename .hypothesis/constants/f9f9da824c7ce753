@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/packages.py
+# hypothesis_version: 6.151.9
+
+['chardet', 'idna', 'urllib3']

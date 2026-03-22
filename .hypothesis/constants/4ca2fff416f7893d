@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/util/url.py
+# hypothesis_version: 6.151.9
+
+[b'%', b'.', 128, 65535, "!$&'()*+,;=", '#', '$', '%25', '%[a-fA-F0-9]{2}', '(', '(?:', '(?:%25|%)(?:[', ')', ')?\\]', ')\\]$', '.', '..', '/', '/.', '/..', '//', ':', '://', '?', '@', 'Url', '[0-9A-Fa-f]{1,4}', '\\[', ']|%[a-fA-F0-9]{2})+', '^', 'ascii', 'auth', 'fragment', 'hex', 'host', 'http', 'https', 'ls32', 'path', 'port', 'query', 'scheme', 'surrogatepass', 'utf-8', '|']

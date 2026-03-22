@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/parser.py
+# hypothesis_version: 6.151.9
+
+['!', '!!', 'Parser', 'ParserError', 'TAG', 'YAML', 'block', 'flow', 'tag:yaml.org,2002:', 'while parsing a node']

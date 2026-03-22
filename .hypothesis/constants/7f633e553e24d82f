@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/dumper.py
+# hypothesis_version: 6.151.9
+
+['BaseDumper', 'Dumper', 'SafeDumper']

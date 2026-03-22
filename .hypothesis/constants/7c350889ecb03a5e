@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/attr/converters.py
+# hypothesis_version: 6.151.9
+
+['0', '1', 'default_if_none', 'f', 'false', 'n', 'no', 'off', 'on', 'optional', 'pipe', 'return', 't', 'to_bool', 'true', 'val', 'y', 'yes']

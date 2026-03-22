@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/scanner.py
+# hypothesis_version: 6.151.9
+
+[1024, '\x00', '\x00\r\n\x85\u2028\u2029', '\x00 \t\r\n\x85\u2028\u2029', '\x00 \t\r\n\x85\u2028\u2029?:,]}%@`', '\x00 \r\n\x85\u2028\u2029', '\x07', '\x08', '\x1b', '!', '"', '"\\', '#', '%', '&', "'", '\'"\\\x00 \t\r\n\x85\u2028\u2029', '*', '+', '+-', ',', ',?[]{}', ',[]{}', '-', '---', '-_', '.', '...', '/', '0', '0123456789', '9', ':', '<', '>', '?', '?:', 'A', 'L', 'N', 'P', 'Scanner', 'ScannerError', 'TAG', 'U', 'YAML', 'Z', '[', '\\', ']', '_', 'a', 'alias', 'anchor', 'b', 'directive', 'e', 'f', 'n', 'r', 't', 'tag', 'u', 'utf-8', 'v', 'while parsing a %s', 'while parsing a tag', 'while scanning a %s', 'while scanning a tag', 'while scanning an %s', 'x', 'z', '{', '|', '}', '\ufeff']

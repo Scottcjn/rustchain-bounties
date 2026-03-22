@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/_distutils_hack/__init__.py
+# hypothesis_version: 6.151.9
+
+['__file__', '__pypy__', '_distutils', 'distutils', 'distutils.', 'distutils.core', 'local', 'pybuilddir.txt', 'setup.py', 'spec_for_{fullname}', 'test.', 'test.test_distutils', 'test.test_importlib']

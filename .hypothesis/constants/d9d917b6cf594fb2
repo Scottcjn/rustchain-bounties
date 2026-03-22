@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/util/request.py
+# hypothesis_version: 6.151.9
+
+[',', ',br', ',zstd', '@@@SKIP_HEADER@@@', 'CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'TRACE', 'accept-encoding', 'authorization', 'cache-control', 'connection', 'gzip,deflate', 'host', 'iso-8859-1', 'keep-alive', 'no-cache', 'proxy-authorization', 'read', 'seek', 'tell', 'user-agent']

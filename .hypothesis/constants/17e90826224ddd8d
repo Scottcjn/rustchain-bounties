@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/click/decorators.py
+# hypothesis_version: 6.151.9
+
+['-', '--help', '--password', '--version', '--yes', '.', 'CmdType', 'FC', 'GrpType', 'P', 'P.args', 'P.kwargs', 'R', 'T', '_', '__click_params__', '__main__', '__name__', '__package__', 'callback', 'confirmation_prompt', 'expose_value', 'help', 'hide_input', 'is_eager', 'is_flag', 'package', 'params', 'prog', 'prompt', 't.Callable[P, R]', 'version']

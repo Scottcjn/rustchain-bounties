@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/representer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 1e+300, '%r', '%r%rj', '%r+%rj', '%rj', '%s.%s', '-.inf', '.', '.0e', '.inf', '.nan', 'BaseRepresenter', 'Representer', 'RepresenterError', 'SafeRepresenter', '__getstate__', '__newobj__', '__reduce__', '__reduce_ex__', 'args', 'ascii', 'dictitems', 'e', 'encodebytes', 'false', 'items', 'listitems', 'null', 'state', 'true', 'yaml_representers', '|']

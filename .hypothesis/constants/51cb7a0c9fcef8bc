@@ -1,0 +1,4 @@
+# file: /home/ubuntu/workspace/rustchain-bounties/scripts/sybil_risk_scorer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-09, 0.78, 0.88, 100, ' token ', ' user ', '#', ').,;!?', ', ', '--input', '--output', '--policy', '/', '@[a-z0-9_-]+', 'ACCOUNT_AGE', 'CLAIM_VELOCITY', 'PROOF_DUPLICATE', 'REPO_SPREAD', 'SELF_TEMPLATE_REUSE', 'TEXT_SIMILARITY', 'WALLET_REUSE', '[^a-z0-9_\\s]', '[a-z0-9_]{3,}', '__main__', '`[^`]*`', 'account_age_days', 'approach', 'balanced', 'body', 'bounty', 'claim', 'claim_id', 'claiming', 'claims', 'created_at', 'details', 'eta', 'github', 'high', 'immediately', 'implementation', 'issue', 'issue_ref', 'low', 'medium', 'miner', 'plan', 'policy', 'proof', 'proof_links', 'ready', 'reasons', 'relaxed', 'results', 'rtc', 'start', 'strict', 'timezone', 'user', 'wallet']

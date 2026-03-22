@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/yaml/constructor.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e+300, '(', ')', '+-', '-', '.', '.inf', '.nan', '0', '0b', '0x', ':', 'BaseConstructor', 'Constructor', 'ConstructorError', 'FullConstructor', 'SafeConstructor', 'UnsafeConstructor', '^__.*__$', '^extend$', '_', '__dict__', '__setstate__', 'args', 'ascii', 'builtins', 'day', 'decodebytes', 'dictitems', 'false', 'found unhashable key', 'fraction', 'hour', 'kwds', 'listitems', 'minute', 'month', 'no', 'off', 'on', 'second', 'state', 'true', 'tz', 'tz_hour', 'tz_minute', 'tz_sign', 'yaml_constructors', 'year', 'yes', '|']

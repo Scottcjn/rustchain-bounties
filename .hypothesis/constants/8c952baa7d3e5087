@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/adapters.py
+# hypothesis_version: 6.151.9
+
+['CERT_NONE', 'CERT_REQUIRED', 'Content-Length', 'Proxy-Authorization', '_pool_block', '_pool_connections', '_pool_maxsize', 'config', 'headers', 'http', 'https', 'max_retries', 'socks', 'status', 'utf-8']

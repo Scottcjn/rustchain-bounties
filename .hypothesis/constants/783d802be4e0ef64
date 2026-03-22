@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/api.py
+# hypothesis_version: 6.151.9
+
+['allow_redirects', 'delete', 'get', 'head', 'options', 'patch', 'post', 'put']

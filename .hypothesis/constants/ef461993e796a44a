@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/pygments/plugin.py
+# hypothesis_version: 6.151.9
+
+['pygments.filters', 'pygments.formatters', 'pygments.lexers', 'pygments.styles', 'select']

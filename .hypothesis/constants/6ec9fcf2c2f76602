@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/click/core.py
+# hypothesis_version: 6.151.9
+
+[' / ', '(Deprecated) {text}', '(dynamic)', '*', ', ', '-', '--help', '.', '...', '/', ';', '; ', 'Aborted!', 'COMMAND [ARGS]...', 'Command', 'Command has no name.', 'Commands', 'CompletionItem', 'Context', 'F', 'Group', 'HelpFormatter', 'Missing command.', 'MultiCommand', 'Option', 'Options', 'Parameter', 'V', '[OPTIONS]', '_', 'allow_extra_args', 'append', 'argument', 'auto_envvar_prefix', 'cls', 'command', 'count', 'default', 'default: {default}', 'env var: {var}', 'envvar', 'inf', 'info_name', 'item length', 'length', 'meta', 'multiple', 'name', 'nargs', 'nt', 'option', 'opts', 'param_type_name', 'parameter', 'red', 'required', 'secondary_opts', 'store', 't.Callable[..., V]', 'te.Literal[False]', 'te.Literal[True]', 'te.NoReturn', 'type']

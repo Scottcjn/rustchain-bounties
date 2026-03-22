@@ -1,0 +1,4 @@
+# file: /home/ubuntu/workspace/rustchain-bounties/scripts/epoch_settlement.py
+# hypothesis_version: 6.151.9
+
+[1.0, 1.2, 1.3, 1.8, 2.0, 2.5, 1000000, '0', '1.5', '1000', 'apple_silicon', 'core2duo', 'g3', 'g4', 'g5', 'miner_id', 'modern', 'multiplier']

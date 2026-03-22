@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/requests/__version__.py
+# hypothesis_version: 6.151.9
+
+[143616, '2.31.0', 'Apache 2.0', 'Kenneth Reitz', 'me@kennethreitz.org', 'requests', '✨ 🍰 ✨']

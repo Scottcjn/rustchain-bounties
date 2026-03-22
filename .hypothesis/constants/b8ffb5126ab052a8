@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/util/wait.py
+# hypothesis_version: 6.151.9
+
+[1000, 'select', 'wait_for_read', 'wait_for_write']

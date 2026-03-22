@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/charsetprober.py
+# hypothesis_version: 6.151.9
+
+[b' ', b'([\x00-\x7f])+', b'<', b'>', b'[a-zA-Z]*[\x80-\xff]+[a-zA-Z]*[^a-zA-Z\x80-\xff]?', b'\x80', 0.0, 0.95, 'c']

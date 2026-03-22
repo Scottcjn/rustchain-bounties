@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/click/types.py
+# hypothesis_version: 6.151.9
+
+[b'-', ' clamped', '%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', ',\n\t', ', ', '-', '0', '1', '<', '<=', '>', '>=', 'BOOL', 'CompletionItem', 'Context', 'DateTime', 'FLOAT', 'INT', 'ParamType', 'Parameter', 'ParameterType', 'STRING', 'UNPROCESSED', 'UUID', 'argument', 'boolean', 'case_sensitive', 'choice', 'choices', 'datetime', 'dir', 'directory', 'f', 'false', 'file', 'filename', 'float', 'float range', 'formats', 'func', 'integer', 'integer range', 'n', 'name', 'no', 'off', 'on', 'os.PathLike[str]', 'param_type', 'path', 'r', 'read', 'replace', 'strict', 't', 't.NoReturn', 'te.Literal[1, -1]', 'text', 'true', 'types', 'utf-8', 'uuid', 'w', 'write', 'y', 'yes', '|']

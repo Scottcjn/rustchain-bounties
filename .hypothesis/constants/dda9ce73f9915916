@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/poolmanager.py
+# hypothesis_version: 6.151.9
+
+[303, 16384, '*/*', 'Accept', 'GET', 'Host', 'No host specified.', 'PoolManager', 'ProxyManager', 'Redirecting %s -> %s', '_SelfT', '_proxy', '_proxy_config', '_proxy_headers', '_socks_options', 'assert_same_host', 'blocksize', 'body', 'ca_cert_dir', 'ca_certs', 'cert_file', 'cert_reqs', 'headers', 'host', 'http', 'https', 'key_', 'key_blocksize', 'key_file', 'key_password', 'port', 'proxy_from_url', 'redirect', 'retries', 'scheme', 'server_hostname', 'socket_options', 'ssl_context', 'ssl_maximum_version', 'ssl_minimum_version', 'ssl_version', 'strict']

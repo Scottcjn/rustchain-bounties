@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/urllib3/util/ssltransport.py
+# hypothesis_version: 6.151.9
+
+[1024, 16384, 'B', 'SSLTransport', '_ReturnValue', '_SelfT', 'b', 'r', 'w', 'wrap_bio']

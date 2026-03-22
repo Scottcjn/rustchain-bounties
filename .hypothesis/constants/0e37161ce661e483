@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/hebrewprober.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 234, 235, 237, 238, 239, 240, 243, 244, 245, 246, 'Hebrew', 'ISO-8859-8', 'windows-1255']

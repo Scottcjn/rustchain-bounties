@@ -1,0 +1,4 @@
+# file: /usr/lib/python3/dist-packages/chardet/__init__.py
+# hypothesis_version: 6.151.9
+
+['UniversalDetector', 'VERSION', '__version__', 'confidence', 'detect', 'detect_all', 'encoding', 'iso-8859', 'language']
