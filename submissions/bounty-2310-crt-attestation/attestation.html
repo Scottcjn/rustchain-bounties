@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRT Light Attestation | RustChain</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: #1a2235;
+      --bg-input: #0d1321;
+      --border: #2a3550;
+      --border-active: #3b82f6;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --accent-purple: #a855f7;
+      --accent-cyan: #06b6d4;
+      --phosphor-green: #33ff33;
+      --phosphor-amber: #ffb000;
+      --glow-green: 0 0 10px rgba(51, 255, 51, 0.3);
+      --glow-blue: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Scanline overlay effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 30px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--phosphor-green);
+      text-shadow: var(--glow-green);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    header .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    header .chain-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 14px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid var(--accent-blue);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent-blue);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active {
+      color: var(--phosphor-green);
+      border-bottom-color: var(--phosphor-green);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      color: var(--phosphor-green);
+      text-shadow: var(--glow-green);
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      color: var(--accent-cyan);
+      margin-bottom: 12px;
+    }
+
+    /* Upload area */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 20px;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .upload-zone .icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .upload-zone .text {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .upload-zone .hint {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 8px;
+    }
+
+    /* Forms */
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--border-active);
+      box-shadow: var(--glow-blue);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 24px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-blue);
+    }
+
+    .checkbox-group label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+    .btn-primary:disabled {
+      background: var(--border);
+      cursor: not-allowed;
+    }
+
+    .btn-green {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .btn-green:hover { background: #16a34a; }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
+    /* Progress */
+    .progress-container {
+      display: none;
+      margin: 20px 0;
+    }
+
+    .progress-container.active { display: block; }
+
+    .progress-bar-track {
+      height: 6px;
+      background: var(--bg-input);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--phosphor-green);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s;
+      box-shadow: var(--glow-green);
+    }
+
+    .progress-log {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .progress-log .log-entry {
+      color: var(--text-muted);
+    }
+
+    .progress-log .log-entry.info { color: var(--phosphor-green); }
+    .progress-log .log-entry.warn { color: var(--accent-amber); }
+    .progress-log .log-entry.error { color: var(--accent-red); }
+    .progress-log .log-entry.pass { color: var(--accent-green); }
+    .progress-log .log-entry.fail { color: var(--accent-red); }
+
+    /* Results */
+    .result-container { display: none; }
+    .result-container.active { display: block; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .result-badge {
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    .result-badge.pass {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .result-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .confidence-meter {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .confidence-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .confidence-track {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    /* Data grid */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .data-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+    }
+
+    .data-item .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .data-item .value {
+      font-size: 1.1rem;
+      color: var(--phosphor-green);
+      word-break: break-all;
+    }
+
+    .data-item .value.small { font-size: 0.8rem; }
+    .data-item .unit {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Canvas for spectrogram and decay curves */
+    .chart-container {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .chart-container canvas {
+      width: 100%;
+      height: 200px;
+      display: block;
+    }
+
+    .chart-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Attestation list */
+    .att-list { list-style: none; }
+
+    .att-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-wrap: wrap;
+    }
+
+    .att-item:hover { background: rgba(59, 130, 246, 0.05); }
+
+    .att-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .att-status.verified { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+    .att-status.completed { background: var(--accent-blue); }
+    .att-status.rejected { background: var(--accent-red); }
+    .att-status.pending { background: var(--accent-amber); }
+
+    .att-id {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      min-width: 260px;
+    }
+
+    .att-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .att-confidence {
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    /* Gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .gallery-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .gallery-card.lcd-ref {
+      border-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .gallery-card h4 {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .gallery-card .phosphor-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent-purple);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      margin-bottom: 10px;
+    }
+
+    .gallery-card canvas {
+      width: 100%;
+      height: 150px;
+      display: block;
+      margin: 8px 0;
+    }
+
+    .gallery-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* Fingerprint display */
+    .fingerprint-display {
+      background: var(--bg-input);
+      border: 1px solid var(--phosphor-green);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .fingerprint-display .hash {
+      font-size: 0.85rem;
+      color: var(--phosphor-green);
+      text-shadow: var(--glow-green);
+      word-break: break-all;
+      letter-spacing: 1px;
+    }
+
+    .fingerprint-display .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    /* Verify section */
+    .verify-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .verify-result {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .verify-result.active { display: block; }
+
+    .tx-hash {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      word-break: break-all;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 12px; }
+      header h1 { font-size: 1.4rem; }
+      .card { padding: 16px; }
+      .form-row { flex-direction: column; }
+      .form-group { min-width: 100%; }
+      .data-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .att-item { flex-direction: column; align-items: flex-start; }
+      .checkbox-group { padding-top: 0; }
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--phosphor-green);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>CRT LIGHT ATTESTATION</h1>
+    <div class="subtitle">Security by Cathode Ray &mdash; Side-Channel Proof via Phosphor Fingerprinting</div>
+    <div class="chain-badge">RustChain Proof-of-Antiquity</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="submit">Submit Capture</button>
+    <button class="tab" data-tab="history">Attestations</button>
+    <button class="tab" data-tab="gallery">CRT Gallery</button>
+    <button class="tab" data-tab="about">About</button>
+  </div>
+
+  <!-- Submit Tab -->
+  <div id="tab-submit" class="tab-panel active">
+    <div class="card">
+      <h2>&gt; SUBMIT CRT CAPTURE</h2>
+
+      <div id="uploadZone" class="upload-zone">
+        <span class="icon">&#9617;</span>
+        <div class="text">Drop CRT capture here or click to browse</div>
+        <div class="hint">Accepts JPEG, PNG, BMP, MP4, AVI, WEBM &mdash; Max 50MB</div>
+        <input type="file" id="fileInput" accept="image/*,video/*" style="display:none">
+      </div>
+
+      <div id="fileName" style="display:none; margin-bottom:16px; color:var(--accent-cyan); font-size:0.85rem;"></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Capture Source</label>
+          <select id="sourceType">
+            <option value="webcam">USB Webcam</option>
+            <option value="photodiode">Photodiode + ADC</option>
+            <option value="dslr">DSLR Camera</option>
+            <option value="phone">Phone Camera</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Stated Refresh Rate (Hz)</label>
+          <input type="number" id="statedRefresh" value="60" min="50" max="120" step="0.1">
+        </div>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="simulateLcd">
+            <label for="simulateLcd">Simulate LCD (test rejection)</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="submitBtn">ANALYZE CAPTURE</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progressContainer" class="progress-container">
+      <div class="card">
+        <h2>&gt; ANALYSIS IN PROGRESS</h2>
+        <div class="progress-bar-track">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+        <div id="progressLog" class="progress-log"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultContainer" class="result-container">
+      <div class="card">
+        <div class="result-header">
+          <span id="resultBadge" class="result-badge"></span>
+          <div class="confidence-meter">
+            <div class="confidence-label">
+              <span>Confidence</span>
+              <span id="confidenceValue"></span>
+            </div>
+            <div class="confidence-track">
+              <div id="confidenceFill" class="confidence-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultMonitor" style="display:none">
+          <h3>&gt; Monitor Identification</h3>
+          <div class="data-grid" id="monitorGrid"></div>
+        </div>
+
+        <div id="resultPhosphor" style="display:none">
+          <h3 style="margin-top:20px">&gt; Phosphor Decay Analysis</h3>
+          <div class="data-grid" id="phosphorGrid"></div>
+          <div class="chart-container">
+            <canvas id="decayChart"></canvas>
+            <div class="chart-label">Phosphor Decay Curve (intensity vs time)</div>
+          </div>
+        </div>
+
+        <div id="resultRefresh" style="display:none">
+          <h3 style="margin-top:20px">&gt; Refresh Rate Analysis</h3>
+          <div class="data-grid" id="refreshGrid"></div>
+        </div>
+
+        <div id="resultScanline" style="display:none">
+          <h3 style="margin-top:20px">&gt; Scanline Timing</h3>
+          <div class="data-grid" id="scanlineGrid"></div>
+        </div>
+
+        <div id="resultBrightness" style="display:none">
+          <h3 style="margin-top:20px">&gt; Brightness Nonlinearity</h3>
+          <div class="data-grid" id="brightnessGrid"></div>
+        </div>
+
+        <div id="resultSpectrogram" style="display:none">
+          <h3 style="margin-top:20px">&gt; Spectral Fingerprint</h3>
+          <div class="chart-container">
+            <canvas id="spectrogramChart"></canvas>
+            <div class="chart-label">Frequency spectrum from CRT signal capture</div>
+          </div>
+        </div>
+
+        <div id="resultFingerprint" style="display:none">
+          <div class="fingerprint-display">
+            <div class="label">CRT Optical Fingerprint</div>
+            <div class="hash" id="fingerprintHash"></div>
+          </div>
+          <div class="fingerprint-display" style="border-color: var(--accent-blue);">
+            <div class="label">Attestation Hash (Chain-Ready)</div>
+            <div class="hash" id="attestationHash" style="color: var(--accent-cyan);"></div>
+          </div>
+
+          <div class="verify-actions">
+            <button class="btn btn-green" id="verifyBtn">VERIFY ON-CHAIN</button>
+            <span id="verifySpinner" style="display:none"><span class="spinner"></span> Submitting...</span>
+          </div>
+
+          <div id="verifyResult" class="verify-result">
+            <div class="card" style="border-color: var(--accent-green);">
+              <h3>&gt; On-Chain Verification</h3>
+              <div class="data-grid" id="verifyGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultLcd" style="display:none; margin-top:16px;">
+          <h3 style="color: var(--accent-red);">&gt; LCD/OLED DETECTED &mdash; ATTESTATION REJECTED</h3>
+          <ul id="lcdReasons" style="margin-top:12px; padding-left:20px; color:var(--accent-red); font-size:0.85rem; line-height:2;"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Tab -->
+  <div id="tab-history" class="tab-panel">
+    <div class="card">
+      <h2>&gt; ATTESTATION HISTORY</h2>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- Gallery Tab -->
+  <div id="tab-gallery" class="tab-panel">
+    <div class="card">
+      <h2>&gt; CRT PHOSPHOR GALLERY</h2>
+      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:20px;">
+        Phosphor decay curves from different CRT monitor archetypes. Each CRT has a unique decay
+        signature based on phosphor type, age, and wear. LCD/OLED displays have zero decay &mdash;
+        they are trivially distinguishable.
+      </p>
+      <div id="galleryGrid" class="gallery-grid"></div>
+    </div>
+  </div>
+
+  <!-- About Tab -->
+  <div id="tab-about" class="tab-panel">
+    <div class="card">
+      <h2>&gt; CRT LIGHT ATTESTATION</h2>
+      <div style="color:var(--text-secondary); font-size:0.85rem; line-height:2;">
+        <p>
+          <strong style="color:var(--phosphor-green);">Security by cathode ray.</strong>
+          Absurd almost everywhere else. Perfectly on-brand for RustChain Proof-of-Antiquity.
+        </p>
+        <br>
+        <h3 style="color:var(--accent-cyan);">&gt; How It Works</h3>
+        <p>
+          A miner flashes a deterministic pattern on a CRT monitor. A camera or photodiode captures
+          the display, recording scanline timing, phosphor decay, and refresh quirks. That optical
+          fingerprint becomes one more thing emulators can never fake.
+        </p>
+        <br>
+        <h3 style="color:var(--accent-cyan);">&gt; Why CRTs Are Unforgeable</h3>
+        <ul style="padding-left:20px; line-height:2.2;">
+          <li><strong>Phosphor decay</strong> &mdash; LCD/OLED have zero decay (sample-and-hold). Instantly detected.</li>
+          <li><strong>Unique aging</strong> &mdash; Each CRT ages differently: electron gun wear, phosphor burn-in, flyback drift.</li>
+          <li><strong>No VMs</strong> &mdash; Virtual machines have no CRT. Period.</li>
+          <li><strong>Scanline jitter</strong> &mdash; Flyback transformer wear creates unique timing signatures.</li>
+          <li><strong>Brightness curve</strong> &mdash; Aging electron guns produce nonlinear gamma drift.</li>
+        </ul>
+        <br>
+        <h3 style="color:var(--accent-cyan);">&gt; Phosphor Types</h3>
+        <ul style="padding-left:20px; line-height:2.2;">
+          <li><strong>P22</strong> &mdash; Standard color (RGB tricolor). Consumer TVs and monitors. ~20us decay.</li>
+          <li><strong>P43</strong> &mdash; Green (YAG:Ce). Oscilloscopes and radar. ~1000us decay.</li>
+          <li><strong>P4</strong> &mdash; White (dual-layer). B&amp;W TV standard. ~60us decay.</li>
+          <li><strong>P31</strong> &mdash; Green (zinc silicate). Classic terminal phosphor. ~32us decay.</li>
+          <li><strong>P1</strong> &mdash; Green (zinc silicate). Early oscilloscope phosphor. ~24us decay.</li>
+        </ul>
+        <br>
+        <h3 style="color:var(--accent-cyan);">&gt; Integration</h3>
+        <p>
+          The CRT fingerprint hash is submitted as a <code style="color:var(--phosphor-green);">crt_fingerprint</code>
+          field in the RustChain attestation payload. On verification, the attestation hash is anchored
+          on-chain, creating a permanent, tamper-proof record of the CRT's optical identity.
+        </p>
+        <br>
+        <p style="color:var(--text-muted); font-size:0.75rem;">
+          RustChain Bounty #2310 &mdash; CRT Light Attestation (140 RTC)<br>
+          Built for Proof-of-Antiquity consensus
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+
+    if (tab.dataset.tab === 'history') loadHistory();
+    if (tab.dataset.tab === 'gallery') loadGallery();
+  });
+});
+
+// File upload
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+let selectedFile = null;
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+  selectedFile = file;
+  const nameEl = document.getElementById('fileName');
+  nameEl.textContent = '> ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+  nameEl.style.display = 'block';
+}
+
+// Submit
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const sourceType = document.getElementById('sourceType').value;
+  const statedRefresh = parseFloat(document.getElementById('statedRefresh').value) || 60;
+  const simulateLcd = document.getElementById('simulateLcd').checked;
+
+  // Reset UI
+  document.getElementById('resultContainer').classList.remove('active');
+
+  // Show progress
+  const progressContainer = document.getElementById('progressContainer');
+  const progressBar = document.getElementById('progressBar');
+  const progressLog = document.getElementById('progressLog');
+  progressContainer.classList.add('active');
+  progressBar.style.width = '0%';
+  progressLog.innerHTML = '';
+
+  function addLog(msg, type) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry ' + (type || '');
+    entry.textContent = msg;
+    progressLog.appendChild(entry);
+    progressLog.scrollTop = progressLog.scrollHeight;
+  }
+
+  // Simulate progress steps
+  const steps = [
+    { msg: 'Initializing CRT analyzer...', pct: 10, delay: 200 },
+    { msg: 'Capturing frame data from ' + sourceType + '...', pct: 20, delay: 300 },
+    { msg: 'Detecting phosphor decay pattern...', pct: 35, delay: 400 },
+    { msg: 'Measuring refresh rate (' + statedRefresh + 'Hz stated)...', pct: 50, delay: 350 },
+    { msg: 'Analyzing scanline timing jitter...', pct: 65, delay: 300 },
+    { msg: 'Computing brightness nonlinearity...', pct: 75, delay: 250 },
+    { msg: 'Generating spectral fingerprint...', pct: 85, delay: 300 },
+    { msg: 'Computing attestation hash...', pct: 95, delay: 200 },
+  ];
+
+  for (const step of steps) {
+    addLog(step.msg, 'info');
+    progressBar.style.width = step.pct + '%';
+    await new Promise(r => setTimeout(r, step.delay));
+  }
+
+  // Submit to API
+  try {
+    let response;
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('source_type', sourceType);
+      formData.append('stated_refresh', statedRefresh.toString());
+      formData.append('simulate_lcd', simulateLcd.toString());
+      response = await fetch(API + '/api/attestations', { method: 'POST', body: formData });
+    } else {
+      response = await fetch(API + '/api/attestations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_type: sourceType, stated_refresh: statedRefresh, simulate_lcd: simulateLcd })
+      });
+    }
+
+    const data = await response.json();
+    progressBar.style.width = '100%';
+
+    if (data.analysis && data.analysis.log) {
+      data.analysis.log.forEach(l => {
+        let type = '';
+        if (l.includes('[INFO]')) type = 'info';
+        if (l.includes('[WARN]')) type = 'warn';
+        if (l.includes('[PASS]')) type = 'pass';
+        if (l.includes('[FAIL]')) type = 'fail';
+        addLog(l, type);
+      });
+    }
+
+    addLog('Analysis complete.', data.is_crt ? 'pass' : 'fail');
+
+    // Display results
+    setTimeout(() => {
+      progressContainer.classList.remove('active');
+      displayResults(data);
+    }, 500);
+
+  } catch (err) {
+    addLog('ERROR: ' + err.message, 'error');
+    progressBar.style.width = '100%';
+    progressBar.style.background = 'var(--accent-red)';
+  }
+});
+
+function displayResults(data) {
+  const container = document.getElementById('resultContainer');
+  container.classList.add('active');
+  container.dataset.attestationId = data.id;
+
+  const badge = document.getElementById('resultBadge');
+  badge.textContent = data.is_crt ? 'CRT CONFIRMED' : 'REJECTED';
+  badge.className = 'result-badge ' + (data.is_crt ? 'pass' : 'fail');
+
+  const confidence = (data.confidence * 100).toFixed(1);
+  document.getElementById('confidenceValue').textContent = confidence + '%';
+  const fill = document.getElementById('confidenceFill');
+  fill.style.width = confidence + '%';
+  fill.style.background = data.confidence > 0.7 ? 'var(--accent-green)' : data.confidence > 0.4 ? 'var(--accent-amber)' : 'var(--accent-red)';
+
+  // Hide all sections first
+  ['resultMonitor','resultPhosphor','resultRefresh','resultScanline','resultBrightness','resultSpectrogram','resultFingerprint','resultLcd'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  if (!data.is_crt && data.analysis && data.analysis.detection) {
+    document.getElementById('resultLcd').style.display = 'block';
+    const reasons = document.getElementById('lcdReasons');
+    reasons.innerHTML = '';
+    (data.analysis.detection.reasons || []).forEach(r => {
+      const li = document.createElement('li');
+      li.textContent = r;
+      reasons.appendChild(li);
+    });
+    return;
+  }
+
+  const a = data.analysis || {};
+
+  // Monitor
+  if (a.monitor) {
+    document.getElementById('resultMonitor').style.display = 'block';
+    document.getElementById('monitorGrid').innerHTML = makeDataItems([
+      { label: 'Archetype', value: a.monitor.name },
+      { label: 'Mask Type', value: a.monitor.mask_type },
+      { label: 'Estimated Age', value: a.monitor.estimated_age_years + ' years' },
+    ]);
+  }
+
+  // Phosphor
+  if (a.phosphor) {
+    document.getElementById('resultPhosphor').style.display = 'block';
+    document.getElementById('phosphorGrid').innerHTML = makeDataItems([
+      { label: 'Phosphor Type', value: a.phosphor.type },
+      { label: 'Phosphor Name', value: a.phosphor.name },
+      { label: 'Base Decay', value: a.phosphor.base_decay_us, unit: 'us' },
+      { label: 'Aged Decay', value: a.phosphor.aged_decay_us, unit: 'us' },
+      { label: 'Persistence', value: a.phosphor.persistence },
+    ]);
+
+    if (a.phosphor.decay_curve_sampled) {
+      drawDecayCurve(a.phosphor.decay_curve_sampled, a.phosphor.type);
+    }
+  }
+
+  // Refresh
+  if (a.refresh) {
+    document.getElementById('resultRefresh').style.display = 'block';
+    document.getElementById('refreshGrid').innerHTML = makeDataItems([
+      { label: 'Stated Refresh', value: a.refresh.stated_hz, unit: 'Hz' },
+      { label: 'Measured Refresh', value: a.refresh.measured_hz, unit: 'Hz' },
+      { label: 'Drift', value: a.refresh.drift_hz, unit: 'Hz' },
+      { label: 'Drift PPM', value: a.refresh.drift_ppm, unit: 'ppm' },
+      { label: 'Frame Samples', value: a.refresh.frame_samples },
+      { label: 'Jitter', value: a.refresh.jitter_us, unit: 'us' },
+    ]);
+  }
+
+  // Scanline
+  if (a.scanline) {
+    document.getElementById('resultScanline').style.display = 'block';
+    document.getElementById('scanlineGrid').innerHTML = makeDataItems([
+      { label: 'Total Lines', value: a.scanline.total_lines },
+      { label: 'Avg H-Period', value: a.scanline.avg_h_period_us, unit: 'us' },
+      { label: 'Jitter StdDev', value: a.scanline.jitter_stddev_us, unit: 'us' },
+      { label: 'Peak Jitter', value: a.scanline.peak_jitter_us, unit: 'us' },
+      { label: 'Flyback Signature', value: a.scanline.flyback_signature, small: true },
+      { label: 'Heat Drift', value: a.scanline.heat_drift ? 'DETECTED' : 'None' },
+    ]);
+  }
+
+  // Brightness
+  if (a.brightness) {
+    document.getElementById('resultBrightness').style.display = 'block';
+    document.getElementById('brightnessGrid').innerHTML = makeDataItems([
+      { label: 'Gamma Nominal', value: a.brightness.gamma_nominal },
+      { label: 'Gamma Measured', value: a.brightness.gamma_measured },
+      { label: 'Nonlinearity Index', value: a.brightness.nonlinearity_index },
+      { label: 'Avg Deviation', value: a.brightness.avg_deviation },
+      { label: 'Electron Gun Wear', value: a.brightness.electron_gun_wear_pct, unit: '%' },
+    ]);
+  }
+
+  // Spectrogram
+  if (a.spectrogram) {
+    document.getElementById('resultSpectrogram').style.display = 'block';
+    drawSpectrogram(a.spectrogram.bins);
+  }
+
+  // Fingerprint
+  if (a.crt_fingerprint) {
+    document.getElementById('resultFingerprint').style.display = 'block';
+    document.getElementById('fingerprintHash').textContent = a.crt_fingerprint;
+    document.getElementById('attestationHash').textContent = data.attestation_hash || 'N/A';
+
+    document.getElementById('verifyResult').classList.remove('active');
+  }
+}
+
+function makeDataItems(items) {
+  return items.map(item => {
+    const smallClass = item.small ? ' small' : '';
+    return `<div class="data-item">
+      <div class="label">${item.label}</div>
+      <div class="value${smallClass}">${item.value} ${item.unit ? '<span class="unit">' + item.unit + '</span>' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// Draw phosphor decay curve
+function drawDecayCurve(curve, phosphorType) {
+  const canvas = document.getElementById('decayChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 200 * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width;
+  const h = 200;
+
+  ctx.fillStyle = '#0d1321';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1a2235';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const x = (i / 10) * w;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    const y = (i / 10) * h;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+
+  // Curve
+  ctx.strokeStyle = '#33ff33';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = 'rgba(51, 255, 51, 0.5)';
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  const n = curve.length;
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * w;
+    const y = (1 - curve[i]) * h;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Label
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px Courier New';
+  ctx.fillText('1.0', 4, 14);
+  ctx.fillText('0.0', 4, h - 4);
+  ctx.fillText(phosphorType + ' decay', w - 80, 14);
+  ctx.fillText('t (us)', w / 2 - 15, h - 4);
+}
+
+// Draw spectrogram
+function drawSpectrogram(bins) {
+  const canvas = document.getElementById('spectrogramChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 200 * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width;
+  const h = 200;
+
+  ctx.fillStyle = '#0d1321';
+  ctx.fillRect(0, 0, w, h);
+
+  if (!bins || !bins.length) return;
+
+  const barW = w / bins.length;
+  const maxAmp = Math.max(...bins.map(b => b.amplitude));
+
+  for (let i = 0; i < bins.length; i++) {
+    const amp = bins[i].amplitude / maxAmp;
+    const barH = amp * (h - 20);
+    const x = i * barW;
+    const y = h - barH - 10;
+
+    // Color gradient based on amplitude
+    const r = Math.floor(59 + amp * 100);
+    const g = Math.floor(130 + amp * 125);
+    const b2 = Math.floor(246);
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b2}, 0.8)`;
+    ctx.fillRect(x + 1, y, barW - 2, barH);
+
+    // Peak dot
+    ctx.fillStyle = '#06b6d4';
+    ctx.beginPath();
+    ctx.arc(x + barW / 2, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px Courier New';
+  ctx.fillText('Amplitude', 4, 14);
+  ctx.fillText('Frequency (kHz)', w / 2 - 45, h - 1);
+}
+
+// Verify on-chain
+document.getElementById('verifyBtn').addEventListener('click', async () => {
+  const container = document.getElementById('resultContainer');
+  const attId = container.dataset.attestationId;
+  if (!attId) return;
+
+  const spinner = document.getElementById('verifySpinner');
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  spinner.style.display = 'inline';
+
+  try {
+    const response = await fetch(API + '/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ attestation_id: attId })
+    });
+    const data = await response.json();
+
+    const result = document.getElementById('verifyResult');
+    result.classList.add('active');
+
+    if (data.chain) {
+      document.getElementById('verifyGrid').innerHTML = makeDataItems([
+        { label: 'Status', value: 'VERIFIED ON-CHAIN' },
+        { label: 'TX Hash', value: data.chain.tx_hash, small: true },
+        { label: 'Block Height', value: data.chain.block_height },
+        { label: 'Chain', value: data.chain.chain },
+        { label: 'Timestamp', value: data.chain.timestamp, small: true },
+      ]);
+    } else {
+      document.getElementById('verifyGrid').innerHTML = makeDataItems([
+        { label: 'Status', value: data.status || 'Error' },
+        { label: 'Message', value: data.error || 'Unknown' },
+      ]);
+    }
+  } catch (err) {
+    alert('Verification failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+});
+
+// Load attestation history
+async function loadHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div style="text-align:center; padding:20px;"><span class="spinner"></span></div>';
+
+  try {
+    const response = await fetch(API + '/api/attestations?limit=50');
+    const data = await response.json();
+
+    if (!data.attestations || data.attestations.length === 0) {
+      list.innerHTML = '<div class="empty-state"><span class="icon">&#9617;</span>No attestations yet. Submit a CRT capture to get started.</div>';
+      return;
+    }
+
+    let html = '<ul class="att-list">';
+    for (const att of data.attestations) {
+      const conf = ((att.confidence || 0) * 100).toFixed(1);
+      const confColor = att.confidence > 0.7 ? 'var(--accent-green)' : att.confidence > 0.4 ? 'var(--accent-amber)' : 'var(--accent-red)';
+      html += `<li class="att-item" onclick="viewAttestation('${att.id}')">
+        <span class="att-status ${att.status}"></span>
+        <span class="att-id">${att.id}</span>
+        <span class="att-meta">${att.phosphor_type || 'N/A'} | ${att.created_at}</span>
+        <span class="att-confidence" style="color:${confColor}">${conf}%</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">${att.status}</span>
+      </li>`;
+    }
+    html += '</ul>';
+    html += `<div style="margin-top:12px; font-size:0.75rem; color:var(--text-muted);">Total: ${data.total} attestation(s)</div>`;
+    list.innerHTML = html;
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state">Failed to load history: ' + err.message + '</div>';
+  }
+}
+
+async function viewAttestation(id) {
+  try {
+    const response = await fetch(API + '/api/attestations/' + id);
+    const data = await response.json();
+
+    // Switch to submit tab and display
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="submit"]').classList.add('active');
+    document.getElementById('tab-submit').classList.add('active');
+
+    displayResults({
+      id: data.id,
+      is_crt: !!data.is_crt,
+      confidence: data.confidence || 0,
+      attestation_hash: data.attestation_hash,
+      analysis: {
+        monitor: data.mask_type ? { name: 'Detected CRT', mask_type: data.mask_type, estimated_age_years: 'N/A' } : null,
+        phosphor: data.phosphor_type ? { type: data.phosphor_type, name: data.phosphor_type, aged_decay_us: data.phosphor_decay_us, base_decay_us: 'N/A', persistence: 'N/A' } : null,
+        refresh: data.measured_refresh ? { stated_hz: data.stated_refresh, measured_hz: data.measured_refresh, drift_hz: data.refresh_drift, drift_ppm: 'N/A', frame_samples: 'N/A', jitter_us: 'N/A' } : null,
+        scanline: data.flyback_signature ? { total_lines: 480, avg_h_period_us: 'N/A', jitter_stddev_us: data.scanline_jitter_us, peak_jitter_us: 'N/A', flyback_signature: data.flyback_signature, heat_drift: true } : null,
+        brightness: data.brightness_nonlinearity ? { gamma_nominal: 2.2, gamma_measured: 'N/A', nonlinearity_index: data.brightness_nonlinearity, avg_deviation: 'N/A', electron_gun_wear_pct: 'N/A' } : null,
+        spectrogram: data.spectrogram_data || null,
+        crt_fingerprint: data.crt_fingerprint,
+      }
+    });
+  } catch (err) {
+    alert('Failed to load attestation: ' + err.message);
+  }
+}
+
+// Load gallery
+async function loadGallery() {
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = '<div style="text-align:center; padding:20px; grid-column: 1/-1;"><span class="spinner"></span></div>';
+
+  try {
+    const response = await fetch(API + '/api/gallery');
+    const data = await response.json();
+
+    grid.innerHTML = '';
+
+    for (const entry of data.gallery) {
+      const card = document.createElement('div');
+      card.className = 'gallery-card' + (entry.is_reference ? ' lcd-ref' : '');
+
+      const canvasId = 'gallery-canvas-' + entry.monitor;
+      card.innerHTML = `
+        <h4>${entry.name}</h4>
+        <span class="phosphor-tag">${entry.phosphor} ${entry.is_reference ? '(NO PHOSPHOR)' : ''}</span>
+        <canvas id="${canvasId}"></canvas>
+        <div class="gallery-meta">
+          ${entry.is_reference ? '<strong style="color:var(--accent-red);">LCD pixels are sample-and-hold. Zero phosphor decay. Instantly detectable.</strong>' : `
+          Decay: ${entry.decay_tau_us} us | Persistence: ${entry.persistence}<br>
+          Mask: ${entry.mask_type} | Age: ~${entry.estimated_age} years
+          `}
+          ${entry.note ? '<br>' + entry.note : ''}
+        </div>
+      `;
+      grid.appendChild(card);
+
+      // Draw after DOM insertion
+      requestAnimationFrame(() => drawGalleryCurve(canvasId, entry.decay_curve, entry.phosphor, entry.is_reference));
+    }
+  } catch (err) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Failed to load gallery: ' + err.message + '</div>';
+  }
+}
+
+function drawGalleryCurve(canvasId, curve, phosphor, isRef) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 150 * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width;
+  const h = 150;
+
+  ctx.fillStyle = '#0a0e17';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1a2235';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 8; i++) {
+    const y = (i / 8) * h;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+
+  // Curve
+  const color = isRef ? '#ef4444' : '#33ff33';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = color.replace(')', ', 0.4)').replace('rgb', 'rgba');
+  ctx.shadowBlur = 3;
+  ctx.beginPath();
+  const n = curve.length;
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * w;
+    const y = (1 - curve[i]) * h;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Courier New';
+  ctx.fillText(phosphor, 4, 12);
+}
+</script>
+
+</body>
+</html>
