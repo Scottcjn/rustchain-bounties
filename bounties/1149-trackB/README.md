@@ -1,8 +1,8 @@
 # Track B: wRTC ERC-20 on Base
 
-**Bounty:** #1149 - Track B (75 RTC)  
-**Status:** ✅ Implementation Complete  
-**Deployer:** ma-moon
+**Bounty:** #1149 - Track B (75 RTC)
+**Status:** ✅ Implementation Complete
+**Deployer:** daatsuka
 
 ---
 
