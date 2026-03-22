@@ -1,0 +1,31 @@
+name: Test BCOS Action
+
+on:
+  push:
+    paths:
+      - 'bcos-action/**'
+  pull_request:
+    paths:
+      - 'bcos-action/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run BCOS scan on this repo (L0 tier)
+        id: bcos
+        uses: ./bcos-action
+        with:
+          tier: L0
+          path: '.'
+          anchor-on-merge: 'false'
+          fail-on-tier-miss: 'false'
+
+      - name: Print outputs
+        run: |
+          echo "Trust score: ${{ steps.bcos.outputs.trust_score }}"
+          echo "Cert ID:     ${{ steps.bcos.outputs.cert_id }}"
+          echo "Tier met:    ${{ steps.bcos.outputs.tier_met }}"
+          echo "Badge URL:   ${{ steps.bcos.outputs.badge_url }}"

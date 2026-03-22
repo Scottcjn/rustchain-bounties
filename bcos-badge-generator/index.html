@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BCOS Badge Generator — RustChain</title>
+  <style>
+    /* ─── Vintage terminal aesthetic ─────────────────────────── */
+    :root {
+      --green: #39ff14;
+      --green-dim: #1a7a09;
+      --amber: #ffb000;
+      --bg: #0a0a0a;
+      --panel: #0f0f0f;
+      --border: #1e3a1e;
+      --text: #c8e6c8;
+      --muted: #557755;
+      --error: #ff4444;
+      --font: 'Courier New', 'Lucida Console', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    h1 {
+      color: var(--green);
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 12px var(--green);
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ─── Panel ───────────────────────────────────────────────── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px rgba(57,255,20,0.04);
+    }
+
+    .panel-title {
+      color: var(--amber);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--green);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--green-dim);
+      box-shadow: 0 0 8px rgba(57,255,20,0.12);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--muted);
+    }
+
+    /* ─── Radio badge style ───────────────────────────────────── */
+    .style-grid {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .style-option {
+      cursor: pointer;
+    }
+
+    .style-option input[type="radio"] { display: none; }
+
+    .style-option span {
+      display: block;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .style-option input[type="radio"]:checked + span {
+      border-color: var(--green-dim);
+      color: var(--green);
+      box-shadow: 0 0 8px rgba(57,255,20,0.15);
+    }
+
+    /* ─── Button ──────────────────────────────────────────────── */
+    button {
+      background: transparent;
+      border: 1px solid var(--green-dim);
+      color: var(--green);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 0.65rem 1.5rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: rgba(57,255,20,0.06);
+      box-shadow: 0 0 12px rgba(57,255,20,0.2);
+    }
+
+    button:active { transform: scale(0.98); }
+
+    /* ─── Status ──────────────────────────────────────────────── */
+    #status {
+      font-size: 0.8rem;
+      min-height: 1.2rem;
+      margin-top: 0.75rem;
+    }
+
+    .status-ok   { color: var(--green); }
+    .status-err  { color: var(--error); }
+    .status-info { color: var(--amber); }
+
+    /* ─── Preview ─────────────────────────────────────────────── */
+    #preview-panel { display: none; }
+
+    .preview-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    #badge-preview {
+      max-height: 28px;
+    }
+
+    /* ─── Code blocks ─────────────────────────────────────────── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+      color: var(--text);
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      border-radius: 2px;
+      margin: 0;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--green-dim);
+      color: var(--green);
+      box-shadow: none;
+    }
+
+    .code-label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+
+    /* ─── Cert details table ──────────────────────────────────── */
+    .cert-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .cert-table td {
+      padding: 0.35rem 0.5rem;
+      border-bottom: 1px solid rgba(57,255,20,0.06);
+    }
+
+    .cert-table td:first-child {
+      color: var(--muted);
+      width: 35%;
+    }
+
+    .cert-table td:last-child {
+      color: var(--text);
+    }
+
+    .tier-badge {
+      color: var(--amber);
+      font-weight: bold;
+    }
+
+    .score-high  { color: var(--green); }
+    .score-mid   { color: var(--amber); }
+    .score-low   { color: var(--error); }
+
+    /* ─── Footer ──────────────────────────────────────────────── */
+    .footer {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .footer a { color: var(--green-dim); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ─── Blink cursor ────────────────────────────────────────── */
+    @keyframes blink { 50% { opacity: 0; } }
+    .cursor::after {
+      content: '█';
+      animation: blink 1s step-end infinite;
+      color: var(--green);
+      margin-left: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>▶ BCOS BADGE GENERATOR</h1>
+  <p class="subtitle">Beacon Certified Open Source — RustChain Attestation v2</p>
+
+  <!-- Input panel -->
+  <div class="panel">
+    <div class="panel-title">// Input</div>
+
+    <label for="cert-input">Repo URL or Cert ID</label>
+    <input
+      type="text"
+      id="cert-input"
+      placeholder="https://github.com/owner/repo  or  BCOS-abc1234"
+      autocomplete="off"
+      spellcheck="false"
+    />
+
+    <div style="margin-top:1.2rem">
+      <label>Badge style</label>
+      <div class="style-grid">
+        <label class="style-option">
+          <input type="radio" name="badge-style" value="flat" checked />
+          <span>flat</span>
+        </label>
+        <label class="style-option">
+          <input type="radio" name="badge-style" value="flat-square" />
+          <span>flat-square</span>
+        </label>
+        <label class="style-option">
+          <input type="radio" name="badge-style" value="for-the-badge" />
+          <span>for-the-badge</span>
+        </label>
+      </div>
+    </div>
+
+    <button id="generate-btn" onclick="generate()">GENERATE BADGE</button>
+    <div id="status"></div>
+  </div>
+
+  <!-- Preview + embed panel -->
+  <div class="panel" id="preview-panel">
+    <div class="panel-title">// Badge Preview</div>
+
+    <div class="preview-box">
+      <img id="badge-preview" alt="BCOS Badge" />
+    </div>
+
+    <!-- Cert details -->
+    <div id="cert-details"></div>
+
+    <!-- Markdown embed -->
+    <span class="code-label">Markdown</span>
+    <div class="code-block" id="markdown-code">
+      <button class="copy-btn" onclick="copyCode('markdown-code')">copy</button>
+      <span id="markdown-text"></span>
+    </div>
+
+    <!-- HTML embed -->
+    <span class="code-label">HTML</span>
+    <div class="code-block" id="html-code">
+      <button class="copy-btn" onclick="copyCode('html-code')">copy</button>
+      <span id="html-text"></span>
+    </div>
+  </div>
+
+  <p class="footer">
+    Powered by <a href="https://rustchain.org" target="_blank">RustChain</a> ·
+    <a href="https://rustchain.org/bcos/" target="_blank">Verify on BCOS</a> ·
+    <a href="https://github.com/Scottcjn/Rustchain/blob/main/docs/BEACON_CERTIFIED_OPEN_SOURCE.md" target="_blank">BCOS Spec</a>
+  </p>
+</div>
+
+<script>
+  const BCOS_API = 'https://50.28.86.131';
+
+  function setStatus(msg, type = 'info') {
+    const el = document.getElementById('status');
+    el.className = `status-${type}`;
+    el.textContent = msg;
+  }
+
+  function getBadgeStyle() {
+    return document.querySelector('input[name="badge-style"]:checked').value;
+  }
+
+  function parseCertId(input) {
+    input = input.trim();
+    if (!input) return null;
+
+    // Already a cert ID
+    if (/^BCOS-[a-zA-Z0-9]+$/i.test(input)) return input;
+
+    // GitHub URL — extract owner/repo and look up cert
+    const match = input.match(/github\.com\/([^/]+\/[^/\s?#]+)/);
+    if (match) return match[1]; // return as repo slug; we'll resolve it
+
+    return null;
+  }
+
+  async function lookupCert(rawInput) {
+    rawInput = rawInput.trim();
+
+    // Direct cert ID
+    if (/^BCOS-[a-zA-Z0-9]+$/i.test(rawInput)) {
+      const r = await fetch(`${BCOS_API}/bcos/verify/${rawInput}`, { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw new Error(`Cert not found (${r.status})`);
+      return await r.json();
+    }
+
+    // Repo URL or owner/repo slug
+    const match = rawInput.match(/(?:github\.com\/)?([a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+)/);
+    if (match) {
+      const slug = match[1];
+      const r = await fetch(`${BCOS_API}/bcos/repo/${encodeURIComponent(slug)}`, { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw new Error(`No BCOS cert found for ${slug}`);
+      return await r.json();
+    }
+
+    throw new Error('Invalid input — enter a GitHub URL or BCOS-xxx cert ID');
+  }
+
+  function scoreClass(score) {
+    if (score >= 8) return 'score-high';
+    if (score >= 5) return 'score-mid';
+    return 'score-low';
+  }
+
+  function renderCertDetails(cert, certId) {
+    const tier = cert.tier ?? cert.tier_met ?? 'L0';
+    const score = cert.trust_score ?? cert.score ?? '—';
+    const repo = cert.repo ?? cert.repository ?? certId;
+    const ts = cert.anchored_at ?? cert.timestamp ?? cert.created_at ?? '';
+    const date = ts ? new Date(ts).toLocaleDateString() : '—';
+    const reviewer = cert.reviewer ?? cert.reviewed_by ?? '—';
+
+    const scoreHtml = typeof score === 'number'
+      ? `<span class="${scoreClass(score)}">${score.toFixed(1)}</span>`
+      : score;
+
+    return `
+      <table class="cert-table">
+        <tr><td>Cert ID</td><td><code>${certId}</code></td></tr>
+        <tr><td>Tier</td><td class="tier-badge">${tier}</td></tr>
+        <tr><td>Trust score</td><td>${scoreHtml}</td></tr>
+        <tr><td>Repository</td><td>${repo}</td></tr>
+        <tr><td>Anchored</td><td>${date}</td></tr>
+        <tr><td>Reviewer</td><td>${reviewer}</td></tr>
+      </table>
+    `;
+  }
+
+  async function generate() {
+    const input = document.getElementById('cert-input').value.trim();
+    if (!input) {
+      setStatus('⚠ Enter a repo URL or cert ID', 'err');
+      return;
+    }
+
+    setStatus('Querying BCOS node…', 'info');
+    document.getElementById('generate-btn').disabled = true;
+
+    try {
+      const cert = await lookupCert(input);
+      const certId = cert.cert_id ?? cert.id ?? (cert.data && cert.data.cert_id) ?? 'BCOS-unknown';
+      const style = getBadgeStyle();
+      const badgeUrl = `${BCOS_API}/bcos/badge/${certId}.svg?style=${style}`;
+      const verifyUrl = `https://rustchain.org/bcos/verify/${certId}`;
+
+      // Preview
+      document.getElementById('badge-preview').src = badgeUrl;
+      document.getElementById('cert-details').innerHTML = renderCertDetails(cert, certId);
+
+      // Embed codes
+      const markdown = `[![BCOS](${badgeUrl})](${verifyUrl})`;
+      const html = `<a href="${verifyUrl}"><img src="${badgeUrl}" alt="BCOS"></a>`;
+
+      document.getElementById('markdown-text').textContent = markdown;
+      document.getElementById('html-text').textContent = html;
+
+      // Show panel
+      document.getElementById('preview-panel').style.display = 'block';
+      setStatus('✓ Badge generated', 'ok');
+
+    } catch (err) {
+      setStatus(`✗ ${err.message}`, 'err');
+      console.error(err);
+    } finally {
+      document.getElementById('generate-btn').disabled = false;
+    }
+  }
+
+  function copyCode(blockId) {
+    const block = document.getElementById(blockId);
+    const text = block.querySelector('span').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = block.querySelector('.copy-btn');
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+
+  // Trigger on Enter in input
+  document.getElementById('cert-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') generate();
+  });
+
+  // Update badge preview when style changes
+  document.querySelectorAll('input[name="badge-style"]').forEach(el => {
+    el.addEventListener('change', () => {
+      const img = document.getElementById('badge-preview');
+      if (img.src && img.src !== window.location.href) {
+        const url = new URL(img.src);
+        url.searchParams.set('style', getBadgeStyle());
+        img.src = url.toString();
+      }
+    });
+  });
+</script>
+</body>
+</html>
