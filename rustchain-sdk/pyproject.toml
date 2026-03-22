@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain"
+version = "0.1.0"
+description = "Python SDK for interacting with RustChain nodes"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "HuiNeng", email = "3650306360@qq.com"}
+]
+keywords = ["rustchain", "blockchain", "cryptocurrency", "sdk", "api"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+rustchain = "rustchain.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/HuiNeng6/rustchain-bounties"
+Repository = "https://github.com/HuiNeng6/rustchain-bounties/tree/main/rustchain-sdk"
+Documentation = "https://github.com/Scottcjn/RustChain"
