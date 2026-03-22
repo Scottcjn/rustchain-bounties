@@ -7,7 +7,7 @@ class TestAIWorkflow(unittest.TestCase):
     @patch('ai_agent.repo')
     def test_get_open_bounties(self, mock_repo):
         # Mocking the repository and issue list
-        mock_issues = [MagicMock(title="Bounty 1", body="This is a non-hardware bounty"),
+        mock_issues = [MagicMock(title="Bounty 1", body="This is a software bounty"),
                        MagicMock(title="Bounty 2", body="This requires hardware")]
         mock_repo.get_issues.return_value = mock_issues
 
