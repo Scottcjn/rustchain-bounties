@@ -1,0 +1,557 @@
+{
+  "generated_at": "2026-03-22T07:41:23.606157Z",
+  "arch_order": [
+    "68k",
+    "g3",
+    "g4",
+    "g5",
+    "sparc",
+    "mips",
+    "power8",
+    "apple_silicon",
+    "modern_x86",
+    "arm",
+    "other"
+  ],
+  "arch_meta": {
+    "68k": {
+      "label": "68K",
+      "color": "#7a4a00",
+      "bucket": "vintage"
+    },
+    "g3": {
+      "label": "G3",
+      "color": "#a85c2c",
+      "bucket": "vintage"
+    },
+    "g4": {
+      "label": "G4",
+      "color": "#c46a2d",
+      "bucket": "vintage"
+    },
+    "g5": {
+      "label": "G5",
+      "color": "#b87333",
+      "bucket": "vintage"
+    },
+    "sparc": {
+      "label": "SPARC",
+      "color": "#9f2b2b",
+      "bucket": "retro"
+    },
+    "mips": {
+      "label": "MIPS",
+      "color": "#1f8a70",
+      "bucket": "retro"
+    },
+    "power8": {
+      "label": "POWER8",
+      "color": "#1f4e79",
+      "bucket": "retro"
+    },
+    "apple_silicon": {
+      "label": "Apple Silicon",
+      "color": "#c0c0c0",
+      "bucket": "modern"
+    },
+    "modern_x86": {
+      "label": "Modern x86",
+      "color": "#b9c0c9",
+      "bucket": "modern"
+    },
+    "arm": {
+      "label": "ARM",
+      "color": "#4c9aff",
+      "bucket": "modern"
+    },
+    "other": {
+      "label": "Other",
+      "color": "#6b7280",
+      "bucket": "modern"
+    }
+  },
+  "summary": {
+    "events": 15,
+    "samples": 4,
+    "unique_miners": 10,
+    "architectures": 4
+  },
+  "first_seen_architectures": [
+    {
+      "arch": "power8",
+      "label": "POWER8",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201
+    },
+    {
+      "arch": "apple_silicon",
+      "label": "Apple Silicon",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201
+    },
+    {
+      "arch": "modern_x86",
+      "label": "Modern x86",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201
+    },
+    {
+      "arch": "arm",
+      "label": "ARM",
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202
+    }
+  ],
+  "settlement_markers": [
+    {
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201
+    },
+    {
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202
+    },
+    {
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203
+    },
+    {
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204
+    }
+  ],
+  "layers": [
+    {
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "count": 1,
+      "avg_entropy_score": 0.94,
+      "avg_fingerprint_quality": 0.96,
+      "total_rtc_earned": 1.8,
+      "miners": [
+        "power8-s824-sophia"
+      ]
+    },
+    {
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "count": 1,
+      "avg_entropy_score": 0.78,
+      "avg_fingerprint_quality": 0.83,
+      "total_rtc_earned": 1.0,
+      "miners": [
+        "m2-mac-mini-sophia"
+      ]
+    },
+    {
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "count": 1,
+      "avg_entropy_score": 0.67,
+      "avg_fingerprint_quality": 0.71,
+      "total_rtc_earned": 0.9,
+      "miners": [
+        "modern-sophiacore-3a168058"
+      ]
+    },
+    {
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "count": 1,
+      "avg_entropy_score": 0.95,
+      "avg_fingerprint_quality": 0.97,
+      "total_rtc_earned": 1.9,
+      "miners": [
+        "power8-s824-sophia"
+      ]
+    },
+    {
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "count": 1,
+      "avg_entropy_score": 0.79,
+      "avg_fingerprint_quality": 0.84,
+      "total_rtc_earned": 1.1,
+      "miners": [
+        "claw-qinlingrongdeMacBook-Pro-48097"
+      ]
+    },
+    {
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "count": 1,
+      "avg_entropy_score": 0.72,
+      "avg_fingerprint_quality": 0.79,
+      "total_rtc_earned": 1.1,
+      "miners": [
+        "trashcan-d500-scott"
+      ]
+    },
+    {
+      "arch": "arm",
+      "arch_label": "ARM",
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "count": 1,
+      "avg_entropy_score": 0.42,
+      "avg_fingerprint_quality": 0.54,
+      "total_rtc_earned": 0.2,
+      "miners": [
+        "claw-jojo-51658"
+      ]
+    },
+    {
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "count": 1,
+      "avg_entropy_score": 0.96,
+      "avg_fingerprint_quality": 0.98,
+      "total_rtc_earned": 2.0,
+      "miners": [
+        "power8-s824-sophia"
+      ]
+    },
+    {
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "count": 1,
+      "avg_entropy_score": 0.8,
+      "avg_fingerprint_quality": 0.85,
+      "total_rtc_earned": 1.1,
+      "miners": [
+        "m2-mac-mini-sophia"
+      ]
+    },
+    {
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "count": 1,
+      "avg_entropy_score": 0.69,
+      "avg_fingerprint_quality": 0.76,
+      "total_rtc_earned": 0.8,
+      "miners": [
+        "ForestLee"
+      ]
+    },
+    {
+      "arch": "arm",
+      "arch_label": "ARM",
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "count": 1,
+      "avg_entropy_score": 0.44,
+      "avg_fingerprint_quality": 0.57,
+      "total_rtc_earned": 0.25,
+      "miners": [
+        "terramaster-nas-arm64"
+      ]
+    },
+    {
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "count": 1,
+      "avg_entropy_score": 0.96,
+      "avg_fingerprint_quality": 0.98,
+      "total_rtc_earned": 2.0,
+      "miners": [
+        "power8-s824-sophia"
+      ]
+    },
+    {
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "count": 1,
+      "avg_entropy_score": 0.81,
+      "avg_fingerprint_quality": 0.86,
+      "total_rtc_earned": 1.15,
+      "miners": [
+        "m2-mac-mini-sophia"
+      ]
+    },
+    {
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "count": 2,
+      "avg_entropy_score": 0.59,
+      "avg_fingerprint_quality": 0.68,
+      "total_rtc_earned": 1.15,
+      "miners": [
+        "stepehenreed",
+        "tianlin-rtc"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "miner": "power8-s824-sophia",
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "device_arch": "power8",
+      "device_family": "powerpc",
+      "hardware_type": "PowerPC (Vintage)",
+      "entropy_score": 0.94,
+      "fingerprint_quality": 0.96,
+      "rtc_earned": 1.8,
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "m2-mac-mini-sophia",
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "device_arch": "apple_silicon",
+      "device_family": "arm",
+      "hardware_type": "Apple Silicon (Modern)",
+      "entropy_score": 0.78,
+      "fingerprint_quality": 0.83,
+      "rtc_earned": 1.0,
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "modern-sophiacore-3a168058",
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "device_arch": "modern",
+      "device_family": "x86",
+      "hardware_type": "x86-64 (Modern)",
+      "entropy_score": 0.67,
+      "fingerprint_quality": 0.71,
+      "rtc_earned": 0.9,
+      "timestamp": 1774164300,
+      "iso_time": "2026-03-22T07:25:00Z",
+      "epoch": 1201,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "power8-s824-sophia",
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "device_arch": "power8",
+      "device_family": "powerpc",
+      "hardware_type": "PowerPC (Vintage)",
+      "entropy_score": 0.95,
+      "fingerprint_quality": 0.97,
+      "rtc_earned": 1.9,
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "trashcan-d500-scott",
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "device_arch": "ivy_bridge",
+      "device_family": "x86",
+      "hardware_type": "x86-64 (Modern)",
+      "entropy_score": 0.72,
+      "fingerprint_quality": 0.79,
+      "rtc_earned": 1.1,
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "claw-qinlingrongdeMacBook-Pro-48097",
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "device_arch": "apple_silicon",
+      "device_family": "arm",
+      "hardware_type": "Apple Silicon (Modern)",
+      "entropy_score": 0.79,
+      "fingerprint_quality": 0.84,
+      "rtc_earned": 1.1,
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "claw-jojo-51658",
+      "arch": "arm",
+      "arch_label": "ARM",
+      "device_arch": "aarch64",
+      "device_family": "ARM",
+      "hardware_type": "Unknown/Other",
+      "entropy_score": 0.42,
+      "fingerprint_quality": 0.54,
+      "rtc_earned": 0.2,
+      "timestamp": 1774164600,
+      "iso_time": "2026-03-22T07:30:00Z",
+      "epoch": 1202,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "power8-s824-sophia",
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "device_arch": "power8",
+      "device_family": "powerpc",
+      "hardware_type": "PowerPC (Vintage)",
+      "entropy_score": 0.96,
+      "fingerprint_quality": 0.98,
+      "rtc_earned": 2.0,
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "m2-mac-mini-sophia",
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "device_arch": "apple_silicon",
+      "device_family": "arm",
+      "hardware_type": "Apple Silicon (Modern)",
+      "entropy_score": 0.8,
+      "fingerprint_quality": 0.85,
+      "rtc_earned": 1.1,
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "ForestLee",
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "device_arch": "modern",
+      "device_family": "x86",
+      "hardware_type": "x86-64 (Modern)",
+      "entropy_score": 0.69,
+      "fingerprint_quality": 0.76,
+      "rtc_earned": 0.8,
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "terramaster-nas-arm64",
+      "arch": "arm",
+      "arch_label": "ARM",
+      "device_arch": "aarch64",
+      "device_family": "ARM",
+      "hardware_type": "Unknown/Other",
+      "entropy_score": 0.44,
+      "fingerprint_quality": 0.57,
+      "rtc_earned": 0.25,
+      "timestamp": 1774164900,
+      "iso_time": "2026-03-22T07:35:00Z",
+      "epoch": 1203,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "power8-s824-sophia",
+      "arch": "power8",
+      "arch_label": "POWER8",
+      "device_arch": "power8",
+      "device_family": "powerpc",
+      "hardware_type": "PowerPC (Vintage)",
+      "entropy_score": 0.96,
+      "fingerprint_quality": 0.98,
+      "rtc_earned": 2.0,
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "m2-mac-mini-sophia",
+      "arch": "apple_silicon",
+      "arch_label": "Apple Silicon",
+      "device_arch": "apple_silicon",
+      "device_family": "arm",
+      "hardware_type": "Apple Silicon (Modern)",
+      "entropy_score": 0.81,
+      "fingerprint_quality": 0.86,
+      "rtc_earned": 1.15,
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "stepehenreed",
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "device_arch": "modern",
+      "device_family": "x86",
+      "hardware_type": "x86-64 (Modern)",
+      "entropy_score": 0.7,
+      "fingerprint_quality": 0.77,
+      "rtc_earned": 0.85,
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "source": "sample-seed"
+    },
+    {
+      "miner": "tianlin-rtc",
+      "arch": "modern_x86",
+      "arch_label": "Modern x86",
+      "device_arch": "modern",
+      "device_family": "arm",
+      "hardware_type": "Unknown/Other",
+      "entropy_score": 0.48,
+      "fingerprint_quality": 0.59,
+      "rtc_earned": 0.3,
+      "timestamp": 1774165200,
+      "iso_time": "2026-03-22T07:40:00Z",
+      "epoch": 1204,
+      "source": "sample-seed"
+    }
+  ]
+}

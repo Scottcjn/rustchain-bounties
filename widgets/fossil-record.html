@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RustChain Fossil Record — Attestation Archaeology</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(15, 23, 42, 0.82);
+      --panel-border: rgba(148, 163, 184, 0.18);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #f59e0b;
+      --grid: rgba(255,255,255,0.08);
+      --settlement: rgba(255,255,255,0.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(245, 158, 11, 0.14), transparent 30%),
+        linear-gradient(180deg, #1b2437 0%, var(--bg) 40%, #060912 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1500px; margin: 0 auto; padding: 32px 20px 80px; }
+    .hero { margin-bottom: 24px; }
+    h1 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3.8rem); }
+    .subtitle { color: var(--muted); max-width: 980px; line-height: 1.6; }
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    .sidebar { padding: 18px; position: sticky; top: 18px; }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 24px; }
+    .metric { background: rgba(255,255,255,0.03); border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.06); }
+    .metric .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .metric .v { font-size: 1.55rem; font-weight: 700; margin-top: 8px; }
+    .legend-row { display:flex; align-items:center; gap:10px; margin: 10px 0; font-size: 14px; color: var(--muted); }
+    .swatch { width: 14px; height: 14px; border-radius: 999px; flex: none; }
+    .content { padding: 18px; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .toolbar .note { color: var(--muted); font-size: 14px; }
+    .toolbar input {
+      width: 100%; max-width: 360px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text); padding: 10px 12px; border-radius: 10px;
+    }
+    svg { width: 100%; height: auto; display:block; }
+    .tooltip {
+      position: fixed; pointer-events: none; opacity: 0; transform: translate(-50%, -110%);
+      background: rgba(2,6,23,0.95); color: white; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08); font-size: 13px; line-height: 1.45; min-width: 220px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.4); transition: opacity 0.15s ease;
+      z-index: 20;
+    }
+    .timeline-label, .axis-label { fill: var(--muted); font-size: 12px; }
+    .chart-title { font-size: 14px; fill: #cbd5e1; font-weight: 600; }
+    .settlement-line { stroke: var(--settlement); stroke-dasharray: 4 5; }
+    .first-seen { stroke: white; stroke-width: 1.4; }
+    .empty { padding: 50px 20px; text-align: center; color: var(--muted); }
+    code { background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 6px; }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } .sidebar { position: static; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>🪨 The Fossil Record</h1>
+      <div class="subtitle">
+        Attestation archaeology for RustChain. Each band represents an architecture layer across time: old silicon at the bottom,
+        recent arrivals near the surface. Width encodes active miner count. Hover any stratum to inspect miners, fingerprint quality,
+        rewards, and the moment an architecture first emerged.
+      </div>
+    </div>
+    <div class="grid">
+      <aside class="panel sidebar">
+        <div><strong>Data contract</strong></div>
+        <div class="subtitle" style="font-size:14px; margin-top:8px;">
+          Load <code>widgets/data/fossil-record.sample.json</code> or generate your own with
+          <code>python3 scripts/build_fossil_record.py --input-sqlite rustchain.db --output widgets/data/fossil-record.json</code>.
+        </div>
+        <div class="metric-grid" id="metrics"></div>
+        <div style="margin-top: 6px; font-weight: 600;">Architecture strata</div>
+        <div id="legend"></div>
+        <div style="margin-top:18px; font-weight: 600;">First appearance markers</div>
+        <div class="subtitle" style="font-size: 14px; margin-top: 8px;">
+          White rings indicate the first known attestation of an architecture in the loaded dataset.
+          Vertical dashed lines mark epoch settlement snapshots.
+        </div>
+      </aside>
+      <section class="panel content">
+        <div class="toolbar">
+          <div class="note">Built for deploys like <code>rustchain.org/fossils</code>. No build step required.</div>
+          <input id="search" placeholder="Filter miner id…" />
+        </div>
+        <div id="chart"></div>
+      </section>
+    </div>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
+  <script>
+    const tooltip = document.getElementById('tooltip');
+    const search = document.getElementById('search');
+    const SAMPLE_PATH = './data/fossil-record.sample.json';
+
+    const fmtNumber = new Intl.NumberFormat('en-US');
+    const fmtCompact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+
+    function el(tag, attrs = {}, text = '') {
+      const node = document.createElement(tag);
+      Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function showTooltip(html, evt) {
+      tooltip.innerHTML = html;
+      tooltip.style.left = `${evt.clientX}px`;
+      tooltip.style.top = `${evt.clientY}px`;
+      tooltip.style.opacity = 1;
+    }
+    function hideTooltip() { tooltip.style.opacity = 0; }
+
+    function renderMeta(data) {
+      const metrics = document.getElementById('metrics');
+      metrics.innerHTML = '';
+      const summary = data.summary || {};
+      [
+        ['Events', fmtCompact.format(summary.events || 0)],
+        ['Samples', fmtCompact.format(summary.samples || 0)],
+        ['Miners', fmtCompact.format(summary.unique_miners || 0)],
+        ['Architectures', fmtCompact.format(summary.architectures || 0)],
+      ].forEach(([k, v]) => {
+        const card = el('div', { class: 'metric' });
+        card.append(el('div', { class: 'k' }, k));
+        card.append(el('div', { class: 'v' }, v));
+        metrics.append(card);
+      });
+
+      const legend = document.getElementById('legend');
+      legend.innerHTML = '';
+      (data.arch_order || []).forEach(key => {
+        const meta = data.arch_meta[key];
+        if (!meta) return;
+        const row = el('div', { class: 'legend-row' });
+        row.append(el('span', { class: 'swatch', style: `background:${meta.color}` }));
+        row.append(el('span', {}, meta.label));
+        legend.append(row);
+      });
+    }
+
+    function renderChart(data, filter = '') {
+      const chart = document.getElementById('chart');
+      const allLayers = (data.layers || []).filter(layer => !filter || (layer.miners || []).some(m => (m || '').toLowerCase().includes(filter)));
+      if (!allLayers.length) {
+        chart.innerHTML = '<div class="empty">No strata match this filter.</div>';
+        return;
+      }
+      const archOrder = data.arch_order || [];
+      const archMeta = data.arch_meta || {};
+      const times = [...new Set(allLayers.map(d => d.timestamp))].sort((a, b) => a - b);
+      const minT = times[0], maxT = times[times.length - 1];
+      const maxCount = Math.max(...allLayers.map(d => d.count || 0), 1);
+      const width = 1080, height = 780;
+      const margin = { top: 50, right: 20, bottom: 70, left: 120 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+      const archBand = innerH / Math.max(archOrder.length, 1);
+      const bandPadding = 10;
+      const x = (t) => margin.left + ((t - minT) / Math.max(1, (maxT - minT))) * innerW;
+      const y = (arch) => margin.top + archOrder.indexOf(arch) * archBand;
+      const bandH = archBand - bandPadding;
+      const rectH = Math.max(16, bandH * 0.72);
+      const rectY = (arch) => y(arch) + (bandH - rectH) / 2;
+      const rectW = (count) => Math.max(10, (count / maxCount) * Math.max(50, innerW / Math.max(times.length, 4)));
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'RustChain fossil timeline');
+
+      const title = document.createElementNS(svg.namespaceURI, 'text');
+      title.setAttribute('x', margin.left);
+      title.setAttribute('y', 24);
+      title.setAttribute('class', 'chart-title');
+      title.textContent = 'Attestation stratigraphy';
+      svg.appendChild(title);
+
+      archOrder.forEach((arch, i) => {
+        const line = document.createElementNS(svg.namespaceURI, 'line');
+        const yy = margin.top + i * archBand + bandH + bandPadding / 2;
+        line.setAttribute('x1', margin.left);
+        line.setAttribute('x2', width - margin.right);
+        line.setAttribute('y1', yy);
+        line.setAttribute('y2', yy);
+        line.setAttribute('stroke', 'var(--grid)');
+        svg.appendChild(line);
+
+        const label = document.createElementNS(svg.namespaceURI, 'text');
+        label.setAttribute('x', margin.left - 12);
+        label.setAttribute('y', rectY(arch) + rectH / 2 + 4);
+        label.setAttribute('text-anchor', 'end');
+        label.setAttribute('class', 'timeline-label');
+        label.textContent = archMeta[arch]?.label || arch;
+        svg.appendChild(label);
+      });
+
+      (data.settlement_markers || []).forEach((marker, idx) => {
+        if (marker.timestamp < minT || marker.timestamp > maxT) return;
+        const lx = x(marker.timestamp);
+        const line = document.createElementNS(svg.namespaceURI, 'line');
+        line.setAttribute('x1', lx);
+        line.setAttribute('x2', lx);
+        line.setAttribute('y1', margin.top - 4);
+        line.setAttribute('y2', height - margin.bottom + 10);
+        line.setAttribute('class', 'settlement-line');
+        svg.appendChild(line);
+        if (idx < 10 || idx === (data.settlement_markers.length - 1)) {
+          const t = document.createElementNS(svg.namespaceURI, 'text');
+          t.setAttribute('x', lx + 4);
+          t.setAttribute('y', margin.top - 10);
+          t.setAttribute('class', 'axis-label');
+          t.textContent = marker.epoch != null ? `E${marker.epoch}` : '';
+          svg.appendChild(t);
+        }
+      });
+
+      allLayers.forEach(layer => {
+        const arch = layer.arch;
+        const meta = archMeta[arch] || { color: '#888', label: arch };
+        const w = rectW(layer.count);
+        const rx = x(layer.timestamp) - w / 2;
+        const ry = rectY(arch);
+        const rect = document.createElementNS(svg.namespaceURI, 'rect');
+        rect.setAttribute('x', rx);
+        rect.setAttribute('y', ry);
+        rect.setAttribute('width', w);
+        rect.setAttribute('height', rectH);
+        rect.setAttribute('rx', Math.min(12, rectH / 2));
+        rect.setAttribute('fill', meta.color);
+        rect.setAttribute('fill-opacity', '0.88');
+        rect.setAttribute('stroke', 'rgba(255,255,255,0.22)');
+        rect.style.cursor = 'pointer';
+        rect.addEventListener('mousemove', (evt) => {
+          showTooltip(`
+            <strong>${meta.label}</strong><br>
+            ${layer.iso_time || ''}${layer.epoch != null ? ` · Epoch ${layer.epoch}` : ''}<br>
+            Active miners: <strong>${layer.count}</strong><br>
+            Avg fingerprint quality: <strong>${layer.avg_fingerprint_quality ?? 'n/a'}</strong><br>
+            RTC earned: <strong>${layer.total_rtc_earned ?? 0}</strong><br>
+            Miners: ${(layer.miners || []).slice(0, 6).join(', ')}${(layer.miners || []).length > 6 ? '…' : ''}
+          `, evt);
+        });
+        rect.addEventListener('mouseleave', hideTooltip);
+        svg.appendChild(rect);
+      });
+
+      (data.first_seen_architectures || []).forEach(item => {
+        if (!archOrder.includes(item.arch) || item.timestamp < minT || item.timestamp > maxT) return;
+        const cx = x(item.timestamp);
+        const cy = rectY(item.arch) + rectH / 2;
+        const circle = document.createElementNS(svg.namespaceURI, 'circle');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', 8);
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('class', 'first-seen');
+        circle.style.cursor = 'pointer';
+        circle.addEventListener('mousemove', (evt) => {
+          showTooltip(`<strong>First seen:</strong> ${item.label}<br>${item.iso_time || ''}${item.epoch != null ? ` · Epoch ${item.epoch}` : ''}`, evt);
+        });
+        circle.addEventListener('mouseleave', hideTooltip);
+        svg.appendChild(circle);
+      });
+
+      const ticks = 6;
+      for (let i = 0; i < ticks; i++) {
+        const ratio = i / (ticks - 1 || 1);
+        const ts = minT + (maxT - minT) * ratio;
+        const tx = x(ts);
+        const label = document.createElementNS(svg.namespaceURI, 'text');
+        label.setAttribute('x', tx);
+        label.setAttribute('y', height - margin.bottom + 26);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('class', 'axis-label');
+        label.textContent = new Date(ts * 1000).toISOString().slice(0, 10);
+        svg.appendChild(label);
+      }
+      const xLabel = document.createElementNS(svg.namespaceURI, 'text');
+      xLabel.setAttribute('x', margin.left + innerW / 2);
+      xLabel.setAttribute('y', height - 18);
+      xLabel.setAttribute('text-anchor', 'middle');
+      xLabel.setAttribute('class', 'axis-label');
+      xLabel.textContent = 'Time / epoch progression';
+      svg.appendChild(xLabel);
+
+      chart.innerHTML = '';
+      chart.appendChild(svg);
+    }
+
+    async function load() {
+      const res = await fetch(SAMPLE_PATH);
+      const data = await res.json();
+      renderMeta(data);
+      renderChart(data);
+      search.addEventListener('input', () => renderChart(data, search.value.trim().toLowerCase()));
+    }
+    load().catch(err => {
+      document.getElementById('chart').innerHTML = `<div class="empty">Failed to load fossil data.<br><br>${err}</div>`;
+    });
+  </script>
+</body>
+</html>
