@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain-sdk"
+version = "1.0.0"
+description = "Python SDK for interacting with RustChain Proof-of-Antiquity blockchain nodes"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "ElromEvedElElyon", email = "standardbitcoin.io@gmail.com"},
+]
+keywords = ["rustchain", "blockchain", "proof-of-antiquity", "sdk", "rtc"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+]
+
+dependencies = [
+    "httpx>=0.24.0,<1.0",
+    "click>=8.0,<9.0",
+]
+
+[project.optional-dependencies]
+ws = ["websockets>=11.0,<14.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.0",
+    "respx>=0.20",
+    "websockets>=11.0,<14.0",
+    "mypy>=1.0",
+    "ruff>=0.1",
+]
+all = ["rustchain-sdk[ws,dev]"]
+
+[project.scripts]
+rustchain = "rustchain.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Scottcjn/rustchain-bounties"
+Repository = "https://github.com/ElromEvedElElyon/rustchain-bounties"
+Issues = "https://github.com/Scottcjn/rustchain-bounties/issues"
+
+[tool.setuptools.packages.find]
+include = ["rustchain*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests that hit a live node (deselect with '-m \"not integration\"')",
+]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.coverage.run]
+source = ["rustchain"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
