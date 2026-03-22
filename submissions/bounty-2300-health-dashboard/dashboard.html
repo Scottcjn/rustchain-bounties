@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Status — Node Health Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',monospace;background:#0d1117;color:#c9d1d9;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:20px 24px;text-align:center}
+.header h1{font-size:20px;color:#ff6b00}
+.header p{font-size:12px;color:#484f58;margin-top:4px}
+.overall{text-align:center;padding:24px;font-size:16px}
+.overall .badge{display:inline-block;padding:8px 24px;border-radius:20px;font-weight:bold;font-size:18px}
+.badge.all-up{background:#0d4429;color:#3fb950;border:1px solid #238636}
+.badge.degraded{background:#4a3000;color:#d29922;border:1px solid #9e6a03}
+.badge.some-down{background:#490202;color:#f85149;border:1px solid #da3633}
+.container{max-width:1000px;margin:0 auto;padding:0 20px 40px}
+.node-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px}
+.node-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;position:relative;overflow:hidden}
+.node-card.up{border-left:3px solid #3fb950}
+.node-card.down{border-left:3px solid #f85149}
+.node-card.degraded{border-left:3px solid #d29922}
+.node-card.unknown{border-left:3px solid #484f58}
+.node-card .name{font-size:15px;font-weight:bold;margin-bottom:4px}
+.node-card .location{font-size:11px;color:#484f58;margin-bottom:12px}
+.node-card .status-badge{position:absolute;top:16px;right:16px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:bold;text-transform:uppercase}
+.status-badge.up{background:#0d4429;color:#3fb950}
+.status-badge.down{background:#490202;color:#f85149}
+.status-badge.degraded{background:#4a3000;color:#d29922}
+.status-badge.unknown{background:#21262d;color:#484f58}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.metric{text-align:center}
+.metric .val{font-size:18px;font-weight:bold;color:#ff6b00}
+.metric .lbl{font-size:10px;color:#484f58;text-transform:uppercase}
+.timeline{margin-top:12px;height:24px;background:#0d1117;border-radius:4px;overflow:hidden;display:flex}
+.timeline-seg{height:100%;min-width:1px}
+.timeline-seg.up{background:#238636}
+.timeline-seg.down{background:#da3633}
+.timeline-seg.degraded{background:#9e6a03}
+.timeline-seg.unknown{background:#21262d}
+.chart-container{margin-top:12px}
+.chart-container canvas{width:100%;height:50px}
+.section-title{font-size:14px;color:#ff6b00;margin:24px 0 12px;border-bottom:1px solid #21262d;padding-bottom:8px}
+.incident-log{background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden}
+.incident{padding:12px 16px;border-bottom:1px solid #21262d;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.incident:last-child{border-bottom:none}
+.incident .node{font-weight:bold;color:#ff6b00;width:100px}
+.incident .time{color:#484f58}
+.incident .dur{color:#d29922}
+.incident.resolved .status-tag{color:#3fb950}
+.incident.ongoing .status-tag{color:#f85149;font-weight:bold}
+.map{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;text-align:center;margin-bottom:24px;position:relative;height:200px}
+.map-dot{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #0d1117}
+.map-dot.up{background:#3fb950;box-shadow:0 0 8px #3fb95066}
+.map-dot.down{background:#f85149;box-shadow:0 0 8px #f8514966}
+.map-label{position:absolute;font-size:10px;color:#484f58;transform:translateX(-50%)}
+.footer{text-align:center;padding:20px;color:#30363d;font-size:11px}
+.rss-link{color:#ff6b00;text-decoration:none;font-size:12px}
+@media(max-width:768px){.node-cards{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>RUSTCHAIN NODE STATUS</h1>
+  <p>Monitoring 4 attestation nodes — updates every 60s | <a href="/rss" class="rss-link">RSS Feed</a></p>
+</div>
+
+<div class="overall"><span class="badge all-up" id="overallBadge">Checking...</span></div>
+
+<div class="container">
+  <div class="map" id="worldMap">
+    <div style="color:#30363d;font-size:12px;position:absolute;top:8px;left:12px">Geographic Distribution</div>
+  </div>
+
+  <div class="node-cards" id="nodeCards"></div>
+
+  <div class="section-title">Recent Incidents</div>
+  <div class="incident-log" id="incidentLog"><div class="incident" style="color:#484f58;text-align:center">Loading...</div></div>
+</div>
+
+<div class="footer">RustChain Multi-Node Health Dashboard v1.0 — by ElromEvedElElyon | Bounty #2300</div>
+
+<script>
+const NODES_META = {
+  'node-1': {name:'LiquidWeb US-1', loc:'LiquidWeb US', mapX:'30%', mapY:'40%'},
+  'node-2': {name:'LiquidWeb US-2', loc:'LiquidWeb US', mapX:'32%', mapY:'45%'},
+  'node-3': {name:"Ryan's Proxmox", loc:'US (Proxmox)', mapX:'20%', mapY:'42%'},
+  'node-4': {name:'Hong Kong', loc:'Hong Kong', mapX:'78%', mapY:'50%'},
+};
+
+const nodeHistories = {};
+
+async function fetchStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    renderNodes(data.nodes);
+    renderMap(data.nodes);
+    updateOverall(data.nodes);
+  } catch(e) { console.error('Status fetch failed:', e); }
+}
+
+async function fetchIncidents() {
+  try {
+    const res = await fetch('/api/incidents');
+    const data = await res.json();
+    renderIncidents(data.incidents);
+  } catch(e) {}
+}
+
+async function fetchHistory(nodeId) {
+  try {
+    const res = await fetch(`/api/history/${nodeId}?hours=24`);
+    const data = await res.json();
+    nodeHistories[nodeId] = data.history;
+    return data.history;
+  } catch(e) { return []; }
+}
+
+function updateOverall(nodes) {
+  const badge = document.getElementById('overallBadge');
+  const up = nodes.filter(n => n.status === 'up').length;
+  if (up === nodes.length) { badge.textContent = 'All Systems Operational'; badge.className = 'badge all-up'; }
+  else if (up === 0) { badge.textContent = 'Major Outage'; badge.className = 'badge some-down'; }
+  else { badge.textContent = `Degraded — ${up}/${nodes.length} Online`; badge.className = 'badge degraded'; }
+}
+
+function renderNodes(nodes) {
+  const container = document.getElementById('nodeCards');
+  container.innerHTML = '';
+  nodes.forEach(async (n) => {
+    const meta = NODES_META[n.node_id || n.id] || {};
+    const card = document.createElement('div');
+    card.className = `node-card ${n.status}`;
+    card.innerHTML = `
+      <div class="name">${meta.name || n.name || n.node_id}</div>
+      <div class="location">${meta.loc || n.location || ''}</div>
+      <div class="status-badge ${n.status}">${n.status}</div>
+      <div class="metrics">
+        <div class="metric"><div class="val">${n.response_time_ms != null ? n.response_time_ms + 'ms' : '—'}</div><div class="lbl">Latency</div></div>
+        <div class="metric"><div class="val">${n.active_miners != null ? n.active_miners : '—'}</div><div class="lbl">Miners</div></div>
+        <div class="metric"><div class="val">${n.current_epoch != null ? n.current_epoch : '—'}</div><div class="lbl">Epoch</div></div>
+      </div>
+      <div class="timeline" id="timeline-${n.node_id || n.id}"></div>
+      <div class="chart-container"><canvas id="chart-${n.node_id || n.id}" height="50"></canvas></div>
+    `;
+    container.appendChild(card);
+
+    const history = await fetchHistory(n.node_id || n.id);
+    renderTimeline(n.node_id || n.id, history);
+    renderLatencyChart(n.node_id || n.id, history);
+  });
+}
+
+function renderTimeline(nodeId, history) {
+  const el = document.getElementById(`timeline-${nodeId}`);
+  if (!el || !history.length) return;
+  const total = history.length;
+  el.innerHTML = '';
+  history.forEach(h => {
+    const seg = document.createElement('div');
+    seg.className = `timeline-seg ${h.status}`;
+    seg.style.width = `${100/total}%`;
+    seg.title = `${new Date(h.ts).toLocaleTimeString()} — ${h.status}`;
+    el.appendChild(seg);
+  });
+}
+
+function renderLatencyChart(nodeId, history) {
+  const canvas = document.getElementById(`chart-${nodeId}`);
+  if (!canvas || !history.length) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 50;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const latencies = history.map(h => h.latency || 0);
+  const max = Math.max(...latencies, 1);
+  const step = canvas.width / (latencies.length - 1 || 1);
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#ff6b00';
+  ctx.lineWidth = 1;
+  latencies.forEach((v, i) => {
+    const x = i * step, y = canvas.height - (v / max) * (canvas.height - 4);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+function renderMap(nodes) {
+  const map = document.getElementById('worldMap');
+  map.querySelectorAll('.map-dot,.map-label').forEach(e => e.remove());
+  nodes.forEach(n => {
+    const meta = NODES_META[n.node_id || n.id];
+    if (!meta) return;
+    const dot = document.createElement('div');
+    dot.className = `map-dot ${n.status}`;
+    dot.style.left = meta.mapX;
+    dot.style.top = meta.mapY;
+    map.appendChild(dot);
+    const label = document.createElement('div');
+    label.className = 'map-label';
+    label.textContent = meta.name;
+    label.style.left = meta.mapX;
+    label.style.top = `calc(${meta.mapY} + 18px)`;
+    map.appendChild(label);
+  });
+}
+
+function renderIncidents(incidents) {
+  const log = document.getElementById('incidentLog');
+  if (!incidents.length) { log.innerHTML = '<div class="incident" style="color:#3fb950;text-align:center;justify-content:center">No incidents in the last 48 hours</div>'; return; }
+  log.innerHTML = '';
+  incidents.forEach(inc => {
+    const resolved = !!inc.resolved_at;
+    const div = document.createElement('div');
+    div.className = `incident ${resolved ? 'resolved' : 'ongoing'}`;
+    div.innerHTML = `
+      <span class="node">${NODES_META[inc.node_id]?.name || inc.node_id}</span>
+      <span class="time">${new Date(inc.started_at).toLocaleString()}</span>
+      <span class="dur">${inc.duration_s ? Math.round(inc.duration_s/60) + 'min' : ''}</span>
+      <span class="status-tag">${resolved ? 'RESOLVED' : 'ONGOING'}</span>
+    `;
+    log.appendChild(div);
+  });
+}
+
+fetchStatus();
+fetchIncidents();
+setInterval(fetchStatus, 60000);
+setInterval(fetchIncidents, 120000);
+</script>
+</body>
+</html>
