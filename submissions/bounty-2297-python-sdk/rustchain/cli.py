@@ -109,7 +109,7 @@ def cli(
     ctx.obj["node"] = node
 
 
-@cli.resultcallback()
+@cli.result_callback()
 @click.pass_context
 def cleanup(ctx: click.Context, *args: Any, **kwargs: Any) -> None:
     """Close client when CLI exits."""
