@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RustChain Mining Simulator</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #f78166;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --blue: #58a6ff;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    /* ── Hardware picker ── */
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--blue);
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .hw-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .hw-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .hw-card:hover { border-color: var(--blue); }
+    .hw-card.selected {
+      border-color: var(--accent);
+      background: #1f1c1a;
+    }
+    .hw-card .hw-name { font-weight: bold; color: var(--text); margin-bottom: 4px; }
+    .hw-card .hw-mult {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    .hw-card .hw-desc { color: var(--muted); font-size: 12px; }
+    .mult-high { color: var(--green); }
+    .mult-med  { color: var(--yellow); }
+    .mult-low  { color: var(--blue); }
+    .mult-zero { color: var(--red); }
+
+    /* ── Simulator panel ── */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 700px) { .sim-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #21262d;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-body { padding: 16px; }
+
+    /* ── Terminal / log ── */
+    #terminal {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      height: 320px;
+      overflow-y: auto;
+      font-size: 13px;
+      margin-bottom: 24px;
+      scroll-behavior: smooth;
+    }
+    .log-line { margin-bottom: 2px; white-space: pre-wrap; word-break: break-all; }
+    .log-ok   { color: var(--green); }
+    .log-err  { color: var(--red); }
+    .log-warn { color: var(--yellow); }
+    .log-dim  { color: var(--muted); }
+    .log-bold { color: var(--text); font-weight: bold; }
+    .log-accent { color: var(--accent); }
+
+    /* ── Fingerprint animation ── */
+    #fp-vis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .fp-check {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .fp-check .fp-icon { font-size: 20px; margin-bottom: 4px; }
+    .fp-check .fp-label { font-size: 10px; color: var(--muted); }
+    .fp-check.running { border-color: var(--yellow); background: #1e1a00; animation: pulse 0.8s infinite alternate; }
+    .fp-check.pass    { border-color: var(--green);  background: #0d1f0d; }
+    .fp-check.fail    { border-color: var(--red);    background: #1f0d0d; }
+    @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+    /* ── Payload viewer ── */
+    #payload-box {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+      max-height: 260px;
+      overflow-y: auto;
+      white-space: pre;
+      color: #79c0ff;
+    }
+
+    /* ── Reward comparison ── */
+    .reward-bar-wrap {
+      margin-bottom: 12px;
+    }
+    .reward-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .reward-bar-track {
+      background: #21262d;
+      border-radius: 4px;
+      height: 14px;
+      overflow: hidden;
+    }
+    .reward-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── Epoch info ── */
+    .epoch-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 20px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .stat-box .stat-val { font-size: 22px; font-weight: bold; color: var(--accent); }
+    .stat-box .stat-key { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Controls ── */
+    .controls { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 22px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button.secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Calculator ── */
+    .calc-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .calc-row label { color: var(--muted); font-size: 13px; min-width: 160px; }
+    .calc-row input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+    .calc-row .calc-val { min-width: 70px; text-align: right; color: var(--text); }
+    .calc-result {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 20px;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+    .calc-result span { color: var(--accent); font-size: 20px; font-weight: bold; }
+
+    /* ── CTA ── */
+    .cta-box {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 28px;
+      text-align: center;
+      margin-top: 32px;
+    }
+    .cta-box h2 { color: var(--accent); margin-bottom: 8px; }
+    .cta-box p  { color: var(--muted); margin-bottom: 20px; }
+    .cta-box a {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      text-decoration: none;
+      border-radius: 6px;
+      padding: 12px 32px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .cta-box a:hover { opacity: 0.85; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⛏ RustChain Mining Simulator</div>
+    <div class="subtitle">Try before you mine — no hardware required</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── Step 1: Hardware Selection ── -->
+  <div class="section-title">① Select Your Hardware</div>
+  <div class="hw-grid" id="hw-grid">
+    <!-- Cards injected by JS -->
+  </div>
+
+  <!-- ── Stats row ── -->
+  <div class="epoch-stats" id="epoch-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-epoch">0</div><div class="stat-key">Epoch</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-balance">0.000000</div><div class="stat-key">RTC Balance</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-enrolled">—</div><div class="stat-key">Enrolled Miners</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-mult">—</div><div class="stat-key">Antiquity Mult.</div></div>
+  </div>
+
+  <!-- ── Controls ── -->
+  <div class="controls">
+    <button id="btn-start" onclick="startSim()">▶ Start Simulation</button>
+    <button id="btn-step" class="secondary" onclick="stepSim()" disabled>⏭ Next Epoch</button>
+    <button id="btn-reset" class="secondary" onclick="resetSim()">↺ Reset</button>
+  </div>
+
+  <!-- ── Terminal ── -->
+  <div class="section-title">② Mining Loop Output</div>
+  <div id="terminal"></div>
+
+  <!-- ── Two-column panel ── -->
+  <div class="sim-grid">
+
+    <!-- Fingerprint visualiser -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>③ RIP-PoA Fingerprint Checks</span>
+        <span id="fp-status" style="color:var(--muted)">idle</span>
+      </div>
+      <div class="panel-body">
+        <div id="fp-vis">
+          <!-- Injected by JS -->
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;">
+          Each epoch the miner re-runs all 6 hardware fingerprint checks.
+          VMs fail anti-emulation — that's why the multiplier is 10<sup>-9</sup>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Attestation payload -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>④ Attestation Payload (POST /attest/submit)</span>
+      </div>
+      <div class="panel-body">
+        <pre id="payload-box">— run a simulation to see the payload —</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Reward comparison ── -->
+  <div class="section-title">⑤ Real-Time Reward Comparison</div>
+  <div id="reward-bars" style="margin-bottom:32px;">
+    <!-- Injected by JS -->
+  </div>
+
+  <!-- ── Calculator ── -->
+  <div class="section-title">⑥ "What Would You Earn?" Calculator</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:32px;">
+    <div class="calc-row">
+      <label>Epochs per day</label>
+      <input type="range" id="calc-epochs" min="1" max="144" value="144"
+             oninput="updateCalc()">
+      <div class="calc-val" id="calc-epochs-val">144</div>
+    </div>
+    <div class="calc-row">
+      <label>Base reward / epoch (RTC)</label>
+      <input type="range" id="calc-base" min="1" max="100" value="10"
+             oninput="updateCalc()">
+      <div class="calc-val" id="calc-base-val">10</div>
+    </div>
+    <div class="calc-row">
+      <label>Days to calculate</label>
+      <input type="range" id="calc-days" min="1" max="365" value="30"
+             oninput="updateCalc()">
+      <div class="calc-val" id="calc-days-val">30</div>
+    </div>
+    <div class="calc-result">
+      Estimated earnings with <strong id="calc-hw-name">—</strong>:
+      <span id="calc-result">—</span> RTC
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="calc-breakdown"></div>
+    </div>
+  </div>
+
+  <!-- ── CTA ── -->
+  <div class="cta-box">
+    <h2>Ready to Mine for Real?</h2>
+    <p>Download the RustChain miner and start earning RTC with your vintage hardware.</p>
+    <a href="https://github.com/rustchain/rustchain-miner/releases" target="_blank" rel="noopener">
+      ⬇ Download RustChain Miner
+    </a>
+    <p style="margin-top:16px;font-size:12px;color:var(--muted);">
+      Supports: PowerBook G4 · Power Mac G5 · Power Mac G4 · iMac G4/G5 · and more PowerPC hardware
+    </p>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  RustChain Mining Simulator · Bounty #2301 · Browser-based educational tool
+</footer>
+
+<script>
+// ── Hardware definitions ────────────────────────────────────────────────────
+const HARDWARE = [
+  {
+    id: 'powerbook_g4',
+    name: 'PowerBook G4',
+    cpu: 'PowerPC 7457 @ 1.67 GHz',
+    cores: 1,
+    ram: 2,
+    os: 'Darwin/ppc (macOS 10.5)',
+    family: 'PowerBook',
+    arch: 'powerpc',
+    mult: 2.5,
+    multClass: 'mult-high',
+    desc: 'Rare portable — highest antiquity bonus',
+    fpPass: [true, true, true, true, true, true],
+  },
+  {
+    id: 'powermac_g5',
+    name: 'Power Mac G5',
+    cpu: 'PowerPC 970MP @ 2.5 GHz',
+    cores: 2,
+    ram: 8,
+    os: 'Darwin/ppc (macOS 10.5)',
+    family: 'PowerMac',
+    arch: 'powerpc',
+    mult: 2.0,
+    multClass: 'mult-med',
+    desc: 'Dual-core workstation — strong bonus',
+    fpPass: [true, true, true, true, true, true],
+  },
+  {
+    id: 'x86_modern',
+    name: 'Modern x86',
+    cpu: 'Intel Core i7-13700K @ 5.4 GHz',
+    cores: 16,
+    ram: 32,
+    os: 'Linux x86_64',
+    family: 'PC',
+    arch: 'x86_64',
+    mult: 1.0,
+    multClass: 'mult-low',
+    desc: 'Standard multiplier — no antiquity bonus',
+    fpPass: [true, true, true, true, true, true],
+  },
+  {
+    id: 'vm',
+    name: 'Virtual Machine',
+    cpu: 'QEMU vCPU @ 2.0 GHz',
+    cores: 4,
+    ram: 4,
+    os: 'Linux x86_64 (VM)',
+    family: 'VM',
+    arch: 'x86_64',
+    mult: 0.000000001,
+    multClass: 'mult-zero',
+    desc: 'Anti-emulation check always fails — effectively zero rewards',
+    fpPass: [true, true, false, false, false, false],
+  },
+];
+
+const FP_CHECKS = [
+  { key: 'clock_drift',        label: 'Clock-Skew\n& Oscillator', icon: '🕐' },
+  { key: 'cache_timing',       label: 'Cache Timing\nFingerprint',  icon: '⚡' },
+  { key: 'simd_identity',      label: 'SIMD Unit\nIdentity',        icon: '🔷' },
+  { key: 'thermal_drift',      label: 'Thermal Drift\nEntropy',     icon: '🌡' },
+  { key: 'instruction_jitter', label: 'Instruction\nPath Jitter',   icon: '📐' },
+  { key: 'anti_emulation',     label: 'Anti-Emulation\nVM Detect',  icon: '🛡' },
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
+let selectedHW = HARDWARE[0];
+let epochCount = 0;
+let balance = 0;
+let running = false;
+let simTimer = null;
+let stepMode = false;
+
+// ── Init ────────────────────────────────────────────────────────────────────
+function init() {
+  buildHWCards();
+  buildFPVis();
+  buildRewardBars();
+  selectHW(HARDWARE[0]);
+  updateCalc();
+}
+
+function buildHWCards() {
+  const grid = document.getElementById('hw-grid');
+  grid.innerHTML = HARDWARE.map(hw => `
+    <div class="hw-card" id="hwcard-${hw.id}" onclick="selectHW(HARDWARE.find(h=>h.id==='${hw.id}'))">
+      <div class="hw-name">${hw.name}</div>
+      <div class="hw-mult ${hw.multClass}">${formatMult(hw.mult)}x</div>
+      <div class="hw-desc">${hw.desc}</div>
+    </div>
+  `).join('');
+}
+
+function buildFPVis() {
+  const vis = document.getElementById('fp-vis');
+  vis.innerHTML = FP_CHECKS.map(c => `
+    <div class="fp-check" id="fp-${c.key}">
+      <div class="fp-icon">${c.icon}</div>
+      <div class="fp-label">${c.label}</div>
+    </div>
+  `).join('');
+}
+
+function buildRewardBars() {
+  const div = document.getElementById('reward-bars');
+  div.innerHTML = HARDWARE.map(hw => `
+    <div class="reward-bar-wrap" id="rbar-${hw.id}">
+      <div class="reward-bar-label">
+        <span>${hw.name}</span>
+        <span id="rval-${hw.id}">0.000000 RTC</span>
+      </div>
+      <div class="reward-bar-track">
+        <div class="reward-bar-fill" id="rfill-${hw.id}"
+          style="width:0%;background:${barColor(hw.mult)}"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function barColor(m) {
+  if (m >= 2)   return 'var(--green)';
+  if (m >= 1)   return 'var(--blue)';
+  if (m >= 0.5) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function formatMult(m) {
+  if (m < 0.001) return m.toExponential(0);
+  return m.toFixed(m % 1 === 0 ? 1 : 1);
+}
+
+// ── Hardware selection ──────────────────────────────────────────────────────
+function selectHW(hw) {
+  selectedHW = hw;
+  document.querySelectorAll('.hw-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('hwcard-' + hw.id).classList.add('selected');
+  document.getElementById('stat-mult').textContent = formatMult(hw.mult) + 'x';
+  updateCalc();
+  if (!running) resetFPVis();
+}
+
+// ── Sim controls ────────────────────────────────────────────────────────────
+function startSim() {
+  if (running) return;
+  running = true;
+  stepMode = false;
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-step').disabled = false;
+  runEpoch();
+}
+
+function stepSim() {
+  if (!running) {
+    running = true;
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-step').disabled = false;
+  }
+  stepMode = true;
+  clearTimeout(simTimer);
+  runEpoch();
+}
+
+function resetSim() {
+  running = false;
+  stepMode = false;
+  clearTimeout(simTimer);
+  epochCount = 0;
+  balance = 0;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-step').disabled = true;
+  document.getElementById('stat-epoch').textContent = '0';
+  document.getElementById('stat-balance').textContent = '0.000000';
+  document.getElementById('stat-enrolled').textContent = '—';
+  document.getElementById('terminal').innerHTML = '';
+  document.getElementById('payload-box').textContent = '— run a simulation to see the payload —';
+  resetFPVis();
+  HARDWARE.forEach(hw => {
+    document.getElementById('rfill-' + hw.id).style.width = '0%';
+    document.getElementById('rval-'  + hw.id).textContent = '0.000000 RTC';
+  });
+}
+
+// ── Core simulation epoch ───────────────────────────────────────────────────
+async function runEpoch() {
+  epochCount++;
+  const hw = selectedHW;
+  const EPOCH_SECS = 600; // 10 minutes real epoch
+
+  document.getElementById('stat-epoch').textContent = epochCount;
+  document.getElementById('fp-status').textContent = 'running…';
+  document.getElementById('fp-status').style.color = 'var(--yellow)';
+
+  log('');
+  logBold(`━━━ Epoch cycle #${epochCount} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+  // 1. Hardware detection
+  await delay(180);
+  logDim('  [1/5] Hardware detection…');
+  await delay(220);
+  logOk(`  ✓ CPU    : ${hw.cpu}`);
+  logOk(`  ✓ Cores  : ${hw.cores}`);
+  logOk(`  ✓ RAM    : ${hw.ram} GB`);
+  logOk(`  ✓ Arch   : ${hw.arch}`);
+  logOk(`  ✓ Family : ${hw.family}`);
+
+  // 2. Fingerprint checks (animated)
+  await delay(200);
+  logDim('  [2/5] Running RIP-PoA fingerprint checks…');
+  resetFPVis();
+
+  const fpResults = {};
+  for (let i = 0; i < FP_CHECKS.length; i++) {
+    const c = FP_CHECKS[i];
+    setFPState(c.key, 'running');
+    await delay(150 + Math.random() * 100);
+    const passed = hw.fpPass[i];
+    setFPState(c.key, passed ? 'pass' : 'fail');
+    fpResults[c.key] = {
+      passed,
+      data: generateFPData(c.key, hw, passed),
+    };
+    const status = passed ? '✓ PASS' : '✗ FAIL';
+    const cls = passed ? 'log-ok' : 'log-err';
+    logRaw(`  [${status}] ${c.label.replace('\n', ' ')}`, cls);
+  }
+
+  const allPassed = hw.fpPass.every(Boolean);
+  document.getElementById('fp-status').textContent = allPassed ? 'all passed ✓' : 'checks failed ✗';
+  document.getElementById('fp-status').style.color = allPassed ? 'var(--green)' : 'var(--red)';
+
+  if (!allPassed) {
+    logWarn('  ⚠ Anti-emulation check failed — VM detected!');
+    logWarn('  ⚠ Reward multiplier: ' + hw.mult.toExponential(0) + 'x (effectively zero)');
+  }
+
+  // 3. Challenge nonce
+  await delay(150);
+  logDim('  [3/5] Requesting challenge nonce…');
+  await delay(200);
+  const nonce = randomHex(32);
+  logOk(`  ✓ nonce=${nonce.slice(0, 16)}…`);
+
+  // 4. Build & show payload
+  const payload = buildPayload(hw, nonce, fpResults, allPassed);
+  document.getElementById('payload-box').textContent = JSON.stringify(payload, null, 2);
+
+  logDim('  [4/5] Submitting attestation…');
+  await delay(300);
+  logOk('  ✓ Accepted (200 OK)');
+
+  // 5. Enroll + reward
+  logDim('  [5/5] Enrolling in epoch…');
+  await delay(150);
+  const enrolled = 47 + Math.floor(Math.random() * 30);
+  logOk(`  ✓ Enrolled — epoch miners: ${enrolled}`);
+  document.getElementById('stat-enrolled').textContent = enrolled;
+
+  // Reward calculation
+  const BASE_REWARD = 10; // RTC per epoch (simulated)
+  const reward = BASE_REWARD * hw.mult;
+  balance += reward;
+  document.getElementById('stat-balance').textContent = balance.toFixed(6);
+  logAccent(`  ◆ Reward this epoch: ${reward.toFixed(8)} RTC  (base ${BASE_REWARD} × ${formatMult(hw.mult)}x)`);
+  logAccent(`  ◆ Total balance    : ${balance.toFixed(6)} RTC`);
+
+  // Update reward bars
+  updateRewardBars(epochCount, BASE_REWARD);
+
+  logDim(`  Sleeping ${EPOCH_SECS}s until next epoch (simulated)…`);
+
+  if (!stepMode && running) {
+    simTimer = setTimeout(runEpoch, 2200);
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function generateFPData(key, hw, passed) {
+  if (key === 'clock_drift')
+    return { drift_ns: passed ? 1200 + Math.random()*800 : 50000 + Math.random()*10000, samples: 1000 };
+  if (key === 'cache_timing')
+    return { l1_ns: 1.2 + Math.random()*0.3, l2_ns: 4.8 + Math.random()*0.5 };
+  if (key === 'simd_identity')
+    return { vector_width: hw.arch === 'powerpc' ? 128 : 256, extensions: hw.arch === 'powerpc' ? ['AltiVec'] : ['SSE4.2','AVX2'] };
+  if (key === 'thermal_drift')
+    return { entropy_bits: passed ? 38 + Math.random()*5 : 2, temp_c: 45 + Math.random()*20 };
+  if (key === 'instruction_jitter')
+    return { jitter_ns: passed ? 0.4 + Math.random()*0.3 : 0, path_hash: randomHex(8) };
+  if (key === 'anti_emulation')
+    return { vm_detected: !passed, hypervisor: !passed ? 'QEMU/KVM' : null, rdtsc_delta: passed ? 42 : 9999 };
+  return {};
+}
+
+function buildPayload(hw, nonce, fpResults, allPassed) {
+  return {
+    miner: 'RTC_YOUR_WALLET_ADDRESS_HERE',
+    miner_id: 'RTC_YOUR_WALLET_ADDRESS_HERE',
+    nonce,
+    report: {
+      cpu_model: hw.cpu,
+      cpu_cores: hw.cores,
+      ram_gb: hw.ram,
+      os: hw.os,
+    },
+    device: {
+      device_family: hw.family,
+      device_arch: hw.arch,
+      device_model: hw.name,
+    },
+    signals: {
+      macs: ['aa:bb:cc:dd:ee:ff'],
+      uptime: Math.floor(Math.random() * 86400 * 30),
+    },
+    fingerprint: {
+      all_passed: allPassed,
+      checks: fpResults,
+    },
+  };
+}
+
+function updateRewardBars(epochCount, baseReward) {
+  const maxEarner = HARDWARE.reduce((a, b) => a.mult > b.mult ? a : b);
+  const maxEarnings = baseReward * maxEarner.mult * epochCount;
+
+  HARDWARE.forEach(hw => {
+    const earnings = baseReward * hw.mult * epochCount;
+    const pct = maxEarnings > 0 ? (earnings / maxEarnings) * 100 : 0;
+    document.getElementById('rfill-' + hw.id).style.width = Math.max(pct, hw.mult > 0 ? 0.5 : 0) + '%';
+    document.getElementById('rval-'  + hw.id).textContent = earnings.toFixed(6) + ' RTC';
+  });
+}
+
+function updateCalc() {
+  const epochs = parseInt(document.getElementById('calc-epochs').value);
+  const base   = parseInt(document.getElementById('calc-base').value);
+  const days   = parseInt(document.getElementById('calc-days').value);
+  document.getElementById('calc-epochs-val').textContent = epochs;
+  document.getElementById('calc-base-val').textContent   = base;
+  document.getElementById('calc-days-val').textContent   = days;
+
+  const hw = selectedHW;
+  const totalEpochs = epochs * days;
+  const total = base * hw.mult * totalEpochs;
+
+  document.getElementById('calc-hw-name').textContent = hw.name;
+  document.getElementById('calc-result').textContent  = total < 0.001 ? total.toExponential(4) : total.toFixed(4);
+  document.getElementById('calc-breakdown').textContent =
+    `${base} RTC/epoch × ${formatMult(hw.mult)}x multiplier × ${totalEpochs.toLocaleString()} epochs (${days} days × ${epochs}/day)`;
+}
+
+// ── FP vis helpers ───────────────────────────────────────────────────────────
+function setFPState(key, state) {
+  const el = document.getElementById('fp-' + key);
+  el.classList.remove('running', 'pass', 'fail');
+  if (state) el.classList.add(state);
+}
+
+function resetFPVis() {
+  FP_CHECKS.forEach(c => setFPState(c.key, ''));
+}
+
+// ── Terminal logging ─────────────────────────────────────────────────────────
+function logRaw(msg, cls) {
+  const t = document.getElementById('terminal');
+  const div = document.createElement('div');
+  div.className = 'log-line ' + (cls || '');
+  div.textContent = msg;
+  t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
+}
+function log(msg)       { logRaw(msg, ''); }
+function logOk(msg)     { logRaw(msg, 'log-ok'); }
+function logErr(msg)    { logRaw(msg, 'log-err'); }
+function logWarn(msg)   { logRaw(msg, 'log-warn'); }
+function logDim(msg)    { logRaw(msg, 'log-dim'); }
+function logBold(msg)   { logRaw(msg, 'log-bold'); }
+function logAccent(msg) { logRaw(msg, 'log-accent'); }
+
+// ── Utilities ────────────────────────────────────────────────────────────────
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function randomHex(bytes) {
+  return Array.from({length: bytes}, () =>
+    Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+  ).join('');
+}
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
