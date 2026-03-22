@@ -1,0 +1,173 @@
+name: 'BCOS v2 Scan'
+description: >
+  Beacon Certified Open Source — scan a repository with BCOS v2 engine,
+  post a score badge comment on PRs, and anchor the attestation to RustChain.
+author: 'Elyan Labs / RustChain'
+
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  tier:
+    description: 'Minimum certification tier: L0 (≥40), L1 (≥60), or L2 (≥80 + signature)'
+    required: false
+    default: 'L1'
+  reviewer:
+    description: 'Reviewer name or GitHub handle (required for L2 tier)'
+    required: false
+    default: ''
+  node-url:
+    description: 'RustChain node URL for on-chain anchoring'
+    required: false
+    default: 'https://50.28.86.131'
+  path:
+    description: 'Path to the repository to scan (default: current workspace)'
+    required: false
+    default: '.'
+  token:
+    description: 'GitHub token for posting PR comments'
+    required: false
+    default: ${{ github.token }}
+  anchor-on-merge:
+    description: 'Anchor attestation to RustChain when merged into default branch'
+    required: false
+    default: 'true'
+  fail-on-tier-miss:
+    description: 'Fail the workflow if the tier threshold is not met'
+    required: false
+    default: 'false'
+
+outputs:
+  trust_score:
+    description: 'BCOS trust score (0-100)'
+    value: ${{ steps.bcos-scan.outputs.trust_score }}
+  cert_id:
+    description: 'BCOS certificate ID (e.g. BCOS-abc1234)'
+    value: ${{ steps.bcos-scan.outputs.cert_id }}
+  tier_met:
+    description: 'Whether the requested tier threshold was met (true/false)'
+    value: ${{ steps.bcos-scan.outputs.tier_met }}
+  badge_url:
+    description: 'URL of the BCOS badge SVG'
+    value: ${{ steps.bcos-scan.outputs.badge_url }}
+  report_json:
+    description: 'Full BCOS report as JSON string'
+    value: ${{ steps.bcos-scan.outputs.report_json }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install BCOS engine dependencies
+      shell: bash
+      run: |
+        pip install requests httpx --quiet
+
+    - name: Download BCOS engine
+      shell: bash
+      run: |
+        curl -fsSL \
+          https://raw.githubusercontent.com/Scottcjn/Rustchain/main/tools/bcos_engine.py \
+          -o /tmp/bcos_engine.py
+
+    - name: Run BCOS scan
+      id: bcos-scan
+      shell: bash
+      env:
+        BCOS_TIER: ${{ inputs.tier }}
+        BCOS_REVIEWER: ${{ inputs.reviewer }}
+        BCOS_PATH: ${{ inputs.path }}
+        BCOS_NODE: ${{ inputs.node-url }}
+      run: python ${{ github.action_path }}/action/run_scan.py
+
+    - name: Post PR comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const score      = '${{ steps.bcos-scan.outputs.trust_score }}';
+          const certId     = '${{ steps.bcos-scan.outputs.cert_id }}';
+          const tierMet    = '${{ steps.bcos-scan.outputs.tier_met }}' === 'true';
+          const tier       = '${{ inputs.tier }}';
+          const badgeUrl   = '${{ steps.bcos-scan.outputs.badge_url }}';
+          const verifyUrl  = `https://rustchain.org/bcos/verify/${certId}`;
+          const nodeUrl    = '${{ inputs.node-url }}';
+
+          const status = tierMet ? '✅ PASS' : '⚠️ BELOW THRESHOLD';
+          const emoji  = parseFloat(score) >= 80 ? '🟢' : parseFloat(score) >= 60 ? '🟡' : '🔴';
+
+          const body = [
+            `## ${emoji} BCOS v2 Scan Results`,
+            '',
+            `[![BCOS](${badgeUrl})](${verifyUrl})`,
+            '',
+            `| Field | Value |`,
+            `|-------|-------|`,
+            `| **Status** | ${status} |`,
+            `| **Trust Score** | ${score} / 100 |`,
+            `| **Tier** | ${tier} |`,
+            `| **Cert ID** | \`${certId}\` |`,
+            `| **Verify** | [${certId}](${verifyUrl}) |`,
+            '',
+            `<details><summary>Score Breakdown</summary>`,
+            '',
+            '```json',
+            '${{ steps.bcos-scan.outputs.report_json }}'.substring(0, 2000),
+            '```',
+            '</details>',
+            '',
+            `*Scanned by [BCOS v2](https://rustchain.org/bcos/) on RustChain node \`${nodeUrl}\`*`,
+          ].join('\n');
+
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const existing = comments.find(c =>
+            c.user.login === 'github-actions[bot]' &&
+            c.body.includes('BCOS v2 Scan Results')
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+          }
+
+    - name: Anchor to RustChain on merge
+      if: >
+        inputs.anchor-on-merge == 'true' &&
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      shell: bash
+      env:
+        CERT_ID: ${{ steps.bcos-scan.outputs.cert_id }}
+        NODE_URL: ${{ inputs.node-url }}
+        REPO: ${{ github.repository }}
+        SHA: ${{ github.sha }}
+      run: python ${{ github.action_path }}/action/anchor.py
+
+    - name: Fail if tier not met
+      if: inputs.fail-on-tier-miss == 'true' && steps.bcos-scan.outputs.tier_met == 'false'
+      shell: bash
+      run: |
+        echo "::error::BCOS tier ${{ inputs.tier }} not met. Score: ${{ steps.bcos-scan.outputs.trust_score }}"
+        exit 1
