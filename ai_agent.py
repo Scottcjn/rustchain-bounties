@@ -11,7 +11,10 @@ RTC_WALLET = f"RTC-agent-{''.join(random.choices(string.ascii_uppercase + string
 
 # Initialize GitHub client
 g = Github(GITHUB_TOKEN)
-repo = g.get_repo(REPO_NAME)
+try:
+    repo = g.get_repo(REPO_NAME)
+except Exception:
+    repo = None
 
 # Function to get open issues from the repository
 def get_open_bounties():
