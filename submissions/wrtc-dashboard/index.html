@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wRTC Solana Bridge Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌉 wRTC Solana Bridge Dashboard</h1>
+            <p class="subtitle">Real-time Wrap/Unwrap Monitor</p>
+            <div class="refresh-indicator">
+                <span class="pulse"></span>
+                <span id="last-update">Last update: Just now</span>
+                <span class="countdown">Next refresh: <span id="countdown">30</span>s</span>
+            </div>
+        </header>
+
+        <!-- Bridge Health Status -->
+        <section class="health-section">
+            <h2>Bridge Health</h2>
+            <div class="health-cards">
+                <div class="health-card" id="rustchain-health">
+                    <div class="health-icon">🔗</div>
+                    <div class="health-info">
+                        <h3>RustChain Side</h3>
+                        <span class="status-badge" id="rustchain-status">Checking...</span>
+                        <p class="health-detail" id="rustchain-detail">Connecting to API...</p>
+                    </div>
+                </div>
+                <div class="health-card" id="solana-health">
+                    <div class="health-icon">☀️</div>
+                    <div class="health-info">
+                        <h3>Solana Side</h3>
+                        <span class="status-badge" id="solana-status">Checking...</span>
+                        <p class="health-detail" id="solana-detail">Connecting to RPC...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Metrics -->
+        <section class="metrics-section">
+            <h2>Key Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">🔒</div>
+                    <div class="metric-value" id="total-locked">--</div>
+                    <div class="metric-label">Total RTC Locked</div>
+                    <div class="metric-change" id="locked-change">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">💰</div>
+                    <div class="metric-value" id="total-circulating">--</div>
+                    <div class="metric-label">wRTC Circulating</div>
+                    <div class="metric-change" id="circulating-change">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-value" id="wrtc-price">--</div>
+                    <div class="metric-label">wRTC Price (USD)</div>
+                    <div class="metric-change" id="price-change">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">💵</div>
+                    <div class="metric-value" id="bridge-revenue">--</div>
+                    <div class="metric-label">Bridge Fee Revenue (24h)</div>
+                    <div class="metric-change" id="revenue-change">--</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Price Chart -->
+        <section class="chart-section">
+            <h2>Price Chart (Raydium)</h2>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="chart-controls">
+                <button class="time-btn active" data-period="1h">1H</button>
+                <button class="time-btn" data-period="24h">24H</button>
+                <button class="time-btn" data-period="7d">7D</button>
+                <button class="time-btn" data-period="30d">30D</button>
+            </div>
+        </section>
+
+        <!-- Recent Transactions -->
+        <section class="transactions-section">
+            <div class="transactions-header">
+                <h2>Recent Transactions</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="wrap">Wraps</button>
+                    <button class="filter-btn" data-filter="unwrap">Unwraps</button>
+                </div>
+            </div>
+            <div class="transactions-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-body">
+                        <tr class="loading-row">
+                            <td colspan="6">Loading transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Bridge Stats -->
+        <section class="stats-section">
+            <h2>Bridge Statistics (24h)</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Total Wraps</span>
+                    <span class="stat-value" id="total-wraps">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Unwraps</span>
+                    <span class="stat-value" id="total-unwraps">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Volume</span>
+                    <span class="stat-value" id="total-volume">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Fee</span>
+                    <span class="stat-value" id="avg-fee">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Success Rate</span>
+                    <span class="stat-value" id="success-rate">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Avg Time</span>
+                    <span class="stat-value" id="avg-time">--</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>wRTC Bridge Dashboard | Data from RustChain API & Solana RPC</p>
+            <p class="wallet-address">RTC Wallet: <code>RTC8xH6Zm...7xK2</code></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
