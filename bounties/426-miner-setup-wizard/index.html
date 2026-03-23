@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Miner Setup Wizard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .wizard-container {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .wizard-header { text-align: center; margin-bottom: 30px; }
+        .wizard-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .wizard-header p { color: #a0a0a0; font-size: 0.95rem; }
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 0; right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            z-index: 0;
+        }
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+        .step-circle {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        .progress-step.active .step-circle { background: #e94560; border-color: #e94560; }
+        .progress-step.completed .step-circle { background: #4ecca3; border-color: #4ecca3; }
+        .step-label {
+            font-size: 0.7rem;
+            margin-top: 8px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        .progress-step.active .step-label { color: #e94560; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-title { font-size: 1.5rem; margin-bottom: 15px; }
+        .step-description { color: #b0b0b0; margin-bottom: 25px; line-height: 1.6; }
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .platform-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .platform-card:hover, .platform-card.selected {
+            border-color: #e94560;
+            background: rgba(233,69,96,0.1);
+        }
+        .platform-icon { font-size: 2rem; margin-bottom: 10px; }
+        .platform-name { font-size: 0.9rem; font-weight: 600; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #ccc; font-size: 0.9rem; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .wallet-display {
+            background: rgba(78,204,163,0.1);
+            border: 1px solid rgba(78,204,163,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .wallet-label { font-size: 0.8rem; color: #4ecca3; margin-bottom: 5px; }
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(233,69,96,0.3); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            margin-right: 10px;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .btn-generate {
+            background: linear-gradient(135deg, #4ecca3, #3db892);
+            color: #fff;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .btn-generate:hover { transform: translateY(-2px); }
+        .btn-container { display: flex; justify-content: space-between; margin-top: 30px; }
+        .code-block {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            color: #c9d1d9;
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .success-message {
+            background: rgba(78,204,163,0.1);
+            border: 1px solid #4ecca3;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .success-icon { font-size: 3rem; margin-bottom: 15px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #e94560; }
+        .stat-label { font-size: 0.75rem; color: #888; margin-top: 5px; }
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .checkbox-group input {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            accent-color: #e94560;
+        }
+        .checkbox-group label { color: #ccc; font-size: 0.9rem; line-height: 1.4; }
+        .info-box {
+            background: rgba(233,69,96,0.1);
+            border-left: 3px solid #e94560;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 20px;
+        }
+        .info-box p { color: #ccc; font-size: 0.9rem; }
+        .hidden { display: none !important; }
+        @media (max-width: 480px) {
+            .wizard-container { padding: 25px; }
+            .platform-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .btn-container { flex-direction: column; gap: 10px; }
+            .btn-secondary { margin-right: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-header">
+            <h1>⛏️ RustChain Miner</h1>
+            <p>Setup Wizard - Configure your mining node in minutes</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-circle">1</div>
+                <span class="step-label">Platform</span>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-circle">2</div>
+                <span class="step-label">Wallet</span>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-circle">3</div>
+                <span class="step-label">Config</span>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-circle">4</div>
+                <span class="step-label">Install</span>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-circle">5</div>
+                <span class="step-label">Start</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Platform Selection -->
+        <div class="step-content active" id="step-1">
+            <h2 class="step-title">Choose Your Platform</h2>
+            <p class="step-description">Select the operating system where you'll run your RustChain miner.</p>
+            <div class="platform-grid">
+                <div class="platform-card" data-platform="windows">
+                    <div class="platform-icon">🪟</div>
+                    <div class="platform-name">Windows</div>
+                </div>
+                <div class="platform-card" data-platform="macos">
+                    <div class="platform-icon">🍎</div>
+                    <div class="platform-name">macOS</div>
+                </div>
+                <div class="platform-card" data-platform="linux">
+                    <div class="platform-icon">🐧</div>
+                    <div class="platform-name">Linux</div>
+                </div>
+                <div class="platform-card" data-platform="docker">
+                    <div class="platform-icon">🐳</div>
+                    <div class="platform-name">Docker</div>
+                </div>
+            </div>
+            <div class="btn-container">
+                <div></div>
+                <button class="btn btn-primary" id="btn-step1-next" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Wallet Setup -->
+        <div class="step-content" id="step-2">
+            <h2 class="step-title">Wallet Configuration</h2>
+            <p class="step-description">Enter your RustChain wallet address where mining rewards will be sent.</p>
+            <div class="input-group">
+                <label for="wallet-address">Wallet Address</label>
+                <input type="text" id="wallet-address" placeholder="rtc1...">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="generate-wallet">
+                <label for="generate-wallet">I don't have a wallet - generate one for me</label>
+            </div>
+            <div id="generated-wallet" class="hidden">
+                <button class="btn btn-generate" id="btn-generate-wallet">🔐 Generate New Wallet</button>
+                <div class="wallet-display hidden" id="wallet-display">
+                    <div class="wallet-label">Your New Wallet Address</div>
+                    <div id="wallet-address-display"></div>
+                </div>
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+                <button class="btn btn-primary" id="btn-step2-next" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Configuration -->
+        <div class="step-content" id="step-3">
+            <h2 class="step-title">Miner Configuration</h2>
+            <p class="step-description">Customize your mining settings for optimal performance.</p>
+            <div class="input-group">
+                <label for="mining-pool">Mining Pool</label>
+                <select id="mining-pool">
+                    <option value="pool.rustchain.network:3333">RustChain Official Pool (pool.rustchain.network:3333)</option>
+                    <option value="eu.rustpool.io:3333">EU Pool (eu.rustpool.io:3333)</option>
+                    <option value="us.rustpool.io:3333">US Pool (us.rustpool.io:3333)</option>
+                    <option value="asia.rustpool.io:3333">Asia Pool (asia.rustpool.io:3333)</option>
+                    <option value="custom">Custom Pool...</option>
+                </select>
+            </div>
+            <div class="input-group hidden" id="custom-pool-group">
+                <label for="custom-pool">Custom Pool Address</label>
+                <input type="text" id="custom-pool" placeholder="pool.example.com:3333">
+            </div>
+            <div class="input-group">
+                <label for="worker-name">Worker Name</label>
+                <input type="text" id="worker-name" placeholder="worker1" value="worker1">
+            </div>
+            <div class="input-group">
+                <label for="threads">CPU Threads to Use</label>
+                <select id="threads">
+                    <option value="auto">Auto (Recommended)</option>
+                    <option value="1">1 Thread</option>
+                    <option value="2">2 Threads</option>
+                    <option value="4">4 Threads</option>
+                    <option value="8">8 Threads</option>
+                    <option value="16">16 Threads</option>
+                    <option value="all">All Available</option>
+                </select>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="start-on-boot" checked>
+                <label for="start-on-boot">Start miner automatically on system boot</label>
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(4)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Installation -->
+        <div class="step-content" id="step-4">
+            <h2 class="step-title">Installation</h2>
+            <p class="step-description">Run the following commands to install and configure your miner.</p>
+            <div class="info-box">
+                <p>💡 Copy and paste these commands into your terminal. The wizard will detect your platform automatically.</p>
+            </div>
+            <div class="code-block">
+                <div class="code-header">
+                    <span id="install-filename">install.sh</span>
+                    <button class="copy-btn" onclick="copyCode('install-commands')">📋 Copy</button>
+                </div>
+                <pre id="install-commands"># Download and install RustChain Miner
+curl -fsSL https://rustchain.network/install.sh | bash
+
+# Configure your miner
+rustchain-miner config --wallet YOUR_WALLET --pool pool.rustchain.network:3333 --worker worker1</pre>
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
+                <button class="btn btn-primary" onclick="goToStep(5)">Next →</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Success -->
+        <div class="step-content" id="step-5">
+            <div class="success-message">
+                <div class="success-icon">🎉</div>
+                <h2 class="step-title">You're Ready to Mine!</h2>
+                <p class="step-description">Your RustChain miner is configured and ready to start earning rewards.</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-platform">-</div>
+                        <div class="stat-label">Platform</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-pool">-</div>
+                        <div class="stat-label">Pool</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-threads">-</div>
+                        <div class="stat-label">Threads</div>
+                    </div>
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Start Mining</span>
+                        <button class="copy-btn" onclick="copyCode('start-command')">📋 Copy</button>
+                    </div>
+                    <pre id="start-command">rustchain-miner start</pre>
+                </div>
+                <p style="color: #888; font-size: 0.85rem; margin-top: 20px;">
+                    Run the command above to start mining. Check your dashboard at <a href="https://rustchain.network/dashboard" style="color: #e94560;">rustchain.network/dashboard</a>
+                </p>
+            </div>
+            <div class="btn-container" style="justify-content: center;">
+                <button class="btn btn-secondary" onclick="goToStep(1)">🔄 Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentStep = 1;
+        let selectedPlatform = null;
+        let walletAddress = '';
+
+        // Platform selection
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedPlatform = card.dataset.platform;
+                document.getElementById('btn-step1-next').disabled = false;
+            });
+        });
+
+        // Step 1 next button
+        document.getElementById('btn-step1-next').addEventListener('click', () => {
+            goToStep(2);
+        });
+
+        // Step 2 wallet handling
+        const walletInput = document.getElementById('wallet-address');
+        const generateCheckbox = document.getElementById('generate-wallet');
+        const generatedWalletDiv = document.getElementById('generated-wallet');
+        const btnStep2Next = document.getElementById('btn-step2-next');
+
+        walletInput.addEventListener('input', () => {
+            walletAddress = walletInput.value.trim();
+            btnStep2Next.disabled = walletAddress.length < 10;
+        });
+
+        generateCheckbox.addEventListener('change', () => {
+            generatedWalletDiv.classList.toggle('hidden', !generateCheckbox.checked);
+            if (generateCheckbox.checked) {
+                walletInput.disabled = true;
+                btnStep2Next.disabled = true;
+            } else {
+                walletInput.disabled = false;
+                btnStep2Next.disabled = walletAddress.length < 10;
+            }
+        });
+
+        // Generate wallet (simulated)
+        document.getElementById('btn-generate-wallet').addEventListener('click', () => {
+            const chars = '0123456789abcdef';
+            let addr = 'rtc1';
+            for (let i = 0; i < 38; i++) addr += chars[Math.floor(Math.random() * chars.length)];
+            walletAddress = addr;
+            document.getElementById('wallet-address-display').textContent = addr;
+            document.getElementById('wallet-display').classList.remove('hidden');
+            btnStep2Next.disabled = false;
+        });
+
+        // Step 2 next
+        btnStep2Next.addEventListener('click', () => {
+            goToStep(3);
+        });
+
+        // Step 3 pool handling
+        document.getElementById('mining-pool').addEventListener('change', (e) => {
+            document.getElementById('custom-pool-group').classList.toggle('hidden', e.target.value !== 'custom');
+        });
+
+        // Navigation
+        function goToStep(step) {
+            // Update progress bar
+            document.querySelectorAll('.progress-step').forEach((el, idx) => {
+                const stepNum = idx + 1;
+                el.classList.remove('active', 'completed');
+                if (stepNum === step) el.classList.add('active');
+                else if (stepNum < step) el.classList.add('completed');
+            });
+
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            
+            // Show target step
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            currentStep = step;
+
+            // Update step 4 commands based on platform
+            if (step === 4) {
+                updateInstallCommands();
+            }
+
+            // Update step 5 summary
+            if (step === 5) {
+                updateSummary();
+            }
+        }
+
+        function updateInstallCommands() {
+            const commands = {
+                windows: `# Download RustChain Miner for Windows\nInvoke-WebRequest -Uri "https://rustchain.network/rustchain-miner.exe" -OutFile "rustchain-miner.exe"\n\n# Configure\n.\\rustchain-miner.exe config --wallet ${walletAddress} --pool ${getPool()} --worker ${getWorker()}`,
+                macos: `# Download and install RustChain Miner\ncurl -fsSL https://rustchain.network/install.sh | bash\n\n# Configure\nrustchain-miner config --wallet ${walletAddress} --pool ${getPool()} --worker ${getWorker()}`,
+                linux: `# Download and install RustChain Miner\ncurl -fsSL https://rustchain.network/install.sh | bash\n\n# Configure\nrustchain-miner config --wallet ${walletAddress} --pool ${getPool()} --worker ${getWorker()}`,
+                docker: `# Run RustChain Miner with Docker\ndocker run -d \\\n  --name rustchain-miner \\\n  -e WALLET=${walletAddress} \\\n  -e POOL=${getPool()} \\\n  -e WORKER=${getWorker()} \\\n  rustchain/miner:latest`
+            };
+            
+            const filenames = { windows: 'PowerShell', macos: 'install.sh', linux: 'install.sh', docker: 'docker run' };
+            
+            document.getElementById('install-commands').textContent = commands[selectedPlatform] || commands.linux;
+            document.getElementById('install-filename').textContent = filenames[selectedPlatform] || 'install.sh';
+        }
+
+        function getPool() {
+            const pool = document.getElementById('mining-pool').value;
+            return pool === 'custom' ? document.getElementById('custom-pool').value : pool;
+        }
+
+        function getWorker() {
+            return document.getElementById('worker-name').value || 'worker1';
+        }
+
+        function updateSummary() {
+            document.getElementById('stat-platform').textContent = selectedPlatform ? selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1) : '-';
+            document.getElementById('stat-pool').textContent = getPool().split(':')[0].split('.')[0].toUpperCase() || '-';
+            document.getElementById('stat-threads').textContent = document.getElementById('threads').value;
+            document.getElementById('start-command').textContent = selectedPlatform === 'windows' ? '.\\rustchain-miner.exe start' : 'rustchain-miner start';
+        }
+
+        function copyCode(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        }
+
+        // Auto-detect platform
+        const platform = navigator.platform.toLowerCase();
+        if (platform.includes('win')) document.querySelector('[data-platform="windows"]').click();
+        else if (platform.includes('mac')) document.querySelector('[data-platform="macos"]').click();
+        else if (platform.includes('linux')) document.querySelector('[data-platform="linux"]').click();
+    </script>
+</body>
+</html>
