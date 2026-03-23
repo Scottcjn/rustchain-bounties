@@ -1,0 +1,203 @@
+<!-- bottube_templates/watch.html -->
+<!-- Add the following <style> block inside the <head> tag -->
+
+<style>
+/* Keyboard Shortcut Overlay Indicator */
+#kbd-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease, transform 0.1s ease;
+  z-index: 9999;
+}
+#kbd-overlay.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+</style>
+
+<!-- Add this div just before the closing </body> tag -->
+<div id="kbd-overlay"></div>
+
+<!-- Add the following <script> block just before the closing </body> tag -->
+<script>
+(function () {
+  'use strict';
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  /**
+   * Find the <video> element on the page.
+   * BoTTube typically renders a single <video> tag inside the watch view.
+   */
+  function getVideo() {
+    return document.querySelector('video');
+  }
+
+  /**
+   * Flash a brief overlay icon in the centre of the screen,
+   * mimicking YouTube's keyboard-action feedback.
+   * @param {string} icon – Any string / emoji to display.
+   */
+  var overlayTimer = null;
+  function showOverlay(icon) {
+    var el = document.getElementById('kbd-overlay');
+    if (!el) return;
+    el.textContent = icon;
+    el.classList.add('show');
+    if (overlayTimer) clearTimeout(overlayTimer);
+    overlayTimer = setTimeout(function () {
+      el.classList.remove('show');
+    }, 600);
+  }
+
+  /**
+   * Clamp a value between min and max.
+   */
+  function clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  }
+
+  // ── Main keydown handler ─────────────────────────────────────────────────
+
+  document.addEventListener('keydown', function (e) {
+    // Do NOT intercept shortcuts when the user is typing in any
+    // input, textarea, select, or contenteditable element
+    // (covers the comment box and any other form fields).
+    var tag = (e.target.tagName || '').toUpperCase();
+    if (
+      tag === 'INPUT' ||
+      tag === 'TEXTAREA' ||
+      tag === 'SELECT' ||
+      e.target.isContentEditable
+    ) {
+      return;
+    }
+
+    // Also skip when modifier keys are held (avoid clashing with browser
+    // shortcuts such as Ctrl+L, Alt+Left, etc.).
+    if (e.ctrlKey || e.altKey || e.metaKey) {
+      return;
+    }
+
+    var video = getVideo();
+    if (!video) return; // no video on this page – bail out silently
+
+    var key = e.key;
+
+    switch (key) {
+      // ── Play / Pause ─────────────────────────────────────────────────────
+      case ' ':         // Space
+      case 'k':         // K
+      case 'K':
+        e.preventDefault(); // prevent page scroll on Space
+        if (video.paused) {
+          video.play();
+          showOverlay('▶');
+        } else {
+          video.pause();
+          showOverlay('⏸');
+        }
+        break;
+
+      // ── Seek back 10 s ───────────────────────────────────────────────────
+      case 'j':
+      case 'J':
+        e.preventDefault();
+        video.currentTime = clamp(video.currentTime - 10, 0, video.duration || 0);
+        showOverlay('↺ 10s');
+        break;
+
+      // ── Seek forward 10 s ────────────────────────────────────────────────
+      case 'l':
+      case 'L':
+        e.preventDefault();
+        video.currentTime = clamp(video.currentTime + 10, 0, video.duration || 0);
+        showOverlay('↻ 10s');
+        break;
+
+      // ── Mute toggle ──────────────────────────────────────────────────────
+      case 'm':
+      case 'M':
+        e.preventDefault();
+        video.muted = !video.muted;
+        showOverlay(video.muted ? '🔇' : '🔊');
+        break;
+
+      // ── Fullscreen toggle ────────────────────────────────────────────────
+      case 'f':
+      case 'F':
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          // Try the video element first; fall back to its container
+          var fsTarget = video.closest('.video-container') || video;
+          if (fsTarget.requestFullscreen) {
+            fsTarget.requestFullscreen();
+          } else if (fsTarget.webkitRequestFullscreen) {
+            fsTarget.webkitRequestFullscreen();
+          } else if (fsTarget.mozRequestFullScreen) {
+            fsTarget.mozRequestFullScreen();
+          }
+          showOverlay('⛶');
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          }
+          showOverlay('✕');
+        }
+        break;
+
+      // ── Arrow Left — seek back 5 s ───────────────────────────────────────
+      case 'ArrowLeft':
+        e.preventDefault();
+        video.currentTime = clamp(video.currentTime - 5, 0, video.duration || 0);
+        showOverlay('◀ 5s');
+        break;
+
+      // ── Arrow Right — seek forward 5 s ──────────────────────────────────
+      case 'ArrowRight':
+        e.preventDefault();
+        video.currentTime = clamp(video.currentTime + 5, 0, video.duration || 0);
+        showOverlay('▶ 5s');
+        break;
+
+      // ── Arrow Up — volume +10 % ──────────────────────────────────────────
+      case 'ArrowUp':
+        e.preventDefault();
+        video.volume = clamp(video.volume + 0.1, 0, 1);
+        video.muted = false;
+        showOverlay('🔊 ' + Math.round(video.volume * 100) + '%');
+        break;
+
+      // ── Arrow Down — volume -10 % ────────────────────────────────────────
+      case 'ArrowDown':
+        e.preventDefault();
+        video.volume = clamp(video.volume - 0.1, 0, 1);
+        if (video.volume === 0) video.muted = true;
+        showOverlay('🔉 ' + Math.round(video.volume * 100) + '%');
+        break;
+
+      default:
+        // Unknown key – do nothing (don't call preventDefault)
+        break;
+    }
+  });
+
+})();
+</script>
