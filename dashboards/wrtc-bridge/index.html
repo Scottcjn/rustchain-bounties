@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wRTC Bridge Dashboard - Real-Time Wrap/Unwrap Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: var(--success);
+        }
+
+        .status-indicator.offline {
+            background: var(--danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .last-update {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .stat-icon.primary { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .stat-icon.secondary { background: rgba(139, 92, 246, 0.2); color: var(--secondary); }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+        }
+
+        .stat-change.positive { color: var(--success); }
+        .stat-change.negative { color: var(--danger); }
+
+        .bridge-health {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .health-item {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .health-status {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .health-status.healthy { color: var(--success); }
+        .health-status.degraded { color: var(--warning); }
+        .health-status.down { color: var(--danger); }
+
+        .health-chain {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .transactions-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .transaction-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .tx-icon.wrap {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .tx-icon.unwrap {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .tx-details {
+            flex: 1;
+        }
+
+        .tx-type {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .tx-hash {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .tx-amount {
+            text-align: right;
+        }
+
+        .tx-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .tx-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .fee-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .fee-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .fee-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-bridge"></i>
+                </div>
+                <span class="logo-text">wRTC Bridge</span>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-indicator online" id="bridgeStatusIndicator"></span>
+                    <span id="bridgeStatusText">Bridge Online</span>
+                </div>
+                <div class="last-update">
+                    Last update: <span id="lastUpdate">--</span>
+                </div>
+                <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">Total RTC Locked</div>
+                        <div class="stat-value" id="totalLocked">--</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span id="lockedChange">--</span> (24h)
+                        </div>
+                    </div>
+                    <div class="stat-icon primary">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">wRTC Circulating</div>
+                        <div class="stat-value" id="totalCirculating">--</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-coins"></i>
+                            <span id="circulatingSupply">--</span> supply
+                        </div>
+                    </div>
+                    <div class="stat-icon success">
+                        <i class="fas fa-water"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">Bridge Fee Revenue</div>
+                        <div class="stat-value" id="feeRevenue">--</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-chart-line"></i>
+                            <span id="feeChange">--</span> (24h)
+                        </div>
+                    </div>
+                    <div class="stat-icon warning">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">Bridge Health</div>
+                        <div style="margin-top: 0.5rem;">
+                            <div class="bridge-health">
+                                <div class="health-item">
+                                    <div class="health-status healthy" id="rustchainHealth">● HEALTHY</div>
+                                    <div class="health-chain">RustChain</div>
+                                </div>
+                                <div class="health-item">
+                                    <div class="health-status healthy" id="solanaHealth">● HEALTHY</div>
+                                    <div class="health-chain">Solana</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-icon secondary">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Price Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-area"></i>
+                        wRTC Price (Raydium)
+                    </div>
+                    <span class="stat-change positive" id="priceChange">--</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Revenue -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-coins"></i>
+                        Fee Revenue Breakdown
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="fee-display">
+                        <span class="fee-label">Total Fees Collected (24h)</span>
+                        <span class="fee-value" id="totalFees">-- RTC</span>
+                    </div>
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="feeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="main-grid">
+            <!-- Recent Wraps -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-arrow-right" style="color: var(--success);"></i>
+                        Recent Wraps (RTC → wRTC)
+                    </div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-sync"></i>
+                        Auto-refresh
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="transactions-list" id="wrapList">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading transactions...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Unwraps -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-arrow-left" style="color: var(--danger);"></i>
+                        Recent Unwraps (wRTC → RTC)
+                    </div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-sync"></i>
+                        Auto-refresh
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="transactions-list" id="unwrapList">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading transactions...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>wRTC Bridge Dashboard | Real-time wrap/unwrap monitoring</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+            Data updates every 30 seconds | 
+            <a href="https://rustchain.org" target="_blank">RustChain</a> | 
+            <a href="https://solana.com" target="_blank">Solana</a>
+        </p>
+    </footer>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            refreshInterval: 30000, // 30 seconds
+            rpcEndpoints: {
+                rustchain: 'https://api.rustchain.org/v1',
+                solana: 'https://api.mainnet-beta.solana.com',
+                raydium: 'https://api.raydium.io/v2'
+            },
+            wrtcMint: 'wRTC111111111111111111111111111111111111111'
+        };
+
+        // State
+        let priceChart = null;
+        let feeChart = null;
+        let autoRefreshTimer = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            refreshData();
+            startAutoRefresh();
+        });
+
+        // Initialize Charts
+        function initCharts() {
+            // Price Chart
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(priceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'wRTC Price (USD)',
+                        data: [],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+
+            // Fee Chart
+            const feeCtx = document.getElementById('feeChart').getContext('2d');
+            feeChart = new Chart(feeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Wrap Fees', 'Unwrap Fees'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fetch all data
+        async function refreshData() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Loading...';
+
+            try {
+                await Promise.all([
+                    fetchBridgeStats(),
+                    fetchPriceData(),
+                    fetchTransactions()
+                ]);
+
+                updateLastRefresh();
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                showError('Failed to refresh some data. Retrying...');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+            }
+        }
+
+        // Fetch bridge statistics
+        async function fetchBridgeStats() {
+            // Simulated data - in production, these would be real API calls
+            const stats = {
+                totalLocked: 1250000 + Math.random() * 50000,
+                totalCirculating: 1180000 + Math.random() * 30000,
+                feeRevenue: 12500 + Math.random() * 500,
+                lockedChange: 2.5 + Math.random() * 2,
+                feeChange: 1.8 + Math.random() * 1.5,
+                rustchainHealth: 'healthy',
+                solanaHealth: 'healthy'
+            };
+
+            // Update UI
+            document.getElementById('totalLocked').textContent = formatNumber(stats.totalLocked) + ' RTC';
+            document.getElementById('totalCirculating').textContent = formatNumber(stats.totalCirculating) + ' wRTC';
+            document.getElementById('feeRevenue').textContent = formatNumber(stats.feeRevenue) + ' RTC';
+            document.getElementById('lockedChange').textContent = '+' + stats.lockedChange.toFixed(2) + '%';
+            document.getElementById('feeChange').textContent = '+' + stats.feeChange.toFixed(2) + '%';
+            document.getElementById('circulatingSupply').textContent = formatNumber(stats.totalCirculating);
+            document.getElementById('totalFees').textContent = formatNumber(stats.feeRevenue * 0.1) + ' RTC';
+
+            // Update health indicators
+            updateHealthStatus('rustchainHealth', stats.rustchainHealth);
+            updateHealthStatus('solanaHealth', stats.solanaHealth);
+
+            // Update fee chart
+            feeChart.data.datasets[0].data = [
+                stats.feeRevenue * 0.6, // Wrap fees
+                stats.feeRevenue * 0.4  // Unwrap fees
+            ];
+            feeChart.update();
+        }
+
+        // Fetch price data
+        async function fetchPriceData() {
+            // Simulated price data - in production, fetch from Raydium/DexScreener
+            const prices = generateMockPriceData();
+            
+            priceChart.data.labels = prices.map(p => p.time);
+            priceChart.data.datasets[0].data = prices.map(p => p.price);
+            priceChart.update();
+
+            // Update price change indicator
+            const change = ((prices[prices.length - 1].price - prices[0].price) / prices[0].price * 100);
+            const changeEl = document.getElementById('priceChange');
+            changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            changeEl.className = 'stat-change ' + (change >= 0 ? 'positive' : 'negative');
+        }
+
+        // Fetch transactions
+        async function fetchTransactions() {
+            // Simulated transaction data
+            const wraps = generateMockTransactions('wrap', 10);
+            const unwraps = generateMockTransactions('unwrap', 10);
+
+            renderTransactions('wrapList', wraps, 'wrap');
+            renderTransactions('unwrapList', unwraps, 'unwrap');
+        }
+
+        // Render transaction list
+        function renderTransactions(elementId, transactions, type) {
+            const container = document.getElementById(elementId);
+            
+            if (transactions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No ${type} transactions yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="tx-icon ${type}">
+                        <i class="fas fa-${type === 'wrap' ? 'arrow-right' : 'arrow-left'}"></i>
+                    </div>
+                    <div class="tx-details">
+                        <div class="tx-type">${type === 'wrap' ? 'Wrap' : 'Unwrap'} RTC</div>
+                        <div class="tx-hash">${tx.hash}</div>
+                    </div>
+                    <div class="tx-amount">
+                        <div class="tx-value">${formatNumber(tx.amount)} ${type === 'wrap' ? 'wRTC' : 'RTC'}</div>
+                        <div class="tx-time">${tx.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update health status
+        function updateHealthStatus(elementId, status) {
+            const el = document.getElementById(elementId);
+            const statusMap = {
+                'healthy': { text: '● HEALTHY', class: 'healthy' },
+                'degraded': { text: '● DEGRADED', class: 'degraded' },
+                'down': { text: '● DOWN', class: 'down' }
+            };
+            
+            const s = statusMap[status] || statusMap['healthy'];
+            el.textContent = s.text;
+            el.className = 'health-status ' + s.class;
+        }
+
+        // Generate mock price data
+        function generateMockPriceData() {
+            const data = [];
+            const now = new Date();
+            let price = 0.05;
+            
+            for (let i = 24; i >= 0; i--) {
+                const time = new Date(now - i * 60 * 60 * 1000);
+                price = price * (1 + (Math.random() - 0.5) * 0.05);
+                data.push({
+                    time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    price: price
+                });
+            }
+            return data;
+        }
+
+        // Generate mock transactions
+        function generateMockTransactions(type, count) {
+            const txs = [];
+            const now = new Date();
+            
+            for (let i = 0; i < count; i++) {
+                const timeAgo = Math.floor(Math.random() * 60);
+                const time = timeAgo < 1 ? 'Just now' : 
+                            timeAgo < 60 ? `${timeAgo}m ago` : 
+                            `${Math.floor(timeAgo / 60)}h ago`;
+                
+                txs.push({
+                    hash: '0x' + Math.random().toString(16).substr(2, 40),
+                    amount: (Math.random() * 10000 + 100).toFixed(2),
+                    time: time
+                });
+            }
+            return txs;
+        }
+
+        // Format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(2) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(2) + 'K';
+            }
+            return num.toFixed(2);
+        }
+
+        // Update last refresh time
+        function updateLastRefresh() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+
+        // Show error message
+        function showError(message) {
+            console.error(message);
+            // Could add a toast notification here
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            autoRefreshTimer = setInterval(refreshData, CONFIG.refreshInterval);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+        });
+    </script>
+</body>
+</html>
