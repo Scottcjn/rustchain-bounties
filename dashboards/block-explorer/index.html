@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Block Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 40px 20px; border-bottom: 2px solid #f39c12; margin-bottom: 30px; }
+        header h1 { font-size: 2.5rem; color: #f39c12; margin-bottom: 10px; }
+        header p { color: #8892b0; font-size: 1.1rem; }
+        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: rgba(22, 33, 62, 0.8); border: 1px solid #2d3a5a; border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-card .label { color: #8892b0; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: #f39c12; font-family: monospace; }
+        .controls { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .controls input, .controls select { background: #16213e; border: 1px solid #2d3a5a; color: #e0e0e0; padding: 10px 15px; border-radius: 8px; }
+        .controls button { background: #f39c12; color: #1a1a2e; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .miners-table-container { background: rgba(22, 33, 62, 0.8); border: 1px solid #2d3a5a; border-radius: 12px; overflow: hidden; }
+        .miners-table { width: 100%; border-collapse: collapse; }
+        .miners-table th { background: #1a1a2e; color: #f39c12; padding: 15px; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; cursor: pointer; }
+        .miners-table td { padding: 15px; border-bottom: 1px solid #2d3a5a; }
+        .miners-table tr:hover td { background: rgba(243, 156, 18, 0.05); }
+        .miner-name { font-family: monospace; color: #64b5f6; }
+        .arch-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .arch-badge.modern { background: #4caf50; color: #fff; }
+        .arch-badge.apple_silicon { background: #9c27b0; color: #fff; }
+        .arch-badge.power8 { background: #ff5722; color: #fff; }
+        .arch-badge.ivy_bridge { background: #2196f3; color: #fff; }
+        .arch-badge.aarch64 { background: #607d8b; color: #fff; }
+        .arch-badge.default { background: #757575; color: #fff; }
+        .multiplier { font-family: monospace; color: #f39c12; font-weight: 700; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-dot.online { background: #4caf50; animation: pulse 2s infinite; }
+        .status-dot.offline { background: #f44336; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .timestamp { font-family: monospace; color: #8892b0; font-size: 0.9rem; }
+        .loading { text-align: center; padding: 60px; color: #8892b0; }
+        .error { text-align: center; padding: 60px; color: #f44336; }
+        .last-update { text-align: center; padding: 15px; color: #8892b0; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛏️ RustChain Block Explorer</h1>
+            <p>Real-time Proof-of-Antiquity Mining Dashboard</p>
+        </header>
+        <div class="stats-bar">
+            <div class="stat-card"><div class="label">Active Miners</div><div class="value" id="totalMiners">-</div></div>
+            <div class="stat-card"><div class="label">Online Now</div><div class="value" id="onlineMiners">-</div></div>
+            <div class="stat-card"><div class="label">Avg Multiplier</div><div class="value" id="avgMultiplier">-</div></div>
+            <div class="stat-card"><div class="label">Architectures</div><div class="value" id="archCount">-</div></div>
+        </div>
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Search miners...">
+            <select id="archFilter">
+                <option value="">All Architectures</option>
+                <option value="modern">Modern x86</option>
+                <option value="apple_silicon">Apple Silicon</option>
+                <option value="power8">PowerPC</option>
+                <option value="aarch64">ARM</option>
+            </select>
+            <button onclick="fetchMiners()">Refresh</button>
+            <label><input type="checkbox" id="autoRefresh" checked> Auto-refresh (30s)</label>
+        </div>
+        <div class="miners-table-container">
+            <div id="content"><div class="loading">Loading miners...</div></div>
+            <div class="last-update" id="lastUpdate"></div>
+        </div>
+    </div>
+    <script>
+        const API_URL = 'https://explorer.rustchain.org/api/miners';
+        let minersData = [], sortColumn = 'last_attest', sortDesc = true, refreshInterval;
+        function getArchClass(a) { return {modern:'modern','apple_silicon':'apple_silicon',power8:'power8',ivy_bridge:'ivy_bridge',aarch64:'aarch64'}[a]||'default'; }
+        function getArchName(a) { return {modern:'Modern','apple_silicon':'Apple Silicon',power8:'POWER8',ivy_bridge:'Ivy Bridge',aarch64:'ARM64'}[a]||a; }
+        function isOnline(t) { return (Math.floor(Date.now()/1000)-t) < 300; }
+        function timeAgo(t) { const s=Math.floor(Date.now()/1000)-t; if(s<60)return'Just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+        function sortData(d,c,desc) { return [...d].sort((a,b)=>{ let av=a[c],bv=b[c]; if(c==='antiquity_multiplier'){av=parseFloat(av);bv=parseFloat(bv);} if(av==null)av=desc?-Infinity:Infinity; if(bv==null)bv=desc?-Infinity:Infinity; return desc?(bv-av):(av-bv); }); }
+        function setSort(c) { if(sortColumn===c)sortDesc=!sortDesc; else{sortColumn=c;sortDesc=true;} renderTable(minersData); }
+        function renderTable(data) {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const archFilter = document.getElementById('archFilter').value;
+            let filtered = data.filter(m => { if(search&&!m.miner.toLowerCase().includes(search))return false; if(archFilter&&m.device_arch!==archFilter)return false; return true; });
+            filtered = sortData(filtered, sortColumn, sortDesc);
+            const arches = new Set(data.map(m=>m.device_arch)).size;
+            const online = data.filter(m=>isOnline(m.last_attest)).length;
+            const avgMult = data.length?(data.reduce((a,m)=>a+parseFloat(m.antiquity_multiplier||0),0)/data.length).toFixed(3):0;
+            document.getElementById('totalMiners').textContent = data.length;
+            document.getElementById('onlineMiners').textContent = online;
+            document.getElementById('avgMultiplier').textContent = avgMult;
+            document.getElementById('archCount').textContent = arches;
+            if(!filtered.length){document.getElementById('content').innerHTML='<div class="loading">No miners found</div>';return;}
+            let html = '<table class="miners-table"><thead><tr>';
+            const cols = [['miner','Miner'],['device_arch','Architecture'],['antiquity_multiplier','Multiplier'],['last_attest','Last Attestation']];
+            cols.forEach(([k,l])=>{html+='<th onclick="setSort(\''+k+'\')">'+l+(sortColumn===k?(sortDesc?'▼':'▲'):'')+'</th>';});
+            html += '<th>Status</th></tr></thead><tbody>';
+            filtered.forEach(m=>{
+                const online = isOnline(m.last_attest);
+                html += '<tr><td class="miner-name">'+m.miner+'</td>';
+                html += '<td><span class="arch-badge '+getArchClass(m.device_arch)+'">'+getArchName(m.device_arch)+'</span></td>';
+                html += '<td class="multiplier">'+m.antiquity_multiplier+'x</td>';
+                html += '<td class="timestamp">'+timeAgo(m.last_attest)+'</td>';
+                html += '<td><span class="status-dot '+(online?'online':'offline')+'"></span>'+(online?'Online':'Offline')+'</td></tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        }
+        async function fetchMiners() {
+            try {
+                const res = await fetch(API_URL);
+                if(!res.ok) throw new Error('HTTP '+res.status);
+                minersData = await res.json();
+                renderTable(minersData);
+            } catch(e) {
+                document.getElementById('content').innerHTML = '<div class="error">Error loading miners: '+e.message+'</div>';
+            }
+        }
+        document.getElementById('searchInput').addEventListener('input',()=>renderTable(minersData));
+        document.getElementById('archFilter').addEventListener('change',()=>renderTable(minersData));
+        document.getElementById('autoRefresh').addEventListener('change',(e)=>{
+            if(e.target.checked)refreshInterval=setInterval(fetchMiners,30000);
+            else clearInterval(refreshInterval);
+        });
+        fetchMiners();
+        refreshInterval = setInterval(fetchMiners, 30000);
+    </script>
+</body>
+</html>
