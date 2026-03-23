@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Attestation Archaeology Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦴 RustChain Attestation Archaeology</h1>
+            <p class="subtitle">Fossil Record of Mining Hardware Through Time</p>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="epoch-range">Epoch Range:</label>
+                <input type="range" id="epoch-start" min="0" max="100" value="0">
+                <span id="epoch-start-label">0</span>
+                <span>to</span>
+                <input type="range" id="epoch-end" min="0" max="100" value="100">
+                <span id="epoch-end-label">100</span>
+            </div>
+            <div class="control-group">
+                <button id="refresh-btn">🔄 Refresh Data</button>
+                <button id="export-btn">📊 Export CSV</button>
+            </div>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+        
+        <div class="chart-container">
+            <svg id="timeline-chart"></svg>
+        </div>
+        
+        <div class="tooltip" id="tooltip"></div>
+        
+        <div class="stats-panel" id="stats-panel">
+            <h3>📊 Statistics</h3>
+            <div class="stat-row">
+                <span class="stat-label">Total Miners:</span>
+                <span class="stat-value" id="total-miners">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Attestations:</span>
+                <span class="stat-value" id="total-attestations">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total RTC Earned:</span>
+                <span class="stat-value" id="total-rtc">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Most Common Arch:</span>
+                <span class="stat-value" id="common-arch">-</span>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Built for RustChain Bounty #2311 | <a href="https://rustchain.org">RustChain</a></p>
+        </footer>
+    </div>
+    
+    <script src="data.js"></script>
+    <script src="visualizer.js"></script>
+</body>
+</html>
