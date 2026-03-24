@@ -1,0 +1,126 @@
+name: 'BCOS v2 Certification'
+description: 'Run BCOS v2 scans on any repository'
+author: 'universe7creator'
+branding:
+  icon: 'shield'
+  color: 'green'
+
+inputs:
+  tier:
+    description: 'Certification tier (L0, L1, or L2)'
+    required: false
+    default: 'L0'
+  reviewer:
+    description: 'Name of the reviewer for attestation'
+    required: false
+    default: 'github-actions'
+  node-url:
+    description: 'RustChain node URL for attestation'
+    required: false
+    default: 'https://rustchain.org'
+  path:
+    description: 'Path to scan (defaults to repository root)'
+    required: false
+    default: '.'
+
+outputs:
+  trust_score:
+    description: 'Calculated trust score (0-100)'
+    value: ${{ steps.bcos-scan.outputs.trust_score }}
+  cert_id:
+    description: 'BCOS certification ID if tier is met'
+    value: ${{ steps.bcos-scan.outputs.cert_id }}
+  tier_met:
+    description: 'Whether the target tier was achieved'
+    value: ${{ steps.bcos-scan.outputs.tier_met }}
+  report:
+    description: 'Full BCOS JSON report'
+    value: ${{ steps.bcos-scan.outputs.report }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install BCOS Engine
+      shell: bash
+      run: |
+        # Download BCOS engine from Rustchain repo
+        curl -sL https://raw.githubusercontent.com/Scottcjn/Rustchain/main/tools/bcos_engine.py -o /tmp/bcos_engine.py
+        chmod +x /tmp/bcos_engine.py
+        
+        # Install optional dependencies
+        pip install --quiet pip-audit 2>/dev/null || true
+        
+        # Verify installation
+        python3 /tmp/bcos_engine.py --version || echo "BCOS engine ready"
+    
+    - name: Run BCOS Scan
+      id: bcos-scan
+      shell: bash
+      run: |
+        # Run BCOS scan
+        python3 /tmp/bcos_engine.py ${{ inputs.path }} --tier ${{ inputs.tier }} --json --reviewer "${{ inputs.reviewer }}" > /tmp/bcos_report.json 2>&1 || true
+        
+        # Extract results
+        if [ -f /tmp/bcos_report.json ]; then
+          TRUST_SCORE=$(cat /tmp/bcos_report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('trust_score', 0))" 2>/dev/null || echo "0")
+          CERT_ID=$(cat /tmp/bcos_report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cert_id', 'N/A'))" 2>/dev/null || echo "N/A")
+          TIER_MET=$(cat /tmp/bcos_report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('true' if d.get('tier_achieved') else 'false')" 2>/dev/null || echo "false")
+          
+          echo "trust_score=$TRUST_SCORE" >> $GITHUB_OUTPUT
+          echo "cert_id=$CERT_ID" >> $GITHUB_OUTPUT
+          echo "tier_met=$TIER_MET" >> $GITHUB_OUTPUT
+          echo "report=$(cat /tmp/bcos_report.json)" >> $GITHUB_OUTPUT
+        else
+          echo "trust_score=0" >> $GITHUB_OUTPUT
+          echo "cert_id=N/A" >> $GITHUB_OUTPUT
+          echo "tier_met=false" >> $GITHUB_OUTPUT
+          echo "report={}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Comment PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const trustScore = '${{ steps.bcos-scan.outputs.trust_score }}';
+          const certId = '${{ steps.bcos-scan.outputs.cert_id }}';
+          const tierMet = '${{ steps.bcos-scan.outputs.tier_met }}';
+          const tier = '${{ inputs.tier }}';
+          
+          const badge = tierMet === 'true' 
+            ? `![BCOS ${tier} Certified](https://img.shields.io/badge/BCOS-${tier}-success?style=for-the-badge&logo=shield)`
+            : `![BCOS Score](https://img.shields.io/badge/BCOS-${trustScore}/100-orange?style=for-the-badge&logo=shield)`;
+          
+          const body = `## 🔒 BCOS v2 Certification Report
+          
+          ${badge}
+          
+          | Metric | Value |
+          |--------|-------|
+          | **Trust Score** | ${trustScore}/100 |
+          | **Target Tier** | ${tier} |
+          | **Tier Met** | ${tierMet === 'true' ? '✅ Yes' : '❌ No'} |
+          | **Cert ID** | ${certId !== 'N/A' ? certId : 'Pending'} |
+          
+          <details>
+          <summary>View Full Report</summary>
+          
+          \`\`\`json
+          ${{ steps.bcos-scan.outputs.report }}
+          \`\`\`
+          </details>
+          
+          ---
+          *Powered by [BCOS v2](https://rustchain.org/bcos/) — Beacon Certified Open Source*`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
