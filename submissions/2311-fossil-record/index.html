@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fossil Record — RustChain Attestation Archaeology</title>
+    <meta name="description" content="Interactive stratigraphy of every miner architecture on RustChain since genesis. Silicon archaeology visualized.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #05080A;
+            --bg-surface: #0A0E12;
+            --bg-card: #0F1418;
+            --border: #1A2030;
+            --text-primary: #E8ECF0;
+            --text-secondary: #7A8899;
+            --text-muted: #4A5568;
+            --accent-blue: #2B3BE5;
+            --accent-glow: rgba(43, 59, 229, 0.3);
+
+            /* Architecture colors from bounty spec */
+            --arch-68k: #8B6914;
+            --arch-g3g4: #B87333;
+            --arch-g5: #CD7F32;
+            --arch-sparc: #DC143C;
+            --arch-mips: #00A86B;
+            --arch-power8: #1E3A5F;
+            --arch-apple-silicon: #C0C0C0;
+            --arch-x86-modern: #6B7B8D;
+            --arch-arm: #4A90D9;
+            --arch-retro-x86: #9B7653;
+            --arch-ivy-bridge: #708090;
+            --arch-windows: #5B9BD5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        header {
+            padding: 40px 60px 30px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(43, 59, 229, 0.05) 0%, transparent 100%);
+        }
+
+        header h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        header .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 4px 12px;
+            background: rgba(43, 59, 229, 0.15);
+            border: 1px solid rgba(43, 59, 229, 0.3);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+        }
+
+        header .live-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: #00FF88;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 40px;
+            padding: 20px 60px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .chart-area {
+            padding: 30px 40px;
+            position: relative;
+        }
+
+        .chart-area h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        #stratigraphy {
+            width: 100%;
+            min-height: 500px;
+        }
+
+        .sidebar {
+            padding: 30px 20px;
+            border-left: 1px solid var(--border);
+            background: var(--bg-surface);
+        }
+
+        .sidebar h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .legend-item:hover {
+            padding-left: 4px;
+        }
+
+        .legend-swatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .legend-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .legend-multiplier {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent-blue);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px 18px;
+            font-size: 0.82rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            z-index: 100;
+            min-width: 240px;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .tooltip.visible { opacity: 1; }
+
+        .tooltip .tt-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .tooltip .tt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            color: var(--text-secondary);
+        }
+
+        .tooltip .tt-row .tt-val {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Miner detail panel */
+        .detail-panel {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-panel .miner-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .detail-panel .miner-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .miner-card .mc-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .miner-card .mc-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Bar chart transitions */
+        .bar-segment {
+            transition: opacity 0.2s ease;
+        }
+
+        .bar-segment:hover {
+            opacity: 0.85;
+        }
+
+        .bar-segment.dimmed {
+            opacity: 0.15;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container { grid-template-columns: 1fr; }
+            .sidebar { border-left: none; border-top: 1px solid var(--border); }
+            header { padding: 24px 20px; }
+            .stats-bar { padding: 16px 20px; flex-wrap: wrap; gap: 20px; }
+            .chart-area { padding: 20px; }
+        }
+
+        /* Footer */
+        footer {
+            padding: 20px 60px;
+            border-top: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>The Fossil Record</h1>
+        <div class="subtitle">Attestation Archaeology — Every miner, every architecture, every epoch.</div>
+        <div class="live-badge">
+            <span class="dot"></span>
+            LIVE — rustchain.org/api/miners
+        </div>
+    </header>
+
+    <div class="stats-bar" id="stats-bar">
+        <div class="stat">
+            <span class="stat-value" id="stat-miners">—</span>
+            <span class="stat-label">Active Miners</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-archs">—</span>
+            <span class="stat-label">Architectures</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-oldest">—</span>
+            <span class="stat-label">Oldest Architecture</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="stat-newest">—</span>
+            <span class="stat-label">Latest Attestation</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="chart-area">
+            <h2>// Stratigraphy by Architecture</h2>
+            <div id="stratigraphy"></div>
+        </div>
+        <div class="sidebar">
+            <h3>// Architecture Layers</h3>
+            <div id="legend"></div>
+            <div class="detail-panel">
+                <h3>// Active Miners</h3>
+                <div id="miner-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <footer>
+        <span>The Fossil Record — Bounty #2311 — RustChain Attestation Archaeology</span>
+        <a href="https://rustchain.org" target="_blank">rustchain.org</a>
+    </footer>
+
+    <script>
+    // Architecture config — ordered oldest (bottom) to newest (top)
+    const ARCH_CONFIG = [
+        { key: '68k',            label: '68K / Amiga',       color: '#8B6914', order: 0 },
+        { key: 'sparc',          label: 'SPARC',             color: '#DC143C', order: 1 },
+        { key: 'mips',           label: 'MIPS',              color: '#00A86B', order: 2 },
+        { key: 'g3',             label: 'PowerPC G3',        color: '#9B6B30', order: 3 },
+        { key: 'g4',             label: 'PowerPC G4',        color: '#B87333', order: 4 },
+        { key: 'g5',             label: 'PowerPC G5',        color: '#CD7F32', order: 5 },
+        { key: 'power8',         label: 'POWER8',            color: '#1E3A5F', order: 6 },
+        { key: 'retro_x86',     label: 'x86 Retro',         color: '#9B7653', order: 7 },
+        { key: 'ivy_bridge',    label: 'Ivy Bridge',        color: '#708090', order: 8 },
+        { key: 'modern_x86',    label: 'x86-64 Modern',     color: '#6B7B8D', order: 9 },
+        { key: 'apple_silicon', label: 'Apple Silicon',      color: '#C0C0C0', order: 10 },
+        { key: 'arm',           label: 'ARM / RPi',         color: '#4A90D9', order: 11 },
+        { key: 'other',         label: 'Other / Unknown',   color: '#3D4A5C', order: 12 },
+    ];
+
+    const ARCH_MAP = {};
+    ARCH_CONFIG.forEach(a => ARCH_MAP[a.key] = a);
+
+    function classifyArch(miner) {
+        const arch = (miner.device_arch || '').toLowerCase();
+        const family = (miner.device_family || '').toLowerCase();
+        const hw = (miner.hardware_type || '').toLowerCase();
+
+        if (arch.includes('68k') || arch.includes('68000')) return '68k';
+        if (arch.includes('sparc')) return 'sparc';
+        if (arch.includes('mips')) return 'mips';
+        if (arch === 'g3') return 'g3';
+        if (arch === 'g4') return 'g4';
+        if (arch === 'g5') return 'g5';
+        if (arch === 'power8' || arch.includes('power8')) return 'power8';
+        if (arch.includes('ivy_bridge') || arch.includes('ivy bridge')) return 'ivy_bridge';
+        if (arch === 'apple_silicon' || hw.includes('apple silicon')) return 'apple_silicon';
+        if (arch === 'aarch64' || (family === 'arm' && !hw.includes('apple'))) return 'arm';
+        if (arch === 'retro' || hw.includes('retro')) return 'retro_x86';
+        if (arch === 'modern' && family === 'x86') return 'modern_x86';
+        if (family === 'windows') return 'modern_x86';
+        if (arch === 'modern' && family === 'arm') return 'arm';
+        return 'other';
+    }
+
+    async function fetchMiners() {
+        try {
+            const resp = await fetch('/api/miners');
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return await resp.json();
+        } catch (e) {
+            console.error('API fetch failed, using embedded data', e);
+            // Fallback: embedded snapshot from 2026-03-24
+            return [
+                {"antiquity_multiplier":0.001,"device_arch":"aarch64","device_family":"ARM","entropy_score":0.0,"first_attest":null,"hardware_type":"Unknown/Other","last_attest":1774338553,"miner":"RTC14f06ee294f327f5685d3de5e1ed501cffab33e7"},
+                {"antiquity_multiplier":1.0,"device_arch":"apple_silicon","device_family":"arm","entropy_score":0.0,"first_attest":null,"hardware_type":"Apple Silicon (Modern)","last_attest":1774338536,"miner":"claw-qinlingrongdeMacBook-Pro-48097"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338496,"miner":"RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338420,"miner":"frozen-factorio-ryan"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"arm","entropy_score":0.0,"first_attest":null,"hardware_type":"Unknown/Other","last_attest":1774338418,"miner":"tianlin-rtc"},
+                {"antiquity_multiplier":1.1,"device_arch":"ivy_bridge","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338407,"miner":"trashcan-d500-scott"},
+                {"antiquity_multiplier":0.001,"device_arch":"aarch64","device_family":"ARM","entropy_score":0.0,"first_attest":null,"hardware_type":"Unknown/Other","last_attest":1774338400,"miner":"terramaster-nas-arm64"},
+                {"antiquity_multiplier":0.001,"device_arch":"aarch64","device_family":"ARM","entropy_score":0.0,"first_attest":null,"hardware_type":"Unknown/Other","last_attest":1774338380,"miner":"claw-jojo-51658"},
+                {"antiquity_multiplier":1.0,"device_arch":"apple_silicon","device_family":"arm","entropy_score":0.0,"first_attest":null,"hardware_type":"Apple Silicon (Modern)","last_attest":1774338311,"miner":"m2-mac-mini-sophia"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338235,"miner":"fraktaldefidao"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338226,"miner":"ForestLee"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338210,"miner":"modern-sophiacore-3a168058"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338064,"miner":"stepehenreed"},
+                {"antiquity_multiplier":1.0,"device_arch":"intel64 family 6 model 165 stepping 3, genuineintel","device_family":"windows","entropy_score":0.0,"first_attest":null,"hardware_type":"Unknown/Other","last_attest":1774338055,"miner":"trawolta"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774338030,"miner":"nox-ventures"},
+                {"antiquity_multiplier":1.0,"device_arch":"power8","device_family":"powerpc","entropy_score":0.0,"first_attest":null,"hardware_type":"PowerPC (Vintage)","last_attest":1774338024,"miner":"power8-s824-sophia"},
+                {"antiquity_multiplier":1.0,"device_arch":"apple_silicon","device_family":"arm","entropy_score":0.0,"first_attest":null,"hardware_type":"Apple Silicon (Modern)","last_attest":1774338016,"miner":"RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2"},
+                {"antiquity_multiplier":1.0,"device_arch":"modern","device_family":"x86","entropy_score":0.0,"first_attest":null,"hardware_type":"x86-64 (Modern)","last_attest":1774337964,"miner":"agentgubbins"}
+            ];
+        }
+    }
+
+    function formatTimestamp(ts) {
+        if (!ts) return '—';
+        const d = new Date(ts * 1000);
+        return d.toLocaleString('en-US', { 
+            month: 'short', day: 'numeric', 
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    function timeAgo(ts) {
+        if (!ts) return 'never';
+        const diff = Date.now() / 1000 - ts;
+        if (diff < 60) return `${Math.floor(diff)}s ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        return `${Math.floor(diff / 86400)}d ago`;
+    }
+
+    async function render() {
+        const miners = await fetchMiners();
+
+        // Classify each miner
+        const classified = miners.map(m => ({
+            ...m,
+            archKey: classifyArch(m)
+        }));
+
+        // Group by architecture
+        const archGroups = {};
+        classified.forEach(m => {
+            if (!archGroups[m.archKey]) archGroups[m.archKey] = [];
+            archGroups[m.archKey].push(m);
+        });
+
+        // Stats
+        const uniqueArchs = Object.keys(archGroups);
+        document.getElementById('stat-miners').textContent = miners.length;
+        document.getElementById('stat-archs').textContent = uniqueArchs.length;
+
+        // Find oldest arch present
+        const presentArchs = ARCH_CONFIG.filter(a => archGroups[a.key]);
+        if (presentArchs.length > 0) {
+            document.getElementById('stat-oldest').textContent = presentArchs[0].label;
+        }
+
+        // Latest attestation
+        const latestAttest = Math.max(...miners.map(m => m.last_attest || 0));
+        document.getElementById('stat-newest').textContent = timeAgo(latestAttest);
+
+        // ========== STRATIGRAPHY CHART ==========
+        const container = document.getElementById('stratigraphy');
+        const width = container.clientWidth;
+        const height = 520;
+        const margin = { top: 20, right: 30, bottom: 60, left: 160 };
+        const chartW = width - margin.left - margin.right;
+        const chartH = height - margin.top - margin.bottom;
+
+        const svg = d3.select('#stratigraphy')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Prepare data: stacked horizontal bars by arch
+        const activeArchs = ARCH_CONFIG.filter(a => archGroups[a.key]).reverse(); // top = newest
+
+        const yScale = d3.scaleBand()
+            .domain(activeArchs.map(a => a.key))
+            .range([0, chartH])
+            .padding(0.15);
+
+        const maxMiners = d3.max(activeArchs, a => archGroups[a.key].length);
+        const xScale = d3.scaleLinear()
+            .domain([0, maxMiners + 1])
+            .range([0, chartW]);
+
+        // Background grid
+        g.selectAll('.grid-line')
+            .data(xScale.ticks(5))
+            .join('line')
+            .attr('class', 'grid-line')
+            .attr('x1', d => xScale(d))
+            .attr('x2', d => xScale(d))
+            .attr('y1', 0)
+            .attr('y2', chartH)
+            .attr('stroke', 'rgba(255,255,255,0.04)')
+            .attr('stroke-dasharray', '3,3');
+
+        // Y axis labels
+        g.selectAll('.arch-label')
+            .data(activeArchs)
+            .join('text')
+            .attr('class', 'arch-label')
+            .attr('x', -12)
+            .attr('y', d => yScale(d.key) + yScale.bandwidth() / 2)
+            .attr('dy', '0.35em')
+            .attr('text-anchor', 'end')
+            .attr('fill', d => d.color)
+            .attr('font-family', "'JetBrains Mono', monospace")
+            .attr('font-size', '0.75rem')
+            .attr('font-weight', 600)
+            .text(d => d.label);
+
+        // Draw individual miner blocks within each arch row
+        const tooltip = document.getElementById('tooltip');
+
+        activeArchs.forEach(arch => {
+            const minerList = archGroups[arch.key]
+                .sort((a, b) => (a.last_attest || 0) - (b.last_attest || 0));
+
+            g.selectAll(`.bar-${arch.key}`)
+                .data(minerList)
+                .join('rect')
+                .attr('class', `bar-segment bar-${arch.key}`)
+                .attr('x', (d, i) => xScale(i))
+                .attr('y', yScale(arch.key))
+                .attr('width', Math.max(xScale(1) - xScale(0) - 3, 8))
+                .attr('height', yScale.bandwidth())
+                .attr('fill', arch.color)
+                .attr('rx', 3)
+                .attr('ry', 3)
+                .style('filter', `drop-shadow(0 0 4px ${arch.color}40)`)
+                .on('mouseenter', function(event, d) {
+                    tooltip.innerHTML = `
+                        <div class="tt-header">${d.miner}</div>
+                        <div class="tt-row"><span>Architecture</span><span class="tt-val">${arch.label}</span></div>
+                        <div class="tt-row"><span>Device</span><span class="tt-val">${d.device_arch}</span></div>
+                        <div class="tt-row"><span>Family</span><span class="tt-val">${d.device_family}</span></div>
+                        <div class="tt-row"><span>Multiplier</span><span class="tt-val">${d.antiquity_multiplier}x</span></div>
+                        <div class="tt-row"><span>Hardware</span><span class="tt-val">${d.hardware_type}</span></div>
+                        <div class="tt-row"><span>Last Attest</span><span class="tt-val">${timeAgo(d.last_attest)}</span></div>
+                        <div class="tt-row"><span>Timestamp</span><span class="tt-val">${formatTimestamp(d.last_attest)}</span></div>
+                    `;
+                    tooltip.classList.add('visible');
+                })
+                .on('mousemove', function(event) {
+                    tooltip.style.left = (event.pageX + 16) + 'px';
+                    tooltip.style.top = (event.pageY - 10) + 'px';
+                })
+                .on('mouseleave', function() {
+                    tooltip.classList.remove('visible');
+                });
+        });
+
+        // X axis
+        g.append('g')
+            .attr('transform', `translate(0,${chartH})`)
+            .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d === 0 ? '' : d))
+            .selectAll('text')
+            .attr('fill', 'var(--text-muted)')
+            .attr('font-family', "'JetBrains Mono', monospace")
+            .attr('font-size', '0.7rem');
+
+        g.selectAll('.domain, .tick line')
+            .attr('stroke', 'var(--border)');
+
+        // X axis label
+        svg.append('text')
+            .attr('x', margin.left + chartW / 2)
+            .attr('y', height - 10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'var(--text-muted)')
+            .attr('font-family', "'JetBrains Mono', monospace")
+            .attr('font-size', '0.7rem')
+            .text('Number of Active Miners');
+
+        // Antiquity weight indicator bar
+        const weightData = activeArchs.map(a => {
+            const ms = archGroups[a.key];
+            const totalWeight = ms.reduce((sum, m) => sum + m.antiquity_multiplier, 0);
+            return { arch: a, totalWeight, count: ms.length };
+        });
+
+        const totalNetworkWeight = weightData.reduce((s, d) => s + d.totalWeight, 0);
+
+        // Add weight percentage to each bar row
+        g.selectAll('.weight-label')
+            .data(weightData)
+            .join('text')
+            .attr('class', 'weight-label')
+            .attr('x', d => xScale(d.count) + 8)
+            .attr('y', d => yScale(d.arch.key) + yScale.bandwidth() / 2)
+            .attr('dy', '0.35em')
+            .attr('fill', 'var(--text-muted)')
+            .attr('font-family', "'JetBrains Mono', monospace")
+            .attr('font-size', '0.65rem')
+            .text(d => `${((d.totalWeight / totalNetworkWeight) * 100).toFixed(1)}% weight`);
+
+        // ========== LEGEND ==========
+        const legendEl = document.getElementById('legend');
+        ARCH_CONFIG.forEach(arch => {
+            const count = archGroups[arch.key] ? archGroups[arch.key].length : 0;
+            const avgMultiplier = count > 0 
+                ? (archGroups[arch.key].reduce((s, m) => s + m.antiquity_multiplier, 0) / count).toFixed(2) 
+                : '—';
+
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = `
+                <div class="legend-swatch" style="background:${arch.color}; opacity:${count > 0 ? 1 : 0.2}"></div>
+                <span class="legend-label">${arch.label}</span>
+                <span class="legend-multiplier">${count > 0 ? avgMultiplier + 'x' : ''}</span>
+                <span class="legend-count">${count}</span>
+            `;
+
+            if (count > 0) {
+                item.addEventListener('mouseenter', () => {
+                    document.querySelectorAll('.bar-segment').forEach(el => {
+                        if (!el.classList.contains(`bar-${arch.key}`)) {
+                            el.classList.add('dimmed');
+                        }
+                    });
+                });
+                item.addEventListener('mouseleave', () => {
+                    document.querySelectorAll('.bar-segment').forEach(el => {
+                        el.classList.remove('dimmed');
+                    });
+                });
+            }
+
+            legendEl.appendChild(item);
+        });
+
+        // ========== MINER LIST ==========
+        const minerListEl = document.getElementById('miner-list');
+        classified
+            .sort((a, b) => (b.last_attest || 0) - (a.last_attest || 0))
+            .forEach(m => {
+                const archInfo = ARCH_MAP[m.archKey] || ARCH_MAP.other;
+                const card = document.createElement('div');
+                card.className = 'miner-card';
+                card.innerHTML = `
+                    <div class="mc-name" style="border-left: 3px solid ${archInfo.color}; padding-left: 8px;">
+                        ${m.miner}
+                    </div>
+                    <div class="mc-meta">
+                        ${archInfo.label} · ${m.antiquity_multiplier}x · ${timeAgo(m.last_attest)}
+                    </div>
+                `;
+                card.addEventListener('mouseenter', () => {
+                    document.querySelectorAll('.bar-segment').forEach(el => el.classList.add('dimmed'));
+                    // Highlight matching segments
+                    // Find the specific segment for this miner
+                    const archMiners = archGroups[m.archKey];
+                    const idx = archMiners.indexOf(archMiners.find(am => am.miner === m.miner));
+                    const segments = document.querySelectorAll(`.bar-${m.archKey}`);
+                    if (segments[idx]) {
+                        segments[idx].classList.remove('dimmed');
+                        segments[idx].style.filter = `drop-shadow(0 0 12px ${archInfo.color})`;
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    document.querySelectorAll('.bar-segment').forEach(el => {
+                        el.classList.remove('dimmed');
+                        el.style.filter = '';
+                    });
+                });
+                minerListEl.appendChild(card);
+            });
+    }
+
+    // Run
+    render();
+
+    // Auto-refresh every 5 minutes
+    setInterval(() => {
+        document.getElementById('stratigraphy').innerHTML = '';
+        document.getElementById('legend').innerHTML = '';
+        document.getElementById('miner-list').innerHTML = '';
+        render();
+    }, 300000);
+    </script>
+</body>
+</html>
