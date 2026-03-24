@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS Badge Generator</title>
+    <style>
+        :root {
+            --terminal-bg: #0d1117;
+            --terminal-text: #00ff00;
+            --terminal-border: #30363d;
+            --terminal-highlight: #1f6feb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--terminal-bg);
+            color: var(--terminal-text);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--terminal-border);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        .terminal-box {
+            background: #161b22;
+            border: 1px solid var(--terminal-border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .terminal-box h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--terminal-highlight);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0d1117;
+            border: 1px solid var(--terminal-border);
+            border-radius: 4px;
+            color: var(--terminal-text);
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--terminal-highlight);
+        }
+
+        button {
+            background: var(--terminal-highlight);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1258c9;
+        }
+
+        button:disabled {
+            background: #8b949e;
+            cursor: not-allowed;
+        }
+
+        .badge-preview {
+            text-align: center;
+            padding: 2rem;
+            background: #0d1117;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .badge-preview img {
+            max-width: 300px;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--terminal-border);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .code-block code {
+            color: #e6edf3;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            background: #21262d;
+        }
+
+        .copy-btn:hover {
+            background: #30363d;
+        }
+
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .style-option {
+            padding: 1rem;
+            background: #0d1117;
+            border: 1px solid var(--terminal-border);
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .style-option:hover {
+            border-color: var(--terminal-highlight);
+        }
+
+        .style-option.selected {
+            border-color: var(--terminal-highlight);
+            background: #1f6feb20;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #ff7b72;
+            padding: 1rem;
+            background: #ff7b7220;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            color: #3fb950;
+            padding: 1rem;
+            background: #3fb95020;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--terminal-border);
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--terminal-highlight);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .terminal-box {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 BCOS Badge Generator</h1>
+            <p class="subtitle">Generate your BCOS certification badge</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="terminal-box">
+            <h2>📝 Enter Certificate ID</h2>
+            <label for="certId">Certificate ID or Repo URL</label>
+            <input 
+                type="text" 
+                id="certId" 
+                placeholder="BCOS-A1B2C3D4E5F6 or https://github.com/owner/repo"
+            />
+            <button onclick="generateBadge()" id="generateBtn">Generate Badge</button>
+            <div id="errorBox" class="error hidden"></div>
+        </div>
+
+        <!-- Badge Preview -->
+        <div class="terminal-box hidden" id="previewBox">
+            <h2>🎨 Badge Preview</h2>
+            <div class="badge-preview">
+                <img id="badgeImage" src="" alt="BCOS Badge" />
+            </div>
+
+            <h2 style="margin-top: 1.5rem;">🎯 Badge Style</h2>
+            <div class="style-options">
+                <div class="style-option selected" onclick="selectStyle('flat')" data-style="flat">
+                    <img src="https://img.shields.io/badge/BCOS-L1_CERTIFIED-blue?style=flat" alt="Flat" />
+                </div>
+                <div class="style-option" onclick="selectStyle('flat-square')" data-style="flat-square">
+                    <img src="https://img.shields.io/badge/BCOS-L1_CERTIFIED-blue?style=flat-square" alt="Flat Square" />
+                </div>
+                <div class="style-option" onclick="selectStyle('for-the-badge')" data-style="for-the-badge">
+                    <img src="https://img.shields.io/badge/BCOS-L1_CERTIFIED-blue?style=for-the-badge" alt="For the Badge" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Embed Codes -->
+        <div class="terminal-box hidden" id="embedBox">
+            <h2>📋 Embed Codes</h2>
+
+            <label>Markdown</label>
+            <div class="code-block">
+                <code id="markdownCode"></code>
+                <button class="copy-btn" onclick="copyToClipboard('markdownCode')">Copy</button>
+            </div>
+
+            <label>HTML</label>
+            <div class="code-block">
+                <code id="htmlCode"></code>
+                <button class="copy-btn" onclick="copyToClipboard('htmlCode')">Copy</button>
+            </div>
+
+            <div id="successBox" class="success hidden">Copied to clipboard!</div>
+        </div>
+
+        <footer>
+            <p>Powered by <a href="https://github.com/Scottcjn/Rustchain" target="_blank">BCOS v2</a></p>
+            <p><a href="https://rustchain.org/bcos/" target="_blank">Verify Certificate</a> • <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2292" target="_blank">Bounty #2292</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let currentCertId = '';
+        let currentStyle = 'flat';
+        let currentTier = 'L1_CERTIFIED';
+
+        function extractCertId(input) {
+            // If it's a URL, try to extract cert ID from it
+            if (input.startsWith('http')) {
+                const match = input.match(/BCOS-[A-Z0-9]+/i);
+                if (match) return match[0].toUpperCase();
+                // Fallback: generate from repo name
+                const repoMatch = input.match(/github\.com\/([^/]+\/[^/]+)/);
+                if (repoMatch) {
+                    return 'BCOS-' + repoMatch[1].replace('/', '-').toUpperCase().substring(0, 12);
+                }
+            }
+            // If it's already a cert ID
+            if (input.toUpperCase().startsWith('BCOS-')) {
+                return input.toUpperCase();
+            }
+            // Generate from repo name
+            return 'BCOS-' + input.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase().substring(0, 12);
+        }
+
+        function generateBadge() {
+            const input = document.getElementById('certId').value.trim();
+            const errorBox = document.getElementById('errorBox');
+            const previewBox = document.getElementById('previewBox');
+            const embedBox = document.getElementById('embedBox');
+
+            if (!input) {
+                errorBox.textContent = 'Please enter a certificate ID or repository URL';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            currentCertId = extractCertId(input);
+            
+            // Generate badge URL
+            const badgeUrl = `https://img.shields.io/badge/BCOS-${currentTier}-blue?style=${currentStyle}`;
+            
+            // Update preview
+            document.getElementById('badgeImage').src = badgeUrl;
+            
+            // Generate embed codes
+            const markdown = `[![BCOS ${currentTier}]](https://rustchain.org/bcos/verify/${currentCertId})`;
+            const html = `<a href="https://rustchain.org/bcos/verify/${currentCertId}" title="BCOS Certified"><img src="${badgeUrl}" alt="BCOS ${currentTier}" /></a>`;
+            
+            document.getElementById('markdownCode').textContent = markdown;
+            document.getElementById('htmlCode').textContent = html;
+            
+            // Show sections
+            errorBox.classList.add('hidden');
+            previewBox.classList.remove('hidden');
+            embedBox.classList.remove('hidden');
+        }
+
+        function selectStyle(style) {
+            currentStyle = style;
+            
+            // Update selected state
+            document.querySelectorAll('.style-option').forEach(el => {
+                el.classList.remove('selected');
+                if (el.dataset.style === style) {
+                    el.classList.add('selected');
+                }
+            });
+            
+            // Regenerate badge if cert ID is set
+            if (currentCertId) {
+                generateBadge();
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const successBox = document.getElementById('successBox');
+                successBox.classList.remove('hidden');
+                setTimeout(() => {
+                    successBox.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        // Allow Enter key to trigger generation
+        document.getElementById('certId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateBadge();
+            }
+        });
+    </script>
+</body>
+</html>
