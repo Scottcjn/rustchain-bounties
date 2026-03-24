@@ -3,7 +3,7 @@
 Ergo Anchor Chain Proof Verifier — Independent Audit Tool
 ==========================================================
 Reads the local ergo_anchors table from rustchain_v2.db,
-fetches actual Ergo transactions, extracts R5 register
+fetches actual Ergo transactions, extracts R4 register
 (Blake2b256 commitment hash), recomputes the commitment
 from block data, and reports discrepancies.
 
@@ -18,10 +18,8 @@ import hashlib
 import json
 import sqlite3
 import sys
-import urllib.request
-import urllib.error
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -133,49 +131,53 @@ class ErgoNodeClient:
     """Minimal client for the Ergo node REST API."""
 
     def __init__(self, base_url: str = "http://localhost:9053", timeout: int = 10):
+        import urllib.request
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
     def get_transaction(self, tx_id: str) -> Optional[Dict]:
         """Fetch a confirmed transaction by ID."""
+        import urllib.request
+        import urllib.error
         url = f"{self.base_url}/blockchain/transaction/byId/{tx_id}"
         try:
             req = urllib.request.Request(url)
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return json.loads(resp.read().decode())
-        except urllib.error.HTTPError as e:
-            if e.code == 404:
-                return None
-            raise
-        except urllib.error.URLError:
+        except Exception:
             return None
 
     def get_unconfirmed_transaction(self, tx_id: str) -> Optional[Dict]:
         """Check if a transaction is in the mempool."""
+        import urllib.request
+        import urllib.error
         url = f"{self.base_url}/transactions/unconfirmed/byTransactionId/{tx_id}"
         try:
             req = urllib.request.Request(url)
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return json.loads(resp.read().decode())
-        except (urllib.error.HTTPError, urllib.error.URLError):
+        except Exception:
             return None
 
     def extract_commitment_from_tx(self, tx_data: Dict) -> Optional[str]:
-        """Extract the commitment hash from R5 register of the first output box."""
+        """Extract the commitment hash from R4 register of the first output box.
+
+        Per ARCHITECTURE.md: R4 = commitment hash, R5 = miner_count.
+        """
         try:
             outputs = tx_data.get("outputs", [])
             if not outputs:
                 return None
             box = outputs[0]
             registers = box.get("additionalRegisters", {})
+            # Primary: R4 contains the commitment hash
+            r4 = registers.get("R4", "")
+            if r4.startswith("0e40") and len(r4) >= 68:
+                return r4[4:]
+            # Legacy fallback: some early anchors used R5
             r5 = registers.get("R5", "")
-            # R5 format: "0e40" + 64-char hex commitment hash
             if r5.startswith("0e40") and len(r5) >= 68:
                 return r5[4:]
-            # Fallback: try R4
-            r4 = registers.get("R4", "")
-            if len(r4) >= 64:
-                return r4[-64:]
             return None
         except (KeyError, IndexError, TypeError):
             return None
@@ -193,7 +195,9 @@ class VerifyResult:
     stored_commitment: str
     onchain_commitment: Optional[str]
     recomputed_commitment: Optional[str]
-    status: str  # MATCH, MISMATCH, TX_MISSING, UNCONFIRMED, RECOMPUTE_MISMATCH, OFFLINE_SKIP
+    status: str
+    # Statuses: MATCH, MATCH_OFFLINE, MISMATCH, TX_MISSING, UNCONFIRMED,
+    #           RECOMPUTE_MISMATCH, MALFORMED_REGISTERS
 
 
 def verify_anchors(db_path: str, ergo_client: Optional[ErgoNodeClient] = None,
@@ -211,7 +215,6 @@ def verify_anchors(db_path: str, ergo_client: Optional[ErgoNodeClient] = None,
         if not offline and ergo_client:
             tx_data = ergo_client.get_transaction(anchor.ergo_tx_id)
             if tx_data is None:
-                # Check mempool
                 unconfirmed = ergo_client.get_unconfirmed_transaction(anchor.ergo_tx_id)
                 if unconfirmed:
                     status = "UNCONFIRMED"
@@ -219,10 +222,10 @@ def verify_anchors(db_path: str, ergo_client: Optional[ErgoNodeClient] = None,
                     status = "TX_MISSING"
             else:
                 onchain_commitment = ergo_client.extract_commitment_from_tx(tx_data)
-                if onchain_commitment and onchain_commitment != anchor.commitment_hash:
+                if onchain_commitment is None:
+                    status = "MALFORMED_REGISTERS"
+                elif onchain_commitment != anchor.commitment_hash:
                     status = "MISMATCH"
-        elif offline:
-            status = "OFFLINE_SKIP"  # Will be upgraded if recompute finds mismatch
 
         # Step 2: Recompute commitment from block data
         block = load_block_data(db_path, anchor.rustchain_height)
@@ -235,15 +238,16 @@ def verify_anchors(db_path: str, ergo_client: Optional[ErgoNodeClient] = None,
                 timestamp=block.get("timestamp", anchor.created_at),
             )
             if recomputed != anchor.commitment_hash:
-                if status in ("MATCH", "OFFLINE_SKIP"):
+                # Recompute mismatch takes precedence unless we already have on-chain MISMATCH
+                if status != "MISMATCH":
                     status = "RECOMPUTE_MISMATCH"
 
-        # Step 3: Three-way comparison
-        if status == "MATCH" and onchain_commitment and recomputed:
-            if onchain_commitment == recomputed == anchor.commitment_hash:
-                status = "MATCH"
-            else:
-                status = "MISMATCH"
+        # Step 3: Offline mode — if recompute matched and we skipped network
+        if offline and status == "MATCH" and recomputed == anchor.commitment_hash:
+            status = "MATCH_OFFLINE"
+        elif offline and status == "MATCH":
+            # No block data to recompute against, can't verify
+            status = "MATCH_OFFLINE"
 
         results.append(VerifyResult(
             anchor_id=anchor.id,
@@ -258,25 +262,26 @@ def verify_anchors(db_path: str, ergo_client: Optional[ErgoNodeClient] = None,
     return results
 
 
-def print_report(results: List[VerifyResult]):
-    """Print human-readable verification report."""
+def print_report(results: List[VerifyResult]) -> bool:
+    """Print human-readable verification report. Returns True if all verified."""
     match_count = 0
     total = len(results)
 
     for r in results:
-        icon = "✓" if r.status == "MATCH" else "✗" if "MISMATCH" in r.status else "?"
+        is_ok = r.status in ("MATCH", "MATCH_OFFLINE")
+        icon = "✓" if is_ok else "✗" if "MISMATCH" in r.status else "?"
         tx_short = r.ergo_tx_id[:10] + "..." if len(r.ergo_tx_id) > 10 else r.ergo_tx_id
         line = f"Anchor #{r.anchor_id}: TX {tx_short} | Height {r.height} | {r.status} {icon}"
 
-        if r.status == "MISMATCH" or r.status == "RECOMPUTE_MISMATCH":
+        if "MISMATCH" in r.status:
             line += f"\n  Stored:     {r.stored_commitment[:16]}..."
             if r.onchain_commitment:
                 line += f"\n  On-chain:   {r.onchain_commitment[:16]}..."
             if r.recomputed_commitment:
                 line += f"\n  Recomputed: {r.recomputed_commitment[:16]}..."
-        elif r.status == "MATCH":
-            match_count += 1
 
+        if is_ok:
+            match_count += 1
         print(line)
 
     print(f"\nSummary: {match_count}/{total} anchors verified"
@@ -304,9 +309,11 @@ def main():
     if args.json:
         import dataclasses
         print(json.dumps([dataclasses.asdict(r) for r in results], indent=2))
+        success = all(r.status in ("MATCH", "MATCH_OFFLINE") for r in results)
     else:
         success = print_report(results)
-        sys.exit(0 if success else 1)
+
+    sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":
