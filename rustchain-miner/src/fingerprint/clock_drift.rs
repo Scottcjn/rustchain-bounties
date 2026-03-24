@@ -6,6 +6,7 @@
 
 use super::CheckResult;
 use crate::config::CLOCK_DRIFT_SAMPLES;
+use std::time::Instant;
 
 /// Read a high-resolution timestamp.
 ///

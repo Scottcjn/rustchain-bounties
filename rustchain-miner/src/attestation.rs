@@ -195,7 +195,7 @@ fn run_test_only() -> Result<(), Box<dyn std::error::Error>> {
     println!("Cores: {} | RAM: {} GB | OS: {}", hw.cpu_cores, hw.ram_gb, hw.os);
     println!();
 
-    println!("Running all 6 RIP-PoA fingerprint checks...");
+    println!("Running all 7 RIP-PoA fingerprint checks...");
     println!("─────────────────────────────────────────────────────");
     let fp = fingerprint::run_all_checks();
     print_fingerprint_summary(&fp);
@@ -225,6 +225,7 @@ fn print_fingerprint_summary(fp: &fingerprint::FingerprintResult) {
         ("thermal_drift", "Thermal Drift Entropy"),
         ("instruction_jitter", "Instruction Path Jitter"),
         ("anti_emulation", "Anti-Emulation / VM Detection"),
+        ("crt_light", "CRT Light Attestation (Hardware)"),
     ];
 
     for (key, name) in &check_order {
