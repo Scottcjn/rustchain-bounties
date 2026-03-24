@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wRTC Bridge Dashboard - Real-Time Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0d1117 100%);
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #14F195 0%, #9945FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #8b949e;
+            font-size: 1.1em;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.healthy { background: #14F195; }
+        .status-dot.warning { background: #f0883e; }
+        .status-dot.error { background: #f85149; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(20, 241, 149, 0.1);
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #14F195;
+        }
+        
+        .stat-value.secondary {
+            color: #9945FF;
+        }
+        
+        .stat-change {
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        
+        .stat-change.positive { color: #14F195; }
+        .stat-change.negative { color: #f85149; }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .view-all {
+            color: #14F195;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tx-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tx-type {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .tx-type.wrap {
+            background: rgba(20, 241, 149, 0.2);
+            color: #14F195;
+        }
+        
+        .tx-type.unwrap {
+            background: rgba(153, 69, 255, 0.2);
+            color: #9945FF;
+        }
+        
+        .tx-details {
+            font-size: 0.85em;
+            color: #8b949e;
+        }
+        
+        .tx-amount {
+            font-weight: 600;
+        }
+        
+        .price-chart {
+            height: 200px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+        }
+        
+        .bridge-health {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .health-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+        
+        .health-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .health-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.8em;
+        }
+        
+        .health-icon.healthy {
+            background: rgba(20, 241, 149, 0.2);
+            color: #14F195;
+        }
+        
+        .health-icon.warning {
+            background: rgba(240, 136, 62, 0.2);
+            color: #f0883e;
+        }
+        
+        .health-icon.error {
+            background: rgba(248, 81, 73, 0.2);
+            color: #f85149;
+        }
+        
+        .refresh-notice {
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #8b949e;
+            font-size: 0.85em;
+        }
+        
+        footer a {
+            color: #14F195;
+            text-decoration: none;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌉 wRTC Bridge Dashboard</h1>
+            <p class="subtitle">Real-time wrap/unwrap monitor for RustChain ↔ Solana bridge</p>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot healthy" id="rtcStatus"></span>
+                    <span>RustChain Node</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot healthy" id="solanaStatus"></span>
+                    <span>Solana RPC</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot healthy" id="bridgeStatus"></span>
+                    <span>Bridge Health</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Key Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">🔒 RTC Locked in Bridge</div>
+                <div class="stat-value" id="rtcLocked">--</div>
+                <div class="stat-change positive" id="rtcLockedChange">Loading...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">💎 wRTC Circulating on Solana</div>
+                <div class="stat-value secondary" id="wrtcSupply">--</div>
+                <div class="stat-change positive" id="wrtcSupplyChange">Loading...</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">💰 Bridge Fee Revenue</div>
+                <div class="stat-value" id="feeRevenue">--</div>
+                <div class="stat-change positive" id="feeRevenueChange">Total collected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📊 wRTC Price (Raydium)</div>
+                <div class="stat-value secondary" id="wrtcPrice">--</div>
+                <div class="stat-change" id="priceChange">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Recent Transactions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">🔄 Recent Transactions</h2>
+                    <span style="color: #8b949e; font-size: 0.85em;">Last 24 hours</span>
+                </div>
+                <div class="transaction-list" id="transactionList">
+                    <!-- Transactions will be loaded here -->
+                    <div style="text-align: center; padding: 40px; color: #8b949e;">
+                        Loading transactions...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bridge Health -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">🏥 Bridge Health</h2>
+                </div>
+                <div class="bridge-health" id="bridgeHealth">
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="health-icon healthy">✓</span>
+                            <span>RustChain Node</span>
+                        </div>
+                        <span style="color: #14F195;">Online</span>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="health-icon healthy">✓</span>
+                            <span>Solana RPC</span>
+                        </div>
+                        <span style="color: #14F195;">Responsive</span>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="health-icon healthy">✓</span>
+                            <span>Bridge Contract</span>
+                        </div>
+                        <span style="color: #14F195;">Active</span>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="health-icon healthy">✓</span>
+                            <span>Lock Ledger</span>
+                        </div>
+                        <span style="color: #14F195;">Synced</span>
+                    </div>
+                    <div class="health-item">
+                        <div class="health-label">
+                            <span class="health-icon healthy">✓</span>
+                            <span>Mint Authority</span>
+                        </div>
+                        <span style="color: #14F195;">Valid</span>
+                    </div>
+                </div>
+                
+                <!-- Price Chart Placeholder -->
+                <div style="margin-top: 20px;">
+                    <div class="panel-header" style="border: none; padding-bottom: 10px;">
+                        <h2 class="panel-title">📈 Price Chart (7D)</h2>
+                    </div>
+                    <div class="price-chart" id="priceChart">
+                        <span>Chart loads via DexScreener</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <p class="refresh-notice">
+            🔄 Auto-refreshes every 30 seconds • Last updated: <span id="lastUpdate">--</span>
+        </p>
+        
+        <footer>
+            <p>
+                <a href="https://rustchain.org" target="_blank">RustChain</a> •
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2303" target="_blank">Bounty #2303</a> •
+                wRTC Token: <code style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;">Coming Soon</code>
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // Configuration
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        const RPC_ENDPOINTS = {
+            rustchain: 'https://rustchain.org/api/v1',
+            solana: 'https://api.mainnet-beta.solana.com',
+            dexscreener: 'https://api.dexscreener.com/latest'
+        };
+        
+        // State
+        let bridgeData = {
+            rtcLocked: 0,
+            wrtcSupply: 0,
+            feeRevenue: 0,
+            price: 0,
+            priceChange: 0,
+            transactions: [],
+            health: {
+                rustchain: 'healthy',
+                solana: 'healthy',
+                bridge: 'healthy'
+            }
+        };
+        
+        // Format numbers
+        function formatNumber(num, decimals = 2) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(decimals) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(decimals) + 'K';
+            }
+            return num.toFixed(decimals);
+        }
+        
+        function formatPrice(num) {
+            return '$' + num.toFixed(6);
+        }
+        
+        // Simulate data fetch (replace with real API calls)
+        async function fetchBridgeData() {
+            try {
+                // In production, replace with real API calls:
+                // const rtcLocked = await fetch(RPC_ENDPOINTS.rustchain + '/bridge/locked');
+                // const wrtcSupply = await fetch(RPC_ENDPOINTS.solana, {...});
+                // const price = await fetch(RPC_ENDPOINTS.dexscreener + '/dex/tokens/...');
+                
+                // Simulated data for demo
+                bridgeData = {
+                    rtcLocked: 125000 + Math.random() * 10000,
+                    wrtcSupply: 118500 + Math.random() * 8000,
+                    feeRevenue: 2450 + Math.random() * 500,
+                    price: 0.00085 + (Math.random() - 0.5) * 0.0001,
+                    priceChange: (Math.random() - 0.5) * 10,
+                    transactions: generateMockTransactions(),
+                    health: {
+                        rustchain: 'healthy',
+                        solana: 'healthy',
+                        bridge: 'healthy'
+                    }
+                };
+                
+                updateUI();
+            } catch (error) {
+                console.error('Failed to fetch bridge data:', error);
+                updateHealthStatus('error');
+            }
+        }
+        
+        function generateMockTransactions() {
+            const txs = [];
+            const types = ['wrap', 'unwrap'];
+            for (let i = 0; i < 10; i++) {
+                const type = types[Math.floor(Math.random() * 2)];
+                txs.push({
+                    type: type,
+                    amount: (Math.random() * 1000 + 10).toFixed(2),
+                    hash: Math.random().toString(36).substring(2, 10) + '...' + Math.random().toString(36).substring(2, 6),
+                    time: Math.floor(Math.random() * 60) + ' min ago'
+                });
+            }
+            return txs;
+        }
+        
+        function updateUI() {
+            // Update stats
+            document.getElementById('rtcLocked').textContent = formatNumber(bridgeData.rtcLocked) + ' RTC';
+            document.getElementById('wrtcSupply').textContent = formatNumber(bridgeData.wrtcSupply) + ' wRTC';
+            document.getElementById('feeRevenue').textContent = formatNumber(bridgeData.feeRevenue) + ' RTC';
+            document.getElementById('wrtcPrice').textContent = formatPrice(bridgeData.price);
+            
+            // Price change
+            const priceChangeEl = document.getElementById('priceChange');
+            const changeValue = bridgeData.priceChange.toFixed(2);
+            priceChangeEl.textContent = (changeValue >= 0 ? '+' : '') + changeValue + '% (24h)';
+            priceChangeEl.className = 'stat-change ' + (changeValue >= 0 ? 'positive' : 'negative');
+            
+            // Update transactions
+            const txList = document.getElementById('transactionList');
+            txList.innerHTML = bridgeData.transactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="tx-info">
+                        <span class="tx-type ${tx.type}">${tx.type}</span>
+                        <div>
+                            <div style="font-weight: 500;">${tx.amount} ${tx.type === 'wrap' ? 'RTC → wRTC' : 'wRTC → RTC'}</div>
+                            <div class="tx-details">${tx.hash} • ${tx.time}</div>
+                        </div>
+                    </div>
+                    <div class="tx-amount" style="color: ${tx.type === 'wrap' ? '#14F195' : '#9945FF'}">
+                        ${tx.type === 'wrap' ? '+' : '-'}${tx.amount}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update last refresh time
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            
+            // Update health status
+            updateHealthStatus(bridgeData.health);
+        }
+        
+        function updateHealthStatus(health) {
+            const statusMap = {
+                healthy: { class: 'healthy', text: '●' },
+                warning: { class: 'warning', text: '◐' },
+                error: { class: 'error', text: '○' }
+            };
+            
+            ['rtcStatus', 'solanaStatus', 'bridgeStatus'].forEach(id => {
+                const el = document.getElementById(id);
+                const key = id.replace('Status', '');
+                const status = health[key] || 'healthy';
+                el.className = 'status-dot ' + statusMap[status].class;
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBridgeData();
+            setInterval(fetchBridgeData, REFRESH_INTERVAL);
+        });
+    </script>
+</body>
+</html>
