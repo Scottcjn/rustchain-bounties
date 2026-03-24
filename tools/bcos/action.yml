@@ -1,0 +1,99 @@
+name: 'BCOS v2 Certification Scan'
+description: 'Scan repositories with BCOS v2 and post certification results'
+author: 'FraktalDeFiDAO'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  tier:
+    description: 'BCOS certification tier (L0, L1, or L2)'
+    required: true
+    default: 'L1'
+  reviewer:
+    description: 'Reviewer identifier'
+    required: false
+    default: 'github-actions'
+  node-url:
+    description: 'RustChain node URL for attestation'
+    required: false
+    default: 'https://50.28.86.131'
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  trust_score:
+    description: 'BCOS trust score (0-100)'
+    value: ${{ steps.scan.outputs.trust_score }}
+  cert_id:
+    description: 'Certificate ID'
+    value: ${{ steps.scan.outputs.cert_id }}
+  tier_met:
+    description: 'Whether tier requirements were met'
+    value: ${{ steps.scan.outputs.tier_met }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install BCOS Engine
+      shell: bash
+      run: |
+        pip install requests pyyaml
+
+    - name: Run BCOS Scan
+      id: scan
+      shell: bash
+      run: |
+        python ${{ github.action_path }}/action/scan.py \
+          --tier "${{ inputs.tier }}" \
+          --reviewer "${{ inputs.reviewer }}" \
+          --node-url "${{ inputs.node-url }}" \
+          --repo "$GITHUB_REPOSITORY" \
+          --pr "${{ github.event.pull_request.number }}"
+
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const result = fs.readFileSync('${{ runner.temp }}/bcos_result.json', 'utf8');
+          const data = JSON.parse(result);
+          
+          const comment = `## 🏆 BCOS v2 Certification Scan
+          
+          | Metric | Value |
+          |--------|-------|
+          | Trust Score | **${data.trust_score}/100** |
+          | Tier | ${data.tier} |
+          | Tier Met | ${data.tier_met ? '✅ Yes' : '❌ No'} |
+          | Certificate | \`${data.cert_id}\` |
+          
+          ![BCOS Badge](https://img.shields.io/badge/BCOS-${data.tier}_CERTIFIED-blue)
+          
+          <details>
+          <summary>Scan Details</summary>
+          
+          \`\`\`json
+          ${JSON.stringify(data, null, 2)}
+          \`\`\`
+          
+          </details>
+          
+          ---
+          *Powered by [BCOS v2](https://github.com/Scottcjn/Rustchain)*`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
