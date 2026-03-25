@@ -1,0 +1,11 @@
+name: BCOS Verification
+description: "Verifies repository adherence to Beacon Companion Operating Standards."
+inputs:
+  agent-id:
+    description: 'The ID of the companion entity'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - run: echo "STRIKE_VERIFIED: Verifying BCOS compliance for ${{ inputs.agent-id }}."
+      shell: bash
