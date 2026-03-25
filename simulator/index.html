@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Mining Simulator - Try Before You Mine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .hardware-select {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .hardware-select h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .hardware-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hardware-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .hardware-card.selected {
+            border-color: #e94560;
+            background: rgba(233, 69, 96, 0.1);
+        }
+
+        .hardware-card .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .hardware-card h3 {
+            margin-bottom: 5px;
+        }
+
+        .hardware-card .multiplier {
+            color: #e94560;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .hardware-card .desc {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .simulation-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .simulation-panel h2 {
+            margin-bottom: 20px;
+        }
+
+        .mining-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            background: rgba(233, 69, 96, 0.2);
+            border: 2px solid #e94560;
+        }
+
+        .step .step-number {
+            width: 40px;
+            height: 40px;
+            background: #e94560;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .step h3 {
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .results h2 {
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(233, 69, 96, 0.2);
+            font-weight: bold;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .highlight {
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        .download-section {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(15, 52, 96, 0.2));
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .download-section h2 {
+            margin-bottom: 15px;
+        }
+
+        .download-section p {
+            color: #a0a0a0;
+            margin-bottom: 25px;
+        }
+
+        .visualization {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .visualization pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .fingerprint-viz {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .fingerprint-bar {
+            height: 30px;
+            flex: 1;
+            min-width: 20px;
+            background: linear-gradient(180deg, #e94560, #0f3460);
+            border-radius: 5px;
+            transition: height 0.3s ease;
+        }
+
+        .log-output {
+            background: #0a0a0a;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #e94560;
+            padding-left: 10px;
+        }
+
+        .log-entry.success {
+            border-left-color: #4caf50;
+        }
+
+        .log-entry.info {
+            border-left-color: #2196f3;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .hardware-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mining-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛏️ RustChain Mining Simulator</h1>
+            <p>Experience RustChain mining without real hardware - Learn how Proof of Antiquity works!</p>
+        </header>
+
+        <!-- Hardware Selection -->
+        <div class="hardware-select">
+            <h2>🖥️ Select Your Hardware</h2>
+            <div class="hardware-grid">
+                <div class="hardware-card" data-hardware="powerbook-g4" data-multiplier="2.5">
+                    <div class="icon">📟</div>
+                    <h3>PowerBook G4</h3>
+                    <div class="multiplier">2.5x Multiplier</div>
+                    <div class="desc">Vintage Apple laptop (2003-2006). Perfect balance of antiquity and reliability.</div>
+                </div>
+                <div class="hardware-card" data-hardware="powermac-g5" data-multiplier="2.0">
+                    <div class="icon">🖥️</div>
+                    <h3>Power Mac G5</h3>
+                    <div class="multiplier">2.0x Multiplier</div>
+                    <div class="desc">Desktop powerhouse (2003-2006). High antiquity score, runs warm.</div>
+                </div>
+                <div class="hardware-card" data-hardware="modern-x86" data-multiplier="1.0">
+                    <div class="icon">💻</div>
+                    <h3>Modern x86_64</h3>
+                    <div class="multiplier">1.0x Multiplier</div>
+                    <div class="desc">Current generation hardware. No antiquity bonus, but reliable.</div>
+                </div>
+                <div class="hardware-card" data-hardware="vm" data-multiplier="0.000000001">
+                    <div class="icon">☁️</div>
+                    <h3>Virtual Machine</h3>
+                    <div class="multiplier">0.000000001x</div>
+                    <div class="desc">VMs are detected and heavily penalized. Not recommended for mining!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Panel -->
+        <div class="simulation-panel">
+            <h2>⚙️ Mining Simulation</h2>
+            
+            <div class="mining-steps">
+                <div class="step" id="step1">
+                    <div class="step-number">1</div>
+                    <h3>Hardware Detection</h3>
+                    <p>Fingerprint checks verify authentic hardware</p>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <h3>Attestation</h3>
+                    <p>Submit signed hardware proof</p>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <h3>Epoch Participation</h3>
+                    <p>Round-robin selection for mining rights</p>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <h3>Reward Calculation</h3>
+                    <p>Base reward × antiquity multiplier</p>
+                </div>
+            </div>
+
+            <div class="visualization" id="fingerprintViz" style="display: none;">
+                <h4>🔍 Hardware Fingerprint Analysis</h4>
+                <div class="fingerprint-viz" id="fingerprintBars"></div>
+                <pre id="fingerprintData"></pre>
+            </div>
+
+            <div class="log-output" id="logOutput" style="display: none;">
+                <div class="log-entry info">Simulation initialized...</div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="startBtn" onclick="startSimulation()" disabled>▶️ Start Mining Simulation</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetSimulation()" style="display: none;">🔄 Reset</button>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="results" id="resultsPanel" style="display: none;">
+            <h2>📊 Simulation Results</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value" id="epochsMined">0</div>
+                    <div class="label">Epochs Mined</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="baseReward">0 RTC</div>
+                    <div class="label">Base Reward</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="multiplierDisplay">1.0x</div>
+                    <div class="label">Antiquity Multiplier</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="totalReward">0 RTC</div>
+                    <div class="label">Total Earned</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">📈 Architecture Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Hardware</th>
+                        <th>Multiplier</th>
+                        <th>Reward/Epoch</th>
+                        <th>Daily (288 epochs)</th>
+                        <th>Monthly</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PowerBook G4</td>
+                        <td class="highlight">2.5x</td>
+                        <td class="highlight">2.5 RTC</td>
+                        <td class="highlight">720 RTC</td>
+                        <td class="highlight">21,600 RTC</td>
+                    </tr>
+                    <tr>
+                        <td>Power Mac G5</td>
+                        <td class="highlight">2.0x</td>
+                        <td class="highlight">2.0 RTC</td>
+                        <td class="highlight">576 RTC</td>
+                        <td class="highlight">17,280 RTC</td>
+                    </tr>
+                    <tr>
+                        <td>Modern x86_64</td>
+                        <td>1.0x</td>
+                        <td>1.0 RTC</td>
+                        <td>288 RTC</td>
+                        <td>8,640 RTC</td>
+                    </tr>
+                    <tr>
+                        <td>Virtual Machine</td>
+                        <td>0.000000001x</td>
+                        <td>~0 RTC</td>
+                        <td>~0 RTC</td>
+                        <td>~0 RTC</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Download Section -->
+        <div class="download-section">
+            <h2>🚀 Ready to Start Real Mining?</h2>
+            <p>Download the official RustChain miner and start earning RTC with your hardware!</p>
+            <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2271" class="btn" target="_blank">
+                📥 Download Miner & Setup Guide
+            </a>
+            <p style="margin-top: 20px; font-size: 0.9rem;">
+                Requires: Physical hardware (no VMs), Python 3.8+, Internet connection
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let selectedHardware = null;
+        let simulationRunning = false;
+        let selectedMultiplier = 1.0;
+
+        // Hardware selection
+        document.querySelectorAll('.hardware-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.hardware-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedHardware = card.dataset.hardware;
+                selectedMultiplier = parseFloat(card.dataset.multiplier);
+                document.getElementById('startBtn').disabled = false;
+                addLog(`Hardware selected: ${card.querySelector('h3').textContent} (${selectedMultiplier}x multiplier)`);
+            });
+        });
+
+        function addLog(message, type = 'info') {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.style.display = 'block';
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function showFingerprintViz() {
+            const viz = document.getElementById('fingerprintViz');
+            viz.style.display = 'block';
+            
+            const barsContainer = document.getElementById('fingerprintBars');
+            barsContainer.innerHTML = '';
+            
+            // Generate random fingerprint bars
+            for (let i = 0; i < 32; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'fingerprint-bar';
+                bar.style.height = `${Math.random() * 100}%`;
+                barsContainer.appendChild(bar);
+            }
+
+            // Show fingerprint data
+            const data = {
+                cpu_id: generateHex(16),
+                motherboard_serial: generateHex(12),
+                mac_addresses: [generateHex(6), generateHex(6), generateHex(6)],
+                disk_serials: [generateHex(10), generateHex(10)],
+                bios_hash: generateHex(20),
+                antiquity_score: (selectedMultiplier * 40).toFixed(1),
+                vm_detected: selectedHardware === 'vm'
+            };
+
+            document.getElementById('fingerprintData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function generateHex(length) {
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += Math.floor(Math.random() * 16).toString(16);
+            }
+            return result;
+        }
+
+        async function startSimulation() {
+            if (!selectedHardware) return;
+            
+            simulationRunning = true;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'inline-block';
+            document.getElementById('resultsPanel').style.display = 'none';
+
+            // Step 1: Hardware Detection
+            activateStep(1);
+            addLog('Starting hardware detection...');
+            showFingerprintViz();
+            await sleep(2000);
+            
+            if (selectedHardware === 'vm') {
+                addLog('⚠️ WARNING: Virtual Machine detected!', 'info');
+                await sleep(1500);
+                addLog('VM detection flags: CPUID mismatch, hypervisor present, timing anomalies', 'info');
+            } else {
+                addLog('✅ Hardware fingerprint verified', 'success');
+            }
+            await sleep(1000);
+
+            // Step 2: Attestation
+            activateStep(2);
+            addLog('Creating attestation payload...');
+            await sleep(1500);
+            addLog('Signing with hardware-bound key...', 'success');
+            await sleep(1000);
+            addLog('Submitting to /attest/submit endpoint...', 'success');
+            await sleep(1500);
+            addLog('✅ Attestation accepted', 'success');
+            await sleep(1000);
+
+            // Step 3: Epoch Participation
+            activateStep(3);
+            addLog('Joining epoch pool...');
+            await sleep(1000);
+            addLog('Waiting for round-robin selection...', 'info');
+            
+            let epochsMined = 0;
+            const totalEpochs = 10;
+            for (let i = 0; i < totalEpochs; i++) {
+                await sleep(800);
+                const selected = Math.random() < 0.3; // 30% chance per epoch
+                if (selected) {
+                    epochsMined++;
+                    addLog(`🎉 Selected for epoch ${i + 1}!`, 'success');
+                } else {
+                    addLog(`Epoch ${i + 1}: Not selected (round-robin)`);
+                }
+            }
+            await sleep(1000);
+
+            // Step 4: Reward Calculation
+            activateStep(4);
+            addLog('Calculating rewards...');
+            await sleep(1500);
+
+            const baseRewardPerEpoch = 1.0;
+            const totalBaseReward = epochsMined * baseRewardPerEpoch;
+            const totalReward = totalBaseReward * selectedMultiplier;
+
+            addLog(`Base reward: ${epochsMined} epochs × ${baseRewardPerEpoch} RTC = ${totalBaseReward} RTC`);
+            addLog(`Antiquity multiplier: ${selectedMultiplier}x`);
+            addLog(`🎉 TOTAL REWARD: ${totalReward.toFixed(3)} RTC`, 'success');
+
+            // Show results
+            document.getElementById('epochsMined').textContent = epochsMined;
+            document.getElementById('baseReward').textContent = `${totalBaseReward} RTC`;
+            document.getElementById('multiplierDisplay').textContent = `${selectedMultiplier}x`;
+            document.getElementById('totalReward').textContent = `${totalReward.toFixed(3)} RTC`;
+            document.getElementById('resultsPanel').style.display = 'block';
+
+            simulationRunning = false;
+        }
+
+        function activateStep(stepNum) {
+            document.querySelectorAll('.step').forEach((step, idx) => {
+                step.classList.toggle('active', idx + 1 === stepNum);
+            });
+        }
+
+        function resetSimulation() {
+            simulationRunning = false;
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('startBtn').disabled = !selectedHardware;
+            document.getElementById('resetBtn').style.display = 'none';
+            document.getElementById('resultsPanel').style.display = 'none';
+            document.getElementById('fingerprintViz').style.display = 'none';
+            document.getElementById('logOutput').innerHTML = '<div class="log-entry info">Simulation reset...</div>';
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
