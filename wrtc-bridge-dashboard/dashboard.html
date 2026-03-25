@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RustChain Bridge Monitor — wRTC Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #f7931a;
+      --accent2: #9945ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.5rem; font-weight: 700; }
+    .logo span { color: var(--accent); }
+    .tag { background: var(--accent); color: #000; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .updated { margin-left: auto; color: var(--muted); font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; padding: 1.5rem 2rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .card-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .card-value { font-size: 1.8rem; font-weight: 700; }
+    .card-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .section { padding: 0 2rem 1.5rem; }
+    .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--muted); }
+    .tx-table { width: 100%; border-collapse: collapse; }
+    .tx-table th { text-align: left; padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.8rem; }
+    .tx-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .tx-table tr:last-child td { border-bottom: none; }
+    .tx-hash { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.8rem; color: var(--accent); cursor: pointer; }
+    .tx-hash:hover { text-decoration: underline; }
+    .type-wrap { color: var(--green); font-weight: 600; }
+    .type-unwrap { color: var(--accent2); font-weight: 600; }
+    .price-row { display: flex; gap: 2rem; align-items: baseline; flex-wrap: wrap; }
+    .chart-placeholder { height: 200px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--muted); margin-top: 1rem; }
+    .status-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-up { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .status-down { background: var(--red); box-shadow: 0 0 6px var(--red); }
+    .status-item { display: flex; align-items: center; font-size: 0.85rem; padding: 0.4rem 0.8rem; background: var(--bg); border-radius: 6px; }
+    .loading { text-align: center; padding: 2rem; color: var(--muted); }
+    .error { color: var(--red); text-align: center; padding: 1rem; background: rgba(248,81,73,0.1); border-radius: 8px; margin: 1rem 2rem; }
+    .refresh-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .refresh-btn:hover { border-color: var(--accent); }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr 1fr; padding: 1rem; }
+      .section { padding: 0 1rem 1rem; }
+      .header { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">RustChain <span>Bridge</span> Monitor</div>
+  <div class="tag">wRTC on Solana</div>
+  <div class="updated" id="updated">Loading...</div>
+  <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid">
+  <div class="card">
+    <div class="card-label">Total RTC Locked</div>
+    <div class="card-value" id="rtc-locked">--</div>
+    <div class="card-sub">On RustChain side</div>
+  </div>
+  <div class="card">
+    <div class="card-label">wRTC Circulating</div>
+    <div class="card-value" id="wrtc-supply">--</div>
+    <div class="card-sub">On Solana</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Bridge Fee Revenue</div>
+    <div class="card-value" id="fees">--</div>
+    <div class="card-sub">Total earned</div>
+  </div>
+  <div class="card">
+    <div class="card-label">wRTC / RTC Price</div>
+    <div class="card-value" id="price">--</div>
+    <div class="card-sub" id="price-sub">Via Raydium</div>
+  </div>
+</div>
+
+<!-- Bridge Health -->
+<div class="section">
+  <div class="section-title">Bridge Health</div>
+  <div class="status-row">
+    <div class="status-item">
+      <span class="status-dot status-up" id="rustchain-status"></span>
+      RustChain Node
+    </div>
+    <div class="status-item">
+      <span class="status-dot status-up" id="solana-status"></span>
+      Solana RPC
+    </div>
+    <div class="status-item">
+      <span class="status-dot status-up" id="raydium-status"></span>
+      Raydium DEX
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="section">
+  <div class="section-title">Recent Transactions</div>
+  <table class="tx-table">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>TX Hash</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="tx-body">
+      <tr><td colspan="4" class="loading">Loading transactions...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Price Chart -->
+<div class="section">
+  <div class="section-title">wRTC Price (Solana DEX)</div>
+  <div class="chart-placeholder" id="chart">
+    Chart loads here — 24h price history from Raydium/DexScreener
+  </div>
+</div>
+
+<script>
+// ─── Configuration ───────────────────────────────────────────────────────────
+const RUSTCHAIN_NODE = 'https://50.28.86.131';
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
+const DEXSCREENER  = 'https://api.dexscreener.com/latest/dex/tokens';
+const WRTC_TOKEN   = '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs'; // wRTC on Solana
+const WRTC_MINT    = 'RNfp4xWDYXs2M2LQV2xM防腐'; // placeholder — update with real wRTC mint
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+async function jsonRPC(method, params = [], rpc = SOLANA_RPC) {
+  const res = await fetch(rpc, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(JSON.stringify(data.error));
+  return data.result;
+}
+
+function fmt(n, decimals = 2) {
+  if (n === null || n === undefined) return '--';
+  return Number(n).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function timeAgo(ts) {
+  const now = Date.now();
+  const ms = now - ts;
+  if (ms < 60000) return Math.floor(ms / 1000) + 's ago';
+  if (ms < 3600000) return Math.floor(ms / 60000) + 'm ago';
+  return Math.floor(ms / 3600000) + 'h ago';
+}
+
+function setError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = msg;
+}
+
+// ─── RustChain: Locked RTC ───────────────────────────────────────────────────
+async function loadRustchainData() {
+  try {
+    // Try node health + balance endpoints
+    const [health, epoch] = await Promise.all([
+      fetch(RUSTCHAIN_NODE + '/health').then(r => r.json()).catch(() => null),
+      fetch(RUSTCHAIN_NODE + '/epoch').then(r => r.json()).catch(() => null)
+    ]);
+    const nodeOk = health && health.status !== 'error';
+    document.getElementById('rustchain-status').className = 'status-dot ' + (nodeOk ? 'status-up' : 'status-down');
+
+    // Estimate locked RTC from epoch reward pot — placeholder until bridge contract is public
+    if (epoch && epoch.reward_pot) {
+      document.getElementById('rtc-locked').textContent = fmt(epoch.reward_pot) + ' RTC';
+    } else {
+      document.getElementById('rtc-locked').textContent = 'Contacting node...';
+    }
+  } catch (e) {
+    document.getElementById('rustchain-status').className = 'status-dot status-down';
+    document.getElementById('rtc-locked').textContent = 'Offline';
+  }
+}
+
+// ─── Solana: wRTC Supply ───────────────────────────────────────────────────────
+async function loadSolanaData() {
+  try {
+    const supply = await jsonRPC('getTokenSupply', [WRTC_TOKEN]);
+    document.getElementById('wrtc-supply').textContent = fmt(supply.value.uiAmount, 2) + ' wRTC';
+    document.getElementById('solana-status').className = 'status-dot status-up';
+  } catch (e) {
+    document.getElementById('wrtc-supply').textContent = 'Offline';
+    document.getElementById('solana-status').className = 'status-dot status-down';
+  }
+}
+
+// ─── DexScreener: Price + Txs ────────────────────────────────────────────────
+async function loadDexScreener() {
+  try {
+    const res = await fetch(DEXSCREENER + '/' + WRTC_TOKEN);
+    const data = await res.json();
+    const pairs = (data.pairs || []).filter(p => p.chainId === 'solana' && p.baseToken.address === WRTC_TOKEN);
+    pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+    const top = pairs[0];
+    if (top) {
+      document.getElementById('price').textContent = '$' + fmt(top.priceUsd);
+      document.getElementById('price-sub').textContent = top.baseToken.symbol + '/' + top.quoteToken.symbol;
+      document.getElementById('raydium-status').className = 'status-dot status-up';
+      renderTxs(data);
+    } else {
+      document.getElementById('price').textContent = 'No pair found';
+      document.getElementById('raydium-status').className = 'status-dot status-down';
+    }
+  } catch (e) {
+    document.getElementById('price').textContent = 'Offline';
+    document.getElementById('raydium-status').className = 'status-dot status-down';
+  }
+}
+
+// ─── Recent Transactions ────────────────────────────────────────────────────────
+function renderTxs(data) {
+  const pairs = (data.pairs || []).filter(p => p.chainId === 'solana');
+  const txs = pairs.flatMap(p => (p.txns || { buys: [], sells: [] }).buys.map(t => ({ ...t, type: 'wrap' })).concat(
+    (p.txns || { buys: [], sells: [] }).sells.map(t => ({ ...t, type: 'unwrap' }))
+  ));
+  txs.sort((a, b) => b.blockTime - a.blockTime);
+  const tbody = document.getElementById('tx-body');
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">No recent transactions found. Bridge may be new.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = txs.slice(0, 20).map(tx => {
+    const isWrap = tx.type === 'wrap';
+    const amount = tx.amount ? fmt(tx.amount, 4) : '--';
+    const hash = tx.txHash || tx.hash || '';
+    const shortHash = hash.slice(0, 8) + '...' + hash.slice(-6);
+    const time = tx.blockTime ? timeAgo(tx.blockTime * 1000) : '--';
+    return '<tr>' +
+      '<td><span class="type-' + (isWrap ? 'wrap' : 'unwrap') + '">' + (isWrap ? 'WRAP' : 'UNWRAP') + '</span></td>' +
+      '<td>' + amount + '</td>' +
+      '<td class="tx-hash" onclick="window.open(\'https://solscan.io/tx/' + hash + '\', \'_blank\')">' + shortHash + '</td>' +
+      '<td>' + time + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ─── Fees (estimated) ──────────────────────────────────────────────────────────
+function calcFees() {
+  // Bridge fee: 0.3% of volume — estimate from on-chain data when available
+  document.getElementById('fees').textContent = 'See on-chain';
+}
+
+// ─── Load All ─────────────────────────────────────────────────────────────────
+async function loadAll() {
+  document.getElementById('updated').textContent = 'Updating...';
+  await Promise.all([loadRustchainData(), loadSolanaData(), loadDexScreener()]);
+  calcFees();
+  document.getElementById('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+// Auto-refresh every 30s
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
