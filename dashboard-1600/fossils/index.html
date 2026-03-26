@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fossil Record — RustChain Attestation Archaeology</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e8e4d9;
+      --text-dim: #8a8a9a;
+      --accent: #c8a84b;
+      --arch-68k: #8B4513;
+      --arch-g3: #CD7F32;
+      --arch-g4: #B87333;
+      --arch-g5: #CD853F;
+      --arch-sparc: #8B0000;
+      --arch-mips: #00A86B;
+      --arch-arm: #556B2F;
+      --arch-power8: #00008B;
+      --arch-power9: #191970;
+      --arch-apple: #C0C0C0;
+      --arch-x86: #D3D3D3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Spectral', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 2rem 3rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+    }
+
+    header h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-style: italic;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    header .meta {
+      margin-left: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    #stats-bar {
+      display: flex;
+      gap: 2rem;
+      padding: 0.75rem 3rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    .stat { display: flex; gap: 0.5rem; }
+    .stat-label { color: var(--text-dim); }
+    .stat-value { color: var(--accent); }
+
+    #chart-container {
+      padding: 1rem 2rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    #chart {
+      display: block;
+    }
+
+    .axis text {
+      fill: var(--text-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+    }
+
+    .axis line, .axis path {
+      stroke: var(--border);
+    }
+
+    .epoch-marker {
+      stroke: rgba(200, 168, 75, 0.15);
+      stroke-width: 1;
+      stroke-dasharray: 3 3;
+    }
+
+    .tooltip {
+      position: fixed;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text);
+      pointer-events: none;
+      z-index: 1000;
+      max-width: 280px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    .tooltip .tip-arch {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tooltip .tip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .tooltip .tip-label { color: var(--text-dim); }
+    .tooltip .tip-val { color: var(--accent); }
+
+    #legend {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    #legend h3 {
+      color: var(--accent);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.3rem 0;
+      cursor: pointer;
+      padding: 0.2rem;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+
+    .legend-item:hover { background: rgba(255,255,255,0.05); }
+    .legend-item.dimmed { opacity: 0.3; }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    #filter-controls {
+      padding: 0.75rem 3rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    #filter-controls label { color: var(--text-dim); }
+    #filter-controls input[type="range"] {
+      width: 120px;
+      accent-color: var(--accent);
+    }
+
+    .arch-intro-marker {
+      stroke: var(--accent);
+      stroke-width: 1.5;
+    }
+
+    .settlement-line {
+      stroke: rgba(200, 168, 75, 0.4);
+      stroke-width: 1;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 2rem;
+      max-width: 480px;
+      z-index: 200;
+      display: none;
+      box-shadow: 0 16px 64px rgba(0,0,0,0.8);
+    }
+
+    .info-panel h2 {
+      font-family: 'Space Mono', monospace;
+      color: var(--accent);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-panel p {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-panel .close-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    #help-btn {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #help-btn:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>THE FOSSIL RECORD</h1>
+    <p class="subtitle">Attestation Archaeology Visualizer — RustChain</p>
+  </div>
+  <div class="meta">
+    <span id="chain-info">Loading chain data...</span>
+  </div>
+</header>
+
+<div id="stats-bar">
+  <div class="stat"><span class="stat-label">Attestations</span><span class="stat-value" id="stat-atts">—</span></div>
+  <div class="stat"><span class="stat-label">Miners</span><span class="stat-value" id="stat-miners">—</span></div>
+  <div class="stat"><span class="stat-label">Epochs</span><span class="stat-value" id="stat-epochs">—</span></div>
+  <div class="stat"><span class="stat-label">Architectures</span><span class="stat-value" id="stat-archs">—</span></div>
+  <div class="stat"><span class="stat-label">Total RTC</span><span class="stat-value" id="stat-rtc">—</span></div>
+</div>
+
+<div id="filter-controls">
+  <label>Zoom Epochs:</label>
+  <input type="range" id="epoch-range" min="0" max="119" value="0" />
+  <span id="epoch-range-label">0 – 119</span>
+  <label style="margin-left:1rem">Min Arch Count:</label>
+  <input type="range" id="min-count" min="1" max="20" value="1" />
+  <span id="min-count-label">1</span>
+</div>
+
+<div id="chart-container">
+  <svg id="chart"></svg>
+</div>
+
+<div id="legend">
+  <h3>Architecture Layers</h3>
+  <div id="legend-items"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<button id="help-btn" title="About this visualization">?</button>
+
+<div class="info-panel" id="info-panel">
+  <span class="close-btn" onclick="document.getElementById('info-panel').style.display='none'">×</span>
+  <h2>The Fossil Record</h2>
+  <p>This visualization renders every attestation from RustChain's genesis as geological strata — the older the architecture, the deeper the layer.</p>
+  <p><strong>X-axis:</strong> Epoch (time). <strong>Y-axis:</strong> Stacked by architecture family. <strong>Width:</strong> Number of attestations from that architecture in that epoch. <strong>Color:</strong> Architecture family.</p>
+  <p>Hover over any stratum to see the miner's fingerprint data, epoch, and RTC earned.</p>
+  <p>Vertical dashed lines mark epoch boundaries. Vertical gold lines mark when a new architecture first appeared.</p>
+  <p style="color:var(--accent);font-size:0.75rem;">75 RTC Bounty #2311 · Wallet: eB51DWp1uECrLZRLsE2cnyZUzfRWvzUzaJzkatTpQV9</p>
+</div>
+
+<script>
+// ─── Arch color map ────────────────────────────────────────────────────────────
+const archColors = {
+  "68K":          "#8B4513",
+  "G3":           "#CD7F32",
+  "G4":           "#B87333",
+  "G5":           "#CD853F",
+  "SPARC":        "#8B0000",
+  "MIPS":         "#00A86B",
+  "ARM":          "#556B2F",
+  "POWER8":       "#00008B",
+  "POWER9":       "#191970",
+  "Apple Silicon":"#C0C0C0",
+  "Modern x86":   "#D3D3D3",
+};
+
+// Order for stacking (oldest at bottom)
+const archOrder = [
+  "68K","G3","G4","G5","SPARC","MIPS",
+  "ARM","POWER8","POWER9","Apple Silicon","Modern x86"
+];
+
+// First appearance of each arch
+const archFirstEpoch = {
+  "68K":0,"G3":7,"G4":13,"G5":13,"SPARC":3,
+  "MIPS":5,"ARM":24,"POWER8":16,"POWER9":25,
+  "Apple Silicon":50,"Modern x86":10,
+};
+
+let allData = [];
+let chart = null;
+
+const margin = { top: 30, right: 60, bottom: 60, left: 80 };
+
+async function init() {
+  const resp = await fetch('data/attestations.json');
+  const json = await resp.json();
+  allData = json.attestations;
+
+  document.getElementById('stat-atts').textContent = json.metadata.total_attestations.toLocaleString();
+  document.getElementById('stat-miners').textContent = json.metadata.miner_count.toLocaleString();
+  document.getElementById('stat-epochs').textContent = json.metadata.total_epochs;
+  document.getElementById('stat-archs').textContent = archOrder.length;
+  const totalRtc = allData.reduce((s,a) => s + a.rtc_earned, 0);
+  document.getElementById('stat-rtc').textContent = totalRtc.toFixed(2) + ' RTC';
+  document.getElementById('chain-info').textContent =
+    `RustChain · Epochs ${json.metadata.genesis_epoch}–${json.metadata.latest_epoch}`;
+
+  buildLegend();
+  document.getElementById('help-btn').addEventListener('click', () => {
+    document.getElementById('info-panel').style.display = 'block';
+  });
+
+  document.getElementById('epoch-range').addEventListener('input', onFilterChange);
+  document.getElementById('min-count').addEventListener('input', onFilterChange);
+
+  onFilterChange();
+}
+
+function onFilterChange() {
+  const maxEpoch = +document.getElementById('epoch-range').value;
+  const minCount = +document.getElementById('min-count').value;
+  document.getElementById('epoch-range-label').textContent = `0 – ${maxEpoch}`;
+  document.getElementById('min-count-label').textContent = minCount;
+  render(maxEpoch, minCount);
+}
+
+function buildLegend() {
+  const container = document.getElementById('legend-items');
+  archOrder.forEach(arch => {
+    const count = allData.filter(a => a.arch === arch).length;
+    const div = document.createElement('div');
+    div.className = 'legend-item';
+    div.dataset.arch = arch;
+    div.innerHTML = `
+      <div class="legend-swatch" style="background:${archColors[arch]}"></div>
+      <span>${arch}</span>
+      <span style="color:var(--text-dim);margin-left:auto;padding-left:0.5rem">${count}</span>
+    `;
+    div.addEventListener('click', () => toggleArch(arch, div));
+    container.appendChild(div);
+  });
+}
+
+const hiddenArchs = new Set();
+function toggleArch(arch, el) {
+  if (hiddenArchs.has(arch)) {
+    hiddenArchs.delete(arch);
+    el.classList.remove('dimmed');
+  } else {
+    hiddenArchs.add(arch);
+    el.classList.add('dimmed');
+  }
+  onFilterChange();
+}
+
+function render(maxEpoch, minCount) {
+  const container = document.getElementById('chart-container');
+  const totalWidth = Math.max(container.clientWidth - 40, 900);
+  const height = 540;
+
+  d3.select('#chart').selectAll('*').remove();
+
+  const svg = d3.select('#chart')
+    .attr('width', totalWidth)
+    .attr('height', height);
+
+  const filtered = allData.filter(d =>
+    d.epoch <= maxEpoch &&
+    !hiddenArchs.has(d.arch)
+  );
+
+  const visibleArchs = archOrder.filter(a => !hiddenArchs.has(a));
+
+  // Count attestations per (epoch, arch)
+  const epochRange = d3.range(0, maxEpoch + 1);
+  const counts = {};
+  epochRange.forEach(ep => {
+    visibleArchs.forEach(arch => {
+      const key = `${ep}-${arch}`;
+      counts[key] = filtered.filter(d => d.epoch === ep && d.arch === arch).length;
+    });
+  });
+
+  // Aggregate: show arch if its total count >= minCount
+  const archTotals = {};
+  visibleArchs.forEach(arch => {
+    archTotals[arch] = filtered.filter(d => d.arch === arch).length;
+  });
+  const shownArchs = visibleArchs.filter(a => archTotals[a] >= minCount);
+
+  // Y scale: band for each arch
+  const yScale = d3.scaleBand()
+    .domain(shownArchs)
+    .range([margin.top, height - margin.bottom])
+    .padding(0.08);
+
+  // X scale: epoch
+  const xScale = d3.scaleLinear()
+    .domain([0, maxEpoch])
+    .range([margin.left, totalWidth - margin.right]);
+
+  const w = xScale(1) - xScale(0);
+
+  // ── Axes ──────────────────────────────────────────────────────────────────
+  const xAxis = d3.axisBottom(xScale)
+    .ticks(Math.min(maxEpoch, 20))
+    .tickFormat(d => `E${d}`);
+
+  svg.append('g')
+    .attr('class', 'axis x-axis')
+    .attr('transform', `translate(0,${height - margin.bottom})`)
+    .call(xAxis)
+    .selectAll('text')
+    .attr('fill', 'var(--text-dim)');
+
+  const yAxis = d3.axisLeft(yScale);
+  svg.append('g')
+    .attr('class', 'axis y-axis')
+    .attr('transform', `translate(${margin.left},0)`)
+    .call(yAxis)
+    .selectAll('text')
+    .attr('fill', d => archColors[d] || 'var(--text-dim)');
+
+  // ── Settlement epoch markers (every 10 epochs) ────────────────────────────
+  const settlementEpochs = d3.range(10, maxEpoch + 1, 10);
+  settlementEpochs.forEach(ep => {
+    svg.append('line')
+      .attr('class', 'epoch-marker')
+      .attr('x1', xScale(ep))
+      .attr('x2', xScale(ep))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom);
+  });
+
+  // ── Architecture first-appearance markers ────────────────────────────────
+  shownArchs.forEach(arch => {
+    const ep = archFirstEpoch[arch];
+    if (ep <= maxEpoch) {
+      svg.append('line')
+        .attr('class', 'arch-intro-marker')
+        .attr('x1', xScale(ep))
+        .attr('x2', xScale(ep))
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom)
+        .attr('stroke', archColors[arch])
+        .attr('stroke-width', 1.5)
+        .attr('opacity', 0.7);
+
+      svg.append('text')
+        .attr('x', xScale(ep) + 4)
+        .attr('y', margin.top + 12)
+        .attr('fill', archColors[arch])
+        .attr('font-size', '9px')
+        .attr('font-family', 'Space Mono, monospace')
+        .attr('opacity', 0.8)
+        .text(`${arch} appears`);
+    }
+  });
+
+  // ── Strata bars ────────────────────────────────────────────────────────────
+  const tooltip = document.getElementById('tooltip');
+
+  shownArchs.forEach(arch => {
+    epochRange.forEach(ep => {
+      const count = counts[`${ep}-${arch}`];
+      if (count === 0) return;
+
+      const y = yScale(arch);
+      const bh = yScale.bandwidth();
+      // Width proportional to count, capped
+      const bw = Math.max(2, Math.min(w * 0.8, count * 1.5));
+      const x = xScale(ep) - bw / 2;
+
+      // Get attestations for this epoch+arch
+      const epArchAtts = filtered.filter(d => d.epoch === ep && d.arch === arch);
+
+      const bar = svg.append('rect')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('width', bw)
+        .attr('height', bh)
+        .attr('fill', archColors[arch])
+        .attr('opacity', 0.75)
+        .attr('rx', 1)
+        .style('cursor', 'pointer')
+        .style('transition', 'opacity 0.15s');
+
+      bar.on('mouseover', function(event) {
+        d3.select(this).attr('opacity', 1);
+
+        const rtc = epArchAtts.reduce((s,a) => s + a.rtc_earned, 0);
+        const avgFq = (epArchAtts.reduce((s,a) => s + a.fingerprint_quality, 0) / epArchAtts.length).toFixed(2);
+        const totalCores = epArchAtts.reduce((s,a) => s + a.cpu_cores, 0);
+        const uniqueMiners = new Set(epArchAtts.map(a => a.miner)).size;
+        const sampleMiner = epArchAtts[0];
+
+        tooltip.innerHTML = `
+          <div class="tip-arch" style="color:${archColors[arch]}">${arch} · Epoch ${ep}</div>
+          <div class="tip-row"><span class="tip-label">Miners</span><span class="tip-val">${uniqueMiners}</span></div>
+          <div class="tip-row"><span class="tip-label">Attestations</span><span class="tip-val">${count}</span></div>
+          <div class="tip-row"><span class="tip-label">RTC Earned</span><span class="tip-val">${rtc.toFixed(4)} RTC</span></div>
+          <div class="tip-row"><span class="tip-label">Avg FP Quality</span><span class="tip-val">${avgFq}</span></div>
+          <div class="tip-row"><span class="tip-label">Total Cores</span><span class="tip-val">${totalCores}</span></div>
+          <div class="tip-row"><span class="tip-label">Sample Device</span><span class="tip-val">${sampleMiner.device}</span></div>
+          <div class="tip-row"><span class="tip-label">Sample Miner</span><span class="tip-val">${sampleMiner.miner}</span></div>
+        `;
+        tooltip.style.display = 'block';
+        tooltip.style.left = (event.clientX + 16) + 'px';
+        tooltip.style.top = (event.clientY - 16) + 'px';
+      });
+
+      bar.on('mousemove', function(event) {
+        tooltip.style.left = (event.clientX + 16) + 'px';
+        tooltip.style.top = (event.clientY - 16) + 'px';
+      });
+
+      bar.on('mouseout', function() {
+        d3.select(this).attr('opacity', 0.75);
+        tooltip.style.display = 'none';
+      });
+    });
+  });
+
+  // ── Title labels ────────────────────────────────────────────────────────────
+  svg.append('text')
+    .attr('x', totalWidth / 2)
+    .attr('y', 20)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'var(--text-dim)')
+    .attr('font-size', '11px')
+    .attr('font-family', 'Space Mono, monospace')
+    .text('EPOCH (TIME) →');
+
+  svg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -(height / 2))
+    .attr('y', 20)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'var(--text-dim)')
+    .attr('font-size', '11px')
+    .attr('font-family', 'Space Mono, monospace')
+    .text('ARCHITECTURE (DEPTH) →');
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
