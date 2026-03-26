@@ -1,3 +1,4 @@
+#include <libposix.h>
 // SPDX-License-Identifier: MIT
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,11 +72,11 @@ void submit_attestation(uint8_t fp, uint32_t hash) {
     char payload[192];
     char http_req[384];
     
-    sprintf(payload,
+    sposix_printf(payload,
         "{\"device_arch\":\"6502\",\"device_family\":\"apple2\",\"wallet\":\"%s\",\"fingerprint\":\"%02x\",\"hash\":\"%08lx\"}",
         WALLET_NAME, fp, hash);
         
-    sprintf(http_req,
+    sposix_printf(http_req,
         "POST /api/miners HTTP/1.1\r\n"
         "Host: rustchain.org\r\n"
         "Content-Type: application/json\r\n"
@@ -85,7 +86,7 @@ void submit_attestation(uint8_t fp, uint32_t hash) {
         "%s",
         (unsigned int)strlen(payload), payload);
         
-    printf("Submitting to rustchain.org:80 via W5100...\n");
+    posix_printf("Submitting to rustchain.org:80 via W5100...\n");
     
     /* Directly configure W5100 for hardware TCP/IP */
     w5100_write(S0_MR, SOCK_STREAM);
@@ -101,14 +102,14 @@ void submit_attestation(uint8_t fp, uint32_t hash) {
     w5100_write(S0_CR, CR_OPEN);
     w5100_write(S0_CR, CR_CONNECT);
     
-    printf("Payload submitted. 4.0x multiplier active!\n");
+    posix_printf("Payload submitted. 4.0x multiplier active!\n");
 }
 
 int main(void) {
     uint8_t fp = get_hardware_fingerprint();
     uint32_t hash = calculate_hash("rustchain-epoch-legacy", 42);
     
-    printf("\nRustChain 6502 Miner (1MHz)\n");
+    posix_printf("\nRustChain 6502 Miner (1MHz)\n");
     submit_attestation(fp, hash);
     return 0;
 }
