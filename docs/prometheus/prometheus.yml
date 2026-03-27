@@ -1,0 +1,39 @@
+# Prometheus scrape configuration for the RustChain exporter
+# Bounty #765 — Observable RustChain
+#
+# Add this to your prometheus.yml under scrape_configs.
+# See docs/PROMETHEUS_METRICS.md for full setup instructions.
+
+# Example: paste this block into your existing prometheus.yml
+# (or use this file as a standalone prometheus.yml for testing)
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: "rustchain"
+    scrape_interval: 30s
+    scrape_timeout: 20s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["localhost:9120"]
+        labels:
+          instance: "rustchain-primary"
+          environment: "production"
+
+    # Optional: relabel to make instance labels cleaner in dashboards
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __address__
+        replacement: "localhost:9120"
+
+  # If you run multiple exporters (one per node), add more targets:
+  # - job_name: "rustchain-secondary"
+  #   static_configs:
+  #     - targets: ["secondary-host:9120"]
+  #       labels:
+  #         instance: "rustchain-secondary"

@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-02-14T23:59:06.080560+00:00",
+  "tests": [
+    {
+      "test": "Identity Load",
+      "status": "PASS",
+      "agent_id": "bcn_d2e6b5eddfd1",
+      "public_key": "6da881e927ce2c9f7e5c331ebd837190f49a52cd1971e1300eaee503f34bdc4b"
+    },
+    {
+      "test": "Heartbeat Init",
+      "status": "PASS"
+    },
+    {
+      "test": "Heartbeat Send",
+      "status": "PASS",
+      "health": {
+        "cpu": 30.5,
+        "memory": 52.3,
+        "disk": 67.8,
+        "uptime": 172800,
+        "tasks_completed": 15,
+        "status": "online"
+      }
+    },
+    {
+      "test": "Agent History",
+      "status": "PASS",
+      "count": 3
+    },
+    {
+      "test": "Peer Discovery",
+      "status": "PASS",
+      "peer_count": 0
+    },
+    {
+      "test": "Atlas Integration",
+      "status": "PASS",
+      "atlas_url": "http://50.28.86.131:8070/beacon/#agent=bcn_d2e6b5eddfd1"
+    },
+    {
+      "test": "Silence Detection",
+      "status": "PASS",
+      "silent_count": 0
+    }
+  ]
+}

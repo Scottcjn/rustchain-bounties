@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3600 5400" width="3600" height="5400">
+  <defs>
+    <linearGradient id="posterBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a14;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#141428;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a14;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E55A2B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="crtGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#33ff33;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00cc00;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="heavyGlow">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="scanlines">
+      <feImage width="4" height="4" result="tile"
+        xlink:href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='2' fill='%23000' opacity='0.15'/%3E%3C/svg%3E"/>
+      <feTile in="tile" result="tiled"/>
+      <feComposite operator="in" in="tiled"/>
+    </filter>
+    <pattern id="scanlinePattern" width="4" height="6" patternUnits="userSpaceOnUse">
+      <rect width="4" height="3" fill="#000" opacity="0.08"/>
+    </pattern>
+    <clipPath id="monitorClip">
+      <rect x="500" y="1500" width="2600" height="1950" rx="30"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="3600" height="5400" fill="url(#posterBg)"/>
+
+  <!-- Vintage border frame -->
+  <rect x="80" y="80" width="3440" height="5240" fill="none" stroke="#FF6B35" stroke-width="4" rx="20" opacity="0.4"/>
+  <rect x="100" y="100" width="3400" height="5200" fill="none" stroke="#FFD700" stroke-width="2" rx="16" opacity="0.25"/>
+
+  <!-- Corner ornaments -->
+  <g opacity="0.5" stroke="#FFD700" stroke-width="2" fill="none">
+    <!-- Top-left -->
+    <path d="M140,140 L140,260 M140,140 L260,140"/>
+    <circle cx="140" cy="140" r="8" fill="#FFD700"/>
+    <!-- Top-right -->
+    <path d="M3460,140 L3460,260 M3460,140 L3340,140"/>
+    <circle cx="3460" cy="140" r="8" fill="#FFD700"/>
+    <!-- Bottom-left -->
+    <path d="M140,5260 L140,5140 M140,5260 L260,5260"/>
+    <circle cx="140" cy="5260" r="8" fill="#FFD700"/>
+    <!-- Bottom-right -->
+    <path d="M3460,5260 L3460,5140 M3460,5260 L3340,5260"/>
+    <circle cx="3460" cy="5260" r="8" fill="#FFD700"/>
+  </g>
+
+  <!-- Top banner text -->
+  <text x="1800" y="350" text-anchor="middle" font-family="'Courier New', monospace" font-size="36" fill="#FFD700" letter-spacing="16" opacity="0.6">
+    DISTRIBUTED LEDGER TECHNOLOGY
+  </text>
+
+  <!-- Small separator -->
+  <line x1="1200" y1="400" x2="2400" y2="400" stroke="#FFD700" stroke-width="1" opacity="0.3"/>
+
+  <!-- Main Title: RUSTCHAIN -->
+  <g filter="url(#heavyGlow)">
+    <text x="1800" y="700" text-anchor="middle" font-family="'Courier New', 'Fira Code', monospace" font-size="280" font-weight="bold" letter-spacing="20">
+      <tspan fill="#FF6B35">RUST</tspan>
+    </text>
+    <text x="1800" y="980" text-anchor="middle" font-family="'Courier New', 'Fira Code', monospace" font-size="280" font-weight="bold" letter-spacing="20">
+      <tspan fill="#FFD700">CHAIN</tspan>
+    </text>
+  </g>
+
+  <!-- Subtitle -->
+  <text x="1800" y="1100" text-anchor="middle" font-family="'Courier New', monospace" font-size="60" fill="#c0c0c0" letter-spacing="22">
+    PROOF OF ANTIQUITY
+  </text>
+
+  <!-- Decorative chain band -->
+  <g transform="translate(1800, 1250)" opacity="0.6">
+    <g fill="none" stroke="#FFD700" stroke-width="3">
+      <rect x="-800" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-720" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-640" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-560" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-480" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-400" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-320" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-240" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-160" y="-18" width="60" height="36" rx="10"/>
+      <rect x="-80" y="-18" width="60" height="36" rx="10"/>
+      <rect x="0" y="-18" width="60" height="36" rx="10"/>
+      <rect x="80" y="-18" width="60" height="36" rx="10"/>
+      <rect x="160" y="-18" width="60" height="36" rx="10"/>
+      <rect x="240" y="-18" width="60" height="36" rx="10"/>
+      <rect x="320" y="-18" width="60" height="36" rx="10"/>
+      <rect x="400" y="-18" width="60" height="36" rx="10"/>
+      <rect x="480" y="-18" width="60" height="36" rx="10"/>
+      <rect x="560" y="-18" width="60" height="36" rx="10"/>
+      <rect x="640" y="-18" width="60" height="36" rx="10"/>
+      <rect x="720" y="-18" width="60" height="36" rx="10"/>
+    </g>
+  </g>
+
+  <!-- Vintage CRT Monitor -->
+  <g>
+    <!-- Monitor outer casing -->
+    <rect x="380" y="1380" width="2840" height="2200" rx="60" fill="#2a2a3a" stroke="#444" stroke-width="4"/>
+    <!-- Monitor bezel -->
+    <rect x="440" y="1440" width="2720" height="2020" rx="40" fill="#1a1a28"/>
+    <!-- Screen area -->
+    <rect x="500" y="1500" width="2600" height="1950" rx="30" fill="#0a1a0a"/>
+
+    <!-- CRT green text content -->
+    <g clip-path="url(#monitorClip)" filter="url(#glow)">
+      <!-- Terminal prompt lines -->
+      <text x="560" y="1600" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.9">
+        $ rustchain --init-genesis
+      </text>
+      <text x="560" y="1660" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        [OK] Genesis block created
+      </text>
+      <text x="560" y="1720" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.9">
+        $ rustchain mine --proof-of-antiquity
+      </text>
+      <text x="560" y="1780" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        [OK] Block #1 mined (nonce: 7f3a9b2c)
+      </text>
+      <text x="560" y="1840" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        [OK] Block #2 mined (nonce: d4e5f6a1)
+      </text>
+      <text x="560" y="1900" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.9">
+        $ rustchain status
+      </text>
+      <text x="560" y="1960" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Chain height: 2,048 blocks
+      </text>
+      <text x="560" y="2020" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Total supply: 21,000,000 RTC
+      </text>
+      <text x="560" y="2080" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Active miners: 1,337
+      </text>
+      <text x="560" y="2140" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Network: HEALTHY
+      </text>
+      <text x="560" y="2240" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.9">
+        $ rustchain verify --all
+      </text>
+      <text x="560" y="2300" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Verifying chain integrity...
+      </text>
+      <text x="560" y="2360" font-family="'Courier New', monospace" font-size="38" fill="#FFD700" opacity="0.9">
+        ALL BLOCKS VALID. CHAIN INTACT.
+      </text>
+      <text x="560" y="2460" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.9">
+        $ rustchain wallet --balance
+      </text>
+      <text x="560" y="2520" font-family="'Courier New', monospace" font-size="38" fill="#33ff33" opacity="0.7">
+        Balance: 42.0 RTC
+      </text>
+
+      <!-- Blinking cursor -->
+      <rect x="560" y="2580" width="24" height="38" fill="#33ff33" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;0;0.8" dur="1.2s" repeatCount="indefinite"/>
+      </rect>
+
+      <!-- Scanline overlay -->
+      <rect x="500" y="1500" width="2600" height="1950" fill="url(#scanlinePattern)"/>
+    </g>
+
+    <!-- Screen reflection -->
+    <rect x="500" y="1500" width="2600" height="1950" rx="30" fill="none" stroke="#33ff33" stroke-width="1" opacity="0.15"/>
+
+    <!-- Monitor brand label -->
+    <text x="1800" y="3520" text-anchor="middle" font-family="'Courier New', monospace" font-size="28" fill="#666" letter-spacing="8">
+      RUSTCHAIN TERMINAL v1.0
+    </text>
+
+    <!-- Monitor stand -->
+    <rect x="1500" y="3580" width="600" height="60" rx="6" fill="#2a2a3a" stroke="#444" stroke-width="2"/>
+    <rect x="1350" y="3640" width="900" height="30" rx="8" fill="#222238" stroke="#444" stroke-width="2"/>
+  </g>
+
+  <!-- Crab mascot to the right of monitor -->
+  <g transform="translate(2900, 2200) scale(0.6)" opacity="0.3">
+    <ellipse cx="0" cy="0" rx="200" ry="140" fill="#FF6B35"/>
+    <circle cx="-60" cy="-70" r="28" fill="#fff"/>
+    <circle cx="60" cy="-70" r="28" fill="#fff"/>
+    <circle cx="-60" cy="-70" r="15" fill="#1a1a2e"/>
+    <circle cx="60" cy="-70" r="15" fill="#1a1a2e"/>
+    <path d="M-220,-60 C-280,-130 -340,-140 -360,-100 C-370,-80 -350,0 -300,20 L-200,0 Z" fill="#FF6B35"/>
+    <path d="M220,-60 C280,-130 340,-140 360,-100 C370,-80 350,0 300,20 L200,0 Z" fill="#FF6B35"/>
+    <line x1="-170" y1="30" x2="-260" y2="100" stroke="#E55A2B" stroke-width="10" stroke-linecap="round"/>
+    <line x1="-150" y1="80" x2="-240" y2="160" stroke="#E55A2B" stroke-width="10" stroke-linecap="round"/>
+    <line x1="170" y1="30" x2="260" y2="100" stroke="#E55A2B" stroke-width="10" stroke-linecap="round"/>
+    <line x1="150" y1="80" x2="240" y2="160" stroke="#E55A2B" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bottom section: Features -->
+  <g>
+    <text x="1800" y="3900" text-anchor="middle" font-family="'Courier New', monospace" font-size="48" fill="#FF6B35" letter-spacing="10" opacity="0.8">
+      MEMORY-SAFE BLOCKCHAIN
+    </text>
+
+    <!-- Feature blocks -->
+    <g transform="translate(500, 4050)">
+      <rect x="0" y="0" width="760" height="200" rx="12" fill="none" stroke="#FF6B35" stroke-width="2" opacity="0.5"/>
+      <text x="380" y="70" text-anchor="middle" font-family="'Courier New', monospace" font-size="36" fill="#FFD700" letter-spacing="4">ZERO-COPY</text>
+      <text x="380" y="120" text-anchor="middle" font-family="'Courier New', monospace" font-size="28" fill="#888" letter-spacing="2">TRANSACTIONS</text>
+      <text x="380" y="168" text-anchor="middle" font-family="'Courier New', monospace" font-size="22" fill="#555">Fearless concurrency</text>
+    </g>
+
+    <g transform="translate(1420, 4050)">
+      <rect x="0" y="0" width="760" height="200" rx="12" fill="none" stroke="#FF6B35" stroke-width="2" opacity="0.5"/>
+      <text x="380" y="70" text-anchor="middle" font-family="'Courier New', monospace" font-size="36" fill="#FFD700" letter-spacing="4">BORROW</text>
+      <text x="380" y="120" text-anchor="middle" font-family="'Courier New', monospace" font-size="28" fill="#888" letter-spacing="2">CHECKED BLOCKS</text>
+      <text x="380" y="168" text-anchor="middle" font-family="'Courier New', monospace" font-size="22" fill="#555">No double-spends</text>
+    </g>
+
+    <g transform="translate(2340, 4050)">
+      <rect x="0" y="0" width="760" height="200" rx="12" fill="none" stroke="#FF6B35" stroke-width="2" opacity="0.5"/>
+      <text x="380" y="70" text-anchor="middle" font-family="'Courier New', monospace" font-size="36" fill="#FFD700" letter-spacing="4">LIFETIME</text>
+      <text x="380" y="120" text-anchor="middle" font-family="'Courier New', monospace" font-size="28" fill="#888" letter-spacing="2">GUARANTEES</text>
+      <text x="380" y="168" text-anchor="middle" font-family="'Courier New', monospace" font-size="22" fill="#555">Immutable history</text>
+    </g>
+  </g>
+
+  <!-- Bottom tagline -->
+  <text x="1800" y="4520" text-anchor="middle" font-family="'Courier New', monospace" font-size="40" fill="#c0c0c0" letter-spacing="12" opacity="0.6">
+    THE CHAIN THAT NEVER SEGFAULTS
+  </text>
+
+  <!-- Bottom hash decoration -->
+  <text x="1800" y="4650" text-anchor="middle" font-family="'Courier New', monospace" font-size="24" fill="#FF6B35" opacity="0.2" letter-spacing="3">
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  </text>
+
+  <!-- Website / project -->
+  <text x="1800" y="4850" text-anchor="middle" font-family="'Courier New', monospace" font-size="44" fill="#FFD700" letter-spacing="6" opacity="0.7">
+    github.com/Scottcjn/rustchain-bounties
+  </text>
+
+  <!-- Edition label -->
+  <text x="1800" y="5100" text-anchor="middle" font-family="'Courier New', monospace" font-size="30" fill="#555" letter-spacing="10">
+    LIMITED EDITION PRINT
+  </text>
+</svg>

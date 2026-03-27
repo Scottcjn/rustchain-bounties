@@ -1,0 +1,23 @@
+name: Verify Bounties
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  verify:
+    if: contains(github.event.comment.body, '/claim')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run Verification Bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          USER_LOGIN: ${{ github.event.comment.user.login }}
+        run: python scripts/verify_bounties.py

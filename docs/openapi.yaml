@@ -1,0 +1,603 @@
+openapi: 3.0.3
+info:
+  title: RustChain REST API
+  description: |
+    REST API endpoints for the RustChain blockchain platform.
+    This specification documents all available endpoints for interacting with the RustChain network.
+  version: 1.0.0
+  contact:
+    name: RustChain Team
+    url: https://rustchain.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.rustchain.org/v1
+    description: Production server
+  - url: https://testnet-api.rustchain.org/v1
+    description: Testnet server
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the node
+      tags:
+        - System
+      responses:
+        '200':
+          description: Node is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: integer
+                    example: 1640000000
+
+  /epoch:
+    get:
+      summary: Get current epoch
+      description: Returns information about the current epoch
+      tags:
+        - Blockchain
+      responses:
+        '200':
+          description: Current epoch information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  epoch:
+                    type: integer
+                    example: 123
+                  block_height:
+                    type: integer
+                    example: 456789
+                  timestamp:
+                    type: integer
+                    example: 1640000000
+
+  /api/miners:
+    get:
+      summary: List miners
+      description: Returns a list of active miners on the network
+      tags:
+        - Mining
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of miners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  miners:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                        hashrate:
+                          type: string
+                        blocks:
+                          type: integer
+                  total:
+                    type: integer
+
+  /wallet/balance:
+    get:
+      summary: Get wallet balance
+      description: Returns the balance of a specified wallet address
+      tags:
+        - Wallet
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "0x742d35Cc6634C0532925a3b844Bc9e7595f..."
+      responses:
+        '200':
+          description: Wallet balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    type: string
+                  balance:
+                    type: string
+                    example: "1.2345"
+                  balance_wei:
+                    type: string
+                    example: "1234500000000000000"
+
+  /attest/submit:
+    post:
+      summary: Submit attestation
+      description: Submit a new attestation to the network
+      tags:
+        - Attestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+                - signature
+              properties:
+                data:
+                  type: object
+                  description: The data to attest
+                signature:
+                  type: string
+                  description: Digital signature
+      responses:
+        '200':
+          description: Attestation submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx_hash:
+                    type: string
+                    example: "0xabc123..."
+                  status:
+                    type: string
+                    example: "submitted"
+
+  /transactions:
+    get:
+      summary: List transactions
+      description: Returns transactions for a given address
+      tags:
+        - Wallet
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                        from:
+                          type: string
+                        to:
+                          type: string
+                        value:
+                          type: string
+                        timestamp:
+                          type: integer
+
+  /block/{block_number}:
+    get:
+      summary: Get block by number
+      description: Returns information about a specific block
+      tags:
+        - Blockchain
+      parameters:
+        - name: block_number
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 12345
+      responses:
+        '200':
+          description: Block information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number:
+                    type: integer
+                  hash:
+                    type: string
+                  timestamp:
+                    type: integer
+                  transactions:
+                    type: array
+                    items:
+                      type: string
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SophiaInspection:
+      type: object
+      description: "RIP-306: Sophia Elya inspection result"
+      properties:
+        miner_id:
+          type: string
+        verdict:
+          type: string
+          enum: [APPROVED, CAUTIOUS, SUSPICIOUS, REJECTED]
+        confidence:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+        reasoning:
+          type: string
+        flags:
+          type: array
+          items:
+            type: string
+        emoji:
+          type: string
+        phase:
+          type: string
+          example: advisory
+        effective_verdict:
+          type: string
+          description: Override verdict if present, else original verdict
+        created_at:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+        details:
+          type: object
+
+    Transaction:
+      type: object
+      properties:
+        hash:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          type: string
+        gas:
+          type: string
+        gas_price:
+          type: string
+        nonce:
+          type: integer
+        timestamp:
+          type: integer
+
+    Block:
+      type: object
+      properties:
+        number:
+          type: integer
+        hash:
+          type: string
+        parent_hash:
+          type: string
+        timestamp:
+          type: integer
+        transactions:
+          type: array
+          items:
+            type: string
+        miner:
+          type: string
+        difficulty:
+          type: string
+        total_difficulty:
+          type: string
+
+  # ── SophiaCore Attestation Inspector (RIP-306) ────────────────────
+
+  /sophia/inspect:
+    post:
+      summary: Inspect miner fingerprint
+      description: Submit a fingerprint bundle for Sophia Elya semantic analysis. Returns verdict, confidence, reasoning, and anomaly flags.
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - miner_id
+                - fingerprint
+              properties:
+                miner_id:
+                  type: string
+                fingerprint:
+                  type: object
+                hardware:
+                  type: object
+                epoch:
+                  type: integer
+      responses:
+        '200':
+          description: Inspection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/status/{miner_id}:
+    get:
+      summary: Latest inspection for miner
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest inspection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SophiaInspection'
+        '404':
+          description: No inspections found
+
+  /sophia/history/{miner_id}:
+    get:
+      summary: Inspection history for miner
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of inspections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  miner_id:
+                    type: string
+                  count:
+                    type: integer
+                  inspections:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/stats:
+    get:
+      summary: Aggregate inspection statistics
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_inspections:
+                    type: integer
+                  by_verdict:
+                    type: object
+                  avg_confidence:
+                    type: number
+                  pending_reviews:
+                    type: integer
+
+  /sophia/pending:
+    get:
+      summary: Get verdicts awaiting human review
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Pending reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  reviews:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaInspection'
+
+  /sophia/override:
+    post:
+      summary: Admin override verdict
+      description: Requires HTTP Basic Auth (if configured)
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - inspection_id
+                - verdict
+                - reason
+              properties:
+                inspection_id:
+                  type: integer
+                verdict:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+                reason:
+                  type: string
+                admin:
+                  type: string
+      responses:
+        '200':
+          description: Override recorded
+        '401':
+          description: Authentication required
+        '403':
+          description: Invalid credentials
+
+  /sophia/batch-status:
+    post:
+      summary: Batch lookup of latest verdicts
+      description: Returns the latest verdict for each miner ID (max 100)
+      tags:
+        - SophiaCore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - miner_ids
+              properties:
+                miner_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Batch results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: object
+
+  /sophia/trigger/{miner_id}:
+    post:
+      summary: Trigger immediate inspection
+      description: Used by sybil risk scorer. Requires Bearer token auth.
+      tags:
+        - SophiaCore
+      parameters:
+        - name: miner_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inspection result
+        '403':
+          description: Invalid trigger secret
+
+  /sophia/health:
+    get:
+      summary: SophiaCore service health
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Service health including Ollama host status
+
+  /sophia/metrics:
+    get:
+      summary: Prometheus metrics
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: Prometheus-format metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /sophia/dashboard:
+    get:
+      summary: Admin spot-check dashboard
+      tags:
+        - SophiaCore
+      responses:
+        '200':
+          description: HTML dashboard page
+          content:
+            text/html:
+              schema:
+                type: string
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Blockchain
+    description: Blockchain data endpoints
+  - name: Wallet
+    description: Wallet and transaction endpoints
+  - name: Mining
+    description: Mining-related endpoints
+  - name: Attestation
+    description: Attestation-related endpoints
+  - name: SophiaCore
+    description: "RIP-306: SophiaCore Attestation Inspector — AI-powered hardware validation (Phase 1: Advisory)"
