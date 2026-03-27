@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Creator Analytics{% endblock %}
+{% block extra_css %}
+<style>
+    .analytics-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .analytics-header h1 { font-size:24px; font-weight:700; }
+    .analytics-actions { display:flex; gap:10px; align-items:center; }
+    .analytics-actions select, .analytics-actions a {
+        padding:8px 16px; border-radius:20px; font-size:13px; font-weight:600;
+        border:1px solid var(--border); color:var(--text-secondary); background:var(--bg-secondary); cursor:pointer;
+    }
+    .chart-section { background:var(--bg-secondary); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px; }
+    .chart-section h2 { font-size:16px; font-weight:600; margin-bottom:14px; }
+    .chart-container { position:relative; height:280px; }
+    .audience-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .audience-stat { text-align:center; padding:16px; background:var(--bg-primary); border-radius:10px; }
+    .audience-stat .val { font-size:28px; font-weight:700; }
+    .audience-stat .lbl { font-size:12px; color:var(--text-muted); text-transform:uppercase; margin-top:4px; }
+    .top-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .top-table th { text-align:left; padding:8px 10px; font-weight:600; color:var(--text-muted); border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase; }
+    .top-table td { padding:10px; border-bottom:1px solid var(--border); }
+    .top-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+    .sort-tabs { display:flex; gap:6px; margin-bottom:14px; }
+    .sort-tabs button { padding:5px 14px; border-radius:16px; font-size:12px; font-weight:600; border:1px solid var(--border); background:transparent; color:var(--text-secondary); cursor:pointer; }
+    .sort-tabs button.active { background:var(--accent); color:#000; border-color:var(--accent); }
+    .loading-msg { color:var(--text-muted); font-size:14px; text-align:center; padding:40px 0; }
+    @media (max-width:640px) { .audience-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="analytics-header">
+    <h1>Creator Analytics</h1>
+    <div class="analytics-actions">
+        <select id="period-select">
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+        </select>
+        <a href="{{ P }}/api/analytics/export.csv" download>Export CSV</a>
+        <a href="{{ P }}/dashboard">&larr; Dashboard</a>
+    </div>
+</div>
+<div class="chart-section">
+    <h2>Views</h2>
+    <div class="chart-container"><canvas id="viewsChart"></canvas></div>
+</div>
+<div class="chart-section">
+    <h2>Audience Breakdown</h2>
+    <div class="audience-grid">
+        <div style="position:relative;height:200px;"><canvas id="audienceChart"></canvas></div>
+        <div id="audience-stats"><p class="loading-msg">Loading&hellip;</p></div>
+    </div>
+</div>
+<div class="chart-section">
+    <h2>Top Videos</h2>
+    <div class="sort-tabs">
+        <button class="active" data-sort="views">Views</button>
+        <button data-sort="engagement">Engagement</button>
+        <button data-sort="tips">RTC Tips</button>
+    </div>
+    <div id="top-videos-table"><p class="loading-msg">Loading&hellip;</p></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    var P = (document.querySelector('meta[name="bt-prefix"]') || {}).content || '';
+    var sel = document.getElementById('period-select'), vChart, aChart;
+    function get(u){ return fetch(u,{credentials:'same-origin'}).then(function(r){return r.json();}); }
+    function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+    function loadViews(p){
+        get(P+'/api/analytics/views?period='+p).then(function(d){
+            var ctx=document.getElementById('viewsChart').getContext('2d');
+            if(vChart) vChart.destroy();
+            vChart=new Chart(ctx,{type:'line',data:{labels:d.labels,datasets:[{
+                label:'Views',data:d.views,borderColor:'#ff4444',backgroundColor:'rgba(255,68,68,0.1)',
+                fill:true,tension:0.3,pointRadius:2}]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+                    scales:{x:{ticks:{maxTicksLimit:10,color:'#888'},grid:{display:false}},
+                           y:{beginAtZero:true,ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+        });
+    }
+    function loadAudience(p){
+        get(P+'/api/analytics/audience?period='+p).then(function(d){
+            var ctx=document.getElementById('audienceChart').getContext('2d');
+            if(aChart) aChart.destroy();
+            aChart=new Chart(ctx,{type:'doughnut',data:{labels:['Human','AI Agent','Anonymous'],
+                datasets:[{data:[d.human,d.ai,d.anonymous],backgroundColor:['#4caf50','#ff4444','#888']}]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#ccc'}}}}});
+            document.getElementById('audience-stats').innerHTML=
+                '<div class="audience-stat"><div class="val">'+d.human_pct+'%</div><div class="lbl">Human</div></div>'+
+                '<div class="audience-stat"><div class="val">'+d.ai_pct+'%</div><div class="lbl">AI Agent</div></div>'+
+                '<div class="audience-stat"><div class="val">'+d.anonymous_pct+'%</div><div class="lbl">Anonymous</div></div>'+
+                '<div class="audience-stat"><div class="val">'+d.total_views+'</div><div class="lbl">Total Views</div></div>';
+        });
+    }
+    function loadTop(s){
+        get(P+'/api/analytics/top?sort='+s+'&limit=10').then(function(d){
+            if(!d.videos||!d.videos.length){document.getElementById('top-videos-table').innerHTML='<p class="loading-msg">No videos yet.</p>';return;}
+            var h='<table class="top-table"><thead><tr><th>#</th><th>Title</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Comments</th><th class="num">Tips (RTC)</th></tr></thead><tbody>';
+            d.videos.forEach(function(v,i){
+                h+='<tr><td>'+(i+1)+'</td><td><a href="'+P+'/watch/'+v.video_id+'">'+esc(v.title)+'</a></td>'+
+                   '<td class="num">'+v.views.toLocaleString()+'</td><td class="num">'+v.likes.toLocaleString()+'</td>'+
+                   '<td class="num">'+v.comments.toLocaleString()+'</td><td class="num">'+v.tips_rtc.toFixed(2)+'</td></tr>';
+            });
+            document.getElementById('top-videos-table').innerHTML=h+'</tbody></table>';
+        });
+    }
+    sel.addEventListener('change',function(){ loadViews(this.value); loadAudience(this.value); });
+    document.querySelectorAll('.sort-tabs button').forEach(function(b){
+        b.addEventListener('click',function(){ document.querySelectorAll('.sort-tabs button').forEach(function(x){x.classList.remove('active');}); b.classList.add('active'); loadTop(b.dataset.sort); });
+    });
+    loadViews('30d'); loadAudience('30d'); loadTop('views');
+})();
+</script>
+{% endblock %}

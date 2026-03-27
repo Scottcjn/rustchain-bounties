@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RustChain Config",
+  "scopeName": "source.rustchain-config",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#keys" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#booleans" },
+    { "include": "#rustchain-keywords" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.rustchain-config",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "sections": {
+      "patterns": [
+        {
+          "name": "entity.name.section.rustchain-config",
+          "match": "^\\s*\\[\\[?[\\w.\\-]+\\]\\]?",
+          "comment": "TOML table headers: [node], [[miners]], etc."
+        }
+      ]
+    },
+    "keys": {
+      "patterns": [
+        {
+          "name": "variable.other.key.rustchain-config",
+          "match": "^\\s*[A-Za-z_][A-Za-z0-9_.\\-]*(?=\\s*[=:])"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.triple.rustchain-config",
+          "begin": "\"\"\"",
+          "end": "\"\"\""
+        },
+        {
+          "name": "string.quoted.double.rustchain-config",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.rustchain-config",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.rustchain-config",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.rustchain-config",
+          "match": "\\b[0-9][0-9_]*(\\.[0-9][0-9_]*)?\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.rustchain-config",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "rustchain-keywords": {
+      "comment": "RustChain-specific identifiers highlighted as language keywords.",
+      "patterns": [
+        {
+          "name": "keyword.other.rustchain-config",
+          "match": "\\b(miner_id|wallet|node_url|NODE_URL|epoch|slot|attestation|fingerprint|entropy|hardware_type|device_arch|device_family|antiquity_multiplier|blocks_per_epoch|epoch_pot|miner_pubkey|nonce|commitment|ergo_anchor)\\b"
+        },
+        {
+          "name": "support.type.rustchain-config",
+          "match": "\\b(RTC|RIP-200|PoA|PSE|BCOS)\\b"
+        },
+        {
+          "name": "constant.other.hardware-tier.rustchain-config",
+          "match": "\\b(PowerPC_G4|PowerPC_G5|POWER8|Apple_Silicon|x86_64|Intel_386|Motorola_68000|DEC_Alpha|SPARC|MIPS_R2000)\\b"
+        },
+        {
+          "name": "constant.other.url.rustchain-config",
+          "match": "https?://[^\\s\"']+"
+        }
+      ]
+    }
+  }
+}

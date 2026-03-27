@@ -1,0 +1,52 @@
+# Stale Issue/PR Closer
+# Automatically marks and closes stale issues and pull requests
+# Bounty: #1591 - Create a GitHub Action workflow
+
+name: Close Stale Issues and PRs
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # Issues configuration
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          stale-issue-label: 'stale'
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed if no further activity occurs.
+            Thank you for your contributions!
+          close-issue-message: >
+            This issue was closed because it has been inactive for 14 days since being
+            marked as stale. Please reopen if this is still relevant.
+          exempt-issue-labels: 'bug,security,help wanted,bounty,pinned'
+          
+          # PRs configuration
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: 'stale'
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed if no further activity occurs.
+            Thank you for your contributions!
+          close-pr-message: >
+            This PR was closed because it has been inactive for 7 days since being
+            marked as stale. Please reopen if this is still relevant.
+          exempt-pr-labels: 'bug,security,bounty,pinned'
+          
+          # General settings
+          operations-per-run: 100
+          remove-stale-when-updated: true
+          debug-only: false

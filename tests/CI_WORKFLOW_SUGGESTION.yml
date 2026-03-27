@@ -1,0 +1,67 @@
+# Suggested GitHub Actions workflow for XP/Badge script testing
+# Copy this to .github/workflows/test-xp-badge-scripts.yml
+#
+# NOTE: This file is provided as a suggestion because the PR author's
+# OAuth token lacks the 'workflow' scope needed to create workflow files.
+# A maintainer can copy this into place.
+
+name: Test XP/Badge Scripts
+
+on:
+  push:
+    paths:
+      - '.github/scripts/update_xp_tracker_api.py'
+      - '.github/scripts/generate_dynamic_badges.py'
+      - 'tests/test_update_xp_tracker_api.py'
+      - 'tests/test_generate_dynamic_badges.py'
+  pull_request:
+    paths:
+      - '.github/scripts/update_xp_tracker_api.py'
+      - '.github/scripts/generate_dynamic_badges.py'
+      - 'tests/test_update_xp_tracker_api.py'
+      - 'tests/test_generate_dynamic_badges.py'
+  workflow_dispatch:
+
+jobs:
+  test-scripts:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Syntax check - update_xp_tracker_api.py
+        run: python -m py_compile .github/scripts/update_xp_tracker_api.py
+
+      - name: Syntax check - generate_dynamic_badges.py
+        run: python -m py_compile .github/scripts/generate_dynamic_badges.py
+
+      - name: Run XP tracker tests
+        run: python -m pytest tests/test_update_xp_tracker_api.py -v
+
+      - name: Run badge generation tests
+        run: python -m pytest tests/test_generate_dynamic_badges.py -v
+
+      - name: Deterministic output check
+        run: |
+          # Verify that running the badge generator twice produces same output
+          mkdir -p /tmp/badges1 /tmp/badges2
+          python .github/scripts/generate_dynamic_badges.py \
+            --tracker bounties/XP_TRACKER.md --out-dir /tmp/badges1
+          python .github/scripts/generate_dynamic_badges.py \
+            --tracker bounties/XP_TRACKER.md --out-dir /tmp/badges2
+          diff -r /tmp/badges1 /tmp/badges2
+          echo "✅ Deterministic output verified"

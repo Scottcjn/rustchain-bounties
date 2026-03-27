@@ -1,0 +1,43 @@
+{
+  "RustChain: Node config scaffold": {
+    "prefix": "rtc-node-config",
+    "body": [
+      "[node]",
+      "url = \"${1:https://50.28.86.131}\"",
+      "verify_tls = ${2:false}",
+      "",
+      "[wallet]",
+      "miner_id = \"${3:my-miner-id}\"",
+      "",
+      "[attestation]",
+      "interval_seconds = ${4:600}",
+      "timeout_seconds = ${5:10}",
+      "",
+      "[hardware]",
+      "device_family = \"${6:x86_64}\"",
+      "device_arch = \"${7:modern}\""
+    ],
+    "description": "Scaffold for a RustChain node configuration file."
+  },
+  "RustChain: Miner section": {
+    "prefix": "rtc-miner-section",
+    "body": [
+      "[[miners]]",
+      "miner_id = \"${1:my-miner}\"",
+      "wallet = \"${2:RTC_WALLET_ADDRESS}\"",
+      "hardware_type = \"${3:x86_64}\"",
+      "antiquity_multiplier = ${4:1.0}"
+    ],
+    "description": "Add a miner entry to a RustChain config."
+  },
+  "RustChain: Ergo anchoring section": {
+    "prefix": "rtc-ergo-anchor",
+    "body": [
+      "[ergo_anchor]",
+      "enabled = ${1:true}",
+      "anchor_interval_blocks = ${2:144}",
+      "ergo_node_url = \"${3:https://ergo-node.example.com}\""
+    ],
+    "description": "Ergo anchoring configuration for RustChain."
+  }
+}

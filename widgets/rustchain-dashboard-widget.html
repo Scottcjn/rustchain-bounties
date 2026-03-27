@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Network Dashboard Widget</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e14;
+            --bg-secondary: #111827;
+            --bg-card: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --border-color: #374151;
+            --glow-blue: rgba(59, 130, 246, 0.3);
+            --glow-green: rgba(16, 185, 129, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .widget-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 0 20px var(--glow-blue);
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .refresh-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refresh-icon {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-online {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-blue);
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .card-value .unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .card-value.accent {
+            color: var(--accent-blue);
+        }
+
+        .card-value.green {
+            color: var(--accent-green);
+        }
+
+        .card-value.yellow {
+            color: var(--accent-yellow);
+        }
+
+        .card-value.purple {
+            color: var(--accent-purple);
+        }
+
+        .activity-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+        }
+
+        .miner-node {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            animation: miner-pulse 3s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--glow-blue);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .miner-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--glow-blue);
+        }
+
+        .miner-node.active {
+            animation: miner-pulse 2s ease-in-out infinite;
+        }
+
+        .miner-node .tooltip {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+        }
+
+        .miner-node:hover .tooltip {
+            opacity: 1;
+        }
+
+        @keyframes miner-pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px var(--glow-blue);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px var(--glow-blue);
+            }
+        }
+
+        .hardware-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .hardware-modern {
+            background: var(--accent-blue);
+        }
+
+        .hardware-vintage {
+            background: var(--accent-yellow);
+        }
+
+        .hardware-other {
+            background: var(--text-secondary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--accent-red);
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .card-value {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 16px;
+            }
+
+            .card-value {
+                font-size: 20px;
+            }
+
+            .miner-node {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">RC</div>
+                <div>
+                    <div class="title">RustChain Network</div>
+                    <div class="refresh-info">
+                        <span class="refresh-icon">↻</span>
+                        <span id="last-updated">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="status-badge status-online" id="network-status">
+                <span class="status-dot"></span>
+                <span id="status-text">Online</span>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <span>Loading network data...</span>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="grid">
+                <div class="card" onclick="window.open('https://50.28.86.131/explorer', '_blank')">
+                    <div class="card-label">Current Epoch</div>
+                    <div class="card-value accent" id="epoch-number">--</div>
+                </div>
+
+                <div class="card" onclick="window.open('https://50.28.86.131/api/miners', '_blank')">
+                    <div class="card-label green">Active Miners</div>
+                    <div class="card-value green" id="miner-count">--</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Epoch Slot</div>
+                    <div class="card-value" id="slot-number">--<span class="unit">/144</span></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Node Uptime</div>
+                    <div class="card-value" id="uptime">--<span class="unit">h</span></div>
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <div class="section-header">
+                    <div class="section-title">Miner Activity</div>
+                    <div class="card-label" id="miner-count-display">-- miners</div>
+                </div>
+                <div class="activity-grid" id="miner-grid">
+                    <!-- Miner nodes will be dynamically added here -->
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>Powered by <a href="https://50.28.86.131/explorer" target="_blank">RustChain Network</a></p>
+                <p style="margin-top: 8px; font-size: 10px; color: var(--text-secondary);">
+                    Data refreshes every 60 seconds | Auto-refresh enabled
+                </p>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            <div>
+                <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
+                <div>Failed to load network data</div>
+                <div style="margin-top: 8px; font-size: 12px;">Retrying in 60 seconds...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        const REFRESH_INTERVAL = 60000; // 60 seconds
+
+        // Hardware types and their icons
+        const HARDWARE_TYPES = {
+            'Apple Silicon': '🍎',
+            'PowerPC G4': '⚡',
+            'PowerPC G5': '💾',
+            'x86-64': '💻',
+            'Unknown/Other': '❓'
+        };
+
+        // Miner icons for activity visualization
+        const MINER_ICONS = ['⛏️', '🔨', '⚒️', '⚙️', '🖥️', '📊', '🔬', '🧪', '📡', '🛰️'];
+
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            return hours.toFixed(1);
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleTimeString();
+        }
+
+        function getHardwareIcon(hardwareType) {
+            if (hardwareType.includes('Apple')) return HARDWARE_TYPES['Apple Silicon'];
+            if (hardwareType.includes('PowerPC')) return HARDWARE_TYPES['PowerPC G4'];
+            if (hardwareType.includes('x86')) return HARDWARE_TYPES['x86-64'];
+            return HARDWARE_TYPES['Unknown/Other'];
+        }
+
+        function isVintage(hardwareType) {
+            return hardwareType.includes('Vintage') || hardwareType.includes('PowerPC');
+        }
+
+        async function fetchWithTimeout(url, timeout = 10000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            try {
+                const response = await fetch(url, {
+                    mode: 'cors',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        async function fetchNetworkData() {
+            try {
+                // Fetch all data in parallel
+                const [health, epoch, miners] = await Promise.all([
+                    fetchWithTimeout(`${API_BASE}/health`),
+                    fetchWithTimeout(`${API_BASE}/epoch`),
+                    fetchWithTimeout(`${API_BASE}/api/miners`)
+                ]);
+
+                return { health, epoch, miners };
+            } catch (error) {
+                console.error('Error fetching network data:', error);
+                throw error;
+            }
+        }
+
+        function updateWidget(data) {
+            const { health, epoch, miners } = data;
+
+            // Update network status
+            const statusBadge = document.getElementById('network-status');
+            const statusText = document.getElementById('status-text');
+            if (health.ok) {
+                statusBadge.className = 'status-badge status-online';
+                statusText.textContent = 'Online';
+            } else {
+                statusBadge.className = 'status-badge status-offline';
+                statusText.textContent = 'Offline';
+            }
+
+            // Update cards
+            document.getElementById('epoch-number').textContent = epoch.epoch;
+            document.getElementById('miner-count').textContent = miners.length;
+            document.getElementById('slot-number').innerHTML = `${epoch.slot}<span class="unit">/144</span>`;
+            document.getElementById('uptime').innerHTML = `${formatUptime(health.uptime_s)}<span class="unit">h</span>`;
+
+            // Update miner display
+            document.getElementById('miner-count-display').textContent = `${miners.length} miners`;
+
+            // Update miner activity grid
+            const minerGrid = document.getElementById('miner-grid');
+            minerGrid.innerHTML = '';
+
+            miners.forEach((miner, index) => {
+                const node = document.createElement('div');
+                node.className = 'miner-node active';
+
+                // Add miner icon
+                const icon = MINER_ICONS[index % MINER_ICONS.length];
+                node.textContent = icon;
+
+                // Add hardware badge
+                const badge = document.createElement('div');
+                badge.className = 'hardware-badge';
+
+                const hardwareType = miner.hardware_type;
+                if (hardwareType.includes('Vintage')) {
+                    badge.classList.add('hardware-vintage');
+                    badge.textContent = 'V';
+                } else if (hardwareType.includes('Modern')) {
+                    badge.classList.add('hardware-modern');
+                    badge.textContent = 'M';
+                } else {
+                    badge.classList.add('hardware-other');
+                    badge.textContent = 'O';
+                }
+
+                node.appendChild(badge);
+
+                // Add tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = `${miner.device_family} (${miner.device_arch})`;
+                node.appendChild(tooltip);
+
+                // Stagger animations
+                node.style.animationDelay = `${index * 0.1}s`;
+
+                minerGrid.appendChild(node);
+            });
+
+            // Update last updated time
+            const now = new Date();
+            document.getElementById('last-updated').textContent = `Updated: ${now.toLocaleTimeString()}`;
+
+            // Show content
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'flex';
+        }
+
+        async function loadWidget() {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                const data = await fetchNetworkData();
+                updateWidget(data);
+            } catch (error) {
+                console.error('Failed to load widget:', error);
+                showError();
+            }
+        }
+
+        // Initial load
+        loadWidget();
+
+        // Auto-refresh every 60 seconds
+        setInterval(loadWidget, REFRESH_INTERVAL);
+    </script>
+</body>
+</html>
