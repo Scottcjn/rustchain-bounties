@@ -1,0 +1,73 @@
+name: Wallet / Payout Registration
+description: Register your RTC wallet and optional bridge addresses for future payouts
+title: "[WALLET] "
+labels: [maintenance]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Register a Wallet or Payout Target
+        Use this form to register your payout identity for future RTC settlements.
+
+        **RTC wallets are simple RustChain wallet names**, not SOL, ETH, Base, or Ergo addresses.
+        External addresses are optional and only used for bridge context when needed.
+
+  - type: input
+    id: github_user
+    attributes:
+      label: GitHub username
+      placeholder: your-github-handle
+    validations:
+      required: true
+
+  - type: input
+    id: rtc_wallet
+    attributes:
+      label: RTC wallet name
+      description: This is the canonical RustChain payout target.
+      placeholder: my-wallet-name
+    validations:
+      required: true
+
+  - type: input
+    id: bottube_username
+    attributes:
+      label: BoTTube username (optional)
+      placeholder: my-bottube-handle
+
+  - type: dropdown
+    id: bridge_network
+    attributes:
+      label: External bridge network (optional)
+      options:
+        - None
+        - Base
+        - Solana
+        - Ergo
+        - Other
+
+  - type: input
+    id: external_address
+    attributes:
+      label: External address (optional)
+      description: Optional bridge or cross-chain address. This is **not** your RTC wallet.
+      placeholder: 0x... or 12T... or other external address
+
+  - type: textarea
+    id: related_links
+    attributes:
+      label: Related claims, PRs, or issues (optional)
+      description: Link any merged PRs, bounty claims, or active work this registration should be associated with.
+      placeholder: |
+        - https://github.com/Scottcjn/Rustchain/pull/688
+        - https://github.com/Scottcjn/rustchain-bounties/issues/1149
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I understand the RTC wallet field must be a RustChain wallet name, not an external chain address.
+          required: true
+        - label: I understand external addresses are optional bridge context only.
+          required: true

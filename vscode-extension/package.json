@@ -1,0 +1,137 @@
+{
+  "name": "rustchain-dev",
+  "displayName": "RustChain Development Tools",
+  "description": "VS Code extension for RustChain development — RTC balance status bar, config highlighting, and code snippets.",
+  "version": "0.1.0",
+  "publisher": "rustchain",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Scottcjn/rustchain-bounties"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "rustchain",
+    "rtc",
+    "blockchain",
+    "proof-of-attestation",
+    "mining"
+  ],
+  "activationEvents": [
+    "onLanguage:rustchain-config",
+    "workspaceContains:**/rustchain.toml",
+    "workspaceContains:**/rustchain.yaml"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "RustChain",
+      "properties": {
+        "rustchain.nodeUrl": {
+          "type": "string",
+          "default": "https://50.28.86.131",
+          "description": "URL of the RustChain attestation node."
+        },
+        "rustchain.minerId": {
+          "type": "string",
+          "default": "",
+          "description": "Your miner/wallet ID for balance display (e.g. 'my-miner-name')."
+        },
+        "rustchain.balanceRefreshInterval": {
+          "type": "number",
+          "default": 120,
+          "minimum": 30,
+          "description": "How often (in seconds) to refresh the RTC balance in the status bar."
+        },
+        "rustchain.showBalance": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show RTC balance in the status bar."
+        },
+        "rustchain.rejectUnauthorized": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enforce TLS certificate validation for the node (the default node uses a self-signed cert)."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "rustchain-config",
+        "aliases": [
+          "RustChain Config",
+          "rustchain"
+        ],
+        "extensions": [
+          ".rustchain.toml",
+          ".rustchain.yaml",
+          ".rustchain.yml"
+        ],
+        "filenames": [
+          "rustchain.toml",
+          "rustchain.yaml",
+          "rustchain.yml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rustchain-config",
+        "scopeName": "source.rustchain-config",
+        "path": "./syntaxes/rustchain-config.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "python",
+        "path": "./snippets/rustchain-python.json"
+      },
+      {
+        "language": "shellscript",
+        "path": "./snippets/rustchain-shell.json"
+      },
+      {
+        "language": "rustchain-config",
+        "path": "./snippets/rustchain-config.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "rustchain.refreshBalance",
+        "title": "RustChain: Refresh RTC Balance"
+      },
+      {
+        "command": "rustchain.setMinerId",
+        "title": "RustChain: Set Miner/Wallet ID"
+      },
+      {
+        "command": "rustchain.checkNodeHealth",
+        "title": "RustChain: Check Node Health"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0",
+    "@vscode/test-electron": "^2.3.0"
+  }
+}
