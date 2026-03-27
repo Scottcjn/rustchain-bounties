@@ -1,0 +1,16 @@
+{
+  "name": "github-tip-bot",
+  "version": "1.0.0",
+  "description": "GitHub Action to tip RTC to contributors",
+  "main": "tip.js",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["github", "action", "tip", "rtc", "cryptocurrency"],
+  "author": "Atlas",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
+  }
+}

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: RustChain Bug or Security Report
+    url: https://github.com/Scottcjn/Rustchain/issues/new?template=bug-report.yml
+    about: Product bugs, wallet bugs, node issues, and protocol issues belong in the Rustchain repo.
+  - name: BoTTube Bug or Feature Request
+    url: https://github.com/Scottcjn/bottube/issues/new?template=bug-report.yml
+    about: Product bugs, creator workflow issues, API bugs, and feature requests belong in the BoTTube repo.
+  - name: beacon-skill Bug or Security Report
+    url: https://github.com/Scottcjn/beacon-skill/issues/new?template=bug-report.yml
+    about: Relay, identity, install, and packaging issues belong in the beacon-skill repo.
