@@ -1,0 +1,77 @@
+name: BCOS v2 Attestation Scan
+description: Run a BCOS (Beacon Certified Open Source) trust scan on any repository and post results as a PR comment.
+author: rbxict
+
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  tier:
+    description: "BCOS tier to evaluate: L0, L1, or L2"
+    required: false
+    default: "L1"
+  reviewer:
+    description: "RTC wallet ID of the reviewer agent"
+    required: false
+    default: "RTCfe4525ac631c325867a65d1b52b793779731d0d7"
+  node-url:
+    description: "RustChain node URL for anchoring attestation"
+    required: false
+    default: "http://50.28.86.131:3000"
+
+outputs:
+  trust_score:
+    description: "Computed BCOS trust score (0-100)"
+    value: ${{ steps.bcos.outputs.trust_score }}
+  cert_id:
+    description: "Certificate ID if tier_met is true"
+    value: ${{ steps.bcos.outputs.cert_id }}
+  tier_met:
+    description: "Whether the repo meets the requested BCOS tier"
+    value: ${{ steps.bcos.outputs.tier_met }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install deps
+      shell: bash
+      run: pip install requests
+
+    - name: Run BCOS Engine
+      id: bcos
+      shell: bash
+      env:
+        BCOS_TIER: ${{ inputs.tier }}
+        BCOS_REVIEWER: ${{ inputs.reviewer }}
+        RTC_NODE_URL: ${{ inputs.node-url }}
+        GITHUB_REPO: ${{ github.repository }}
+      run: |
+        python ${{ github.action_path }}/bcos_runner.py
+
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const score = '${{ steps.bcos.outputs.trust_score }}';
+          const cert  = '${{ steps.bcos.outputs.cert_id }}';
+          const met   = '${{ steps.bcos.outputs.tier_met }}';
+          const tier  = '${{ inputs.tier }}';
+          const badge = met === 'true'
+            ? `![BCOS ${tier}](https://rustchain.org/bcos/badge/${cert}.svg)`
+            : '⚠️ Tier not yet met';
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## BCOS v2 Attestation Result\n\n${badge}\n\n| Field | Value |\n|---|---|\n| Trust Score | ${score}/100 |\n| Cert ID | ${cert || 'N/A'} |\n| Tier Met | ${met} |\n`
+          });
