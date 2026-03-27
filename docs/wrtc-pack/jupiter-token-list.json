@@ -1,0 +1,19 @@
+{
+  "name": "wRTC Token Listing Request",
+  "description": "Token listing request for wRTC - Wrapped RustChain Credit",
+  "tokenInfo": {
+    "name": "Wrapped RustChain Credit",
+    "symbol": "wRTC",
+    "decimals": 6,
+    "mintAddress": "12TAdKXxcGf6oCv4rqDz2NkgxjyHq6HQKoxKZYGf5i4X",
+    "logoURI": "https://github.com/Scottcjn/rustchain-bounties/raw/main/assets/wrtc-logo.png",
+    "tags": ["utility", "bridge", "rustchain", "ai-mining"]
+  },
+  "extensions": {
+    "website": "https://bottube.ai/bridge/wrtc",
+    "twitter": "https://x.com/RustchainPOA",
+    "github": "https://github.com/Scottcjn/rustchain-bounties",
+    "raydiumPool": "8CF2Q8nSCxRacDShbtF86XTSrYjueBMKmfdR3MLdnYzb",
+    "description": "wRTC is the wrapped version of RTC (RustChain Credit), the native token for RustChain's AI mining ecosystem. It enables seamless trading on Solana DEXs while maintaining bridge capability to BoTTube credits for content creator tipping."
+  }
+}

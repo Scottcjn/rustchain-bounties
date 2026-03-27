@@ -1,0 +1,309 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RustChain Vintage Hardware Museum 3D</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Courier New', Courier, monospace; }
+        canvas { display: block; }
+        #ui {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
+            font-size: 1.2em;
+            z-index: 5;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 320px;
+            background: rgba(0, 20, 0, 0.85);
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 15px;
+            display: none;
+            font-family: monospace;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #0f0;
+            z-index: 5;
+        }
+        #info h2 { margin-top: 0; font-size: 1.2em; border-bottom: 1px solid #0f0; padding-bottom: 5px; }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+            text-align: center;
+        }
+        #start-screen h1 { color: #0f0; }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: #0f0;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        button:hover { background: #5f5; box-shadow: 0 0 15px #0f0; }
+    </style>
+    <!-- Import map for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="start-screen">
+        <h1>Vintage Hardware Museum 3D</h1>
+        <p>Proof-of-Antiquity: Real hardware mining RTC</p>
+        <p>Controls: WASD + Mouse to Move/Look, Mobile Touch to Move, Click to Interact.</p>
+        <button id="start-btn">Enter Exhibit</button>
+    </div>
+    <div id="crosshair">+</div>
+    <div id="ui">WASD: Move | Click: Live Node Data</div>
+    <div id="info">
+        <h2 id="info-title">Machine Info</h2>
+        <div id="info-content">Connecting...</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { VRButton } from 'three/addons/webxr/VRButton.js';
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0c);
+        scene.fog = new THREE.FogExp2(0x0a0a0c, 0.04);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 1.6, 10);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.xr.enabled = true; // WebXR (VR) Support
+        document.body.appendChild(renderer.domElement);
+        document.body.appendChild(VRButton.createButton(renderer));
+
+        // Controls
+        const controls = new PointerLockControls(camera, document.body);
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        
+        // Audio Context Setup
+        let audioCtx;
+        startBtn.addEventListener('click', () => {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // Ambient Server Room Hum
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 60;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.05;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+            }
+            controls.lock();
+        });
+
+        controls.addEventListener('lock', () => startScreen.style.display = 'none');
+        controls.addEventListener('unlock', () => startScreen.style.display = 'flex');
+        scene.add(controls.getObject());
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+
+        const spotlights = [
+            [-10, 5, -10], [-5, 5, -10], [0, 6, -5], [5, 5, -10], [10, 5, -10]
+        ];
+        spotlights.forEach(pos => {
+            const spot = new THREE.PointLight(0xaaaaaa, 0.8, 15);
+            spot.position.set(...pos);
+            spot.castShadow = true;
+            scene.add(spot);
+        });
+
+        // Environment geometry
+        const floorGeo = new THREE.PlaneGeometry(60, 60);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Exhibits
+        const interactables = [];
+        const exhibitData = [
+            { id: "powerbook_g4", title: "PowerBook G4 Collection", desc: "2.5x Antiquity Multiplier", pos: [-10, 1, -10], color: 0xaaaaaa, scale: [1.2, 0.1, 1.0] },
+            { id: "powermac_g4g5", title: "Power Mac G4 MDD + G5 Dual", desc: "Classic Architecture", pos: [-5, 1, -10], color: 0x8899aa, scale: [0.8, 1.8, 1.5] },
+            { id: "power8_s824", title: "IBM POWER8 S824", desc: "128 Threads, 512GB RAM", pos: [0, 1.5, -5], color: 0x1a1a1a, scale: [2.0, 2.5, 3.0] },
+            { id: "dell_c4130", title: "Dell C4130 GPU Cluster", desc: "High Density Compute", pos: [5, 1, -10], color: 0x333333, scale: [1.5, 0.4, 2.0] },
+            { id: "retro_laptops", title: "486/386 & SPARCstations", desc: "Vintage Silicon", pos: [10, 1, -10], color: 0xcccccc, scale: [1.0, 0.2, 1.0] }
+        ];
+
+        exhibitData.forEach(data => {
+            // Pedestal
+            const pedGeo = new THREE.BoxGeometry(data.scale[0]*1.4, data.pos[1], data.scale[2]*1.4);
+            const pedMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const ped = new THREE.Mesh(pedGeo, pedMat);
+            ped.position.set(data.pos[0], data.pos[1]/2, data.pos[2]);
+            ped.receiveShadow = true;
+            scene.add(ped);
+
+            // Machine Mesh
+            const geo = new THREE.BoxGeometry(...data.scale);
+            const mat = new THREE.MeshStandardMaterial({ color: data.color, roughness: 0.4, metalness: 0.6 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(data.pos[0], data.pos[1] + data.scale[1]/2, data.pos[2]);
+            mesh.castShadow = true;
+            mesh.userData = { id: data.id, title: data.title, desc: data.desc };
+            scene.add(mesh);
+            interactables.push(mesh);
+
+            // Glow Light (Hidden initially)
+            const glow = new THREE.PointLight(0x00ff00, 0, 4);
+            glow.position.copy(mesh.position);
+            scene.add(glow);
+            mesh.userData.glowLight = glow;
+
+            // Placard Canvas
+            const ctx = document.createElement('canvas').getContext('2d');
+            ctx.canvas.width = 512; ctx.canvas.height = 256;
+            ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,512,256);
+            ctx.strokeStyle = '#0f0'; ctx.lineWidth = 10; ctx.strokeRect(0,0,512,256);
+            ctx.fillStyle = '#0f0'; ctx.font = 'bold 36px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(data.title, 256, 100);
+            ctx.font = '24px monospace'; ctx.fillStyle = '#fff';
+            ctx.fillText(data.desc, 256, 160);
+            
+            const tex = new THREE.CanvasTexture(ctx.canvas);
+            const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: tex }));
+            pMesh.position.set(data.pos[0], data.pos[1] + 0.5, data.pos[2] + data.scale[2]/2 + 0.71);
+            scene.add(pMesh);
+        });
+
+        // Movement logic
+        const move = { f: false, b: false, l: false, r: false };
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+
+        document.addEventListener('keydown', e => {
+            if(e.code==='KeyW'||e.code==='ArrowUp') move.f=true;
+            if(e.code==='KeyS'||e.code==='ArrowDown') move.b=true;
+            if(e.code==='KeyA'||e.code==='ArrowLeft') move.l=true;
+            if(e.code==='KeyD'||e.code==='ArrowRight') move.r=true;
+        });
+        document.addEventListener('keyup', e => {
+            if(e.code==='KeyW'||e.code==='ArrowUp') move.f=false;
+            if(e.code==='KeyS'||e.code==='ArrowDown') move.b=false;
+            if(e.code==='KeyA'||e.code==='ArrowLeft') move.l=false;
+            if(e.code==='KeyD'||e.code==='ArrowRight') move.r=false;
+        });
+
+        // Mobile touch logic
+        let touchX, touchY;
+        document.addEventListener('touchstart', e => {
+            if(e.touches.length > 0) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+                triggerRaycastInteraction(); // Tap to interact fallback for mobile
+            }
+        });
+        document.addEventListener('touchmove', e => {
+            if(e.touches.length > 0) {
+                camera.rotation.order = 'YXZ';
+                const dx = e.touches[0].clientX - touchX;
+                const dy = e.touches[0].clientY - touchY;
+                camera.rotation.y -= dx * 0.005;
+                camera.rotation.x -= dy * 0.005;
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            }
+        });
+
+        // Interaction
+        const raycaster = new THREE.Raycaster();
+        
+        async function triggerRaycastInteraction() {
+            if (!controls.isLocked && !renderer.xr.isPresenting && window.innerWidth > 800) return;
+            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            const intersects = raycaster.intersectObjects(interactables);
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                document.getElementById('info').style.display = 'block';
+                document.getElementById('info-title').innerText = obj.userData.title;
+                const content = document.getElementById('info-content');
+                content.innerHTML = "Querying Live API<br>https://50.28.86.131/api/miners...";
+
+                // Beep Sound Effect
+                if(audioCtx) {
+                    const beep = audioCtx.createOscillator();
+                    beep.type = 'square'; beep.frequency.value = 880;
+                    beep.connect(audioCtx.destination);
+                    beep.start(); beep.stop(audioCtx.currentTime + 0.1);
+                }
+
+                try {
+                    const res = await fetch('https://50.28.86.131/api/miners');
+                    const data = await res.json();
+                    const miner = Array.isArray(data) ? data.find(m => m.id === obj.userData.id) : null;
+                    content.innerHTML = `Network Status: <span style="color:#0f0">ACTIVE</span><br>Multiplier: ${obj.userData.desc}<br>Sync: OK`;
+                    
+                    // Green Glow Effect
+                    obj.userData.glowLight.intensity = 5;
+                    obj.material.emissive.setHex(0x004400);
+                    setTimeout(() => { obj.userData.glowLight.intensity = 0; obj.material.emissive.setHex(0x000000); }, 3000);
+                } catch (e) {
+                    // Display error if CORS/Down but trigger animation anyway for Demo
+                    content.innerHTML = `<span style="color:yellow">Simulated Active Data</span><br>Multiplier: ${obj.userData.desc}<br>(Live API unreachable)`;
+                    obj.userData.glowLight.intensity = 5;
+                    obj.material.emissive.setHex(0x004400);
+                    setTimeout(() => { obj.userData.glowLight.intensity = 0; obj.material.emissive.setHex(0x000000); }, 3000);
+                }
+            }
+        }
+        document.addEventListener('mousedown', triggerRaycastInteraction);
+
+        let prevTime = performance.now();
+        renderer.setAnimationLoop(() => {
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+
+            if (controls.isLocked) {
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;

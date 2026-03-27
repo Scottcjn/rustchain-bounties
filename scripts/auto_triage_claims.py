@@ -1,0 +1,578 @@
+#!/usr/bin/env python3
+"""Auto-triage community bounty claims and update ledger issue block.
+
+This script is designed for GitHub Actions. It checks claim comments on
+configured bounty issues and marks each recent claim as:
+- `eligible`
+- `needs-action`
+
+It does not queue payouts directly. It generates an audit-friendly report that
+maintainers can use to process payments quickly and consistently.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Set
+
+try:
+    from scripts.sybil_risk_scorer import ClaimInput as RiskClaimInput
+    from scripts.sybil_risk_scorer import extract_links, score_claims
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from sybil_risk_scorer import ClaimInput as RiskClaimInput
+    from sybil_risk_scorer import extract_links, score_claims
+
+
+DEFAULT_TARGETS = [
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 87,
+        "min_account_age_days": 30,
+        "required_stars": ["Rustchain", "bottube"],
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": False,
+        "name": "Community Support",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "Rustchain",
+        "issue": 47,
+        "min_account_age_days": 30,
+        "required_stars": ["Rustchain"],
+        # Bounty allows either a RustChain wallet name OR a BoTTube username.
+        # Treat either as a valid payout target.
+        "require_wallet": False,
+        "require_bottube_username": False,
+        "require_payout_target": True,
+        "require_proof_link": False,
+        "name": "Rustchain Star",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "bottube",
+        "issue": 74,
+        "min_account_age_days": 30,
+        "required_stars": ["bottube"],
+        "require_wallet": False,
+        "require_bottube_username": True,
+        "require_proof_link": False,
+        "name": "BoTTube Star+Join",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 103,
+        "min_account_age_days": 30,
+        "required_stars": [],
+        "require_wallet": True,
+        "require_bottube_username": True,
+        "require_proof_link": True,
+        "name": "X + BoTTube Social",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 157,
+        "min_account_age_days": 30,
+        "required_stars": ["beacon-skill"],
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": True,
+        "name": "Beacon Star + Share",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 158,
+        "min_account_age_days": 30,
+        "required_stars": [],
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": True,
+        "name": "Beacon Integration",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "bottube",
+        "issue": 122,
+        "min_account_age_days": 30,
+        "required_stars": ["bottube"],
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": True,
+        "name": "BoTTube Star + Share Why",
+    },
+]
+
+MARKER_START = "<!-- auto-triage-report:start -->"
+MARKER_END = "<!-- auto-triage-report:end -->"
+
+
+def _env(name: str, default: Optional[str] = None) -> str:
+    value = os.environ.get(name, default)
+    if value is None:
+        raise RuntimeError(f"Missing required env: {name}")
+    return value
+
+
+def _now_utc() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _parse_iso(ts: str) -> datetime:
+    return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
+
+def _gh_request(
+    method: str,
+    path: str,
+    token: str,
+    data: Optional[Dict[str, Any]] = None,
+) -> Any:
+    base = "https://api.github.com"
+    url = path if path.startswith("http") else f"{base}{path}"
+    payload = None if data is None else json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, method=method.upper())
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("User-Agent", "elyan-auto-triage")
+    if payload is not None:
+        req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _gh_paginated(path: str, token: str) -> List[Dict[str, Any]]:
+    page = 1
+    out: List[Dict[str, Any]] = []
+    while True:
+        sep = "&" if "?" in path else "?"
+        p = f"{path}{sep}per_page=100&page={page}"
+        chunk = _gh_request("GET", p, token)
+        if not isinstance(chunk, list) or not chunk:
+            break
+        out.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
+    return out
+
+
+def _extract_wallet(body: str) -> Optional[str]:
+    # Strip minimal markdown that commonly wraps labels like **RTC Wallet:**,
+    # without corrupting valid underscores in wallet names (e.g. abdul_rtc_01).
+    body = re.sub(r"[`*]", "", body)
+
+    stop = {"wallet", "address", "miner_id", "please", "thanks", "thankyou"}
+    found: Optional[str] = None
+    expect_next = False
+    for line in body.splitlines():
+        s = line.strip()
+        if not s:
+            continue
+
+        # Handle "Wallet:" on one line and the value on the next.
+        if expect_next:
+            expect_next = False
+            if re.fullmatch(r"[A-Za-z0-9_\-]{4,80}", s) and s.lower() not in stop:
+                if re.search(r"[0-9_\-]", s) or s.upper().startswith("RTC") or len(s) >= 6:
+                    found = s
+                    continue
+
+        # Common non-English label (Chinese): "钱包地址： <wallet>" or value on next line.
+        m = re.search(r"钱包(?:地址)?\s*[:：\-]\s*([A-Za-z0-9_\-]{4,80})\b", s)
+        if m:
+            val = m.group(1).strip()
+            if val.lower() not in stop:
+                found = val
+                continue
+        if re.search(r"钱包(?:地址)?\s*[:：\-]\s*$", s):
+            expect_next = True
+            continue
+
+        # English label with value on next line.
+        if re.search(r"(?i)\b(?:rtc\s*)?(?:wallet|miner[_\-\s]?id|address)\b.*[:：\-]\s*$", s):
+            expect_next = True
+            continue
+
+        # English label + value on same line (also allows "Payout target miner_id: X").
+        m = re.search(
+            r"(?i)\b(?:payout\s*target\s*)?"
+            r"(?:rtc\s*)?"
+            r"(wallet|miner[_\-\s]?id|address)\s*"
+            r"(?:\((?:miner_?id|id|address)\))?\s*[:：\-]\s*"
+            r"([A-Za-z0-9_\-]{4,80})\b",
+            s,
+        )
+        if not m:
+            continue
+        val = m.group(2).strip()
+        if val.lower() in stop:
+            continue
+        # Heuristic: avoid capturing short plain words after "wallet:".
+        if not re.search(r"[0-9_\-]", val) and not val.upper().startswith("RTC") and len(val) < 6:
+            continue
+        found = val
+
+    return found
+
+
+def _extract_bottube_user(body: str) -> Optional[str]:
+    # Strip minimal markdown without corrupting valid underscores in usernames.
+    body = re.sub(r"[`*]", "", body)
+    patterns = [
+        # Prefer extracting from profile URLs if present.
+        r"https?://(?:www\.)?bottube\.ai/@([A-Za-z0-9_-]{2,64})",
+        r"https?://(?:www\.)?bottube\.ai/agent/([A-Za-z0-9_-]{2,64})",
+        # Explicit label on its own line.
+        r"(?im)^\s*bottube(?:\s*(?:username|user|account))?\s*[:：\-]\s*(?!https?\b)([A-Za-z0-9_-]{2,64})\s*$",
+    ]
+    for pat in patterns:
+        matches = list(re.finditer(pat, body))
+        if matches:
+            return matches[-1].group(1).strip()
+    return None
+
+
+def _has_proof_link(body: str) -> bool:
+    return bool(re.search(r"https?://", body))
+
+
+def _wallet_looks_external(wallet: str) -> bool:
+    # Heuristic: very long base58/base62 tokens are usually external chain
+    # addresses, not RTC wallet names used in these bounties.
+    if re.fullmatch(r"[1-9A-HJ-NP-Za-km-z]{28,64}", wallet):
+        return True
+    if re.fullmatch(r"[A-Za-z0-9]{30,64}", wallet):
+        return True
+    return False
+
+
+def _looks_like_claim(body: str) -> bool:
+    text = body.lower()
+    tokens = [
+        "claim",
+        "starred",
+        "wallet",
+        "proof",
+        "bounty",
+        "rtc",
+        "payout",
+        "submission",
+        "submit",
+        "pr",
+        "pull request",
+        "demo",
+    ]
+    return any(t in text for t in tokens)
+
+
+def _status_label(blockers: List[str]) -> str:
+    return "eligible" if not blockers else "needs-action"
+
+
+@dataclass
+class ClaimResult:
+    claim_id: str
+    user: str
+    issue_ref: str
+    comment_url: str
+    created_at: str
+    account_age_days: Optional[int]
+    wallet: Optional[str]
+    bottube_user: Optional[str]
+    blockers: List[str]
+    proof_links: List[str] = field(default_factory=list)
+    body: str = ""
+    risk_score: int = 0
+    risk_level: str = "low"
+    risk_reasons: List[str] = field(default_factory=list)
+
+    @property
+    def status(self) -> str:
+        return _status_label(self.blockers)
+
+
+def _apply_risk_scores(
+    results_by_issue: Dict[str, List[ClaimResult]],
+    policy_name: str,
+) -> None:
+    flat_rows = [row for rows in results_by_issue.values() for row in rows]
+    if not flat_rows:
+        return
+
+    inputs = [
+        RiskClaimInput(
+            claim_id=row.claim_id,
+            user=row.user,
+            issue_ref=row.issue_ref,
+            created_at=row.created_at,
+            body=row.body,
+            account_age_days=row.account_age_days,
+            wallet=row.wallet,
+            proof_links=tuple(row.proof_links),
+        )
+        for row in flat_rows
+    ]
+    risk_by_claim = {
+        item.claim_id: item
+        for item in score_claims(inputs, policy_name=policy_name)
+    }
+    for rows in results_by_issue.values():
+        for row in rows:
+            risk = risk_by_claim.get(row.claim_id)
+            if risk is None:
+                continue
+            row.risk_score = risk.score
+            row.risk_level = risk.level
+            row.risk_reasons = list(risk.reasons)
+        rows.sort(key=lambda r: (-r.risk_score, r.status != "eligible", r.user.lower()))
+
+
+def _build_report_md(
+    generated_at: str,
+    results_by_issue: Dict[str, List[ClaimResult]],
+    since_hours: int,
+    risk_policy: str,
+) -> str:
+    lines: List[str] = []
+    lines.append(f"### Auto-Triage Report ({generated_at})")
+    lines.append(f"Window: last `{since_hours}`h")
+    lines.append(f"Risk policy: `{risk_policy}`")
+    lines.append("")
+
+    suspicious = sorted(
+        [
+            row
+            for rows in results_by_issue.values()
+            for row in rows
+            if row.risk_level != "low"
+        ],
+        key=lambda row: (-row.risk_score, row.user.lower(), row.issue_ref.lower()),
+    )
+    lines.append("#### Suspicious Claims")
+    if not suspicious:
+        lines.append("_No medium/high risk claims in this window._")
+    else:
+        lines.append("| User | Issue | Risk | Score | Reasons | Comment |")
+        lines.append("|---|---|---|---:|---|---|")
+        for row in suspicious[:10]:
+            reasons = ", ".join(row.risk_reasons)
+            lines.append(
+                f"| @{row.user} | {row.issue_ref} | `{row.risk_level}` | {row.risk_score} | {reasons} | [link]({row.comment_url}) |"
+            )
+    lines.append("")
+    for issue_ref, rows in results_by_issue.items():
+        lines.append(f"#### {issue_ref}")
+        if not rows:
+            lines.append("_No recent claim comments._")
+            lines.append("")
+            continue
+        lines.append(
+            "| User | Risk | Score | Status | Age(d) | Wallet | BoTTube | Reasons | Blockers | Comment |"
+        )
+        lines.append("|---|---|---:|---|---:|---|---|---|---|---|")
+        for r in rows:
+            age = "" if r.account_age_days is None else str(r.account_age_days)
+            wallet = r.wallet or ""
+            bt = r.bottube_user or ""
+            reasons = ", ".join(r.risk_reasons)
+            blockers = ", ".join(r.blockers) if r.blockers else ""
+            lines.append(
+                f"| @{r.user} | `{r.risk_level}` | {r.risk_score} | `{r.status}` | {age} | `{wallet}` | `{bt}` | {reasons} | {blockers} | [link]({r.comment_url}) |"
+            )
+        lines.append("")
+    return "\n".join(lines).strip()
+
+
+def _ignored_users() -> Set[str]:
+    # Ignore maintainers/bots so their informational comments don't become
+    # "claims" (which would pollute triage results).
+    ignored = {"scottcjn", "github-actions[bot]", "sophiaeagent-beep"}
+    extra = os.environ.get("TRIAGE_IGNORE_USERS", "").strip()
+    if extra:
+        for u in extra.split(","):
+            u = u.strip().lower()
+            if u:
+                ignored.add(u)
+    return ignored
+
+
+def main() -> int:
+    token = _env("GITHUB_TOKEN")
+    since_hours = int(_env("SINCE_HOURS", "72"))
+    risk_policy = _env("TRIAGE_RISK_POLICY", "balanced")
+    ignored_users = _ignored_users()
+    targets_json = os.environ.get("TRIAGE_TARGETS_JSON", "").strip()
+    if targets_json:
+        targets = json.loads(targets_json)
+    else:
+        targets = DEFAULT_TARGETS
+
+    # Build star cache only for repos we need.
+    required_star_repos: Set[str] = set()
+    for t in targets:
+        for repo in t.get("required_stars", []):
+            required_star_repos.add(repo)
+
+    star_cache: Dict[str, Set[str]] = {}
+    for repo in sorted(required_star_repos):
+        users = _gh_paginated(f"/repos/Scottcjn/{repo}/stargazers", token)
+        star_cache[repo] = {u.get("login") for u in users if u.get("login")}
+
+    user_cache: Dict[str, Dict[str, Any]] = {}
+    cutoff = _now_utc() - timedelta(hours=since_hours)
+
+    results_by_issue: Dict[str, List[ClaimResult]] = {}
+    for target in targets:
+        owner = target["owner"]
+        repo = target["repo"]
+        issue = int(target["issue"])
+        min_age = int(target.get("min_account_age_days", 0))
+        req_wallet = bool(target.get("require_wallet", True))
+        req_bt = bool(target.get("require_bottube_username", False))
+        req_payout_target = bool(target.get("require_payout_target", False))
+        req_proof = bool(target.get("require_proof_link", False))
+        req_stars = list(target.get("required_stars", []))
+
+        issue_ref = f"{owner}/{repo}#{issue}"
+        try:
+            issue_obj = _gh_request("GET", f"/repos/{owner}/{repo}/issues/{issue}", token)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                print(f"WARN: {issue_ref} not found (HTTP 404), skipping target")
+                results_by_issue[issue_ref] = []
+                continue
+            raise
+        comments_url = issue_obj["comments_url"]
+        comments = _gh_paginated(comments_url, token)
+
+        # Merge multi-comment claims per user (users often add follow-ups).
+        per_user: Dict[str, Dict[str, Any]] = {}
+        for c in comments:
+            user = (c.get("user") or {}).get("login")
+            if not user:
+                continue
+            # Ignore maintainer/system messages
+            if user.lower() in ignored_users:
+                continue
+            created = c.get("created_at")
+            if not created:
+                continue
+            created_dt = _parse_iso(created)
+            if created_dt < cutoff:
+                continue
+
+            body = c.get("body") or ""
+            if not _looks_like_claim(body):
+                continue
+
+            if user not in per_user:
+                per_user[user] = {
+                    "bodies": [],
+                    "latest_created": created,
+                    "latest_url": c.get("html_url") or "",
+                }
+            per_user[user]["bodies"].append(body)
+            if _parse_iso(per_user[user]["latest_created"]) <= created_dt:
+                per_user[user]["latest_created"] = created
+                per_user[user]["latest_url"] = c.get("html_url") or ""
+
+        rows: List[ClaimResult] = []
+        for user, info in per_user.items():
+            if user not in user_cache:
+                try:
+                    u = _gh_request("GET", f"/users/{user}", token)
+                    created_at = u.get("created_at")
+                    age_days = None
+                    if created_at:
+                        age_days = (_now_utc() - _parse_iso(created_at)).days
+                    user_cache[user] = {"age_days": age_days}
+                except urllib.error.HTTPError:
+                    user_cache[user] = {"age_days": None}
+
+            age_days = user_cache[user]["age_days"]
+            merged_body = "\n\n".join(info["bodies"])
+            wallet = _extract_wallet(merged_body)
+            bottube_user = _extract_bottube_user(merged_body)
+            proof_links = list(extract_links(merged_body))
+            blockers: List[str] = []
+
+            if age_days is not None and age_days < min_age:
+                blockers.append(f"account_age<{min_age}")
+            if req_payout_target:
+                if not wallet and not bottube_user:
+                    blockers.append("missing_payout_target")
+            else:
+                if req_wallet and not wallet:
+                    blockers.append("missing_wallet")
+            if wallet and _wallet_looks_external(wallet):
+                blockers.append("wallet_external_format")
+            if req_bt and not bottube_user:
+                blockers.append("missing_bottube_username")
+            if req_proof and not _has_proof_link(merged_body):
+                blockers.append("missing_proof_link")
+
+            for star_repo in req_stars:
+                if user not in star_cache.get(star_repo, set()):
+                    blockers.append(f"missing_star:{star_repo}")
+
+            rows.append(
+                ClaimResult(
+                    claim_id=info["latest_url"] or f"{issue_ref}:{user}:{info['latest_created']}",
+                    user=user,
+                    issue_ref=issue_ref,
+                    comment_url=info["latest_url"],
+                    created_at=info["latest_created"],
+                    account_age_days=age_days,
+                    wallet=wallet,
+                    bottube_user=bottube_user,
+                    blockers=blockers,
+                    proof_links=proof_links,
+                    body=merged_body,
+                )
+            )
+
+        results_by_issue[issue_ref] = rows
+
+    _apply_risk_scores(results_by_issue, risk_policy)
+
+    generated_at = _now_utc().isoformat().replace("+00:00", "Z")
+    report = _build_report_md(generated_at, results_by_issue, since_hours, risk_policy)
+    print(report)
+
+    ledger_repo = os.environ.get("LEDGER_REPO", "").strip()
+    ledger_issue = os.environ.get("LEDGER_ISSUE", "").strip()
+    if ledger_repo and ledger_issue:
+        issue_path = f"/repos/Scottcjn/{ledger_repo}/issues/{int(ledger_issue)}"
+        ledger = _gh_request("GET", issue_path, token)
+        body = ledger.get("body") or ""
+        new_block = f"{MARKER_START}\n{report}\n{MARKER_END}"
+        if MARKER_START in body and MARKER_END in body:
+            start = body.index(MARKER_START)
+            end = body.index(MARKER_END) + len(MARKER_END)
+            updated = f"{body[:start]}{new_block}{body[end:]}"
+        else:
+            updated = f"{body}\n\n{new_block}\n"
+        _gh_request("PATCH", issue_path, token, data={"body": updated})
+        print(f"\nUpdated ledger issue: Scottcjn/{ledger_repo}#{ledger_issue}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:  # pragma: no cover - runtime safety for actions logs
+        print(f"auto-triage failed: {exc}", file=sys.stderr)
+        raise

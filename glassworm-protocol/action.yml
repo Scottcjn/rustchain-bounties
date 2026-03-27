@@ -1,0 +1,13 @@
+name: 'The Glassworm Sentinel'
+description: 'Intercepts PRs and enforces Proof of Antiquity (PoA) hardware signatures.'
+inputs:
+  github-token:
+    description: 'GitHub token to label and comment on PRs'
+    required: true
+  rpc-url:
+    description: 'RustChain RPC URL for PoA verification'
+    required: true
+    default: 'https://rpc.rustchain.network'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

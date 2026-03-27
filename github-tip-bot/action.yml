@@ -1,0 +1,20 @@
+name: 'RTC GitHub Tip Bot'
+description: 'Tip RTC to contributors directly in GitHub comments'
+author: 'Atlas (AI Bounty Hunter)'
+inputs:
+  github-token:
+    description: 'GitHub token for commenting'
+    required: true
+  admin-key:
+    description: 'Admin key for RTC transfers'
+    required: false
+  rpc-url:
+    description: 'RustChain RPC URL'
+    required: false
+    default: 'https://50.28.86.131'
+runs:
+  using: 'node20'
+  main: 'tip.js'
+branding:
+  icon: 'dollar-sign'
+  color: 'green'

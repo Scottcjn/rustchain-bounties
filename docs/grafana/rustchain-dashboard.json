@@ -1,0 +1,768 @@
+{
+    "__inputs": [
+        {
+            "name": "DS_PROMETHEUS",
+            "label": "Prometheus",
+            "description": "Prometheus data source for RustChain metrics",
+            "type": "datasource",
+            "pluginId": "prometheus",
+            "pluginName": "Prometheus"
+        }
+    ],
+    "__requires": [
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "9.0.0"
+        },
+        {
+            "type": "datasource",
+            "id": "prometheus",
+            "name": "Prometheus",
+            "version": "1.0.0"
+        }
+    ],
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "id": 1,
+            "title": "Node Status",
+            "type": "stat",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 0,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_node_up",
+                    "legendFormat": "Node Up",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [
+                        {
+                            "options": {
+                                "0": {
+                                    "text": "DOWN",
+                                    "color": "red"
+                                }
+                            },
+                            "type": "value"
+                        },
+                        {
+                            "options": {
+                                "1": {
+                                    "text": "UP",
+                                    "color": "green"
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "background",
+                "graphMode": "none"
+            }
+        },
+        {
+            "id": 2,
+            "title": "Node Uptime",
+            "type": "stat",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 4,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_node_uptime_seconds / 3600",
+                    "legendFormat": "Hours",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "h",
+                    "decimals": 1,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "yellow",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 24
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "value",
+                "graphMode": "area"
+            }
+        },
+        {
+            "id": 3,
+            "title": "Current Epoch",
+            "type": "stat",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 8,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_epoch_current",
+                    "legendFormat": "Epoch",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "value",
+                "graphMode": "none"
+            }
+        },
+        {
+            "id": 4,
+            "title": "Epoch Progress",
+            "type": "gauge",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 12,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_epoch_slot / rustchain_epoch_blocks_per_epoch",
+                    "legendFormat": "Progress",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percentunit",
+                    "min": 0,
+                    "max": 1,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 0.5
+                            },
+                            {
+                                "color": "orange",
+                                "value": 0.9
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            }
+        },
+        {
+            "id": 5,
+            "title": "Epoch Pot (RTC)",
+            "type": "stat",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 16,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_epoch_pot_rtc",
+                    "legendFormat": "Pot",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "decimals": 2,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "purple",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "value",
+                "graphMode": "none"
+            }
+        },
+        {
+            "id": 6,
+            "title": "Enrolled Miners",
+            "type": "stat",
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 20,
+                "y": 0
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_epoch_enrolled_miners",
+                    "legendFormat": "Enrolled",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "color": {
+                        "mode": "thresholds"
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "colorMode": "value",
+                "graphMode": "area"
+            }
+        },
+        {
+            "id": 7,
+            "title": "Active Miners Over Time",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_miners_active",
+                    "legendFormat": "Active Miners",
+                    "refId": "A"
+                },
+                {
+                    "expr": "rustchain_epoch_enrolled_miners",
+                    "legendFormat": "Enrolled Miners",
+                    "refId": "B"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "smooth",
+                        "lineWidth": 2,
+                        "fillOpacity": 15,
+                        "gradientMode": "scheme",
+                        "spanNulls": true,
+                        "showPoints": "auto",
+                        "pointSize": 5,
+                        "stacking": {
+                            "mode": "none",
+                            "group": "A"
+                        },
+                        "axisPlacement": "auto",
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "none"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "calcs": []
+                }
+            }
+        },
+        {
+            "id": 8,
+            "title": "API Request Latency (p50 / p95 / p99)",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 4
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.50, rate(rustchain_api_request_duration_seconds_bucket[5m]))",
+                    "legendFormat": "p50",
+                    "refId": "A"
+                },
+                {
+                    "expr": "histogram_quantile(0.95, rate(rustchain_api_request_duration_seconds_bucket[5m]))",
+                    "legendFormat": "p95",
+                    "refId": "B"
+                },
+                {
+                    "expr": "histogram_quantile(0.99, rate(rustchain_api_request_duration_seconds_bucket[5m]))",
+                    "legendFormat": "p99",
+                    "refId": "C"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s",
+                    "custom": {
+                        "drawStyle": "line",
+                        "lineInterpolation": "smooth",
+                        "lineWidth": 2,
+                        "fillOpacity": 10,
+                        "gradientMode": "scheme",
+                        "spanNulls": true,
+                        "showPoints": "never",
+                        "stacking": {
+                            "mode": "none",
+                            "group": "A"
+                        },
+                        "axisPlacement": "auto",
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            },
+                            {
+                                "color": "red",
+                                "value": 2
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "none"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "calcs": [
+                        "mean",
+                        "max"
+                    ]
+                }
+            }
+        },
+        {
+            "id": 9,
+            "title": "Per-Miner Attestation Age",
+            "type": "table",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 12
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rustchain_attestation_age_seconds",
+                    "legendFormat": "{{ miner }}",
+                    "refId": "A",
+                    "format": "table",
+                    "instant": true
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "displayMode": "auto"
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Value"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "s"
+                            },
+                            {
+                                "id": "displayName",
+                                "value": "Attestation Age"
+                            },
+                            {
+                                "id": "thresholds",
+                                "value": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": null
+                                        },
+                                        {
+                                            "color": "yellow",
+                                            "value": 300
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 600
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "id": "custom.displayMode",
+                                "value": "color-background"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "miner"
+                        },
+                        "properties": [
+                            {
+                                "id": "displayName",
+                                "value": "Miner ID"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Time"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.hidden",
+                                "value": true
+                            }
+                        ]
+                    }
+                ]
+            },
+            "options": {
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "displayName": "Attestation Age",
+                        "desc": true
+                    }
+                ]
+            },
+            "transformations": [
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "__name__": true,
+                            "instance": true,
+                            "job": true
+                        },
+                        "indexByName": {},
+                        "renameByName": {}
+                    }
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "title": "Scrape Errors Rate",
+            "type": "timeseries",
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 12
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+            },
+            "targets": [
+                {
+                    "expr": "rate(rustchain_scrape_errors_total[5m])",
+                    "legendFormat": "{{ endpoint }}",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "ops",
+                    "custom": {
+                        "drawStyle": "bars",
+                        "lineWidth": 1,
+                        "fillOpacity": 50,
+                        "gradientMode": "scheme",
+                        "spanNulls": false,
+                        "showPoints": "never",
+                        "stacking": {
+                            "mode": "normal",
+                            "group": "A"
+                        },
+                        "axisPlacement": "auto",
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    },
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.1
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "none"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "calcs": []
+                }
+            }
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 37,
+    "style": "dark",
+    "tags": [
+        "rustchain",
+        "blockchain",
+        "monitoring"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "RustChain Network Dashboard",
+    "uid": "rustchain-network-overview",
+    "version": 1,
+    "weekStart": ""
+}

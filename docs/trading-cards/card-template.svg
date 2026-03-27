@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 560" width="400" height="560">
+  <defs>
+    <!-- Card border gradient -->
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c9a400;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f5d442;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c9a400;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Rarity backgrounds -->
+    <linearGradient id="rarityCommon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6914" />
+      <stop offset="100%" style="stop-color:#CD853F" />
+    </linearGradient>
+    <linearGradient id="rarityUncommon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#708090" />
+      <stop offset="100%" style="stop-color:#C0C0C0" />
+    </linearGradient>
+    <linearGradient id="rarityRare" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#B8860B" />
+      <stop offset="100%" style="stop-color:#FFD700" />
+    </linearGradient>
+    <linearGradient id="rarityEpic" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4B0082" />
+      <stop offset="100%" style="stop-color:#9370DB" />
+    </linearGradient>
+    <linearGradient id="rarityLegendary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6347" />
+      <stop offset="25%" style="stop-color:#FFD700" />
+      <stop offset="50%" style="stop-color:#00CED1" />
+      <stop offset="75%" style="stop-color:#FF69B4" />
+      <stop offset="100%" style="stop-color:#FF6347" />
+    </linearGradient>
+    <linearGradient id="rarityMythic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF0000" />
+      <stop offset="20%" style="stop-color:#FF8C00" />
+      <stop offset="40%" style="stop-color:#FFD700" />
+      <stop offset="60%" style="stop-color:#00FF00" />
+      <stop offset="80%" style="stop-color:#4169E1" />
+      <stop offset="100%" style="stop-color:#8B00FF" />
+    </linearGradient>
+
+    <!-- Card background pattern -->
+    <pattern id="circuitPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="none"/>
+      <path d="M0 20 H15 M25 20 H40 M20 0 V15 M20 25 V40" stroke="#2a2a2a" stroke-width="0.5" fill="none"/>
+      <circle cx="20" cy="20" r="2" fill="#333"/>
+    </pattern>
+  </defs>
+
+  <!-- Outer border -->
+  <rect x="0" y="0" width="400" height="560" rx="16" ry="16" fill="url(#borderGradient)" />
+
+  <!-- Inner card background -->
+  <rect x="6" y="6" width="388" height="548" rx="12" ry="12" fill="#1a1a1a" />
+
+  <!-- Circuit board pattern overlay -->
+  <rect x="6" y="6" width="388" height="548" rx="12" ry="12" fill="url(#circuitPattern)" opacity="0.3" />
+
+  <!-- Card header bar -->
+  <rect x="20" y="16" width="360" height="36" rx="6" ry="6" fill="#0d0d0d" stroke="#444" stroke-width="1"/>
+  <text x="30" y="40" font-family="'Courier New', monospace" font-size="11" fill="#888" font-weight="bold">RUSTCHAIN HARDWARE CARD</text>
+  <text x="340" y="40" font-family="'Courier New', monospace" font-size="11" fill="#c9a400" font-weight="bold" text-anchor="end">#000</text>
+
+  <!-- Art frame -->
+  <rect x="30" y="62" width="340" height="180" rx="4" ry="4" fill="#0d0d0d" stroke="#555" stroke-width="1"/>
+
+  <!-- Placeholder art area -->
+  <text x="200" y="140" font-family="'Courier New', monospace" font-size="14" fill="#444" text-anchor="middle">[ HARDWARE IMAGE ]</text>
+  <text x="200" y="160" font-family="'Courier New', monospace" font-size="10" fill="#333" text-anchor="middle">Replace with ASCII art or illustration</text>
+
+  <!-- Card name plate -->
+  <rect x="30" y="252" width="340" height="32" rx="4" ry="4" fill="#0d0d0d" stroke="url(#borderGradient)" stroke-width="1.5"/>
+  <text x="200" y="274" font-family="'Courier New', monospace" font-size="16" fill="#f5d442" font-weight="bold" text-anchor="middle">CARD NAME HERE</text>
+
+  <!-- Rarity and multiplier row -->
+  <rect x="30" y="292" width="165" height="24" rx="4" ry="4" fill="#111" stroke="#444" stroke-width="0.5"/>
+  <text x="112" y="309" font-family="'Courier New', monospace" font-size="11" fill="#aaa" text-anchor="middle">Rarity: -------</text>
+
+  <rect x="205" y="292" width="165" height="24" rx="4" ry="4" fill="#111" stroke="#444" stroke-width="0.5"/>
+  <text x="287" y="309" font-family="'Courier New', monospace" font-size="11" fill="#4fc3f7" text-anchor="middle">Multiplier: --x</text>
+
+  <!-- Stats block -->
+  <rect x="30" y="324" width="340" height="100" rx="4" ry="4" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+
+  <text x="44" y="346" font-family="'Courier New', monospace" font-size="11" fill="#888">Clock Speed</text>
+  <text x="356" y="346" font-family="'Courier New', monospace" font-size="11" fill="#e0e0e0" text-anchor="end">--- MHz</text>
+  <line x1="44" y1="352" x2="356" y2="352" stroke="#222" stroke-width="0.5"/>
+
+  <text x="44" y="368" font-family="'Courier New', monospace" font-size="11" fill="#888">Architecture</text>
+  <text x="356" y="368" font-family="'Courier New', monospace" font-size="11" fill="#e0e0e0" text-anchor="end">-----------</text>
+  <line x1="44" y1="374" x2="356" y2="374" stroke="#222" stroke-width="0.5"/>
+
+  <text x="44" y="390" font-family="'Courier New', monospace" font-size="11" fill="#888">Year</text>
+  <text x="356" y="390" font-family="'Courier New', monospace" font-size="11" fill="#e0e0e0" text-anchor="end">----</text>
+  <line x1="44" y1="396" x2="356" y2="396" stroke="#222" stroke-width="0.5"/>
+
+  <text x="44" y="412" font-family="'Courier New', monospace" font-size="11" fill="#888">Hash Rate</text>
+  <text x="356" y="412" font-family="'Courier New', monospace" font-size="11" fill="#4fc3f7" text-anchor="end">--- H/s</text>
+
+  <!-- Flavor text block -->
+  <rect x="30" y="432" width="340" height="60" rx="4" ry="4" fill="#111" stroke="#333" stroke-width="1"/>
+  <text x="200" y="454" font-family="Georgia, serif" font-size="10" fill="#999" text-anchor="middle" font-style="italic">"Flavor text goes here.</text>
+  <text x="200" y="468" font-family="Georgia, serif" font-size="10" fill="#999" text-anchor="middle" font-style="italic">Replace with card lore."</text>
+
+  <!-- Special ability bar -->
+  <rect x="30" y="500" width="340" height="28" rx="4" ry="4" fill="#1a0a2e" stroke="#7c4dff" stroke-width="1"/>
+  <text x="40" y="519" font-family="'Courier New', monospace" font-size="10" fill="#7c4dff" font-weight="bold">ABILITY:</text>
+  <text x="110" y="519" font-family="'Courier New', monospace" font-size="10" fill="#b388ff">Ability Name Here</text>
+
+  <!-- Footer -->
+  <text x="200" y="546" font-family="'Courier New', monospace" font-size="8" fill="#444" text-anchor="middle">RUSTCHAIN HARDWARE SERIES v1.0</text>
+</svg>
