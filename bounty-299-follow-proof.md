@@ -17,3 +17,7 @@ Screenshot of following available upon request.
 
 ---
 *Submitted for Bounty #299*
+
+
+## Referral Process
+Refer a friend who completes a bounty and earn 3 RTC per referral.
