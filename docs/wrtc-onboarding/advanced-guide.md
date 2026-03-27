@@ -245,7 +245,7 @@ miner:
   gpu_device: 0
 
 network:
-  rpc_url: "https://mainnet.rustchain.org"
+  rpc_url: "https://mainnet.rustchain.ai"
   pool_address: "pool.rustchain.ai:8888"
 
 rewards:
@@ -433,7 +433,7 @@ None reported as of 2026-02-14. Report issues via [GitHub Security](https://gith
 
 ```bash
 # Check bridge status
-curl https://api.rustchain.org/bridge/status
+curl https://api.rustchain.ai/bridge/status
 
 # Restart bridge transaction
 python scripts/restart_bridge.py --tx <tx_id>

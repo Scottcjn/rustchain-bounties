@@ -38,12 +38,6 @@ jobs:
             name: linux-ppc64
             cross: true
 
-          # ── RISC-V 64-bit Linux (gnu) — StarFive VisionFive 2, SiFive Unmatched, Milk-V Pioneer ──
-          - target: riscv64gc-unknown-linux-gnu
-            os: ubuntu-latest
-            name: linux-riscv64
-            cross: true
-
           # ── Windows x86_64 (MSVC) ──
           - target: x86_64-pc-windows-msvc
             os: windows-latest
@@ -130,7 +124,7 @@ jobs:
 
       - name: Verify expected targets
         run: |
-          expected="linux-x86_64 linux-aarch64 linux-ppc64 linux-riscv64 windows-x86_64 macos-x86_64 macos-aarch64"
+          expected="linux-x86_64 linux-aarch64 linux-ppc64 windows-x86_64 macos-x86_64 macos-aarch64"
           for target in $expected; do
             dir="binaries/rustchain-miner-$target"
             if [ ! -d "$dir" ]; then
