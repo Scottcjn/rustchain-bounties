@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCOS v2 Badge Generator — RustChain</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 560px;
+      width: 100%;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #8b949e; font-size: 0.875rem; margin-bottom: 2rem; }
+    label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 0.3rem; margin-top: 1rem; }
+    input, select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 0.9rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #f78166, #d2a8ff);
+      border: none;
+      border-radius: 8px;
+      color: #0d1117;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.88; }
+    .result { margin-top: 1.5rem; display: none; }
+    .badge-preview {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .badge-img { height: 24px; }
+    .copy-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .copy-row input { flex: 1; font-size: 0.75rem; color: #8b949e; }
+    .copy-btn {
+      padding: 0.4rem 0.8rem;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-top: 0;
+      width: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>🛡 BCOS Badge Generator</h1>
+  <p class="subtitle">Generate a Beacon Certified Open Source badge for your repository.</p>
+
+  <label for="certId">Certificate ID</label>
+  <input id="certId" type="text" placeholder="e.g. bcos_a3f8d2...">
+
+  <label for="tier">BCOS Tier</label>
+  <select id="tier">
+    <option value="L0">L0 — Basic Trust</option>
+    <option value="L1" selected>L1 — Verified Open Source</option>
+    <option value="L2">L2 — Certified & Audited</option>
+  </select>
+
+  <label for="repoName">Repository (optional display name)</label>
+  <input id="repoName" type="text" placeholder="e.g. my-org/my-repo">
+
+  <button onclick="generate()">Generate Badge</button>
+
+  <div class="result" id="result">
+    <div class="badge-preview">
+      <img id="badgeImg" class="badge-img" alt="BCOS Badge">
+    </div>
+    <div class="copy-row">
+      <input id="mdCode" type="text" readonly>
+      <button class="copy-btn" onclick="copy('mdCode')">Copy MD</button>
+    </div>
+    <div class="copy-row">
+      <input id="htmlCode" type="text" readonly>
+      <button class="copy-btn" onclick="copy('htmlCode')">Copy HTML</button>
+    </div>
+    <div class="copy-row">
+      <input id="urlCode" type="text" readonly>
+      <button class="copy-btn" onclick="copy('urlCode')">Copy URL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function generate() {
+    const certId   = document.getElementById('certId').value.trim() || 'demo_cert';
+    const tier     = document.getElementById('tier').value;
+    const repoName = document.getElementById('repoName').value.trim() || 'repo';
+    const color    = tier === 'L2' ? 'blueviolet' : tier === 'L1' ? 'blue' : 'lightgrey';
+    const badgeUrl = `https://img.shields.io/badge/BCOS-${tier}%20Certified-${color}?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAxTDMgNXY2YzAgNS41NSAzLjg0IDEwLjc0IDkgMTIgNS4xNi0xLjI2IDktNi40NSA5LTEyVjVMMTIgMXoiLz48L3N2Zz4=`;
+    const verifyUrl = `https://rustchain.org/bcos/verify/${certId}`;
+    const md   = `[![BCOS ${tier}](${badgeUrl})](${verifyUrl})`;
+    const html = `<a href="${verifyUrl}"><img src="${badgeUrl}" alt="BCOS ${tier}"></a>`;
+    document.getElementById('badgeImg').src = badgeUrl;
+    document.getElementById('mdCode').value   = md;
+    document.getElementById('htmlCode').value = html;
+    document.getElementById('urlCode').value  = badgeUrl;
+    document.getElementById('result').style.display = 'block';
+  }
+
+  function copy(id) {
+    const el = document.getElementById(id);
+    el.select();
+    document.execCommand('copy');
+  }
+</script>
+</body>
+</html>
