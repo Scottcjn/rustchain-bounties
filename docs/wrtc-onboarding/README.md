@@ -185,7 +185,7 @@ Future features will include:
 - **Website:** https://bottube.ai/bridge/wrtc
 - **Twitter/X:** https://x.com/RustchainPOA
 - **GitHub:** https://github.com/Scottcjn/rustchain-bounties
-- **Documentation:** https://docs.rustchain.org (coming soon)
+- **Documentation:** https://docs.rustchain.ai (coming soon)
 
 ### Community
 

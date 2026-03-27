@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain | Multi-Node Health Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-primary); color: var(--text-main); min-height: 100vh; padding: 2rem; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--accent); }
+        .network-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; color: var(--emerald); background: rgba(16, 185, 129, 0.1); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-dot { width: 8px; height: 8px; background: var(--emerald); border-radius: 50%; box-shadow: 0 0 10px var(--emerald); }
+
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-color: var(--accent); }
+        
+        .card-label { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .card-value { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono'; }
+        .card-trend { font-size: 0.75rem; margin-top: 0.5rem; display: flex; gap: 0.25rem; align-items: center; }
+        .trend-up { color: var(--emerald); }
+
+        .nodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .node-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+        .node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .node-name { font-weight: 700; font-size: 1rem; }
+        .node-health { height: 6px; background: #334155; border-radius: 3px; margin: 1rem 0; overflow: hidden; }
+        .health-fill { height: 100%; border-radius: 3px; }
+
+        .logs-section { background: #000; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; height: 300px; overflow-y: auto; color: #a5f3fc; }
+        .log-line { margin-bottom: 0.25rem; display: flex; gap: 1rem; }
+        .log-time { color: var(--text-dim); min-width: 80px; }
+        .log-type { font-weight: 700; width: 60px; }
+        .type-success { color: var(--emerald); }
+        .type-info { color: var(--accent); }
+
+        .chart-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2.5rem; height: 300px; }
+
+        footer { text-align: center; color: var(--text-dim); font-size: 0.75rem; margin-top: 4rem; padding-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">RUSTCHAIN_NETWORK</div>
+            <div class="network-status">
+                <div class="status-dot"></div>
+                GLOBAL_NETWORK_HEALTH: OPTIMAL
+            </div>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="card">
+                <div class="card-label">Active Nodes</div>
+                <div class="card-value">12</div>
+                <div class="card-trend trend-up">▲ 2 newly synced</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Network Epoch</div>
+                <div class="card-value">469</div>
+                <div class="card-trend">Slot 122 / 144</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Avg. Latency</div>
+                <div class="card-value">42ms</div>
+                <div class="card-trend trend-up">▼ 5ms optimization</div>
+            </div>
+        </section>
+
+        <h2 style="margin-bottom: 1.5rem;">Node Health Monitor</h2>
+        <section class="nodes-grid">
+            <div class="node-card">
+                <div class="node-header">
+                    <span class="node-name">primary-validator-us</span>
+                    <span style="font-size: 0.7rem; color: var(--emerald);">ONLINE</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">CPU: 12% | RAM: 4.2GB</div>
+                <div class="node-health"><div class="health-fill" style="width: 98%; background: var(--emerald);"></div></div>
+                <div style="font-size: 0.75rem;">Attestation rate: 99.9%</div>
+            </div>
+            <div class="node-card">
+                <div class="node-header">
+                    <span class="node-name">backup-sync-eu</span>
+                    <span style="font-size: 0.7rem; color: var(--emerald);">ONLINE</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">CPU: 45% | RAM: 8.1GB</div>
+                <div class="node-health"><div class="health-fill" style="width: 85%; background: var(--emerald);"></div></div>
+                <div style="font-size: 0.75rem;">Attestation rate: 98.2%</div>
+            </div>
+            <div class="node-card">
+                <div class="node-header">
+                    <span class="node-name">vantage-vintage-node</span>
+                    <span style="font-size: 0.7rem; color: var(--amber);">CAUTIOUS</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">CPU: 92% | RAM: 0.5GB</div>
+                <div class="node-health"><div class="health-fill" style="width: 40%; background: var(--amber);"></div></div>
+                <div style="font-size: 0.75rem;">Attestation rate: 72.1%</div>
+            </div>
+        </section>
+
+        <h2 style="margin-bottom: 1.5rem;">Network Latency Stream (Last 24h)</h2>
+        <div class="chart-container">
+            <canvas id="latencyChart"></canvas>
+        </div>
+
+        <h2 style="margin-bottom: 1.5rem;">Global Attestation Log</h2>
+        <section class="logs-section">
+            <div class="log-line"><span class="log-time">21:40:01</span> <span class="log-type type-success">SUCCESS</span> <span>Attestation verified for slot 122 (Node: primary-us)</span></div>
+            <div class="log-line"><span class="log-time">21:39:58</span> <span class="log-type type-info">INFO</span> <span>New peer handshaking: ripple-global-3</span></div>
+            <div class="log-line"><span class="log-time">21:39:45</span> <span class="log-type type-success">SUCCESS</span> <span>Epoch rollover detected. Transitioning to Epoch 469.</span></div>
+            <div class="log-line"><span class="log-time">21:39:30</span> <span class="log-type type-success">SUCCESS</span> <span>Attestation verified for slot 121 (Node: backup-eu)</span></div>
+        </section>
+
+        <footer>
+            RustChain Open Network Monitoring | Powered by SophiaCore Inspector
+        </footer>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('latencyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', '11h', '12h'],
+                datasets: [{
+                    label: 'Network Latency (ms)',
+                    data: [42, 45, 38, 40, 42, 35, 30, 32, 40, 42, 44, 42],
+                    borderColor: '#38bdf8',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

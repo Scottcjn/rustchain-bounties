@@ -24,7 +24,7 @@ pub fn get_cpu_serial() -> String {
     #[cfg(target_os = "linux")]
     {
         if let Ok(contents) = std::fs::read_to_string("/proc/cpuinfo") {
-            // Look for Serial line (common on ARM/PPC/RISC-V StarFive)
+            // Look for Serial line (common on ARM/PPC)
             for line in contents.lines() {
                 let lower = line.to_lowercase();
                 if lower.starts_with("serial") {
@@ -41,18 +41,6 @@ pub fn get_cpu_serial() -> String {
                 if line.starts_with("physical id") {
                     if let Some(val) = line.split(':').nth(1) {
                         return format!("phys-{}", val.trim());
-                    }
-                }
-            }
-            // RISC-V: extract mhartid (hardware thread ID) as serial proxy
-            for line in contents.lines() {
-                let lower = line.to_lowercase();
-                if lower.starts_with("hart") || lower.starts_with("mhartid") {
-                    if let Some(val) = line.split(':').nth(1) {
-                        let hart = val.trim().to_string();
-                        if !hart.is_empty() && hart != "0" {
-                            return format!("riscv-hart-{}", hart);
-                        }
                     }
                 }
             }
