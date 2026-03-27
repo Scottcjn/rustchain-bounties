@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>wRTC Solana Bridge Dashboard</title>
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e1a;--card:#111827;--border:#1f2937;--text:#f9fafb;--muted:#9ca3af;--accent:#6366f1;--accent2:#8b5cf6;--green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+h1{font-size:17px;font-weight:600}
+.sub{font-size:12px;color:var(--muted)}
+.right{display:flex;align-items:center;gap:10px}
+.lbl{font-size:11px;color:var(--muted)}
+.badge{font-size:11px;padding:3px 9px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:20px;color:var(--accent);cursor:pointer;transition:all .2s;user-select:none}
+.badge:hover{background:rgba(99,102,241,.25)}
+.badge.spin{animation:spin 1s linear infinite;opacity:.6}
+@keyframes spin{to{transform:rotate(360deg)}}
+main{max-width:1400px;margin:0 auto;padding:18px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.card.rtc::before{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+.card.wrtc::before{background:linear-gradient(90deg,#10b981,#34d399)}
+.card.fee::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.card.txs::before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+.card.hlth::before{background:linear-gradient(90deg,#10b981,#6ee7b7)}
+.card.prc::before{background:linear-gradient(90deg,#ec4899,#f472b6)}
+.lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.val{font-size:22px;font-weight:700;line-height:1}
+.sub{font-size:11px;color:var(--muted);margin-top:3px}
+.g{color:var(--green)}
+.r{color:var(--red)}
+.y{color:var(--yellow)}
+.hbar{display:flex;gap:5px;margin-top:7px;align-items:center;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot.up{background:var(--green);box-shadow:0 0 5px var(--green)}
+.dot.dn{background:var(--red)}
+.dot.chk{background:var(--yellow);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dot-label{font-size:11px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.phdr{padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600}
+.pdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 13px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 13px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+tbody tr:hover{background:rgba(99,102,241,.05)}
+tbody tr:last-child td{border-bottom:none}
+.tag{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.tag.done{background:rgba(16,185,129,.12);color:var(--green)}
+.tag.pend{background:rgba(245,158,11,.12);color:var(--yellow)}
+.tag.fail,.tag.void{background:rgba(239,68,68,.12);color:var(--red)}
+.tag.lock,.tag.cnf{background:rgba(59,130,246,.12);color:var(--blue)}
+.tag.wrap{background:rgba(99,102,241,.12);color:var(--accent)}
+.tag.unwrap{background:rgba(16,185,129,.12);color:var(--green)}
+.mono{font-family:'JetBrains Mono','Fira Code','Consolas',monospace;font-size:11px}
+.grey{color:var(--muted)}
+.bold{font-weight:600}
+#chart{width:100%;height:155px;display:block}
+.nodata{text-align:center;padding:40px 16px;color:var(--muted);font-size:13px;display:none}
+.scroll{max-height:305px;overflow-y:auto}
+.scroll::-webkit-scrollbar{width:4px}
+.scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.act{padding:0}
+.item{display:flex;align-items:flex-start;gap:9px;padding:9px 15px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.item:last-child{border-bottom:none}
+.ai{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.ai.w{background:rgba(99,102,241,.2)}
+.ai.u{background:rgba(16,185,129,.2)}
+.ai.f{background:rgba(245,158,11,.2)}
+.atime{font-size:10px;color:var(--muted);margin-top:2px}
+.atext{line-height:1.4}
+footer{text-align:center;padding:18px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:18px}
+.ebanner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px 15px;margin-bottom:14px;font-size:12px;color:var(--red);display:none}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:11px">
+    <div class="logo">&#x2328;</div>
+    <div>
+      <h1>wRTC Solana Bridge Dashboard</h1>
+      <div class="sub">Real-time cross-chain bridge monitoring</div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="lbl" id="lastUpd">Loading...</span>
+    <span class="badge" id="badge" title="Click to refresh" onclick="manualRefresh()">&#x21bb; <span id="cnt">30s</span></span>
+  </div>
+</header>
+<main>
+  <div class="ebanner" id="errBanner"></div>
+
+  <div class="stats">
+    <div class="card rtc">
+      <div class="lbl">Total RTC Locked in Bridge</div>
+      <div class="val" id="sRtc">&#x2014;</div>
+      <div class="sub" id="sRtcSub">Fetching...</div>
+    </div>
+    <div class="card wrtc">
+      <div class="lbl">Total wRTC Circulating (Solana)</div>
+      <div class="val" id="sWrtc">&#x2014;</div>
+      <div class="sub" id="sWrtcSub">Fetching supply...</div>
+    </div>
+    <div class="card fee">
+      <div class="lbl">Bridge Fee Revenue</div>
+      <div class="val" id="sFee">&#x2014;</div>
+      <div class="sub">Cumulative RTC fees</div>
+    </div>
+    <div class="card txs">
+      <div class="lbl">Total Bridge Transactions</div>
+      <div class="val" id="sTxs">&#x2014;</div>
+      <div class="sub">All time</div>
+    </div>
+    <div class="card hlth">
+      <div class="lbl">Bridge Health</div>
+      <div class="val g" id="sHlth">&#x2014;</div>
+      <div class="hbar" id="hbar">
+        <div class="dot chk"></div>
+        <span class="dot-label">Checking...</span>
+      </div>
+    </div>
+    <div class="card prc">
+      <div class="lbl">wRTC Price (Raydium)</div>
+      <div class="val" id="sPrc">&#x2014;</div>
+      <div class="sub" id="sPrcSub">via DexScreener</div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="phdr">
+        <span><span class="pdot" style="background:var(--accent)"></span>wRTC Price (Raydium)</span>
+        <span class="lbl" id="cUpd">&#x2014;</span>
+      </div>
+      <div style="position:relative">
+        <canvas id="chart"></canvas>
+        <div class="nodata" id="cNoData">Loading price data...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="phdr">
+        <span><span class="pdot" style="background:var(--green)"></span>Live Activity</span>
+      </div>
+      <div class="act" id="feed">
+        <div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Loading activity...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="phdr">
+        <span><span class="pdot" style="background:var(--accent)"></span>Recent Wraps (RTC &#x2192; wRTC)</span>
+        <span class="lbl" id="wUpd">&#x2014;</span>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Time</th><th>Amount</th><th>Status</th><th>From (RTC)</th><th>To (Solana)</th></tr></thead>
+          <tbody id="wTbl"><tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="phdr">
+        <span><span class="pdot" style="background:var(--green)"></span>Recent Unwraps (wRTC &#x2192; RTC)</span>
+        <span class="lbl" id="uUpd">&#x2014;</span>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Time</th><th>Amount</th><th>Status</th><th>From (Solana)</th><th>To (RTC)</th></tr></thead>
+          <tbody id="uTbl"><tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>
+  wRTC Solana Bridge Dashboard &#x2014; Auto-refreshes every 30s &#x2014;
+  Data: RustChain API, Solana RPC &amp; DexScreener
+</footer>
+
+<script>
+(function(){
+'use strict';
+var CFG = window.BRIDGE_CONFIG || {};
+var SOLANA_RPC = CFG.solanaRpc || 'https://api.mainnet-beta.solana.com';
+var WRTC_MINT  = CFG.wrtcMint  || 'WRTCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+var EXPLR      = CFG.explorer  || 'https://solscan.io';
+var REFRESH_MS = CFG.refreshMs || 30000;
+var priceHist  = [];
+var countdown  = Math.ceil(REFRESH_MS / 1000);
+var timer      = null;
+var badge      = document.getElementById('badge');
+var cntEl      = document.getElementById('cnt');
+
+function $(id){return document.getElementById(id)}
+function txt(id,v){var e=$(id);if(e)e.textContent=v!==undefined?v:''}
+function err(m){var e=$('errBanner');if(e){e.textContent=m;e.style.display='block';setTimeout(function(){e.style.display='none'},10000)}}
+
+function shAddr(a,n){n=n||6;if(!a||a.length<n*2)return a||'\u2014';return a.slice(0,n)+'\u2026'+a.slice(-n)}
+function fmtNum(n,d){d=d!==undefined?d:2;if(n==null||isNaN(n))return'\u2014';if(n>=1e9)return(n/1e9).toFixed(d)+'B';if(n>=1e6)return(n/1e6).toFixed(d)+'M';if(n>=1e3)return(n/1e3).toFixed(d)+'K';return Number(n).toFixed(d)}
+function fmtTime(ts){if(!ts)return'\u2014';var d=(Date.now()/1000)-ts;if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';if(d<86400)return Math.floor(d/3600)+'h ago';return new Date(ts*1000).toLocaleDateString()}
+function statusTag(s){var m={'completed':'done',pending:'pend',failed:'fail',voided:'void',locked:'lock',confirming:'cnf'};var c=m[s]||'pend';return'<span class="tag '+c+'">'+s+'</span>'}
+
+// ── Demo data – replace with real RustChain API calls ──
+async function fetchBridge(){
+  var now=Math.floor(Date.now()/1000);
+  return{totalLockedRtc:142857.34,totalWrtcCirculating:138421.12,totalFeeRevenue:1428.57,totalTransactions:3824,healthRustchain:'operational',healthSolana:'operational',
+    recentWraps:[
+      {amount:500,status:'completed',fromRtc:'RTC_7fXa9K1aBcD2EfG',toSol:'Sol_4TRwNq3XpYv7Bm',time:now-45},
+      {amount:1200,status:'completed',fromRtc:'RTC_3bBc8K2CdE3FgH',toSol:'Sol_9XyPmQ4YqZu8Cn',time:now-210},
+      {amount:350,status:'completed',fromRtc:'RTC_9dZw2L3DeF4GhI',toSol:'Sol_2AbCrS5ZrAv9Do',time:now-480},
+      {amount:800,status:'locked',fromRtc:'RTC_5eFg3M4EfG5HiJ',toSol:'Sol_7kLmNp6AsBw0Ep',time:now-900},
+      {amount:2000,status:'completed',fromRtc:'RTC_1aBcDe5FgH6IjK',toSol:'Sol_3qRsTu7BtCx1Fq',time:now-1200},
+      {amount:150,status:'completed',fromRtc:'RTC_8fGh4N6GhI7JkL',toSol:'Sol_5vWxYz8CuDy2Gr',time:now-1500},
+      {amount:600,status:'completed',fromRtc:'RTC_2bCdEf7HiJ8KlM',toSol:'Sol_6pQrSt9DvEz3Hs',time:now-2000},
+      {amount:3000,status:'completed',fromRtc:'RTC_6hIj5K8IjK9LmN',toSol:'Sol_8mNoPq0EwF4It',time:now-2400},
+      {amount:450,status:'confirming',fromRtc:'RTC_3cDeFg9JkL0MnO',toSol:'Sol_9nOpQr1FxG5Ju',time:now-3000},
+      {amount:750,status:'completed',fromRtc:'RTC_7iJk6L0KlM1NoP',toSol:'Sol_1oPqRs2GyH6Kv',time:now-3600},
+      {amount:1100,status:'completed',fromRtc:'RTC_4dEfGh1LmN2OpQ',toSol:'Sol_2pQrSt3HzI7Lw',time:now-4000},
+      {amount:280,status:'completed',fromRtc:'RTC_9jKl7M2MnO3PqR',toSol:'Sol_3qRsTu4IaJ8Mx',time:now-4500},
+      {amount:900,status:'completed',fromRtc:'RTC_5eLmNo3NoP4QsT',toSol:'Sol_4rStUv5JbK9Ny',time:now-5000},
+      {amount:220,status:'completed',fromRtc:'RTC_1fMnOp4OpQ5RtU',toSol:'Sol_5sTuVw6KcL0Oz',time:now-5400},
+      {amount:1800,status:'completed',fromRtc:'RTC_6gNoPq5PqR6SuV',toSol:'Sol_6tUvWx7LdM1Pa',time:now-6000},
+      {amount:560,status:'completed',fromRtc:'RTC_2hOpQr6QrS7TvW',toSol:'Sol_7uVwXy8MeN2Qb',time:now-6600},
+      {amount:1300,status:'completed',fromRtc:'RTC_7iPqRs7RsT8UwX',toSol:'Sol_8vWxYz9NfO3Rc',time:now-7200},
+      {amount:420,status:'completed',fromRtc:'RTC_3jRsTu8StU9VxY',toSol:'Sol_9wXyZa0OgP4Sd',time:now-7800},
+      {amount:670,status:'failed',fromRtc:'RTC_8kStUv9TuV0WyZ',toSol:'Sol_1xYzAb1PhQ5Te',time:now-8400},
+    ],
+    recentUnwraps:[
+      {amount:300,status:'completed',fromSol:'Sol_2AbCdE1QrS2TuV',toRtc:'RTC_9fGh3K4LmN5OpQ',time:now-30},
+      {amount:850,status:'completed',fromSol:'Sol_3BcDeF2RsT3UvW',toRtc:'RTC_1iJk4L5MnO6PqR',time:now-180},
+      {amount:200,status:'pending',fromSol:'Sol_4CdEfG3StU4VwX',toRtc:'RTC_5jKl6M7NoP8QrS',time:now-400},
+      {amount:1500,status:'completed',fromSol:'Sol_5DeFgH4TuV5WxY',toRtc:'RTC_2kLm7N8OpQ9RsT',time:now-600},
+      {amount:380,status:'completed',fromSol:'Sol_6EfGhI5UvW6XyZ',toRtc:'RTC_6mNo8O9PqR0StU',time:now-900},
+      {amount:920,status:'completed',fromSol:'Sol_7FgHiJ6VwX7YzA',toRtc:'RTC_3nOp9P0QrS1TuV',time:now-1200},
+      {amount:140,status:'completed',fromSol:'Sol_8GhIjK7WxY8ZaB',toRtc:'RTC_7pQr1Q2RsT3UvW',time:now-1500},
+      {amount:2100,status:'completed',fromSol:'Sol_9HiJkL8XyZ9AbC',toRtc:'RTC_4qRs2R3StU4VwX',time:now-2000},
+      {amount:480,status:'confirming',fromSol:'Sol_1IjKlM9YzA0BcD',toRtc:'RTC_8sTu3S4TuV5WxY',time:now-2500},
+      {amount:750,status:'completed',fromSol:'Sol_2JkLmN0ZaB1CdE',toRtc:'RTC_5tUv4T5UvW6XyZ',time:now-3000},
+      {amount:320,status:'completed',fromSol:'Sol_3KlMnO1AbC2DeF',toRtc:'RTC_9vWx5U6VwX7YzA',time:now-3600},
+      {amount:1800,status:'completed',fromSol:'Sol_4LmNoP2BcD3EfG',toRtc:'RTC_1wXy6V7WxY8ZaB',time:now-4000},
+      {amount:560,status:'completed',fromSol:'Sol_5MnOpQ3CdE4FgH',toRtc:'RTC_6yZa7W8XyZ9AbC',time:now-4500},
+      {amount:95,status:'completed',fromSol:'Sol_6NoPqR4DeF5GhI',toRtc:'RTC_2zAb8X9YzA0BcD',time:now-5000},
+      {amount:1200,status:'completed',fromSol:'Sol_7OpQrS5EfG6HiJ',toRtc:'RTC_7bBc9Y0ZaB1CdE',time:now-5500},
+      {amount:440,status:'voided',fromSol:'Sol_8PqRsT6FgH7IjK',toRtc:'RTC_3cCd1Z2AbC3DeF',time:now-6000},
+      {amount:780,status:'completed',fromSol:'Sol_9QrStU7GhI8JkL',toRtc:'RTC_8dDe2B3BcD4EfG',time:now-6600},
+      {amount:1900,status:'completed',fromSol:'Sol_1rStUv8HiJ9KlM',toRtc:'RTC_4eEf3C4CdE5FgH',time:now-7200},
+      {amount:350,status:'completed',fromSol:'Sol_2sTuVw9IjK0LmN',toRtc:'RTC_9fFg4D5DeF6GhI',time:now-7800},
+    ],
+    recentActivity:[
+      {type:'wrap',msg:'500 RTC \u2192 wRTC',addr:shAddr('RTC_7fXa9K1aBcD2EfG'),time:now-45},
+      {type:'unwrap',msg:'300 wRTC \u2192 RTC',addr:shAddr('RTC_9fGh3K4LmN5OpQ'),time:now-30},
+      {type:'wrap',msg:'1,200 RTC \u2192 wRTC',addr:shAddr('RTC_3bBc8K2CdE3FgH'),time:now-210},
+      {type:'fee',msg:'+0.5 RTC bridge fee',addr:'',time:now-300},
+      {type:'unwrap',msg:'850 wRTC \u2192 RTC',addr:shAddr('RTC_1iJk4L5MnO6PqR'),time:now-180},
+      {type:'wrap',msg:'350 RTC \u2192 wRTC',addr:shAddr('RTC_9dZw2L3DeF4GhI'),time:now-480},
+      {type:'unwrap',msg:'200 wRTC \u2192 RTC (pending)',addr:shAddr('RTC_5jKl6M7NoP8QrS'),time:now-400},
+    ]
+  };
+}
+
+async function fetchSupply(){
+  // PRODUCTION: POST SOLANA_RPC {jsonrpc:"2.0",id:1,method:"getTokenSupply",params:[WRTC_MINT]}
+  return 138421.12;
+}
+
+async function fetchPrice(){
+  // PRODUCTION: GET https://api.dexscreener.com/latest/dex/pairs/solana/{PAIR}
+  var base=0.0234;
+  var var_=(Math.random()-0.5)*0.003;
+  return{price:base+var_,chg:4.2+(Math.random()-0.5)*3,vol:284500};
+}
+
+// ── Chart ──
+function drawChart(){
+  var canvas=$('chart');
+  var noData=$('cNoData');
+  if(!canvas)return;
+  if(priceHist.length<2){noData.style.display='block';return;}
+  noData.style.display='none';
+  var ctx=canvas.getContext('2d');
+  var W=canvas.offsetWidth||600;
+  var H=155;
+  canvas.width=W;canvas.height=H;
+  var prices=priceHist.map(function(p){return p.price});
+  var min=Math.min.apply(null,prices);
+  var max=Math.max.apply(null,prices);
+  var range=max-min||1;
+  var pL=8,pR=8,pT=8,pB=22,cW=W-pL-pR,cH=H-pT-pB;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.05)';
+  ctx.lineWidth=1;
+  for(var i=0;i<=3;i++){var y=pT+(cH/3)*i;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();}
+  var grad=ctx.createLinearGradient(0,pT,0,H-pB);
+  grad.addColorStop(0,'rgba(99,102,241,0.28)');
+  grad.addColorStop(1,'rgba(99,102,241,0)');
+  ctx.beginPath();
+  priceHist.forEach(function(p,i){var x=pL+(i/(priceHist.length-1))*cW;var y=pT+((max-p.price)/range)*cH;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
+  ctx.lineTo(pL+cW,H-pB);ctx.lineTo(pL,H-pB);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  var lineGrad=ctx.createLinearGradient(pL,0,pL+cW,0);
+  lineGrad.addColorStop(0,'#6366f1');lineGrad.addColorStop(1,'#8b5cf6');
+  ctx.beginPath();
+  priceHist.forEach(function(p,i){var x=pL+(i/(priceHist.length-1))*cW;var y=pT+((max-p.price)/range)*cH;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
+  ctx.strokeStyle=lineGrad;ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px Inter,sans-serif';
+  ctx.textAlign='right';
+  var priceFmt=function(n){if(n>=1)return'$'+n.toFixed(2);return'$'+(n*1000).toFixed(1)+'m';};
+  ctx.fillText(priceFmt(max),pL-2,pT+6);
+  ctx.fillText(priceFmt(min),pL-2,H-pB+4);
+}
+
+// ── Render helpers ──
+function renderActivity(acts){
+  var el=$('feed');
+  if(!acts||!acts.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">No recent activity</div>';return;}
+  el.innerHTML=acts.map(function(a){
+    var icon=a.type==='wrap'?'&#x2193;':a.type==='unwrap'?'&#x2191;':'&#x2696;';
+    var cls=a.type==='wrap'?'w':a.type==='unwrap'?'u':'f';
+    return'<div class="item"><div class="ai '+cls+'">'+icon+'</div><div><div class="atext">'+a.msg+(a.addr?' <span class="grey">('+a.addr+')</span>':'')+'</div><div class="atime">'+fmtTime(a.time)+'</div></div></div>';
+  }).join('');
+}
+
+function renderWraps(rows){
+  var el=$('wTbl');
+  if(!rows||!rows.length){el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No wraps found</td></tr>';return;}
+  el.innerHTML=rows.slice(0,20).map(function(r){
+    return'<tr>'+
+      '<td class="grey">'+fmtTime(r.time)+'</td>'+
+      '<td class="bold">'+fmtNum(r.amount,4)+' RTC</td>'+
+      '<td>'+statusTag(r.status)+'</td>'+
+      '<td class="grey mono" title="'+r.fromRtc+'">'+shAddr(r.fromRtc)+'</td>'+
+      '<td class="grey mono" title="'+r.toSol+'">'+shAddr(r.toSol)+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function renderUnwraps(rows){
+  var el=$('uTbl');
+  if(!rows||!rows.length){el.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">No unwraps found</td></tr>';return;}
+  el.innerHTML=rows.slice(0,20).map(function(r){
+    return'<tr>'+
+      '<td class="grey">'+fmtTime(r.time)+'</td>'+
+      '<td class="bold">'+fmtNum(r.amount,4)+' wRTC</td>'+
+      '<td>'+statusTag(r.status)+'</td>'+
+      '<td class="grey mono" title="'+r.fromSol+'">'+shAddr(r.fromSol)+'</td>'+
+      '<td class="grey mono" title="'+r.toRtc+'">'+shAddr(r.toRtc)+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function renderHealth(r,h){
+  var el=$('hbar');
+  var health=r.healthRustchain==='operational'&&r.healthSolana==='operational';
+  var hlth=$('sHlth');
+  if(health){
+    el.innerHTML='<div class="dot up"></div><span class="dot-label">RustChain: OK</span><div class="dot up" style="margin-left:8px"></div><span class="dot-label">Solana: OK</span>';
+    if(hlth){hlth.textContent='Operational';hlth.className='val g';}
+  } else {
+    var rdot=r.healthRustchain==='operational'?'up':'dn';
+    var sdot=r.healthSolana==='operational'?'up':'dn';
+    el.innerHTML='<div class="dot '+rdot+'"></div><span class="dot-label">RustChain</span><div class="dot '+sdot+'" style="margin-left:8px"></div><span class="dot-label">Solana</span>';
+    if(hlth){hlth.textContent='Degraded';hlth.className='val y';}
+  }
+}
+
+// ── Main refresh ──
+async function refresh(){
+  badge.classList.add('spin');
+  var now=new Date().toLocaleTimeString();
+  txt('lastUpd','Updated '+now);
+  try{
+    var data=await fetchBridge();
+    txt('sRtc',fmtNum(data.totalLockedRtc)+' RTC');
+    txt('sRtcSub',data.totalLockedRtc>0?'Live locked supply':'No active locks');
+    var wrtc=await fetchSupply();
+    txt('sWrtc',fmtNum(wrtc)+' wRTC');
+    txt('sWrtcSub','Solana circulating supply');
+    txt('sFee',fmtNum(data.totalFeeRevenue)+' RTC');
+    txt('sTxs',fmtNum(data.totalTransactions));
+    renderHealth(data);
+    renderActivity(data.recentActivity);
+    renderWraps(data.recentWraps);
+    renderUnwraps(data.recentUnwraps);
+    txt('wUpd',now);
+    txt('uUpd',now);
+    var pdata=await fetchPrice();
+    txt('sPrc','$'+pdata.price.toFixed(6));
+    txt('sPrcSub','24h: '+(pdata.chg>=0?'+':'')+pdata.chg.toFixed(2)+'% | Vol: $'+fmtNum(pdata.vol));
+    if(pdata.chg<0)$('sPrc').className='val r';else if(pdata.chg>2)$('sPrc').className='val g';else $('sPrc').className='val';
+    priceHist.push({price:pdata.price,ts:Date.now()});
+    if(priceHist.length>60)priceHist.shift();
+    drawChart();
+    txt('cUpd',now);
+  } catch(e){
+    err('Failed to fetch bridge data: '+(e.message||e));
+  }
+  badge.classList.remove('spin');
+}
+
+// ── Countdown timer ──
+function startTimer(){
+  if(timer)clearInterval(timer);
+  countdown=Math.ceil(REFRESH_MS/1000);
+  txt('cnt',countdown+'s');
+  timer=setInterval(function(){
+    countdown--;
+    if(countdown<=0){
+      countdown=Math.ceil(REFRESH_MS/1000);
+      refresh();
+    }
+    txt('cnt',countdown+'s');
+  },1000);
+}
+
+// ── Manual refresh ──
+function manualRefresh(){
+  countdown=Math.ceil(REFRESH_MS/1000);
+  refresh();
+}
+
+// ── Init ──
+window.BRIDGE_CONFIG=CFG;
+window.manualRefresh=manualRefresh;
+refresh();
+startTimer();
+
+// ── Resize chart on window resize ──
+var resizeTimer;
+window.addEventListener('resize',function(){
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(drawChart,200);
+});
+
+})();
+</script>
+</body>
+</html>
+

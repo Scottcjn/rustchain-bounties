@@ -1,0 +1,88 @@
+# Patch 2: rustchain_p2p_gossip.py — Add attestation node binding verification
+# This patch modifies node/rustchain_p2p_gossip.py
+# to verify that attestations are bound to the receiving node
+
+diff --git a/node/rustchain_p2p_gossip.py b/node/rustchain_p2p_gossip.py
+--- a/node/rustchain_p2p_gossip.py
++++ b/node/rustchain_p2p_gossip.py
+@@ -295,6 +295,13 @@ class GossipLayer:
+         self.attestation_crdt = LWWRegister()
+         self.balance_crdt = PNCounter()
+         self.epoch_crdt = GSet()
++        
++        # NEW: Track seen attestation hashes to prevent replay
++        # Format: {miner_id: {attestation_hash: set of node_ids that sent it}}
++        self._seen_attestation_hashes: Dict[str, Dict[str, Set[str]]] = defaultdict(
++            lambda: defaultdict(set)
++        )
+ 
+         # Load initial state from DB
+         self._load_state_from_db()
+@@ -480,6 +487,36 @@ class GossipLayer:
+         
+         return {"status": "ok"}
+ 
++    # NEW METHOD: Verify attestation node binding
++    def _verify_attestation_node_binding(self, attestation: Dict, sender_node_id: str) -> bool:
++        """
++        Verify that an attestation was generated for THIS node, not replayed from another.
++        
++        Returns True if the attestation is valid for this node.
++        Returns False if this is a replay attack.
++        """
++        node_peer_id = attestation.get("node_peer_id")
++        
++        if not node_peer_id:
++            # Legacy attestation without node binding — log warning but accept
++            # (for backward compatibility during migration)
++            logger.warning(
++                f"Attestation for {attestation.get('miner', '?')[:16]} lacks "
++                f"node_peer_id — may be from pre-fix client"
++            )
++            return True
++        
++        if node_peer_id != self.node_id:
++            logger.warning(
++                f"REJECTED cross-node replay: attestation for miner "
++                f"{attestation.get('miner', '?')[:16]} was generated for node "
++                f"{node_peer_id}, not {self.node_id} (received from {sender_node_id})"
++            )
++            return False
++        
++        return True
++
+     def _handle_attestation(self, msg: GossipMessage) -> Dict:
+         """Handle full attestation data"""
+         attestation = msg.payload
+@@ -489,6 +526,14 @@ class GossipLayer:
+         # Update CRDT
+         if self.attestation_crdt.set(miner_id, attestation, ts_ok):
+             self._save_attestation_to_db(attestation, ts_ok)
++            
++            # NEW: Verify node binding before final acceptance
++            if not self._verify_attestation_node_binding(attestation, msg.sender_id):
++                # Rollback: remove the entry we just added
++                if miner_id in self.attestation_crdt.data:
++                    del self.attestation_crdt.data[miner_id]
++                return {"status": "rejected", "reason": "cross_node_replay"}
++            
+             logger.info(f"Merged attestation for {miner_id[:16]}...")
+ 
+         return {"status": "ok"}
+@@ -505,6 +550,16 @@ class GossipLayer:
+             # Request full data
+             return {"status": "need_data", "miner_id": miner_id}
+ 
++        # NEW: Check for hash-level replay (even if timestamp is newer)
++        attestation_hash = payload.get("attestation_hash")
++        if attestation_hash:
++            if sender_node_id in self._seen_attestation_hashes[miner_id].get(attestation_hash, set()):
++                logger.warning(
++                    f"Duplicate attestation hash {attestation_hash[:16]} from "
++                    f"{sender_node_id} for miner {miner_id[:16]} — possible gossip loop"
++                )
++                return {"status": "rejected", "reason": "duplicate_hash"}
++        
+         return {"status": "have_data"}
+ 
+     def _handle_epoch_propose(self, msg: GossipMessage) -> Dict:

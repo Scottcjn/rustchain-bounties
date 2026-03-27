@@ -1,0 +1,59 @@
+{
+  "RustChain: curl check balance": {
+    "prefix": "rtc-curl-balance",
+    "body": [
+      "curl -sk \"${1:https://50.28.86.131}/wallet/balance?miner_id=${2:YOUR_MINER_ID}\""
+    ],
+    "description": "curl command to check RTC wallet balance."
+  },
+  "RustChain: curl node health": {
+    "prefix": "rtc-curl-health",
+    "body": [
+      "curl -sk ${1:https://50.28.86.131}/health"
+    ],
+    "description": "curl command to check RustChain node health."
+  },
+  "RustChain: curl epoch info": {
+    "prefix": "rtc-curl-epoch",
+    "body": [
+      "curl -sk ${1:https://50.28.86.131}/epoch"
+    ],
+    "description": "curl command to fetch current epoch info."
+  },
+  "RustChain: curl list miners": {
+    "prefix": "rtc-curl-miners",
+    "body": [
+      "curl -sk ${1:https://50.28.86.131}/api/miners | python3 -m json.tool"
+    ],
+    "description": "curl command to list active miners with pretty JSON output."
+  },
+  "RustChain: curl attestation challenge": {
+    "prefix": "rtc-curl-challenge",
+    "body": [
+      "curl -sk -X POST ${1:https://50.28.86.131}/attest/challenge \\\\",
+      "  -H 'Content-Type: application/json' \\\\",
+      "  -d '{}'"
+    ],
+    "description": "curl command to request an attestation challenge nonce."
+  },
+  "RustChain: systemd miner unit": {
+    "prefix": "rtc-systemd-unit",
+    "body": [
+      "[Unit]",
+      "Description=RustChain Miner",
+      "After=network.target",
+      "",
+      "[Service]",
+      "Type=simple",
+      "User=${1:your_username}",
+      "WorkingDirectory=${2:/home/your_username/Rustchain}",
+      "ExecStart=/usr/bin/python3 ${3:miners/linux/rustchain_linux_miner.py} --wallet ${4:YOUR_MINER_ID}",
+      "Restart=always",
+      "RestartSec=10",
+      "",
+      "[Install]",
+      "WantedBy=multi-user.target"
+    ],
+    "description": "systemd service unit for a RustChain miner."
+  }
+}

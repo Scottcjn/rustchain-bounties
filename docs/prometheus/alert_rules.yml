@@ -1,0 +1,78 @@
+# RustChain Prometheus Alert Rules
+# Bounty #765 — Observable RustChain
+#
+# Import these into your Prometheus server's rule_files configuration.
+# See docs/PROMETHEUS_METRICS.md for setup instructions.
+
+groups:
+  - name: rustchain_alerts
+    rules:
+      # ── Critical ──────────────────────────────────────────────────────
+
+      - alert: RustChainNodeDown
+        expr: rustchain_node_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RustChain node is unreachable"
+          description: >-
+            The RustChain node has been down for more than 2 minutes.
+            Check the node process and network connectivity.
+
+      - alert: RustChainDBReadOnly
+        expr: rustchain_db_rw == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RustChain database is read-only"
+          description: >-
+            The node's database has been in read-only mode for over 1 minute.
+            This typically indicates a disk full condition or filesystem error.
+
+      - alert: RustChainNoActiveMiners
+        expr: rustchain_miners_active == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No active miners on the network"
+          description: >-
+            Zero miners have been active for over 5 minutes.
+            This may indicate a network-wide issue or node isolation.
+
+      # ── Warning ───────────────────────────────────────────────────────
+
+      - alert: RustChainEpochStuck
+        expr: changes(rustchain_epoch_current[30m]) == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Epoch has not advanced in 30 minutes"
+          description: >-
+            The epoch counter has not changed in the last 30 minutes.
+            This may indicate a stalled chain or node sync issue.
+
+      - alert: RustChainBackupStale
+        expr: rustchain_backup_age_hours > 6
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database backup is stale (>6 hours old)"
+          description: >-
+            The latest database backup is {{ $value | printf "%.1f" }} hours old.
+            Verify the backup cron job is running.
+
+      - alert: RustChainHighAPILatency
+        expr: histogram_quantile(0.95, rate(rustchain_api_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency on RustChain node"
+          description: >-
+            The 95th percentile API latency is above 2 seconds.
+            The node may be under heavy load or experiencing resource contention.

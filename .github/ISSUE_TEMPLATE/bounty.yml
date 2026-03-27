@@ -1,0 +1,171 @@
+name: Bounty
+description: Create a new RTC-paid bounty
+title: "[BOUNTY] "
+labels: ["bounty", "open"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## New RTC Bounty
+        Fill in the details below to post a bounty.
+
+        Use the **Bounty Proof / Claim** form for completed work and the **Wallet / Payout Registration** form for payout targets.
+
+        ---
+
+        ### About RTC Wallets
+
+        **RTC wallets are simple string names**, not blockchain addresses.
+        Pick any name you like: `my-cool-wallet`, `alice`, `builder-fred`, etc.
+
+        Start mining with reproducible instructions only:
+        - use pinned versions/commits
+        - provide checksum or container digest
+        - avoid unpinned `pip install` in bounty posts
+
+        **Do NOT submit ETH, SOL, or ERG addresses as your wallet.**
+        Those chains (Solana wRTC, Ergo anchoring) exist for bridging INTO the RTC economy — not for cashing out.
+        RustChain is a long-term project. Bounties exist to grow and support the ecosystem, not for quick dumps.
+        If you are here to build, welcome. If you are here to flip, this is not the project for you.
+
+        ---
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What needs to be built or fixed?
+      placeholder: Describe the objective clearly
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope & Requirements
+      description: What's in scope? What are the acceptance criteria?
+      placeholder: |
+        In-scope:
+        - ...
+
+        Acceptance criteria:
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Bounty Tier
+      options:
+        - "Micro (1-10 RTC)"
+        - "Standard (10-50 RTC)"
+        - "Major (50-200 RTC)"
+        - "Critical (200-500 RTC)"
+    validations:
+      required: true
+
+  - type: input
+    id: payout
+    attributes:
+      label: RTC Payout
+      description: Exact RTC amount for this bounty
+      placeholder: "25"
+    validations:
+      required: true
+
+  - type: textarea
+    id: skills
+    attributes:
+      label: Skills Needed
+      description: What skills or knowledge are required?
+      placeholder: "Python, networking, blockchain, security..."
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Resources & Context
+      description: Links to relevant code, docs, or discussions
+      placeholder: |
+        - File: /root/rustchain/...
+        - Docs: ...
+        - Related issue: #...
+
+
+  - type: textarea
+    id: target
+    attributes:
+      label: Target Repo / Ref / Environment
+      description: Exact target for reproducible review.
+      placeholder: |
+        Repository: owner/repo
+        Branch or commit range: ...
+        Deployment/test environment: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: supply_chain
+    attributes:
+      label: Supply-Chain Hygiene
+      description: Required for any bounty that changes dependencies, install steps, CI, or tooling.
+      placeholder: |
+        - Pinned dependency versions:
+        - External repos pinned to commit SHA:
+        - Artifact checksum/container digest:
+        - Any install commands reviewers must run:
+    validations:
+      required: true
+
+  - type: textarea
+    id: disclosure
+    attributes:
+      label: Disclosure / Safe Harbor (Security Bounties)
+      description: Required for security/red-team bounties.
+      placeholder: |
+        Disclosure window: ...
+        Safe harbor: SECURITY.md
+        Severity rubric + payout table reference: ...
+
+  - type: textarea
+    id: quality_gate
+    attributes:
+      label: Quality Gate Scorecard (0-5 each)
+      description: Used by maintainers during payout review.
+      placeholder: |
+        Scoring dimensions:
+        - Impact (0-5):
+        - Correctness (0-5):
+        - Evidence (0-5):
+        - Craft (0-5):
+
+        Suggested gate:
+        - Minimum total: 13/20
+        - Correctness must be > 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: disqualifiers
+    attributes:
+      label: Global Disqualifiers
+      description: Submissions matching these can be rejected with no payout.
+      placeholder: |
+        - AI slop / template-only output
+        - Duplicate or noisy submissions
+        - Missing proof links or validation evidence
+        - Repeated low-effort near-identical content
+        - Submitting ETH/SOL/ERG addresses instead of RTC wallet names
+    validations:
+      required: true
+
+  - type: dropdown
+    id: payout_mode
+    attributes:
+      label: Payout Mode
+      description: For higher-value bounties, staged payout is recommended.
+      options:
+        - "Single payout on merge"
+        - "Staged payout (60% on merge, 40% after stability window)"
+    validations:
+      required: true
