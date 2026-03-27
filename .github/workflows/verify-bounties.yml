@@ -1,26 +1,23 @@
-name: Verify Bounty Claims
-
+name: Verify Bounties
 on:
-  schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch:        # Manual trigger
+  issue_comment:
+    types: [created]
 
 jobs:
   verify:
+    if: contains(github.event.comment.body, '/claim')
     runs-on: ubuntu-latest
-    permissions:
-      issues: write        # Post/update comments on issues
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
-
+          python-version: '3.10'
       - name: Install dependencies
         run: pip install requests
-
-      - name: Run bounty verification
-        run: python scripts/verify_bounties.py
+      - name: Run Verification Bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          USER_LOGIN: ${{ github.event.comment.user.login }}
+        run: python scripts/verify_bounties.py
