@@ -1,0 +1,17 @@
+name: The Glassworm Protocol
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  verify-poa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Glassworm Sentinel
+        uses: ./glassworm-protocol
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          rpc-url: 'https://rpc.rustchain.network'

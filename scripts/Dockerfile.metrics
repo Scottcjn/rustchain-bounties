@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+LABEL maintainer="rustchain-community"
+LABEL description="Prometheus metrics exporter for RustChain nodes"
+
+WORKDIR /app
+
+COPY requirements-metrics.txt .
+RUN pip install --no-cache-dir -r requirements-metrics.txt
+
+COPY prometheus_exporter.py .
+
+EXPOSE 9120
+
+ENTRYPOINT ["python", "prometheus_exporter.py"]
+CMD ["--port", "9120"]
