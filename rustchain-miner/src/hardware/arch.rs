@@ -44,26 +44,6 @@ pub fn classify(brand: &str) -> (&'static str, &'static str) {
         return ("ARM", "modern");
     }
 
-    // RISC-V detection — StarFive VisionFive 2 (JH7110)
-    if lower.contains("starfive") || lower.contains("jh7110") || lower.contains("visionfive") {
-        return ("RISC-V", "starfive_jh7110");
-    }
-
-    // RISC-V detection — SiFive Unmatched
-    if lower.contains("sifive") || lower.contains("fu740") || lower.contains("hifive") {
-        return ("RISC-V", "sifive_unmatched");
-    }
-
-    // RISC-V detection — Milk-V Pioneer (SG2380)
-    if lower.contains("milk-v") || lower.contains("sg2380") || lower.contains("pioneer") {
-        return ("RISC-V", "milkv_pioneer");
-    }
-
-    // Generic RISC-V detection
-    if lower.contains("riscv") || lower.contains("rv64") || lower.contains("rv32") {
-        return ("RISC-V", "riscv_modern");
-    }
-
     // Default: modern x86_64
     ("x86_64", "modern")
 }
@@ -77,11 +57,6 @@ pub fn get_multiplier(device_arch: &str) -> f64 {
         "g3" => 1.8,
         "apple_silicon" => 1.2,
         "core2duo" => 1.3,
-        // RISC-V tiers — slower than x86_64, higher reward for vintage hardware
-        "starfive_jh7110" => 1.1,
-        "sifive_unmatched" => 1.0,
-        "milkv_pioneer" => 0.9,
-        "riscv_modern" => 0.95,
         _ => 1.0,
     }
 }
@@ -131,34 +106,5 @@ mod tests {
         let (family, arch) = classify("13th Gen Intel(R) Core(TM) i7-13700H");
         assert_eq!(family, "x86_64");
         assert_eq!(arch, "modern");
-    }
-
-    #[test]
-    fn test_classify_riscv_starfive() {
-        let (family, arch) = classify("StarFive JH7110 RISC-V");
-        assert_eq!(family, "RISC-V");
-        assert_eq!(arch, "starfive_jh7110");
-        assert!((get_multiplier(arch) - 1.1).abs() < f64::EPSILON);
-    }
-
-    #[test]
-    fn test_classify_riscv_sifive() {
-        let (family, arch) = classify("SiFive Freedom U740 RISC-V");
-        assert_eq!(family, "RISC-V");
-        assert_eq!(arch, "sifive_unmatched");
-    }
-
-    #[test]
-    fn test_classify_riscv_milkv() {
-        let (family, arch) = classify("Milk-V Pioneer SG2380");
-        assert_eq!(family, "RISC-V");
-        assert_eq!(arch, "milkv_pioneer");
-    }
-
-    #[test]
-    fn test_classify_riscv_generic() {
-        let (family, arch) = classify("RISC-V Processor");
-        assert_eq!(family, "RISC-V");
-        assert_eq!(arch, "riscv_modern");
     }
 }

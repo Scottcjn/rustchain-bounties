@@ -16,7 +16,6 @@ TARGETS=(
     "x86_64-unknown-linux-musl"        # x86_64 Linux (static)
     "aarch64-unknown-linux-musl"       # ARM64 Linux (static)
     "powerpc64-unknown-linux-gnu"      # PowerPC 64-bit Linux (big-endian)
-    "riscv64gc-unknown-linux-gnu"      # RISC-V 64-bit Linux (StarFive, SiFive, Milk-V)
 )
 
 BINARY="rustchain-miner"
