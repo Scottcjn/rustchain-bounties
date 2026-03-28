@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fossil Record - Attestation Archaeology Visualizer</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .header p {
+      opacity: 0.7;
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .control-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .control-btn:hover, .control-btn.active {
+      background: rgba(102, 126, 234, 0.5);
+      border-color: #667eea;
+    }
+    .viz-container {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    #viz {
+      width: 100%;
+      height: 500px;
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🦕 The Fossil Record</h1>
+    <p>Attestation Archaeology Visualizer - RustChain Mining History</p>
+  </div>
+
+  <div class="controls">
+    <button class="control-btn active" data-mode="stacked">Stacked Area</button>
+    <button class="control-btn" data-mode="streamgraph">Streamgraph</button>
+    <button class="control-btn" data-mode="timeline">Timeline</button>
+    <button class="control-btn" data-mode="heatmap">Heatmap</button>
+  </div>
+
+  <div class="viz-container">
+    <div id="viz"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="total-attestations">0</div>
+      <div class="stat-label">Total Attestations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="total-miners">0</div>
+      <div class="stat-label">Active Miners</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="architectures">0</div>
+      <div class="stat-label">Architectures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="days-mining">0</div>
+      <div class="stat-label">Days of Mining</div>
+    </div>
+  </div>
+
+  <div class="tooltip" id="tooltip" style="display: none;"></div>
+
+  <script src="fossil_viz.js"></script>
+</body>
+</html>
