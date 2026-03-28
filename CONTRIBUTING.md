@@ -1,6 +1,6 @@
-# Contributing to Rustchain
+# Contributing to RustChain
 
-Thank you for your interest in contributing to Rustchain! Every contribution helps build a stronger Proof-of-Antiquity blockchain ecosystem.
+Thank you for your interest in contributing to RustChain! Every contribution helps build a stronger Proof-of-Antiquity blockchain ecosystem.
 
 ## 🚀 Quick Start
 
@@ -120,7 +120,7 @@ Closes #<issue_number>
 
 ## 🎯 Good First Issues
 
-New to Rustchain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
+New to RustChain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
 
 ## ⚖️ Code of Conduct
 
