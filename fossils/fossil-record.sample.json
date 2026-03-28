@@ -1,0 +1,1572 @@
+{
+  "title": "RustChain Fossil Record (live snapshot approximation)",
+  "generated_at": "2026-03-28T18:04:32.043564Z",
+  "current_epoch": 115,
+  "architectures": [
+    {
+      "key": "68k",
+      "label": "68K",
+      "color": "#8c5a22",
+      "depth": 0
+    },
+    {
+      "key": "g3_g4",
+      "label": "G3/G4",
+      "color": "#b86a2f",
+      "depth": 1
+    },
+    {
+      "key": "g5",
+      "label": "G5",
+      "color": "#c07a3a",
+      "depth": 2
+    },
+    {
+      "key": "sparc",
+      "label": "SPARC",
+      "color": "#9f334b",
+      "depth": 3
+    },
+    {
+      "key": "mips",
+      "label": "MIPS",
+      "color": "#2d8f62",
+      "depth": 4
+    },
+    {
+      "key": "power8",
+      "label": "POWER8",
+      "color": "#20558c",
+      "depth": 5
+    },
+    {
+      "key": "riscv",
+      "label": "RISC-V",
+      "color": "#6b4fd1",
+      "depth": 6
+    },
+    {
+      "key": "apple_silicon",
+      "label": "Apple Silicon",
+      "color": "#bfc6ce",
+      "depth": 7
+    },
+    {
+      "key": "arm",
+      "label": "ARM",
+      "color": "#6ba7a8",
+      "depth": 8
+    },
+    {
+      "key": "modern_x86",
+      "label": "Modern x86",
+      "color": "#d8d8d2",
+      "depth": 9
+    },
+    {
+      "key": "unknown",
+      "label": "Unknown",
+      "color": "#767b82",
+      "depth": 10
+    }
+  ],
+  "first_appearance": [
+    {
+      "architecture": "modern_x86",
+      "epoch": 95
+    },
+    {
+      "architecture": "apple_silicon",
+      "epoch": 97
+    },
+    {
+      "architecture": "arm",
+      "epoch": 97
+    },
+    {
+      "architecture": "power8",
+      "epoch": 97
+    },
+    {
+      "architecture": "unknown",
+      "epoch": 97
+    }
+  ],
+  "settlement_markers": [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    110
+  ],
+  "summary": [
+    {
+      "epoch": 95,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 96,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 97,
+      "layers": [
+        {
+          "architecture": "power8",
+          "count": 1
+        },
+        {
+          "architecture": "apple_silicon",
+          "count": 3
+        },
+        {
+          "architecture": "arm",
+          "count": 1
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 9
+        },
+        {
+          "architecture": "unknown",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "epoch": 99,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 100,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 101,
+      "layers": [
+        {
+          "architecture": "power8",
+          "count": 1
+        },
+        {
+          "architecture": "apple_silicon",
+          "count": 3
+        },
+        {
+          "architecture": "arm",
+          "count": 1
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 9
+        },
+        {
+          "architecture": "unknown",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "epoch": 103,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 104,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 105,
+      "layers": [
+        {
+          "architecture": "power8",
+          "count": 1
+        },
+        {
+          "architecture": "apple_silicon",
+          "count": 3
+        },
+        {
+          "architecture": "arm",
+          "count": 1
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 9
+        },
+        {
+          "architecture": "unknown",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "epoch": 107,
+      "layers": [
+        {
+          "architecture": "arm",
+          "count": 3
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 108,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 109,
+      "layers": [
+        {
+          "architecture": "power8",
+          "count": 1
+        },
+        {
+          "architecture": "apple_silicon",
+          "count": 3
+        },
+        {
+          "architecture": "arm",
+          "count": 1
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 9
+        },
+        {
+          "architecture": "unknown",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "epoch": 111,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 112,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "epoch": 113,
+      "layers": [
+        {
+          "architecture": "power8",
+          "count": 1
+        },
+        {
+          "architecture": "apple_silicon",
+          "count": 3
+        },
+        {
+          "architecture": "arm",
+          "count": 4
+        },
+        {
+          "architecture": "modern_x86",
+          "count": 9
+        },
+        {
+          "architecture": "unknown",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "epoch": 115,
+      "layers": [
+        {
+          "architecture": "modern_x86",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "epoch": 95,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.7333,
+      "fingerprint_quality": 0.3667,
+      "multiplier": 1.1,
+      "attested_at": 1772992683
+    },
+    {
+      "epoch": 96,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophia-Pow-9862e3be",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.7035,
+      "fingerprint_quality": 0.3675,
+      "multiplier": 1.05,
+      "attested_at": 1773079291
+    },
+    {
+      "epoch": 97,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165790
+    },
+    {
+      "epoch": 97,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165638
+    },
+    {
+      "epoch": 97,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "m2-mac-mini-sophia",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165480
+    },
+    {
+      "epoch": 97,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "tianlin-rtc",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165775
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "ForestLee",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165626
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165603
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "claw-vita-virtual-machine-24550",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165546
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "frozen-factorio-ryan",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165712
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "mm",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165302
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophiacore-3a168058",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165852
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "nox-ventures",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165787
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "stepehenreed",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165659
+    },
+    {
+      "epoch": 97,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "victus-x86-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165379
+    },
+    {
+      "epoch": 97,
+      "architecture": "power8",
+      "architecture_label": "POWER8",
+      "miner_id": "power8-s824-sophia",
+      "device": "PowerPC (Vintage)",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165676
+    },
+    {
+      "epoch": 97,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "11",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165644
+    },
+    {
+      "epoch": 97,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "Eud4bLR7sjwUviGkSA9w8Wg4PYY1api3Ybrjtsat3J4G",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773164482
+    },
+    {
+      "epoch": 97,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "RTC",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165707
+    },
+    {
+      "epoch": 97,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "bb",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165585
+    },
+    {
+      "epoch": 97,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "trawolta",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.6737,
+      "fingerprint_quality": 0.3684,
+      "multiplier": 1.0,
+      "attested_at": 1773165692
+    },
+    {
+      "epoch": 99,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.0267,
+      "fingerprint_quality": 0.4333,
+      "multiplier": 1.1,
+      "attested_at": 1773338283
+    },
+    {
+      "epoch": 100,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophia-Pow-9862e3be",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9975,
+      "fingerprint_quality": 0.4375,
+      "multiplier": 1.05,
+      "attested_at": 1773424891
+    },
+    {
+      "epoch": 101,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511390
+    },
+    {
+      "epoch": 101,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511238
+    },
+    {
+      "epoch": 101,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "m2-mac-mini-sophia",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511080
+    },
+    {
+      "epoch": 101,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "tianlin-rtc",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511375
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "ForestLee",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511226
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511203
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "claw-vita-virtual-machine-24550",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511146
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "frozen-factorio-ryan",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511312
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "mm",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773510902
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophiacore-3a168058",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511452
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "nox-ventures",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511387
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "stepehenreed",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511259
+    },
+    {
+      "epoch": 101,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "victus-x86-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773510979
+    },
+    {
+      "epoch": 101,
+      "architecture": "power8",
+      "architecture_label": "POWER8",
+      "miner_id": "power8-s824-sophia",
+      "device": "PowerPC (Vintage)",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511276
+    },
+    {
+      "epoch": 101,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "11",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511244
+    },
+    {
+      "epoch": 101,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "Eud4bLR7sjwUviGkSA9w8Wg4PYY1api3Ybrjtsat3J4G",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773510082
+    },
+    {
+      "epoch": 101,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "RTC",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511307
+    },
+    {
+      "epoch": 101,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "bb",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511185
+    },
+    {
+      "epoch": 101,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "trawolta",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.9684,
+      "fingerprint_quality": 0.4421,
+      "multiplier": 1.0,
+      "attested_at": 1773511292
+    },
+    {
+      "epoch": 103,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.32,
+      "fingerprint_quality": 0.5,
+      "multiplier": 1.1,
+      "attested_at": 1773683883
+    },
+    {
+      "epoch": 104,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophia-Pow-9862e3be",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2915,
+      "fingerprint_quality": 0.5075,
+      "multiplier": 1.05,
+      "attested_at": 1773770491
+    },
+    {
+      "epoch": 105,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856990
+    },
+    {
+      "epoch": 105,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856838
+    },
+    {
+      "epoch": 105,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "m2-mac-mini-sophia",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856680
+    },
+    {
+      "epoch": 105,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "tianlin-rtc",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856975
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "ForestLee",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856826
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856803
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "claw-vita-virtual-machine-24550",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856746
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "frozen-factorio-ryan",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856912
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "mm",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856502
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophiacore-3a168058",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773857052
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "nox-ventures",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856987
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "stepehenreed",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856859
+    },
+    {
+      "epoch": 105,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "victus-x86-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856579
+    },
+    {
+      "epoch": 105,
+      "architecture": "power8",
+      "architecture_label": "POWER8",
+      "miner_id": "power8-s824-sophia",
+      "device": "PowerPC (Vintage)",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856876
+    },
+    {
+      "epoch": 105,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "11",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856844
+    },
+    {
+      "epoch": 105,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "Eud4bLR7sjwUviGkSA9w8Wg4PYY1api3Ybrjtsat3J4G",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773855682
+    },
+    {
+      "epoch": 105,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "RTC",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856907
+    },
+    {
+      "epoch": 105,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "bb",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856785
+    },
+    {
+      "epoch": 105,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "trawolta",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.2632,
+      "fingerprint_quality": 0.5158,
+      "multiplier": 1.0,
+      "attested_at": 1773856892
+    },
+    {
+      "epoch": 107,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "RTC14f06ee294f327f5685d3de5e1ed501cffab33e7",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.3889,
+      "multiplier": 0.001,
+      "attested_at": 1774029870
+    },
+    {
+      "epoch": 107,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "claw-jojo-51658",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.3889,
+      "multiplier": 0.001,
+      "attested_at": 1774029746
+    },
+    {
+      "epoch": 107,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "terramaster-nas-arm64",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.3889,
+      "multiplier": 0.001,
+      "attested_at": 1774029634
+    },
+    {
+      "epoch": 107,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.6133,
+      "fingerprint_quality": 0.5667,
+      "multiplier": 1.1,
+      "attested_at": 1774029483
+    },
+    {
+      "epoch": 108,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophia-Pow-9862e3be",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5855,
+      "fingerprint_quality": 0.5775,
+      "multiplier": 1.05,
+      "attested_at": 1774116091
+    },
+    {
+      "epoch": 109,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202590
+    },
+    {
+      "epoch": 109,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202438
+    },
+    {
+      "epoch": 109,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "m2-mac-mini-sophia",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202280
+    },
+    {
+      "epoch": 109,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "tianlin-rtc",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202575
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "ForestLee",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202426
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202403
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "claw-vita-virtual-machine-24550",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202346
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "frozen-factorio-ryan",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202512
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "mm",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202102
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophiacore-3a168058",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202652
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "nox-ventures",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202587
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "stepehenreed",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202459
+    },
+    {
+      "epoch": 109,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "victus-x86-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202179
+    },
+    {
+      "epoch": 109,
+      "architecture": "power8",
+      "architecture_label": "POWER8",
+      "miner_id": "power8-s824-sophia",
+      "device": "PowerPC (Vintage)",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202476
+    },
+    {
+      "epoch": 109,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "11",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202444
+    },
+    {
+      "epoch": 109,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "Eud4bLR7sjwUviGkSA9w8Wg4PYY1api3Ybrjtsat3J4G",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774201282
+    },
+    {
+      "epoch": 109,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "RTC",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202507
+    },
+    {
+      "epoch": 109,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "bb",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202385
+    },
+    {
+      "epoch": 109,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "trawolta",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.5579,
+      "fingerprint_quality": 0.5895,
+      "multiplier": 1.0,
+      "attested_at": 1774202492
+    },
+    {
+      "epoch": 111,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.9067,
+      "fingerprint_quality": 0.6333,
+      "multiplier": 1.1,
+      "attested_at": 1774375083
+    },
+    {
+      "epoch": 112,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophia-Pow-9862e3be",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8795,
+      "fingerprint_quality": 0.6475,
+      "multiplier": 1.05,
+      "attested_at": 1774461691
+    },
+    {
+      "epoch": 113,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "RTCa7fce17fc2e4016c750ce86dee4c28a7339013b2",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548190
+    },
+    {
+      "epoch": 113,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "claw-qinlingrongdeMacBook-Pro-48097",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548038
+    },
+    {
+      "epoch": 113,
+      "architecture": "apple_silicon",
+      "architecture_label": "Apple Silicon",
+      "miner_id": "m2-mac-mini-sophia",
+      "device": "Apple Silicon (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774547880
+    },
+    {
+      "epoch": 113,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "RTC14f06ee294f327f5685d3de5e1ed501cffab33e7",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.6222,
+      "multiplier": 0.001,
+      "attested_at": 1774548270
+    },
+    {
+      "epoch": 113,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "claw-jojo-51658",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.6222,
+      "multiplier": 0.001,
+      "attested_at": 1774548146
+    },
+    {
+      "epoch": 113,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "terramaster-nas-arm64",
+      "device": "Unknown/Other",
+      "rtc_earned": 0.05,
+      "fingerprint_quality": 0.6222,
+      "multiplier": 0.001,
+      "attested_at": 1774548034
+    },
+    {
+      "epoch": 113,
+      "architecture": "arm",
+      "architecture_label": "ARM",
+      "miner_id": "tianlin-rtc",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548175
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "ForestLee",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548026
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "RTC1d48d848a5aa5ecf2c5f01aa5fb64837daaf2f35",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548003
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "claw-vita-virtual-machine-24550",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774547946
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "frozen-factorio-ryan",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548112
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "mm",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774547702
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "modern-sophiacore-3a168058",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548252
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "nox-ventures",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548187
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "stepehenreed",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548059
+    },
+    {
+      "epoch": 113,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "victus-x86-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774547779
+    },
+    {
+      "epoch": 113,
+      "architecture": "power8",
+      "architecture_label": "POWER8",
+      "miner_id": "power8-s824-sophia",
+      "device": "PowerPC (Vintage)",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548076
+    },
+    {
+      "epoch": 113,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "11",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548044
+    },
+    {
+      "epoch": 113,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "Eud4bLR7sjwUviGkSA9w8Wg4PYY1api3Ybrjtsat3J4G",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774546882
+    },
+    {
+      "epoch": 113,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "RTC",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548107
+    },
+    {
+      "epoch": 113,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "bb",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774547985
+    },
+    {
+      "epoch": 113,
+      "architecture": "unknown",
+      "architecture_label": "Unknown",
+      "miner_id": "trawolta",
+      "device": "Unknown/Other",
+      "rtc_earned": 1.8526,
+      "fingerprint_quality": 0.6632,
+      "multiplier": 1.0,
+      "attested_at": 1774548092
+    },
+    {
+      "epoch": 115,
+      "architecture": "modern_x86",
+      "architecture_label": "Modern x86",
+      "miner_id": "trashcan-d500-scott",
+      "device": "x86-64 (Modern)",
+      "rtc_earned": 2.2,
+      "fingerprint_quality": 0.7,
+      "multiplier": 1.1,
+      "attested_at": 1774720683
+    }
+  ]
+}

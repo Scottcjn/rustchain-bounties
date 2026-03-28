@@ -1,0 +1,341 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fossil Record</title>
+    <style>
+        :root {
+            --bg: #06110b;
+            --panel: rgba(8, 28, 18, 0.88);
+            --panel-strong: rgba(4, 20, 11, 0.96);
+            --line: rgba(118, 255, 169, 0.22);
+            --text: #d8ffe6;
+            --muted: #7acb95;
+            --accent: #80ffb0;
+            --warning: #ffe89c;
+            --shadow: rgba(0, 0, 0, 0.45);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "IBM Plex Mono", "Cascadia Code", Consolas, monospace;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top, rgba(62, 122, 79, 0.16), transparent 34%),
+                linear-gradient(180deg, #08150d 0%, #041008 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(transparent 0%, rgba(100, 255, 166, 0.03) 50%, transparent 100%);
+            background-size: 100% 5px;
+            opacity: 0.55;
+        }
+
+        .shell { max-width: 1440px; margin: 0 auto; padding: 20px; }
+        .hero, .panel {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            box-shadow: 0 20px 50px var(--shadow), inset 0 0 0 1px rgba(128, 255, 176, 0.06);
+            backdrop-filter: blur(8px);
+        }
+
+        .hero { padding: 26px; margin-bottom: 18px; }
+        .eyebrow { color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; font-size: 12px; }
+        h1 { margin: 10px 0 8px; font-size: clamp(30px, 4vw, 58px); line-height: 1.02; }
+        .lede { max-width: 78ch; color: var(--muted); line-height: 1.6; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .stat, .meta-item {
+            padding: 14px;
+            background: var(--panel-strong);
+            border: 1px solid rgba(128, 255, 176, 0.08);
+        }
+
+        .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+        .stat-value { margin-top: 8px; font-size: 28px; }
+
+        .layout { display: grid; grid-template-columns: 1.8fr 0.95fr; gap: 18px; }
+        .panel { padding: 18px; }
+        .panel h2 { margin: 0 0 14px; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+
+        .controls { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+        .control { flex: 1 1 180px; }
+        label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+        input[type="range"] { width: 100%; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .legend button {
+            font: inherit; color: inherit; background: rgba(6, 17, 11, 0.9);
+            border: 1px solid rgba(128, 255, 176, 0.18); padding: 7px 10px; cursor: pointer;
+        }
+        .legend button[aria-pressed="false"] { opacity: 0.45; }
+
+        .chart-wrap { position: relative; overflow: hidden; }
+        svg {
+            display: block; width: 100%; height: auto;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.02)), rgba(5, 15, 9, 0.94);
+            border: 1px solid rgba(128, 255, 176, 0.12);
+        }
+
+        .tooltip {
+            position: absolute; min-width: 250px; max-width: 320px; pointer-events: none;
+            padding: 12px; border: 1px solid rgba(128, 255, 176, 0.2); background: rgba(4, 12, 8, 0.96);
+            color: var(--text); box-shadow: 0 14px 30px var(--shadow); opacity: 0; transition: opacity 120ms ease-out;
+        }
+        .tooltip strong { display: block; margin-bottom: 6px; color: var(--accent); }
+
+        .meta-list { display: grid; gap: 8px; }
+        .note { margin-top: 14px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+        .empty { color: var(--warning); }
+
+        @media (max-width: 1100px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <div class="eyebrow">RustChain / Fossils</div>
+            <h1>The Fossil Record</h1>
+            <p class="lede">
+                A stratigraphy of RustChain attestations: older silicon at the bedrock, newer architectures layered above it.
+                Hover any attestation to inspect miner, device, epoch, RTC earned, and fingerprint quality.
+            </p>
+            <div class="stats" id="stats"></div>
+        </section>
+
+        <section class="layout">
+            <div class="panel">
+                <h2>Stratigraphy</h2>
+                <div class="controls">
+                    <div class="control">
+                        <label for="epochWindow">Epoch window</label>
+                        <input id="epochWindow" type="range" min="16" max="128" step="8" value="64">
+                    </div>
+                    <div class="control">
+                        <label for="minLayerCount">Min active miners per layer</label>
+                        <input id="minLayerCount" type="range" min="1" max="8" step="1" value="1">
+                    </div>
+                </div>
+                <div class="legend" id="legend"></div>
+                <div class="chart-wrap">
+                    <svg id="chart" viewBox="0 0 1200 760" aria-label="Attestation archaeology visualizer"></svg>
+                    <div class="tooltip" id="tooltip"></div>
+                </div>
+                <div class="note">
+                    Settlement markers appear every 10 epochs. First-appearance markers identify when a new architecture entered the ledger.
+                    This page can render a true SQLite export or the included live-snapshot approximation.
+                </div>
+            </div>
+
+            <aside class="panel">
+                <h2>Field Notes</h2>
+                <div class="meta-list" id="notes"></div>
+                <div class="note" id="datasetNote"></div>
+            </aside>
+        </section>
+    </div>
+
+    <script>
+        const chart = document.getElementById("chart");
+        const statsEl = document.getElementById("stats");
+        const legendEl = document.getElementById("legend");
+        const notesEl = document.getElementById("notes");
+        const datasetNoteEl = document.getElementById("datasetNote");
+        const tooltip = document.getElementById("tooltip");
+        const epochWindowInput = document.getElementById("epochWindow");
+        const minLayerCountInput = document.getElementById("minLayerCount");
+
+        let dataset;
+        let activeArchitectures = new Set();
+
+        async function loadDataset() {
+            const url = new URL(window.location.href);
+            const dataPath = url.searchParams.get("data") || "./fossil-record.sample.json";
+            const response = await fetch(dataPath);
+            dataset = await response.json();
+            activeArchitectures = new Set(dataset.architectures.map((item) => item.key));
+            renderControls();
+            render();
+        }
+
+        function renderControls() {
+            legendEl.innerHTML = "";
+            dataset.architectures.forEach((item) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = item.label;
+                button.style.borderColor = item.color;
+                button.setAttribute("aria-pressed", "true");
+                button.addEventListener("click", () => {
+                    if (activeArchitectures.has(item.key)) {
+                        activeArchitectures.delete(item.key);
+                        button.setAttribute("aria-pressed", "false");
+                    } else {
+                        activeArchitectures.add(item.key);
+                        button.setAttribute("aria-pressed", "true");
+                    }
+                    render();
+                });
+                legendEl.appendChild(button);
+            });
+        }
+
+        function render() {
+            const epochWindow = Number(epochWindowInput.value);
+            const minLayerCount = Number(minLayerCountInput.value);
+            const latestEpoch = dataset.current_epoch;
+            const minEpoch = Math.max(1, latestEpoch - epochWindow + 1);
+            const visibleRecords = dataset.records.filter((record) => record.epoch >= minEpoch && activeArchitectures.has(record.architecture));
+            const countsByArch = new Map();
+            visibleRecords.forEach((record) => countsByArch.set(record.architecture, (countsByArch.get(record.architecture) || 0) + 1));
+            const filtered = visibleRecords.filter((record) => (countsByArch.get(record.architecture) || 0) >= minLayerCount);
+            renderStats(filtered, latestEpoch, minEpoch);
+            renderNotes(filtered);
+            renderChart(filtered, latestEpoch, minEpoch);
+        }
+
+        function renderStats(records, latestEpoch, minEpoch) {
+            const minerCount = new Set(records.map((record) => record.miner_id)).size;
+            const avgQuality = records.length ? (records.reduce((sum, record) => sum + Number(record.fingerprint_quality || 0), 0) / records.length) : 0;
+            const totalRtc = records.reduce((sum, record) => sum + Number(record.rtc_earned || 0), 0);
+            const archCount = new Set(records.map((record) => record.architecture)).size;
+            const blocks = [
+                ["Epoch span", `${minEpoch} -> ${latestEpoch}`],
+                ["Visible attestations", records.length.toLocaleString()],
+                ["Active miners", minerCount.toLocaleString()],
+                ["Architectures", archCount.toLocaleString()],
+                ["RTC across window", totalRtc.toFixed(1)],
+                ["Avg fingerprint quality", `${Math.round(avgQuality * 100)}%`],
+            ];
+            statsEl.innerHTML = blocks.map(([label, value]) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div></div>`).join("");
+            datasetNoteEl.textContent = `${dataset.title}. Generated ${dataset.generated_at}.`;
+        }
+
+        function renderNotes(records) {
+            if (!records.length) {
+                notesEl.innerHTML = `<div class="meta-item empty">No records match the current filters.</div>`;
+                return;
+            }
+            const byArch = new Map();
+            records.forEach((record) => {
+                const bucket = byArch.get(record.architecture) || { count: 0, rtc: 0 };
+                bucket.count += 1;
+                bucket.rtc += Number(record.rtc_earned || 0);
+                byArch.set(record.architecture, bucket);
+            });
+            notesEl.innerHTML = Array.from(byArch.entries())
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 6)
+                .map(([key, value]) => {
+                    const meta = dataset.architectures.find((item) => item.key === key);
+                    return `<div class="meta-item"><strong style="color:${meta.color}">${meta.label}</strong><br>${value.count} attestations in view<br>${value.rtc.toFixed(1)} RTC represented</div>`;
+                }).join("");
+        }
+
+        function renderChart(records, latestEpoch, minEpoch) {
+            const width = 1200;
+            const height = 760;
+            const margin = { top: 28, right: 20, bottom: 60, left: 130 };
+            const plotWidth = width - margin.left - margin.right;
+            const plotHeight = height - margin.top - margin.bottom;
+            const architectures = dataset.architectures.filter((item) => activeArchitectures.has(item.key)).sort((a, b) => a.depth - b.depth);
+            const epochs = Array.from({ length: latestEpoch - minEpoch + 1 }, (_, index) => minEpoch + index);
+            const counts = new Map();
+            epochs.forEach((epoch) => counts.set(epoch, new Map(architectures.map((arch) => [arch.key, 0]))));
+            records.forEach((record) => {
+                const row = counts.get(record.epoch);
+                if (row) row.set(record.architecture, (row.get(record.architecture) || 0) + 1);
+            });
+
+            const maxCount = Math.max(1, ...epochs.flatMap((epoch) => architectures.map((arch) => counts.get(epoch).get(arch.key) || 0)));
+            const rowHeight = plotHeight / Math.max(1, architectures.length);
+            const epochScale = (epoch) => margin.left + ((epoch - minEpoch) / Math.max(1, latestEpoch - minEpoch)) * plotWidth;
+            const parts = [`<rect x="0" y="0" width="${width}" height="${height}" fill="#05120a" />`];
+
+            dataset.settlement_markers.filter((epoch) => epoch >= minEpoch && epoch <= latestEpoch).forEach((epoch) => {
+                const x = epochScale(epoch);
+                parts.push(`<line x1="${x}" y1="${margin.top}" x2="${x}" y2="${height - margin.bottom}" stroke="rgba(255,232,156,0.15)" stroke-dasharray="5 7" />`);
+                parts.push(`<text x="${x + 4}" y="${height - margin.bottom + 18}" fill="rgba(255,232,156,0.6)" font-size="10">E${epoch}</text>`);
+            });
+
+            architectures.forEach((arch, index) => {
+                const y = margin.top + index * rowHeight;
+                parts.push(`<rect x="${margin.left}" y="${y}" width="${plotWidth}" height="${rowHeight - 6}" fill="rgba(255,255,255,0.01)" />`);
+                parts.push(`<text x="${margin.left - 18}" y="${y + rowHeight / 2}" fill="${arch.color}" text-anchor="end" dominant-baseline="middle" font-size="14">${arch.label}</text>`);
+                epochs.forEach((epoch) => {
+                    const count = counts.get(epoch).get(arch.key) || 0;
+                    if (!count) return;
+                    const x = epochScale(epoch);
+                    const w = Math.max(6, plotWidth / epochs.length - 3);
+                    const h = Math.max(10, (count / maxCount) * (rowHeight - 18));
+                    const yRect = y + rowHeight - h - 8;
+                    parts.push(`<rect x="${x - w / 2}" y="${yRect}" width="${w}" height="${h}" fill="${arch.color}" opacity="0.78" rx="3" />`);
+                });
+            });
+
+            dataset.first_appearance.filter((entry) => entry.epoch >= minEpoch && entry.epoch <= latestEpoch && activeArchitectures.has(entry.architecture)).forEach((entry) => {
+                const archIndex = architectures.findIndex((item) => item.key === entry.architecture);
+                if (archIndex === -1) return;
+                const arch = architectures[archIndex];
+                const x = epochScale(entry.epoch);
+                const y = margin.top + archIndex * rowHeight + 10;
+                parts.push(`<circle cx="${x}" cy="${y}" r="5" fill="${arch.color}" stroke="#08150d" stroke-width="2" />`);
+                parts.push(`<text x="${x + 8}" y="${y + 4}" fill="${arch.color}" font-size="11">First ${arch.label}</text>`);
+            });
+
+            parts.push(records.map((record) => {
+                const archIndex = architectures.findIndex((item) => item.key === record.architecture);
+                if (archIndex === -1) return "";
+                const arch = architectures[archIndex];
+                const x = epochScale(record.epoch);
+                const y = margin.top + archIndex * rowHeight + 18 + (1 - Number(record.fingerprint_quality || 0)) * (rowHeight - 34);
+                const radius = 3 + Math.min(7, Number(record.multiplier || 0));
+                const data = encodeURIComponent(JSON.stringify(record));
+                return `<circle class="point" cx="${x}" cy="${y}" r="${radius}" fill="${arch.color}" opacity="0.9" data-record="${data}" />`;
+            }).join(""));
+
+            parts.push(`<text x="${margin.left}" y="${height - 18}" fill="rgba(122,203,149,0.8)" font-size="12">Epoch</text>`);
+            parts.push(`<text x="18" y="${margin.top - 8}" fill="rgba(122,203,149,0.8)" font-size="12">Architecture strata</text>`);
+            chart.innerHTML = parts.join("");
+            bindTooltip();
+        }
+
+        function bindTooltip() {
+            chart.querySelectorAll(".point").forEach((point) => {
+                point.addEventListener("mouseenter", (event) => {
+                    const record = JSON.parse(decodeURIComponent(event.target.dataset.record));
+                    tooltip.innerHTML = `<strong>${record.miner_id}</strong>${record.device}<br>Epoch ${record.epoch} / ${record.architecture_label}<br>RTC earned: ${Number(record.rtc_earned).toFixed(3)}<br>Fingerprint quality: ${Math.round(Number(record.fingerprint_quality) * 100)}%<br>Antiquity multiplier: ${record.multiplier}`;
+                    tooltip.style.opacity = "1";
+                });
+                point.addEventListener("mousemove", (event) => {
+                    const bounds = chart.getBoundingClientRect();
+                    tooltip.style.left = `${event.clientX - bounds.left + 16}px`;
+                    tooltip.style.top = `${event.clientY - bounds.top + 16}px`;
+                });
+                point.addEventListener("mouseleave", () => { tooltip.style.opacity = "0"; });
+            });
+        }
+
+        epochWindowInput.addEventListener("input", render);
+        minLayerCountInput.addEventListener("input", render);
+        loadDataset().catch((error) => { datasetNoteEl.textContent = `Failed to load dataset: ${error.message}`; });
+    </script>
+</body>
+</html>
