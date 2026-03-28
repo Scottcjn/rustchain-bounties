@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Fossil Record — RustChain Attestation Archaeology</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            border: 1px solid #2a2a4e;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #f39c12, #e74c3c, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #1a1a2e;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 1px solid #2a2a4e;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f39c12;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        #visualization {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border: 1px solid #2a2a4e;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 26, 46, 0.95);
+            border: 1px solid #2a2a4e;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.9em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            max-width: 350px;
+            z-index: 1000;
+        }
+        
+        .tooltip h4 {
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+        
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 0.85em;
+        }
+        
+        .tooltip-label {
+            color: #888;
+        }
+        
+        .tooltip-value {
+            color: #e0e0e0;
+            margin-left: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        footer a {
+            color: #f39c12;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦕 The Fossil Record</h1>
+            <p class="subtitle">RustChain Attestation Archaeology — A Geological Timeline of Silicon</p>
+        </header>
+        
+        <div class="stats-bar" id="stats">
+            <div class="loading">Loading statistics...</div>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+        
+        <div id="visualization">
+            <div class="loading">Loading attestation data...</div>
+        </div>
+        
+        <footer>
+            <p>RustChain Proof of Antiquity Network</p>
+            <p>
+                <a href="https://rustchain.org" target="_blank">rustchain.org</a> • 
+                <a href="https://github.com/Scottcjn/Rustchain" target="_blank">GitHub</a> • 
+                <a href="https://50.28.86.131/explorer" target="_blank">Block Explorer</a>
+            </p>
+        </footer>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        // Architecture color mapping (geological strata colors)
+        const ARCH_COLORS = {
+            '68K': '#FFBF00',      // Dark amber (deepest)
+            'G3': '#B87333',       // Warm copper
+            'G4': '#CD7F32',       // Bronze/copper
+            'G5': '#CD853F',       // Bronze
+            'SPARC': '#DC143C',    // Crimson
+            'MIPS': '#00A86B',     // Jade
+            'POWER8': '#003366',   // Deep blue
+            'PowerPC': '#4682B4',  // Steel blue
+            'Apple Silicon': '#C0C0C0', // Silver
+            'x86-64 (Modern)': '#BEBEBE', // Pale grey
+            'ARM': '#708090',      // Slate grey
+            'Unknown/Other': '#4a4a4a' // Dark grey
+        };
+        
+        const ARCH_ORDER = ['68K', 'G3', 'G4', 'G5', 'SPARC', 'MIPS', 'POWER8', 'PowerPC', 'Apple Silicon', 'x86-64 (Modern)', 'ARM', 'Unknown/Other'];
+        
+        // Tooltip element
+        const tooltip = d3.select('#tooltip');
+        
+        // Fetch miners data
+        async function fetchMiners() {
+            try {
+                const response = await fetch('https://50.28.86.131/api/miners');
+                if (!response.ok) throw new Error('Failed to fetch miners');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching miners:', error);
+                throw error;
+            }
+        }
+        
+        // Fetch epoch data
+        async function fetchEpoch() {
+            try {
+                const response = await fetch('https://50.28.86.131/epoch');
+                if (!response.ok) throw new Error('Failed to fetch epoch');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching epoch:', error);
+                throw error;
+            }
+        }
+        
+        // Group miners by architecture
+        function groupByArchitecture(miners) {
+            const groups = {};
+            miners.forEach(miner => {
+                const arch = miner.hardware_type || 'Unknown/Other';
+                if (!groups[arch]) groups[arch] = [];
+                groups[arch].push(miner);
+            });
+            return groups;
+        }
+        
+        // Update statistics
+        function updateStats(miners, epoch) {
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${epoch.epoch}</div>
+                    <div class="stat-label">Current Epoch</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${miners.length}</div>
+                    <div class="stat-label">Active Miners</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${Object.keys(groupByArchitecture(miners)).length}</div>
+                    <div class="stat-label">Architecture Types</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${(epoch.epoch_pot || 0).toFixed(2)} RTC</div>
+                    <div class="stat-label">Epoch Reward Pot</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+        
+        // Render legend
+        function renderLegend(groups) {
+            const legend = document.getElementById('legend');
+            legend.innerHTML = Object.keys(groups).sort((a, b) => {
+                return ARCH_ORDER.indexOf(a) - ARCH_ORDER.indexOf(b);
+            }).map(arch => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${ARCH_COLORS[arch] || '#666'}"></div>
+                    <span>${arch} (${groups[arch].length})</span>
+                </div>
+            `).join('');
+        }
+        
+        // Create visualization
+        function createVisualization(miners, epoch) {
+            const groups = groupByArchitecture(miners);
+            const container = document.getElementById('visualization');
+            container.innerHTML = '';
+            
+            // SVG dimensions
+            const margin = {top: 40, right: 30, bottom: 60, left: 80};
+            const width = Math.max(800, window.innerWidth - 100) - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+            
+            // Create SVG
+            const svg = d3.select('#visualization')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Prepare data for stacked chart
+            const archs = Object.keys(groups).sort((a, b) => {
+                return ARCH_ORDER.indexOf(a) - ARCH_ORDER.indexOf(b);
+            }).filter(a => ARCH_COLORS[a]);
+            
+            const stackData = archs.map(arch => ({
+                architecture: arch,
+                count: groups[arch].length,
+                miners: groups[arch]
+            }));
+            
+            // Create stack generator
+            const stack = d3.stack()
+                .keys(['count'])
+                .order(d3.stackOrderNone)
+                .offset(d3.stackOffsetNone);
+            
+            // X scale (architectures)
+            const x = d3.scaleBand()
+                .domain(archs)
+                .range([0, width])
+                .padding(0.3);
+            
+            // Y scale (miner count)
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(stackData, d => d.count) || 1])
+                .nice()
+                .range([height, 0]);
+            
+            // Add X axis
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+                .attr('dx', '-0.5em')
+                .attr('dy', '0.5em')
+                .style('fill', '#888');
+            
+            // Add Y axis
+            svg.append('g')
+                .call(d3.axisLeft(y))
+                .selectAll('text')
+                .style('fill', '#888');
+            
+            // Add Y axis label
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -60)
+                .attr('x', -height / 2)
+                .attr('text-anchor', 'middle')
+                .style('fill', '#888')
+                .text('Number of Miners');
+            
+            // Add X axis label
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + 50)
+                .attr('text-anchor', 'middle')
+                .style('fill', '#888')
+                .text('Architecture Family (Oldest → Newest)');
+            
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -20)
+                .attr('text-anchor', 'middle')
+                .style('fill', '#f39c12')
+                .style('font-size', '16px')
+                .text(`RustChain Epoch ${epoch.epoch} — Miner Distribution by Architecture`);
+            
+            // Create bars
+            const bars = svg.selectAll('.arch-bar')
+                .data(stackData)
+                .enter()
+                .append('g')
+                .attr('class', 'arch-bar');
+            
+            // Add rectangles
+            bars.append('rect')
+                .attr('x', d => x(d.architecture))
+                .attr('y', d => y(d.count))
+                .attr('width', x.bandwidth())
+                .attr('height', d => height - y(d.count))
+                .attr('fill', d => ARCH_COLORS[d.architecture] || '#666')
+                .attr('rx', 4)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('opacity', 0.8);
+                    
+                    // Show tooltip
+                    const minerDetails = d.miners.slice(0, 5).map(m => `
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">${m.miner.substring(0, 20)}...</span>
+                            <span class="tooltip-value">${m.antiquity_multiplier}x</span>
+                        </div>
+                    `).join('');
+                    
+                    const moreText = d.miners.length > 5 ? `<div class="tooltip-row"><span class="tooltip-label">...and ${d.miners.length - 5} more</span></div>` : '';
+                    
+                    tooltip.html(`
+                        <h4>${d.architecture}</h4>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Miners:</span>
+                            <span class="tooltip-value">${d.count}</span>
+                        </div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Color:</span>
+                            <span class="tooltip-value" style="color: ${ARCH_COLORS[d.architecture]}">■ Geological Layer</span>
+                        </div>
+                        <hr style="border-color: #2a2a4e; margin: 8px 0;">
+                        <div style="font-size: 0.8em; color: #888; margin-bottom: 5px;">Sample Miners:</div>
+                        ${minerDetails}
+                        ${moreText}
+                    `)
+                    .style('opacity', 1)
+                    .style('left', (event.pageX + 10) + 'px')
+                    .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mousemove', function(event) {
+                    tooltip
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 10) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('opacity', 1);
+                    tooltip.style('opacity', 0);
+                });
+            
+            // Add count labels on bars
+            bars.append('text')
+                .attr('x', d => x(d.architecture) + x.bandwidth() / 2)
+                .attr('y', d => y(d.count) - 5)
+                .attr('text-anchor', 'middle')
+                .style('fill', '#e0e0e0')
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .text(d => d.count);
+            
+            // Add epoch marker line
+            const epochY = y(0);
+            svg.append('line')
+                .attr('x1', 0)
+                .attr('y1', epochY)
+                .attr('x2', width)
+                .attr('y2', epochY)
+                .attr('stroke', '#f39c12')
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,5');
+            
+            svg.append('text')
+                .attr('x', width - 10)
+                .attr('y', epochY - 8)
+                .attr('text-anchor', 'end')
+                .style('fill', '#f39c12')
+                .style('font-size', '11px')
+                .text(`Epoch ${epoch.epoch}`);
+        }
+        
+        // Initialize
+        async function init() {
+            try {
+                const [miners, epoch] = await Promise.all([
+                    fetchMiners(),
+                    fetchEpoch()
+                ]);
+                
+                updateStats(miners, epoch);
+                renderLegend(groupByArchitecture(miners));
+                createVisualization(miners, epoch);
+                
+            } catch (error) {
+                document.getElementById('visualization').innerHTML = `
+                    <div class="error">
+                        <h3>⚠️ Failed to load data</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">
+                            Make sure the RustChain node is accessible at https://50.28.86.131
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Start
+        init();
+        
+        // Refresh every 60 seconds
+        setInterval(init, 60000);
+    </script>
+</body>
+</html>
