@@ -1,15 +1,10 @@
-# SPDX-License-Identifier: MIT
 
-CC = cl65
-CFLAGS = -t apple2enh -O
+CC = sh4-unknown-linux-gnu-gcc
+CFLAGS = -O3 -m4a-nofpu
+LDFLAGS = -static
 
-SRC = miner.c
-OUT = miner.system
-
-all: $(OUT)
-
-$(OUT): $(SRC)
-	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
+miner: miner.c
+	$(CC) $(CFLAGS) -o miner miner.c $(LDFLAGS)
 
 clean:
-	rm -f $(OUT) *.o
+	rm -f miner
