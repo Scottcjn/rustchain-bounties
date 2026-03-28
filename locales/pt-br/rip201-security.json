@@ -1,0 +1,6 @@
+{
+  "rip201_error_arch_mismatch": "Erro: Inconsistência de arquitetura. CPU detectada não condiz com G4 (RIP-201).",
+  "rip201_error_latency_high": "Erro: Latência de rede suspeita. Verifique sua rota de conexão (RIP-201).",
+  "rip201_miner_alert": "Atenção: O multiplicador 2.5x exige hardware vintage verificado. Emulação detectada.",
+  "status_bucket_normalized": "Bucket normalizado com sucesso. Integridade da rede preservada."
+}
