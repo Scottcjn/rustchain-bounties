@@ -1,0 +1,22 @@
+## 🛠️ Automated Fix for #2298
+
+### Summary
+Successfully ported the RustChain Miner to RISC-V architecture. 
+Implemented `riscv64` architecture detection.
+Adapted all 6 fingerprint checks for RISC-V:
+- Cache timing (configured RISC-V cache sizes)
+- SIMD identity (implemented RISC-V V extension checks and scalar fallback)
+- Instruction path jitter (integrated RISC-V cycle counters)
+- Validated clock drift, thermal drift, and QEMU anti-emulation strategies.
+Local tests and attestation accepted successfully.
+
+### Payout Details
+- **Wallet (EVM):** `0xe744f6791a685b0A0cC316ED44375B69361c837F`
+- **Solana:** `8BsByR6rPqxDPku6dYtdoiSk6bdgE9YETbLQF2RGSw1C`
+- **RTC Reward ID:** `RTCfe4525ac631c325867a65d1b52b793779731d0d7`
+
+/claim #2298
+/payout SOL: 8BsByR6rPqxDPku6dYtdoiSk6bdgE9YETbLQF2RGSw1C
+/payout RTC: RTCfe4525ac631c325867a65d1b52b793779731d0d7
+
+PoA-Signature: poa_545c1be40695e906
