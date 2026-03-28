@@ -1,0 +1,19 @@
+## 🛠️ Automated Fix for #2277
+
+### Summary
+Implemented `ggml-numa-shard.h` to allow intelligent per-layer NUMA placement for POWER8 architecture. 
+- Integrated parsing logic to identify transformer layers.
+- Assigned early layers to Node 1, Attention layers to Node 3, FFN to Node 2.
+- Implemented `mbind` to correctly pin tensor memory to target NUMA nodes.
+- Preserved x86 build compatibility using `#ifdef __powerpc__`.
+
+### Payout Details
+- **Wallet (EVM):** `0xe744f6791a685b0A0cC316ED44375B69361c837F`
+- **Solana:** `8BsByR6rPqxDPku6dYtdoiSk6bdgE9YETbLQF2RGSw1C`
+- **RTC Reward ID:** `RTCfe4525ac631c325867a65d1b52b793779731d0d7`
+
+/claim #2277
+/payout SOL: 8BsByR6rPqxDPku6dYtdoiSk6bdgE9YETbLQF2RGSw1C
+/payout RTC: RTCfe4525ac631c325867a65d1b52b793779731d0d7
+
+PoA-Signature: poa_1f2cd53c090817aa
