@@ -1,0 +1,10 @@
+fix: correct PoA signature for Issue #440
+
+Closes #440
+
+Bounty payout:
+- EVM: 0xe744f6791a685b0A0cC316ED44375B69361c837F
+- SOL: 8BsByR6rPqxDPku6dYtdoiSk6bdgE9YETbLQF2RGSw1C
+- RTC: RTCfe4525ac631c325867a65d1b52b793779731d0d7
+
+PoA-Signature: poa_hunter2_recovery_1774694862
