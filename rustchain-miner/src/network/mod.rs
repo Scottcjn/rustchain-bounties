@@ -33,6 +33,6 @@ impl RustChainClient {
 
     /// Construct a full URL for a given path.
     pub fn url(&self, path: &str) -> String {
-        format!("{}{}", self.base_url, path)
+        format!("{}{}", self.base_url, t!(path))
     }
 }

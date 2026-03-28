@@ -75,7 +75,7 @@ impl RustChainClient {
         let resp = self.inner().get(self.url("/health")).send()?;
         let status = resp.status();
         if !status.is_success() {
-            return Err(format!("Health check failed: HTTP {}", status).into());
+            return Err(t!("network.health_check_failed", status = status).into());
         }
         Ok(resp.json()?)
     }
@@ -100,7 +100,7 @@ impl RustChainClient {
         }
         if !status.is_success() {
             let body = resp.text().unwrap_or_default();
-            return Err(format!("Challenge failed: HTTP {} — {}", status, body).into());
+            return Err(t!("network.challenge_failed", status = status, body = body).into());
         }
         Ok(resp.json()?)
     }
@@ -121,7 +121,7 @@ impl RustChainClient {
         }
         if !status.is_success() {
             let body = resp.text().unwrap_or_default();
-            return Err(format!("Submit failed: HTTP {} — {}", status, body).into());
+           return Err(t!("network.submit_failed", status = status, body = body).into()); 
         }
         Ok(resp.json()?)
     }
@@ -152,7 +152,7 @@ impl RustChainClient {
         }
         if !status.is_success() {
             let body = resp.text().unwrap_or_default();
-            return Err(format!("Enroll failed: HTTP {} — {}", status, body).into());
+            return Err(t!("network.enroll_failed", status = status, body = body).into());
         }
         Ok(resp.json()?)
     }
