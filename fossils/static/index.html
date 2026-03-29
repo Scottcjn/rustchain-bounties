@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fossil Record — Attestation Archaeology</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=Libre+Baskerville:ital@0;1&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0c0a;
+      --surface:   #1a1814;
+      --border:    #2e2b24;
+      --text:      #e8dcc8;
+      --muted:     #8a7f6e;
+      --accent:    #c9a84c;
+      --settle:    #4a6741;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    header {
+      padding: 2rem 3rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #141210 0%, var(--bg) 100%);
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 2.4rem;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      line-height: 1;
+    }
+    header .subtitle {
+      margin-top: 0.4rem;
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    header .meta {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    header .meta span { display: flex; align-items: center; gap: 0.4rem; }
+    header .meta strong { color: var(--accent); font-weight: 500; }
+
+    /* ── Controls ───────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 0.8rem 3rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      flex-wrap: wrap;
+    }
+    .controls label { color: var(--muted); }
+    .controls select, .controls input[type=range] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .controls .arch-toggles {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    .arch-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 0.68rem;
+      transition: opacity 0.2s;
+      user-select: none;
+    }
+    .arch-toggle.off { opacity: 0.3; }
+    .arch-toggle .swatch {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .arch-toggle input { display: none; }
+
+    /* ── Chart area ──────────────────────────────────────────── */
+    #chart {
+      width: 100%;
+      padding: 1.5rem 3rem 1rem;
+      overflow-x: auto;
+    }
+    #chart svg {
+      display: block;
+      overflow: visible;
+    }
+
+    /* ── Tooltip ────────────────────────────────────────────── */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #1c1916;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      max-width: 260px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    #tooltip.visible { opacity: 1; }
+    #tooltip .tip-arch {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    #tooltip .tip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.2rem;
+    }
+    #tooltip .tip-label { color: var(--muted); }
+    #tooltip .tip-val { color: var(--accent); font-weight: 500; }
+
+    /* ── Legend ─────────────────────────────────────────────── */
+    #legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 1rem 3rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    #legend .legend-title {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    #legend .legend-items {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    #legend .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.68rem;
+    }
+    #legend .legend-swatch {
+      width: 14px; height: 14px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    #legend .legend-item .arch-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.75rem;
+    }
+    #legend .legend-item .first-ep {
+      color: var(--muted);
+      font-size: 0.65rem;
+    }
+
+    /* ── Axis labels ─────────────────────────────────────────── */
+    .axis-label {
+      font-size: 0.65rem;
+      fill: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Loading state ───────────────────────────────────────── */
+    #loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: var(--muted);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.8rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    footer {
+      padding: 1rem 3rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── First-appearance annotation ─────────────────────────── */
+    .fa-annotation {
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Fossil Record</h1>
+  <div class="subtitle">Attestation Archaeology — RustChain Stratigraphy Visualizer</div>
+  <div class="meta">
+    <span><strong id="stat-att">—</strong> attestations</span>
+    <span><strong id="stat-miners">—</strong> miners</span>
+    <span>Epoch range: <strong id="stat-epochs">—</strong></span>
+    <span>Deploy: <strong>rustchain.org/fossils</strong></span>
+  </div>
+</header>
+
+<div class="controls">
+  <label>View:</label>
+  <select id="view-mode">
+    <option value="stratigraphy">Stratigraphy (stacked layers)</option>
+    <option value="streamgraph">Streamgraph (proportion)</option>
+  </select>
+
+  <label>Width encode:</label>
+  <select id="width-encode">
+    <option value="miners">Active miners</option>
+    <option value="rtc">Total RTC earned</option>
+    <option value="count">Attestation count</option>
+  </select>
+
+  <label>Epoch range:</label>
+  <input type="range" id="epoch-range" min="1" max="1000" value="1000" style="width:120px">
+  <span id="epoch-range-label" style="color:var(--accent);font-size:0.72rem">Epoch 1–1000</span>
+
+  <div class="arch-toggles" id="arch-toggles"></div>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>Excavating attestation layers…
+</div>
+
+<div id="chart"></div>
+<div id="tooltip"></div>
+
+<div id="legend">
+  <div class="legend-title">Architecture Layers (oldest → newest, bottom → top)</div>
+  <div class="legend-items" id="legend-items"></div>
+</div>
+
+<footer>
+  <span>RustChain Fossil Record — Bounty #2311 — 75 RTC</span>
+  <span>Data: RustChain Attestation DB · Visualization: D3.js Stratigraphy</span>
+</footer>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let allData = null;
+let epochAggregates = [];
+let architectures = [];
+let settlementEpochs = [];
+let visibleArches = new Set();
+
+const CHART_MARGIN = { top: 30, right: 40, bottom: 60, left: 80 };
+const MIN_CHART_HEIGHT = 420;
+const ARCH_LAYER_HEIGHT = 46;
+const ARCH_SPACING = 4;
+
+// ── Load Data ─────────────────────────────────────────────────────────────────
+async function loadData() {
+  const resp = await fetch('/api/attestations/epochs');
+  const json = await resp.json();
+  epochAggregates = json.data;
+  settlementEpochs = json.settlement_epochs;
+
+  const summaryResp = await fetch('/api/summary');
+  const summary = await summaryResp.json();
+
+  architectures = summary.architectures.sort((a, b) => a.first_epoch - b.first_epoch);
+
+  document.getElementById('stat-att').textContent = summary.total_attestations.toLocaleString();
+  document.getElementById('stat-miners').textContent = summary.total_miners.toLocaleString();
+  document.getElementById('stat-epochs').textContent = `${summary.epoch_range.min}–${summary.epoch_range.max}`;
+
+  buildArchToggles();
+  buildLegend();
+
+  document.getElementById('loading').style.display = 'none';
+  renderChart();
+}
+
+// ── Arch Toggles ──────────────────────────────────────────────────────────────
+function buildArchToggles() {
+  const container = document.getElementById('arch-toggles');
+  architectures.forEach(arch => {
+    visibleArches.add(arch.id);
+    const div = document.createElement('div');
+    div.className = 'arch-toggle';
+    div.dataset.arch = arch.id;
+    div.innerHTML = `
+      <div class="swatch" style="background:${arch.color}"></div>
+      <span>${arch.name}</span>
+    `;
+    div.addEventListener('click', () => {
+      if (visibleArches.has(arch.id)) {
+        visibleArches.delete(arch.id);
+        div.classList.add('off');
+      } else {
+        visibleArches.add(arch.id);
+        div.classList.remove('off');
+      }
+      renderChart();
+    });
+    container.appendChild(div);
+  });
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+function buildLegend() {
+  const container = document.getElementById('legend-items');
+  architectures.forEach(arch => {
+    const div = document.createElement('div');
+    div.className = 'legend-item';
+    div.innerHTML = `
+      <div class="legend-swatch" style="background:${arch.color}"></div>
+      <span class="arch-name">${arch.name}</span>
+      <span class="first-ep">from ep. ${arch.first_epoch}</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ── Main Chart Render ─────────────────────────────────────────────────────────
+function renderChart() {
+  const container = document.getElementById('chart');
+  d3.select(container).selectAll('*').remove();
+
+  const viewMode = document.getElementById('view-mode').value;
+  const widthEncode = document.getElementById('width-encode').value;
+  const maxEpoch = parseInt(document.getElementById('epoch-range').value);
+
+  // Filter data
+  const filteredEpochs = epochAggregates.filter(d => d.epoch <= maxEpoch);
+
+  // Visible architectures (filtered by order of first appearance)
+  const visibleArchs = architectures.filter(a => visibleArches.has(a.id));
+
+  // For stratigraphy: we need layers for each arch at each epoch
+  // Each arch gets its own horizontal band (stacked vertically)
+  const chartHeight = Math.max(MIN_CHART_HEIGHT, visibleArchs.length * (ARCH_LAYER_HEIGHT + ARCH_SPACING) + 80);
+
+  const svgWidth = Math.max(container.clientWidth || 1200, 1200);
+  const svgHeight = chartHeight + CHART_MARGIN.top + CHART_MARGIN.bottom;
+  const innerWidth = svgWidth - CHART_MARGIN.left - CHART_MARGIN.right;
+  const innerHeight = chartHeight;
+
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', svgWidth)
+    .attr('height', svgHeight);
+
+  // Defs for textures/glows
+  const defs = svg.append('defs');
+
+  // Subtle noise filter for geological texture feel
+  const filter = defs.append('filter').attr('id', 'noise');
+  filter.append('feTurbulence').attr('type', 'fractalNoise').attr('baseFrequency', '0.65').attr('numOctaves', '3').attr('stitchTiles', 'stitch');
+  filter.append('feColorMatrix').attr('type', 'saturate').attr('values', '0');
+  const feBlend = filter.append('feBlend').attr('in', 'SourceGraphic').attr('in2', 'noise').attr('mode', 'multiply');
+
+  // ── Scales ──────────────────────────────────────────────────────────────────
+  const xScale = d3.scaleLinear()
+    .domain([1, maxEpoch])
+    .range([0, innerWidth]);
+
+  // Y: stacked bands by architecture order (oldest at bottom)
+  const archIndex = {};
+  visibleArchs.forEach((a, i) => { archIndex[a.id] = i; });
+
+  const yScale = d3.scaleBand()
+    .domain(visibleArchs.map(a => a.id))
+    .range([innerHeight, 0])
+    .padding(0.08);
+
+  // ── Background ──────────────────────────────────────────────────────────────
+  const bg = svg.append('g')
+    .attr('transform', `translate(${CHART_MARGIN.left},${CHART_MARGIN.top})`);
+
+  // Chart background with subtle grid
+  bg.append('rect')
+    .attr('width', innerWidth)
+    .attr('height', innerHeight)
+    .attr('fill', '#13120f')
+    .attr('rx', 4);
+
+  // Horizontal stripes for geological strata feel
+  visibleArchs.forEach((arch, i) => {
+    const y = yScale(arch.id);
+    const h = yScale.bandwidth();
+    if (i % 2 === 0) {
+      bg.append('rect')
+        .attr('x', 0).attr('y', y)
+        .attr('width', innerWidth).attr('height', h)
+        .attr('fill', '#141312')
+        .attr('opacity', 0.5);
+    }
+  });
+
+  // ── Settlement epoch markers ─────────────────────────────────────────────────
+  const settlementX = settlementEpochs.filter(e => e <= maxEpoch);
+  settlementX.forEach(ep => {
+    bg.append('line')
+      .attr('x1', xScale(ep)).attr('x2', xScale(ep))
+      .attr('y1', 0).attr('y2', innerHeight)
+      .attr('stroke', '#3a5a35')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '3,4')
+      .attr('opacity', 0.7);
+  });
+
+  // ── X-axis ───────────────────────────────────────────────────────────────────
+  const xAxis = d3.axisBottom(xScale)
+    .ticks(Math.min(20, maxEpoch / 20))
+    .tickFormat(d => `Ep. ${d}`)
+    .tickSize(-innerHeight);
+
+  bg.append('g')
+    .attr('class', 'x-axis')
+    .attr('transform', `translate(0,${innerHeight})`)
+    .call(xAxis)
+    .call(g => {
+      g.select('.domain').attr('stroke', '#2e2b24');
+      g.selectAll('.tick line')
+        .attr('stroke', '#2e2b24')
+        .attr('stroke-dasharray', '2,6');
+      g.selectAll('.tick text')
+        .attr('fill', '#8a7f6e')
+        .attr('font-size', '11px')
+        .attr('font-family', 'IBM Plex Mono, monospace');
+    });
+
+  // X-axis label
+  bg.append('text')
+    .attr('class', 'axis-label')
+    .attr('x', innerWidth / 2)
+    .attr('y', innerHeight + 48)
+    .attr('text-anchor', 'middle')
+    .text('EPOCH');
+
+  // ── Y-axis (architecture labels) ───────────────────────────────────────────
+  const yAxis = d3.axisLeft(yScale)
+    .tickSize(0)
+    .tickPadding(10);
+
+  bg.append('g')
+    .attr('class', 'y-axis')
+    .call(yAxis)
+    .call(g => {
+      g.select('.domain').remove();
+      g.selectAll('.tick text')
+        .attr('fill', d => {
+          const arch = architectures.find(a => a.id === d);
+          return arch ? arch.color : '#e8dcc8';
+        })
+        .attr('font-size', '13px')
+        .attr('font-family', 'Playfair Display, serif')
+        .attr('font-weight', '700')
+        .attr('dx', '-6');
+    });
+
+  // ── Stratigraphy Bars ────────────────────────────────────────────────────────
+  // Group data by epoch
+  const epochGroups = d3.group(filteredEpochs, d => d.epoch);
+
+  // Width encoding scale
+  let widthScale;
+  if (widthEncode === 'miners') {
+    const maxMiners = d3.max(filteredEpochs, d => d.active_miner_count);
+    widthScale = d3.scaleLinear().domain([0, maxMiners || 1]).range([0, 1]);
+  } else if (widthEncode === 'rtc') {
+    const maxRtc = d3.max(filteredEpochs, d => d.total_rtc);
+    widthScale = d3.scaleLinear().domain([0, maxRtc || 1]).range([0, 1]);
+  } else {
+    const maxCount = d3.max(filteredEpochs, d => d.attestation_count);
+    widthScale = d3.scaleLinear().domain([0, maxCount || 1]).range([0, 1]);
+  }
+
+  // For each architecture, draw a horizontal band of rectangles (one per epoch)
+  visibleArchs.forEach(arch => {
+    const archGroup = bg.append('g')
+      .attr('class', `arch-group-${arch.id}`)
+      .attr('opacity', 0);
+
+    // Fade in animation
+    archGroup.transition().duration(600).attr('opacity', 1);
+
+    const bandY = yScale(arch.id);
+    const bandH = yScale.bandwidth();
+
+    // Get all epochs for this arch (some epochs may have no data for this arch)
+    const archEpochs = [];
+    for (let ep = 1; ep <= maxEpoch; ep++) {
+      const rec = filteredEpochs.find(d => d.epoch === ep && d.architecture === arch.id);
+      archEpochs.push({
+        epoch: ep,
+        data: rec,
+        x: xScale(ep),
+        w: xScale(ep + 1) - xScale(ep) - 1,
+        h: bandH,
+        y: bandY,
+      });
+    }
+
+    // Background band
+    archGroup.append('rect')
+      .attr('x', 0).attr('y', bandY)
+      .attr('width', innerWidth).attr('height', bandH)
+      .attr('fill', arch.color)
+      .attr('opacity', 0.06)
+      .attr('rx', 2);
+
+    // Draw rectangles per epoch
+    archEpochs.forEach(({ epoch, data, x, w, h, y }) => {
+      if (!data) return; // no attestation at this epoch for this arch
+
+      const wEnc = widthScale(
+        widthEncode === 'miners' ? data.active_miner_count :
+        widthEncode === 'rtc' ? data.total_rtc : data.attestation_count
+      );
+
+      // Width of colored bar = base width * width encoding
+      const barW = Math.max(1, w * (0.15 + 0.85 * wEnc));
+      // Height also modulated by quality
+      const barH = Math.max(4, h * data.avg_quality);
+
+      const rect = archGroup.append('rect')
+        .attr('x', x + (w - barW) / 2)
+        .attr('y', y + (h - barH) / 2)
+        .attr('width', barW)
+        .attr('height', barH)
+        .attr('fill', arch.color)
+        .attr('opacity', 0.55 + 0.45 * wEnc)
+        .attr('rx', 2)
+        .attr('cursor', 'pointer');
+
+      // Tooltip interactions
+      rect.on('mouseenter', function(event) {
+        d3.select(this).attr('opacity', 1).attr('filter', 'url(#glow)');
+        showTooltip(event, data);
+      });
+      rect.on('mousemove', function(event) {
+        moveTooltip(event);
+      });
+      rect.on('mouseleave', function() {
+        d3.select(this).attr('opacity', 0.55 + 0.45 * wEnc).attr('filter', null);
+        hideTooltip();
+      });
+    });
+  });
+
+  // ── First Appearance Annotations ────────────────────────────────────────────
+  visibleArchs.forEach(arch => {
+    const firstX = xScale(arch.first_epoch);
+    const archIdx = archIndex[arch.id];
+    const bandY = yScale(arch.id);
+    const bandH = yScale.bandwidth();
+
+    // Vertical line at first appearance
+    if (arch.first_epoch <= maxEpoch) {
+      bg.append('line')
+        .attr('x1', firstX).attr('x2', firstX)
+        .attr('y1', bandY).attr('y2', innerHeight)
+        .attr('stroke', arch.color)
+        .attr('stroke-width', 1.5)
+        .attr('opacity', 0.4)
+        .attr('stroke-dasharray', '4,3');
+
+      // Star/diamond marker at first appearance
+      bg.append('circle')
+        .attr('cx', firstX)
+        .attr('cy', bandY + bandH / 2)
+        .attr('r', 5)
+        .attr('fill', arch.color)
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1)
+        .attr('opacity', 0.9);
+
+      // Annotation label
+      bg.append('text')
+        .attr('x', firstX + 8)
+        .attr('y', bandY + 14)
+        .attr('fill', arch.color)
+        .attr('font-family', 'Libre Baskerville, serif')
+        .attr('font-style', 'italic')
+        .attr('font-size', '10px')
+        .attr('opacity', 0.8)
+        .text(`First seen: Ep. ${arch.first_epoch}`);
+    }
+  });
+
+  // ── Glow filter ──────────────────────────────────────────────────────────────
+  const glow = defs.append('filter').attr('id', 'glow');
+  glow.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'coloredBlur');
+  const feMerge = glow.append('feMerge');
+  feMerge.append('feMergeNode').attr('in', 'coloredBlur');
+  feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  // ── Title ─────────────────────────────────────────────────────────────────────
+  svg.append('text')
+    .attr('x', CHART_MARGIN.left)
+    .attr('y', 20)
+    .attr('fill', '#8a7f6e')
+    .attr('font-size', '11px')
+    .attr('font-family', 'IBM Plex Mono, monospace')
+    .attr('text-transform', 'uppercase')
+    .attr('letter-spacing', '0.1em')
+    .text('ARCHITECTURE STRATIGRAPHY — RUSTCHAIN ATTESTATION HISTORY');
+
+  // ── Streamgraph alternative ──────────────────────────────────────────────────
+  if (viewMode === 'streamgraph') {
+    renderStreamgraph(svg, innerWidth, innerHeight, xScale, filteredEpochs, visibleArchs, maxEpoch);
+  }
+}
+
+// ── Streamgraph (bonus view) ──────────────────────────────────────────────────
+function renderStreamgraph(svg, innerWidth, innerHeight, xScale, filteredEpochs, visibleArchs, maxEpoch) {
+  // Stack by epoch
+  const epochs = d3.range(1, maxEpoch + 1);
+  const stackData = epochs.map(ep => {
+    const row = { epoch: ep };
+    visibleArchs.forEach(arch => {
+      const rec = filteredEpochs.find(d => d.epoch === ep && d.architecture === arch.id);
+      row[arch.id] = rec ? rec.active_miner_count : 0;
+    });
+    return row;
+  });
+
+  const stack = d3.stack()
+    .keys(visibleArchs.map(a => a.id))
+    .offset(d3.stackOffsetWiggle)
+    .order(d3.stackOrderInsideOut);
+
+  const series = stack(stackData);
+  const yScaleS = d3.scaleLinear()
+    .domain([
+      d3.min(series, layer => d3.min(layer, d => d[0])),
+      d3.max(series, layer => d3.max(layer, d => d[1]))
+    ])
+    .range([innerHeight, 0]);
+
+  const area = d3.area()
+    .x(d => xScale(d.data.epoch))
+    .y0(d => yScaleS(d[0]))
+    .y1(d => yScaleS(d[1]))
+    .curve(d3.curveBasis);
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${CHART_MARGIN.left},${CHART_MARGIN.top})`);
+
+  series.forEach(layer => {
+    const arch = visibleArchs.find(a => a.id === layer.key);
+    g.append('path')
+      .datum(layer)
+      .attr('d', area)
+      .attr('fill', arch.color)
+      .attr('opacity', 0.7)
+      .attr('stroke', arch.color)
+      .attr('stroke-width', 0.5);
+  });
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+function showTooltip(event, data) {
+  const tip = document.getElementById('tooltip');
+  const arch = architectures.find(a => a.id === data.architecture);
+  tip.innerHTML = `
+    <div class="tip-arch" style="color:${arch ? arch.color : '#c9a84c'}">${data.architecture_name || data.architecture}</div>
+    <div class="tip-row"><span class="tip-label">Epoch</span><span class="tip-val">${data.epoch}</span></div>
+    <div class="tip-row"><span class="tip-label">Miners</span><span class="tip-val">${data.active_miner_count}</span></div>
+    <div class="tip-row"><span class="tip-label">Attestations</span><span class="tip-val">${data.attestation_count}</span></div>
+    <div class="tip-row"><span class="tip-label">RTC Earned</span><span class="tip-val">${data.total_rtc.toFixed(4)}</span></div>
+    <div class="tip-row"><span class="tip-label">Quality</span><span class="tip-val">${(data.avg_quality * 100).toFixed(1)}%</span></div>
+  `;
+  tip.classList.add('visible');
+  moveTooltip(event);
+}
+
+function moveTooltip(event) {
+  const tip = document.getElementById('tooltip');
+  const x = event.clientX + 16;
+  const y = event.clientY - 16;
+  tip.style.left = `${Math.min(x, window.innerWidth - tip.offsetWidth - 20)}px`;
+  tip.style.top = `${Math.min(y, window.innerHeight - tip.offsetHeight - 20)}px`;
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').classList.remove('visible');
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+document.getElementById('view-mode').addEventListener('change', renderChart);
+document.getElementById('width-encode').addEventListener('change', renderChart);
+document.getElementById('epoch-range').addEventListener('input', function() {
+  document.getElementById('epoch-range-label').textContent = `Epoch 1–${this.value}`;
+  renderChart();
+});
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+window.addEventListener('load', loadData);
+window.addEventListener('resize', () => { if (allData) renderChart(); });
+</script>
+</body>
+</html>
