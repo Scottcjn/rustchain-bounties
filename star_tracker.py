@@ -17,6 +17,10 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 # API Endpoints
 GITHUB_API = "https://api.github.com"
+MAIN_REPO_NAME = "Rustchain"
+MAIN_REPO_URL = "https://github.com/Scottcjn/Rustchain"
+STAR_PAGE_URL = "https://rustchain.org/stars.html"
+TARGET_STARS = 5000
 
 
 def init_db():
@@ -172,7 +176,7 @@ def get_stats(conn):
         top_with_delta.append((name, stars, delta))
     
     # Main repo stats for Claude Code OSS Campaign
-    cursor.execute("SELECT stars FROM repos WHERE name = 'Rustchain'")
+    cursor.execute("SELECT stars FROM repos WHERE name = ?", (MAIN_REPO_NAME,))
     main_row = cursor.fetchone()
     main_stars = main_row[0] if main_row else 0
 
@@ -182,7 +186,7 @@ def get_stats(conn):
         "top_repos": top_with_delta,
         "yesterday": yesterday,
         "main_stars": main_stars,
-        "target_stars": 5000
+        "target_stars": TARGET_STARS
     }
 
 
@@ -217,6 +221,7 @@ def print_dashboard(conn):
 def generate_html_report(conn):
     """Generate HTML report with chart"""
     cursor = conn.cursor()
+    stats = get_stats(conn)
     
     # Get historical data for chart
     cursor.execute("""
@@ -245,6 +250,10 @@ def generate_html_report(conn):
         th {{ color: #8b949e; }}
         .delta-pos {{ color: #3fb950; }}
         .delta-neg {{ color: #f85149; }}
+        .callout {{ margin: 24px 0; padding: 16px; background: #161b22; border-left: 4px solid #58a6ff; }}
+        .section {{ margin-top: 32px; }}
+        a {{ color: #58a6ff; }}
+        ul, ol {{ padding-left: 24px; }}
     </style>
 </head>
 <body>
@@ -258,6 +267,14 @@ def generate_html_report(conn):
         <div class="stat-value">{stats['total_repos']}</div>
         <div class="stat-label">Total Repos 📁</div>
     </div>
+
+    <div class="section">
+        <h2>Updated Strategy: Focus on Main Repo</h2>
+        <p><strong>Requirement clarified:</strong> Claude Code Open Source requires <strong>one repo with 5,000+ stars</strong> (not spread across all repos). We're focusing the campaign on <a href="{MAIN_REPO_URL}">Scottcjn/{MAIN_REPO_NAME}</a>.</p>
+        <div class="callout">
+            <p><em>"If you maintain something the ecosystem quietly depends on, apply anyway and tell us about it."</em> - Claude Code OSS criteria</p>
+        </div>
+    </div>
     
     <h2>🚀 Claude Code OSS Campaign Progress</h2>
     <table>
@@ -266,6 +283,41 @@ def generate_html_report(conn):
         <tr><td><strong>Target</strong></td><td><strong>{stats['target_stars']}</strong></td></tr>
         <tr><td><strong>Gap</strong></td><td><strong>{stats['target_stars'] - stats['main_stars']}</strong></td></tr>
     </table>
+
+    <div class="section">
+        <h2>Why RustChain Qualifies (Even Before 5K)</h2>
+        <ul>
+            <li><strong>4 published PyPI packages</strong>: <code>clawrtc</code>, <code>beacon-skill</code>, <code>bottube</code>, <code>grazer-skill</code></li>
+            <li><strong>Novel consensus mechanism</strong>: Proof-of-Antiquity (RIP-200) - genuinely original, no prior art</li>
+            <li><strong>Running production network</strong>: 15+ active miners on real hardware (PowerPC G4, G5, IBM POWER8)</li>
+            <li><strong>Academic submission</strong>: Grail-V paper submitted to CVPR 2026 Workshop</li>
+            <li><strong>wRTC tokens live</strong>: Solana (Raydium) + Base L2 (Aerodrome) with locked liquidity</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Bounty Pool: 5,000 RTC (~$500 USD)</h2>
+        <table>
+            <tr><th>Action</th><th>Reward</th></tr>
+            <tr><td>Star the main Rustchain repo</td><td><strong>2 RTC</strong></td></tr>
+            <tr><td>Star main repo + 5 other repos</td><td><strong>3 RTC per repo</strong></td></tr>
+            <tr><td>Star main repo + ALL 86 repos</td><td><strong>5 RTC per repo (430 RTC!)</strong></td></tr>
+            <tr><td>Share campaign on social media</td><td><strong>+5 RTC bonus</strong></td></tr>
+            <tr><td>Referral (get someone else to star)</td><td><strong>+2 RTC per referral</strong></td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>How to Claim</h2>
+        <ol>
+            <li>Star <a href="{MAIN_REPO_URL}">{MAIN_REPO_URL}</a> (REQUIRED)</li>
+            <li>Star additional repos for multiplied rewards</li>
+            <li>Comment here with GitHub username + repos starred</li>
+            <li>Receive RTC within 24 hours</li>
+        </ol>
+        <p><strong>Star page</strong>: <a href="{STAR_PAGE_URL}">{STAR_PAGE_URL}</a></p>
+        <p><em>Pool funded from Community Fund (85,000+ RTC available)</em></p>
+    </div>
 
     <h2>🏆 Top 10 Repos</h2>
     <table>

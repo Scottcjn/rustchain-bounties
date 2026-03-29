@@ -151,6 +151,54 @@ class TestGetStats:
         assert stats["total_repos"] == 0
         conn.close()
 
+    def test_main_repo_campaign_stats(self, tmp_db):
+        conn = star_tracker.init_db()
+        star_tracker.save_repos(conn, [{
+            "id": 3,
+            "name": "Rustchain",
+            "full_name": "Scottcjn/Rustchain",
+            "stargazers_count": 63,
+            "forks_count": 7,
+            "description": "Main repo",
+            "updated_at": "2026-03-17T00:00:00Z",
+        }])
+        stats = star_tracker.get_stats(conn)
+        assert stats["main_stars"] == 63
+        assert stats["target_stars"] == 5000
+        conn.close()
+
+
+class TestGenerateHtmlReport:
+    def test_includes_issue_478_campaign_copy(self, tmp_db, tmp_path):
+        conn = star_tracker.init_db()
+        star_tracker.save_repos(conn, [{
+            "id": 3,
+            "name": "Rustchain",
+            "full_name": "Scottcjn/Rustchain",
+            "stargazers_count": 63,
+            "forks_count": 7,
+            "description": "Main repo",
+            "updated_at": "2026-03-17T00:00:00Z",
+        }])
+        star_tracker.record_snapshot(conn)
+
+        previous_cwd = os.getcwd()
+        os.chdir(tmp_path)
+        try:
+            star_tracker.generate_html_report(conn)
+            html = (tmp_path / "star_tracker.html").read_text()
+        finally:
+            os.chdir(previous_cwd)
+            conn.close()
+
+        assert "Updated Strategy: Focus on Main Repo" in html
+        assert "one repo with 5,000+ stars" in html
+        assert "Why RustChain Qualifies (Even Before 5K)" in html
+        assert "Bounty Pool: 5,000 RTC (~$500 USD)" in html
+        assert "How to Claim" in html
+        assert "https://github.com/Scottcjn/Rustchain" in html
+        assert "https://rustchain.org/stars.html" in html
+
 
 # ─── get_all_repos ──────────────────────────────────────────────────
 
