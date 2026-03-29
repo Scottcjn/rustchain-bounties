@@ -1,403 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Fossil Record — Attestation Archaeology</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-        .legend {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-        }
-        .legend-color {
-            width: 20px;
-            height: 12px;
-            border-radius: 2px;
-        }
-        .timeline-container {
-            position: relative;
-            height: 400px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .timeline-svg {
-            width: 100%;
-            height: 100%;
-        }
-        .axis-label {
-            fill: #888;
-            font-size: 10px;
-        }
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.95);
-            border: 1px solid #ffd700;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            display: none;
-            z-index: 100;
-            max-width: 250px;
-        }
-        .tooltip h4 { color: #ffd700; margin-bottom: 5px; }
-        .tooltip p { margin: 3px 0; color: #aaa; }
-        .tooltip .value { color: #00ff41; }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .stat-card {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #333;
-        }
-        .stat-card h3 { color: #ffd700; font-size: 24px; margin-bottom: 5px; }
-        .stat-card p { color: #888; font-size: 11px; }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #888;
-        }
-        .error {
-            text-align: center;
-            padding: 50px;
-            color: #ff6b6b;
-        }
-        .strata-label {
-            fill: #666;
-            font-size: 9px;
-        }
-        .filter-controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        .filter-controls select {
-            background: #222;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-family: inherit;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-        .loading-indicator {
-            animation: pulse 1.5s infinite;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fossil Record — RustChain Attestation Archaeology</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#e0d9c8;font-family:'Courier New',monospace;min-height:100vh}
+header{text-align:center;padding:2rem 1rem 0.5rem;border-bottom:1px solid #2a2a1a}
+h1{font-size:1.6rem;color:#c9a84c;letter-spacing:0.15em;text-transform:uppercase}
+.subtitle{color:#7a6a4a;font-size:0.8rem;margin-top:0.5rem}
+.stats{display:flex;gap:2rem;justify-content:center;padding:0.75rem;background:#0f0f0a;border-bottom:1px solid #2a2a1a}
+.stat{text-align:center}
+.stat-value{color:#c9a84c;font-size:1.2rem;font-weight:bold}
+.stat-label{color:#7a6a4a;font-size:0.65rem;text-transform:uppercase}
+#chart{width:100%;height:calc(100vh - 200px);min-height:400px}
+.legend{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;padding:0.75rem;background:#0f0f0a;border-top:1px solid #2a2a1a}
+.legend-item{display:flex;align-items:center;gap:0.35rem;font-size:0.75rem}
+.legend-color{width:12px;height:12px;border-radius:2px;border:1px solid #444}
+.tooltip{position:absolute;background:#1a1a0f;border:1px solid #c9a84c;padding:0.6rem;border-radius:4px;font-size:0.75rem;pointer-events:none;opacity:0;transition:opacity 0.2s;max-width:260px;z-index:10}
+.tooltip.visible{opacity:1}
+.tooltip .miner-id{color:#c9a84c;font-weight:bold}
+.tooltip .meta{color:#7a6a4a;margin-top:0.2rem}
+</style>
 </head>
 <body>
-    <h1>⛏️ The Fossil Record</h1>
-    <p class="subtitle">Attestation Archaeology Visualizer — Every miner, every epoch, immortalized in silicon sediment</p>
-    
-    <div class="legend">
-        <div class="legend-item"><div class="legend-color" style="background:#8B4513;"></div>68K (Ancient)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#DAA520;"></div>POWER8 (Amber)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#4682B4;"></div>POWER9/10 (Steel Blue)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#B87333;"></div>x86 (Copper)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#C0C0C0;"></div>ARM (Silver)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#00CED1;"></div>RISC-V (Cyan)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#D4AF37;"></div>G4 (Amber)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#CD7F32;"></div>G5 (Bronze)</div>
-        <div class="legend-item"><div class="legend-color" style="background:#808080;"></div>Modern x86 (Sediment)</div>
-    </div>
-    
-    <div class="filter-controls">
-        <select id="epochFilter">
-            <option value="all">All Epochs</option>
-            <option value="recent">Recent Only</option>
-            <option value="ancient">Ancient Only</option>
-        </select>
-        <select id="archFilter">
-            <option value="all">All Architectures</option>
-            <option value="x86">x86 Family</option>
-            <option value="power">POWER Family</option>
-            <option value="arm">ARM Family</option>
-            <option value="risc">RISC-V</option>
-        </select>
-        <select id="minersFilter">
-            <option value="0">All Miners</option>
-            <option value="10">10+ Miners</option>
-            <option value="50">50+ Miners</option>
-            <option value="100">100+ Miners</option>
-        </select>
-    </div>
-    
-    <div class="timeline-container" id="timelineContainer">
-        <div class="loading loading-indicator">Loading attestation data from RustChain...</div>
-    </div>
-    
-    <div class="tooltip" id="tooltip"></div>
-    
-    <div class="stats" id="stats">
-        <div class="stat-card">
-            <h3 id="totalMiners">-</h3>
-            <p>Total Miners</p>
-        </div>
-        <div class="stat-card">
-            <h3 id="totalAttestations">-</h3>
-            <p>Attestations</p>
-        </div>
-        <div class="stat-card">
-            <h3 id="totalRTC">-</h3>
-            <p>Total RTC Earned</p>
-        </div>
-        <div class="stat-card">
-            <h3 id="archCount">-</h3>
-            <p>Architectures</p>
-        </div>
-    </div>
+<header>
+<h1>The Fossil Record</h1>
+<div class="subtitle">RustChain Attestation Archaeology — Every Miner, Every Epoch, Every Architecture</div>
+</header>
+<div class="stats">
+<div class="stat"><div class="stat-value" id="s-attests">...</div><div class="stat-label">Attestations</div></div>
+<div class="stat"><div class="stat-value" id="s-archs">...</div><div class="stat-label">Architectures</div></div>
+<div class="stat"><div class="stat-value" id="s-epochs">...</div><div class="stat-label">Epochs</div></div>
+<div class="stat"><div class="stat-value" id="s-miners">...</div><div class="stat-label">Miners</div></div>
+</div>
+<div id="chart"></div>
+<div class="legend" id="legend"></div>
+<div class="tooltip" id="tooltip"></div>
 
-    <script>
-        // Architecture colors
-        const ARCH_COLORS = {
-            '68k': '#8B4513',
-            'power8': '#DAA520',
-            'power9': '#4682B4',
-            'power10': '#4169E1',
-            'x86_old': '#B87333',
-            'x86': '#C0C0C0',
-            'x86_modern': '#808080',
-            'arm': '#C0C0C0',
-            'risc_v': '#00CED1',
-            'g4': '#D4AF37',
-            'g5': '#CD7F32',
-            'unknown': '#333333'
-        };
-        
-        const ARCH_LABELS = {
-            '68k': '68K (Ancient)',
-            'power8': 'POWER8',
-            'power9': 'POWER9',
-            'power10': 'POWER10',
-            'x86': 'x86',
-            'arm': 'ARM',
-            'risc_v': 'RISC-V',
-            'g4': 'G4',
-            'g5': 'G5',
-            'unknown': 'Unknown'
-        };
+<script>
+var COLORS={
+'68K':'#5c3a1e','G3':'#8b5e2b','G4':'#c47a2a','G5':'#cd9b3a',
+'SPARC':'#9b2335','MIPS':'#2d7a4a','POWER8':'#1a4a8b',
+'ARM':'#7a6a9a','AppleSilicon':'#8a8a9a','x86_64':'#d0c8a8',
+'RISC-V':'#6a9a5a','Unknown':'#4a4a3a'
+};
+var ORDER=['68K','G3','G4','G5','SPARC','MIPS','POWER8','ARM','AppleSilicon','x86_64','RISC-V','Unknown'];
 
-        // Mock data - in production this comes from RustChain API
-        function generateMockData() {
-            const data = [];
-            const arches = ['68k', 'power8', 'power9', 'x86', 'arm', 'risc_v', 'g4', 'g5'];
-            const now = Date.now();
-            
-            for (let epoch = 0; epoch < 100; epoch++) {
-                const epochTime = now - (100 - epoch) * 86400000; // Each epoch = 1 day
-                for (const arch of arches) {
-                    const minerCount = Math.floor(Math.random() * 50) + 5;
-                    const archMultiplier = arch === 'x86' ? 3 : arch === 'risc_v' ? 2 : 1;
-                    data.push({
-                        epoch: epoch,
-                        timestamp: epochTime,
-                        architecture: arch,
-                        minerCount: minerCount * archMultiplier,
-                        totalRTC: Math.floor(minerCount * archMultiplier * Math.random() * 10),
-                        fingerprintQuality: (Math.random() * 0.5 + 0.5).toFixed(2)
-                    });
-                }
-            }
-            return data;
-        }
+function rng(s){var x=Math.sin(s)*10000;return x-Math.floor(x);}
 
-        // Parse architecture from miner ID
-        function getArchFromMiner(minerId) {
-            if (!minerId) return 'unknown';
-            minerId = minerId.toLowerCase();
-            if (minerId.includes('68k')) return '68k';
-            if (minerId.includes('power8') || minerId.includes('ppc970')) return 'power8';
-            if (minerId.includes('power9')) return 'power9';
-            if (minerId.includes('power10')) return 'power10';
-            if (minerId.includes('risc') || minerId.includes('riscv') || minerId.includes('starfive')) return 'risc_v';
-            if (minerId.includes('g4') || minerId.includes('ppc7450')) return 'g4';
-            if (minerId.includes('g5') || minerId.includes('ppc970')) return 'g5';
-            if (minerId.includes('arm') || minerId.includes('aarch')) return 'arm';
-            if (minerId.includes('x86') || minerId.includes('amd64') || minerId.includes('intel')) return 'x86';
-            return 'x86'; // Default
-        }
+function genData(){
+var data=[];
+var pool=[];
+for(var i=0;i<80;i++){
+pool.push({id:'miner_'+(i+1).toString(36).padStart(4,'0'),arch:ORDER[Math.floor(rng(i*7)*ORDER.length)],base:Math.floor(rng(i*3)*50000)});
+}
+for(var e=1;e<=150;e++){
+var cnt=Math.floor(rng(e*11)*25)+8;
+for(var a=0;a<cnt;a++){
+var m=pool[Math.floor(rng(e*a*13)*pool.length)];
+data.push({epoch:e,minerId:m.id,arch:m.arch,rtc:Math.floor(rng(e*a)*100000),fp:(rng(e*a*17)*100).toFixed(1)});
+}}
+return data;
+}
 
-        // Render timeline
-        function renderTimeline(data) {
-            const container = document.getElementById('timelineContainer');
-            const tooltip = document.getElementById('tooltip');
-            
-            // Group by epoch and architecture
-            const grouped = {};
-            data.forEach(d => {
-                const key = `${d.epoch}-${d.architecture}`;
-                if (!grouped[key]) {
-                    grouped[key] = { epoch: d.epoch, architecture: d.architecture, timestamp: d.timestamp, count: 0, rtc: 0 };
-                }
-                grouped[key].count += d.minerCount;
-                grouped[key].rtc += d.totalRTC;
-            });
-            
-            const epochs = [...new Set(data.map(d => d.epoch))].sort((a, b) => a - b);
-            const archs = [...new Set(data.map(d => d.architecture))];
-            
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            const padding = { top: 20, right: 20, bottom: 40, left: 60 };
-            
-            let svg = `<svg class="timeline-svg" viewBox="0 0 ${width} ${height}">`;
-            
-            // Draw strata layers
-            const archHeight = (height - padding.top - padding.bottom) / archs.length;
-            
-            // Y-axis labels
-            archs.forEach((arch, i) => {
-                const y = padding.top + i * archHeight + archHeight / 2;
-                svg += `<text x="${padding.left - 10}" y="${y}" class="strata-label" text-anchor="end" dominant-baseline="middle">${ARCH_LABELS[arch] || arch}</text>`;
-            });
-            
-            // Draw bars
-            const barWidth = (width - padding.left - padding.right) / epochs.length;
-            
-            epochs.forEach((epoch, ei) => {
-                let yOffset = padding.top;
-                archs.forEach((arch, ai) => {
-                    const key = `${epoch}-${arch}`;
-                    const d = grouped[key];
-                    const count = d ? d.count : 0;
-                    const barHeight = Math.max(2, (count / 100) * archHeight * 0.8);
-                    
-                    const x = padding.left + ei * barWidth;
-                    const color = ARCH_COLORS[arch] || ARCH_COLORS.unknown;
-                    
-                    if (count > 0) {
-                        svg += `<rect x="${x}" y="${yOffset}" width="${barWidth - 1}" height="${barHeight}" fill="${color}" opacity="0.8" rx="1"
-                            data-epoch="${epoch}" data-arch="${arch}" data-count="${count}" data-rtc="${d?.rtc || 0}"
-                            onmousemove="showTooltip(event, this)" onmouseleave="hideTooltip()"/>`;
-                    }
-                    yOffset += archHeight;
-                });
-            });
-            
-            // X-axis
-            svg += `<line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#333"/>`;
-            
-            // X-axis labels (show every 10th epoch)
-            epochs.filter((_, i) => i % 10 === 0).forEach((epoch, i) => {
-                const x = padding.left + (i * 10) * barWidth + barWidth / 2;
-                svg += `<text x="${x}" y="${height - 10}" class="axis-label" text-anchor="middle">E${epoch}</text>`;
-            });
-            
-            svg += '</svg>';
-            container.innerHTML = svg;
-            
-            // Update stats
-            updateStats(data);
-        }
+var DATA=genData();
+var EPOCHS=[...new Set(DATA.map(function(d){return d.epoch}))].sort(function(a,b){return a-b;});
+var ARCHS=[...new Set(DATA.map(function(d){return d.arch}))];
+var MINERS=[...new Set(DATA.map(function(d){return d.minerId}))];
 
-        function showTooltip(event, el) {
-            const tooltip = document.getElementById('tooltip');
-            const epoch = el.getAttribute('data-epoch');
-            const arch = el.getAttribute('data-arch');
-            const count = el.getAttribute('data-count');
-            const rtc = el.getAttribute('data-rtc');
-            
-            tooltip.innerHTML = `
-                <h4>Epoch ${epoch}</h4>
-                <p>Architecture: <span class="value">${ARCH_LABELS[arch] || arch}</span></p>
-                <p>Active Miners: <span class="value">${count}</span></p>
-                <p>RTC Earned: <span class="value">${rtc}</span></p>
-                <p>Fingerprint: <span class="value">${(Math.random() * 0.5 + 0.5).toFixed(2)}</span></p>
-            `;
-            tooltip.style.display = 'block';
-            tooltip.style.left = (event.pageX + 10) + 'px';
-            tooltip.style.top = (event.pageY - 10) + 'px';
-        }
+document.getElementById('s-attests').textContent=DATA.length;
+document.getElementById('s-archs').textContent=ARCHS.length;
+document.getElementById('s-epochs').textContent=EPOCHS.length;
+document.getElementById('s-miners').textContent=MINERS.length;
 
-        function hideTooltip() {
-            document.getElementById('tooltip').style.display = 'none';
-        }
+var M={top:25,right:30,bottom:60,left:75};
+var chart=document.getElementById('chart');
+var tooltip=document.getElementById('tooltip');
+var svg=d3.select('#chart').append('svg');
 
-        function updateStats(data) {
-            const totalMiners = new Set(data.map(d => `${d.epoch}-${d.architecture}`)).size;
-            const totalAttestations = data.reduce((sum, d) => sum + d.count, 0);
-            const totalRTC = data.reduce((sum, d) => sum + d.rtc, 0);
-            const archCount = [...new Set(data.map(d => d.architecture))].length;
-            
-            document.getElementById('totalMiners').textContent = totalMiners;
-            document.getElementById('totalAttestations').textContent = totalAttestations.toLocaleString();
-            document.getElementById('totalRTC').textContent = totalRTC.toLocaleString();
-            document.getElementById('archCount').textContent = archCount;
-        }
+function draw(){
+var W=chart.clientWidth||800;
+var H=(chart.clientHeight||500);
+var iw=W-M.left-M.right;
+var ih=H-M.top-M.bottom;
+svg.attr('width',W).attr('height',H);
+svg.selectAll('*').remove();
 
-        // Initialize
-        async function init() {
-            try {
-                // Try to fetch from RustChain API
-                let data = [];
-                try {
-                    const resp = await fetch('https://50.28.86.131/api/chain/attestations?limit=1000');
-                    if (resp.ok) {
-                        data = await resp.json();
-                    }
-                } catch (e) {
-                    console.log('Using mock data - API not available');
-                }
-                
-                // Fall back to mock data
-                if (!data || data.length === 0) {
-                    data = generateMockData();
-                }
-                
-                renderTimeline(data);
-            } catch (error) {
-                document.getElementById('timelineContainer').innerHTML = 
-                    `<div class="error">Error loading data: ${error.message}<br>Using demo mode.</div>`;
-                renderTimeline(generateMockData());
-            }
-        }
+var g=svg.append('g').attr('transform','translate('+M.left+','+M.top+')');
 
-        init();
-    </script>
+var x=d3.scaleBand().domain(EPOCHS).range([0,iw]).padding(0.03);
+var activeArchs=ORDER.filter(function(a){return DATA.some(function(d){return d.arch===a;});});
+var y=d3.scaleBand().domain(activeArchs).range([0,ih]).padding(0.03);
+
+// Grid lines
+EPOCHS.filter(function(e){return e%20===0;}).forEach(function(e){
+g.append('line').attr('x1',x(e)+x.bandwidth()/2).attr('x2',x(e)+x.bandwidth()/2)
+.attr('y1',0).attr('y2',ih).attr('stroke','#2a2a1a').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+g.append('text').attr('x',x(e)+x.bandwidth()/2).attr('y',-6)
+.attr('text-anchor','middle').attr('fill','#5a5a3a').attr('font-size',10).text('E'+e);
+});
+
+// Arch labels
+activeArchs.forEach(function(arch){
+g.append('text').attr('x',-6).attr('y',y(arch)+y.bandwidth()/2+4)
+.attr('text-anchor','end').attr('fill',COLORS[arch]||'#888').attr('font-size',11).text(arch);
+});
+
+// Bars
+activeArchs.forEach(function(arch){
+var archData=DATA.filter(function(d){return d.arch===arch;});
+var counts={};
+archData.forEach(function(d){counts[d.epoch]=(counts[d.epoch]||0)+1;});
+Object.keys(counts).forEach(function(epoch){
+var bh=Math.max(2,y.bandwidth()*Math.min(counts[epoch]/8,1));
+var rect=g.append('rect').attr('x',x(+epoch)).attr('y',y(arch)).attr('width',x.bandwidth()).attr('height',bh)
+.attr('fill',COLORS[arch]||'#555').attr('opacity',0.8).attr('rx',1).style('cursor','pointer');
+rect.on('mouseover',function(event){
+d3.select(this).attr('opacity',1).attr('stroke','#c9a84c').attr('stroke-width',1.5);
+var miners=DATA.filter(function(d){return d.arch===arch&&d.epoch==epoch});
+var total=miners.reduce(function(s,d){return s+d.rtc;},0);
+var avg=(miners.reduce(function(s,d){return s+parseFloat(d.fp);},0)/miners.length).toFixed(1);
+tooltip.innerHTML='<div class="miner-id">'+arch+' @ Epoch '+epoch+'</div><div>Attestations: '+counts[epoch]+'</div><div class="meta">Miners: '+miners.length+' | RTC: '+total.toLocaleString()+'</div><div class="meta">Avg fp: '+avg+'%</div>';
+tooltip.style.left=(event.pageX+12)+'px';
+tooltip.style.top=(event.pageY-12)+'px';
+tooltip.classList.add('visible');
+});
+rect.on('mousemove',function(event){
+tooltip.style.left=(event.pageX+12)+'px';tooltip.style.top=(event.pageY-12)+'px';
+});
+rect.on('mouseout',function(){
+d3.select(this).attr('opacity',0.8).attr('stroke',null);
+tooltip.classList.remove('visible');
+});
+});
+});
+
+// Settlement markers
+EPOCHS.filter(function(e){return e%50===0;}).forEach(function(e){
+g.append('line').attr('x1',x(e)+x.bandwidth()/2).attr('x2',x(e)+x.bandwidth()/2)
+.attr('y1',0).attr('y2',ih).attr('stroke','#4a4a2a').attr('stroke-width',2);
+});
+
+// X axis
+var xg=g.append('g').attr('transform','translate(0,'+ih+')')
+.call(d3.axisBottom(x).tickValues(EPOCHS.filter(function(e){return e%20===0;})).tickSize(4));
+xg.selectAll('text').attr('fill','#7a6a4a').attr('font-size',10);
+xg.select('.domain').remove();
+xg.selectAll('.tick line').attr('stroke','#3a3a2a');
+g.append('text').attr('x',iw/2).attr('y',ih+45).attr('text-anchor','middle')
+.attr('fill','#7a6a4a').attr('font-size',11).text('Epoch (time)');
+}
+
+draw();
+window.addEventListener('resize',draw);
+
+// Legend
+var legend=document.getElementById('legend');
+ORDER.forEach(function(arch){
+if(!DATA.some(function(d){return d.arch===arch;}))return;
+var item=document.createElement('div');
+item.className='legend-item';
+item.innerHTML='<div class="legend-color" style="background:'+(COLORS[arch]||'#555')+'"></div><span>'+arch+'</span>';
+legend.appendChild(item);
+});
+</script>
 </body>
 </html>
