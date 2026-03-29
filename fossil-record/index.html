@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fossil Record — Rustchain Stratigraphy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0d0d;
+      color: #e8e0d0;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #c8b88a;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #6b6050;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+    }
+    #chart {
+      width: 100%;
+      max-width: 1400px;
+    }
+    .axis-label {
+      font-size: 11px;
+      fill: #9b8e7a;
+      letter-spacing: 0.1em;
+    }
+    .settlement-line {
+      stroke: #4a3f30;
+      stroke-width: 1;
+      stroke-dasharray: 4 3;
+    }
+    .settlement-label {
+      font-size: 9px;
+      fill: #6b5f4f;
+    }
+    .arch-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin: 3px 8px;
+      font-size: 10px;
+      color: #c0b090;
+    }
+    .arch-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    #legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 12px;
+      gap: 2px;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(15, 12, 8, 0.96);
+      border: 1px solid #5a4a30;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #e0d4b0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      line-height: 1.7;
+      min-width: 180px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .tooltip.visible { opacity: 1; }
+    .tooltip .tip-arch {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .tooltip .tip-epoch {
+      font-size: 10px;
+      color: #7a6a50;
+      margin-bottom: 6px;
+    }
+    .tooltip .tip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .tooltip .tip-label { color: #8a7a60; }
+    .tooltip .tip-value { color: #e0d0a0; }
+  </style>
+</head>
+<body>
+  <h1>The Fossil Record</h1>
+  <div class="subtitle">RUSTCHAIN MINER STRATIGRAPHY &mdash; EPOCHS 1&ndash;150 &mdash; 80 MINERS</div>
+  <div id="chart"></div>
+  <div id="legend"></div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+  (function() {
+    // ── Architecture palette ───────────────────────────────────────────────
+    const ARCH_COLORS = {
+      '68K':     '#D4A017',
+      'G3':      '#B87333',
+      'G4':      '#A0522D',
+      'G5':      '#8B4513',
+      'SPARC':   '#DC143C',
+      'MIPS':    '#00A86B',
+      'POWER8':  '#4169E1',
+      'ARM':     '#A8A8A0',
+      'x86_64':  '#808080',
+      'RISC-V':  '#808000',
+    };
+
+    // ── Generate sample data ───────────────────────────────────────────────
+    // 80 miners × 150 epochs
+    const ARCH_FAMILIES = Object.keys(ARCH_COLORS);
+    const DEVICES = [
+      'ASIC-X1','ASIC-X2','FPGA-A7','FPGA-KU','GPU-RTX','GPU-V100','GPU-A100',
+      'SoC-BCM','SoC-IMX','MCU-LPC','MCU-STM','RISC-BO','VULCAN-S','ELRUS-H',
+      'ORACLE-S','DELL-PWR','IBM-P8','AMD-EPYC','INTEL-X','MARVELL-A'
+    ];
+
+    function rng(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    // Build 80 miners
+    const miners = Array.from({ length: 80 }, (_, i) => {
+      const arch = ARCH_FAMILIES[i % ARCH_FAMILIES.length];
+      return {
+        id: `MN-${String(i + 1).padStart(3, '0')}`,
+        arch,
+        device: DEVICES[i % DEVICES.length],
+        rtc_earned: rng(10, 9999),
+        fingerprint_quality: rng(0, 100),
+        // each miner is active for a random span of epochs
+        epoch_start: rng(1, 30),
+        epoch_end: rng(100, 150),
+      };
+    });
+
+    // ── Build epoch data: for each epoch, count miners per arch ────────────
+    const NUM_EPOCHS = 150;
+    const epochs = [];
+    for (let e = 1; e <= NUM_EPOCHS; e++) {
+      const byArch = {};
+      ARCH_FAMILIES.forEach(a => { byArch[a] = 0; });
+      miners.forEach(m => {
+        if (e >= m.epoch_start && e <= m.epoch_end) {
+          byArch[m.arch]++;
+        }
+      });
+      epochs.push({ epoch: e, byArch });
+    }
+
+    // Stack layout data
+    const stackData = epochs.map(ep => {
+      const row = { epoch: ep.epoch };
+      ARCH_FAMILIES.forEach(a => { row[a] = ep.byArch[a] || 0; });
+      return row;
+    });
+
+    const stack = d3.stack().keys(ARCH_FAMILIES)(stackData);
+
+    // ── Layout dimensions ──────────────────────────────────────────────────
+    const container = document.getElementById('chart');
+    const W = container.clientWidth || 1200;
+    const margin = { top: 20, right: 30, bottom: 60, left: 90 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = Math.max(400, Math.min(600, innerW * 0.45));
+    const barW = innerW / NUM_EPOCHS;
+
+    const svg = d3.select('#chart')
+      .append('svg')
+      .attr('width', W)
+      .attr('height', innerH + margin.top + margin.bottom)
+      .attr('viewBox', `0 0 ${W} ${innerH + margin.top + margin.bottom}`);
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Scales
+    const xScale = d3.scaleLinear().domain([1, NUM_EPOCHS]).range([0, innerW]);
+    const yScale = d3.scaleLinear().domain([0, d3.max(stack, layer => d3.max(layer, d => d[1]))]).range([innerH, 0]);
+    const yBand  = d3.scaleBand().domain(ARCH_FAMILIES).range([innerH, 0]).padding(0.08);
+
+    // ── Grid lines ─────────────────────────────────────────────────────────
+    g.append('g')
+      .attr('class', 'grid')
+      .selectAll('line.grid-h')
+      .data(yScale.ticks(6))
+      .enter().append('line')
+      .attr('class', 'grid-h')
+      .attr('x1', 0).attr('x2', innerW)
+      .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
+      .attr('stroke', '#1e1a14')
+      .attr('stroke-width', 1);
+
+    // ── Settlement markers every 50 epochs ─────────────────────────────────
+    const settlementEpochs = [50, 100];
+    settlementEpochs.forEach(ep => {
+      const x = xScale(ep);
+      g.append('line')
+        .attr('class', 'settlement-line')
+        .attr('x1', x).attr('x2', x)
+        .attr('y1', 0).attr('y2', innerH);
+      g.append('text')
+        .attr('class', 'settlement-label')
+        .attr('x', x + 4).attr('y', 12)
+        .text(`SETTLEMENT ${ep}`);
+    });
+
+    // ── Stacked bars (stratigraphy) ─────────────────────────────────────────
+    // architecture bands (background stripes for visual layering)
+    g.selectAll('rect.arch-band')
+      .data(ARCH_FAMILIES)
+      .enter().append('rect')
+      .attr('class', 'arch-band')
+      .attr('x', 0)
+      .attr('y', d => yBand(d))
+      .attr('width', innerW)
+      .attr('height', yBand.bandwidth())
+      .attr('fill', d => ARCH_COLORS[d])
+      .attr('opacity', 0.06)
+      .attr('rx', 1);
+
+    // Draw each arch layer as a set of epoch bars
+    stack.forEach(layer => {
+      const arch = layer.key;
+      const color = ARCH_COLORS[arch];
+
+      g.selectAll(`rect.bar-${arch}`)
+        .data(layer)
+        .enter().append('rect')
+        .attr('class', `bar-${arch}`)
+        .attr('x', d => xScale(d.data.epoch))
+        .attr('y', d => yScale(d[1]))
+        .attr('width', d => {
+          const count = d[1] - d[0];
+          return Math.max(1, count * barW * 2.5); // width = miner count
+        })
+        .attr('height', d => Math.max(2, yScale(d[0]) - yScale(d[1])))
+        .attr('fill', color)
+        .attr('opacity', 0.88)
+        .attr('rx', 1)
+        .attr('cursor', 'pointer')
+        .on('mousemove', function(event, d) {
+          const ep = d.data.epoch;
+          const arch = layer.key;
+          const count = d[1] - d[0];
+          // gather miner details for this arch at this epoch
+          const activeMiners = miners.filter(m => m.arch === arch && ep >= m.epoch_start && ep <= m.epoch_end);
+          const totalRtc = activeMiners.reduce((s, m) => s + m.rtc_earned, 0);
+          const avgFq = activeMiners.length
+            ? Math.round(activeMiners.reduce((s, m) => s + m.fingerprint_quality, 0) / activeMiners.length)
+            : 0;
+
+          const tip = document.getElementById('tooltip');
+          const minerList = activeMiners.slice(0, 4).map(m =>
+            `<div style="font-size:10px;color:#9a8a6a">${m.id} &middot; ${m.device} &middot; RTC ${m.rtc_earned} &middot; FQ ${m.fingerprint_quality}</div>`
+          ).join('');
+          const more = activeMiners.length > 4 ? `<div style="font-size:10px;color:#6a5a4a">+${activeMiners.length - 4} more miners</div>` : '';
+
+          tip.innerHTML = `
+            <div class="tip-arch" style="color:${color}">${arch}</div>
+            <div class="tip-epoch">Epoch ${ep}</div>
+            <div class="tip-row"><span class="tip-label">Miners</span><span class="tip-value">${count}</span></div>
+            <div class="tip-row"><span class="tip-label">RTC Earned</span><span class="tip-value">${totalRtc.toLocaleString()}</span></div>
+            <div class="tip-row"><span class="tip-label">Avg FQ</span><span class="tip-value">${avgFq}%</span></div>
+            <div style="margin-top:6px;border-top:1px solid #3a2a1a;padding-top:6px;">${minerList}${more}</div>
+          `;
+          tip.style.left = (event.clientX + 14) + 'px';
+          tip.style.top  = (event.clientY - 20) + 'px';
+          tip.classList.add('visible');
+        })
+        .on('mouseleave', function() {
+          document.getElementById('tooltip').classList.remove('visible');
+        });
+    });
+
+    // ── Axes ────────────────────────────────────────────────────────────────
+    const xAxis = d3.axisBottom(xScale)
+      .tickValues(d3.range(0, NUM_EPOCHS + 1, 10))
+      .tickFormat(d => d === 0 ? '' : d)
+      .tickSize(4);
+
+    g.append('g')
+      .attr('transform', `translate(0,${innerH})`)
+      .call(xAxis)
+      .call(ax => ax.select('.domain').attr('stroke', '#3a3020'))
+      .call(ax => ax.selectAll('line').attr('stroke', '#3a3020'))
+      .call(ax => ax.selectAll('text').attr('fill', '#7a6a50').attr('font-size', '10px').attr('dy', '1.2em'));
+
+    const yAxis = d3.axisLeft(yBand).tickSize(0).tickPadding(8);
+    g.append('g')
+      .call(yAxis)
+      .call(ax => ax.select('.domain').attr('stroke', '#3a3020'))
+      .call(ax => ax.selectAll('text')
+        .attr('fill', d => ARCH_COLORS[d] || '#c0b090')
+        .attr('font-size', '11px')
+        .attr('font-weight', 'bold')
+        .attr('dx', '-4px'));
+
+    // Axis labels
+    g.append('text')
+      .attr('class', 'axis-label')
+      .attr('transform', `translate(${innerW / 2}, ${innerH + 48})`)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#6b5f4f')
+      .attr('font-size', '11px')
+      .attr('letter-spacing', '0.15em')
+      .text('EPOCH / TIME');
+
+    g.append('text')
+      .attr('class', 'axis-label')
+      .attr('transform', `translate(-72, ${innerH / 2}) rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#6b5f4f')
+      .attr('font-size', '11px')
+      .attr('letter-spacing', '0.15em')
+      .text('ARCHITECTURE LAYER (OLDEST → NEWEST)');
+
+    // ── Legend ───────────────────────────────────────────────────────────────
+    const legend = document.getElementById('legend');
+    ARCH_FAMILIES.forEach(arch => {
+      const el = document.createElement('div');
+      el.className = 'arch-box';
+      el.innerHTML = `<div class="arch-swatch" style="background:${ARCH_COLORS[arch]}"></div>${arch}`;
+      legend.appendChild(el);
+    });
+
+    // ── Responsive resize ───────────────────────────────────────────────────
+    const resizeObserver = new ResizeObserver(() => {
+      const newW = container.clientWidth || 1200;
+      svg.attr('width', newW).attr('viewBox', `0 0 ${newW} ${innerH + margin.top + margin.bottom}`);
+    });
+    resizeObserver.observe(container);
+  })();
+  </script>
+</body>
+</html>
