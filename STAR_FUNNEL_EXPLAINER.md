@@ -21,6 +21,12 @@ No. It's a **customer acquisition funnel** — and it works better than anything
 | Time to build this | ~90 days |
 | VC funding | $0 |
 
+## Campaign Update: Main Repo First
+
+Claude Code OSS qualification is based on **one repository reaching 5,000+ stars**. For RustChain, that means the primary campaign target is **[Scottcjn/Rustchain](https://github.com/Scottcjn/Rustchain)**.
+
+Additional repo stars still help discovery across the ecosystem, but they are now framed as a secondary multiplier. The entry action is simple: star the main RustChain repo first, then optionally star other ecosystem repos for extra rewards and broader discovery.
+
 For comparison:
 
 | Project | Age | Funding | Stars | Followers | Contributors |
@@ -34,7 +40,7 @@ For comparison:
 
 ```
 STAR BOUNTY (entry point)
-    "Star 10 repos, earn 5 RTC"
+    "Star Scottcjn/Rustchain, then optionally star more ecosystem repos"
          │
          ▼
 DISCOVERY (they browse the repos)
@@ -96,13 +102,15 @@ Our approach:
 
 A star is not the product. A star is the **handshake**.
 
-When someone stars 10+ repos, they:
-1. **Visit each repo page** — they see the README, the code, the vision
+When someone stars the main RustChain repo, they:
+1. **Visit the main repo page** — they see the README, the code, the vision
 2. **Learn what RustChain is** — Proof-of-Antiquity, vintage hardware, agent economy
 3. **Create a wallet** — their first on-chain identity
 4. **Enter the ecosystem** — they're now reachable for future bounties
 
-The star itself has value too: GitHub's algorithm surfaces repos with more stars in search results. More stars = more organic discovery = more contributors who arrive without bounties.
+If they continue starring additional repos, they also map the broader ecosystem: tooling, experiments, integrations, and subprojects. The main repo star is the qualification target; the extra stars deepen discovery.
+
+The star itself has value too: GitHub's algorithm surfaces repos with more stars in search results. More stars on the main repo = more organic discovery = more contributors who arrive without bounties.
 
 ## The Fork-to-Star Ratio Proves It's Real
 
