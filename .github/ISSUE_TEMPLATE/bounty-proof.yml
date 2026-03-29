@@ -10,6 +10,7 @@ body:
         Use this form for:
         - merged PR payout requests
         - star / follow / referral claims
+        - external product review claims
         - campaign or content proof
         - install or compatibility reports
         - node / miner uptime proof
@@ -85,7 +86,7 @@ body:
     id: proof
     attributes:
       label: Proof links and evidence
-      description: Include direct links, screenshots, analytics, logs, or reproducible evidence.
+      description: Include direct links, screenshots, analytics, logs, or reproducible evidence. For review bounties, include the published review URL or listing URL, a screenshot showing your submitted review, and the specific product features or workflow you evaluated.
       placeholder: |
         - Link 1:
         - Link 2:

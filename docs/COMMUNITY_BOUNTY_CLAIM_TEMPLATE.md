@@ -18,10 +18,34 @@ Actions completed:
 Total requested: <N> RTC
 ```
 
+## Review Bounty Claim Template
+
+Use this for bounties that require leaving a review on a third-party listing such as ToolPilot.
+
+```markdown
+Wallet: <your RTC wallet>
+
+Bounty issue: <link to the bounty issue>
+Platform identity: <your ToolPilot or related username, if public>
+
+Completed work:
+- Explored product: <product URL>
+- Reviewed listing: <listing URL>
+- Review summary: <1-3 sentences describing the honest feedback you posted>
+- Features evaluated: <specific features you actually tried>
+
+Proof:
+- Published review URL or listing URL: <link>
+- Screenshot showing the submitted review: <image or attachment link>
+- Extra notes: <anything a maintainer should verify>
+```
+
 ## Fast Validation Checklist
 
 - Wallet address included
 - Every claimed action has one proof link/screenshot/username
+- Review claims include the product/listing URL and a screenshot of the published review
+- Review claims mention specific features or workflow actually evaluated
 - Claimed RTC sum matches table values in issue #87
 - Claim is not duplicate for the same action
 

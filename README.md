@@ -44,6 +44,7 @@ Comment on the issue: **"I would like to work on this"**
 - **Code bounties**: Open a PR to the relevant repo and link it in the issue
 - **Content bounties**: Post your content and link it in the issue
 - **Star/propagation bounties**: Follow the instructions in the issue
+- **Review/social-proof bounties**: Open a `Bounty Proof / Claim` issue with the bounty link, your RTC wallet name, and screenshot/link evidence of the published review or campaign action
 
 ### 4. Get Paid
 Once verified, RTC is sent to your wallet. First time? We will help you set one up.
