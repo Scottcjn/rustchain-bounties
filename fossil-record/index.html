@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fossil Record — RustChain Attestation Archaeology</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#e0d9c8;font-family:'Courier New',monospace;min-height:100vh}
+header{text-align:center;padding:2rem 1rem 0.5rem;border-bottom:1px solid #2a2a1a}
+h1{font-size:1.6rem;color:#c9a84c;letter-spacing:0.15em;text-transform:uppercase}
+.subtitle{color:#7a6a4a;font-size:0.8rem;margin-top:0.5rem}
+.stats{display:flex;gap:2rem;justify-content:center;padding:0.75rem;background:#0f0f0a;border-bottom:1px solid #2a2a1a}
+.stat{text-align:center}
+.stat-value{color:#c9a84c;font-size:1.2rem;font-weight:bold}
+.stat-label{color:#7a6a4a;font-size:0.65rem;text-transform:uppercase}
+#chart{width:100%;height:calc(100vh - 200px);min-height:400px}
+.legend{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;padding:0.75rem;background:#0f0f0a;border-top:1px solid #2a2a1a}
+.legend-item{display:flex;align-items:center;gap:0.35rem;font-size:0.75rem}
+.legend-color{width:12px;height:12px;border-radius:2px;border:1px solid #444}
+.tooltip{position:absolute;background:#1a1a0f;border:1px solid #c9a84c;padding:0.6rem;border-radius:4px;font-size:0.75rem;pointer-events:none;opacity:0;transition:opacity 0.2s;max-width:260px;z-index:10}
+.tooltip.visible{opacity:1}
+.tooltip .miner-id{color:#c9a84c;font-weight:bold}
+.tooltip .meta{color:#7a6a4a;margin-top:0.2rem}
+</style>
+</head>
+<body>
+<header>
+<h1>The Fossil Record</h1>
+<div class="subtitle">RustChain Attestation Archaeology — Every Miner, Every Epoch, Every Architecture</div>
+</header>
+<div class="stats">
+<div class="stat"><div class="stat-value" id="s-attests">...</div><div class="stat-label">Attestations</div></div>
+<div class="stat"><div class="stat-value" id="s-archs">...</div><div class="stat-label">Architectures</div></div>
+<div class="stat"><div class="stat-value" id="s-epochs">...</div><div class="stat-label">Epochs</div></div>
+<div class="stat"><div class="stat-value" id="s-miners">...</div><div class="stat-label">Miners</div></div>
+</div>
+<div id="chart"></div>
+<div class="legend" id="legend"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+var COLORS={
+'68K':'#5c3a1e','G3':'#8b5e2b','G4':'#c47a2a','G5':'#cd9b3a',
+'SPARC':'#9b2335','MIPS':'#2d7a4a','POWER8':'#1a4a8b',
+'ARM':'#7a6a9a','AppleSilicon':'#8a8a9a','x86_64':'#d0c8a8',
+'RISC-V':'#6a9a5a','Unknown':'#4a4a3a'
+};
+var ORDER=['68K','G3','G4','G5','SPARC','MIPS','POWER8','ARM','AppleSilicon','x86_64','RISC-V','Unknown'];
+
+function rng(s){var x=Math.sin(s)*10000;return x-Math.floor(x);}
+
+function genData(){
+var data=[];
+var pool=[];
+for(var i=0;i<80;i++){
+pool.push({id:'miner_'+(i+1).toString(36).padStart(4,'0'),arch:ORDER[Math.floor(rng(i*7)*ORDER.length)],base:Math.floor(rng(i*3)*50000)});
+}
+for(var e=1;e<=150;e++){
+var cnt=Math.floor(rng(e*11)*25)+8;
+for(var a=0;a<cnt;a++){
+var m=pool[Math.floor(rng(e*a*13)*pool.length)];
+data.push({epoch:e,minerId:m.id,arch:m.arch,rtc:Math.floor(rng(e*a)*100000),fp:(rng(e*a*17)*100).toFixed(1)});
+}}
+return data;
+}
+
+var DATA=genData();
+var EPOCHS=[...new Set(DATA.map(function(d){return d.epoch}))].sort(function(a,b){return a-b;});
+var ARCHS=[...new Set(DATA.map(function(d){return d.arch}))];
+var MINERS=[...new Set(DATA.map(function(d){return d.minerId}))];
+
+document.getElementById('s-attests').textContent=DATA.length;
+document.getElementById('s-archs').textContent=ARCHS.length;
+document.getElementById('s-epochs').textContent=EPOCHS.length;
+document.getElementById('s-miners').textContent=MINERS.length;
+
+var M={top:25,right:30,bottom:60,left:75};
+var chart=document.getElementById('chart');
+var tooltip=document.getElementById('tooltip');
+var svg=d3.select('#chart').append('svg');
+
+function draw(){
+var W=chart.clientWidth||800;
+var H=(chart.clientHeight||500);
+var iw=W-M.left-M.right;
+var ih=H-M.top-M.bottom;
+svg.attr('width',W).attr('height',H);
+svg.selectAll('*').remove();
+
+var g=svg.append('g').attr('transform','translate('+M.left+','+M.top+')');
+
+var x=d3.scaleBand().domain(EPOCHS).range([0,iw]).padding(0.03);
+var activeArchs=ORDER.filter(function(a){return DATA.some(function(d){return d.arch===a;});});
+var y=d3.scaleBand().domain(activeArchs).range([0,ih]).padding(0.03);
+
+// Grid lines
+EPOCHS.filter(function(e){return e%20===0;}).forEach(function(e){
+g.append('line').attr('x1',x(e)+x.bandwidth()/2).attr('x2',x(e)+x.bandwidth()/2)
+.attr('y1',0).attr('y2',ih).attr('stroke','#2a2a1a').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+g.append('text').attr('x',x(e)+x.bandwidth()/2).attr('y',-6)
+.attr('text-anchor','middle').attr('fill','#5a5a3a').attr('font-size',10).text('E'+e);
+});
+
+// Arch labels
+activeArchs.forEach(function(arch){
+g.append('text').attr('x',-6).attr('y',y(arch)+y.bandwidth()/2+4)
+.attr('text-anchor','end').attr('fill',COLORS[arch]||'#888').attr('font-size',11).text(arch);
+});
+
+// Bars
+activeArchs.forEach(function(arch){
+var archData=DATA.filter(function(d){return d.arch===arch;});
+var counts={};
+archData.forEach(function(d){counts[d.epoch]=(counts[d.epoch]||0)+1;});
+Object.keys(counts).forEach(function(epoch){
+var bh=Math.max(2,y.bandwidth()*Math.min(counts[epoch]/8,1));
+var rect=g.append('rect').attr('x',x(+epoch)).attr('y',y(arch)).attr('width',x.bandwidth()).attr('height',bh)
+.attr('fill',COLORS[arch]||'#555').attr('opacity',0.8).attr('rx',1).style('cursor','pointer');
+rect.on('mouseover',function(event){
+d3.select(this).attr('opacity',1).attr('stroke','#c9a84c').attr('stroke-width',1.5);
+var miners=DATA.filter(function(d){return d.arch===arch&&d.epoch==epoch});
+var total=miners.reduce(function(s,d){return s+d.rtc;},0);
+var avg=(miners.reduce(function(s,d){return s+parseFloat(d.fp);},0)/miners.length).toFixed(1);
+tooltip.innerHTML='<div class="miner-id">'+arch+' @ Epoch '+epoch+'</div><div>Attestations: '+counts[epoch]+'</div><div class="meta">Miners: '+miners.length+' | RTC: '+total.toLocaleString()+'</div><div class="meta">Avg fp: '+avg+'%</div>';
+tooltip.style.left=(event.pageX+12)+'px';
+tooltip.style.top=(event.pageY-12)+'px';
+tooltip.classList.add('visible');
+});
+rect.on('mousemove',function(event){
+tooltip.style.left=(event.pageX+12)+'px';tooltip.style.top=(event.pageY-12)+'px';
+});
+rect.on('mouseout',function(){
+d3.select(this).attr('opacity',0.8).attr('stroke',null);
+tooltip.classList.remove('visible');
+});
+});
+});
+
+// Settlement markers
+EPOCHS.filter(function(e){return e%50===0;}).forEach(function(e){
+g.append('line').attr('x1',x(e)+x.bandwidth()/2).attr('x2',x(e)+x.bandwidth()/2)
+.attr('y1',0).attr('y2',ih).attr('stroke','#4a4a2a').attr('stroke-width',2);
+});
+
+// X axis
+var xg=g.append('g').attr('transform','translate(0,'+ih+')')
+.call(d3.axisBottom(x).tickValues(EPOCHS.filter(function(e){return e%20===0;})).tickSize(4));
+xg.selectAll('text').attr('fill','#7a6a4a').attr('font-size',10);
+xg.select('.domain').remove();
+xg.selectAll('.tick line').attr('stroke','#3a3a2a');
+g.append('text').attr('x',iw/2).attr('y',ih+45).attr('text-anchor','middle')
+.attr('fill','#7a6a4a').attr('font-size',11).text('Epoch (time)');
+}
+
+draw();
+window.addEventListener('resize',draw);
+
+// Legend
+var legend=document.getElementById('legend');
+ORDER.forEach(function(arch){
+if(!DATA.some(function(d){return d.arch===arch;}))return;
+var item=document.createElement('div');
+item.className='legend-item';
+item.innerHTML='<div class="legend-color" style="background:'+(COLORS[arch]||'#555')+'"></div><span>'+arch+'</span>';
+legend.appendChild(item);
+});
+</script>
+</body>
+</html>
