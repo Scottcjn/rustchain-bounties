@@ -1,0 +1,110 @@
+# SPDX-License-Identifier: MIT
+# BCOS v2 Reusable GitHub Action
+# Usage:
+#   jobs:
+#     certify:
+#       uses: Scottcjn/bcos-action/.github/workflows/bcos-action.yml@v1
+#       with:
+#         tier: L1
+#         reviewer: 'your-username'
+
+name: 'BCOS v2 Code Certification'
+description: 'Scan and certify your code with BCOS v2 - free, open-source code certification'
+author: 'Elyan Labs <https://elyanlabs.ai>'
+
+branding:
+  icon: 'award'
+  color: 'green'
+
+inputs:
+  tier:
+    description: 'Certification tier (L0/L1/L2)'
+    required: false
+    default: 'L1'
+  reviewer:
+    description: 'Reviewer name or GitHub username'
+    required: false
+  node-url:
+    description: 'RustChain node URL for attestation'
+    required: false
+    default: 'https://50.28.86.131'
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.9'
+  fail-on-vulnerabilities:
+    description: 'Fail the scan if vulnerabilities are found'
+    required: false
+    default: 'false'
+  min-trust-score:
+    description: 'Minimum trust score required to pass'
+    required: false
+    default: '70'
+
+outputs:
+  trust_score:
+    description: 'BCOS trust score (0-100)'
+    value: ${{ jobs.bcos-scan.outputs.trust_score }}
+  cert_id:
+    description: 'BCOS certification ID'
+    value: ${{ jobs.bcos-scan.outputs.cert_id }}
+  tier_met:
+    description: 'Whether tier requirements were met'
+    value: ${{ jobs.bcos-scan.outputs.tier_met }}
+  license_status:
+    description: 'License compliance status'
+    value: ${{ jobs.bcos-scan.outputs.license_status }}
+  vuln_count:
+    description: 'Number of vulnerabilities found'
+    value: ${{ jobs.bcos-scan.outputs.vuln_count }}
+  test_coverage:
+    description: 'Test coverage percentage'
+    value: ${{ jobs.bcos-scan.outputs.test_coverage }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    
+    - name: Install BCOS engine
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install clawrtc>=1.8.0
+    
+    - name: Run BCOS scan
+      id: scan
+      shell: bash
+      run: |
+        SCAN_OUTPUT=$(clawrtc bcos scan . --json 2>&1 || true)
+        TRUST_SCORE=$(echo "$SCAN_OUTPUT" | jq -r '.trust_score // 0')
+        CERT_ID=$(echo "$SCAN_OUTPUT" | jq -r '.cert_id // "pending"')
+        TIER_MET=$(echo "$SCAN_OUTPUT" | jq -r '.tier_met // false')
+        LICENSE_STATUS=$(echo "$SCAN_OUTPUT" | jq -r '.license.status // "unknown"')
+        VULN_COUNT=$(echo "$SCAN_OUTPUT" | jq -r '.vulnerabilities.count // 0')
+        TEST_COVERAGE=$(echo "$SCAN_OUTPUT" | jq -r '.test.coverage // 0')
+        
+        echo "trust_score=$TRUST_SCORE" >> $GITHUB_OUTPUT
+        echo "cert_id=$CERT_ID" >> $GITHUB_OUTPUT
+        echo "tier_met=$TIER_MET" >> $GITHUB_OUTPUT
+        echo "license_status=$LICENSE_STATUS" >> $GITHUB_OUTPUT
+        echo "vuln_count=$VULN_COUNT" >> $GITHUB_OUTPUT
+        echo "test_coverage=$TEST_COVERAGE" >> $GITHUB_OUTPUT
+        
+        echo "$SCAN_OUTPUT" > bcos-scan-result.json
+        
+        MIN_SCORE="${{ inputs.min-trust-score }}"
+        if [ "$TRUST_SCORE" -lt "$MIN_SCORE" ]; then
+          echo "❌ Trust score ($TRUST_SCORE) below minimum ($MIN_SCORE)"
+          exit 1
+        fi
+        
+        if [ "${{ inputs.fail-on-vulnerabilities }}" = "true" ] && [ "$VULN_COUNT" -gt 0 ]; then
+          echo "❌ Vulnerabilities found ($VULN_COUNT)"
+          exit 1
+        fi
+        
+        echo "✅ BCOS scan completed!"
