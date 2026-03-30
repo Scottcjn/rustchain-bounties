@@ -1,0 +1,339 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS v2 vs Altermenta Nucleus Verify - Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .subtitle {
+            color: #00aa00;
+            font-size: 1.1em;
+        }
+        
+        .intro {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 40px;
+            border-radius: 4px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .comparison-table th {
+            background: rgba(0, 255, 0, 0.1);
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .comparison-table th:first-child {
+            width: 25%;
+        }
+        
+        .comparison-table th:nth-child(2),
+        .comparison-table th:nth-child(3) {
+            width: 37.5%;
+            text-align: center;
+        }
+        
+        .comparison-table td {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .comparison-table td:nth-child(2),
+        .comparison-table td:nth-child(3) {
+            text-align: center;
+        }
+        
+        .winner {
+            background: rgba(0, 255, 0, 0.2) !important;
+            font-weight: bold;
+        }
+        
+        .feature-section {
+            margin-bottom: 40px;
+        }
+        
+        .feature-section h2 {
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        
+        .feature-card h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 40px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #00ff00;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #5fff5f;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        .badge-preview {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .badge-preview img {
+            margin: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 40px;
+            border-top: 1px solid #00ff00;
+            color: #00aa00;
+        }
+        
+        a {
+            color: #00ff00;
+            text-decoration: underline;
+        }
+        
+        a:hover {
+            color: #5fff5f;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-table {
+                font-size: 0.9em;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ BCOS v2 vs Altermenta Nucleus Verify ⚡</h1>
+            <p class="subtitle">Open Source Code Certification Compared</p>
+        </header>
+        
+        <div class="intro">
+            <p><strong>BCOS v2</strong> (Beacon Certified Open Source) is a free, open-source code certification engine by Elyan Labs. 
+            <strong>Altermenta Nucleus Verify</strong> is a proprietary code verification service.</p>
+            <br>
+            <p>This comparison helps you choose the right tool for your code certification needs.</p>
+        </div>
+        
+        <div class="feature-section">
+            <h2>📊 Feature Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>BCOS v2</th>
+                        <th>Nucleus Verify</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Price</strong></td>
+                        <td class="winner">Free (MIT License)</td>
+                        <td>$20-50/month</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Source Code</strong></td>
+                        <td class="winner">Open Source</td>
+                        <td>Proprietary (Closed)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>On-Chain Proof</strong></td>
+                        <td class="winner">RustChain BLAKE2b</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Offline Scanning</strong></td>
+                        <td class="winner">Full Local Engine</td>
+                        <td>Cloud API Only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Human Review</strong></td>
+                        <td class="winner">L2 Ed25519 Signatures</td>
+                        <td>Fully Automated</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trust Score</strong></td>
+                        <td class="winner">Transparent Formula</td>
+                        <td>Opaque Algorithm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Self-Hosting</strong></td>
+                        <td class="winner">Yes - Full Control</td>
+                        <td>No - SaaS Only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom Rules</strong></td>
+                        <td class="winner">Yes - Extendable</td>
+                        <td>Limited</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SBOM Generation</strong></td>
+                        <td class="winner">Included</td>
+                        <td>Additional Cost</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GitHub Integration</strong></td>
+                        <td class="winner">Native Action</td>
+                        <td>Marketplace App</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="feature-section">
+            <h2>🎯 Why Choose BCOS v2?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>💰 Free Forever</h3>
+                    <p>No subscription fees. No hidden costs. MIT licensed - use it commercially, modify it, distribute it.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔗 Blockchain Anchored</h3>
+                    <p>Every certification is anchored to RustChain with BLAKE2b-256 commitment. Tamper-proof proof of your code's state.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🏠 Run Locally</h3>
+                    <p>Scan your code offline. No need to upload proprietary code to cloud services. Full privacy and control.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 Extensible</h3>
+                    <p>Add custom Semgrep rules. Modify trust score formula. Integrate with your CI/CD pipeline.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📜 Transparent</h3>
+                    <p>Trust score formula is open and auditable. No black-box algorithms deciding your code's fate.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🤖 Agent Ready</h3>
+                    <p>Built for AI agents and automated workflows. GitHub Action, CLI, and API interfaces.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature-section">
+            <h2>🚀 Quick Start</h2>
+            <div class="feature-card">
+                <h3>Install BCOS Engine</h3>
+                <pre style="background: #000; padding: 15px; margin-top: 10px; border: 1px solid #00ff00; overflow-x: auto;"><code># Install via pip
+pip install clawrtc
+
+# Scan your repository
+clawrtc bcos scan .
+
+# Verify a certification
+clawrtc bcos verify BCOS-xxxxxxxx
+
+# Or use Homebrew (coming soon)
+brew install Scottcjn/tap/bcos
+bcos scan .</code></pre>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h2>Ready to Certify Your Code?</h2>
+            <p>Join the open-source code certification revolution.</p>
+            <div class="badge-preview">
+                <p><strong>Add BCOS badge to your README:</strong></p>
+                <pre style="background: #000; padding: 10px; margin-top: 10px; display: inline-block;"><code>[![BCOS Certified](https://img.shields.io/badge/BCOS-Certified-brightgreen?style=flat)](https://rustchain.org/bcos/)</code></pre>
+            </div>
+            <br>
+            <a href="https://github.com/Scottcjn/Rustchain/blob/main/docs/BEACON_CERTIFIED_OPEN_SOURCE.md" class="cta-button">📖 Read BCOS v2 Spec</a>
+            <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2291" class="cta-button" style="margin-left: 10px;">🔧 GitHub Action</a>
+        </div>
+        
+        <footer>
+            <p>BCOS v2 is part of the <a href="https://rustchain.org">RustChain</a> ecosystem by <a href="https://elyanlabs.ai">Elyan Labs</a>.</p>
+            <p>Proof of Antiquity • Open Source • Blockchain Anchored</p>
+        </footer>
+    </div>
+</body>
+</html>
