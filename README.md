@@ -44,7 +44,7 @@ for m in miners:
 
 # Check wallet balance
 bal = client.get_balance("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC")
-print(f"Balance: {bal.amount_rtc} RTC  ({bal.amount_i64} micro-RTC)")
+print(f"Balance: {bal.amount_rtc} RTC")
 
 # Check lottery eligibility
 le = client.get_lottery_eligibility("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC")
