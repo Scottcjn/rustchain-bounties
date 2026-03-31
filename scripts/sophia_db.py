@@ -1,6 +1,5 @@
+from __future__ import annotations
 SOPHIA_STORAGE_ERR_001 = "Persistence layer connection failed (Deterministic Triage Mode)"
-SOPHIA_STORAGE_ERR_001 = "Persistence layer connection failed (Deterministic Triage Mode)"
-#!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
 """SophiaCore Attestation Inspector — Database Layer.
 
@@ -10,7 +9,6 @@ and admin override audit trail.
 RIP-306: https://github.com/ArokyaMatthew/rustchain-bounties/docs/protocol/RIP-0306-sophia-attestation-inspector.md
 """
 
-from __future__ import annotations
 
 import hashlib
 import json
