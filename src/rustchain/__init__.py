@@ -16,7 +16,7 @@ Basic usage::
 
     # Lottery eligibility
     eligibility = client.get_lottery_eligibility("my-miner-id")
-    print(eligibility.eligible, eligibility.epoch)
+    print(eligibility.eligible, eligibility.reason)
 
     # Signed transfer
     tx = client.signed_transfer(

@@ -443,8 +443,10 @@ class RustChainClient:
 
     def get_lottery_eligibility(self, miner_id: str) -> LotteryEligibility:
         """
-        Check if a miner is eligible for the epoch lottery and what their
-        selection chance is.
+        Check if a miner is eligible for the current epoch's lottery.
+
+        The RustChain node evaluates attestation status and miner rotation
+        to determine eligibility for the per-epoch reward draw.
 
         Parameters
         ----------
@@ -454,13 +456,14 @@ class RustChainClient:
         Returns
         -------
         LotteryEligibility
-            Eligibility status, per-epoch selection chance, and hardware factors.
+            Eligibility status and rotation metadata.
 
         Example::
 
             le = client.get_lottery_eligibility("my-miner-id")
-            print(f"Eligible: {le.eligible}, chance={le.chance:.2%}")
-            print(f"Antiquity multiplier: {le.antiquity_multiplier}x")
+            print(f"Eligible: {le.eligible}")
+            print(f"Reason: {le.reason}")
+            print(f"Rotation size: {le.rotation_size} miners")
         """
         data = self._request(
             "GET", "/lottery/eligibility", params={"miner_id": miner_id}

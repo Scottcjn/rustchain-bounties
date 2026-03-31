@@ -221,22 +221,38 @@ class AttestationResponse:
 
 @dataclass
 class LotteryEligibility:
-    miner_id: str
-    epoch: int
+    """
+    Represents a miner's eligibility status for the epoch lottery / reward draw.
+
+    Fields
+    ------
+    eligible:
+        Whether the miner is eligible for this epoch's reward draw.
+    reason:
+        Reason why the miner is not eligible (e.g. ``"not_attested"``).
+        ``null`` when eligible.
+    rotation_size:
+        Number of miners in the current attestation rotation.
+    slot:
+        Current chain slot.
+    slot_producer:
+        The miner selected as slot producer for this slot, if any.
+    """
+
     eligible: bool
-    chance: float  # 0.0 – 1.0
-    antiquity_multiplier: float
-    entropy_score: float
+    reason: Optional[str]  # null when eligible
+    rotation_size: int
+    slot: int
+    slot_producer: Optional[str]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LotteryEligibility":
         return cls(
-            miner_id=data["miner_id"],
-            epoch=data["epoch"],
             eligible=data["eligible"],
-            chance=data["chance"],
-            antiquity_multiplier=data["antiquity_multiplier"],
-            entropy_score=data["entropy_score"],
+            reason=data.get("reason"),
+            rotation_size=data["rotation_size"],
+            slot=data["slot"],
+            slot_producer=data.get("slot_producer"),
         )
 
 

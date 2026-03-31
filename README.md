@@ -48,8 +48,8 @@ print(f"Balance: {bal.amount_rtc} RTC  ({bal.amount_i64} micro-RTC)")
 
 # Check lottery eligibility
 le = client.get_lottery_eligibility("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC")
-print(f"Eligible: {le.eligible}, selection chance: {le.chance:.2%}")
-print(f"Antiquity multiplier: {le.antiquity_multiplier}x  entropy: {le.entropy_score}")
+print(f"Eligible: {le.eligible}, reason: {le.reason}")
+print(f"Rotation size: {le.rotation_size} miners, slot: {le.slot}")
 
 # View transfer history
 history = client.get_wallet_history("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC", limit=10)

@@ -153,11 +153,11 @@ def test_get_lottery_eligibility(client):
     assert len(miners) >= 1
     le = client.get_lottery_eligibility(miners[0].miner)
     assert isinstance(le, LotteryEligibility)
-    assert le.epoch >= 0
     assert isinstance(le.eligible, bool)
-    assert isinstance(le.chance, float)
-    assert 0.0 <= le.chance <= 1.0
-    assert le.antiquity_multiplier >= 0.0
+    assert isinstance(le.rotation_size, int)
+    assert le.rotation_size >= 0
+    assert isinstance(le.slot, int)
+    assert le.slot >= 0
 
 
 # ---------------------------------------------------------------------------
