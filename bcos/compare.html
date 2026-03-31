@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS v2 vs Nucleus Verify - Comparison</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+        h1 { color: #58a6ff; }
+        .container { max-width: 900px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 15px; text-align: left; border: 1px solid #30363d; }
+        th { color: #8b949e; text-transform: uppercase; font-size: 0.85em; }
+        .win { color: #3fb950; font-weight: bold; }
+        .terminal-box { background: #161b22; border: 1px solid #30363d; padding: 20px; margin: 20px 0; border-radius: 6px; }
+        .verdict { text-align: center; padding: 30px; margin: 30px 0; background: #161b22; border: 2px solid #3fb950; border-radius: 6px; }
+        .verdict h2 { color: #3fb950; }
+        a { color: #58a6ff; }
+        code { background: rgba(110,118,129,0.4); padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 BCOS v2 vs Nucleus Verify</h1>
+        <p>Open Source Security Certification Compared</p>
+        
+        <div class="terminal-box">
+            <h2>📊 Feature Comparison</h2>
+            <table>
+                <tr><th>Feature</th><th>BCOS v2</th><th>Nucleus Verify</th></tr>
+                <tr><td>Price</td><td class="win">FREE (MIT)</td><td>$20-50/mo</td></tr>
+                <tr><td>Source Code</td><td class="win">✓ Open Source</td><td>✗ Proprietary</td></tr>
+                <tr><td>On-Chain Proof</td><td class="win">✓ RustChain BLAKE2b</td><td>✗ None</td></tr>
+                <tr><td>Offline Scanning</td><td class="win">✓ Full Local Engine</td><td>✗ Cloud API Only</td></tr>
+                <tr><td>Human Review</td><td class="win">✓ L2 Ed25519 Signatures</td><td>✗ Fully Automated</td></tr>
+                <tr><td>Trust Score</td><td class="win">✓ Transparent Formula</td><td>✗ Opaque</td></tr>
+                <tr><td>CLI Tool</td><td class="win"><code>clawrtc bcos</code></td><td>Web Only</td></tr>
+                <tr><td>Community</td><td class="win">⭐ 183 stars, 18mo</td><td>⭐ 0 stars, 6 days</td></tr>
+            </table>
+        </div>
+        
+        <div class="verdict">
+            <h2>🏆 BCOS Wins on Every Metric</h2>
+            <p>Free, open source, with on-chain proof and transparent scoring. Why pay for opaque cloud-only verification when you can have full local control with cryptographic proof?</p>
+        </div>
+        
+        <div class="terminal-box">
+            <h2>🚀 Get Started</h2>
+            <pre>
+# Install the CLI tool
+pip install clawrtc
+
+# Scan your repository
+clawrtc bcos scan .
+
+# Verify a certification
+clawrtc bcos verify BCOS-xxxxxxxx
+
+# Documentation
+https://rustchain.org/bcos/docs</pre>
+        </div>
+        
+        <p style="text-align:center;color:#8b949e;margin-top:30px;">
+            <a href="https://rustchain.org/bcos/">🏠 BCOS Home</a> | 
+            <a href="https://github.com/Scottcjn/Rustchain">📦 GitHub</a> | 
+            <a href="https://elyanlabs.ai">🔗 Elyan Labs</a>
+        </p>
+    </div>
+</body>
+</html>
