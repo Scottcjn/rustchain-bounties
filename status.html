@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Network Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        .status-online { animation: pulse-green 2s infinite; }
+        .status-offline { animation: pulse-red 2s infinite; }
+        .arch-badge { @apply px-2 py-1 rounded text-xs font-mono; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-emerald-400 mb-2">⚡ RustChain Network Status</h1>
+            <p class="text-gray-400">Real-time blockchain health monitoring</p>
+            <p class="text-xs text-gray-500 mt-2">Auto-refresh: <span id="countdown">60</span>s | Last updated: <span id="last-update">--</span></p>
+        </header>
+
+        <!-- Network Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Active Miners</div>
+                <div class="text-4xl font-bold text-emerald-400" id="miner-count">--</div>
+                <div class="text-xs text-gray-500 mt-1" id="miner-detail"></div>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Current Epoch</div>
+                <div class="text-4xl font-bold text-blue-400" id="epoch-number">--</div>
+                <div class="text-xs text-gray-500 mt-1" id="epoch-time"></div>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Attestation Nodes</div>
+                <div class="text-4xl font-bold text-purple-400" id="node-count">--</div>
+                <div class="text-xs text-gray-500 mt-1" id="node-status-summary"></div>
+            </div>
+        </div>
+
+        <!-- Epoch Progress -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+            <h2 class="text-lg font-semibold mb-4">⏱️ Epoch Progress</h2>
+            <div class="relative h-4 bg-gray-700 rounded-full overflow-hidden mb-2">
+                <div id="epoch-progress" class="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-400" id="epoch-timing">
+                <span>Start: <span id="epoch-start">--</span></span>
+                <span>End: <span id="epoch-end">--</span></span>
+            </div>
+        </div>
+
+        <!-- Attestation Nodes -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+            <h2 class="text-lg font-semibold mb-4">🔗 Attestation Nodes</h2>
+            <div class="space-y-3" id="nodes-list">
+                <div class="flex items-center justify-center text-gray-500 py-8">Loading node data...</div>
+            </div>
+        </div>
+
+        <!-- Active Miners -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+            <h2 class="text-lg font-semibold mb-4">⛏️ Active Miners</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-400 border-b border-gray-700">
+                            <th class="pb-3 pr-4">Architecture</th>
+                            <th class="pb-3 pr-4">Count</th>
+                            <th class="pb-3">Distribution</th>
+                        </tr>
+                    </thead>
+                    <tbody id="miners-table">
+                        <tr><td colspan="3" class="py-4 text-center text-gray-500">Loading miner data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Architecture Breakdown -->
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-8">
+            <h2 class="text-lg font-semibold mb-4">🖥️ Miner Architecture Distribution</h2>
+            <div id="arch-breakdown" class="space-y-2">
+                <div class="text-center text-gray-500 py-4">Loading architecture data...</div>
+            </div>
+        </div>
+
+        <!-- Raw API Response -->
+        <details class="bg-gray-800 rounded-xl border border-gray-700 mb-8">
+            <summary class="p-4 cursor-pointer text-gray-400 hover:text-white">🔧 Raw API Data (Debug)</summary>
+            <pre class="p-4 text-xs text-green-400 overflow-x-auto max-h-64" id="raw-data">Loading...</pre>
+        </details>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-500 text-sm">
+            <p>RustChain Bounty #38 | Built with ❤️ for the vintage hardware community</p>
+            <p class="mt-1">Payout Address: <code class="text-emerald-400 text-xs">0x4304329306B8Ab663888705818A0baAA8297f1E9</code></p>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        const REFRESH_INTERVAL = 60000;
+        let countdown = 60;
+
+        async function fetchJSON(endpoint) {
+            try {
+                const resp = await fetch(`${API_BASE}${endpoint}`, { 
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                return await resp.json();
+            } catch (e) {
+                console.warn(`Failed to fetch ${endpoint}:`, e);
+                return null;
+            }
+        }
+
+        function formatTimestamp(ts) {
+            if (!ts) return '--';
+            const d = new Date(ts * 1000);
+            return d.toLocaleTimeString();
+        }
+
+        function formatDuration(ms) {
+            if (!ms) return '--';
+            const s = Math.floor(ms / 1000);
+            const m = Math.floor(s / 60);
+            const h = Math.floor(m / 60);
+            if (h > 0) return `${h}h ${m % 60}m`;
+            if (m > 0) return `${m}m ${s % 60}s`;
+            return `${s}s`;
+        }
+
+        function countByArch(miners) {
+            const counts = {};
+            miners.forEach(m => {
+                const arch = m.arch || m.architecture || 'Unknown';
+                counts[arch] = (counts[arch] || 0) + 1;
+            });
+            return counts;
+        }
+
+        async function fetchHealth() {
+            const data = await fetchJSON('/health');
+            const nodesList = document.getElementById('nodes-list');
+            const nodeCount = document.getElementById('node-count');
+            const nodeStatusSummary = document.getElementById('node-status-summary');
+            
+            if (!data) {
+                nodesList.innerHTML = '<div class="text-red-400 text-center py-8">⚠️ Failed to load node data</div>';
+                nodeCount.textContent = '?';
+                return;
+            }
+
+            const nodes = data.nodes || data.attestors || [];
+            const online = nodes.filter(n => n.status === 'online' || n.status === 'active' || n.online).length;
+            
+            nodeCount.textContent = `${online}/${nodes.length}`;
+            nodeStatusSummary.textContent = nodes.length > 0 ? (online === nodes.length ? 'All online' : `${nodes.length - online} offline`) : '';
+
+            nodesList.innerHTML = nodes.map(node => {
+                const isOnline = node.status === 'online' || node.status === 'active' || node.online;
+                const statusClass = isOnline ? 'status-online bg-emerald-500' : 'status-offline bg-red-500';
+                const statusText = isOnline ? 'Online' : 'Offline';
+                const name = node.name || node.id || node.pubkey?.slice(0, 8) || 'Node';
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full ${statusClass}"></div>
+                            <span class="font-mono text-sm">${name}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="${isOnline ? 'text-emerald-400' : 'text-red-400'} text-sm font-medium">${statusText}</span>
+                            ${node.last_seen ? `<div class="text-xs text-gray-500">Last: ${formatTimestamp(node.last_seen)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchMiners() {
+            const data = await fetchJSON('/api/miners');
+            const minerCount = document.getElementById('miner-count');
+            const minerDetail = document.getElementById('miner-detail');
+            const minersTable = document.getElementById('miners-table');
+            const archBreakdown = document.getElementById('arch-breakdown');
+            
+            if (!data) {
+                minerCount.textContent = '?';
+                minersTable.innerHTML = '<tr><td colspan="3" class="py-4 text-center text-red-400">Failed to load miner data</td></tr>';
+                return;
+            }
+
+            const miners = data.miners || data.active_miners || data.data || [];
+            minerCount.textContent = miners.length || '--';
+            
+            const archCounts = countByArch(miners);
+            const topArch = Object.entries(archCounts).sort((a, b) => b[1] - a[1])[0];
+            minerDetail.textContent = topArch ? `${topArch[0]}: ${topArch[1]}` : '';
+
+            // Miner table
+            const totalMiners = miners.length || 1;
+            minersTable.innerHTML = Object.entries(archCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([arch, count]) => `
+                    <tr class="border-b border-gray-700/50">
+                        <td class="py-3 pr-4"><span class="arch-badge bg-emerald-900 text-emerald-300">${arch}</span></td>
+                        <td class="py-3 pr-4 font-bold">${count}</td>
+                        <td class="py-3">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: ${(count / totalMiners * 100).toFixed(1)}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+            // Architecture breakdown chart
+            const colors = ['bg-emerald-500', 'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-red-500', 'bg-cyan-500'];
+            archBreakdown.innerHTML = Object.entries(archCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([arch, count], i) => `
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 ${colors[i % colors.length]} rounded"></div>
+                        <span class="flex-1 text-sm">${arch}</span>
+                        <span class="text-sm font-bold">${count}</span>
+                        <span class="text-xs text-gray-500 w-12 text-right">${(count / totalMiners * 100).toFixed(0)}%</span>
+                    </div>
+                `).join('');
+        }
+
+        async function fetchEpoch() {
+            const data = await fetchJSON('/epoch');
+            const epochNumber = document.getElementById('epoch-number');
+            const epochTime = document.getElementById('epoch-time');
+            const epochProgress = document.getElementById('epoch-progress');
+            const epochStart = document.getElementById('epoch-start');
+            const epochEnd = document.getElementById('epoch-end');
+            
+            if (!data) {
+                epochNumber.textContent = '?';
+                return;
+            }
+
+            epochNumber.textContent = data.epoch || data.number || data.current_epoch || '--';
+            epochTime.textContent = data.remaining ? `⏱ ${formatDuration(data.remaining)} remaining` : '';
+
+            if (data.start_time && data.end_time) {
+                epochStart.textContent = formatTimestamp(data.start_time);
+                epochEnd.textContent = formatTimestamp(data.end_time);
+                const progress = data.progress || 0;
+                epochProgress.style.width = `${progress}%`;
+            }
+        }
+
+        async function updateRawData() {
+            const [health, miners, epoch] = await Promise.all([
+                fetchJSON('/health'),
+                fetchJSON('/api/miners'),
+                fetchJSON('/epoch')
+            ]);
+            document.getElementById('raw-data').textContent = JSON.stringify({ health, miners, epoch }, null, 2);
+        }
+
+        async function refresh() {
+            await Promise.all([fetchHealth(), fetchMiners(), fetchEpoch()]);
+            updateRawData();
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            countdown = 60;
+        }
+
+        function startCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            setInterval(() => {
+                countdown--;
+                countdownEl.textContent = countdown;
+                if (countdown <= 0) {
+                    countdown = 60;
+                    refresh();
+                }
+            }, 1000);
+        }
+
+        // Initialize
+        refresh();
+        startCountdown();
+    </script>
+</body>
+</html>
