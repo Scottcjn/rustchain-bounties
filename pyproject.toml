@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain"
+version = "0.1.0"
+description = "Python SDK for RustChain node API — Proof-of-Antiquity blockchain"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Scottcjn", email = "scottcjn@rustchain.org"}
+]
+keywords = ["rustchain", "blockchain", "proof-of-antiquity", "mining", "rtc"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "requests>=2.28.0",
+    "typing-extensions>=4.5.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.24.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Scottcjn/rustchain-bounties"
+Repository = "https://github.com/Scottcjn/rustchain-bounties"
+Documentation = "https://github.com/Scottcjn/rustchain-bounties#readme"
+"Bounty Issue" = "https://github.com/Scottcjn/rustchain-bounties/issues/36"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

@@ -1,107 +1,202 @@
-<div align="center">
+# RustChain Python SDK
 
-# RustChain Bounties
+> Python SDK for the [RustChain](https://github.com/Scottcjn/Rustchain) Proof-of-Antiquity blockchain node API.
+> Bounty issue: [#36 – RustChain Python SDK](https://github.com/Scottcjn/rustchain-bounties/issues/36)
 
-### Earn RTC by contributing to the RustChain ecosystem
+## Install
 
-[![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=open%20bounties&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
+```bash
+# Install from GitHub (recommended for latest version)
+pip install git+https://github.com/Scottcjn/rustchain-bounties.git
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+# Or clone and install locally
+git clone https://github.com/Scottcjn/rustchain-bounties.git
+cd rustchain-bounties
+pip install -e .
+```
 
-[![Total Paid](https://img.shields.io/badge/Total%20Paid-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
+## Quick Start
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+```python
+from rustchain import RustChainClient
 
-</div>
+# Connect to the public RustChain node
+# (SSL verification disabled for self-signed certificates)
+client = RustChainClient(
+    base_url="https://rustchain.org",
+    verify_ssl=False,
+)
 
----
+# Check node health
+health = client.health()
+print(f"Node OK: {health.ok}, version: {health.version}")
+print(f"Uptime: {health.uptime_s}s, DB writable: {health.db_rw}")
 
-## What is RTC?
+# Get current epoch
+epoch = client.get_epoch()
+print(f"Epoch {epoch.epoch}, slot {epoch.slot}/{epoch.blocks_per_epoch}")
+print(f"Pot: {epoch.epoch_pot} RTC  |  Enrolled miners: {epoch.enrolled_miners}")
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
+# List active miners
+miners = client.get_miners()
+for m in miners:
+    print(f"  {m.miner[:30]:<30} {m.hardware_type:<30} mult={m.antiquity_multiplier}x")
 
-Bounties are paid in RTC to your wallet address upon completion and verification.
+# Check wallet balance
+bal = client.get_balance("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC")
+print(f"Balance: {bal.amount_rtc} RTC")
 
-## How to Earn
+# Check lottery eligibility
+le = client.get_lottery_eligibility("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC")
+print(f"Eligible: {le.eligible}, reason: {le.reason}")
+print(f"Rotation size: {le.rotation_size} miners, slot: {le.slot}")
 
-### 1. Pick a Bounty
-Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) and find one that matches your skills.
+# View transfer history
+history = client.get_wallet_history("eafc6f14eab6d5c5362fe651e5e6c23581892a37RTC", limit=10)
+for tx in history:
+    print(f"  {tx.direction} {tx.amount_rtc} RTC → {tx.counterparty} [{tx.status}]")
 
-| Difficulty | Label | Typical Reward |
-|-----------|-------|---------------|
-| Beginner | `good first issue` | 1-5 RTC |
-| Standard | `standard` | 5-25 RTC |
-| Major | `major` | 25-100 RTC |
-| Critical | `critical`, `red-team` | 100-200 RTC |
+client.close()  # or use `with` block
+```
 
-### 2. Claim It
-Comment on the issue: **"I would like to work on this"**
+## Attestation
 
-### 3. Submit Your Work
-- **Code bounties**: Open a PR to the relevant repo and link it in the issue
-- **Content bounties**: Post your content and link it in the issue
-- **Star/propagation bounties**: Follow the instructions in the issue
+```python
+from rustchain.models import Fingerprint
+from rustchain.exceptions import AttestationError
 
-### 4. Get Paid
-Once verified, RTC is sent to your wallet. First time? We will help you set one up.
+# Build hardware fingerprint from probe results
+fp = Fingerprint(
+    clock_skew={"value_ns": 1234, "drift_ppm": 12.3},
+    cache_timing={"l1_latency_ns": 1.2, "l2_latency_ns": 4.5},
+    simd_identity={"alv": True, "simd_width": 128},
+    thermal_entropy={"drift": 0.5, "sample_count": 100},
+    instruction_jitter={"jitter_ps": 10.0, "std_dev": 0.3},
+    behavioral_heuristics={"hypervisor": False, "container": False},
+)
 
-## Bounty Categories
+try:
+    result = client.submit_attestation(
+        miner_id="my-miner-id",
+        fingerprint=fp,
+        signature="<base64_ed25519_signature>",
+    )
+    print(f"Enrolled: {result.enrolled}, multiplier: {result.multiplier}x")
+    print(f"Next settlement slot: {result.next_settlement_slot}")
+except AttestationError as e:
+    print(f"Attestation failed: {e.code} — {e.check_failed}: {e.detail}")
+```
 
-| Category | Examples | Count |
-|----------|---------|-------|
-| **Community** | Star repos, share content, recruit contributors | 30+ |
-| **Code** | Bug fixes, features, integrations, tests | 40+ |
-| **Content** | Tutorials, articles, videos, documentation | 20+ |
-| **Red Team** | Security audits, penetration testing, exploit finding | 6 |
-| **Propagation** | Awesome-list PRs, social media, cross-posting | 15+ |
-| **Integration** | Bridge to new chains, exchange listings, DEX pools | 10+ |
+## Signed Transfer
 
-## Featured Bounties
+```python
+from rustchain.exceptions import TransferError, InsufficientBalanceError
 
-| Bounty | Reward | Difficulty |
-|--------|--------|-----------|
-| [RustChain to 500 Stars](https://github.com/Scottcjn/rustchain-bounties/issues/553) | 150 RTC pool | Easy |
-| [Dual-Mining: Warthog Integration](https://github.com/Scottcjn/rustchain-bounties/issues/550) | 25 RTC | Major |
-| [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
-| [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
-| [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
+try:
+    tx = client.signed_transfer(
+        from_address="RTCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        to_address="RTCbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        amount_rtc=1.0,
+        nonce=12345,           # must be incrementing per sender
+        public_key="<ed25519_public_key_hex>",
+        signature="<ed25519_signature_hex>",
+        memo="payment",
+        chain_id="rustchain-mainnet-v2",
+    )
+    print(f"Tx submitted: {tx.tx_hash}")
+    print(f"Verified: {tx.verified}, phase: {tx.phase}")
+    print(f"Confirmations in: {tx.confirms_in_hours}h")
+except InsufficientBalanceError as e:
+    print(f"Not enough RTC: have {e.available}, need {e.required}")
+except TransferError as e:
+    print(f"Transfer failed: {e.tx_hash}")
+```
 
-## Quick Links
+## Exception Handling
 
-| Resource | Link |
-|----------|------|
-| **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Block Explorer** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
-| **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
-| **Wallet Setup** | Comment on any bounty and we will help |
+```python
+from rustchain import RustChainClient
+from rustchain.exceptions import (
+    RustChainError,
+    NodeUnreachableError,
+    RateLimitError,
+    AttestationError,
+    TransferError,
+    MinerNotFoundError,
+    InvalidSignatureError,
+    InsufficientBalanceError,
+)
 
-## Stats
+client = RustChainClient(base_url="https://rustchain.org", verify_ssl=False)
 
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.10 USD
+try:
+    client.get_balance("non-existent-miner")
+except MinerNotFoundError as e:
+    print(f"Unknown miner: {e.miner_id}")
+except RateLimitError:
+    print("Slow down — rate limited")
+except NodeUnreachableError:
+    print("Node is down or unreachable")
+except RustChainError as e:
+    print(f"RustChain error {e.code}: {e}")
+```
 
----
+## Configuration Options
 
-<div align="center">
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `base_url` | `https://rustchain.org` | RustChain node base URL |
+| `verify_ssl` | `True` | Set `False` for self-signed certificates |
+| `timeout` | `30` | Request timeout in seconds |
+| `max_retries` | `5` | Max retry attempts for 5xx/429 errors |
 
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
+## SSL / Self-Signed Certificates
 
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
+Private nodes often use self-signed TLS certificates. Pass `verify_ssl=False` to disable verification:
 
-</div>
+```python
+client = RustChainClient(
+    base_url="https://50.28.86.131",
+    verify_ssl=False,
+)
+```
 
+For production, prefer installing the node's CA certificate system-wide instead of disabling verification.
 
----
+## Retry Behavior
 
-### Part of the Elyan Labs Ecosystem
+The SDK uses exponential back-off with jitter for transient failures (HTTP 429, 5xx). The default retry strategy:
 
-- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
-- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
-- [GitHub](https://github.com/Scottcjn)
+- **Total attempts**: 5
+- **Back-off factor**: 0.5s × (2 ^ attempt)
+- **Retried status codes**: 429, 500, 502, 503, 504
+
+## Supported Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `client.health()` | `GET /health` | Node health and version |
+| `client.get_epoch()` | `GET /epoch` | Current epoch details |
+| `client.get_miners()` | `GET /api/miners` | Active enrolled miners |
+| `client.get_balance(miner_id)` | `GET /wallet/balance` | Wallet RTC balance |
+| `client.get_wallet_history(miner_id)` | `GET /wallet/history` | Transfer history |
+| `client.get_lottery_eligibility(miner_id)` | `GET /lottery/eligibility` | Lottery eligibility |
+| `client.submit_attestation(...)` | `POST /attest/submit` | Hardware attestation |
+| `client.signed_transfer(...)` | `POST /wallet/transfer/signed` | Signed RTC transfer |
+
+## Running Tests
+
+```bash
+pip install pytest pytest-asyncio httpx
+pytest tests/ -v
+```
+
+## Wallet Address for Bounty Payout
+
+```
+0x4304329306B8Ab663888705818A0baAA8297f1E9
+```
+
+## License
+
+MIT
