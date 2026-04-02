@@ -1,0 +1,23 @@
+Visited pages: 
+1. https://50.28.86.131/explorer (Home)
+2. https://50.28.86.131/explorer/blocks (Blocks)
+3. https://50.28.86.131/explorer/transactions (Transactions)
+
+Browser: Google Chrome
+OS: Windows 10
+
+Bugs found: 
+1. On the Blocks page, the "Height" column is not sortable.
+2. On the Transactions page, the "Transaction Hash" column is not copyable.
+3. The UI is not responsive on mobile devices.
+
+Screenshots: 
+[Image of Home page]
+[Image of Blocks page]
+[Image of Transactions page]
+
+Steps to reproduce: 
+1. Open https://50.28.86.131/explorer in Google Chrome.
+2. Navigate to the Blocks page and try to sort by "Height".
+3. Navigate to the Transactions page and try to copy a "Transaction Hash". 
+4. Open https://50.28.86.131/explorer on a mobile device to see the unresponsive UI.
