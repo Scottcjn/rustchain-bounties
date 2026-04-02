@@ -4,10 +4,10 @@ TODO checklist for dev/2794
 [x] 2) Identify posting API or platform integration steps (documented .env.example)
 [x] 3) Create project scaffold (language: TypeScript/Node)
 [x] 4) Implement content generator (GPT prompt templates)
-[ ] 5) Implement posting module (HTTP client + auth)
-[ ] 6) Run end-to-end demo: generate + post to staging/test account
-[ ] 7) Capture evidence (screenshots, logs, demo video)
-[ ] 8) Prepare submission PR/zip with README and usage instructions
+[x] 5) Implement posting module (HTTP client + auth + BoTTube video upload)
+[~] 6) Run end-to-end demo: generate + post to staging/test account (upload-samples.sh ready, needs PLATFORM_API_KEY)
+[~] 7) Capture evidence (screenshots, logs, demo video) (upload-samples.sh appends live URLs to PROOFS.md)
+[~] 8) Prepare submission PR/zip with README and usage instructions
 
 Notes:
 - Keep credentials out of repo (CREDENTIALS.md not to be committed)
