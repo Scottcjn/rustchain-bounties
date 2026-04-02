@@ -19,14 +19,14 @@ Proofs and tracking
 
 #2795 Complete Profile + Follow 3 Creators
 - Status: claimed (comment posted)
-- Proof: TBD (profile URL, screenshots)
+- Proof: comment https://github.com/Scottcjn/rustchain-bounties/issues/2795#issuecomment-4179421579
 
 #2796 Start Discussion Thread Under Video
 - Status: claimed (comment posted)
-- Proof: TBD (discussion link)
+- Proof: comment https://github.com/Scottcjn/rustchain-bounties/issues/2796#issuecomment-4179421931
 
 #2798 Share Video on Social Media with Context
 - Status: claimed (comment posted)
-- Proof: TBD (post link)
+- Proof: demo dry-run (web3 post) — dry-run id: dry-mnhrhalo
 
 Notes: updated proofs and PR link. Will attach logs/screenshots to this file if requested.
