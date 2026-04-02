@@ -1,0 +1,137 @@
+```javascript
+// manifest.json
+{
+  "manifest_version": 3,
+  "name": "BoTTube",
+  "version": "1.0",
+  "description": "BoTTube Chrome Extension",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon48.png"
+  },
+  "permissions": ["activeTab", "https://bottube.ai/api/*"]
+}
+
+// background.js
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.storage.local.set({ apiKey: "" });
+});
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.action === "getApiKey") {
+    chrome.storage.local.get("apiKey", function (result) {
+      sendResponse({ apiKey: result.apiKey });
+    });
+  } else if (request.action === "setApiKey") {
+    chrome.storage.local.set({ apiKey: request.apiKey });
+  }
+});
+
+// popup.js
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("search-input");
+  const searchButton = document.getElementById("search-button");
+  const videoList = document.getElementById("video-list");
+
+  searchButton.addEventListener("click", function () {
+    const searchQuery = searchInput.value;
+    fetch(`https://bottube.ai/api/search?q=${searchQuery}`)
+      .then(response => response.json())
+      .then(data => {
+        videoList.innerHTML = "";
+        data.videos.forEach(video => {
+          const videoElement = document.createElement("div");
+          videoElement.innerHTML = `
+            <h2>${video.title}</h2>
+            <p>${video.description}</p>
+            <button class="vote-button" data-video-id="${video.id}">Vote</button>
+          `;
+          videoList.appendChild(videoElement);
+        });
+      });
+  });
+
+  videoList.addEventListener("click", function (event) {
+    if (event.target.classList.contains("vote-button")) {
+      const videoId = event.target.dataset.videoId;
+      chrome.runtime.sendMessage({ action: "getApiKey" }, function (response) {
+        const apiKey = response.apiKey;
+        fetch(`https://bottube.ai/api/videos/${videoId}/vote`, {
+          method: "POST",
+          headers: {
+            "X-API-Key": apiKey
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+          });
+      });
+    }
+  });
+});
+
+// popup.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BoTTube</title>
+    <style>
+      body {
+        width: 200px;
+        height: 100px;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BoTTube</h1>
+    <input id="search-input" type="text" placeholder="Search">
+    <button id="search-button">Search</button>
+    <div id="video-list"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>
+
+// settings.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BoTTube Settings</title>
+    <style>
+      body {
+        width: 200px;
+        height: 100px;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BoTTube Settings</h1>
+    <input id="api-key-input" type="text" placeholder="API Key">
+    <button id="save-api-key-button">Save</button>
+    <script src="settings.js"></script>
+  </body>
+</html>
+
+// settings.js
+document.addEventListener("DOMContentLoaded", function () {
+  const apiKeyInput = document.getElementById("api-key-input");
+  const saveApiKeyButton = document.getElementById("save-api-key-button");
+
+  saveApiKeyButton.addEventListener("click", function () {
+    const apiKey = apiKeyInput.value;
+    chrome.runtime.sendMessage({ action: "setApiKey", apiKey: apiKey });
+  });
+});
+```
