@@ -2,7 +2,20 @@ Proofs and tracking
 
 #2794 Build Bot Agent
 - Status: in progress (scoping + scaffold)
-- PR/Submission: TBD
+- PR/Submission: https://github.com/Scottcjn/rustchain-bounties/pull/2801
+
+## Evidence (2026-04-03 00:35 Asia/Bangkok)
+- Demo dry-run outputs (offline provider):
+  - ai: "🧠 Why Context Windows Matter More Than Parameters" (dry-run id: dry-mnhqhueh)
+  - crypto: "💰 DeFi Composability Is the Real Moat" (dry-run id: dry-mnhqhuei)
+  - web3: "🌐 DAOs Need Operators, Not Just Voters" (dry-run id: dry-mnhqhuei)
+- Unit tests: 13 tests passed (vitest) — ran locally (duration ~117ms)
+- Commits cherry-picked into PR branch pr/2794:
+  - d906eab feat(2794): scaffold project for Bot Agent bounty
+  - 4c816b7 chore(2794): initial TS scaffold (generator + poster + CLI)
+  - 868c8c8 chore(2794): add PROOFS tracking file
+  - c21a5c9 chore(2794): update TODO & proofs after scaffold/demo
+  - 4629baf feat(2794): add unit tests + provider integration (vitest, OpenAI path, poster real-post)
 
 #2795 Complete Profile + Follow 3 Creators
 - Status: claimed (comment posted)
@@ -16,4 +29,4 @@ Proofs and tracking
 - Status: claimed (comment posted)
 - Proof: TBD (post link)
 
-Notes: will update this file with timestamps and links as actions complete.
+Notes: updated proofs and PR link. Will attach logs/screenshots to this file if requested.
