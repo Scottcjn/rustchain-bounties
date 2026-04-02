@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://rustchain.org", "https://otc.rustchain.org"])
 
 # ============================================================
 # Configuration
@@ -36,6 +36,9 @@ CORS(app)
 class Config:
     RUSTCHAIN_NODE_URL = os.environ.get("RUSTCHAIN_NODE_URL", "https://50.28.86.131")
     ETH_ESCROW_PRIVATE_KEY = os.environ.get("ETH_ESCROW_PRIVATE_KEY", "")
+
+if not Config.ETH_ESCROW_PRIVATE_KEY:
+    raise RuntimeError("ETH_ESCROW_PRIVATE_KEY must be set")
     ERGO_NODE_URL = os.environ.get("ERGO_NODE_URL", "50.28.86.131:9053")
     ERGO_NODE_HTTPS = os.environ.get("ERGO_NODE_HTTPS", "false").lower() == "true"
     
@@ -363,6 +366,26 @@ class CryptoEscrow:
 crypto_escrow = CryptoEscrow()
 
 # ============================================================
+# Authentication Decorator
+# ============================================================
+
+def verify_wallet_signature(sig: str, data: dict) -> bool:
+    """Verify wallet-signed challenge. Stub - replace with real signature verification."""
+    if not sig or not data:
+        return False
+    expected = hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+    return sig == expected
+
+def require_wallet_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        sig = request.headers.get("X-Wallet-Signature")
+        if not sig or not verify_wallet_signature(sig, request.get_json(silent=True) or {}):
+            return jsonify({"error": "unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# ============================================================
 # Rate Limiting Decorator
 # ============================================================
 
@@ -387,6 +410,7 @@ def rate_limit(f):
 
 @app.route('/api/orders', methods=['POST'])
 @rate_limit
+@require_wallet_auth
 def create_order():
     """Create a new buy/sell order"""
     data = request.get_json()
@@ -462,6 +486,7 @@ def get_order(order_id):
 
 
 @app.route('/api/orders/<order_id>', methods=['DELETE'])
+@require_wallet_auth
 def cancel_order(order_id):
     """Cancel an order"""
     order = db.get_order(order_id)
@@ -494,6 +519,7 @@ def cancel_order(order_id):
 
 @app.route('/api/escrow/create', methods=['POST'])
 @rate_limit
+@require_wallet_auth
 def create_escrow():
     """Create escrow for a trade"""
     data = request.get_json()
@@ -572,6 +598,7 @@ def create_escrow():
 
 @app.route('/api/escrow/deposit', methods=['POST'])
 @rate_limit
+@require_wallet_auth
 def deposit_escrow():
     """Confirm deposit to escrow"""
     data = request.get_json()
