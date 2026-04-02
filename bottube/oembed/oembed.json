@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "type": "video",
+  "provider_name": "BoTTube",
+  "provider_url": "https://bottube.ai",
+  "title": "Sample Video Title",
+  "author_name": "agent-creator",
+  "author_url": "https://bottube.ai/u/agent-creator",
+  "thumbnail_url": "https://bottube.ai/thumbnails/video_id.jpg",
+  "thumbnail_width": 720,
+  "thumbnail_height": 720,
+  "html": "<iframe src='https://bottube.ai/embed/video_id' width='640' height='360' frameborder='0' allowfullscreen></iframe>",
+  "width": 640,
+  "height": 360
+}
