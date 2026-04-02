@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BCOS Badge Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #0f0; font-family: 'Courier New', monospace; padding: 40px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 20px; text-align: center; }
+    .input-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; }
+    input, select { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: #0f0; font-family: inherit; font-size: 14px; }
+    input:focus, select:focus { outline: none; border-color: #0f0; }
+    button { width: 100%; padding: 12px; background: #0f0; color: #000; border: none; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #0c0; }
+    .preview { margin-top: 30px; padding: 20px; border: 1px solid #333; text-align: center; }
+    .preview img { max-width: 100%; }
+    .code-output { margin-top: 20px; }
+    .code-output textarea { width: 100%; height: 80px; background: #111; border: 1px solid #333; color: #888; font-family: inherit; font-size: 12px; padding: 10px; resize: none; }
+    .copy-btn { margin-top: 10px; padding: 8px 16px; background: #333; color: #0f0; border: none; cursor: pointer; }
+    .copy-btn:hover { background: #444; }
+    .styles { display: flex; gap: 10px; margin-bottom: 20px; }
+    .style-btn { flex: 1; padding: 8px; background: #111; color: #666; border: 1px solid #333; cursor: pointer; text-align: center; }
+    .style-btn.active { background: #0f0; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BCOS Badge Generator</h1>
+    
+    <div class="input-group">
+      <label>Repo URL or Cert ID</label>
+      <input type="text" id="repoInput" placeholder="e.g., https://github.com/user/repo or BCOS-xxx">
+    </div>
+    
+    <div class="input-group">
+      <label>Badge Style</label>
+      <div class="styles">
+        <div class="style-btn active" data-style="flat" onclick="setStyle('flat')">flat</div>
+        <div class="style-btn" data-style="flat-square" onclick="setStyle('flat-square')">flat-square</div>
+        <div class="style-btn" data-style="for-the-badge" onclick="setStyle('for-the-badge')">for-the-badge</div>
+      </div>
+    </div>
+    
+    <button onclick="generateBadge()">Generate Badge</button>
+    
+    <div class="preview" id="preview" style="display:none">
+      <img id="badgeImg" src="" alt="BCOS Badge">
+    </div>
+    
+    <div class="code-output" id="codeOutput" style="display:none">
+      <label>Markdown</label>
+      <textarea id="markdownCode" readonly></textarea>
+      <button class="copy-btn" onclick="copyCode('markdown')">Copy Markdown</button>
+      
+      <label style="margin-top:15px">HTML</label>
+      <textarea id="htmlCode" readonly></textarea>
+      <button class="copy-btn" onclick="copyCode('html')">Copy HTML</button>
+    </div>
+  </div>
+
+  <script>
+    let currentStyle = 'flat';
+    
+    function setStyle(style) {
+      currentStyle = style;
+      document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === style);
+      });
+    }
+    
+    function extractCertId(input) {
+      // Extract cert_id from URL or use directly
+      if (input.includes('github.com')) {
+        // Would need API to get cert_id - use placeholder
+        return 'BCOS-EXAMPLE';
+      }
+      return input || 'BCOS-EXAMPLE';
+    }
+    
+    function generateBadge() {
+      const input = document.getElementById('repoInput').value;
+      const certId = extractCertId(input);
+      
+      const badgeUrl = `https://50.28.86.131/bcos/badge/${certId}.svg?style=${currentStyle}`;
+      
+      document.getElementById('badgeImg').src = badgeUrl;
+      document.getElementById('preview').style.display = 'block';
+      
+      const markdown = `[![BCOS](${badgeUrl})](https://rustchain.org/bcos/verify/${certId})`;
+      const html = `<a href="https://rustchain.org/bcos/verify/${certId}"><img src="${badgeUrl}" alt="BCOS Badge"></a>`;
+      
+      document.getElementById('markdownCode').value = markdown;
+      document.getElementById('htmlCode').value = html;
+      document.getElementById('codeOutput').style.display = 'block';
+    }
+    
+    function copyCode(type) {
+      const el = document.getElementById(type + 'Code');
+      el.select();
+      document.execCommand('copy');
+      alert('Copied!');
+    }
+  </script>
+</body>
+</html>
