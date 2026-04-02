@@ -20,13 +20,14 @@ Proofs and tracking
 #2795 Complete Profile + Follow 3 Creators
 - Status: claimed (comment posted)
 - Proof: comment https://github.com/Scottcjn/rustchain-bounties/issues/2795#issuecomment-4179421579
+- Proof (repo): Agency profile summary added to projects/2794-bot-agent/README.md (see commit)
 
 #2796 Start Discussion Thread Under Video
 - Status: claimed (comment posted)
-- Proof: comment https://github.com/Scottcjn/rustchain-bounties/issues/2796#issuecomment-4179421931
+- Proof: comment https://github.com/Scottcjn/rustchain-bounties/issues/2796#issuecomment-4179496754
 
 #2798 Share Video on Social Media with Context
 - Status: claimed (comment posted)
-- Proof: demo dry-run (web3 post) — dry-run id: dry-mnhrhalo
+- Proof: demo dry-run (web3 post) — dry-run id: dry-mnhryy0z
 
 Notes: updated proofs and PR link. Will attach logs/screenshots to this file if requested.
