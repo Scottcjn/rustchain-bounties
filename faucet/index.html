@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>RustChain Testnet Faucet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #0f0; font-family: monospace; padding: 40px; }
+    .container { max-width: 500px; margin: 0 auto; text-align: center; }
+    h1 { font-size: 28px; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 30px; }
+    input { width: 100%; padding: 15px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: #fff; font-size: 16px; }
+    input:focus { border-color: #0f0; outline: none; }
+    button { width: 100%; padding: 15px; background: #0f0; color: #000; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #0c0; }
+    button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .result { margin-top: 20px; padding: 15px; border: 1px solid #333; display: none; }
+    .success { border-color: #0f0; }
+    .error { border-color: #f00; color: #f00; }
+    .info { margin-top: 20px; color: #666; font-size: 14px; }
+    .github-btn { margin-bottom: 15px; padding: 10px; background: #333; color: #fff; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RustChain Faucet</h1>
+    <p class="subtitle">Get free test RTC for development</p>
+    
+    <button class="github-btn" onclick="loginWithGitHub()">Login with GitHub</button>
+    
+    <input type="text" id="wallet" placeholder="Enter your RTC wallet address (RTC...)">
+    
+    <button onclick="requestTokens()" id="requestBtn">Request 1 Test RTC</button>
+    
+    <div class="result" id="result"></div>
+    
+    <div class="info">
+      <p>Rate limit: 1 request per GitHub account per 24 hours</p>
+      <p>Testnet only - not real RTC</p>
+    </div>
+  </div>
+
+  <script>
+    let githubUser = null;
+    
+    function loginWithGitHub() {
+      // OAuth would go here - for demo, simulate
+      githubUser = 'demo_user';
+      alert('GitHub login simulated (implement OAuth for production)');
+    }
+    
+    async function requestTokens() {
+      const wallet = document.getElementById('wallet').value;
+      const btn = document.getElementById('requestBtn');
+      const result = document.getElementById('result');
+      
+      if (!wallet.startsWith('RTC')) {
+        result.className = 'result error';
+        result.style.display = 'block';
+        result.textContent = 'Invalid wallet address';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = 'Requesting...';
+      
+      // Simulate API call
+      setTimeout(() => {
+        result.className = 'result success';
+        result.style.display = 'block';
+        result.innerHTML = `
+          <p>✅ Success!</p>
+          <p>Sent 1 test RTC to ${wallet}</p>
+          <p>TX: abc123... (mock)</p>
+        `;
+        btn.textContent = 'Requested';
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
