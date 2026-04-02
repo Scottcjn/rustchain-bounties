@@ -1,0 +1,11 @@
+No code is required for this task as it involves testing and reporting results. However, to follow the format and provide a concise answer:
+
+```bash
+# Install the miner
+pip install clawrtc
+
+# Run a dry-run test
+clawrtc mine --dry-run
+
+# Copy the output and post it as a comment with the required information
+```
