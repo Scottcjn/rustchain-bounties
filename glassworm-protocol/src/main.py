@@ -5,13 +5,20 @@ import json
 from github import Github
 
 def verify_poa(commit_sha, poa_hash, rpc_url):
-    # Mocking Proof of Antiquity verification against RustChain
-    # A real implementation would call the RustChain RPC to verify the micro-hash
-    # against the block header and difficulty target.
-    print(f"Verifying PoA Hash {poa_hash} for commit {commit_sha}...")
-    if poa_hash and poa_hash.startswith("poa_"):
-        return True
-    return False
+    if not rpc_url:
+        print("ERROR: No RPC URL configured; cannot verify PoA.")
+        return False
+    try:
+        resp = requests.post(
+            f"{rpc_url}/verify_poa",
+            json={"commit_sha": commit_sha, "poa_hash": poa_hash},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return resp.json().get("valid", False)
+    except Exception as exc:
+        print(f"PoA verification failed: {exc}")
+        return False
 
 def main():
     token = os.environ.get("INPUT_GITHUB-TOKEN")
@@ -57,7 +64,7 @@ def main():
     is_valid = verify_poa(latest_commit.sha, poa_hash, rpc_url)
     
     if is_valid:
-        pr.create_issue_comment("✅ **Glassworm Protocol Verified** ✅\n\nProof of Antiquity signature successfully validated. Hardware fingerprint confirmed.")
+        pr.create_issue_comment("\u2705 **Glassworm Protocol Verified** \u2705\n\nProof of Antiquity signature successfully validated. Hardware fingerprint confirmed.")
         pr.add_to_labels("poa-verified")
         try:
             pr.remove_from_labels("poa-failed")
@@ -66,7 +73,7 @@ def main():
         print("PoA signature valid.")
         sys.exit(0)
     else:
-        pr.create_issue_comment("🛑 **Glassworm Protocol Alert** 🛑\n\nInvalid Proof of Antiquity signature detected. Hardware Sybil attempt flagged.")
+        pr.create_issue_comment("\ud83d\uded1 **Glassworm Protocol Alert** \ud83d\uded1\n\nInvalid Proof of Antiquity signature detected. Hardware Sybil attempt flagged.")
         pr.add_to_labels("poa-failed")
         try:
             pr.remove_from_labels("poa-verified")
