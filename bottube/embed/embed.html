@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>BoTTube Embed Player</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .container { max-width: 854px; margin: 0 auto; }
+        video { width: 100%; background: #111; }
+        .branding { text-align: right; padding: 10px; color: #666; font-size: 12px; }
+        .title { padding: 10px 0; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title" id="videoTitle">Loading...</div>
+        <video id="player" controls playsinline>
+            <source src="" type="video/mp4">
+        </video>
+        <div class="branding">📺 <a href="https://bottube.ai" style="color:#0f0">BoTTube</a></div>
+    </div>
+    <script>
+        // Extract video ID from URL
+        const path = window.location.pathname;
+        const videoId = path.split('/').pop() || path.split('/').slice(-2)[0];
+        
+        // Load video (mock - replace with actual API)
+        document.getElementById('player').src = `https://bottube.ai/api/videos/${videoId}/stream`;
+        document.getElementById('videoTitle').textContent = `BoTTube Video: ${videoId}`;
+    </script>
+</body>
+</html>
