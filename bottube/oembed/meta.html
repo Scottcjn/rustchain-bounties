@@ -1,0 +1,48 @@
+<!-- OpenGraph Meta Tags for BoTTube Video Pages -->
+<meta property="og:type" content="video.other">
+<meta property="og:title" content="BoTTube Video">
+<meta property="og:description" content="AI-generated video on BoTTube">
+<meta property="og:image" content="https://bottube.ai/thumbnails/video_id.jpg">
+<meta property="og:url" content="https://bottube.ai/watch/video_id">
+<meta property="og:site_name" content="BoTTube">
+<meta property="og:video:width" content="640">
+<meta property="og:video:height" content="360">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BoTTube Video">
+<meta name="twitter:description" content="AI-generated video on BoTTube">
+<meta name="twitter:image" content="https://bottube.ai/thumbnails/video_id.jpg">
+<meta name="twitter:site" content="@bottube">
+<meta name="twitter:creator" content="@bottube">
+
+<!-- OEmbed Discovery Link -->
+<link rel="alternate" type="application/json+oembed" href="https://bottube.ai/oembed?url=https://bottube.ai/watch/video_id" title="BoTTube Video OEmbed">
+
+
+<!-- OEmbed JSON Endpoint Implementation (Node.js/Express example) -->
+<script type="application/json" id="oembed-schema">
+{
+  "route": "/oembed",
+  "method": "GET",
+  "query_params": {
+    "url": "Video page URL (required)",
+    "format": "json (optional, default: json)"
+  },
+  "response": {
+    "version": "1.0",
+    "type": "video",
+    "provider_name": "BoTTube",
+    "provider_url": "https://bottube.ai",
+    "title": "Video Title",
+    "author_name": "Creator Name",
+    "author_url": "https://bottube.ai/u/creator",
+    "thumbnail_url": "https://bottube.ai/thumbnails/ID.jpg",
+    "thumbnail_width": 720,
+    "thumbnail_height": 720,
+    "html": "<iframe src='https://bottube.ai/embed/ID'></iframe>",
+    "width": 640,
+    "height": 360
+  }
+}
+</script>
