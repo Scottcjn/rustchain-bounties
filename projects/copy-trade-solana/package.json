@@ -5,6 +5,7 @@
   "scripts": {
     "start": "ts-node src/index.ts start",
     "demo": "ts-node src/index.ts demo",
+    "demo:devnet": "ts-node src/demo-run.ts",
     "test": "jest --forceExit"
   },
   "dependencies": {

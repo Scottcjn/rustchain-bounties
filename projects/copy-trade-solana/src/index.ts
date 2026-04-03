@@ -112,8 +112,9 @@ async function start() {
       break;
     default:
       console.log("Usage: ts-node src/index.ts <demo|start>");
-      console.log("  demo  — dry-run with simulated trade (no keys needed)");
-      console.log("  start — live mode (requires .env with RPC_URL, SOURCE_PUBKEY, KEYPAIR_PATH)");
+      console.log("  demo        — dry-run with simulated trade (no keys needed)");
+      console.log("  start       — live mode (requires .env with RPC_URL, SOURCE_PUBKEY, KEYPAIR_PATH)");
+      console.log("\nSee also: npm run demo:devnet — sprint-2 end-to-end devnet demo");
       process.exit(1);
   }
 })();
