@@ -1,0 +1,73 @@
+# RustChain Theme Song - "Proof of Antiquity"
+
+**Genre**: Sea Shanty / Folk
+**Duration**: ~2 minutes
+
+---
+
+## Lyrics
+
+### Verse 1
+```
+In the age of ASICs and GPU farms,
+Where the mighty miners do arm,
+There's a chain where the old ways rule,
+Proof of Antiquity, hardware's cool!
+
+Oh, RTC, the coin of the sea,
+Mining on PowerPC and old CPU!
+One CPU, one vote we say,
+Ancient hardware leads the way!
+```
+
+### Chorus
+```
+Hoist the flag, let the G4s roar!
+Vintage hardware's what we're mining for!
+N64 and G4 in the lead,
+Proof of Antiquity is our creed!
+```
+
+### Verse 2
+```
+From the Nintendo sixty-four,
+To the POWER8 and even more,
+The fingerprint says we're old and true,
+And the multiplier kicks in too!
+
+Clock drift and cache, can't be fake,
+Our silicon hearts will never break!
+```
+
+### Bridge
+```
+(8-bit instrumental break)
+
+G5, G4, they all unite,
+From the ancient days of computing night!
+```
+
+### Verse 3
+```
+Join the fleet on RustChain's sea,
+Miners from the vintage crew,
+No VC money, just code and heart,
+One CPU plays one part!
+
+(Repeat Chorus)
+
+---
+
+## How to Record
+
+1. Use a simple recording setup (phone, computer mic)
+2. Add sea shanty-style instrumentation:
+   - Acoustic guitar
+   - Fiddle/strings
+   - Drums
+   - Accordion
+3. Upload audio file + lyrics to rustchain-bounties
+
+## Files
+- `lyrics.txt` - Full lyrics
+- `README.md` - This file
