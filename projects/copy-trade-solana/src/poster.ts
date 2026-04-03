@@ -12,8 +12,8 @@ export async function postActivity(agent: string, event: string, detail: string)
       body: JSON.stringify({ agent, event, detail, cost_thb: 0, tokens: 0 }),
       timeout: 10000,
     });
-  } catch (e) {
-    console.warn('postActivity failed', e.message || e);
+  } catch (e: any) {
+    console.warn('postActivity failed', e?.message || e);
   }
 }
 
@@ -26,8 +26,8 @@ export async function postDiscordMessage(content: string) {
       body: JSON.stringify({ content }),
       timeout: 10000,
     });
-  } catch (e) {
-    console.warn('postDiscordMessage failed', e.message || e);
+  } catch (e: any) {
+    console.warn('postDiscordMessage failed', e?.message || e);
   }
 }
 
