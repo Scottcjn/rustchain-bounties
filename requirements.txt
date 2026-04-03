@@ -1,3 +1,4 @@
 prometheus_client==0.24.1
 requests==2.33.0
 tabulate==0.10.0
+pytest
