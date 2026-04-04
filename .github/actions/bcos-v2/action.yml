@@ -1,0 +1,103 @@
+name: 'BCOS v2 Action'
+description: 'Reusable GitHub Action for BCOS v2 integration'
+author: '巴斯 (AI Agent)'
+branding:
+  icon: 'cloud'
+  color: 'blue'
+
+inputs:
+  api-key:
+    description: 'BCOS API key for authentication'
+    required: true
+  endpoint:
+    description: 'BCOS endpoint URL'
+    required: true
+    default: 'https://api.bcos.dev/v2'
+  command:
+    description: 'Command to execute (deploy, verify, test)'
+    required: true
+    default: 'verify'
+  config-path:
+    description: 'Path to BCOS configuration file'
+    required: false
+    default: './bcos.json'
+  timeout:
+    description: 'Request timeout in seconds'
+    required: false
+    default: '300'
+
+outputs:
+  result:
+    description: 'Command execution result'
+  status:
+    description: 'Execution status (success/failure)'
+  timestamp:
+    description: 'Execution timestamp'
+  duration:
+    description: 'Execution duration in milliseconds'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup BCOS CLI
+      shell: bash
+      run: |
+        echo "Setting up BCOS v2 CLI..."
+        # Download and install BCOS CLI
+        curl -fsSL https://install.bcos.dev/v2 | bash
+        echo "$HOME/.bcos/bin" >> $GITHUB_PATH
+    
+    - name: Configure BCOS
+      shell: bash
+      run: |
+        echo "Configuring BCOS..."
+        bcos config set endpoint "${{ inputs.endpoint }}"
+        bcos config set api-key "${{ inputs.api-key }}"
+        
+        if [ -f "${{ inputs.config-path }}" ]; then
+          echo "Loading config from ${{ inputs.config-path }}"
+          bcos config load "${{ inputs.config-path }}"
+        fi
+    
+    - name: Execute Command
+      shell: bash
+      id: execute
+      run: |
+        echo "Executing: ${{ inputs.command }}"
+        START_TIME=$(date +%s%3N)
+        
+        # Execute the command with timeout
+        if timeout ${{ inputs.timeout }} bcos ${{ inputs.command }} --json > result.json 2>&1; then
+          STATUS="success"
+          echo "✅ Command executed successfully"
+        else
+          STATUS="failure"
+          echo "❌ Command failed"
+        fi
+        
+        END_TIME=$(date +%s%3N)
+        DURATION=$((END_TIME - START_TIME))
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        
+        # Set outputs
+        RESULT=$(cat result.json)
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+        echo "status=$STATUS" >> $GITHUB_OUTPUT
+        echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+        echo "duration=$DURATION" >> $GITHUB_OUTPUT
+        
+        # Print summary
+        echo "## BCOS v2 Execution Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Command**: ${{ inputs.command }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: $STATUS" >> $GITHUB_STEP_SUMMARY
+        echo "- **Duration**: ${DURATION}ms" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $TIMESTAMP" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "$STATUS" = "failure" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Error Output" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat result.json >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
