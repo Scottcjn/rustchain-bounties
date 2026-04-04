@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS Badge Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="terminal">
+        <div class="terminal-header">
+            <span class="terminal-title">BCOS Badge Generator v2.0</span>
+            <span class="terminal-controls">
+                <span class="control close"></span>
+                <span class="control min"></span>
+                <span class="control max"></span>
+            </span>
+        </div>
+        <div class="terminal-body">
+            <div class="ascii-art">
+<pre>
+  ██████╗ ██████╗ ██████╗ ███████╗
+ ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+ ██║     ██║   ██║██║  ██║█████╗
+ ██║     ██║   ██║██║  ██║██╔══╝
+ ╚██████╗╚██████╔╝██████╔╝███████╗
+  ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+  Beacon Certified Open Source
+</pre>
+            </div>
+
+            <div class="input-section">
+                <div class="prompt">&gt;_ Enter repo URL or cert_id:</div>
+                <div class="input-wrapper">
+                    <input type="text" id="certInput" placeholder="https://github.com/user/repo or BCOS-xxx" spellcheck="false">
+                    <button id="fetchBtn">[ FETCH ]</button>
+                </div>
+            </div>
+
+            <div id="errorMsg" class="error hidden"></div>
+            <div id="loading" class="loading hidden">
+                <span class="blink">&gt;</span> Connecting to rustchain.org API...
+            </div>
+
+            <div id="resultSection" class="result-section hidden">
+                <div class="status-line">
+                    <span class="status-ok">&gt; Certificate found:</span>
+                    <span id="certId" class="cert-id"></span>
+                </div>
+
+                <div class="score-display">
+                    <span class="label">TRUST SCORE:</span>
+                    <span id="trustScore" class="score"></span>
+                </div>
+
+                <div class="tier-display">
+                    <span class="label">TIER:</span>
+                    <span id="tierLevel" class="tier"></span>
+                </div>
+
+                <div class="preview-section">
+                    <div class="prompt">&gt;_ Badge Preview:</div>
+                    <div class="badge-styles">
+                        <div class="badge-option">
+                            <span class="style-label">flat</span>
+                            <img id="badgeFlat" class="badge-img" alt="BCOS Badge Flat">
+                        </div>
+                        <div class="badge-option">
+                            <span class="style-label">flat-square</span>
+                            <img id="badgeFlatSquare" class="badge-img" alt="BCOS Badge Flat Square">
+                        </div>
+                        <div class="badge-option">
+                            <span class="style-label">for-the-badge</span>
+                            <img id="badgeForTheBadge" class="badge-img" alt="BCOS Badge For The Badge">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="embed-section">
+                    <div class="prompt">&gt;_ Embed Code:</div>
+                    <div class="style-tabs">
+                        <button class="tab active" data-format="markdown">Markdown</button>
+                        <button class="tab" data-format="html">HTML</button>
+                    </div>
+                    <div class="embed-code-wrapper">
+                        <pre id="embedCode" class="embed-code"></pre>
+                        <button id="copyBtn" class="copy-btn">[ COPY ]</button>
+                    </div>
+                    <div id="copyMsg" class="copy-msg hidden">Copied to clipboard!</div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span>Powered by</span>
+                <a href="https://rustchain.org" target="_blank">rustchain.org</a>
+                <span>|</span>
+                <a href="https://github.com/scottcjn/rustchain-bounties/issues/2292" target="_blank">Issue #2292</a>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
