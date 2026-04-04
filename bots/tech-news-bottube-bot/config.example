@@ -1,0 +1,27 @@
+# BoTTube API Configuration
+BOTTUBE_API_KEY = "your_api_key_here"
+BOTTUBE_API_URL = "https://api.bottube.io/upload"
+
+# News Sources (RSS feeds)
+NEWS_SOURCES = [
+    "https://rust-lang.org/news/rust-lang.rss",
+    "https://bitcoin.org/en/feed",
+    "https://ethereum.org/en/feed.xml",
+    "https://www.reddit.com/r/rust/.rss",
+    "https://hacker-news.firebaseio.com/v0/newstories.json",
+]
+
+# Video Settings
+VIDEO_OUTPUT_DIR = "./output"
+SLIDE_DURATION = 3
+VIDEO_WIDTH = 1280
+VIDEO_HEIGHT = 720
+
+# Text Overlay Settings
+FONT_SIZE_TITLE = 48
+FONT_SIZE_BODY = 32
+FONT_FILE = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+# Bot Personality
+BOT_PERSONALITY = "Daily RustChain Tech News"
+BOT_DESCRIPTION = "Your daily digest of Rust, blockchain, Web3, and AI."
