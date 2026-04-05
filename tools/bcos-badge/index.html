@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS Badge Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preview {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .preview img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+        }
+        
+        .copy-btn {
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏅 BCOS Badge Generator</h1>
+        <p class="subtitle">Create beautiful badges for your BCOS v2 projects</p>
+        
+        <div class="form-group">
+            <label for="project">Project Name</label>
+            <input type="text" id="project" placeholder="my-awesome-project" value="my-project">
+        </div>
+        
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status">
+                <option value="validated">Validated</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+                <option value="scanning">Scanning</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="style">Badge Style</label>
+            <select id="style">
+                <option value="flat">Flat</option>
+                <option value="flat-square">Flat Square</option>
+                <option value="plastic">Plastic</option>
+                <option value="for-the-badge">For The Badge</option>
+            </select>
+        </div>
+        
+        <div class="preview">
+            <h3>Preview</h3>
+            <img id="badge-preview" src="" alt="Badge Preview">
+        </div>
+        
+        <button onclick="generateBadge()">Generate Badge</button>
+        
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode()">Copy</button>
+            <code id="badge-code">Select options and click Generate</code>
+        </div>
+    </div>
+
+    <script>
+        const statusColors = {
+            'validated': 'brightgreen',
+            'pending': 'yellow',
+            'failed': 'red',
+            'scanning': 'blue'
+        };
+        
+        const statusLabels = {
+            'validated': 'BCOS: validated',
+            'pending': 'BCOS: pending',
+            'failed': 'BCOS: failed',
+            'scanning': 'BCOS: scanning'
+        };
+        
+        function generateBadge() {
+            const project = document.getElementById('project').value || 'project';
+            const status = document.getElementById('status').value;
+            const style = document.getElementById('style').value;
+            
+            const color = statusColors[status];
+            const label = statusLabels[status];
+            
+            const badgeUrl = `https://img.shields.io/badge/${encodeURIComponent(label)}-${color}?style=${style}&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bS0yIDE1bC01LTUgMS40MS0xLjQxTDEwIDE0LjE3bDcuNTktNy41OUwxOSA4bC05IDl6IiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==`;
+            
+            document.getElementById('badge-preview').src = badgeUrl;
+            
+            const markdown = `![BCOS Status](${badgeUrl})`;
+            const html = `<img src="${badgeUrl}" alt="BCOS Status">`;
+            
+            document.getElementById('badge-code').textContent = `Markdown:\n${markdown}\n\nHTML:\n${html}`;
+        }
+        
+        function copyCode() {
+            const code = document.getElementById('badge-code').textContent;
+            navigator.clipboard.writeText(code);
+            alert('Copied to clipboard!');
+        }
+        
+        // Generate initial badge
+        generateBadge();
+    </script>
+</body>
+</html>
