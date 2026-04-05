@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS Badge Generator | RustChain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff41;
+            font-size: 1.8em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #00aa2a;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .generator-box {
+            background: #111;
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00cc33;
+            font-weight: bold;
+        }
+        
+        input[type="text"], 
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1em;
+            border-radius: 4px;
+        }
+        
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        
+        .style-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .style-option {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .style-option input[type="radio"] {
+            display: none;
+        }
+        
+        .style-option label {
+            display: block;
+            padding: 12px 20px;
+            background: #000;
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .style-option input[type="radio"]:checked + label {
+            background: #00ff41;
+            color: #000;
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        
+        .preview-label {
+            color: #00aa2a;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        .badge-preview {
+            text-align: center;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .badge-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .code-output {
+            margin-top: 20px;
+        }
+        
+        .code-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .code-box label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .copy-btn {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8em;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #00cc33;
+        }
+        
+        .copy-btn.copied {
+            background: #ffff00;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        
+        .status-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .status-valid {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+        }
+        
+        .status-invalid {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .status-loading {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            color: #ffff00;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.8em;
+        }
+        
+        .footer a {
+            color: #00ff41;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>▸ BCOS Badge Generator</h1>
+        <p class="subtitle">RustChain Certificate Verification Badges</p>
+        
+        <div class="generator-box">
+            <div class="input-group">
+                <label for="certId">Certificate ID (BCOS-xxx)</label>
+                <input type="text" id="certId" placeholder="BCOS-xxxx-xxxx-xxxx" autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label>Badge Style</label>
+                <div class="style-options">
+                    <div class="style-option">
+                        <input type="radio" name="style" id="flat" value="flat" checked>
+                        <label for="flat">Flat</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="style" id="flat-square" value="flat-square">
+                        <label for="flat-square">Flat Square</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="style" id="plastic" value="plastic">
+                        <label for="plastic">Plastic</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="style" id="for-the-badge" value="for-the-badge">
+                        <label for="for-the-badge">For The Badge</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="status">Status (optional)</label>
+                <div class="style-options">
+                    <div class="style-option">
+                        <input type="radio" name="status" id="valid" value="valid" checked>
+                        <label for="valid">✓ Validated</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="status" id="pending" value="pending">
+                        <label for="pending">◐ Pending</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="status" id="failed" value="failed">
+                        <label for="failed">✗ Failed</label>
+                    </div>
+                    <div class="style-option">
+                        <input type="radio" name="status" id="scanning" value="scanning">
+                        <label for="scanning">⟳ Scanning</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <p class="preview-label">▸ Badge Preview</p>
+                <div class="badge-preview" id="badgePreview">
+                    <img id="badgeImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='32'%3E%3Crect fill='%23000' width='128' height='32' rx='4'/%3E%3Ctext x='64' y='20' fill='%2300ff41' font-family='monospace' font-size='12' text-anchor='middle'%3EBCOS%3C/text%3E%3C/svg%3E" alt="BCOS Badge Preview">
+                </div>
+                
+                <div class="status-section" id="statusSection">
+                    <span id="statusText">Enter a Certificate ID to verify</span>
+                </div>
+            </div>
+            
+            <div class="code-output">
+                <div class="code-box">
+                    <label>
+                        <span>Markdown</span>
+                        <button class="copy-btn" onclick="copyToClipboard('markdownCode', this)">Copy</button>
+                    </label>
+                    <textarea id="markdownCode" readonly></textarea>
+                </div>
+                
+                <div class="code-box">
+                    <label>
+                        <span>HTML</span>
+                        <button class="copy-btn" onclick="copyToClipboard('htmlCode', this)">Copy</button>
+                    </label>
+                    <textarea id="htmlCode" readonly></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by <a href="https://rustchain.org">RustChain</a> | 
+            <a href="https://rustchain.org/bcos/">BCOS Verification</a></p>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        const BADGE_COLORS = {
+            'valid': { bg: '#2ea44f', text: '#ffffff' },
+            'pending': { bg: '#f0c14b', text: '#000000' },
+            'failed': { bg: '#cb2431', text: '#ffffff' },
+            'scanning': { bg: '#6f42c1', text: '#ffffff' }
+        };
+        const STYLE_CLASSES = {
+            'flat': '',
+            'flat-square': 'flat-square',
+            'plastic': 'plastic',
+            'for-the-badge': 'for-the-badge'
+        };
+        
+        const certIdInput = document.getElementById('certId');
+        const badgeImage = document.getElementById('badgeImage');
+        const markdownCode = document.getElementById('markdownCode');
+        const htmlCode = document.getElementById('htmlCode');
+        const statusSection = document.getElementById('statusSection');
+        const statusText = document.getElementById('statusText');
+        
+        function getBadgeUrl(certId, style, status) {
+            const encodedCertId = encodeURIComponent(certId);
+            const color = BADGE_COLORS[status];
+            const styleClass = STYLE_CLASSES[style];
+            
+            // Generate SVG badge inline
+            const svg = generateSvgBadge(certId, style, status, color);
+            return 'data:image/svg+xml,' + encodeURIComponent(svg);
+        }
+        
+        function generateSvgBadge(certId, style, status, color) {
+            const borderRadius = style === 'for-the-badge' ? '0' : 
+                                style === 'flat-square' ? '0' : '4';
+            const padding = style === 'for-the-badge' ? '6px 12px' : '5px 10px';
+            const fontSize = style === 'for-the-badge' ? '14' : '12';
+            
+            return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="140" height="32">
+  <defs>
+    <linearGradient id="s" x2="0" y2="100%">
+      <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+      <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <filter id="f"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity=".3"/></filter>
+  </defs>
+  <clipPath id="r"><rect width="140" height="32" rx="${borderRadius}"/></clipPath>
+  <g clip-path="url(#r)">
+    <rect width="140" height="32" fill="${color.bg}"/>
+    <rect x="70" width="70" height="32" fill="#555"/>
+    <path d="M70 0h70v32H70z" fill="url(#s)"/>
+    <rect width="70" height="32" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,sans-serif" text-rendering="geometricPrecision" font-size="${fontSize}">
+    <text x="35" y="20" fill="${color.text}" font-weight="bold">BCOS</text>
+    <text x="105" y="20" fill="#fff" font-size="${parseInt(fontSize)-2}">${status}</text>
+  </g>
+</svg>`;
+        }
+        
+        function updateBadge() {
+            const certId = certIdInput.value.trim().toUpperCase();
+            const style = document.querySelector('input[name="style"]:checked').value;
+            const status = document.querySelector('input[name="status"]:checked').value;
+            
+            if (!certId) {
+                badgeImage.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="32"%3E%3Crect fill="%23000" width="128" height="32" rx="4"/%3E%3Ctext x="64" y="20" fill="%23666" font-family="monospace" font-size="12" text-anchor="middle"%3EEnter ID%3C/text%3E%3C/svg%3E';
+                markdownCode.value = '';
+                htmlCode.value = '';
+                statusSection.className = 'status-section';
+                statusText.textContent = 'Enter a Certificate ID to verify';
+                return;
+            }
+            
+            const badgeUrl = getBadgeUrl(certId, style, status);
+            badgeImage.src = badgeUrl;
+            
+            const badgeLink = `https://rustchain.org/bcos/verify/${certId}`;
+            const badgeSvg = `https://50.28.86.131/bcos/badge/${certId}.svg`;
+            
+            const markdown = `[![BCOS](${badgeSvg})](${badgeLink})`;
+            const html = `<a href="${badgeLink}"><img src="${badgeSvg}" alt="BCOS Badge"></a>`;
+            
+            markdownCode.value = markdown;
+            htmlCode.value = html;
+            
+            // Verify with API
+            verifyCert(certId);
+        }
+        
+        async function verifyCert(certId) {
+            statusSection.className = 'status-section status-loading';
+            statusText.textContent = 'Verifying';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bcos/verify/${certId}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusSection.className = 'status-section status-valid';
+                    statusText.textContent = '✓ Certificate Verified';
+                } else {
+                    statusSection.className = 'status-section status-invalid';
+                    statusText.textContent = '✗ Certificate Not Found';
+                }
+            } catch (error) {
+                // API call failed, but badge still works
+                statusSection.className = 'status-section';
+                statusText.textContent = '⚠ API unavailable (badge still functional)';
+            }
+        }
+        
+        function copyToClipboard(elementId, button) {
+            const textarea = document.getElementById(elementId);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        // Event listeners
+        certIdInput.addEventListener('input', updateBadge);
+        document.querySelectorAll('input[name="style"]').forEach(radio => {
+            radio.addEventListener('change', updateBadge);
+        });
+        document.querySelectorAll('input[name="status"]').forEach(radio => {
+            radio.addEventListener('change', updateBadge);
+        });
+        
+        // Initialize
+        updateBadge();
+    </script>
+</body>
+</html>
