@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Stats Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        h1 {
+            color: var(--accent);
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .refresh-info {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-value.success {
+            color: var(--success);
+        }
+        
+        .stat-value.warning {
+            color: var(--warning);
+        }
+        
+        .stat-detail {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        
+        .miners-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: var(--text);
+            font-size: 1.3em;
+        }
+        
+        .miner-count {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .miners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        
+        .miner-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .miner-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .miner-arch {
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+        
+        .miner-earnings {
+            text-align: right;
+        }
+        
+        .miner-rtc {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .miner-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+        
+        .status-inactive {
+            background: var(--warning);
+        }
+        
+        .chain-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+        
+        .chain-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .chain-stat {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+        
+        .chain-stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .chain-stat-label {
+            font-size: 0.85em;
+            color: var(--text-muted);
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        
+        .error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid #f85149;
+            color: #f85149;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .stat-value {
+                font-size: 2em;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛓️ RustChain Stats</h1>
+            <span class="refresh-info">Auto-refreshes every 30s</span>
+        </header>
+        
+        <div id="error-container"></div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Current Epoch</div>
+                <div class="stat-value" id="epoch">-</div>
+                <div class="stat-detail" id="epoch-detail"></div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Active Miners</div>
+                <div class="stat-value success" id="miner-count">-</div>
+                <div class="stat-detail" id="miner-detail"></div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Total Supply</div>
+                <div class="stat-value" id="supply">-</div>
+                <div class="stat-detail">RTC Tokens</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Network Status</div>
+                <div class="stat-value warning" id="network-status">-</div>
+                <div class="stat-detail" id="network-detail"></div>
+            </div>
+        </div>
+        
+        <div class="miners-section">
+            <div class="section-header">
+                <h2>🏆 Top Miners</h2>
+                <span class="miner-count" id="total-miners">0</span>
+            </div>
+            <div class="miners-grid" id="miners-grid">
+                <div class="loading">Loading miners...</div>
+            </div>
+        </div>
+        
+        <div class="chain-section">
+            <h2>📊 Network Overview</h2>
+            <div class="chain-stats">
+                <div class="chain-stat">
+                    <div class="chain-stat-value" id="total-tx">-</div>
+                    <div class="chain-stat-label">Total Transactions</div>
+                </div>
+                <div class="chain-stat">
+                    <div class="chain-stat-value" id="attestations">-</div>
+                    <div class="chain-stat-label">Total Attestations</div>
+                </div>
+                <div class="chain-stat">
+                    <div class="chain-stat-value" id="pot-size">-</div>
+                    <div class="chain-stat-label">Current Pot Size</div>
+                </div>
+                <div class="chain-stat">
+                    <div class="chain-stat-value" id="avg-hash">-</div>
+                    <div class="chain-stat-label">Avg Hash Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="last-updated">
+            Last updated: <span id="last-update">-</span>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://50.28.86.131';
+        
+        async function fetchJSON(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    mode: 'cors',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        }
+        
+        async function loadStats() {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = '';
+            
+            // Fetch all data in parallel
+            const [epochData, minersData] = await Promise.all([
+                fetchJSON('/epoch'),
+                fetchJSON('/api/miners')
+            ]);
+            
+            if (!epochData && !minersData) {
+                errorContainer.innerHTML = `
+                    <div class="error">
+                        ⚠️ Unable to connect to RustChain node<br>
+                        <small>Ensure the node is running at ${API_BASE}</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Update epoch
+            if (epochData) {
+                document.getElementById('epoch').textContent = epochData.epoch || '0';
+                document.getElementById('epoch-detail').textContent = 
+                    `Timestamp: ${new Date(epochData.timestamp || Date.now()).toLocaleString()}`;
+                document.getElementById('pot-size').textContent = (epochData.pot || 0).toFixed(2);
+                document.getElementById('network-status').textContent = epochData.status || 'Active';
+            }
+            
+            // Update miners
+            if (minersData) {
+                const miners = Array.isArray(minersData) ? minersData : minersData.miners || [];
+                document.getElementById('miner-count').textContent = miners.length;
+                document.getElementById('total-miners').textContent = miners.length;
+                
+                // Sort by earnings and show top 10
+                const topMiners = miners
+                    .sort((a, b) => (b.total_earnings || 0) - (a.total_earnings || 0))
+                    .slice(0, 12);
+                
+                const minersGrid = document.getElementById('miners-grid');
+                minersGrid.innerHTML = topMiners.map(miner => `
+                    <div class="miner-card">
+                        <div>
+                            <div class="miner-name">
+                                <span class="status-status status-active"></span>
+                                ${miner.miner_id || 'Unknown'}
+                            </div>
+                            <div class="miner-arch">${miner.architecture || 'Unknown'}</div>
+                        </div>
+                        <div class="miner-earnings">
+                            <div class="miner-rtc">${(miner.total_earnings || 0).toFixed(2)} RTC</div>
+                            <div class="miner-arch">${miner.earnings || 0}/epoch</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Update timestamp
+            document.getElementById('last-update').textContent = new Date().toLocaleString();
+        }
+        
+        // Initial load
+        loadStats();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>
