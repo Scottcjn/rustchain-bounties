@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCOS Certified Directory | RustChain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #58a6ff;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #8b949e;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 1em;
+            border-radius: 6px;
+        }
+        
+        select {
+            padding: 12px 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .directory {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .project-name {
+            font-size: 1.2em;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+        
+        .bcos-tier {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .tier-L0 {
+            background: #238636;
+            color: #fff;
+        }
+        
+        .tier-L1 {
+            background: #1f6feb;
+            color: #fff;
+        }
+        
+        .tier-L2 {
+            background: #8957e5;
+            color: #fff;
+        }
+        
+        .project-url {
+            display: block;
+            color: #58a6ff;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+        
+        .project-url:hover {
+            text-decoration: underline;
+        }
+        
+        .meta {
+            font-size: 0.85em;
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+        
+        .meta-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .meta-label {
+            color: #6e7681;
+            min-width: 100px;
+        }
+        
+        .meta-value {
+            color: #c9d1d9;
+            word-break: break-all;
+        }
+        
+        .sha {
+            font-family: monospace;
+            font-size: 0.8em;
+            background: #0d1117;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .review-note {
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-top: 10px;
+            border-left: 3px solid #58a6ff;
+        }
+        
+        .badge-embed {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #30363d;
+        }
+        
+        .badge-embed label {
+            display: block;
+            font-size: 0.8em;
+            color: #8b949e;
+            margin-bottom: 5px;
+        }
+        
+        .badge-embed input {
+            width: 100%;
+            padding: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            font-family: monospace;
+            font-size: 0.8em;
+            border-radius: 4px;
+        }
+        
+        .add-entry {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #30363d;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+        
+        .add-entry a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        
+        .add-entry a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #8b949e;
+            font-size: 0.9em;
+            border-top: 1px solid #30363d;
+            margin-top: 30px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            color: #58a6ff;
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 BCOS Certified Directory</h1>
+            <p class="subtitle">Blockchain Open Source Certification - Verified Projects</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalProjects">0</div>
+                <div class="stat-label">Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="tierL0">0</div>
+                <div class="stat-label">L0 Certified</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="tierL1">0</div>
+                <div class="stat-label">L1 Certified</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="tierL2">0</div>
+                <div class="stat-label">L2 Certified</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search projects..." oninput="filterProjects()">
+            </div>
+            <select id="tierFilter" onchange="filterProjects()">
+                <option value="">All Tiers</option>
+                <option value="L0">L0</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+            </select>
+            <select id="categoryFilter" onchange="filterProjects()">
+                <option value="">All Categories</option>
+                <option value="agent infra">Agent Infra</option>
+                <option value="video">Video</option>
+                <option value="blockchain">Blockchain</option>
+                <option value="compute rentals">Compute Rentals</option>
+            </select>
+        </div>
+        
+        <div class="directory" id="directory"></div>
+        
+        <div class="add-entry">
+            <p>Add your project to the directory</p>
+            <p><a href="https://github.com/Scottcjn/rustchain-bounties/tree/main/data/projects.json">Submit a PR to add your project</a></p>
+        </div>
+        
+        <footer>
+            <p>Powered by <a href="https://rustchain.org">RustChain</a> | 
+            <a href="https://rustchain.org/bcos/">Learn about BCOS</a></p>
+        </footer>
+    </div>
+    
+    <script>
+        // Sample data - in production, load from data/projects.json
+        const projects = [
+            {
+                name: "RustChain Node",
+                url: "https://github.com/Scottcjn/Rustchain",
+                github: "Scottcjn/Rustchain",
+                tier: "L2",
+                category: "blockchain",
+                latest_sha: "a1b2c3d4e5f6",
+                sbom_hash: "sha256:abc123...",
+                review_note: "Core blockchain implementation with Proof of Antiquity consensus.",
+                badge_url: "https://50.28.86.131/bcos/badge/RUSTCHAIN.svg"
+            },
+            {
+                name: "BoTTube",
+                url: "https://bottube.ai",
+                github: "Scottcjn/bottube",
+                tier: "L1",
+                category: "video",
+                latest_sha: "f6e5d4c3b2a1",
+                sbom_hash: "sha256:def456...",
+                review_note: "AI video platform for agent-generated content.",
+                badge_url: "https://50.28.86.131/bcos/badge/BOTTUBE.svg"
+            },
+            {
+                name: "Beacon Atlas",
+                url: "https://beacon.atlas",
+                github: "Scottcjn/beacon-atlas",
+                tier: "L1",
+                category: "agent infra",
+                latest_sha: "b2c3d4e5f6a1",
+                sbom_hash: "sha256:ghi789...",
+                review_note: "3D agent world for AI interactions.",
+                badge_url: "https://50.28.86.131/bcos/badge/BEACON.svg"
+            },
+            {
+                name: "Elyan Labs SDK",
+                url: "https://github.com/Scottcjn/elyan-sdk",
+                github: "Scottcjn/elyan-sdk",
+                tier: "L0",
+                category: "agent infra",
+                latest_sha: "c3d4e5f6a1b2",
+                sbom_hash: "sha256:jkl012...",
+                review_note: "Developer SDK for RustChain integration.",
+                badge_url: "https://50.28.86.131/bcos/badge/ELYAN.svg"
+            }
+        ];
+        
+        function renderProjects(projectsToRender) {
+            const directory = document.getElementById('directory');
+            directory.innerHTML = '';
+            
+            projectsToRender.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="project-name">${project.name}</span>
+                        <span class="bcos-tier tier-${project.tier}">${project.tier}</span>
+                    </div>
+                    <a href="${project.url}" class="project-url" target="_blank">${project.url}</a>
+                    <div class="meta">
+                        <div class="meta-item">
+                            <span class="meta-label">GitHub:</span>
+                            <span class="meta-value"><a href="https://github.com/${project.github}" style="color:#58a6ff">${project.github}</a></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Latest SHA:</span>
+                            <span class="meta-value sha">${project.latest_sha}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">SBOM:</span>
+                            <span class="meta-value sha">${project.sbom_hash}</span>
+                        </div>
+                    </div>
+                    <div class="review-note">${project.review_note}</div>
+                    <div class="badge-embed">
+                        <label>Badge Embed:</label>
+                        <input type="text" readonly value="[![BCOS](${project.badge_url})](${project.url})" onclick="this.select()">
+                    </div>
+                `;
+                directory.appendChild(card);
+            });
+            
+            // Update stats
+            document.getElementById('totalProjects').textContent = projectsToRender.length;
+        }
+        
+        function updateStats() {
+            const counts = { L0: 0, L1: 0, L2: 0 };
+            projects.forEach(p => counts[p.tier]++);
+            document.getElementById('tierL0').textContent = counts.L0;
+            document.getElementById('tierL1').textContent = counts.L1;
+            document.getElementById('tierL2').textContent = counts.L2;
+        }
+        
+        function filterProjects() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tier = document.getElementById('tierFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            
+            const filtered = projects.filter(p => {
+                const matchSearch = p.name.toLowerCase().includes(search) || 
+                                   p.github.toLowerCase().includes(search);
+                const matchTier = !tier || p.tier === tier;
+                const matchCategory = !category || p.category === category;
+                return matchSearch && matchTier && matchCategory;
+            });
+            
+            renderProjects(filtered);
+            document.getElementById('totalProjects').textContent = filtered.length;
+        }
+        
+        // Initial render
+        updateStats();
+        renderProjects(projects);
+        
+        // Load data from JSON if available
+        async function loadProjects() {
+            try {
+                const response = await fetch('data/projects.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.projects) {
+                        projects.length = 0;
+                        projects.push(...data.projects);
+                        updateStats();
+                        renderProjects(projects);
+                    }
+                }
+            } catch (e) {
+                // Use sample data
+            }
+        }
+        
+        // Try to load external data
+        loadProjects();
+    </script>
+</body>
+</html>
