@@ -1,281 +1,148 @@
-# RustChain v2 API Reference
+# RustChain API Reference (Draft)
 
-> **Base URL:** `https://50.28.86.131`
-> **Version:** 2.2.1-rip200
-> **Protocol:** HTTPS (self-signed cert, use `-k` with curl)
+This document provides a comprehensive reference for all REST API endpoints available in the RustChain ecosystem, including the core blockchain functions and the SophiaCore (RIP-306) attestation inspector.
 
----
-
-## Table of Contents
-
-1. [GET /api/stats](#get-apistats) — System statistics
-2. [GET /health](#get-health) — Node health check
-3. [GET /epoch](#get-epoch) — Current epoch information
-4. [GET /balance/{miner_pk}](#get-balanceminer_pk) — Miner balance
-5. [POST /attest/challenge](#post-attestchallenge) — Get attestation challenge
-6. [POST /attest/submit](#post-attestsubmit) — Submit attestation
-7. [POST /epoch/enroll](#post-epochenroll) — Enroll in epoch
-8. [GET /withdraw/history/{miner_pk}](#get-withdrawhistoryminer_pk) — Withdrawal history
-9. [POST /withdraw/register](#post-withdrawregister) — Register withdrawal key
-10. [POST /withdraw/request](#post-withdrawrequest) — Request withdrawal
-11. [GET /withdraw/status/{withdrawal_id}](#get-withdrawstatuswithdrawal_id) — Withdrawal status
-12. [GET /metrics](#get-metrics) — Prometheus metrics
+## Base URL
+- Production: `https://api.rustchain.org/v1`
+- Node (Self-signed): `https://<node-ip>/`
 
 ---
 
+## 1. System Endpoints
 
-## GET /api/stats
-
-Returns system-wide statistics including chain info, block times, and network metrics.
-
-### Example
-```bash
-curl -sk https://50.28.86.131/api/stats
-```
-
-### Response (200)
-```json
-{
-    "block_time": 600,
-    "chain_id": "rustchain-mainnet-v2",
-    "epoch": 104,
-    "features": [
-        "RIP-0005",
-        "RIP-0008",
-        "RIP-0009",
-        "RIP-0142",
-        "RIP-0143",
-        "RIP-0144"
-    ],
-    "pending_withdrawals": 0,
-    "security": [
-        "no_mock_sigs",
-        "mandatory_admin_key",
-        "replay_protection",
-        "validated_json"
-    ],
-    "total_balance": 412913.417317,
-    "total_miners": 487,
-    "version": "2.2.1-security-hardened"
-}
-```
-
----
-
-## GET /health
-
-Quick node health check. Returns uptime, version, database status, and tip information.
-
-### Example
-```bash
-curl -sk https://50.28.86.131/health
-```
-
-### Response (200)
-```json
-{
-    "backup_age_hours": 8.202856836782562,
-    "db_rw": true,
+### GET /health
+Returns the health status of the node.
+- **Example**: `curl -sk https://50.28.86.131/health`
+- **Response**:
+  ```json
+  {
     "ok": true,
-    "tip_age_slots": 0,
-    "uptime_s": 31284,
-    "version": "2.2.1-rip200"
-}
-```
+    "version": "1.0.0",
+    "uptime_s": 3600,
+    "db_rw": true
+  }
+  ```
+
+### GET /api/stats
+Returns aggregate network statistics.
+- **Example**: `curl -sk https://50.28.86.131/api/stats`
 
 ---
 
-## GET /epoch
+## 2. Blockchain Endpoints
 
-Returns current epoch information including number, start time, and enrollment count.
+### GET /epoch
+Returns information about the current mining epoch.
+- **Example**: `curl -sk https://50.28.86.131/epoch`
+- **Response**:
+  ```json
+  {
+    "epoch": 123,
+    "slot": 45,
+    "blocks_per_epoch": 1000,
+    "enrolled_miners": 50,
+    "epoch_pot": 150.0
+  }
+  ```
 
-### Example
-```bash
-curl -sk https://50.28.86.131/epoch
-```
-
-### Response (200)
-```json
-{
-    "blocks_per_epoch": 144,
-    "enrolled_miners": 30,
-    "epoch": 104,
-    "epoch_pot": 1.5,
-    "slot": 15066,
-    "total_supply_rtc": 8388608
-}
-```
-
----
-
-## GET /metrics
-
-Prometheus-compatible metrics endpoint. Returns node metrics in the Prometheus exposition format.
-
-### Example
-```bash
-curl -sk https://50.28.86.131/metrics
-```
-
-### Response (200)
-```
-# Prometheus not available```
+### GET /block/{block_number}
+Returns information about a specific block.
+- **Path Parameters**: `block_number` (integer)
 
 ---
 
-## GET /balance/{miner_pk}
+## 3. Mining & Attestation Endpoints
 
-Returns the RTC balance for a given miner public key.
+### POST /epoch/enroll
+Enrolls a miner for the current epoch with hardware details.
+- **Request Body**:
+  ```json
+  {
+    "miner_pubkey": "string",
+    "miner_id": "string",
+    "device": {
+      "family": "PowerPC G4",
+      "arch": "ppc"
+    }
+  }
+  ```
 
-### Path Parameters
+### POST /attest/challenge
+Generates a challenge nonce for Proof-of-Attestation (PoA).
+- **Example**: `curl -sk -X POST https://50.28.86.131/attest/challenge`
+- **Response**:
+  ```json
+  {
+    "nonce": "a1b2c3d4...",
+    "expires_at": 1640000000
+  }
+  ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `miner_pk` | string | Miner public key (hex) |
+### POST /attest/submit
+Submits the completed PoA payload.
+- **Request Body**: JSON payload containing the signed nonce and hardware fingerprints.
 
-### Example
-```bash
-curl -sk https://50.28.86.131/balance/0x0000000000000000000000000000000000000000000000000000000000000001
-```
-
----
-
-## POST /attest/challenge
-
-Request a hardware attestation challenge. The challenge is a cryptographic puzzle tied to the current epoch.
-
-### Request Body
-```json
-{
-  "miner_pk": "string (hex public key)"
-}
-```
-
-### Example
-```bash
-curl -sk -X POST https://50.28.86.131/attest/challenge \\
-  -H "Content-Type: application/json" \\
-  -d '{"miner_pk": "0x..."}'
-```
-
----
-
-## POST /attest/submit
-
-Submit a completed hardware attestation response to the node for verification.
-
-### Request Body
-```json
-{
-  "miner_pk": "string",
-  "challenge": "string",
-  "response": "string",
-  "hardware_proof": {...}
-}
-```
-
-### Example
-```bash
-curl -sk -X POST https://50.28.86.131/attest/submit \\
-  -H "Content-Type: application/json" \\
-  -d '{"miner_pk": "0x...", ...}'
-```
+### GET /api/miners
+Returns a list of currently active miners.
+- **Query Parameters**: `limit`, `offset`
 
 ---
 
-## POST /epoch/enroll
+## 4. Wallet & Withdraw Endpoints
 
-Enroll a miner in the current epoch to participate in block production and earn rewards.
+### GET /wallet/balance
+Returns the balance for a specific miner/wallet ID.
+- **Query Parameters**: `miner_id` (required)
+- **Example**: `curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_ID"`
 
-### Request Body
-```json
-{
-  "miner_pk": "string (hex public key)"
-}
-```
+### POST /withdraw/register
+Registers an SR25519 key for secure withdrawals.
+- **Request Body**:
+  ```json
+  {
+    "miner_pk": "hex_public_key",
+    "withdrawal_pk": "sr25519_public_key"
+  }
+  ```
 
-### Example
-```bash
-curl -sk -X POST https://50.28.86.131/epoch/enroll \\
-  -H "Content-Type: application/json" \\
-  -d '{"miner_pk": "0x..."}'
-```
+### POST /withdraw/request
+Requests an RTC token withdrawal.
+- **Request Body**:
+  ```json
+  {
+    "miner_pk": "hex_public_key",
+    "amount": 100,
+    "signature": "signed_by_withdrawal_key"
+  }
+  ```
 
----
-
-## GET /withdraw/history/{miner_pk}
-
-Returns withdrawal history for a miner.
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `miner_pk` | string | Miner public key (hex) |
-
-### Example
-```bash
-curl -sk https://50.28.86.131/withdraw/history/0x...
-```
+### GET /withdraw/status/{withdrawal_id}
+Checks the status of a specific withdrawal request.
 
 ---
 
-## POST /withdraw/register
+## 5. SophiaCore (RIP-306) Endpoints
+*AI-powered hardware validation and anomaly detection.*
 
-Register an SR25519 key for withdrawals. This key is used to sign withdrawal requests.
+### POST /sophia/inspect
+Submits a fingerprint bundle for semantic analysis.
+- **Response**: Verdict (APPROVED, CAUTIOUS, SUSPICIOUS, REJECTED), confidence, and reasoning.
 
-### Request Body
-```json
-{
-  "miner_pk": "string (hex public key)",
-  "withdrawal_pk": "string (SR25519 public key)"
-}
-```
+### GET /sophia/status/{miner_id}
+Returns the latest inspection result for a miner.
 
----
+### GET /sophia/stats
+Returns aggregate statistics for SophiaCore inspections.
 
-## POST /withdraw/request
-
-Request an RTC token withdrawal.
-
-### Request Body
-```json
-{
-  "miner_pk": "string (hex public key)",
-  "amount": "integer (RTC amount)",
-  "signature": "string (signed by withdrawal key)"
-}
-```
-
----
-
-## GET /withdraw/status/{withdrawal_id}
-
-Check the status of a withdrawal request.
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `withdrawal_id` | string | Withdrawal request ID |
-
-### Example
-```bash
-curl -sk https://50.28.86.131/withdraw/status/<withdrawal_id>
-```
-
----
-
-*Generated from live RustChain node API. Last updated: 2026-03-17*
+### GET /sophia/health
+Checks the status of the SophiaCore service and Ollama host.
 
 ---
 
 ## Error Codes
-
-| Status | Meaning |
-|--------|---------|
-| 200 | Success |
-| 400 | Bad request (invalid parameters) |
-| 404 | Not found (invalid endpoint or miner) |
-| 429 | Rate limited |
-| 500 | Internal server error |
+- **200**: Success
+- **400**: Bad Request (invalid parameters)
+- **401**: Unauthorized
+- **404**: Not Found
+- **429**: Rate Limited (wait before retrying)
+- **500**: Internal Server Error
