@@ -1,5 +1,8 @@
-# Arch Linux Haiku
+---
+title: Arch Linux Haiku
+---
 
-Arch Linux
 Rolling release
-BTW I use Arch
+BTW user
+DIY Linux
+{/meta}

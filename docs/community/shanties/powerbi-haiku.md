@@ -1,5 +1,8 @@
-# Power BI Haiku
+---
+title: Power BI Haiku
+---
 
-Power BI
 Microsoft BI
-Dashboards
+Data analytics
+Reports
+{/meta}

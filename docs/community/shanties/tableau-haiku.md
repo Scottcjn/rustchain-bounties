@@ -1,5 +1,8 @@
-# Tableau Haiku
+---
+title: Tableau Haiku
+---
 
-Tableau
 BI tool
-Visual analytics
+Data visualization
+Dashboards
+{/meta}

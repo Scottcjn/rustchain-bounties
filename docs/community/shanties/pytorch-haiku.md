@@ -1,8 +1,8 @@
-# PyTorch (2016)
-
-Tensors compute
-CUDA accelerates
-Torch serves
-
 ---
-*PYTORCH-HAIKU*
+title: PyTorch Haiku
+---
+
+Deep learning framework
+Facebook AI research
+Tensor computation
+{/meta}

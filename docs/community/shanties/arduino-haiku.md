@@ -1,5 +1,8 @@
-# Arduino Haiku
+---
+title: Arduino Haiku
+---
 
-Arduino
 Microcontroller
-IoT starter
+DIY electronics
+Prototyping
+{/meta}

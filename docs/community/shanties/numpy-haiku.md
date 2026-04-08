@@ -1,8 +1,8 @@
-# NumPy (1995)
-
-Arrays compute
-Broadcasting works
-SciPy extends
-
 ---
-*NUMPY-HAIKU*
+title: NumPy Haiku
+---
+
+Numerical Python
+Array computing
+Math library
+{/meta}

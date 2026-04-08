@@ -1,5 +1,8 @@
-# SciPy Haiku
+---
+title: SciPy Haiku
+---
 
-SciPy
-Scientific computing
+Scientific Python
 Algorithms
+Computing
+{/meta}

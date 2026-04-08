@@ -1,5 +1,8 @@
-# Dagster Haiku
+---
+title: Dagster Haiku
+---
 
-Dagster
 Data orchestrator
 Modern ETL
+Asset pipelines
+{/meta}

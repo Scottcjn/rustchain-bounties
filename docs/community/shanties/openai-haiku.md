@@ -1,8 +1,8 @@
-# OpenAI (2015)
-
-GPT models
-API calls
-Safety guides
-
 ---
-*OPENAI-HAIKU*
+title: OpenAI Haiku
+---
+
+AI research lab
+GPT models
+Safety focus
+{/meta}

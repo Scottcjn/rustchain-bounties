@@ -1,8 +1,8 @@
-# Pandas (2008)
-
-DataFrames organize
-CSV reads
-NaN fills
-
 ---
-*PANDAS-HAIKU*
+title: Pandas Haiku
+---
+
+Python data analysis
+DataFrames
+Time series
+{/meta}

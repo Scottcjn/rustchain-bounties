@@ -1,5 +1,8 @@
-# ESP32 Haiku
+---
+title: ESP32 Haiku
+---
 
-ESP32
-WiFi and Bluetooth
-IoT chip
+WiFi microcontroller
+Low power
+IoT
+{/meta}

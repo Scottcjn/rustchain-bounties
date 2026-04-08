@@ -1,8 +1,8 @@
-# Hugging Face (2016)
-
-Models hub
-Transformers library
-Spaces deploy
-
 ---
-*HUGGINGFACE-HAIKU*
+title: Hugging Face Haiku
+---
+
+NLP models hub
+Transformers library
+AI democratization
+{/meta}

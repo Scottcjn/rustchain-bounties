@@ -1,5 +1,8 @@
-# Matplotlib Haiku
+---
+title: Matplotlib Haiku
+---
 
-Matplotlib
 Python plotting
-Static charts
+2D visualization
+Charts
+{/meta}

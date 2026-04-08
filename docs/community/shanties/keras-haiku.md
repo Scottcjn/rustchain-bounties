@@ -1,5 +1,8 @@
-# Keras Haiku
+---
+title: Keras Haiku
+---
 
-Keras
-High-level API
-Easy neural nets
+Neural network API
+High-level abstraction
+Easy to use
+{/meta}

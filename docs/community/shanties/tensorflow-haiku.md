@@ -1,8 +1,8 @@
-# TensorFlow (2015)
-
-Tensors flow
-Keras builds
-TPU trains
-
 ---
-*TENSORFLOW-HAIKU*
+title: TensorFlow Haiku
+---
+
+Google ML framework
+Keras integration
+Neural networks
+{/meta}
