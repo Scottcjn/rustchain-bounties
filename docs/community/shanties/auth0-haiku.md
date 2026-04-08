@@ -1,5 +1,8 @@
-# Auth0 Haiku
+# Auth0 (2013)
 
-Auth0
-Identity platform
-Authentication
+Login with all
+Universal Login page
+Identity as code
+
+---
+*AUTH0-HAIKU*

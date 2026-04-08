@@ -1,5 +1,8 @@
-# React Native Haiku
+# React Native (2015)
 
-React Native
-Mobile apps
-JavaScript power
+JavaScript runs
+Native components render
+iOS and Android
+
+---
+*REACT-NATIVE-HAIKU*

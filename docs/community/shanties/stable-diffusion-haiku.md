@@ -1,5 +1,8 @@
-# Stable Diffusion Haiku
+# Stable Diffusion (2022)
 
-Stable Diffusion
-Text to image
-AI art generator
+Local AI dreams
+Diffusion runs
+Images spawn
+
+---
+*STABLE-DIFFUSION-HAIKU*

@@ -1,5 +1,8 @@
-# Istio Haiku
+# Istio (2016)
 
-Istio
-Service mesh
-Traffic management
+Sidecar injects
+Traffic flows visualized
+Service mesh wraps
+
+---
+*ISTIO-HAIKU*

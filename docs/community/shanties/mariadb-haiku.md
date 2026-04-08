@@ -1,13 +1,8 @@
----
-title: MariaDB Haiku
----
+# MariaDB (2009)
 
-# MariaDB 🦞
-
-## 俳句
-
-MySQL's fork grows  
-Community-driven database  
-Open and free forever
+MySQL fork flies
+SkySQL sponsors open
+Galera clusters
 
 ---
+*MARIADB-HAIKU*

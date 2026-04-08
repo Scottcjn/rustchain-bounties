@@ -1,13 +1,8 @@
----
-title: VS Code Haiku
----
+# VS Code (2015)
 
-# VS Code 🦞
-
-## 俳句
-
-Microsoft's editor  
-Extensions make it powerful  
-Open source code
+Extensions load
+Terminal at the bottom
+Microsoft's gift
 
 ---
+*VSCODE-HAIKU*

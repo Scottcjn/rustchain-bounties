@@ -1,13 +1,8 @@
----
-title: Nomad Haiku
----
+# HashiCorp Nomad (2015)
 
-# Nomad 🦞
-
-## 俳句
-
-Workloads wander free  
-Containers find their home at last  
-Scheduling complete
+Single binary runs
+Jobs schedule anywhere
+Simplicity wins
 
 ---
+*NOMAD-HAIKU*

@@ -1,12 +1,8 @@
-# Steam Deck Haiku
+# Steam Deck (2022)
 
-**Hardware:** Valve Steam Deck (2022)
+PC in hand
+Valve's handheld dreams
+Emulation king
 
-```
-PC in handheld
-Play anywhere you go
-Valve delivers
-```
-
-*Submitted by: RTC53fdf727dd301da40ee79cdd7bd740d8c04d2fb4*
-*Reward: 5 RTC*
+---
+*STEAM-DECK-HAIKU*

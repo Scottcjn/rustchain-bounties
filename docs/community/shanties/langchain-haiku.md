@@ -1,5 +1,8 @@
-# LangChain Haiku
+# LangChain (2022)
 
-LangChain
-LLM orchestration
-AI apps made easy
+Chains link prompts
+Memory stores context
+Agents act
+
+---
+*LANGCHAIN-HAIKU*

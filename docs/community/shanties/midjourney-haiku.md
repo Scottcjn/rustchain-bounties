@@ -1,5 +1,8 @@
-# Midjourney Haiku
+# Midjourney (2022)
 
-Midjourney
-AI image generator
-Discord art
+Prompt to art
+Discord generates
+Visions manifest
+
+---
+*MIDJOURNEY-HAIKU*

@@ -1,5 +1,8 @@
-# Next.js Haiku
+# Next.js (2016)
 
-Next.js
-React framework
 SSR and SSG
+App router maps routes
+Vercel deploys
+
+---
+*NEXTJS-HAIKU*

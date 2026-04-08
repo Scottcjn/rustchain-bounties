@@ -1,13 +1,8 @@
-# Vercel Haiku
+# Vercel (2015)
 
-*Vercel: The platform for frontend developers*
+Serverless Next
+Edge functions run
+Deploys instant
 
-```
-Deploy in seconds
-Edge functions serve worldwide
-Next.js thrives here
-```
-
-**Topic**: Cloud Platform  
-**Created**: 2026-04-08  
-**Reward**: 5 RTC
+---
+*VERCEL-HAIKU*

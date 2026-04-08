@@ -1,13 +1,8 @@
-# Netlify Haiku
+# Netlify (2014)
 
-*Netlify: The modern web development platform*
+Jamstack hosts
+Forms submit easily
+Deploy triggers fire
 
-```
-Jamstack deploys
-Forms and functions work
-Netlify builds fast
-```
-
-**Topic**: Cloud Platform  
-**Created**: 2026-04-08  
-**Reward**: 5 RTC
+---
+*NETLIFY-HAIKU*

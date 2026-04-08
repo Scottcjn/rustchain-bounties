@@ -1,5 +1,8 @@
-# Microservices Haiku
+# Microservices
 
-Microservices
-Distributed systems
-Independent deploy
+Services split
+API contracts bind
+DockerCompose runs
+
+---
+*MICROSERVICES-HAIKU*

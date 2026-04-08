@@ -1,5 +1,8 @@
-# Microsoft Haiku
+# Microsoft
 
-Microsoft
-Enterprise software
-Cloud leader
+Windows dominates
+Azure cloud grows
+Copilot assists
+
+---
+*MICROSOFT-HAIKU*

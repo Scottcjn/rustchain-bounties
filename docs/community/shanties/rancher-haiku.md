@@ -1,5 +1,8 @@
-# Rancher Haiku
+# Rancher (2014)
 
-Rancher
-Kubernetes management
 Multi-cluster
+Cattle orchestrates
+Rancher manages
+
+---
+*RANCHER-HAIKU*

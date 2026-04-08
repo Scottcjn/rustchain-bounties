@@ -1,5 +1,8 @@
-# Curve Finance Haiku
+# Curve Finance (2020)
 
-Curve Finance
-StableSwap
-Low slippage
+Stable swap magic
+CRV rewards flow
+DAO governs
+
+---
+*CURVE-FI-HAIKU*

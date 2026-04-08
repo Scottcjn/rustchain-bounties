@@ -1,5 +1,8 @@
-# Polkadot Haiku
+# Polkadot (2020)
 
-Polkadot
-Multi-chain
-Parachains
+Parachains connect
+Relay chain secures
+DOT stakes high
+
+---
+*POLKADOT-HAIKU*

@@ -1,5 +1,8 @@
-# ChatGPT Haiku
+# ChatGPT (2022)
 
-ChatGPT
-Conversational AI
-Assistant bot
+GPT speaks plain
+Conversations flow
+Prompt engineering
+
+---
+*CHATGPT-HAIKU*
