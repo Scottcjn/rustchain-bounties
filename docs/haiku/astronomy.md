@@ -1,85 +1,56 @@
 # Astronomy Haiku Collection
 
-## Stars
+## About
+This collection celebrates astronomy and space science through haiku poetry. From distant galaxies to our solar system, explore the cosmos.
+
+## Haiku Categories
+
+### Celestial Objects
+- stars and constellations
+- planets and moons
+- galaxies and nebulae
+- black holes
+
+### Observation
+- telescope viewing
+- astrophotography
+- star parties
+- night sky maps
+
+### Space Exploration
+- rockets and missions
+- space stations
+- rovers and probes
+- future colonies
+
+## Sample Haiku
+
 ```
-Stars twinkle
-Distant nuclear furnaces
-Light years away
+Stars fill the night
+Ancient light reaches my eyes
+Cosmic history
 ```
 
-## Planets
 ```
-Orbits spin
-Planets revolve
-Solar system
-```
-
-## Galaxies
-```
-Milky way
-Spiral arms rotate
-Billions stars
+Moon rises high
+Craters visible tonight
+Lunar landscape glows
 ```
 
-## Black Holes
 ```
-Gravity wins
-Nothing escapes
-Event horizon
-```
-
-## Nebulae
-```
-Gas clouds glow
-Star birth regions
-Colorful dust
+Rocket launches
+Breaking gravity's hold
+Humanity rises
 ```
 
-## Comets
-```
-Ice and rock
-Tails point from sun
-Periodic visits
-```
+## Themes
+- Cosmic wonder
+- Scientific exploration
+- Human curiosity
+- Vast universe
 
-## The Moon
-```
-Lunar phases
-Crescent to full
-Tides controlled
-```
-
-## Eclipses
-```
-Shadow plays
-Sun moon align
-Darkness day
-```
-
-## Exoplanets
-```
-Distant worlds
-Kepler discovers
-Goldilocks zone
-```
-
-## Cosmology
-```
-Big bang
-Universe expands
-Dark energy
-```
-
-## Telescopes
-```
-Looking far
-Light collected
-Cosmos reveals
-```
-
-## Future Space
-```
-Mars colony
-Humanity multiplies
-Star traveler
-```
+## Related Categories
+- space.md
+- space-tech.md
+- science.md
+- nature.md
