@@ -65,3 +65,75 @@ Force meets resistance
 Calculations ensure survival
 Safety first designed
 ```
+
+## Biomedical
+
+```
+Engineering meets
+Medical advances merge
+Healthcare improves
+```
+
+## Chemical
+
+```
+Reactions create
+Molecular transformations
+Products form
+```
+
+## Environmental
+
+```
+Sustainable designs
+Green engineering
+Future
+```
+
+## Materials
+
+```
+New materials
+Composite strength
+Innovation
+```
+
+## Robotics Engineering
+
+```
+Mechatronics
+Hardware software combine
+Automation
+```
+
+## Systems
+
+```
+Complex systems
+Integration
+Unity
+```
+
+## Innovation
+
+```
+Breakthroughs
+Engineering changes
+World
+```
+
+## Manufacturing
+
+```
+Production lines
+Mass manufacture
+Scale
+```
+
+## Quality
+
+```
+Testing ensures
+Quality control
+Standards
+```
