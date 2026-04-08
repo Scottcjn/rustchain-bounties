@@ -1,7 +1,5 @@
 # Apple Silicon Haiku
 
-*M1 chip in my Mac*
-*Neural engine humming loud*
-*Proof of silicon*
-
----
+Apple Silicon
+M1 M2 M3 chips
+ARM revolution
