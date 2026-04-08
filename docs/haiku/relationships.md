@@ -3,134 +3,83 @@
 ## Family
 ```
 Family bonds
-Unconditional love
-Forever
+Generations connect
+Love endures
 ```
 
+## Friendship
 ```
-Parents wise
-Life experience shared
-Generations
-```
-
-```
-Siblings close
-Childhood memories
-Rivals friends
-```
-
-```
-Grandparents old
-Stories of the past
-Wisdom
-```
-
-## Friendships
-```
-Best friends
-Loyal through years
-Support
-```
-```
-Childhood friends
-Playground memories
-Forever
-```
-```
-Work friends
-Professional network
-Colleagues
-```
-```
-Online friends
-Digital connections
-Global
-```
-
-## Romantic
-```
-First date nervous
-Butterflies in stomach
-Spark
-```
-```
-Love languages
-Words touch gifts time
-Understanding
-```
-```
-Long distance
-Miles apart hearts
-Connected
-```
-```
-Marriage vow
+True friends
 Through thick and thin
-Commitment
+Loyalty matters
+```
+
+## Romance
+```
+Love blooms
+Hearts connect
+Chemistry sparks
 ```
 
 ## Communication
 ```
-Active listening
-Hear without response
-Empathy
-```
-```
-Nonviolent communication
-Feelings needs requests
-NVC
-```
-```
-Boundaries set
-Respect limits
-Healthy
-```
-```
-Conflict resolved
-Compromise dialogue
-Peace
+Listen well
+Understanding grows
+Empathy bridges
 ```
 
-## Social Skills
+## Conflict
 ```
-Small talk flows
-Weather sports news
-Ice breaker
+Disagreements
+Resolution builds
+Growth emerges
 ```
+
+## Trust
 ```
-Body language
-Posture reveals
-Subconscious
+Trust builds
+Bridges strengthen
+Betrayal breaks
 ```
+
+## Boundaries
 ```
-Eye contact
-Connection builds
-Presence
-```
-```
-Thank you notes
-Gratitude expressed
-Appreciation
+Healthy limits
+Respect creates
+Space breathes
 ```
 
 ## Community
 ```
-Neighborhood waves
-Hello neighbors
-Local
+Neighbors close
+Community supports
+Together stronger
 ```
+
+## Work Relationships
 ```
-Volunteer helps
-Giving back
-Purpose
+Team synergy
+Collaboration creates
+Success shared
 ```
+
+## Long Distance
 ```
-Group membership
-Belonging matters
-Together
+Distance tests
+Connection transcends
+Love persists
 ```
+
+## Self Love
 ```
-Cultural events
-Festivals celebrate
-Heritage
+Self accept
+Inner peace grows
+Wholeness found
+```
+
+## Future Relationships
+```
+AI companions
+Virtual relationships
+New connections
 ```

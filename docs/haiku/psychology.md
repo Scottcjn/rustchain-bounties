@@ -1,136 +1,84 @@
 # Psychology Haiku Collection
 
-## Mental Health
-```
-Depression fog
-Heavy blanket invisible
-Reach out
-```
-
-```
-Anxiety racing
-Heart pounds fast
-Breath
-```
-
-```
-Therapy helps
-Talking heals
-Professional
-```
-
-```
-Mindfulness present
-Meditation grounds
-Peace
-```
-
-## Psychological Concepts
+## Cognitive Psychology
 ```
 Cognitive bias
-Thinking patterns
-Heuristics
-```
-```
-Dunning Kruger
-Confidence without skill
-Illusion
-```
-```
-Confirmation bias
-Seeking evidence
-Beliefs
-```
-```
-Loss aversion
-Pain greater than gain
-Risk
+Thinking errors patterns
+Heuristics guide
 ```
 
-## Emotions
 ```
-Happiness joy
-Positive psychology
-Flow state
-```
-```
-Anger flares
-Fight or flight
-Emotion
-```
-```
-Grief process
-Kubler Ross stages
-Healing
-```
-```
-Love attachment
-Bowlby theory
-Bonds
+Memory recall
+Past experiences stored
+Neurons encode
 ```
 
-## Memory
+## Developmental
 ```
-Short term memory
-Working memory limited
-Seven plus
+Piaget stages
+Children construct knowledge
+Sensors then ops
 ```
+
+## Behavioral
 ```
-Long term memory
-Episodic semantic
-Recall
+Behaviorism
+Stimulus response
+Conditioning
 ```
+
+## Psychoanalysis
 ```
-Forgetting curve
-Ebbinghaus
-Review spaced
-```
-```
-Flashbulb memory
-Vivid recollection
-Historic
+Freud unconscious
+Dreams reveal hidden
+Id ego superego
 ```
 
 ## Social Psychology
 ```
-Stanford prison
-Zimbardo experiment
-Power
-```
-```
-Milgram study
-Obedience authority
-Shock
-```
-```
-Social proof
-Influence Cialdini
 Conformity
-```
-```
-Groupthink consensus
-Decision making
-Silos
+Group pressure influences
+Social proof
 ```
 
-## Personal Growth
+## Emotions
 ```
-Growth mindset
-Effort matters
-Carol Dweck
+Feelings flow
+Emotions regulate
+Amygdala fires
 ```
+
+## Personality
 ```
-Self actualization
-Maslow hierarchy
-Peak
+Big five traits
+Openness conscience
+Extraversion agree
 ```
+
+## Mental Health
 ```
-Intrinsic motivation
-Inner drive
-Purpose
+Anxiety rises
+Stress overwhelms
+Therapy helps
 ```
+
+## Positive Psychology
 ```
-Habits loop
-Cue routine reward
-Atomic habits
+Flow state
+Peak performance
+Happiness cultivated
+```
+
+## Neuropsychology
+```
+Brain plasticity
+Neural pathways change
+Learning rewires
+```
+
+## Future Psychology
+```
+Brain machine
+Interfaces expand
+Mind uploading
 ```
