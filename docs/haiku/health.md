@@ -69,3 +69,73 @@ Gene therapy
 Cures found
 Future healing
 ```
+
+## Mental Wellness
+```
+Stress relief
+Calm returns
+Balance
+```
+
+## Physical Therapy
+```
+Rehabilitation
+Recovery movements
+Healing
+```
+
+## Heart Health
+```
+Cardio exercise
+Heart beats strong
+Circulation
+```
+
+## Immune System
+```
+Defense strong
+Viruses fight
+immunity
+```
+
+## Healthy Habits
+```
+Daily routine
+Consistency
+Wellbeing
+```
+
+## Nutrition Science
+```
+Macros count
+Micronutrients
+Diet science
+```
+
+## Hydration
+```
+Water intake
+Hydrated cells
+Health
+```
+
+## Mind Body
+```
+Yoga practice
+Body mind spirit
+Connection
+```
+
+## Alternative Medicine
+```
+Acupuncture
+Traditional healing
+Holistic
+```
+
+## Health Technology
+```
+Wearables track
+Health metrics
+Data
+```
