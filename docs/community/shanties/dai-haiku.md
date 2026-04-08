@@ -1,5 +1,8 @@
-# DAI Haiku
+---
+title: DAI Haiku
+---
 
-DAI
 Decentralized stablecoin
-Crypto collateral
+MakerDAO
+Collateralized
+{/meta}

@@ -1,5 +1,8 @@
-# Raydium Haiku
+---
+title: Raydium Haiku
+---
 
-Raydium
-Solana DEX
-AMM pools
+Solana AMM
+DeFi
+Yield
+{/meta}

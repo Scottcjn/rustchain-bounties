@@ -1,5 +1,8 @@
-# BUSD Haiku
+---
+title: BUSD Haiku
+---
 
-BUSD
-Binance stablecoin
-Paused now
+Stablecoin
+Binance Paxos
+Dollar backed
+{/meta}

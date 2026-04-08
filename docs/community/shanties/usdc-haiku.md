@@ -1,5 +1,8 @@
-# USDC Haiku
+---
+title: USDC Haiku
+---
 
-USDC
-Circle stablecoin
+Stablecoin
+Circle token
 Regulated
+{/meta}

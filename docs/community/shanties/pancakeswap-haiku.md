@@ -1,5 +1,8 @@
-# PancakeSwap Haiku
+---
+title: PancakeSwap Haiku
+---
 
-PaddleSwap
-BNB Chain DEX
-Cake token
+DEX BSC
+DeFi
+Yield farming
+{/meta}

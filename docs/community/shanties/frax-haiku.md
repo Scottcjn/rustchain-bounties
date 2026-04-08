@@ -1,5 +1,8 @@
-# FRAX Haiku
+---
+title: FRAX Haiku
+---
 
-FRAX
 Algorithmic stablecoin
+Partial collateral
 Fractional
+{/meta}

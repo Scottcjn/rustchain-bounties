@@ -1,5 +1,8 @@
-# USDT Haiku
+---
+title: USDT Haiku
+---
 
-USDT
-Tether stablecoin
-Crypto dollar
+Stablecoin
+Tether token
+Dollar pegged
+{/meta}

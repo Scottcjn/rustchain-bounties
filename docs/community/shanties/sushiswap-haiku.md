@@ -1,5 +1,8 @@
-# SushiSwap Haiku
+---
+title: SushiSwap Haiku
+---
 
-SushiSwap
-DEX alternative
-Community owned
+DEX AMM
+DeFi
+Swap
+{/meta}

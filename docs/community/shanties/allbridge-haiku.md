@@ -1,14 +1,8 @@
 ---
-title: AllBridge Haiku
-description: A haiku about AllBridge for the RustChain community shanty collection
+title: Allbridge Haiku
 ---
 
-# AllBridge Haiku
-
-```
-AllBridge
-bridge any asset
-universal swap
-```
-
-*An original haiku celebrating AllBridge in the RustChain ecosystem.*
+Cross chain bridge
+Asset transfer
+Multiple chains
+{/meta}
