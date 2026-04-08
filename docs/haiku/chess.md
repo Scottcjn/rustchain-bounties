@@ -1,57 +1,56 @@
 # Chess Haiku Collection
 
 ## About
-Contemplate the ancient game of chess through haiku poetry. Chess is battle of minds.
+This collection celebrates chess and the game of kings through haiku poetry. From openings to endgames, explore the strategic battle on 64 squares.
 
 ## Haiku Categories
 
-### Chess Pieces
-- king and queen
-- knights
-- bishops
-- rooks and pawns
-
-### Chess Moments
-- opening
+### Game Phases
+- openings
 - middlegame
 - endgame
-- checkmate
+- tactics
 
-### Chess Philosophy
+### Pieces
+- knights and bishops
+- rooks and queens
+- the king
+- the pawn
+
+### Concepts
 - strategy
-- patience
-- foresight
-- competition
+- tactics
+- patterns
+- time control
 
 ## Sample Haiku
 
 ```
-Pawns move first
-Opening defines the game
+Knights jump in L
+Forks and pins on the board
 Strategy unfolds
 ```
 
 ```
-Knight jumps L-shape
-Unexpected attack comes
-Checkmate approaches
+King in checkmate
+No squares left to escape
+Victory is mine
 ```
 
 ```
-Silent thought moves
-Minds duel across the board
-King falls at last
+Pawn advances
+Promotion awaits ahead
+Power transforms
 ```
 
 ## Themes
-- Strategy
-- Intelligence
-- Competition
-- Patience
-- Mind games
+- Strategic thinking
+- Pattern recognition
+- Mental competition
+- Ancient game
 
 ## Related Categories
 - games.md
 - strategy.md
-- competition.md
 - intelligence.md
+- competition.md

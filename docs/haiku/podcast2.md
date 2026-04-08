@@ -1,58 +1,56 @@
 # Podcast Haiku Collection
 
 ## About
-Celebrate podcasting through haiku poetry. Podcasts bring knowledge and entertainment to our ears.
+This collection celebrates podcasting and audio content through haiku poetry. From interviews to storytelling, explore the world of spoken word media.
 
 ## Haiku Categories
 
 ### Podcast Types
-- true crime
-- comedy
-- educational
-- news
+- interview shows
 - storytelling
+- educational
+- comedy
 
-### Podcast Moments
-- listening commute
-- learning something new
-- discovery
-- binging series
+### Production
+- recording
+- editing
+- hosting
+- publishing
 
-### Podcast Culture
-- hosts
-- listeners
-- communities
-- interviews
+### Listening
+- commutes
+- workouts
+- relaxation
+- learning
 
 ## Sample Haiku
 
 ```
-Earbuds in
-Voice speaks into my ear
-Knowledge flows in
+Microphone on
+Voice flows into the air
+Stories reach ears
 ```
 
 ```
-Stories told
-Through voices I now know
-Intimacy grows
+Headphones deliver
+Conversations in my mind
+Learning happens
 ```
 
 ```
-True crime tale
-Chills run down spine while
-Listening at night
+Episode drops
+New content to discover
+Binge listening starts
 ```
 
 ## Themes
-- Media
-- Education
-- Entertainment
-- Community
-- Storytelling
+- Audio storytelling
+- Content creation
+- Long-form media
+- Community building
 
 ## Related Categories
-- streaming.md
 - entertainment.md
-- storytelling.md
 - media.md
+- social-media.md
+- streaming.md
