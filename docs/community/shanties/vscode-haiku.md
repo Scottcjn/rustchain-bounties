@@ -1,5 +1,13 @@
-# VS Code Haiku
+---
+title: VS Code Haiku
+---
 
-VS Code
-Editor of choice
-Extensions power
+# VS Code 🦞
+
+## 俳句
+
+Microsoft's editor  
+Extensions make it powerful  
+Open source code
+
+---
