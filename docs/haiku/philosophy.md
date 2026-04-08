@@ -1,113 +1,80 @@
 # Philosophy Haiku Collection
 
-## Branches
-```
-Metaphysics
-Existence being
-Reality
-```
-
-```
-Epistemology
-Knowledge theory
-Belief truth
-```
-
-```
-Ethics moral
-Right wrong virtue
-Good life
-```
-
-```
-Aesthetics art
-Beauty judgment
-Taste
-```
-
-## Philosophers
+## Ancient Philosophy
 ```
 Socrates questioned
-Oracle said wisest
-Know nothing
+Truth through dialogue
+Wisdom begins
 ```
+
 ```
-Plato ideals
-Forms eternal
-Republic
+Plato's forms
+Ideals transcend
+Shadows on cave
 ```
+
 ```
 Aristotle logic
-Syllogism reason
+Syllogisms reason
 Golden mean
 ```
-```
-Nietzsche proclaimed
-God is dead
-Will power
-```
-
-## Schools
-```
-Stoicism accepts
-What cannot control
-Inner peace
-```
-```
-Epicurean pleasure
-Simple joys
-Ataraxia
-```
-```
-Existentialism
-Existence precedes
-Meaning
-```
-```
-Utilitarianism
-Greatest good
-Consequences
-```
-
-## Concepts
-```
-Free will choice
-Determined or not
-Responsibility
-```
-```
-Identity self
-Who am I
-Consciousness
-```
-```
-Purpose meaning
-Life questions
-Absurd
-```
-```
-Truth relative
-Perspective shapes
-Reality
 
 ## Modern Philosophy
 ```
-Feminism equality
-Gender social
-Empowerment
+Descartes doubts
+I think therefore I am
+Mind body split
 ```
+
 ```
-Postmodernism
-Grand narratives
-Deconstruction
+Kant pure reason
+Transcendental categories
+Categorical imperative
 ```
+
+## Eastern Philosophy
 ```
-Transhumanism
-Human enhancement
-Tech
+Lao Tzu flows
+Tao te Ching wisdom
+Wu wei action
 ```
+
 ```
-Environmental ethics
-Nature intrinsic value
-Future
+Zen meditation
+Mindfulness present
+Enlightenment
+```
+
+## Existentialism
+```
+ Sartre exists
+Existence precedes essence
+Freedom anxiety
+```
+
+```
+Camus absurd
+Life meaningless
+Rebellion rises
+```
+
+## Ethics
+```
+Utilitarian
+Greatest good for all
+Happiness counts
+```
+
+## Metaphysics
+```
+Being becomes
+Process philosophy
+Change exists
+```
+
+## Future Philosophy
+```
+AI consciousness
+Machine sentience
+New ethics emerge
 ```
