@@ -65,3 +65,75 @@ Daily habit
 Moments of peace in chaos
 Coffee time sacred
 ```
+
+## Brewing
+
+```
+Pour over method
+Slow drip extraction
+Flavor
+```
+
+## French Press
+
+```
+Full immersion
+Coarse grounds steep
+Rich
+```
+
+## Cold Brew
+
+```
+Time extracts
+Cold water slow
+Smooth
+```
+
+## Coffee Shop
+
+```
+Third place exists
+Community gathers
+Space
+```
+
+## Coffee Culture
+
+```
+Global tradition
+Every country brews
+Unity
+```
+
+## Coffee Farming
+
+```
+Cherries ripen
+Farmers harvest
+Trade
+```
+
+## Coffee Roasting
+
+```
+Heat transforms
+Green beans turn brown
+Aroma
+```
+
+## Decaf
+
+```
+Without the buzz
+Coffee flavor remains
+Choice
+```
+
+## Coffee Varieties
+
+```
+Arabica sweet
+Robusta strong
+Blend
+```

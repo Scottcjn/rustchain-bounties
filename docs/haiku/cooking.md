@@ -65,3 +65,75 @@ Eyes eat first too
 Beautiful plating matters
 Art on the plate
 ```
+
+## Baking
+
+```
+Oven heat rises
+Bread bakes golden
+Aroma
+```
+
+## Grilling
+
+```
+Flames kiss meat
+Charred flavors
+Smoke
+```
+
+## Sauces
+
+```
+Mirepoix starts
+Base builds flavor
+Depth
+```
+
+##Sous Vide
+
+```
+Precision cooking
+Temperature control
+Perfection
+```
+
+## Food Safety
+
+```
+Clean hands work
+Hygiene matters
+Safety
+```
+
+## Cooking Techniques
+
+```
+Sauté stir fry
+Methods many
+Skill
+```
+
+## Meal Prep
+
+```
+Plan ahead
+Weekly cooking
+Efficiency
+```
+
+## Fusion Cuisine
+
+```
+Cultures combine
+East meets west
+Innovation
+```
+
+## Home Cooking
+
+```
+Family recipes
+Traditions pass
+Love
+```
