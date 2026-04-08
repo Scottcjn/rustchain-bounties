@@ -65,3 +65,75 @@ Millions of years
 Rocks tell the planet's story
 Patience in stone
 ```
+
+## Minerals
+
+```
+Precious metals
+Resources extracted
+Value
+```
+
+## Plate Tectonics
+
+```
+Continents move
+Drift across the ages
+Pangea was
+```
+
+## Erosion
+
+```
+Wind and water
+Shape the landscape slowly
+Grand canyon
+```
+
+## Volcanology
+
+```
+Lava flows
+Magma chambers
+Eruption
+```
+
+## Seismology
+
+```
+Seismographs
+Earthquake detection
+Warning
+```
+
+## Geological Time
+
+```
+Eons pass
+Deep time
+History
+```
+
+## Mining
+
+```
+Extract resources
+Minerals from earth
+Industry
+```
+
+## Geological Survey
+
+```
+Mapping earth
+Resources locate
+Knowledge
+```
+
+## Gemstones
+
+```
+Diamonds form
+Deep earth pressure
+Beauty
+```
