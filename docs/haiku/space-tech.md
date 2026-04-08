@@ -1,140 +1,71 @@
-# Space Technology Haiku Collection
+# Space Tech Haiku Collection
 
 ## Satellites
 ```
-Starlink orbits high
-Five thousand satellites fly
-Internet everywhere
+Starlink orbits
+Thousands of satellites
+Global internet
 ```
 
+## Rockets
 ```
-GPS guides our way
-Twenty-four satellites watch
-Location revealed
-```
-
-```
-Weather satellite
-Watching storms from orbit high
-Forecast more precise
-```
-
-## Space Missions
-```
-Artemis to moon
-First woman on lunar surface
-History will note
-```
-
-```
-Mars rover Perseverance
-Rock samples collected
-Find ancient life
-```
-
-```
-James Webb telescope
-Peering back to universe birth
-Light from long ago
-```
-
-## Space Companies
-```
-SpaceX rocket lands
-Autonomous return to Earth
-Reusable dreams
-```
-
-```
-Blue Origin flies
-New Shepard touches the stars
-Space for all of us
-```
-
-```
-Rocket Lab launches
-Small satellites reach orbit
-New space economy
-```
-
-## Space Terms
-```
-Zero gravity floats
-Astronauts do backflips
-Water bubble sphere
-```
-
-```
-Orbital mechanics
-Elliptical paths through space
-Gravity assists speed
-```
-
-```
-Space debris spins
-Junk in low Earth orbit
-Cleanup required
-```
-
-## Space Science
-```
-Astrophysics
-Studying cosmic mysteries
-Origins
-```
-
-## Space Travel
-```
-Space tourism
-Civilians orbit the Earth
-Private astronauts
+SpaceX Falcon
+Reusable rockets
+Landing
 ```
 
 ## Space Stations
 ```
-Tiangong station
-Chinese habitat orbits
-Permanent presence
+ISS orbits
+International cooperation
+Research
 ```
 
-## Asteroid Mining
+## Telescopes
 ```
-Asteroid resources
-Precious metals in space
-Future economy
-```
-
-## Space Communication
-```
-Deep space network
-Signals travel across vacuum
-Communication
+James Webb sees
+Deep field images
+Cosmos
 ```
 
-## Space Biology
+## Mars
 ```
-Astrobiology
-Searching for life beyond Earth
-Extremophiles
-```
-
-## Exoplanets
-```
-Kepler mission
-Thousands of exoplanets found
-Habitable zones
+Mars rovers
+Red planet explores
+Perseverance
 ```
 
-## Space Robotics
+## Moon
 ```
-Rovers explore
-Robotic arms analyze
-Automated science
+Apollo lands
+Moon walking
+History made
 ```
 
-## Future Propulsion
+## Space Exploration
 ```
-Ion drives
-Efficient thrust in vacuum
-Deep space travel
+Voyager travels
+Interstellar space
+Golden record
+```
+
+## Future Space
+```
+Mars colony
+Multi-planetary
+Humanity spreads
+```
+
+## SpaceX
+```
+Starship flies
+Mars mission
+Future
+```
+
+## Space Agencies
+```
+NASA explores
+ESA European
+JAXA Japanese
 ```
