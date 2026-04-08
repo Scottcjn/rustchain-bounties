@@ -1,114 +1,71 @@
-# Pets & Animals Haiku Collection
+# Pets Haiku Collection
 
 ## Dogs
 ```
-Golden Retriever
-Friendly loyal companion
-Fetch
-```
-
-```
-German Shepherd
-Protective smart
-Police
-```
-
-```
-Husky howls
-Pulls sleds snowy
-Alaska
-```
-
-```
-Poodle curly
-Intelligent elegant
-Show dog
+Puppy plays
+Wagging tails
+Loyal friend
 ```
 
 ## Cats
 ```
-Persian luxury
-Long fluffy coat
-Grooming
-```
-```
-Siamese meows
-Blue eyes distinctive
-Talkative
-```
-```
-Maine Coon big
-Gentle giant
-Fluffy
-```
-```
-Tabby stripes
-Hunter purrs
-Indoor outdoor
+Cat naps
+Purrs softly
+Independence
 ```
 
-## Exotic Pets
+## Fish
+```
+Fish swim
+Tank bubbles
+Calm presence
+```
+
+## Birds
 ```
 Parrot talks
-Mimics words colorful
-Tropical
+Songs sing
+Feathers bright
 ```
+
+## Rabbits
 ```
-Turtle slow
-Shell protects
-Century
-```
-```
-Hamster wheel
-Running exercise
+Hopping bunny
+Cotton tail
 Cute
 ```
+
+## Hamsters
 ```
-Fish aquarium
-Swimming colors
-Relaxing
+Wheel spins
+Night runs
+Small pet
 ```
 
-## Farm Animals
+## Reptiles
 ```
-Cow moos
-Milk and beef
-Barn
-```
-```
-Chicken clucks
-Eggs for breakfast
-Rooster
-```
-```
-Pig oinks
-Smart and social
-Farm
-```
-```
-Horse neighs
-Riding and racing
-Saddle
+Lizard basks
+Snake slithers
+Exotic
 ```
 
-## Wildlife
+## Pet Care
 ```
-Deer grazes
-Forest peaceful
-Bambi
+Vet visits
+Shots given
+Health
 ```
+
+## Pet Training
 ```
-Bear hibernates
-Winter sleep
-Salmon
+Commands teach
+Sit stay come
+Training
 ```
+
+## Pet Love
 ```
-Eagle soars
-Freedom symbol
-National
-```
-```
-Wolf pack hunts
-Howl at moon
-Social
+Companionship
+Unconditional love
+Pet friend
 ```

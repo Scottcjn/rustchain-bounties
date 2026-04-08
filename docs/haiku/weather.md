@@ -1,114 +1,71 @@
 # Weather Haiku Collection
 
-## Weather Phenomena
-```
-Rain drops fall
-Puddles form on streets
-Umbrella
-```
-
-```
-Snowflakes drift
-Winter wonderland
-Cold
-```
-
-```
-Lightning strikes
-Thunder follows loud
-Storm
-```
-
-```
-Fog rolls in
-Visibility low
-Mystery
-```
-
 ## Seasons
 ```
-Spring blooms flowers
-New growth begins
-Easter
-```
-```
-Summer heat
-Beach and barbecue
-Vacation
-```
-```
-Autumn leaves
-Colors change
-Harvest
-```
-```
-Winter cold
-Fireplace warmth
-Holiday
+Spring arrives
+Flowers bloom
+Nature awakens
 ```
 
-## Weather Tech
+## Weather Types
 ```
-Weather apps
-Accurate forecasts
-Technology
+Rain falls
+Puddles form
+Umbrella up
 ```
+
+## Storms
 ```
-Doppler radar
-Storm tracking
-Warning
+Thunder rumbles
+Lightning strikes
+Storm passes
 ```
+
+## Snow
 ```
-Satellite images
-From space view
-Clouds
+Snowflakes fall
+Winter wonderland
+Blanket white
 ```
+
+## Sun
 ```
-Weather station
-Personal data
-Amateur
+Sunny days
+Warmth radiates
+Light bright
+```
+
+## Clouds
+```
+Clouds float
+Shapes form
+Skies change
+```
+
+## Wind
+```
+Windy days
+Kites fly
+Breezes blow
+```
+
+## Temperature
+```
+Heat rises
+Cold snap
+Thermometer
 ```
 
 ## Climate
 ```
-Climate change
+Climate shifts
 Global warming
 Sustainability
 ```
-```
-Greenhouse effect
-Atmosphere traps heat
-Carbon
-```
-```
-Sea level rise
-Coastal cities
-Adaptation
-```
-```
-Renewable energy
-Solar wind power
-Clean future
-```
 
-## Extreme Weather
+## Weather Tech
 ```
-Hurricane spins
-Category winds
-Evacuation
-```
-```
-Tornado warning
-Shelter safe room
-Warning
-```
-```
-Heat wave dangerous
-Stay hydrated
-Danger
-```
-```
-Flood waters rise
-Evacuation routes
-Emergency
+Satellites orbit
+Weather predicts
+Forecasts
 ```
