@@ -1,122 +1,155 @@
-# IoT (Internet of Things) Haiku Collection
+# IoT & Smart Devices Haiku Collection
 
 ## Smart Home
 ```
-Smart thermostat
-Learning your preferences
-Comfort automated
+Alexa responds
+Voice controls light and music
+Assistant listens
 ```
 
 ```
-Smart lights glow
-Color changes with mood
-Ambient lighting
+Google Home
+Natural conversation flows
+Smart answers
 ```
 
 ```
-Smart locks secure
-Keyless entry granted
-Package delivered
+Apple HomeKit
+Privacy first approach
+Secure automation
+```
+
+## Smart Lighting
+```
+Philips Hue
+Colors set the mood
+Ambience changes
 ```
 
 ```
-Smart cameras watch
-Motion detected alerts
-Home always safe
+Smart bulbs
+WiFi connects instantly
+App controls brightness
+```
+
+## Smart Thermostats
+```
+Nest learns
+Temperature preferences adapt
+Energy saves
+```
+
+```
+Ecobee sensors
+Room by room control
+Comfort optimized
+```
+
+## Security Cameras
+```
+Ring doorbell
+Motion triggers recording
+Package detected
+```
+
+```
+Arlo wire-free
+HD streams to cloud
+Security monitored
+```
+
+## Smart Locks
+```
+August locks
+Keyless entry installs
+Access granted
+```
+
+```
+Yale smart
+Fingerprint opens door
+Keys become optional
+```
+
+## Wearables
+```
+Apple Watch
+Health metrics track
+ECG monitors
+```
+
+```
+Fitbit counts
+Steps and sleep stages
+Wellness quantified
+```
+```
+Garmin tracks
+Athletes performance
+GPS records
 ```
 
 ## Industrial IoT
 ```
 Sensor networks
-Data streams from machines
 Predictive maintenance
-```
-
-```
-SCADA systems
-Industrial control flows
-Critical infrastructure
+Downtime avoided
 ```
 
 ```
 Edge computing
-Processing near the source
+Data processed locally
 Latency reduced
 ```
 
-## Wearables
+## Smart Agriculture
 ```
-Smart watch ticks
-Heart rate continuously
-Health monitored
-```
-```
-Fitness tracker
-Steps counted daily
-Goals achieved
-```
-```
-VR headset worn
-Immersive worlds appear
-Gaming transformed
+Soil sensors
+Moisture measured
+Irrigation smart
 ```
 
-## Connected Cars
 ```
-Tesla drives itself
-Autopilot guides the way
-Future arrived
-```
-```
-Electric vehicles
-Charging stations everywhere
-Green revolution
-```
-```
-Connected car API
-Remote start and climate
-Convenience enhanced
+Drone monitors
+Crop health from above
+Precision agriculture
 ```
 
 ## Smart Cities
 ```
-Smart traffic lights
-Flow optimized algorithms
+Traffic sensors
+Flows optimize
 Congestion reduced
 ```
 ```
-Smart parking
-Sensors find spaces fast
-No more circling
-```
-```
-Smart grid power
-Renewable energy flows
-Efficiency up
-```
-```
-Smart waste bins
-Collection optimized
-Routes shortened
+Smart grid
+Energy distributed
+Renewables balanced
 ```
 
 ## IoT Protocols
 ```
 MQTT lightweight
-Publish subscribe messaging
-IoT protocol
+Publish subscribe model
+IoT connects
 ```
+
 ```
-Zigbee meshes
-Low power devices talk
-Smart home hub
+Zigbee mesh
+Low power devices
+Network extends
 ```
+
+## Edge IoT
 ```
-LoRaWAN long
-Wide area network
-Rural connectivity
+Edge devices
+Process data locally
+Bandwidth saved
 ```
+
+## Future IoT
 ```
-Thread protocol
-IPv6 smart home ready
-Interoperable
+Digital twins
+Physical systems simulate
+Predict and optimize
+```
