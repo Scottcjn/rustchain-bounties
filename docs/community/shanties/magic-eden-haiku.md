@@ -2,7 +2,7 @@
 title: Magic Eden Haiku
 ---
 
-Solana NFT
-Marketplace
-Launchpad
+Solana NFT hub
+Launch and trade art
+Creator tools
 {/meta}

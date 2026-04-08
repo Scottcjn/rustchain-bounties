@@ -3,6 +3,6 @@ title: Rarible Haiku
 ---
 
 NFT platform
-Create trade
-DAO
+Multiple chains supported
+Create and sell
 {/meta}

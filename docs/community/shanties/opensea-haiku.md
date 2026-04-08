@@ -3,6 +3,6 @@ title: OpenSea Haiku
 ---
 
 NFT marketplace
-Largest
-Collection
+Largest trading volume
+Digital ownership
 {/meta}

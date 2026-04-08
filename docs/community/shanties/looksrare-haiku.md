@@ -3,6 +3,6 @@ title: LooksRare Haiku
 ---
 
 NFT marketplace
-Rewards
-Trading
+Rewards for trading
+Token incentives
 {/meta}
