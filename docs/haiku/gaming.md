@@ -1,136 +1,84 @@
 # Gaming Haiku Collection
 
-## Gaming Platforms
-```
-Steam library
-Thousands of games owned
-Wishlist grows
-```
-
+## Video Games
 ```
 PlayStation plays
-Exclusive titles draw
-Console wars
+Controller in hand
+Adventure starts
+```
+
+## Game Genres
+```
+RPG adventures
+Story unfolds
+Level up
 ```
 
 ```
-Xbox Game Pass
-Subscription gaming
-Value proposition
+FPS shooter
+Reflexes test
+Headshots
 ```
 
+## Gaming Platforms
 ```
-Nintendo Switch
-Hybrid portable home
-Mario Kart
-```
-
-## Gaming Concepts
-```
-Open world
-Boundless exploration
-Freedom
-```
-```
-Boss battles
-Epic confrontations
-Victory
-```
-```
-Speedrunning
-Time records shattered
-Community
-```
-```
-Easter eggs
-Hidden secrets found
-Reward
+Nintendo switch
+Portable play
+Joycons
 ```
 
 ## Esports
 ```
-League of Legends
-Professional teams clash
-Worlds championship
-```
-```
-Dota 2 The International
-Prize pools millions
-Starcraft broodwar
-```
-```
-Counter-Strike
-Tactical precision
-Valorant rises
-```
-```
-Fighting games
-Street Fighter tournaments
-Tekken legends
+Pro gamers
+Tournaments激烈
+Prize pools
 ```
 
-## Game Development
+## Indie Games
 ```
-Unity engine
-2D 3D games create
-Cross-platform
-```
-```
-Unreal renders
-Photorealistic graphics
-AAA quality
-```
-```
-Godot open
-Free game engine
-Community
-```
-```
-Blender 3D
-Models animated
-Assets created
-```
-
-## Gaming Hardware
-```
-RTX GPU
-Ray tracing enabled
-Real-time
-```
-```
-VR headset
-Immersive gaming
-Presence
-```
-```
-Steam Deck
-PC gaming portable
-Handheld
-```
-```
-Controller input
-Precision mapped
-Accessibility
+Small studios
+Creative visions
+Pixel art
 ```
 
 ## Mobile Gaming
 ```
-Candy Crush
-Match three addictive
-Mobile casual
+Touch screens
+Mobile games
+Casual play
 ```
+
+## Cloud Gaming
 ```
-Genshin Impact
-Gacha pulls
-Wish for five star
+Stadia streams
+Games on demand
+No console
 ```
+
+## VR Gaming
 ```
-PUBG Mobile
-Battle royale mobile
-Last survivor
+Virtual worlds
+Immersive games
+Presence
 ```
+
+## Gaming Culture
 ```
-Clash of Clans
-Base building strategy
-Time sunk
+Speedruns
+Communities
+Records break
+```
+
+## Game Development
+```
+Unity builds
+Code creates
+Dev cycle
+```
+
+## Future Gaming
+```
+Neural interfaces
+Mind plays
+Future gaming
 ```

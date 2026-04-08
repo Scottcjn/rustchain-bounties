@@ -75,3 +75,66 @@ Space debris spins
 Junk in low Earth orbit
 Cleanup required
 ```
+
+## Space Science
+```
+Astrophysics
+Studying cosmic mysteries
+Origins
+```
+
+## Space Travel
+```
+Space tourism
+Civilians orbit the Earth
+Private astronauts
+```
+
+## Space Stations
+```
+Tiangong station
+Chinese habitat orbits
+Permanent presence
+```
+
+## Asteroid Mining
+```
+Asteroid resources
+Precious metals in space
+Future economy
+```
+
+## Space Communication
+```
+Deep space network
+Signals travel across vacuum
+Communication
+```
+
+## Space Biology
+```
+Astrobiology
+Searching for life beyond Earth
+Extremophiles
+```
+
+## Exoplanets
+```
+Kepler mission
+Thousands of exoplanets found
+Habitable zones
+```
+
+## Space Robotics
+```
+Rovers explore
+Robotic arms analyze
+Automated science
+```
+
+## Future Propulsion
+```
+Ion drives
+Efficient thrust in vacuum
+Deep space travel
+```
