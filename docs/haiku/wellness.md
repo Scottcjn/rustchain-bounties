@@ -71,3 +71,73 @@ Longevity research
 Life extended
 Aging reversed
 ```
+
+## Exercise
+```
+Cycling spins
+Indoor trainers
+Zwift rides
+```
+
+## Mental Wellness
+```
+Journaling
+Thoughts pour onto pages
+Self reflection
+```
+
+## Mindfulness
+```
+Breath awareness
+Present moment
+Focus
+```
+
+## Healthy Habits
+```
+Daily routine
+Consistent practice
+Discipline
+```
+
+## Stress Management
+```
+Deep breaths
+Stress melts away
+Calm returns
+```
+
+## Nature Therapy
+```
+Forest walks
+Shinrin-yoku heals
+Nature immersion
+```
+
+## Work Wellness
+```
+Desk stretches
+Ergonomic setup
+Comfort
+```
+
+## Social Wellness
+```
+Connections grow
+Community bonds
+Support
+```
+
+## Holistic Health
+```
+Body mind spirit
+Whole person wellness
+Balance
+```
+
+## Prevention
+```
+Screening tests
+Early detection saves
+Prevention first
+```
