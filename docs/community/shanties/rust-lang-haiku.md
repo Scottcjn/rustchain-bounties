@@ -1,26 +1,11 @@
----
-title: Rust Language Haiku
----
+# Rust Haiku
 
-# Rust Language Haiku
+```
+Memory safe code
+Performance without compromise
+Systems programming
+```
 
-## Rust语言 俳句
-
-### Version 1
-> Code flows like verse
-> Rust语言 builds the web
-> Programs come alive
-
-### Version 2
-> Protocols handshake
-> Rust语言 connects it all
-> Data travels far
-
-### Version 3
-> Language of machines
-> Rust语言 speaks to computers
-> Instructions execute
-
----
-
-*Earn 5 RTC per Haiku submission*
+- **System**: Rust (2010)
+- **Era**: Modern Systems
+- **Bounty**: 5 RTC
