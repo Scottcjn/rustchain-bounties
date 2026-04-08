@@ -1,11 +1,12 @@
 # Kindle Haiku
 
+**Hardware:** Amazon Kindle (2007)
+
 ```
-E-ink paper glows
-Books weigh nothing at all
-Read anywhere
+E-ink displays
+Read anywhere anytime
+Books go digital
 ```
 
-- **System**: Amazon Kindle (2007)
-- **Era**: Digital Reading
-- **Bounty**: 5 RTC
+*Submitted by: RTC53fdf727dd301da40ee79cdd7bd740d8c04d2fb4*
+*Reward: 5 RTC*
