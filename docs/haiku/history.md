@@ -3,133 +3,79 @@
 ## Ancient Civilizations
 ```
 Egypt pyramids
-Pharaohs ruled
-Nile river flows
+Pharaohs eternal rest
+Stone monuments
 ```
 
 ```
-Rome fell empire
-Gladiators fought
-Colosseum
+Roman empire
+Gladius conquers lands
+Senate falls
 ```
 
 ```
-Greece democracy
-Philosophy Socrates
-Athens
+Greek philosophy
+Socrates teaches
+Wisdom seeks
 ```
 
+## Medieval
 ```
-Mesopotamia
-Cradle of civilization
-Tigris Euphrates
-```
-
-## Medieval Period
-```
-Knights in armor
-Jousting tournaments
-Chivalry
-```
-```
-Crusades holy
-Religious wars
-Jerusalem
-```
-```
-Black death
-Plague killed millions
-Black
-```
-```
-Feudal lords
-Manor self sufficient
-Middle ages
+Knights joust
+Chivalry codes
+Castles rise
 ```
 
 ## Renaissance
 ```
-Leonardo da Vinci
-Mona Lisa painted
-Renaissance man
+Leonardo draws
+Mona Lisa smiles
+Art revives
 ```
+
+## Industrial Age
 ```
-Gutenberg prints
-Printing press spreads
-Knowledge
+Steam engine
+Revolution transforms
+Factories bloom
 ```
+
+## World Wars
 ```
-Copernicus helio
-Sun at center
-Revolution
+WWI trenches
+War machines clash
+Peace emerges
 ```
+
 ```
-Michelangelo
-Sistine Chapel ceiling
-Artistic
+WWII global
+Allies defeat axis
+Holocaust remembered
 ```
 
 ## Modern History
 ```
-World war one
-Trenches and poison gas
-1914
-```
-```
-World war two
-Atomic bomb dropped
-Holocaust
-```
-```
-Cold war tension
-Nuclear fear
-Berlin wall
-```
-```
 Moon landing
-Neil Armstrong walks
-1969
+Apollo reaches
+One small step
 ```
 
-## Historical Figures
 ```
-Napoleon short
-French emperor
-Waterloo
-```
-```
-Alexander great
-Macedonian empire
-Conqueror
-```
-```
-Queen Elizabeth
-Virgin queen era
-Shakespeare
-```
-```
-Gandhi nonviolence
-India independence
-Peaceful
+Internet connects
+World wide web
+Information flows
 ```
 
-## History Concepts
+## Cold War
 ```
-Primary source
-Contemporary account
-Letters diaries
+Berlin wall
+Freedom divided
+Wall falls
 ```
+
+## Future History
 ```
-Secondary source
-Later interpretation
-Historians
+AI writes
+Future chapters
+Still unwritten
 ```
-```
-Timeline events
-Chronological order
-Cause effect
-```
-```
-Historical bias
-Perspective shapes
-Narrative
