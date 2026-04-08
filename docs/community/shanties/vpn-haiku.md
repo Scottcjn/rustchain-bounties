@@ -1,5 +1,8 @@
-# VPN Haiku
+# VPN (1996)
 
-VPN
-Virtual private network
-Secure tunnel
+Tunnel encrypts
+IP masks
+Remote connects
+
+---
+*VPN-HAIKU*

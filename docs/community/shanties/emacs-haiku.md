@@ -1,13 +1,8 @@
----
-title: Emacs Haiku
----
+# Emacs (1976)
 
-# Emacs 🦞
-
-## 俳句
-
-Extensible editor  
-Org-mode runs my life away  
-God's text editor
+Org mode plans
+Lisp extends
+Meta keys
 
 ---
+*EMACS-HAIKU*

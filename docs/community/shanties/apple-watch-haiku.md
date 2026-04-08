@@ -1,12 +1,8 @@
-# Apple Watch Haiku
+# Apple Watch (2015)
 
-**Hardware:** Apple Watch (2015)
+Wrist notifications
+Fitness tracks
+Digital crown
 
-```
-Wrist computer
-Notifications and health tracking
-Future on your arm
-```
-
-*Submitted by: RTC53fdf727dd301da40ee79cdd7bd740d8c04d2fb4*
-*Reward: 5 RTC*
+---
+*APPLE-WATCH-HAIKU*

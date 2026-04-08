@@ -1,5 +1,8 @@
-# Laravel Haiku
+---
+title: Laravel Haiku
+---
 
-Laravel
 PHP framework
 Elegant syntax
+Blade templates
+{/meta}

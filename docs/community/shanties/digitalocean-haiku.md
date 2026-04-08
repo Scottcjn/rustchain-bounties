@@ -1,5 +1,8 @@
-# DigitalOcean Haiku
+---
+title: DigitalOcean Haiku
+---
 
-DigitalOcean
-Developer cloud
-Simple VPS
+Cloud droplets
+Simple infrastructure
+Developer friendly
+{/meta}

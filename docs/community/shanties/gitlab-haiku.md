@@ -1,8 +1,8 @@
-# GitLab (2011)
+---
+title: GitLab Haiku
+---
 
 DevOps platform
+Git repository hosting
 CI/CD pipelines
-Issues merge
-
----
-*GITLAB-HAIKU*
+{/meta}

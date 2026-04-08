@@ -1,13 +1,8 @@
----
-title: Prometheus Haiku
----
+# Prometheus (2012)
 
-# Prometheus 🦞
-
-## 俳句
-
-Metrics and time series  
-Pull model monitoring  
-CNCF graduate
+Metrics scrape
+Time series store
+Alert manager warns
 
 ---
+*PROMETHEUS-HAIKU*

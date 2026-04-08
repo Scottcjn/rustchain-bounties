@@ -1,8 +1,8 @@
-# Solana (2020)
-
-Fast transactions
-Proof of history
-SOL shines
-
 ---
-*SOLANA-HAIKU*
+title: Solana Haiku
+---
+
+High throughput
+PoS blockchain
+Fast transactions
+{/meta}

@@ -1,5 +1,8 @@
-# Django Haiku
+---
+title: Django Haiku
+---
 
-Django
 Python web framework
 Batteries included
+MTV pattern
+{/meta}

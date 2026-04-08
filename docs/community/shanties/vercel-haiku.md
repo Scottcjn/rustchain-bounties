@@ -1,8 +1,8 @@
-# Vercel (2015)
-
-Serverless Next
-Edge functions run
-Deploys instant
-
 ---
-*VERCEL-HAIKU*
+title: Vercel Haiku
+---
+
+Frontend cloud
+Next.js deployment
+Edge functions
+{/meta}

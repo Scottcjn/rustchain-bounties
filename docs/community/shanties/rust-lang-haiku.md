@@ -1,8 +1,8 @@
-# Rust (2010)
-
-Ownership moves
-Borrow checker shouts
-Cargo builds
-
 ---
-*RUST-LANG-HAIKU*
+title: Rust Haiku
+---
+
+Memory safety
+Zero-cost abstractions
+Systems programming
+{/meta}

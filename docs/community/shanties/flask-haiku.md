@@ -1,5 +1,8 @@
-# Flask Haiku
+---
+title: Flask Haiku
+---
 
-Flask
-Python micro framework
-Lightweight
+Micro framework
+Python WSGI toolkit
+Light and flexible
+{/meta}

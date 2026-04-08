@@ -1,5 +1,8 @@
-# Grafana Haiku
+# Grafana (2013)
 
-Grafana
-Dashboards
-Visualize everything
+Dashboards chart
+Prometheus queries
+Alerts fire
+
+---
+*GRAFANA-HAIKU*

@@ -1,5 +1,8 @@
-# Weights & Biases Haiku
+# Weights & Biases (2017)
 
-Weights & Biases
 ML experiment tracking
-Visualization
+Visuals report
+Sweeps optimize
+
+---
+*WEIGHTS-BIASES-HAIKU*

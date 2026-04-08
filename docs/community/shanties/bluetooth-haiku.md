@@ -1,11 +1,8 @@
-# Bluetooth Haiku
+# Bluetooth (1998)
 
-```
-Wireless earbuds
-No cables bind your music
-Sound floats in air
-```
+Short range links
+Pairing connects
+LE audio
 
-- **System**: Bluetooth (1999)
-- **Era**: Wireless Audio
-- **Bounty**: 5 RTC
+---
+*BLUETOOTH-HAIKU*

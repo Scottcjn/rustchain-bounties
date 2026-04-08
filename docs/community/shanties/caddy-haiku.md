@@ -1,5 +1,8 @@
-# Caddy Haiku
+---
+title: Caddy Haiku
+---
 
-Caddy
-HTTPS by default
-Automatic TLS
+Web server
+HTTPS automatic
+Go language
+{/meta}

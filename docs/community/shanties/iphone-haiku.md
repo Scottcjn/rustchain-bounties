@@ -1,11 +1,8 @@
-# iPhone Haiku
+# iPhone (2007)
 
-```
-Touch the glass screen
-App Store changes everything
-Smartphone revolution
-```
+Touchscreen revolution
+App Store opens
+iOS evolves
 
-- **System**: Apple iPhone (2007)
-- **Era**: Mobile Computing
-- **Bounty**: 5 RTC
+---
+*IPHONE-HAIKU*

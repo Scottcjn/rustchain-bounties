@@ -1,13 +1,8 @@
----
-title: Vim Haiku
----
+# Vim (1991)
 
-# Vim 🦞
-
-## 俳句
-
-Modal editing king  
-Escape sequences flow free  
-Unix text editor
+Escape inserts
+Dot repeats
+Modal editing
 
 ---
+*VIM-HAIKU*

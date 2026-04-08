@@ -1,5 +1,8 @@
-# Google Colab Haiku
+# Google Colab (2017)
 
-Google Colab
-Cloud notebooks
-Free GPU
+Free GPU runs
+Notebooks share
+TPU accelerates
+
+---
+*COLAB-HAIKU*

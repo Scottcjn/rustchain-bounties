@@ -1,5 +1,8 @@
-# Spring Haiku
+---
+title: Spring Haiku
+---
 
-Spring
 Java enterprise
 Dependency injection
+Cloud native
+{/meta}

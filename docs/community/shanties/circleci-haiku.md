@@ -1,5 +1,8 @@
-# CircleCI Haiku
+---
+title: CircleCI Haiku
+---
 
-CircleCI
 Cloud CI/CD
+Automated workflows
 Fast builds
+{/meta}

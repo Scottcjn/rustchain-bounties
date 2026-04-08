@@ -1,5 +1,8 @@
-# Scala Haiku
+---
+title: Scala Haiku
+---
 
-Scala
-JVM functional
-Spark language
+Functional Java
+Object-oriented blend
+JVM language
+{/meta}

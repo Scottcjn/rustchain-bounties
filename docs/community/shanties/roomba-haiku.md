@@ -1,12 +1,8 @@
-# Roomba Haiku
+# iRobot Roomba (2002)
 
-**Hardware:** iRobot Roomba (2002)
+Vacuum autonomy
+Dirt detection
+Mapping learns
 
-```
-Vacuuming itself
-Robot cleans the floor
-Smart home begins
-```
-
-*Submitted by: RTC53fdf727dd301da40ee79cdd7bd740d8c04d2fb4*
-*Reward: 5 RTC*
+---
+*ROOMBA-HAIKU*

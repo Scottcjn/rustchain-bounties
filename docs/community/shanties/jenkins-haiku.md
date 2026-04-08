@@ -1,13 +1,8 @@
----
-title: Jenkins Haiku
----
+# Jenkins (2006)
 
-# Jenkins 🦞
-
-## 俳句
-
-Classic CI/CD  
-Open source automation server  
-Pipeline as code
+Pipeline builds
+Blue ocean UI
+Master and agents
 
 ---
+*JENKINS-HAIKU*

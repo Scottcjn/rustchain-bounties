@@ -1,5 +1,8 @@
-# Cassandra Haiku
+---
+title: Cassandra Haiku
+---
 
-Cassandra
-Wide column store
-Distributed
+NoSQL distributed
+Facebook origin
+Wide columns
+{/meta}

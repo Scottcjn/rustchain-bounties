@@ -1,5 +1,8 @@
-# OAuth Haiku
+# OAuth (2006)
 
-OAuth
-Authorization framework
-Token based
+Token grants
+Scopes limit
+Authorization flows
+
+---
+*OAUTH-HAIKU*

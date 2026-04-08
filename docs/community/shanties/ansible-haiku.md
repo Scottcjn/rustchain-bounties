@@ -1,13 +1,8 @@
-# Ansible Haiku
+# Ansible (2012)
 
-*Ansible: The simple IT automation engine*
+Playbooks write
+SSH connects
+Idempotent runs
 
-```
-Playbooks run smooth
-No agents required to install
-Ansible connects
-```
-
-**Topic**: DevOps Tool  
-**Created**: 2026-04-08  
-**Reward**: 5 RTC
+---
+*ANSIBLE-HAIKU*

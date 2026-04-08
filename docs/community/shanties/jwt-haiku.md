@@ -1,5 +1,8 @@
-# JWT Haiku
+# JWT (2010)
 
-JWT
-JSON Web Token
+Token encodes
+Claims verify
 Stateless auth
+
+---
+*JWT-HAIKU*

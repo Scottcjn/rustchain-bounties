@@ -1,5 +1,8 @@
-# SQLite Haiku
+---
+title: SQLite Haiku
+---
 
-SQLite
-Embedded database
-Zero config
+Lightweight file
+Zero configuration DB
+Embedded apps
+{/meta}

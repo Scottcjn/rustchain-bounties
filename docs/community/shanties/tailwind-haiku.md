@@ -1,5 +1,8 @@
-# Tailwind CSS Haiku
+---
+title: Tailwind Haiku
+---
 
-Tailwind CSS
-Utility classes
-Rapid UI
+Utility CSS
+Rapid styling
+Responsive design
+{/meta}

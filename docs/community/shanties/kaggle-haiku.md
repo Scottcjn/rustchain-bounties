@@ -1,5 +1,8 @@
-# Kaggle Haiku
+# Kaggle (2010)
 
-Kaggle
-ML competitions
-Dataset hub
+Competitions challenge
+Datasets explore
+Kernels code
+
+---
+*KAGGLE-HAIKU*

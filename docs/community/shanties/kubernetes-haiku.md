@@ -1,8 +1,8 @@
-# Kubernetes (2014)
-
-Pods schedule
-Services expose
-Helm charts install
-
 ---
-*KUBERNETES-HAIKU*
+title: Kubernetes Haiku
+---
+
+Container orchestration
+K8s clusters
+Cloud native
+{/meta}

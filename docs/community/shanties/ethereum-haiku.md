@@ -1,8 +1,8 @@
-# Ethereum (2015)
+---
+title: Ethereum Haiku
+---
 
 Smart contracts
-EVM executes
-ETH stakes
-
----
-*ETHEREUM-HAIKU*
+EVM runtime
+DeFi ecosystem
+{/meta}

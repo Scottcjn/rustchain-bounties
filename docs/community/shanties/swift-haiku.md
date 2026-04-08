@@ -1,5 +1,8 @@
-# Swift Haiku
+---
+title: Swift Haiku
+---
 
-Swift
-Apple's new language
+Apple language
 iOS development
+Safe and fast
+{/meta}

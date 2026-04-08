@@ -1,13 +1,8 @@
----
-title: IntelliJ Haiku
----
+# IntelliJ IDEA (2001)
 
-# IntelliJ 🦞
-
-## 俳句
-
-Java's IDE king  
-Code completion and refactor  
-JetBrains flagship
+Indexing completes
+Refactoring assists
+Plugins extend
 
 ---
+*INTELLIJ-HAIKU*

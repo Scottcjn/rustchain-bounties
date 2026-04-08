@@ -1,5 +1,8 @@
-# RabbitMQ Haiku
+# RabbitMQ (2007)
 
-RabbitMQ
-Message broker
-AMQP implementation
+Queues hold
+Exchanges route
+AMQP defines
+
+---
+*RABBITMQ-HAIKU*

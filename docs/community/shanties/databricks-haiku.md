@@ -1,13 +1,8 @@
----
-title: Databricks Haiku
----
+# Databricks (2013)
 
-# Databricks 🦞
-
-## 俳句
-
-Lakehouse emerges  
-Spark unified analytics  
-Data unified
+Spark runs
+Notebooks collaborate
+Lakehouse architecture
 
 ---
+*DATABRICKS-HAIKU*

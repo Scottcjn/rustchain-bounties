@@ -1,5 +1,8 @@
-# Express Haiku
+---
+title: Express Haiku
+---
 
-Express
-Node.js web framework
-Minimal middleware
+Node.js backend
+Minimalist web framework
+REST APIs
+{/meta}

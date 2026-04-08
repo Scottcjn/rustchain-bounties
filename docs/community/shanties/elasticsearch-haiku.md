@@ -1,8 +1,8 @@
-# Elasticsearch (2010)
-
-Search clusters
-Kibana visualizes
-Indices shard
-
 ---
-*ELASTICSEARCH-HAIKU*
+title: Elasticsearch Haiku
+---
+
+Full-text search
+Distributed analytics
+Log analysis
+{/meta}

@@ -1,5 +1,8 @@
-# Kafka Haiku
+# Apache Kafka (2011)
 
-Kafka
-Event streaming
-High throughput
+Topics partition
+Consumer groups
+Stream processes
+
+---
+*KAFKA-HAIKU*

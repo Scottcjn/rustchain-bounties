@@ -1,11 +1,8 @@
-# WiFi Haiku
+# WiFi (1997)
 
-```
-Wireless waves connect
-No cables, pure freedom
-Internet everywhere
-```
+Wireless waves
+SSID connects
+Password protects
 
-- **System**: WiFi (1997)
-- **Era**: Wireless Networking
-- **Bounty**: 5 RTC
+---
+*WIFI-HAIKU*

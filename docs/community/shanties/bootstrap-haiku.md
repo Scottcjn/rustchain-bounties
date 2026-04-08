@@ -1,8 +1,8 @@
-# Bootstrap (2011)
-
-Grid system
-Components ready
-CDN includes
-
 ---
-*BOOTSTRAP-HAIKU*
+title: Bootstrap Haiku
+---
+
+CSS framework
+Responsive grid
+Twitter origin
+{/meta}

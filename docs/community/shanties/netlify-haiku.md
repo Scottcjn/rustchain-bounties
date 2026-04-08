@@ -1,8 +1,8 @@
-# Netlify (2014)
-
-Jamstack hosts
-Forms submit easily
-Deploy triggers fire
-
 ---
-*NETLIFY-HAIKU*
+title: Netlify Haiku
+---
+
+Static hosting
+Jamstack deployments
+Global CDN
+{/meta}

@@ -1,5 +1,8 @@
-# InfluxDB Haiku
+---
+title: InfluxDB Haiku
+---
 
-InfluxDB
 Time series DB
-Monitoring
+Monitoring metrics
+IoT data
+{/meta}
