@@ -1,57 +1,56 @@
 # Stargazing Haiku Collection
 
 ## About
-Marvel at the night sky through haiku poetry. Stars have fascinated humans for millennia.
+This collection celebrates stargazing and astronomy through haiku poetry. From constellations to meteor showers, explore the night sky.
 
 ## Haiku Categories
 
-### Night Sky
+### Objects
 - stars
-- constellations
-- Milky Way
 - planets
+- moon
+- galaxies
 
-### Stargazing Moments
-- telescope viewing
+### Events
 - meteor showers
-- camping under stars
-- moonlit nights
-
-### Celestial Events
 - eclipses
-- comets
-- supermoons
-- planetary alignments
+- auroras
+- occultations
+
+### Equipment
+- telescopes
+- binoculars
+- star charts
+- apps
 
 ## Sample Haiku
 
 ```
-Stars fill the sky
-Pinpricks of ancient light
-Looking into past
+Point at the sky
+Thousands of stars appear
+Universe vast
 ```
 
 ```
-Telescope points
-Jupiter's moons come into
-Tiny bright dots
+Shooting star
+Wish upon the light
+Night magic
 ```
 
 ```
-Meteor shower
-Wishes made on shooting stars
-Night fills with magic
+Moon craters glow
+Telescope brings it close
+Lunar landscape
 ```
 
 ## Themes
 - Astronomy
+- Night sky
 - Wonder
 - Exploration
-- Beauty
-- Universe
 
 ## Related Categories
 - astronomy.md
-- night.md
-- sky.md
 - space.md
+- night.md
+- science.md

@@ -1,57 +1,56 @@
 # Sunrise Haiku Collection
 
 ## About
-Greet the dawn through haiku poetry. Each sunrise brings new hope.
+This collection celebrates sunrises and new beginnings through haiku poetry. From dawn breaking to first light, embrace the day.
 
 ## Haiku Categories
 
-### Sunrise Moments
-- first light
-- colors at dawn
-- morning mist
-- early bird
+### Morning Light
+- colors in sky
+- gradual brightening
+- mist and fog
+- quiet world
 
-### Sunrise Places
-- mountains
-- beaches
+### Experience
+- early morning
+- mountaintop views
+- beach sunrises
 - city skylines
-- countryside
 
-### Sunrise Feelings
+### Feelings
 - hope
 - renewal
 - peace
-- gratitude
+- wonder
 
 ## Sample Haiku
 
 ```
-Darkness retreats
-Orange paints the eastern sky
-New day begins now
+Dark sky turns pink
+Sun rises over the hills
+New day begins
 ```
 
 ```
-Mountain peak glows
-First light touches summit
-World awakens slow
+Misty morning
+Golden light breaks through clouds
+World awakens
 ```
 
 ```
-Dawn breaks soft
-Birds begin their songs clear
-Hope rises high
+Early runner
+First light guides the way
+Peace in motion
 ```
 
 ## Themes
 - New beginnings
-- Light
-- Hope
-- Beauty
-- Morning
+- Nature's beauty
+- Morning routine
+- Optimism
 
 ## Related Categories
-- morning.md
-- sky.md
 - nature.md
+- morning.md
 - light.md
+- hope.md
