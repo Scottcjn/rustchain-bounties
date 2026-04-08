@@ -1,135 +1,82 @@
 # Art Haiku Collection
 
-## Art Movements
+## Art Forms
 ```
-Impressionism
-Light and color captures
-Monet painted
+Paint brush strokes
+Canvas transforms
+Colors blend
 ```
 
 ```
-Surrealism dreams
-Dali melting clocks
-Dalí
+Sculpture carves
+Stone becomes form
+Marble breathes
+```
+
+## Art Movements
+```
+Impressionism
+Light captures moment
+Monet paints
 ```
 
 ```
 Abstract art
-Shapes and colors free
+Emotion expressed
 Kandinsky
 ```
 
+## Artists
 ```
-Pop culture art
-Warhol Campbell's soup
-Commercial
+Van Gogh stars
+Starry night glows
+Sunflowers
+```
+
+```
+Da Vinci draws
+Renaissance master
+Mona Lisa
 ```
 
 ## Digital Art
 ```
-Procreate draws
-iPad art creation
-Brush studio
-```
-```
-Photoshop edits
-Image manipulation
-Pixel perfect
-```
-```
-Midjourney creates
-AI art from prompt
-Imagination
-```
-```
-Stable Diffusion
-Open source AI art
-Local run
+Photoshop creates
+Digital brushes
+Pixel art
 ```
 
-## Art Tools
+## Street Art
 ```
-Wacom tablet
-Digital pen pressure
-Drawing
-```
-```
-Blender creates
-3D art models
-Render
-```
-```
-Figma designs
-UI and icons
-Vector
-```
-```
-Canva easy
-Templates for all
-Social media
+Graffiti murals
+Banksy mystery
+Walls transform
 ```
 
-## Art Institutions
+## Photography
 ```
-MoMA modern
-New York museum
-Picasso
-```
-```
-Louvre Paris
-Mona Lisa hidden
-Crowds gather
-```
-```
-Tate modern
-Industrial converted
-Contemporary
-```
-```
-Uffizi Florence
-Renaissance masters
-Botticelli
+Shutter clicks
+Moment captured
+Light freezes
 ```
 
-## Art Terms
+## Art Galleries
 ```
-Perspective depth
-Vanishing point
-Space created
+Museums house
+Masterpieces displayed
+Appreciate
 ```
-```
-Color theory
-Complementary harmony
-Wheel
-```
-```
-Composition rule
-Rule of thirds
-Balance
-```
-```
-Texture adds
-Visual touch
-Surface
 
-## NFT Art
+## Art Market
 ```
-OpenSea trades
-NFT marketplace
-Digital art
+Auctions bid
+Prices skyrocket
+Collect art
 ```
+
+## Future Art
 ```
-Foundation art
-Curated NFT
-Community
-```
-```
-SuperRare unique
-One of one art
-Verified
-```
-```
-Rarible creates
-NFT minting
-Ownership
+NFT art
+Blockchain ownership
+Digital scarce
 ```

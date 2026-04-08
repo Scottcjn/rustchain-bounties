@@ -2,134 +2,79 @@
 
 ## Music Genres
 ```
-Jazz improvisation
-Spontaneous melodies
-Swing era
-```
-
-```
-Classical symphony
-Orchestra performs
-Beethoven
-```
-
-```
 Rock and roll
-Electric guitars rage
-Classic era
+Electric guitars
+Energy flows
+```
+
+```
+Classical music
+Orchestra plays
+Symphony flows
+```
+
+```
+Jazz improvisation
+Spontaneous notes
+Syncopation
 ```
 
 ```
 Hip hop beats
-Rhyme and rhythm spoken
-Culture born
-```
-
-## Music Tech
-```
-Spotify algorithm
-Discover weekly mixes
-New artists found
-```
-```
-GarageBand creates
-Music production
-Mac studio
-```
-```
-Ableton Live
-Electronic music
-DAW powerful
-```
-```
-FL Studio beat
-Producer makes loops
-Trap beat
+Rhythm and rhymes
+Freestyle
 ```
 
 ## Instruments
 ```
 Piano keys
-Eighty-eight keys
-Classical foundation
-```
-```
-Guitar strings
-Fingerstyle fingerpick
-Acoustic
-```
-```
-Drums keep time
-Four on the floor
-Rhythm section
-```
-```
-Synthesizer
-Electronic sounds
-Oscillators
+Fingers dance
+Melody flows
 ```
 
-## Music Industry
 ```
-Apple Music
-High fidelity audio
-Lossless streaming
+Guitar strings
+Fingerstyle
+Acoustic warmth
 ```
+
 ```
-Tidal pays
-Artist royalties fair
-Quality
+Drums beat
+Rhythm section
+Percussion
 ```
+
+## Music Production
 ```
-Bandcamp supports
-Independent artists
-Direct payment
+DAW software
+Pro tools creates
+Beats produce
 ```
+
+## Music Streaming
 ```
-SoundCloud uploads
-Discovery platform
-Unsigned talent
+Spotify plays
+Algorithms recommend
+Discover music
+```
+
+## Live Music
+```
+Concerts live
+Crowd energy
+Live experience
 ```
 
 ## Music Theory
 ```
 Scales practice
-Major minor modes
-Harmony
-```
-```
-Chord progression
-Roman numerals analysis
-Song structure
-```
-```
-Tempo marking
-Allegro andante largo
-Speed
-```
-```
-Time signature
-Four four time
-Counting beats
+Fingering patterns
+Practice
 ```
 
-## Music Streaming
+## Musicians
 ```
-Shazam identifies
-Song recognized
-Instantly
+Artists create
+Music expresses
+Soul speaks
 ```
-```
-Lyrics sync
-Karaoke ready
-Sing along
-```
-```
-Playlist curation
-Mood based mixes
-Algorithms
-```
-```
-Podcast music
-Background sounds
-Focus beats

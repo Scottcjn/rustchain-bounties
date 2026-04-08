@@ -4,133 +4,79 @@
 ```
 Fantasy worlds
 Dragons and magic
-Tolkien
+Imagination
 ```
 
 ```
 Mystery solves
-Whodunit puzzles
-Sherlock
+Detective investigates
+Clues reveal
 ```
 
 ```
-Science fiction
-Future tech societies
-Asimov
+Romance loves
+Hearts entwine
+Passion
 ```
 
 ```
-Romance love
-Happily ever after
-Jane Austen
+Sci fi future
+Space operas
+Technology
 ```
 
-## Reading Tech
+## Reading
 ```
-Kindle e-ink
-Digital pages turn
-E-reader
-```
-```
-Audible listens
-Audiobooks narrated
-Stories heard
-```
-```
-Kobo reader
-EPUB format
-Open ecosystem
-```
-```
-Book app
-Reading tracker
-Pages read
-```
-
-## Book Apps
-```
-Goodreads tracks
-Reading challenge
-Shelves
-```
-```
-Storytel audio
-Unlimited listening
-Subscription
-```
-```
-Scribd library
-Ebooks and audio
-All you can
-```
-```
-Perlego textbook
-Academic access
-Subscription
+Pages turn
+Stories unfold
+Words absorb
 ```
 
 ## Publishing
 ```
-Amazon KDP
-Self publishing
-Indie author
-```
-```
-Medium writes
-Publication platform
-Newsletter
-```
-```
-Substack publishes
-Email newsletter
-Direct reader
-```
-```
-Patreon supports
-Exclusive content
-Crowdfunding
-```
-
-## Literary Terms
-```
-Plot unfolds
-Conflict rising action
-Climax resolves
-```
-```
-Protagonist
-Hero's journey
-Character arc
-```
-```
-Foreshadowing
-Hints at ending
-Reveal
-```
-```
-Pacing narrative
-Tension builds
-Page turner
+Authors write
+Editors refine
+Publish print
 ```
 
 ## Libraries
 ```
-Public library
-Free books community
-Public good
+Library quiet
+Books line shelves
+Knowledge
 ```
+
+## Book Clubs
 ```
-Libby app
-Library digital
-Borrow ebook
+Discuss read
+Share perspectives
+Community
 ```
+
+## Audiobooks
 ```
-OverDrive provides
-Digital lending
-Public
+Listen reads
+Audible stories
+Commute companion
 ```
+
+## E-books
 ```
-Little Free Library
-Take a book share
-Neighborhood
+Digital pages
+Kindle reads
+Environment
+```
+
+## Bookstores
+```
+Browse shelves
+Independent shops
+Discovery
+```
+
+## Future Books
+```
+AI authors
+Stories generate
+Words create
 ```

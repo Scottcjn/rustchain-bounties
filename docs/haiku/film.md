@@ -2,135 +2,81 @@
 
 ## Movie Genres
 ```
-Sci-fi future
-Aliens and spaceships
-Blade Runner
-```
-
-```
-Horror frightens
-Jump scares scare
-Nightmare
+Action films
+Explosions and chase
+Adrenaline
 ```
 
 ```
 Comedy laughs
-Romantic comedies
-Feel good
+Humour entertains
+Comedian stars
 ```
 
 ```
-Action explosions
-Heroes save the day
-Blockbuster
+Horror scares
+Thrillers suspense
+Fear factor
 ```
 
-## Film Production
 ```
-Adobe Premiere
-Video editing
-Timeline
-```
-```
-DaVinci Resolve
-Color grading
-Professional
-```
-```
-Final Cut Pro
-Mac video editing
-Apple ecosystem
-```
-```
-iMovie simple
-Beginner editing
-Easy cuts
+Sci fi future
+Aliens and space
+Imagination
 ```
 
-## Film Awards
+## Film Making
 ```
+Director calls
+Camera rolls
+Action
+```
+
+## Actors
+```
+Method acting
+Character becomes
+Emotion draws
+```
+
+## Film Festivals
+```
+Cannes premieres
+Awards season
 Oscar night
-Academy Awards glitter
-Best picture
-```
-```
-Cannes festival
-Palme d'Or awarded
-Art cinema
-```
-```
-Sundance indie
-Independent films
-Discovery
-```
-```
-Golden Globes
-Hollywood foreign press
-Television too
 ```
 
-## Cinema Tech
+## Streaming
 ```
-IMAX experience
-Giant screen immersion
- documentaries
-```
-```
-Dolby Cinema
-Atmos sound
-Premium
-```
-```
-3D glasses
-Pop-out effects
-Avatar
-```
-```
-HFR high frame
-The Hobbit流畅
-Innovation
+Netflix binge
+Originals stream
+Watch anytime
 ```
 
-## Film Terms
+## Animation
 ```
-Close-up emotion
-Medium shot narrative
-Wide shot scene
-```
-```
-Cut to transition
-Dissolve fade
-Montage
-```
-```
-Screenplay script
-Dialogue and action
-Storytelling
-```
-```
-Storyboard visual
-Pre-visualization
-Planning
+Disney magic
+Pixar creates
+Dreams animate
 ```
 
-## Streaming Films
+## Documentaries
 ```
-Netflix original
-Award winning content
-Binge watch
+Real stories
+Document truth
+Films reveal
 ```
+
+## Film History
 ```
-Amazon Prime
-Movie selection
-Originals
+Silent films
+Talkies arrive
+Cinema evolves
 ```
+
+## Future Film
 ```
-Disney+ legacy
-Classic animations
-Marvel
-```
-```
-Hulu new
-Current releases
-Cable alternative
+VR movies
+Immersive cinema
+Experience
 ```
