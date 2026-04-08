@@ -1,5 +1,13 @@
-# Rust Haiku
+---
+title: Rust Haiku
+---
 
-Rust
-Memory safe
-Systems programming
+# Rust 🦞
+
+## 俳句
+
+Memory safe dreams  
+Ownership moves through the code  
+Fearless concurrency
+
+---
