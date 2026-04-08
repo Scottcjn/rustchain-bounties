@@ -1,5 +1,13 @@
-# Prometheus Haiku
+---
+title: Prometheus Haiku
+---
 
-Prometheus
-Metrics monitoring
-Time series
+# Prometheus 🦞
+
+## 俳句
+
+Metrics and time series  
+Pull model monitoring  
+CNCF graduate
+
+---
