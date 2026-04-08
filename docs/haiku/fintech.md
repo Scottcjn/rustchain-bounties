@@ -2,126 +2,110 @@
 
 ## Payment Systems
 ```
-Visa Mastercard
-Cards swipe contactless
-Purchase complete
+Stripe processes
+Online payments smooth
+Checkout converts
 ```
 
 ```
-PayPal online
-Digital wallet connects
-Global payments
+PayPal trusted
+Digital wallet flows
+Global reach
 ```
 
 ```
-Stripe checkout
-Developer friendly API
-Subscription management
+Square reader
+Card payments accept
+Mobile point of sale
 ```
 
-```
-Square POS
-Small business payments
-Tap to pay
-```
-
-## Banking Tech
+## Banking
 ```
 Open banking
-APIs unlock account data
-Third parties join
+APIs share data
+Innovation blooms
+```
+```
+Neobanks rise
+Mobile first banking
+No branches
 ```
 
+## Lending
 ```
-Neobank rises
-No branches just app
-Gen Z loves it
-```
-
-```
-ACH transfers
-Automated clearing house
-Batched daily
-```
-
-```
-SWIFT messages
-International wires move
-Cross-border settled
-```
-
-## Crypto Finance
-```
-DeFi summer
-Uniswap swaps tokens
-Liquidity pools
-```
-
-```
-Aave lends out
-Collateral deposits earn
-Interest accrues
-```
-
-```
-Compound accrues
-Algorithmic rates shift
-Supply earns
-```
-
-```
-MakerDAO stable
-Dai maintains dollar peg
-Collateralized debt
-```
-
-## Stock Trading
-```
-Robinhood trades
-Commission free trading
-Gamified investing
-```
-
-```
-NASDAQ listing
-Tech stocks on exchange
-Index tracks
-```
-
-```
-Dark pools trade
-Large orders hidden away
-Price discovery
-```
-
-```
-High frequency
-Algorithms trade microseconds
-Market maker
-```
-
-## Insurtech
-```
-Lemonade claims
-AI adjusts instantly
-No paperwork
+Loan approvals
+Credit scoring models
+Risk assessed
 ```
 
 ```
 Peer to peer
-Risk shared among friends
-Mutual insurance
+Lenders borrowers match
+Platform facilitates
 ```
 
-## Regtech
+## Investing
 ```
-KYC compliance
-Identity verified
-AML monitors
+Robinhood trades
+Commission-free trading
+Democratized markets
 ```
 
 ```
-Sandbox testing
-Innovation protected
-Regulators guide
+ETF tracks
+Index funds diversified
+Passively invest
+```
+
+## Crypto Finance
+```
+Coinbase trades
+Cryptocurrency exchange
+On-ramp crypto
+```
+
+```
+DeFi yields
+Yield farming earns
+Staking rewards
+```
+
+## RegTech
+```
+Compliance automated
+Regulations code
+KYC verified
+```
+
+## Insurtech
+```
+Policy issued
+Digital insurance
+Claims fast
+```
+
+## Personal Finance
+```
+Budget tracks
+Expenses categorized
+Savings grows
+```
+
+## Embedded Finance
+```
+Buy now pay later
+BNPL installments
+Credit extends
+```
+
+## Future Fintech
+```
+CBDC central
+Digital currency
+Programmable money
+```
+```
+Open finance
+Unified financial API
+Data liberation
 ```
