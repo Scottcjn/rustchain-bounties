@@ -65,3 +65,75 @@ Tomorrow's machines
 Break today's encryption walls
 Prepare now, safe
 ```
+
+## Public Key
+
+```
+RSA protects
+Asymmetric keys
+Security
+```
+
+## Symmetric
+
+```
+Same key both ends
+Shared secret
+Encryption
+```
+
+## Digital Certificates
+
+```
+Trust chain
+Certificates verify
+Identity
+```
+
+## Steganography
+
+```
+Hidden in images
+Messages in pixels
+Secret
+```
+
+## Homomorphic
+
+```
+Compute encrypted
+Process without decrypting
+Privacy
+```
+
+## Post Quantum
+
+```
+New algorithms
+Lattice based security
+Future
+```
+
+## Multiparty
+
+```
+Threshold schemes
+Secret sharing
+Collaboration
+```
+
+## Crypto Analysis
+
+```
+Break codes
+Vulnerabilities find
+Security
+```
+
+## Smart Contracts
+
+```
+Code is law
+Self-executing
+Trustless
+```

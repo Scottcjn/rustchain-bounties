@@ -65,3 +65,75 @@ Chess on a board
 Every move calculated
 Win the endgame
 ```
+
+## Entrepreneurship
+
+```
+Risk takers rise
+Failures teach the best lessons
+Try again
+```
+
+## Management
+
+```
+Teams align
+Goals set
+Achieve
+```
+
+## Sales
+
+```
+Close deals
+Revenue grows
+Success
+```
+
+## Customer Success
+
+```
+Support smiles
+Problems solved
+Retention
+```
+
+## Operations
+
+```
+Process flows
+Efficiency
+Optimization
+```
+
+## Corporate Culture
+
+```
+Values shape
+Environment
+Belong
+```
+
+## Business Ethics
+
+```
+Integrity
+Trust builds
+Reputation
+```
+
+## Scaling
+
+```
+Grow fast
+Systems scale
+Success
+```
+
+## Exit Strategy
+
+```
+IPO rings
+Acquisition
+Journey end
+```
