@@ -2,135 +2,74 @@
 
 ## Platforms
 ```
-Twitter now X
-Microblogging debates
-Trending topics
-```
-
-```
-Facebook social
-Old network still thrives
-News feed scrolls
+Twitter posts
+Tweets retweet
+Viral moments
 ```
 
 ```
 Instagram photos
-Square images filtered
-Stories vanish
+Filters enhance
+Grid perfect
 ```
 
 ```
+Facebook connects
+Friends timeline
+Status updates
+```
+
+## Content Types
+```
+Videos short
 TikTok dances
-Short videos viral
-Algorithm knows
+Trends birth
 ```
 
-## Content Creation
 ```
-YouTube videos
-Monetization flows
-Creator economy
-```
-```
-Twitch streams
-Live engagement
-Subscribed
-```
-```
-Podcasts audio
-Long form conversations
-Spotify plays
-```
-```
-Substack writes
-Newsletter subscriptions
-Direct reader
+Stories vanish
+Ephemeral content
+Moment captured
 ```
 
-## Social Features
+## Influencers
 ```
-Hashtags trend
-Discoverability
-Viral moment
-```
-```
-Retweets spread
-Content amplified
-Network effect
-```
-```
-DM messages
-Private conversations
-End to end
-```
-```
-Stories ephemeral
-Twenty-four hours
-Temporary
-```
-
-## Influencer Culture
-```
-Followers count
-Influence measured
+Followers grow
+Influencer life
 Brand deals
 ```
+
+## Engagement
 ```
-TikTok creator
-Viral fame overnight
-Algorithm
-```
-```
-YouTube influencer
-Merch and sponsorships
-Business
-```
-```
-Micro influencer
-Niche audience
-Authentic
+Likes count
+Comments feedback
+Share spreads
 ```
 
-## Social Issues
+## Marketing
 ```
-Echo chambers
-算法 bubbles
+Ads target
+Audience reached
+Conversions
+```
+
+## Community
+```
+Groups form
+Tribes unite
+Online family
+```
+
+## Privacy
+```
+Data tracks
 Privacy concerns
-```
-```
-Misinformation
-Viral lies spread
-Fact check
-```
-```
-Cyberbullying
-Online harassment
-Reporting
-```
-```
-Digital wellbeing
-Screen time tracked
-Balance
+Settings change
 ```
 
-## Tech Features
+## Future Social
 ```
-Dark mode
-Easy on the eyes
-Night browsing
-```
-```
-Two factor auth
-Account secured
-Login verified
-```
-```
-Data portability
-Export your posts
-Switching
-```
-```
-Privacy settings
-Control your data
-Permissions
+Metaverse social
+Virtual presence
+Avatar world
 ```

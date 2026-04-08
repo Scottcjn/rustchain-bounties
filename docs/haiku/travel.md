@@ -1,113 +1,82 @@
 # Travel Haiku Collection
 
-## Travel Platforms
+## Destinations
 ```
-Airbnb stays
-Unique accommodations
-Homes not hotels
-```
-
-```
-Booking.com
-Hotels flights cars
-One stop
+Paris romantic
+Eiffel towers
+Love city
 ```
 
 ```
-Expedia bundles
-Packages save
-Vacations
+Tokyo bright
+Neon lights
+Future past
 ```
 
 ```
-Vrbo rentals
-Private vacation
-Homes
+New york city
+Times square
+Dreams city
+```
+
+## Travel Types
+```
+Backpack travels
+Adventure awaits
+Solo journeys
 ```
 
 ## Transportation
 ```
-United Airlines
-Star Alliance global
-Miles
-```
-```
-Delta flies
-Premium service
-Main cabin
-```
-```
-Amtrak rails
-Cross country scenic
-Train travel
-```
-```
-Greyhound buses
-Budget travel
-Intercity
+Planes fly
+Wings span
+Travel fast
 ```
 
-## Travel Tech
 ```
-Google Maps
-Street view explores
-Navigation
-```
-```
-TripAdvisor reviews
-Local recommendations
-Trust
-```
-```
-Hopper predicts
-Flight price trends
-Book optimal
-```
-```
-Airline apps
-Mobile boarding
-Seat selection
+Trains ride
+Scenic routes
+Rails connect
 ```
 
-## Destinations
+## Adventure
 ```
-Paris Eiffel
-City of lights
-Romance
-```
-```
-Tokyo modern
-Ancient meets future
-Sushi
-```
-```
-New York city
-Times Square lights
-Broadway
-```
-```
-Bali beaches
-Tropical paradise
-Surf
+Hiking trails
+Mountains climb
+Summit reached
 ```
 
-## Travel Tips
+## Beach
 ```
-Travel hacking
-Miles and points
-Free flights
+Tropical waves
+White sand beach
+Paradise found
 ```
+
+## Cultural
 ```
-Packing light
-Carry on only
-Minimalist
+Museum visits
+History learned
+Culture shared
 ```
+
+## Solo Travel
 ```
-Travel insurance
-Medical coverage
-Peace
+Alone explores
+Independence grows
+Self discovery
 ```
+
+## Travel Memories
 ```
-ESIM data
-Roaming without
-Connected
+Photos capture
+Moments last
+Memories
+```
+
+## Future Travel
+```
+Space tourism
+Orbit experiences
+Stars travel
+```

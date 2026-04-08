@@ -1,135 +1,78 @@
-# Education Technology Haiku Collection
+# Education Haiku Collection
+
+## Learning
+```
+Books open
+Knowledge grows
+Minds expand
+```
+
+## Schools
+```
+Classrooms learn
+Teachers guide
+Students grow
+```
+
+## Higher Ed
+```
+University
+Degrees pursue
+Career builds
+```
 
 ## Online Learning
 ```
 Coursera courses
-University content online
-Learn anything
+Learn online
+Skills gain
 ```
 
+## Teaching
 ```
-edX MITx
-Free education global
-Knowledge shared
-```
-
-```
-Khan Academy
-Free school subjects
-Salman founded
+Lessons teach
+Explanations clarify
+Understanding
 ```
 
+## Students
 ```
-Udemy courses
-Lifetime access
-Self paced
-```
-
-## Language Learning
-```
-Duolingo gamifies
-Language learning fun
-Streak maintained
-```
-```
-Rosetta Stone
-Immersive learning
-Flashcards
-```
-```
-Babbel speaks
-Conversation focused
-Practical
-```
-```
-HelloTalk tandem
-Native speakers exchange
-Cultural
-```
-
-## EdTech Tools
-```
-Notion workspace
-Notes and wiki combined
-Productivity
-```
-```
-Obsidian links
-Knowledge graph builds
-Bidirectional
-```
-```
-Anki flashcards
-Spaced repetition
-Memory
-```
-```
-Quizlet study
-Flashcard sets
-Exam prep
-```
-
-## Educational Concepts
-```
-Bloom's taxonomy
-Learning levels mapped
-Remember create
-```
-```
-Pomodoro timer
-Focused work intervals
-Break time
-```
-```
-Growth mindset
-Effort matters
-Carol Dweck
-```
-```
-Active recall
-Retrieval practice
-Study smart
-```
-
-## Remote Learning
-```
-Zoom classroom
-Video call education
-Attendance taken
-```
-```
-Google Classroom
-Assignments distributed
-Grades posted
-```
-```
-Canvas LMS
-Learning management
-Discussion boards
-```
-```
-Blackboard old
-Enterprise education
-Course management
+Study hard
+Exams approach
+Grades reflect
 ```
 
 ## STEM Education
 ```
-Code.org teaches
-Hour of code
-Kids coding
+Science math
+Engineering tech
+Future builds
 ```
+
+## Languages
 ```
-Scratch block
-Programming basics
-Animated
+Words acquire
+Practice makes
+Fluency grows
 ```
+
+## Research
 ```
-LEGO Education
-Robotics building
-STEM learning
+Labs discover
+Data analyzes
+Papers publish
 ```
+
+## EdTech
 ```
-Arduino builds
-Physical computing
-Prototypes
+AI tutors
+Personalized
+Future learns
+```
+
+## Future Education
+```
+Metaverse class
+Virtual learning
+Future education
+```

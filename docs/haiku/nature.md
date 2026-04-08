@@ -1,136 +1,83 @@
-# Nature & Environment Haiku Collection
+# Nature Haiku Collection
 
-## Ecosystems
+## Seasons
 ```
-Rainforest canopy
-Biodiversity rich
-Amazon
-```
-
-```
-Coral reefs marine
-Colorful fish swim
-Great barrier
+Spring blooms
+Flowers awaken
+Life returns
 ```
 
 ```
-Tundra frozen
-Permafrost deep
-Arctic
+Summer heat
+Sun beats down
+Beach days
 ```
 
 ```
-Savanna plains
-Grassland safari
-Lions roam
+Autumn leaves
+Colors transform
+Harvest time
 ```
 
-## Climate
+## Weather
 ```
-Climate change
-Global warming rises
-Carbon
-```
-```
-Greenhouse gases
-CO2 methane warming
-Carbon cycle
-```
-```
-Sea level rise
-Coastal cities threatened
-Flooding
-```
-```
-Renewable energy
-Solar wind power
-Clean future
+Rain falls
+Puddles form
+Umbrella up
 ```
 
-## Environmentalism
+## Animals
 ```
-Sustainability
-Reduce reuse recycle
-Green
+Birds fly
+Migration patterns
+Natures way
 ```
+
+## Oceans
 ```
-Recycling bins
-Paper plastic glass
-Sorted
+Waves crash
+Deep blue mystery
+Marine life
 ```
+
+## Forests
 ```
-Composting soil
-Food scraps decompose
-Garden
+Trees tower
+Canopy creates
+Ecosystem
 ```
+
+## Mountains
 ```
-Zero waste
-Plastic free living
-Reusable bags
+Peaks rise
+Summit awaits
+Climber dreams
+```
+
+## Deserts
+```
+Sand dunes
+Endless horizon
+Oasis found
 ```
 
 ## Wildlife
 ```
-Endangered species
-Protection needed
-Poaching
+Safari spots
+Animals roam
+Wild kingdom
 ```
+
+## Climate
 ```
-Polar bears
-Sea ice melting
+Climate shifts
+Global warming
+Sustainability
+```
+
+## Nature Future
+```
 Conservation
-```
-```
-Whale migration
-Journey across oceans
-Breaching
-```
-```
-Bird migration
-Seasons change
-Fly south
-```
-
-## Nature Phenomena
-```
-Aurora borealis
-Northern lights dance
-Solar wind
-```
-```
-Eclipse shadow
-Moon blocks sun
-Totality
-```
-```
-Volcano erupts
-Lava flows
-Mount Saint Helens
-```
-```
-Earthquake tremors
-Seismic waves
-Plate boundaries
-```
-
-## Conservation
-```
-National parks
-Protected wilderness
-Yellowstone
-```
-```
-Marine reserve
-Fishing restricted
-Oceans
-```
-```
-Wind farms
-Clean energy
-Turbines
-```
-```
-Solar panels
-Photovoltaic
-Power
+Protect earth
+Sustainability
 ```
