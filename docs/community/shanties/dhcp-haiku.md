@@ -1,5 +1,8 @@
-# DHCP Haiku
+---
+title: DHCP Haiku
+---
 
-DHCP
 Dynamic host config
 IP assignment
+Automatic
+{/meta}

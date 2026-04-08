@@ -1,5 +1,8 @@
-# DNS Haiku
+---
+title: DNS Haiku
+---
 
-DNS
 Domain name system
-IP lookup
+IP mapping
+Internet directory
+{/meta}

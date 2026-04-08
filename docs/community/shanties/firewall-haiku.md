@@ -1,5 +1,8 @@
-# Firewall Haiku
+---
+title: Firewall Haiku
+---
 
-Firewall
 Network security
-Packet filtering
+Filtering
+Protection
+{/meta}

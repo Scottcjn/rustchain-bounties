@@ -1,5 +1,8 @@
-# Service Mesh Haiku
+---
+title: Service Mesh Haiku
+---
 
-Service Mesh
-Traffic control
-Istio Linkerd
+Microservices infrastructure
+Sidecar proxies
+Traffic management
+{/meta}

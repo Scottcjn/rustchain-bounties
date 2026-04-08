@@ -1,8 +1,8 @@
-# JWT (2010)
-
-Token encodes
-Claims verify
-Stateless auth
-
 ---
-*JWT-HAIKU*
+title: JWT Haiku
+---
+
+JSON web token
+Claims based
+Stateless
+{/meta}

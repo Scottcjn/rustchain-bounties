@@ -1,5 +1,8 @@
-# CDN Haiku
+---
+title: CDN Haiku
+---
 
-CDN
-Content delivery
-Edge caching
+Content delivery network
+Global edge
+Caching
+{/meta}

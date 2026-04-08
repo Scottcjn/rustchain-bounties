@@ -1,8 +1,8 @@
-# VPN (1996)
-
-Tunnel encrypts
-IP masks
-Remote connects
-
 ---
-*VPN-HAIKU*
+title: VPN Haiku
+---
+
+Virtual private network
+Encrypted tunnel
+Remote access
+{/meta}

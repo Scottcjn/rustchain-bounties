@@ -1,5 +1,8 @@
-# GraphQL Haiku
+---
+title: GraphQL Haiku
+---
 
-GraphQL
 Query language
-Ask exactly
+Fetch exactly
+Single request
+{/meta}
