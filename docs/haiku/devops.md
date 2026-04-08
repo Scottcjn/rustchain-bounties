@@ -1,118 +1,67 @@
-# DevOps & Cloud Haiku Collection
+# Haiku: DevOps
 
-## CI/CD Pipelines
-```
-GitHub Actions
-Workflows automate tests
-Deploy on merge
-```
+Five RTC per unique haiku collection.
+
+## Automation
 
 ```
-Jenkins builds
-Continuous integration
-Pipelines flow
+Scripts do the work
+Manual steps fade away
+Efficiency soars
 ```
 
+## CI/CD
+
 ```
-GitLab CI
-DevOps platform unified
-GitOps emerges
+Pipeline builds
+Continuous integration flows
+Deployment happens
 ```
 
 ## Containers
-```
-Docker container
-Lightweight virtualization
-Ship anywhere
-```
 
 ```
-Kubernetes orchestrates
-Pods schedule and scale
-Self-healing runs
+Packaged software
+Shipping everywhere works
+Consistency wins
 ```
 
-## Cloud Platforms
-```
-AWS scales
-EC2 instances spawn
-Lambda responds
-```
+## Infrastructure
 
 ```
-GCP data
-BigQuery analyzes
-Cloud functions
-```
-
-```
-Azure hybrid
-Microsoft's cloud connects
-Enterprise ready
-```
-
-## Infrastructure as Code
-```
-Terraform code
-Infrastructure provisions
-State tracks
-```
-
-```
-Ansible plays
-Configuration management
-Idempotent runs
+Code defines servers
+Infrastructure as software
+Repeatable builds
 ```
 
 ## Monitoring
-```
-Prometheus scrapes
-Metrics collected
-Grafana visualizes
-```
 
-## Logging
 ```
-ELK stack logs
-Elasticsearch searches
-Kibana dashboards
-```
-
-## Service Mesh
-```
-Istio connects
-Microservices traffic
 Observability
+Metrics tell the whole story
+Health is visible
 ```
 
-## Cloud Native
-```
-Knative scales
-Serverless on Kubernetes
-Functions run
-```
-
-## Deployment Strategies
-```
-Blue green deploy
-Zero downtime release
-Traffic switches
-```
+## Collaboration
 
 ```
-Canary tests
-Gradual rollout
-Metrics decide
+Devs and ops
+Breaking down the walls
+Together we ship
 ```
 
-## Future DevOps
+## Speed
+
 ```
-GitOps workflow
-Declarative infrastructure
-Drift detected
+Release faster
+Frequent small changes
+Innovation accelerates
 ```
+
+## Reliability
+
 ```
-Platform engineering
-Internal developer platforms
-Self-service infrastructure
+Stable systems
+Resilience through automation
+Trust in the code
 ```
