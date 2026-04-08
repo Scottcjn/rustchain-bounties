@@ -2,135 +2,85 @@
 
 ## Team Sports
 ```
-Football touchdowns
-Touchdown celebrations
-Super Bowl
+Football field
+Eleven players run
+Goal kicks
 ```
 
 ```
-Basketball hoops
-Three point shots
-March madness
+Basketball
+Court and slam dunk
+Swish scores
 ```
 
 ```
-Soccer fields
-World Cup passion
-Goal
-```
-
-```
-Baseball games
-Home runs and strikes
-World Series
+Baseball diamond
+Pitch throw and bat
+ run hits
 ```
 
 ## Individual Sports
 ```
-Tennis match
-Grand Slam titles
-Wimbledon
-```
-```
-Golf courses
-Masters tournament
-Tiger
-```
-```
-Boxing fights
-Heavyweight champions
-Ringside
-```
-```
-Wrestling match
-Championship bout
-Pin
+Tennis serves
+Racquet swings
+Love game
 ```
 
-## Olympic Sports
 ```
-Running tracks
-Olympic records
-Faster higher
+Golf swings
+Course challenges
+Par scores
 ```
+
 ```
-Swimming pools
-Laps timed
-Michael Phelps
-```
-```
-Gymnastics scores
-Perfect ten
-Nadia
-```
-```
-Figure skating
-Spins and jumps
-Gold medal
+Swimming laps
+Pool lengths timed
+Records break
 ```
 
 ## Extreme Sports
 ```
 Skateboarding
-Tony Hawk ollie
-Vert
+Parks and rails
+Kickflip lands
 ```
+
 ```
 Surfing waves
-Pipeline barrels
-Kelly Slater
+Ocean rides
+Tube riding
 ```
+
+## Combat Sports
+```
+Boxing rings
+Punches thrown
+Champion wins
+```
+
+```
+MMA fights
+Multiple styles
+Submission wins
+```
+
+## Winter Sports
 ```
 Skiing slopes
-Downhill racing
-Alpine
-```
-```
-Snowboarding half
-Freestyle moves
-X Games
+Snow crystals glide
+Downhill fast
 ```
 
-## Sports Tech
+## Water Sports
 ```
-VAR reviews
-Video assistant referee
-Goal or not
-```
-```
-Hawkeye tennis
-Ball tracking
-Line calls
-```
-```
-Wearables track
-Heart rate GPS
-Performance
-```
-```
-Statcast baseball
-Pitch tracking
-Data
+Sailing winds
+Boats navigate
+Regatta race
 ```
 
-## Sports Terms
+## Motor Sports
 ```
-MVP most
-Valuable player
-Season
-```
-```
-Overtime extra
-Sudden death
-Win
-```
-```
-Draft picks
-Teams select players
-Rookies
-```
-```
-Free agency
-Players sign new teams
-Contracts
+Formula One
+Pit stops and speed
+Podium celebrates
 ```

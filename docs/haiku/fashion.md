@@ -1,135 +1,84 @@
 # Fashion Haiku Collection
 
-## Fashion Brands
+## Clothing
 ```
-Supreme box logo
-Streetwear hypebeast
-Drop culture
-```
-
-```
-Nike sneakers
-Air Jordan classics
-Collector
+Denim jeans
+Casual comfort
+Style timeless
 ```
 
 ```
-Louis Vuitton
-Luxury handbags
-Monogram
+Silk dresses
+Elegance flows
+Red carpet
 ```
 
+## Designers
 ```
-Gucci flashy
-Double G logo
-Alessandro
-```
-
-## Fashion Tech
-```
-Amazon Fashion
-Try before buy
-Fit prediction
-```
-```
-AR try on
-Virtual fitting room
-Augmented
-```
-```
-3D printing
-Custom garments
-Made
-```
-```
-Sustainable fashion
-Recycled materials
-Eco conscious
+Coco Chanel
+Little black dress
+Timeless style
 ```
 
-## Fashion Terms
+## Trends
 ```
-Trend cycles
-Spring summer fall
-Fashion week
-```
-```
-Capsule wardrobe
-Essential pieces
-Minimalist
-```
-```
-Fast fashion
-Quick trend turnover
-H&M Zara
-```
-```
-Slow fashion
-Quality over quantity
-Investment
+Fashion weeks
+Runway reveals
+Trendsetters
 ```
 
 ## Accessories
 ```
-Apple Watch
-Wearable tech
-Notifications
-```
-```
-Ray-Ban classic
-Wayfarer sunglasses
-Iconic
-```
-```
-Birkin bag
-Hermès holy grail
-Waitlist
-```
-```
-Rolex watches
-Luxury timepieces
-Investment
+Leather bags
+Craftsmanship
+Status symbol
 ```
 
-## Beauty & Cosmetics
+## Shoes
 ```
-Sephora stocks
-Makeup brands
-Beauty
-```
-```
-Glossier minimal
-Skin first makeup
-Effortless
-```
-```
-MAC Cosmetics
-Pro makeup artistry
-Studio
-```
-```
-Fenty Beauty
-Inclusive shades
-Rihanna
+Sneakers rise
+Comfort meets style
+Athleisure
 ```
 
-## Fashion Icons
+## Jewelry
 ```
-Coco Chanel
-Little black dress
-Timeless
+Diamond rings
+Sparkle and shine
+Eternity
 ```
+
+## Sustainable Fashion
 ```
-Virgil Abloh
-Off-White bridges
-Street luxury
+Eco fabrics
+Recycled materials
+Green style
 ```
+
+## Street Style
 ```
-Anna Wintour
-Vogue editor
-Fashion power
+Urban fashion
+Individuality
+Self expression
 ```
+
+## Beauty
 ```
-Marc Jacobs
-Creative director
-Artistic
+Makeup art
+Colors transform
+Beauty enhance
+```
+
+## Hairstyles
+```
+Hair styling
+Trendy cuts
+Style changes
+```
+
+## Future Fashion
+```
+Digital fashion
+Virtual clothes
+Metaverse style
+```
