@@ -1,5 +1,8 @@
-# Ionic Haiku
+---
+title: Ionic Haiku
+---
 
-Ionic
-Hybrid mobile
-Web technologies
+Mobile framework
+Angular and React
+Cross-platform
+{/meta}

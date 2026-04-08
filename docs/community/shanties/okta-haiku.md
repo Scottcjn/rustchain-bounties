@@ -1,5 +1,8 @@
-# Okta Haiku
+---
+title: Okta Haiku
+---
 
-Okta
 Identity management
-SSO provider
+SSO platform
+IAM
+{/meta}

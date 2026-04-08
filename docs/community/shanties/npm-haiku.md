@@ -1,8 +1,8 @@
-# npm (2010)
-
-Packages install
-Package.json lists
-Node modules grow
-
 ---
-*NPM-HAIKU*
+title: npm Haiku
+---
+
+Node package manager
+Largest registry
+JavaScript world
+{/meta}

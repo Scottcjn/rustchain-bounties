@@ -1,5 +1,8 @@
-# Cargo Haiku
+---
+title: Cargo Haiku
+---
 
-Cargo
 Rust package manager
-Crate dependency
+Crates registry
+Build tool
+{/meta}

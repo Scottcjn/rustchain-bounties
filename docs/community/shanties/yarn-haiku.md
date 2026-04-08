@@ -1,5 +1,8 @@
-# Yarn Haiku
+---
+title: Yarn Haiku
+---
 
-Yarn
-Facebook's package manager
+Package manager
+Facebook creation
 Fast and reliable
+{/meta}

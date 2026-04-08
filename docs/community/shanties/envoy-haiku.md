@@ -1,5 +1,8 @@
-# Envoy Haiku
+---
+title: Envoy Haiku
+---
 
-Envoy
 Proxy sidecar
-High performance
+L7 proxy
+Service mesh
+{/meta}

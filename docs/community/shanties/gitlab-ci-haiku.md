@@ -1,5 +1,8 @@
-# GitLab CI Haiku
+---
+title: GitLab CI Haiku
+---
 
-GitLab CI
-DevOps platform
-Pipeline as code
+GitLab pipelines
+CI/CD code
+Auto DevOps
+{/meta}

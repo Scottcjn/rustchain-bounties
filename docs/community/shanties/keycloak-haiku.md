@@ -1,5 +1,8 @@
-# Keycloak Haiku
+---
+title: Keycloak Haiku
+---
 
-Keycloak
-Open source IDP
+Open source IAM
 Red Hat tool
+SSO
+{/meta}

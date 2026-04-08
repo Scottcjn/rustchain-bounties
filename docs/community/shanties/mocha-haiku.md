@@ -1,5 +1,8 @@
-# Mocha Haiku
+---
+title: Mocha Haiku
+---
 
-Mocha
 JS test framework
 Async support
+BDD/TDD
+{/meta}

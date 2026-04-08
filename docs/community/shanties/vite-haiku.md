@@ -1,5 +1,8 @@
-# Vite Haiku
+---
+title: Vite Haiku
+---
 
-Vite
-Next gen bundler
-Lightning fast
+Build tool
+ES modules
+Fast HMR
+{/meta}

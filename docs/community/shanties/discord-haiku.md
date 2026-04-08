@@ -1,8 +1,8 @@
-# Discord (2015)
-
-Servers chat
-Voice channels buzz
-Bot moderates
-
 ---
-*DISCORD-HAIKU*
+title: Discord Haiku
+---
+
+Chat platform
+Gaming community
+Real-time
+{/meta}

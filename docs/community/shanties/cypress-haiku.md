@@ -1,5 +1,8 @@
-# Cypress Haiku
+---
+title: Cypress Haiku
+---
 
-Cypress
 E2E testing
-Modern web
+JavaScript framework
+Automation browser
+{/meta}

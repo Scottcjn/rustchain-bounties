@@ -1,5 +1,8 @@
-# pnpm Haiku
+---
+title: pnpm Haiku
+---
 
-pnpm
 Fast package manager
 Disk efficient
+Node modules
+{/meta}

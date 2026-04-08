@@ -1,8 +1,8 @@
-# Travis CI (2011)
-
-YAML configures
-Build matrix runs
-Deploy triggers
-
 ---
-*TRAVIS-CI-HAIKU*
+title: Travis CI Haiku
+---
+
+Continuous integration
+Cloud CI service
+GitHub integration
+{/meta}

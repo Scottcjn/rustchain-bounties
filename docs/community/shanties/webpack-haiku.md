@@ -1,5 +1,8 @@
-# Webpack Haiku
+---
+title: Webpack Haiku
+---
 
-Webpack
 Module bundler
-Bundle all assets
+Asset compilation
+Code splitting
+{/meta}

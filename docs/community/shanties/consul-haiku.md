@@ -1,5 +1,8 @@
-# Consul Haiku
+---
+title: Consul Haiku
+---
 
-Consul
-Service discovery
+Service mesh
 HashiCorp tool
+Service discovery
+{/meta}

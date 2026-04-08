@@ -2,12 +2,7 @@
 title: OpenFaaS Haiku
 ---
 
-# OpenFaaS 🦞
-
-## 俳句
-
-Functions as service  
-Serverless in any cloud  
-Scale on demand
-
----
+Serverless functions
+Docker and Kubernetes
+Function as service
+{/meta}

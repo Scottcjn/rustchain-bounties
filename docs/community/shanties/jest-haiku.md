@@ -1,5 +1,8 @@
-# Jest Haiku
+---
+title: Jest Haiku
+---
 
-Jest
 JavaScript testing
-Zero config
+Facebook framework
+Snapshot testing
+{/meta}

@@ -1,5 +1,8 @@
-# S3 Haiku
+---
+title: S3 Haiku
+---
 
-S3
 Object storage
-Buckets of data
+Amazon service
+Scalable
+{/meta}

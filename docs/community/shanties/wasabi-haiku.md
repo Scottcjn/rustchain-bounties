@@ -1,5 +1,8 @@
-# Wasabi Haiku
+---
+title: Wasabi Haiku
+---
 
-Wasabi
-Cheap hot storage
-No egress fees
+Cloud storage
+Low cost S3
+Hot storage
+{/meta}

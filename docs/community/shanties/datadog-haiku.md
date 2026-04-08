@@ -1,13 +1,8 @@
 ---
-title: DataDog Haiku
+title: Datadog Haiku
 ---
 
-# DataDog 🦞
-
-## 俳句
-
-Cloud monitoring  
-APM and log analytics  
-Unified platform
-
----
+Cloud monitoring
+APM and logs
+Infrastructure
+{/meta}

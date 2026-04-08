@@ -2,12 +2,7 @@
 title: New Relic Haiku
 ---
 
-# New Relic 🦞
-
-## 俳句
-
-Observability  
-Application performance monitoring  
-Full stack visibility
-
----
+Application monitoring
+Performance insights
+Observability
+{/meta}
