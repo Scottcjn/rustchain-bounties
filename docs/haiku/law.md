@@ -1,136 +1,84 @@
 # Law Haiku Collection
 
-## Legal Systems
+## Criminal Law
 ```
-Common law precedent
-Case by case
-Judges
+Crimes committed
+Prosecutor proves guilt
+Justice serves
+```
+
+## Civil Law
+```
+Disputes resolve
+Settlements negotiated
+Compensation paid
+```
+
+## Constitutional
+```
+Rights protected
+Constitution guides
+Supreme court rules
+```
+
+## Contract Law
+```
+Agreement binds
+Terms and conditions
+Breach consequences
+```
+
+## Property Law
+```
+Ownership transfers
+Titles transfer
+Deeds recorded
+```
+
+## International Law
+```
+Nations cooperate
+Treaties bind
+Diplomacy works
+```
+
+## Intellectual Property
+```
+Patents grant
+Inventions protected
+Trademarks register
 ```
 
 ```
-Civil law codes
-Statutes written
-France
+Copyright
+Creative works
+Rights reserved
 ```
 
+## Family Law
 ```
-Constitutional
-Supreme law
-Rights
-```
-
-```
-International law
-Between nations
-Treaties
-```
-
-## Legal Fields
-```
-Criminal law
-Prosecution defense
-Justice
-```
-```
-Civil law disputes
-Private conflicts
-Compensation
-```
-```
-Contract law
-Agreement enforce
-Breach
-```
-```
-Property law
-Ownership transfer
-Real estate
-```
-
-## Legal Concepts
-```
-Innocent until
-Proven guilty
-Burden
-```
-```
-Due process
-Fair procedure
-Rights
-```
-```
-Reasonable doubt
-Criminal standard
-Evidence
-```
-```
-Precedent binds
-Stare decisis
-Consistency
-```
-
-## Legal Professions
-```
-Lawyers advocate
-Client representation
-Advocacy
-```
-```
-Judges decide
-Impartial justice
-Court
-```
-```
-Prosecutors charge
-State representation
-Justice
-```
-```
-Paralegals assist
-Case research
-Support
+Divorce settles
+Custody arranged
+Support paid
 ```
 
 ## Corporate Law
 ```
-Incorporation
-Business structure
-LLC corporation
-```
-```
-Securities law
-Investments regulated
-SEC
-```
-```
-Intellectual property
-Patents trademarks
-Copyright
-```
-```
-Employment law
-Worker rights
-Discrimination
+Companies incorporate
+Shareholders vote
+Boards govern
 ```
 
-## Modern Legal
+## Legal Profession
 ```
-Data privacy
-GDPR CCPA
-Protection
+Attorneys argue
+Juries decide
+Verdicts render
 ```
+
+## Future Law
 ```
-Cyber law
-Digital crimes
-Jurisdiction
-```
-```
-Human rights
-International declarations
-Dignity
-```
-```
-Environmental law
-Protection conservation
-Regulation
+AI judges
+Algorithmic justice
+Code law
 ```

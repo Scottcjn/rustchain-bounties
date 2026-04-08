@@ -1,114 +1,84 @@
 # Economics Haiku Collection
 
-## Basics
+## Microeconomics
 ```
-Supply and demand
+Supply demand
 Market equilibrium
 Price signals
 ```
 
+## Macroeconomics
 ```
-Opportunity cost
-Next best alternative
-Scarcity
-```
-
-```
-Inflation rises
-Prices increase
-Currency
+GDP measures
+Economic output
+Growth rates
 ```
 
+## Money
 ```
-Unemployment rate
-Jobless count
-Labor
+Fiat currency
+Trust in government
+Paper value
 ```
 
-## Markets
+## Inflation
 ```
-Stock market
-Exchange trading
-Indices
+Prices rise
+Purchasing power
+Central banks act
 ```
+
+## Trade
 ```
-Bond market
-Debt securities
-Treasury
+Exports imports
+Balance of trade
+Comparative advantage
 ```
+
+## Labor
 ```
-Currency forex
-Dollar euro yen
-Exchange rates
+Wages paid
+Labor markets
+Skills valued
 ```
+
+## Investment
 ```
-Commodities oil
-Gold silver wheat
-Raw materials
+Stocks bonds
+Portfolio diversifies
+Risk returns
 ```
 
 ## Economic Systems
 ```
-Capitalism free
-Market forces
-Profit
+Capitalism
+Free markets trade
+Profit motive
 ```
+
 ```
-Socialism public
+Socialism
 Collective ownership
-Equality
-```
-```
-Communism planned
-State controls
-Marx
-```
-```
-Mixed economy
-Private and public
-Hybrid
+Redistribution
 ```
 
-## Concepts
+## Development
 ```
-GDP growth
-Gross domestic product
-Measure
-```
-```
-Fiscal policy
-Government spending
-Taxes
-```
-```
-Monetary policy
-Interest rates
-Central bank
-```
-```
-Trade balance
-Exports imports
-Current account
+GDP per capita
+Living standards rise
+Emerging markets
 ```
 
-## Economic Theories
+## Economic History
 ```
-Keynesian stimulus
-Government intervention
-Demand
+Industrial revolution
+Machines transform
+Factories rise
 ```
+
+## Future Economics
 ```
-Monetarism money
-Inflation control
-Friedman
-```
-```
-Classical free
-Market self corrects
-Invisible hand
-```
-```
-Behavioral econ
-Psychology in choice
-Nudge
+UBI debates
+Universal basic income
+Automation shifts
 ```
