@@ -1,57 +1,67 @@
-# Science Haiku Collection
+# Haiku: Science
 
-## About
-Explore the wonders of science through haiku poetry. Science reveals the universe's secrets.
+Five RTC per unique haiku collection.
 
-## Haiku Categories
-
-### Scientific Fields
-- physics
-- chemistry
-- biology
-- astronomy
-
-### Science Moments
-- discoveries
-- experiments
-- breakthroughs
-- understanding
-
-### Science Themes
-- curiosity
-- innovation
-- discovery
-- exploration
-
-## Sample Haiku
+## Discovery
 
 ```
-Atom splits wide
-Energy released so bright
-Power understood
+Knowledge expands
+Mysteries unravel slowly
+Truth is revealed
 ```
 
-```
-Stars billions far
-Light travels to reach our eyes
-Looking into past
-```
+## Experiment
 
 ```
-Cells divide now
-Life grows from simple start
-Miracle unfolds
+Testing the hypothesis
+Data proves or disproves
+Science advances
 ```
 
-## Themes
-- Discovery
-- Innovation
-- Knowledge
-- Exploration
-- Wonder
+## Theory
 
-## Related Categories
-- physics.md
-- biology.md
-- astronomy.md
-- technology.md
+```
+Frameworks built
+Explaining how things work
+Understanding grows
+```
+
+## Research
+
+```
+Questions asked
+Investigations follow
+Answers emerge
+```
+
+## Lab
+
+```
+White coats work
+Microscopes and beakers
+Discovery happens
+```
+
+## Innovation
+
+```
+Technology leaps
+Solving problems anew
+Progress continues
+```
+
+## Data
+
+```
+Numbers speak
+Evidence from experiments
+Facts matter most
+```
+
+## Future
+
+```
+Tomorrow's world
+Science will lead the way
+Possibilities endless
+```

@@ -1,58 +1,67 @@
-# Gaming Haiku Collection
+# Haiku: Gaming
 
-## About
-Celebrate video gaming through haiku poetry. Games challenge and entertain us.
+Five RTC per unique haiku collection.
 
-## Haiku Categories
-
-### Game Types
-- action games
-- RPGs
-- puzzle games
-- sports games
-- indie games
-
-### Gaming Moments
-- first playthrough
-- finishing a game
-- gaming with friends
-- speedrunning
-
-### Gaming Culture
-- esports
-- streamers
-- game development
-- community
-
-## Sample Haiku
+## Play
 
 ```
-Controller in hand
-Pixels come alive with
-Adventure awaits
+Fun is the key
+Entertainment in pixels
+Joy in controller
 ```
 
+## Adventure
+
 ```
-Level complete!
-Joy surges through my veins
+Heroes rise up
+Quests await in virtual worlds
+Glory is earned
+```
+
+## Strategy
+
+```
+Mind games are played
+Plans formulated in seconds
 Victory is sweet
 ```
 
+## Multiplayer
+
 ```
-Online players
-Together we fight as one
-Teamwork wins games
+Friends gather online
+Teamwork brings down enemies
+Together we win
 ```
 
-## Themes
-- Entertainment
-- Challenge
-- Community
-- Competition
-- Creativity
+## Esports
 
-## Related Categories
-- gaming.md
-- entertainment.md
-- technology.md
-- competition.md
+```
+Professional play
+Champions compete for glory
+Crowds cheer loudly
+```
+
+## RPG
+
+```
+Story unfolds
+Character grows in power
+Narrative wins
+```
+
+## Indie
+
+```
+Small studios dream
+Creative games break through
+Innovation thrives
+```
+
+## Virtual Reality
+
+```
+Worlds come alive
+Immersive experiences await
+Beyond the screen
+```
