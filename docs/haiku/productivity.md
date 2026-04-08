@@ -2,138 +2,77 @@
 
 ## Time Management
 ```
-Time blocking
-Schedule focus work
+Hours plan
+Priorities set
+Focus wins
+```
+
+## Goal Setting
+```
+Dreams target
+Goals set
+Achieve
+```
+
+## Focus
+```
 Deep work
+Flow state
+Productivity
 ```
 
+## Habits
 ```
-Eisenhower matrix
-Urgent important split
-Prioritize
-```
-
-```
-Pomodoro timer
-Twenty-five minutes work
-Break five minutes
+Routine builds
+Daily habits
+Consistency
 ```
 
+## Organization
 ```
-Time tracking
-Where did hours go
-Analysis
-```
-
-## Task Management
-```
-Todoist tasks
-Natural language input
-Organized
-```
-
-```
-Notion all
-Notes database workspace
-Flexible
-```
-
-```
-Trello boards
-Kanban columns flow
-Cards move
-```
-
-```
-Asana projects
-Team collaboration
-Timeline view
-```
-
-## Note Taking
-```
-Obsidian vault
-Markdown notes linked
-Graph view
-```
-```
-Roam research
-Bidirectional links
-Knowledge graph
-```
-```
-Logseq outliner
-Outline structure
-Org mode
-```
-```
-Evernote old
-Notebooks and notes
-Search powerful
+Desk tidy
+Files organized
+Efficiency
 ```
 
 ## Collaboration
 ```
-Slack channels
-Team communication
-Real-time
-```
-```
-Microsoft Teams
-Meetings and calls
-Integration
-```
-```
-Discord servers
-Community chats
-Roles
-```
-```
-Miro whiteboards
-Visual collaboration
-Remote workshops
+Team syncs
+Meetings productive
+Output
 ```
 
-## Writing
+## Tools
 ```
-Grammarly checks
-Grammar and style
-AI writing
-```
-```
-Hemingway app
-Bold clear writing
-Readability
-```
-```
-Scrivener writes
-Long form manuscripts
-Organized
-```
-```
-Google Docs
-Real-time collaboration
-Comments
+Apps boost
+Productivity rises
+Tools help
 ```
 
-## Focus & Wellness
+## Work Life Balance
 ```
-Forest app
-Focus tree grows
-Phone down
+Rest recharge
+Balance needed
+Wellbeing
 ```
+
+## Remote Work
 ```
-Freedom app
-Distractions blocked
-Concentration
+Home office
+Productivity home
+Focus
 ```
+
+## Minimizing
 ```
-Headspace冥想
-Meditation guided
-Calm
+Distractions
+Notifications mute
+Focus
 ```
+
+## Future Productivity
 ```
-Cold showers
-Morning ritual
-Discipline
+AI assistant
+Future workflows
+Efficiency
 ```

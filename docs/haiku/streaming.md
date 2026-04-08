@@ -1,135 +1,75 @@
-# Streaming & Entertainment Haiku Collection
+# Streaming Haiku Collection
 
 ## Video Streaming
 ```
 Netflix binge
 Original series
-Recommendation
+Watch anytime
 ```
 
 ```
-Disney+ brand
-Marvel Star Wars Pixar
-Family bundle
+YouTube videos
+Creators upload
+Subscribers
 ```
 
 ```
-Hulu live TV
-Cable cutting option
-Sports included
-```
-
-```
-Amazon Prime
-Video included shipping
-Bundled value
+Twitch streams
+Live gamers
+Chat engages
 ```
 
 ## Music Streaming
 ```
-Spotify algorithm
+Spotify streams
+Playlists curated
 Discover weekly
-New music found
 ```
+
 ```
-Apple Music
-High fidelity audio
-Spatial sound
-```
-```
-YouTube Music
-Video audio combined
-Background play
-```
-```
-Tidal lossless
-Artist pays fairly
-High quality
+Apple music
+Songs library
+Streaming
 ```
 
 ## Live Streaming
 ```
-Twitch live cam
-Gamers broadcasting
-Community
-```
-```
-Kick streaming
-New platform rises
-Gambling
-```
-```
-YouTube Live
-Events broadcast
-Real-time chat
-```
-```
-Twitch drops
-Watching earns rewards
-Engagement
-```
-
-## Podcasting
-```
-Spotify podcasts
-Audio entertainment
-Serial mystery
-```
-```
-Apple Podcasts
-iOS built-in
-Discovery
-```
-```
-Anchor creates
-Distribution everywhere
-Monetization
-```
-```
-Clubhouse audio
-Live conversations
-Club
-```
-
-## Entertainment Tech
-```
-4K streaming
-Ultra high definition
-Crystal clear
-```
-```
-HDR video
-High dynamic range
-Bright vivid
-```
-```
-Dolby Atmos
-Spatial audio
-Immersive sound
-```
-```
-Chromecast casts
-Screen to TV
-Mirroring
+Concerts live
+Virtual events
+Real time
 ```
 
 ## Streaming Tech
 ```
-CDN content
-Edge servers deliver
-Fast buffering
+CDN delivers
+Buffer free
+Quality HD
 ```
+
+## Podcast Streaming
 ```
-HLS streaming
-Adaptive bitrate
-Quality shifts
+Spotify podcasts
+Episodes stream
+Audio
 ```
+
+## Sports Streaming
 ```
-RTMP protocol
-Real-time messaging
-Live encoding
+Live games
+Watch anywhere
+Score updates
 ```
+
+## Gaming Streaming
 ```
-OBS studio
-Streaming software
-Free powerful
+Game streams
+Viewers watch
+Streamers play
+```
+
+## Future Streaming
+```
+VR streams
+Immersive content
+Future watch
+```
