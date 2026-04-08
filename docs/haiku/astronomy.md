@@ -1,114 +1,85 @@
 # Astronomy Haiku Collection
 
-## Solar System
+## Stars
 ```
-Mercury closest
-Scorched planet
-Fast year
-```
-
-```
-Venus hottest
-Greenhouse runaway
-Clouds
+Stars twinkle
+Distant nuclear furnaces
+Light years away
 ```
 
+## Planets
 ```
-Red planet Mars
-Colonization target
-Perseverance
-```
-
-```
-Jupiter giant
-Gas planet bands
-Great red spot
+Orbits spin
+Planets revolve
+Solar system
 ```
 
-## Outer Planets
+## Galaxies
 ```
-Saturn rings ice
-Beautiful planet
-Cassini
-```
-```
-Uranus tilted
-Ice giant
-Discovery
-```
-```
-Neptune farthest
-Deep blue
-Windiest
-```
-```
-Pluto dwarf
-Heart shaped glacier
-New Horizons
+Milky way
+Spiral arms rotate
+Billions stars
 ```
 
-## Space Objects
+## Black Holes
 ```
-Comet tail
-Ice and dust
-Sungrazers
-```
-```
-Asteroid belt
-Between Mars Jupiter
-Ceres
-```
-```
-Meteor shower
-Shooting stars
-Annual
-```
-```
-Lunar eclipse
-Earth shadow moon
-Blood moon
+Gravity wins
+Nothing escapes
+Event horizon
 ```
 
-## Space Exploration
+## Nebulae
 ```
-Apollo moon
-Neil Armstrong first step
-History
+Gas clouds glow
+Star birth regions
+Colorful dust
 ```
+
+## Comets
 ```
-Space station
-ISS continuous
-Astronauts
+Ice and rock
+Tails point from sun
+Periodic visits
 ```
+
+## The Moon
 ```
-Mars rovers
-Curiosity Perseverance
-Explore
+Lunar phases
+Crescent to full
+Tides controlled
 ```
+
+## Eclipses
 ```
-James Webb
-Deep field image
-First light
+Shadow plays
+Sun moon align
+Darkness day
+```
+
+## Exoplanets
+```
+Distant worlds
+Kepler discovers
+Goldilocks zone
 ```
 
 ## Cosmology
 ```
-Big Bang start
-Everything from nothing
-Time begins
-```
-```
+Big bang
+Universe expands
 Dark energy
-Expansion accelerates
-Mystery
 ```
+
+## Telescopes
 ```
-Multiverse
-Many universes
-Theory
+Looking far
+Light collected
+Cosmos reveals
 ```
+
+## Future Space
 ```
-Black holes singularities
-Event horizon
-Hawking radiation
+Mars colony
+Humanity multiplies
+Star traveler
 ```
