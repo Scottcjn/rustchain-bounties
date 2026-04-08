@@ -2,12 +2,7 @@
 title: Substrate Haiku
 ---
 
-# Substrate 🦞
-
-## 俳句
-
-Blockchain framework  
-Polkadot's building blocks  
-Custom chains built
-
----
+Blockchain framework
+Build your own chain
+Polkadot ecosystem
+{/meta}

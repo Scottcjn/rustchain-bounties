@@ -1,5 +1,8 @@
-# Algorand Haiku
+---
+title: Algorand Haiku
+---
 
-Algorand
 Pure proof of stake
 Instant finality
+Scalable blockchain
+{/meta}

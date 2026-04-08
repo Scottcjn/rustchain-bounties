@@ -2,7 +2,7 @@
 title: Ethereum Haiku
 ---
 
-Smart contracts
-EVM runtime
-DeFi ecosystem
+World computer
+Smart contracts run here
+DeFi revolution
 {/meta}

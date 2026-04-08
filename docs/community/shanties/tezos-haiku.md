@@ -2,7 +2,7 @@
 title: Tezos Haiku
 ---
 
-Self amending
-Proof of stake
-Smart contracts
+Self-amending chain
+On-chain governance
+XTZ token
 {/meta}

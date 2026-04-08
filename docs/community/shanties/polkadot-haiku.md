@@ -1,8 +1,8 @@
-# Polkadot (2020)
-
-Parachains connect
-Relay chain secures
-DOT stakes high
-
 ---
-*POLKADOT-HAIKU*
+title: Polkadot Haiku
+---
+
+Relay chain
+Parachains connect here
+Sharded future
+{/meta}

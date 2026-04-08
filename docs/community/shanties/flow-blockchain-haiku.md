@@ -1,8 +1,8 @@
 ---
-title: Flow Haiku
+title: Flow Blockchain Haiku
 ---
 
-Blockchain for NFTs
-Dapper Labs
-Multi-role
+Dapper Labs built
+NFT and gaming focus
+Scalable chain
 {/meta}

@@ -2,7 +2,7 @@
 title: Optimism Haiku
 ---
 
-L2 scaling
-Ethereum rollup
-Fast
+Optimistic rollup
+Ethereum scaling
+Bedrock upgrade
 {/meta}

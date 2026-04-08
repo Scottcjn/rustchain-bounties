@@ -3,6 +3,6 @@ title: Synthetix Haiku
 ---
 
 Synthetic assets
-Trading platform
-Derivatives
+Trade anything onchain
+Infinite liquidity
 {/meta}

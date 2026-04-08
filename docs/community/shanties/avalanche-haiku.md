@@ -2,7 +2,7 @@
 title: Avalanche Haiku
 ---
 
-High throughput
-Subnet
-Consensus
+ subnet deployment
+High performance chain
+AVAX token
 {/meta}

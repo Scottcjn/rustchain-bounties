@@ -2,7 +2,7 @@
 title: Arbitrum Haiku
 ---
 
-L2 rollup
-Ethereum scaling
-Nitro
+Optimistic rollup
+Ethereum L2 scaling
+Fast and cheap
 {/meta}

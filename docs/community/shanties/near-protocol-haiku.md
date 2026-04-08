@@ -1,8 +1,8 @@
-# NEAR Protocol (2020)
-
-Nightshade sharding
-Account model simple
-Aurora bridges
-
 ---
-*NEAR-PROTOCOL-HAIKU*
+title: NEAR Protocol Haiku
+---
+
+ sharding design
+User-friendly dApps
+Nightshade consensus
+{/meta}

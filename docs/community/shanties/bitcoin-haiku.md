@@ -1,8 +1,8 @@
-# Bitcoin (2009)
-
-Satoshi's coin
-Blocks chain
-Halving approaches
-
 ---
-*BITCOIN-HAIKU*
+title: Bitcoin Haiku
+---
+
+Digital gold
+Decentralized money
+Hard money
+{/meta}

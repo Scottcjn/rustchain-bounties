@@ -2,7 +2,7 @@
 title: Cardano Haiku
 ---
 
-PoS blockchain
 Academic research
-Proof of stake
+Proof of stake pioneer
+ADA token
 {/meta}

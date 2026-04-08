@@ -2,7 +2,7 @@
 title: Polygon Haiku
 ---
 
-L2 scaling
-Ethereum sidechain
+Ethereum scaling
+Layer 2 solutions
 MATIC token
 {/meta}

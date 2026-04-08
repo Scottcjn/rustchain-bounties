@@ -1,8 +1,8 @@
-# MetaMask
+---
+title: MetaMask Haiku
+---
 
 Browser extension
-EVM chains connect
-Wallets bridge
-
----
-*METAMASK-HAIKU*
+Ethereum gateway
+Self custody key
+{/meta}
