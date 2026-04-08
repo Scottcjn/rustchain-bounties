@@ -78,3 +78,73 @@ AI consciousness
 Machine sentience
 New ethics emerge
 ```
+
+## Epistemology
+```
+Knowledge studies
+Truth seeking
+Justified belief
+```
+
+## Logic
+```
+Reasoning rules
+Arguments valid
+Fallacies
+```
+
+## Aesthetics
+```
+Beauty studies
+Art appreciation
+Taste
+```
+
+## Political Philosophy
+```
+Justice theories
+Social contract
+Government
+```
+
+## Philosophy of Mind
+```
+Consciousness
+Hard problem
+Qualia
+```
+
+## Philosophy of Science
+```
+Scientific method
+Empirical truth
+Knowledge
+```
+
+## Stoicism
+```
+Virtue lives
+Accept what is
+Inner peace
+```
+
+## Buddhism
+```
+Four noble truths
+Path to enlightenment
+Suffering ends
+```
+
+## Pragmatism
+```
+Truth works
+Practical consequences
+Experience
+```
+
+## Phenomenology
+```
+Experience first
+Consciousness describes
+Essence
+```
