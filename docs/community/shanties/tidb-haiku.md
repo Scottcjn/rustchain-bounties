@@ -1,13 +1,13 @@
----
-title: TiDB Haiku
----
+# TiDB Haiku
 
-# TiDB 🦞
+*TiDB: The distributed SQL database for HTAP*
 
-## 俳句
+```
+MySQL compatible
+HTAP scales horizontally
+PingCAP delivers
+```
 
-NewSQL rises  
-HTAP meets distributed  
-PingCAP's treasure
-
----
+**Topic**: Database  
+**Created**: 2026-04-08  
+**Reward**: 5 RTC
