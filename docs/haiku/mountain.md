@@ -65,3 +65,75 @@ Panorama spreads
 Vast landscapes below expand
 Beauty overwhelming
 ```
+
+## Climbing
+
+```
+Rocks and ice
+Technical ascent
+Challenge
+```
+
+## Mountaineering
+
+```
+Alpine adventure
+Summit quest
+Perseverance
+```
+
+## Alpine
+
+```
+High altitude
+Thin air
+Endurance
+```
+
+## Alpine Flora
+
+```
+Alpine flowers
+Bloom in summer
+Short season
+```
+
+## Wildlife
+
+```
+Mountain goats
+Cliffside creatures
+Adaptation
+```
+
+## Climbing Gear
+
+```
+Ropes and harnesses
+Safety equipment
+Protection
+```
+
+## Base Camp
+
+```
+Acclimatize
+Before the summit push
+Rest
+```
+
+## Mountaineers
+
+```
+Climbers push
+Human limits test
+Achieve
+```
+
+## Elevation
+
+```
+Height measures
+Vertical challenge
+Summit
+```
