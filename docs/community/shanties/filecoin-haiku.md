@@ -1,5 +1,8 @@
-# Filecoin Haiku
+---
+title: Filecoin Haiku
+---
 
-Filecoin
-Decentralized storage
-Storage market
+P2P storage
+Cryptocurrency
+File storage
+{/meta}

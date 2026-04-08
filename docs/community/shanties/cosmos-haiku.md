@@ -1,5 +1,8 @@
-# Cosmos Haiku
+---
+title: Cosmos Haiku
+---
 
-Cosmos
 Internet of blockchains
+Interchain
 Hub and zones
+{/meta}

@@ -1,5 +1,8 @@
-# Balancer Haiku
+---
+title: Balancer Haiku
+---
 
-Balancer
-AMM protocol
-Custom pools
+AMM
+Liquidity pools
+Custom weights
+{/meta}

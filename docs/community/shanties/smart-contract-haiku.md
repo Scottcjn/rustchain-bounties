@@ -1,5 +1,8 @@
-# Smart Contract Haiku
+---
+title: Smart Contract Haiku
+---
 
-Smart Contract
-Self-executing code
-Trustless
+Self executing code
+Blockchain
+Immutable
+{/meta}

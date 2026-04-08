@@ -1,5 +1,8 @@
-# Cardano Haiku
+---
+title: Cardano Haiku
+---
 
-Cardano
-Proof of stake
+PoS blockchain
 Academic research
+Proof of stake
+{/meta}

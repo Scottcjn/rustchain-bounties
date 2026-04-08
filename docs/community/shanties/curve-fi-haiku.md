@@ -1,8 +1,8 @@
-# Curve Finance (2020)
-
-Stable swap magic
-CRV rewards flow
-DAO governs
-
 ---
-*CURVE-FI-HAIKU*
+title: Curve Finance Haiku
+---
+
+Stable swap
+Low slippage
+DeFi
+{/meta}

@@ -1,5 +1,8 @@
-# Web3 Haiku
+---
+title: Web3 Haiku
+---
 
-Web3
 Decentralized web
-User ownership
+Blockchain
+Ownership
+{/meta}

@@ -1,5 +1,8 @@
-# WebAssembly Haiku
+---
+title: WebAssembly Haiku
+---
 
-WebAssembly
 WASM
-Browser code
+Browser binary
+High performance
+{/meta}

@@ -1,5 +1,8 @@
-# Arweave Haiku
+---
+title: Arweave Haiku
+---
 
-Arweave
 Permanent storage
-Pay once store forever
+Data treasury
+One time payment
+{/meta}

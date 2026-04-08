@@ -1,8 +1,8 @@
-# DeFi (2020)
-
-Uniswap trades
-Aave lends
-Yield farms
-
 ---
-*DEFI-HAIKU*
+title: DeFi Haiku
+---
+
+Decentralized finance
+Open finance
+Smart contracts
+{/meta}

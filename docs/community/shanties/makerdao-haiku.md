@@ -1,5 +1,8 @@
-# MakerDAO Haiku
+---
+title: MakerDAO Haiku
+---
 
-MakerDAO
 Stablecoin DAI
-Decentralized lending
+Collateralized
+Decentralized
+{/meta}

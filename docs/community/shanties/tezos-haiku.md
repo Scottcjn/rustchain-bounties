@@ -1,5 +1,8 @@
-# Tezos Haiku
+---
+title: Tezos Haiku
+---
 
-Tezos
-Self-amending ledger
-On-chain governance
+Self amending
+Proof of stake
+Smart contracts
+{/meta}

@@ -1,8 +1,8 @@
-# IPFS (2015)
-
-Content addressed
-P2P shares
-Filecoin stores
-
 ---
-*IPFS-HAIKU*
+title: IPFS Haiku
+---
+
+InterPlanetary File System
+P2P storage
+Content address
+{/meta}

@@ -1,5 +1,8 @@
-# Avalanche Haiku
+---
+title: Avalanche Haiku
+---
 
-Avalanche
-Three blockchains
-Consensus protocol
+High throughput
+Subnet
+Consensus
+{/meta}

@@ -1,5 +1,8 @@
-# WASM Haiku
+---
+title: WASM Haiku
+---
 
-WASM
-Near native speed
-Universal runtime
+WebAssembly
+Near native
+In browser
+{/meta}

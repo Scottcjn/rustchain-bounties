@@ -1,5 +1,8 @@
-# Compound Haiku
+---
+title: Compound Haiku
+---
 
-Compound
-Algorithmic money
-Interest rates
+Lending protocol
+Algorithmic rates
+DeFi
+{/meta}
