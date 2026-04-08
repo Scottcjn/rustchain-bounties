@@ -76,3 +76,66 @@ AI assistant
 Future workflows
 Efficiency
 ```
+
+## Task Management
+```
+Todo lists
+Tasks completed
+Progress
+```
+
+## Note Taking
+```
+Notes captured
+Evernote syncs
+Knowledge
+```
+
+## Project Management
+```
+Sprints plan
+Deadlines meet
+Success
+```
+
+## Calendar
+```
+Calendar fills
+Time slots book
+Schedule
+```
+
+## Email
+```
+Inbox zero
+Messages clear
+Communication
+```
+
+## Automation
+```
+Scripts run
+Workflows automate
+Time saved
+```
+
+## Analytics
+```
+Data shows
+Metrics track
+Insight
+```
+
+## Communication
+```
+Slack messages
+Teams chat
+Collaboration
+```
+
+## Documentation
+```
+Docs write
+Knowledge share
+Wiki
+```
