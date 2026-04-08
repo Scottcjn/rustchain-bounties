@@ -65,3 +65,75 @@ Earth must survive
 Regenerative practices
 Future feeds us
 ```
+
+## Irrigation
+
+```
+Water flows
+Drip systems deliver
+Conservation
+```
+
+## Fertilizers
+
+```
+Nutrients补充
+Soil health improves
+Growth
+```
+
+## Farming Tools
+
+```
+Tractors work
+Modern equipment
+Efficiency
+```
+
+## Greenhouse
+
+```
+Climate control
+Year round growing
+Seasons
+```
+
+## Urban Farming
+
+```
+Rooftop gardens
+City grows food
+Vertical
+```
+
+## Hydroponics
+
+```
+Soil-less growth
+Water based systems
+Innovation
+```
+
+## Pesticides
+
+```
+Pest control
+Integrated management
+Protection
+```
+
+## Farm Economics
+
+```
+Market prices
+Supply and demand
+Trade
+```
+
+## Livestock Management
+
+```
+Animal welfare
+Health monitoring
+Care
+```

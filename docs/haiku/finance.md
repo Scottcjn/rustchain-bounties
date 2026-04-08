@@ -65,3 +65,75 @@ Not just in gold
 Health, time, and love matter
 True richness found
 ```
+
+## Taxes
+
+```
+Filings due
+Taxes support society
+ Civic duty
+```
+
+## Loans
+
+```
+Borrow today
+Repay with interest
+Debt
+```
+
+## Insurance
+
+```
+Risk transfer
+Protection
+Peace
+```
+
+## Real Estate
+
+```
+Property buys
+Homes appreciate
+Investment
+```
+
+## Bonds
+
+```
+Fixed income
+Safe investments
+Returns
+```
+
+## Portfolio
+
+```
+Diversify
+Asset allocation
+Balance
+```
+
+## Financial Planning
+
+```
+Future plans
+Goals set
+Achieve
+```
+
+## Economic
+
+```
+GDP grows
+Economy cycles
+Trends
+```
+
+## Credit
+
+```
+Score builds
+Credit history
+Access
+```
