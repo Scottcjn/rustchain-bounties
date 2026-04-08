@@ -1,13 +1,13 @@
----
-title: CockroachDB Haiku
----
+# CockroachDB Haiku
 
-# CockroachDB 🦞
+*CockroachDB: The distributed SQL database*
 
-## 俳句
+```
+SQL scales globally
+Cockroach survives failures
+Distributed data
+```
 
-Distributed SQL  
-Cockroach crawls across the globe  
-Strong consistency
-
----
+**Topic**: Database  
+**Created**: 2026-04-08  
+**Reward**: 5 RTC

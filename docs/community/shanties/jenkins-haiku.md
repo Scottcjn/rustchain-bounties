@@ -1,5 +1,13 @@
-# Jenkins Haiku
+---
+title: Jenkins Haiku
+---
 
-Jenkins
-CI/CD pipeline
-Automation builds
+# Jenkins 🦞
+
+## 俳句
+
+Classic CI/CD  
+Open source automation server  
+Pipeline as code
+
+---

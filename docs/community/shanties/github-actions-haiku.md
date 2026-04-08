@@ -1,5 +1,13 @@
-# GitHub Actions Haiku
+---
+title: GitHub Actions Haiku
+---
 
-GitHub Actions
-Workflow automation
-CI meets GitHub
+# GitHub Actions 🦞
+
+## 俳句
+
+Workflow automation  
+CI/CD right in GitHub  
+Builds on trigger
+
+---
