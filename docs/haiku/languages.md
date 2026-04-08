@@ -1,114 +1,85 @@
 # Languages Haiku Collection
 
-## Language Learning
+## English
 ```
-Duolingo streaks
-Daily practice
-Gamified
-```
-
-```
-Memory palace
-Mnemonic devices
-Recall
+Global language
+Business communicates
+World connects
 ```
 
+## Spanish
 ```
-Immersion method
-Surrounded by language
-Native
-```
-
-```
-Language exchange
-HelloTalk partners
-Mutual
+Romance tongue
+Passionate speakers
+Amor speaks
 ```
 
-## Language Tech
+## Mandarin
 ```
-Google Translate
-Neural machine
-Instant
-```
-```
-DeepL German
-Accurate translations
-Quality
-```
-```
-Anki flashcards
-Spaced repetition
-Vocab
-```
-```
-Speech recognition
-Pronunciation practice
-Accent
+Tones four
+Characters write
+Ancient wisdom
 ```
 
-## Language Concepts
+## French
 ```
-Syntax grammar
-Word order matters
-Structure
-```
-```
-Semantics meaning
-Vocabulary
-Definition
-```
-```
-Phonetics sounds
-IPA pronunciation
-Symbols
-```
-```
-Morphology roots
-Affixes prefixes
-Word formation
+Language of love
+Parisian elegance
+Bon voyage
 ```
 
-## World Languages
+## German
 ```
-Spanish second
-Billion speakers
-Romance
-```
-```
-Mandarin tones
-Four pitch levels
-Chinese
-```
-```
-Arabic script
-Right to left
-Cursive
-```
-```
-Japanese kanji
-Three writing systems
-Complex
+Precision words
+Engineering language
+Structure flows
 ```
 
-## Linguistics
+## Japanese
 ```
-Noam Chomsky
-Universal grammar
-Innate
+Politeness flows
+Kanji characters
+Respect language
 ```
+
+## Arabic
 ```
-Sapir Whorf
-Language thought
-Relativity
+Poetry weaves
+Script flows right
+Desert wisdom
 ```
+
+## Hindi
 ```
-Dialect variation
-Regional accents
+Bollywood words
+Cinema speaks
 Diversity
 ```
+
+## Russian
 ```
-Sign language
-Visual gesture
-Communication
+Cyrillic script
+Literature deep
+Winter cold
+```
+
+## Programming Languages
+```
+Code languages
+Syntax differs
+Logic same
+```
+
+## Language Learning
+```
+Words acquire
+Practice daily
+Fluency grows
+```
+
+## Future Languages
+```
+AI translates
+Universal understanding
+Babel falls
 ```
