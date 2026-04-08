@@ -1,13 +1,8 @@
----
-title: Rust Haiku
----
+# Rust (2010)
 
-# Rust 🦞
-
-## 俳句
-
-Memory safe dreams  
-Ownership moves through the code  
-Fearless concurrency
+Ownership moves
+Borrow checker shouts
+Cargo builds
 
 ---
+*RUST-LANG-HAIKU*

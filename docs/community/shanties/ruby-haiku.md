@@ -1,5 +1,8 @@
-# Ruby Haiku
+---
+title: Ruby Haiku
+---
 
-Ruby
-Rails framework
-Productive coding
+Ruby on rails
+Web development joy
+Code poetry
+{/meta}

@@ -1,5 +1,8 @@
-# GitLab Haiku
+# GitLab (2011)
 
-GitLab
 DevOps platform
-CI included
+CI/CD pipelines
+Issues merge
+
+---
+*GITLAB-HAIKU*

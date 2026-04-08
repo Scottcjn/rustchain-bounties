@@ -1,5 +1,8 @@
-# REST API Haiku
+# REST API (2000)
 
-REST API
-Stateless endpoints
-Resource based
+CRUD operations
+Endpoints route
+JSON returns
+
+---
+*REST-API-HAIKU*

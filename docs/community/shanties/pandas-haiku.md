@@ -1,5 +1,8 @@
-# Pandas Haiku
+# Pandas (2008)
 
-Pandas
-Data analysis
-DataFrames
+DataFrames organize
+CSV reads
+NaN fills
+
+---
+*PANDAS-HAIKU*

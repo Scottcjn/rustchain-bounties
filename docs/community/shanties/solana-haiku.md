@@ -1,5 +1,8 @@
-# Solana Haiku
+# Solana (2020)
 
-Solana
-Fast and cheap
-High throughput
+Fast transactions
+Proof of history
+SOL shines
+
+---
+*SOLANA-HAIKU*

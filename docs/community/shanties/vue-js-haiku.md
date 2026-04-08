@@ -1,5 +1,8 @@
-# Vue.js Haiku
+# Vue.js (2014)
 
-Vue.js
-Reactive framework
-Components bind
+Reactive data
+Single file component
+Vue CLI builds
+
+---
+*VUE-JS-HAIKU*

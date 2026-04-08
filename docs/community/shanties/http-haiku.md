@@ -1,5 +1,8 @@
-# HTTP Haiku
+# HTTP (1990)
 
-HTTP
 Request and response
-Web foundation
+Headers transmit
+Status codes tell
+
+---
+*HTTP-HAIKU*

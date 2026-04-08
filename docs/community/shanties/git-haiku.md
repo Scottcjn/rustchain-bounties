@@ -1,5 +1,8 @@
-# Git Haiku
+# Git (2005)
 
-Git
 Version control
-Branch and merge
+Branch and merge fast
+Commit messages
+
+---
+*GIT-HAIKU*

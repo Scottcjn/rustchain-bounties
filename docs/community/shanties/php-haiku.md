@@ -1,5 +1,8 @@
-# PHP Haiku
+---
+title: PHP Haiku
+---
 
-PHP
-Web backend language
-WordPress powers
+Server-side scripts
+WordPress powers the web
+Dynamic pages
+{/meta}

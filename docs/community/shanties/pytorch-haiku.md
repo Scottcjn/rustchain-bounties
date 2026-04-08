@@ -1,5 +1,8 @@
-# PyTorch Haiku
+# PyTorch (2016)
 
-PyTorch
-Facebook's ML library
-Dynamic graphs
+Tensors compute
+CUDA accelerates
+Torch serves
+
+---
+*PYTORCH-HAIKU*

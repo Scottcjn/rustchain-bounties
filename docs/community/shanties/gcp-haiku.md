@@ -1,5 +1,8 @@
-# GCP Haiku
+# Google Cloud (2008)
 
-GCP
-Google Cloud
-BigQuery AI
+Compute Engine
+BigQuery analyzes
+App Engine scales
+
+---
+*GCP-HAIKU*

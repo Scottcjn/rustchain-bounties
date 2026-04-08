@@ -1,5 +1,8 @@
-# npm Haiku
+# npm (2010)
 
-npm
-Node package manager
-Largest registry
+Packages install
+Package.json lists
+Node modules grow
+
+---
+*NPM-HAIKU*

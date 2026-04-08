@@ -1,5 +1,8 @@
-# MongoDB Haiku
+---
+title: MongoDB Haiku
+---
 
-MongoDB
-Document database
-JSON everywhere
+NoSQL document
+JSON-like data stores
+Flexible schema
+{/meta}

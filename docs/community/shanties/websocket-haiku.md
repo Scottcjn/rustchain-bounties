@@ -1,5 +1,8 @@
-# WebSocket Haiku
+# WebSocket (2011)
 
-WebSocket
-Real-time connection
-Bidirectional
+Full duplex
+Handshake upgrades
+Socket stays open
+
+---
+*WEBSOCKET-HAIKU*

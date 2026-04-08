@@ -1,5 +1,8 @@
-# IPFS Haiku
+# IPFS (2015)
 
-IPFS
-InterPlanetary File System
-Distributed storage
+Content addressed
+P2P shares
+Filecoin stores
+
+---
+*IPFS-HAIKU*

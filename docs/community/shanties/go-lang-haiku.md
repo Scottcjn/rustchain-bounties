@@ -1,5 +1,8 @@
-# Go Haiku
+# Go (2009)
 
-Go
-Google's language
-Concurrency simple
+Goroutines run
+Channels communicate
+Defer closes
+
+---
+*GO-LANG-HAIKU*

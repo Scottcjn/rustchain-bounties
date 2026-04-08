@@ -1,5 +1,8 @@
-# Kubernetes Haiku
+# Kubernetes (2014)
 
-Kubernetes
-Container orchestrator
-Scale automatically
+Pods schedule
+Services expose
+Helm charts install
+
+---
+*KUBERNETES-HAIKU*

@@ -1,11 +1,8 @@
-# Python Haiku
+# Python (1991)
 
-```
-Batteries included
-Readable code powers AI
-Community strong
-```
+Indentation rules
+Import statements
+PyPI hosts
 
-- **System**: Python (1991)
-- **Era**: General Purpose
-- **Bounty**: 5 RTC
+---
+*PYTHON-HAIKU*

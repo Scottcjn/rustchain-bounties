@@ -1,11 +1,8 @@
-# JavaScript Haiku
+# JavaScript (1995)
 
-```
-Web runs on this
-ES6+ modern syntax
-Node.js powers back
-```
+Prototype chain
+Async await flows
+Node runs server
 
-- **System**: JavaScript (1995)
-- **Era**: Web Development
-- **Bounty**: 5 RTC
+---
+*JAVASCRIPT-HAIKU*

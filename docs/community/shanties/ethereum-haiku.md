@@ -1,5 +1,8 @@
-# Ethereum Haiku
+# Ethereum (2015)
 
-Ethereum
-Smart contracts run
-DeFi revolution
+Smart contracts
+EVM executes
+ETH stakes
+
+---
+*ETHEREUM-HAIKU*

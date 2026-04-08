@@ -1,5 +1,8 @@
-# MySQL Haiku
+---
+title: MySQL Haiku
+---
 
-MySQL
-Relational database
-Open source SQL
+Relational data
+Open source database
+Queries run fast
+{/meta}

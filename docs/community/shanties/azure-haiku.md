@@ -1,5 +1,8 @@
-# Azure Haiku
+# Azure (2010)
 
-Azure
-Microsoft cloud
-Enterprise ready
+Virtual machines
+Azure Functions run
+CosmosDB stores
+
+---
+*AZURE-HAIKU*

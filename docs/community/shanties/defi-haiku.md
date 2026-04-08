@@ -1,5 +1,8 @@
-# DeFi Haiku
+# DeFi (2020)
 
-DeFi
-Financial services
-Decentralized
+Uniswap trades
+Aave lends
+Yield farms
+
+---
+*DEFI-HAIKU*

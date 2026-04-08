@@ -1,5 +1,8 @@
-# OpenAI Haiku
+# OpenAI (2015)
 
-OpenAI
-GPT models lead
-AI revolution
+GPT models
+API calls
+Safety guides
+
+---
+*OPENAI-HAIKU*

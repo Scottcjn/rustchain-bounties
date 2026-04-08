@@ -1,5 +1,8 @@
-# Redis Haiku
+---
+title: Redis Haiku
+---
 
-Redis
 In-memory store
-Cache and queue
+Key-value cache
+Speed unlimited
+{/meta}

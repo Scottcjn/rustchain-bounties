@@ -1,5 +1,8 @@
-# Polygon Haiku
+# Polygon (2017)
 
-Polygon
-Ethereum's sidechain
-Scale and speed
+Layer 2
+MATIC stakes
+ZKEVM runs
+
+---
+*POLYGON-HAIKU*

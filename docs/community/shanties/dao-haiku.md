@@ -1,5 +1,8 @@
-# DAO Haiku
+# DAO (2016)
 
-DAO
-Decentralized org
-Token voting
+Token votes
+Treasury grows
+Proposals pass
+
+---
+*DAO-HAIKU*

@@ -1,5 +1,8 @@
-# Bootstrap Haiku
+# Bootstrap (2011)
 
-Bootstrap
-CSS framework
-Responsive grid
+Grid system
+Components ready
+CDN includes
+
+---
+*BOOTSTRAP-HAIKU*

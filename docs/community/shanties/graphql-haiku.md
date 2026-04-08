@@ -1,5 +1,8 @@
-# GraphQL Haiku
+# GraphQL (2015)
 
-GraphQL
-Query what you need
-Exact data
+Schema defines
+Resolvers solve
+Apollo serves
+
+---
+*GRAPHQL-HAIKU*

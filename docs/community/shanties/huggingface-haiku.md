@@ -1,5 +1,8 @@
-# Hugging Face Haiku
+# Hugging Face (2016)
 
-Hugging Face
-Model hub
+Models hub
 Transformers library
+Spaces deploy
+
+---
+*HUGGINGFACE-HAIKU*

@@ -1,5 +1,8 @@
-# GitHub Haiku
+# GitHub (2008)
 
-GitHub
-Code hosting
-Social coding
+Pull requests
+Issues track bugs
+Actions automate
+
+---
+*GITHUB-HAIKU*

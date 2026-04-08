@@ -1,5 +1,8 @@
-# TypeScript Haiku
+# TypeScript (2012)
 
-TypeScript
-Typed JavaScript
-IDE autocomplete
+Types compile
+Interfaces define
+VSCode assists
+
+---
+*TYPESCRIPT-HAIKU*

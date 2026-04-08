@@ -1,11 +1,8 @@
-# YouTube Haiku
+# YouTube (2005)
 
-```
-Video goes viral
-CATS becomes internet king
-Streamer nation rises
-```
+Video hosts all
+Subscribe and like
+Algorithm feeds
 
-- **System**: YouTube (2005)
-- **Era**: Video Sharing Revolution
-- **Bounty**: 5 RTC
+---
+*YOUTUBE-HAIKU*

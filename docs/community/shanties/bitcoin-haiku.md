@@ -1,5 +1,8 @@
-# Bitcoin Haiku
+# Bitcoin (2009)
 
-Bitcoin
-Digital gold
-Blockchain first
+Satoshi's coin
+Blocks chain
+Halving approaches
+
+---
+*BITCOIN-HAIKU*

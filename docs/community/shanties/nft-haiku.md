@@ -1,5 +1,8 @@
-# NFT Haiku
+# NFTs (2021)
 
-NFT
-Non-fungible token
-Digital ownership
+Tokens unique
+Collections grow
+Opensea trades
+
+---
+*NFT-HAIKU*

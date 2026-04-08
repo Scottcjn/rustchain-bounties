@@ -1,5 +1,8 @@
-# NumPy Haiku
+# NumPy (1995)
 
-NumPy
-Numerical Python
-Arrays and matrices
+Arrays compute
+Broadcasting works
+SciPy extends
+
+---
+*NUMPY-HAIKU*

@@ -1,11 +1,8 @@
-# TikTok Haiku
+# TikTok (2016)
 
-```
-Short videos scroll
-Dance challenges fill the feed
-Gen Z dominates
-```
+Short videos trend
+For You page feeds
+Dance challenges
 
-- **System**: TikTok (2016)
-- **Era**: Short-Form Video
-- **Bounty**: 5 RTC
+---
+*TIKTOK-HAIKU*

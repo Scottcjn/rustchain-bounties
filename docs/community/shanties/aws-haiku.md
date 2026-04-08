@@ -1,5 +1,8 @@
-# AWS Haiku
+# AWS (2006)
 
-AWS
-Cloud computing
-EC2 and S3
+EC2 runs
+S3 stores
+Lambda scales
+
+---
+*AWS-HAIKU*

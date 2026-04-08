@@ -1,5 +1,8 @@
-# Docker Haiku
+# Docker (2013)
 
-Docker
-Container runtime
-Ship any app
+Containers run
+Dockerfile builds
+Images deploy
+
+---
+*DOCKER-HAIKU*

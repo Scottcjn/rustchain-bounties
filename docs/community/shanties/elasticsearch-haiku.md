@@ -1,5 +1,8 @@
-# Elasticsearch Haiku
+# Elasticsearch (2010)
 
-Elasticsearch
-Search engine
-Log analysis
+Search clusters
+Kibana visualizes
+Indices shard
+
+---
+*ELASTICSEARCH-HAIKU*

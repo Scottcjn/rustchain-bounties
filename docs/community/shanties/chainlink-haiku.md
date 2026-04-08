@@ -1,5 +1,8 @@
-# Chainlink Haiku
+# Chainlink (2017)
 
-Chainlink
-Oracle network
-Off-chain data
+Oracles feed
+VRF verifies
+CCIP bridges
+
+---
+*CHAINLINK-HAIKU*

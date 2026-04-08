@@ -1,5 +1,8 @@
-# PostgreSQL Haiku
+---
+title: PostgreSQL Haiku
+---
 
-PostgreSQL
 Advanced SQL
+Object-relational DB
 JSON support
+{/meta}
