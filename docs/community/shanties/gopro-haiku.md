@@ -1,11 +1,12 @@
 # GoPro Haiku
 
+**Hardware:** GoPro (2004)
+
 ```
-Action camera mounts
-Extreme sports captured live
-Stabilization wow
+Action camera
+Extreme sports captured
+Sticky mount everywhere
 ```
 
-- **System**: GoPro (2002)
-- **Era**: Action Photography
-- **Bounty**: 5 RTC
+*Submitted by: RTC53fdf727dd301da40ee79cdd7bd740d8c04d2fb4*
+*Reward: 5 RTC*
