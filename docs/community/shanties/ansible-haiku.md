@@ -1,11 +1,13 @@
 # Ansible Haiku
 
+*Ansible: The simple IT automation engine*
+
 ```
-Playbooks orchestrate
-Configuration management
-Agentless automation
+Playbooks run smooth
+No agents required to install
+Ansible connects
 ```
 
-- **System**: Ansible (2012)
-- **Era**: Automation
-- **Bounty**: 5 RTC
+**Topic**: DevOps Tool  
+**Created**: 2026-04-08  
+**Reward**: 5 RTC
