@@ -76,3 +76,73 @@ AI security
 ML detects
 Threats
 ```
+
+## Ransomware
+```
+Files encrypt
+Ransom demands
+Backups save
+```
+
+## Cloud Security
+```
+CSPM monitors
+Configuration
+Secure posture
+```
+
+## SOC
+```
+Security ops
+24 7 monitoring
+Threats hunt
+```
+
+## Vulnerability
+```
+CVEs publish
+Patches release
+Updates apply
+```
+
+## Identity Management
+```
+IAM controls
+Access managed
+Users
+```
+
+## Endpoint Security
+```
+EDR protects
+Endpoints monitor
+Threat detection
+```
+
+## Security Awareness
+```
+Training employees
+Phishing simulations
+Culture
+```
+
+## Threat Intelligence
+```
+IOCs share
+Intelligence feeds
+Detection
+```
+
+## Application Security
+```
+SAST scans
+Code review
+Secure SDLC
+```
+
+## Data Security
+```
+DLP monitors
+Data classifies
+Protection
+```

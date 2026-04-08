@@ -76,3 +76,73 @@ Edge computing
 Fog networks
 Future cloud
 ```
+
+## Cloud Migration
+```
+On-premise moves
+Legacy modernization
+Cloud journey
+```
+
+## Multi Cloud
+```
+Multiple vendors
+Strategy spreads
+Vendor choice
+```
+
+## Cloud Monitoring
+```
+Logs monitor
+Metrics observe
+Observability
+```
+
+## Cloud Databases
+```
+RDS manages
+Aurora scales
+Databases
+```
+
+## Cloud AI
+```
+ML in cloud
+SageMaker trains
+AI services
+```
+
+## Cloud DevOps
+```
+CI CD pipelines
+Automation
+Deployment
+```
+
+## Cloud Backup
+```
+Disaster recovery
+Backup strategies
+Data protection
+```
+
+## Cloud Compliance
+```
+Regulations meet
+Compliance
+Audit ready
+```
+
+## Serverless Architecture
+```
+Event driven
+Microservices
+Scale
+```
+
+## Cloud Architecture
+```
+Patterns design
+Best practices
+Solutions
+```
