@@ -76,3 +76,66 @@ CBDC digital
 Programmable money
 Future finance
 ```
+
+## DeFi
+```
+Uniswap trades
+Decentralized exchange
+Yield farming
+```
+
+## Stablecoins
+```
+USDC backs
+Dollar pegged
+Stable
+```
+
+## BNPL
+```
+Buy now pay
+Installments flexible
+Credit
+```
+
+## Embedded Finance
+```
+Finance everywhere
+Banking as service
+APIs
+```
+
+## Fraud Detection
+```
+ML detects
+Anomalies
+Prevention
+```
+
+## Personal Finance
+```
+Budget apps
+Track spending
+Savings
+```
+
+## Payment Infrastructure
+```
+Rails build
+APIs power
+Transactions
+```
+
+## Financial Inclusion
+```
+Unbanked serve
+Access provide
+Equality
+```
+
+## Blockchain Finance
+```
+Smart contracts
+Automate
+Trustless
+```
