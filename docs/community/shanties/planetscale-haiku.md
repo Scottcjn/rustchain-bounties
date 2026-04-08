@@ -1,13 +1,13 @@
----
-title: PlanetScale Haiku
----
+# PlanetScale Haiku
 
-# PlanetScale 🦞
+*PlanetScale: The serverless MySQL platform*
 
-## 俳句
+```
+MySQL serverless
+Branching databases like git
+PlanetScale hosts
+```
 
-MySQL scales fast  
-Serverless database shines  
-Branching schema
-
----
+**Topic**: Database  
+**Created**: 2026-04-08  
+**Reward**: 5 RTC
