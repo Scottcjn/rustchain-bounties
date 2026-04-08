@@ -1,136 +1,85 @@
 # Home & Living Haiku Collection
 
-## Smart Home
+## Interior Design
 ```
-Amazon Alexa
+Furniture arranged
+Living spaces transform
+Comfort embraces
+```
+
+## Home Automation
+```
+Smart home hub
 Voice controls everything
-Assistant
+Convenience reigns
 ```
 
+## Gardening
 ```
-Google Home
-Smart speaker answers
-Assistant
-```
-
-```
-Apple HomeKit
-Secure ecosystem
-Privacy
+Plants grow
+Greenery indoors
+Nature inside
 ```
 
+## Home Cooking
 ```
-Smart thermostat
-Learning temperature
-Comfort
-```
-
-## Home Design
-```
-Minimalist style
-Less is more
-Clutter free
-```
-```
-Scandinavian
-Hygge cozy
-Nordic
-```
-```
-Industrial chic
-Exposed brick pipes
-Loft
-```
-```
-Bohemian eclectic
-Mix patterns colors
-Free spirit
-```
-
-## Organization
-```
-KonMari method
-Spark joy
-Tidying
-```
-```
-The Home Edit
-Organized spaces
-Aesthetics
-```
-```
-Storage solutions
-Hidden places
-Hidden
-```
-```
-Vertical space
-Shelves walls
-Maximize
+Kitchen smells
+Fresh ingredients cook
+Meals bring joy
 ```
 
 ## Home Office
 ```
-Standing desk
-Ergonomic work
-Health
-```
-```
-Dual monitors
-Productivity boost
-Workflow
-```
-```
-Good lighting
-Natural light
-Desk lamp
-```
-```
-Noise canceling
-Headphones focus
-Concentration
+Remote work
+Productivity flows
+Zoom meetings
 ```
 
-## DIY & Crafts
+## Sustainable Living
 ```
-IKEA hacks
-Custom furniture
-Budget
-```
-```
-Woodworking builds
-Handmade projects
-Crafts
-```
-```
-3D printing
-Maker projects
-Custom
-```
-```
-Home automation
-Self programmed
-Routines
+Solar powers
+Renewable energy
+Green home
 ```
 
-## Home Improvement
+## Minimalism
 ```
-Home renovation
-Kitchen bathroom
-Update
+Less is more
+Declutter simplifies
+Space clears
 ```
+
+## Home Decor
 ```
-Smart locks
-Keyless entry
-Security
+Art hangs
+Colors coordinate
+Style expresses
 ```
+
+## DIY Projects
 ```
-Solar panels
-Energy independence
-Green
+Tools used
+Projects build
+Create and fix
 ```
+
+## Home Maintenance
 ```
-Insulation
-Energy efficiency
-Comfort
+Repairs done
+Maintenance prevents
+Prevention
+```
+
+## Home Security
+```
+Locks secure
+Cameras monitor
+Safety first
+```
+
+## Future Homes
+```
+Smart mirrors
+Health scans daily
+Future living
 ```

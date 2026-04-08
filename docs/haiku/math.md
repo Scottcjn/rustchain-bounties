@@ -1,114 +1,85 @@
 # Mathematics Haiku Collection
 
-## Branches
+## Arithmetic
 ```
-Algebra solves
-Equations unknown
-Variables
-```
-
-```
-Geometry shapes
-Triangles circles
-Space
+Numbers add
+Subtraction multiplies
+Division divides
 ```
 
+## Algebra
 ```
-Calculus changes
-Derivatives integrals
-Rates
-```
-
-```
-Statistics data
-Analysis probability
-Inference
+Variables solve
+Equations balance
+Unknowns find
 ```
 
-## Concepts
+## Geometry
 ```
-Pi circle
-Ratio circumference
-Infinite
-```
-```
-Golden ratio
-Phi divine
-Beauty
-```
-```
-Fibonacci sequence
-Nature spirals
-Golden
-```
-```
-Prime numbers
-Divisible only
-Infinity
+Shapes define
+Triangles circles squares
+Angles measure
 ```
 
-## Applications
+## Calculus
 ```
-Finance math
-Compound interest
-Wealth
-```
-```
-Physics math
-Equations model
-Reality
-```
-```
-Cryptography
-Prime factorization
-Security
-```
-```
-Machine learning
-Linear algebra
-Models
+Derivatives change
+Integrals accumulate
+Limits approach
 ```
 
-## Famous
+## Statistics
 ```
-Pythagorean
-Theorem squares
-Hypotenuse
-```
-```
-Euler identity
-e to i pi
-Beautiful
-```
-```
-Newton calculus
-Tangent slopes
-Motion
-```
-```
-Gauss normal
-Distribution bell
-Statistics
+Data collects
+Mean median mode
+Probability
 ```
 
-## Problem Solving
+## Number Theory
 ```
-Proof logic
-Step by step
-Evidence
+Primes divide
+Fundamental theorem
+Infinite sequence
 ```
+
+## Linear Algebra
 ```
-Conjecture unproven
-Hypothesis proposed
-Testing
+Matrices multiply
+Vectors in spaces
+Eigenvalues solve
 ```
+
+## Trigonometry
 ```
-Counterexample
-Proof by contradiction
-False
+Sine cosine
+Tangent waves
+Periodicity
 ```
+
+## Logic
 ```
-Elegant solution
-Simple beautiful
-Aha moment
+Syllogisms
+Boolean algebra
+Binary true
+```
+
+## Set Theory
+```
+Elements belong
+Union intersection
+Infinite sets
+```
+
+## Topology
+```
+Shapes transform
+Homeomorphisms
+Holes persist
+```
+
+## Future Math
+```
+Quantum compute
+Math transforms
+New reality
 ```
