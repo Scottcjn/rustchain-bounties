@@ -1,126 +1,78 @@
-# Biotechnology Haiku Collection
+# Biotech Haiku Collection
 
-## DNA & Genetics
+## Genetic Engineering
 ```
 CRISPR edits
-Gene sequences corrected
-Disease prevented
+Gene editing precise
+Disease treated
 ```
 
+## Pharmaceuticals
 ```
-DNA sequencing
-A T C G code decoded
-Life's blueprint read
-```
-
-```
-Genomic data
-Personalized medicine
-Treatment tailored
-```
-
-```
-Gene therapy
-Defective genes replaced
-Hope restored
-```
-
-## Pharma & Medicine
-```
-mRNA vaccines
-Spike protein instruction
-Immunity trained
-```
-
-```
-Antibiotics fight
-Bacterial infections
-Prescribed wisely
-```
-
-```
+Drugs develop
 Clinical trials
-Phases prove efficacy
-Drug approved
+FDA approves
 ```
 
+## Stem Cells
 ```
-Pharmacogenomics
-Drug response predicted
-Dosing optimized
+Stem cells divide
+Regenerative medicine
+Future healing
 ```
 
 ## Bioinformatics
 ```
-BLAST searches
-Sequence similarity found
-Evolution traced
+Data sequences
+Genomes decode
+Life code
 ```
 
+## Personalized Medicine
 ```
-Protein folding
-AlphaFold predicts structure
-3D shapes revealed
+Treatment tailored
+Individual genes
+Precision
 ```
 
+## Synthetic Biology
 ```
-Molecular docking
-Drug candidates screened
-Binding predicted
+Life redesigned
+Bio engineering
+Future biology
+```
+
+## Cloning
+```
+Dolly cloned
+Genetic copies
+Ethics debate
+```
+
+## Gene Therapy
+```
+Vectors deliver
+Gene fixes
+Cure emerges
 ```
 
 ## Biotech Companies
 ```
-Moderna mRNA
-Pioneering vaccine tech
-COVID vaccine
-```
-```
-Illumina seq
-DNA reading cheaper
-Research accelerated
-```
-```
-Regenerative
-Stem cells rebuild tissues
-Healing enhanced
+Biotech startups
+Innovation drives
+Future cures
 ```
 
-## Emerging Tech
+## Agricultural Biotech
 ```
-Cell therapy
-Patient cells engineered
-Cancer attacked
-```
-```
-Microbiome
-Gut bacteria sequenced
-Health connected
-```
-```
-Lab grown meat
-Cultured protein sustainable
-Future food
-```
-```
-Gene drives spread
-Malaria mosquitoes targeted
-Disease eliminated
+GMOs grow
+Crops engineered
+Food security
 ```
 
-## Bioinformatics Tools
+## Future Biotech
 ```
-Bioconductor
-R packages for biology
-Analysis flows
-```
-```
-Galaxy platform
-Bioinformatics in the cloud
-Workflows shared
-```
-```
-UCSC genome
-Browser visualizes genes
-Research hub
+Aging reversed
+Longevity biotech
+Future health
 ```

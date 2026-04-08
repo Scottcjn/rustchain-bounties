@@ -2,134 +2,77 @@
 
 ## Industrial Robots
 ```
-Robot arm moves
-Precision assembly line
-Tesla factory
+Assembly lines
+Robots build cars
+Precision
 ```
 
+## AI Robots
 ```
-Cobot works
-Side by side with humans
-Safe collaboration
-```
-
-```
-Welding robot
-Fast precise joins
-Car bodies formed
-```
-
-```
-Pick and place
-Bin picking solved
-Automation flows
+Boston dynamics
+Atlas runs
+Spot walks
 ```
 
 ## Drones
 ```
-DJI drone flies
-Aerial photography
-Perspective shifted
-```
-```
-Delivery drone
-Packages dropped from sky
-Last mile solved
-```
-```
-Agricultural drone
-Precision spraying
-Crop yield up
-```
-```
-Military drone
-Reconnaissance flights
-Surveillance
+DJI flies
+Aerial views
+Surveying
 ```
 
-## Humanoid Robots
+## Humanoid
 ```
-Boston Dynamics
-Atlas jumps and runs
-Future robot
+Pepper speaks
+Humanoid assistant
+Social robot
 ```
+
+## Medical Robots
 ```
-Sophia speaks
-AI conversations
-Human-like
+Da Vinci operates
+Precision surgery
+Robotic assist
 ```
+
+## Space Robots
 ```
-Pepper welcomes
-Retail assistant
-Customer engagement
+Rovers explore
+Mars surface
+Curiosity
 ```
+
+## Service Robots
 ```
-Tesla Optimus
-Humanoid helper
-Future of work
+Roomba sweeps
+Vacuum cleaner
+Home help
 ```
 
 ## Autonomous Vehicles
 ```
+Self driving
 Waymo rides
-Self-driving taxis
-No steering wheel
-```
-```
-Cruise operates
-San Francisco streets
-Autonomous
-```
-```
-Nuro delivers
-Local goods transported
-Sidewalk robot
-```
-```
-Tractor autonomy
-Self-driving farm machines
-Labor saved
+Future transport
 ```
 
-## Robot Types
-```
-SWARM robots
-Coordination collective
-Emergent behavior
-```
-```
-Soft robotics
-Flexible actuators
-Safe human contact
-```
-```
-Medical robots
-Da Vinci surgeries
-Precision
-```
-```
-Space robots
-Mars rovers explore
-Other worlds
-```
-
-## AI & Robotics
-```
-Computer vision
-Machines see the world
-Recognition
-```
-```
-SLAM mapping
-Localization and mapping
-Navigation
-```
+## Robot Learning
 ```
 Reinforcement
-Learning through trial
-Skills acquired
+Neural networks
+Teach robots
 ```
+
+## Swarm Robotics
 ```
-Edge AI
-Processing on robot
-Real-time response
+Multiple bots
+Coordination
+Emergent
+```
+
+## Future Robotics
+```
+Emotional robots
+Companion bots
+Future home
+```
