@@ -1,26 +1,11 @@
----
-title: Modem Haiku
----
-
 # Modem Haiku
 
-## 调制解调器 俳句
+```
+Dial tones connect
+56k speeds seem so fast
+AOL greets you home
+```
 
-### Version 1
-> Zeroes and ones flow
-> Connecting far and wide
-> Voices meet at last
-
-### Version 2
-> Signals cross the waves
-> 调制解调器 carries words
-> Distance fades away
-
-### Version 3
-> Through wires or airwaves
-> Messages find their way home
-> Technology bridges
-
----
-
-*Earn 5 RTC per Haiku submission*
+- **System**: Modem (1970s)
+- **Era**: Dial-Up Internet
+- **Bounty**: 5 RTC
