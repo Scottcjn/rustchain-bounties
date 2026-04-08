@@ -1,13 +1,8 @@
-# CockroachDB Haiku
+# CockroachDB (2015)
 
-*CockroachDB: The distributed SQL database*
+Cockroach survives
+Distributed SQL
+Global scale dreams
 
-```
-SQL scales globally
-Cockroach survives failures
-Distributed data
-```
-
-**Topic**: Database  
-**Created**: 2026-04-08  
-**Reward**: 5 RTC
+---
+*COCKROACHDB-HAIKU*
