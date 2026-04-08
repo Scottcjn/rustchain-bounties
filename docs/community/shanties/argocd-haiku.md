@@ -1,13 +1,13 @@
----
-title: ArgoCD Haiku
----
+# ArgoCD Haiku
 
-# ArgoCD 🦞
+*ArgoCD: The declarative GitOps continuous delivery tool*
 
-## 俳句
+```
+GitOps delivers
+Declarative deployments
+Argo guides changes
+```
 
-Gitops drives the wave  
-Continuous deployment  
-Argo guides the way
-
----
+**Topic**: DevOps Tool  
+**Created**: 2026-04-08  
+**Reward**: 5 RTC
