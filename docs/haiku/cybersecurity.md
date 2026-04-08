@@ -1,129 +1,78 @@
 # Cybersecurity Haiku Collection
 
-## Attack Types
+## Network Security
 ```
-SQL injection
-User input not sanitized
-Database breached
-```
-
-```
-XSS scripts run
-Malicious code in browser
-Cookie stolen
+Firewall blocks
+Traffic filtered
+Intruders denied
 ```
 
+## Encryption
 ```
-DDoS floods in
-Botnet army attacks
-Service falls down
-```
-
-```
-Phishing email tricks
-Fake login page tempts
-Password compromised
+AES encrypts
+Keys protect
+Data safe
 ```
 
+## Threats
 ```
-Zero-day exploit
-Unknown vulnerability found
-Rush to patch now
-```
-
-## Security Tools
-```
-Nmap scans ports
-Network mapped completely
-Vulnerabilities found
+Phishing emails
+Social engineering
+User tricked
 ```
 
+## Malware
 ```
-Wireshark watches
-Packet analysis reveals truth
-Traffic speaks loud
-```
-
-```
-Burp Suite proxies
-Web app tested thoroughly
-Bugs exposed
-```
-
-```
-Metasploit runs
-Exploitation framework ready
-Pen test essential
-```
-
-## Security Concepts
-```
-Encryption protects
-Keys must stay secure
-Public-private pair
-```
-
-```
-Two-factor auth
-Something you know and have
-Account more safe
-```
-
-```
-Zero trust model
-Never trust always verify
-Least privilege given
-```
-
-```
-Defense in depth
-Multiple layers of protection
-Harder to breach
+Virus spreads
+Malware infects
+Antivirus detects
 ```
 
 ## Authentication
 ```
-OAuth flows
-Third-party login convenient
-Token granted
+Passwords strong
+MFA enabled
+Account secure
 ```
 
+## Penetration Testing
 ```
-JWT carries claims
-Signed token travels safe
-Stateless auth
-```
-
-```
-SAML asserts
-XML based identity
-Enterprise SSO
+Ethical hackers
+Red team tests
+Vulnerabilities
 ```
 
+## Security Tools
 ```
-LDAP queries
-Directory knows your name
-Single sign-on
+Nmap scans
+Ports discovered
+Network mapped
 ```
 
-## Network Security
+## Zero Trust
 ```
-VPN tunnels
-Encrypted traffic flows private
-Remote work safe
+Never trust
+Always verify
+Identity
 ```
+
+## Incident Response
 ```
-Firewall rules
-Allow and deny packets
-Perimeter secured
+Breach detects
+Response teams
+Contain
 ```
+
+## Compliance
 ```
-IDS alerts
-Intrusion detected quickly
-Logs tell the story
+GDPR data
+Privacy rules
+Regulation
 ```
+
+## Future Security
 ```
-WAF shields web
-Application layer protected
-SQLi blocked
+AI security
+ML detects
+Threats
 ```

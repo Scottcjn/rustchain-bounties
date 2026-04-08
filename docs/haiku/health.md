@@ -1,136 +1,71 @@
-# Health & Wellness Haiku Collection
+# Health Haiku Collection
 
 ## Fitness
 ```
-CrossFit intense
-High intensity intervals
-Box jumps
-```
-
-```
-Weightlifting builds
-Strength training
-Muscles
-```
-
-```
-Yoga flows
-Flexibility peace
-Namaste
-```
-
-```
-Running cardio
-Marathon training
-Pace
+Morning runs
+Cardio health
+Endorphins
 ```
 
 ## Nutrition
 ```
-Macros counted
-Protein carbs fats
-Balanced
-```
-```
-Whole foods eat
-Unprocessed nutrition
-Clean eating
-```
-```
-Intermittent fasting
-Eating windows
-Time restricted
-```
-```
-Meal prep sunday
-Batch cooking
-Healthy ready
+Balanced meals
+Diet health
+Nutrition
 ```
 
-## Mental Wellness
+## Sleep
 ```
-Meditation daily
-Mindfulness practice
-Present
+Restful sleep
+Circadian rhythm
+Dreams
 ```
+
+## Mental Health
 ```
-Sleep hygiene
-Eight hours rest
-Dark room
-```
-```
-Journaling reflects
-Writing releases
-Gratitude
-```
-```
-Nature walks
-Shinrin yoku forest
-Grounding
+Meditation
+Mindfulness
+Inner peace
 ```
 
 ## Healthcare
 ```
 Telemedicine
-Video call doctor
-Convenient
-```
-```
-Health insurance
-Coverage matters
-Premium
-```
-```
-Vaccines protect
-Immunity builds
-Science
-```
-```
-Checkups annual
-Prevention matters
-Screening
+Remote care
+Doctor visits
 ```
 
-## Supplements
+## Wellness
 ```
-Vitamin D sunshine
-Bone health
-Immunity
-```
-```
-Omega-3 fatty
-Fish oil
-Brain
-```
-```
-Creatine builds
-Strength recovery
-Muscle
-```
-```
-Multivitamin fills
-Nutrient gaps
-Daily
+Wellbeing
+Holistic health
+Balance
 ```
 
-## Wellness Trends
+## Exercise
 ```
-Infrared sauna
-Heat therapy
-Detox
+Workouts
+Muscles grow
+Strength
 ```
+
+## Prevention
 ```
-Cold plunge
-Ice bath recovery
-Wim Hof
+Screening tests
+Early detection
+Prevention
 ```
+
+## Aging
 ```
-Red light therapy
-Near infrared
-Skin
+Healthy aging
+Longevity
+Quality life
 ```
+
+## Future Health
 ```
-Floating tank
-Sensory deprivation
-Relaxation
+Gene therapy
+Cures found
+Future healing
 ```

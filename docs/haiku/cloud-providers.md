@@ -1,133 +1,78 @@
 # Cloud Providers Haiku Collection
 
-## AWS Services
+## AWS
 ```
-EC2 elastic
-Virtual servers in the cloud
-Scale on demand
-```
-
-```
-S3 object store
-Buckets hold unlimited files
-Durability guaranteed
-```
-
-```
-Lambda runs code
-Serverless functions trigger
-Pay only used
-```
-
-```
-RDS database
-Managed relational data
-Postgres or MySQL
-```
-
-```
-DynamoDB NoSQL
-Key-value document store
-Global tables
+EC2 servers
+Cloud computing scales
+Lambda runs
 ```
 
 ## Google Cloud
 ```
-GCP compute
-Virtual machines powerful
+GCP scales
 BigQuery analyzes
+Cloud functions
 ```
 
+## Azure
 ```
-Cloud Run deploys
-Container serverless
-Kubernetes managed
-```
-
-```
-BigQuery warehouse
-Petabyte scale analytics
-SQL on data lake
-```
-
-## Azure Services
-```
-Azure VMs
-Windows and Linux hosted
+Microsoft cloud
+Enterprise solutions
 Hybrid cloud
 ```
 
+## Cloud Services
 ```
-Azure Functions
-Serverless in Microsoft land
-Event driven
-```
-
-```
-Cosmos DB globally
-Multi-model distributed
-Readiness strong
-```
-
-## Cloud Concepts
-```
-Auto scaling
-Resources grow with demand
-Cost optimized
-```
-
-```
-Load balancer
-Traffic distributed evenly
-No single point
-```
-
-```
-CDN caches
-Content near users fast
-Latency reduced
-```
-
-```
-Multi-region
-Disaster recovery ready
-High availability
+S3 stores
+Files in cloud
+Buckets
 ```
 
 ## Serverless
 ```
-FaaS functions
-Event-driven architecture
-Cold start waits
+No servers
+Functions run
+Auto scale
 ```
 
+## Containers
 ```
-Backend as service
-APIs without servers
-Rapid development
+Kubernetes orchestrates
+Pods schedule
+Self heal
 ```
 
+## Cloud Storage
+```
+Data in cloud
+Access anywhere
+Sync
+```
+
+## Cloud Security
+```
+IAM controls
+Permissions
+Secure cloud
+```
+
+## Cloud Networking
+```
+VPC networks
+Private cloud
+Isolation
+```
+
+## Cloud Cost
+```
+Pay per use
+Cost optimization
+Budgets
+```
+
+## Future Cloud
 ```
 Edge computing
-Code runs near users
-Response instant
-```
-
-## DevOps in Cloud
-```
-CI/CD pipelines
-Automated deployments flow
-GitOps controls
-```
-
-```
-Infrastructure code
-Terraform defines the cloud
-Version controlled
-```
-
-```
-Container registry
-Images stored and versioned
-Deployment ready
+Fog networks
+Future cloud
 ```

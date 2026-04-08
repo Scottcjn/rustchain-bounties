@@ -1,111 +1,78 @@
 # Fintech Haiku Collection
 
-## Payment Systems
+## Payments
 ```
 Stripe processes
-Online payments smooth
-Checkout converts
-```
-
-```
-PayPal trusted
-Digital wallet flows
-Global reach
-```
-
-```
-Square reader
-Card payments accept
-Mobile point of sale
+Online payments
+Checkout
 ```
 
 ## Banking
 ```
-Open banking
-APIs share data
-Innovation blooms
+Mobile banking
+Apps manage
+Funds transfer
 ```
+
+## Crypto
 ```
-Neobanks rise
-Mobile first banking
-No branches
+Bitcoin trades
+Blockchain
+Decentralized
 ```
 
 ## Lending
 ```
-Loan approvals
-Credit scoring models
-Risk assessed
-```
-
-```
 Peer to peer
-Lenders borrowers match
-Platform facilitates
+Lenders borrowers
+Platform
 ```
 
 ## Investing
 ```
-Robinhood trades
-Commission-free trading
-Democratized markets
+Robo advisors
+Algorithmic
+Portfolio
 ```
 
+## Insurance
 ```
-ETF tracks
-Index funds diversified
-Passively invest
-```
-
-## Crypto Finance
-```
-Coinbase trades
-Cryptocurrency exchange
-On-ramp crypto
+Digital policies
+Instant claims
+Insurtech
 ```
 
-```
-DeFi yields
-Yield farming earns
-Staking rewards
-```
-
-## RegTech
+## Regtech
 ```
 Compliance automated
 Regulations code
-KYC verified
+KYC
 ```
 
-## Insurtech
+## Open Banking
 ```
-Policy issued
-Digital insurance
-Claims fast
-```
-
-## Personal Finance
-```
-Budget tracks
-Expenses categorized
-Savings grows
+APIs open
+Data shares
+Innovation
 ```
 
-## Embedded Finance
+## Neobanks
 ```
-Buy now pay later
-BNPL installments
-Credit extends
+Digital only
+No branches
+Mobile first
+```
+
+## Wealth Tech
+```
+Wealth management
+Roboadvisors
+Planning
 ```
 
 ## Future Fintech
 ```
-CBDC central
-Digital currency
+CBDC digital
 Programmable money
-```
-```
-Open finance
-Unified financial API
-Data liberation
+Future finance
 ```
