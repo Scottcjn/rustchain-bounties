@@ -2,7 +2,7 @@
 title: LayerZero Haiku
 ---
 
-Omnichain
-Messaging
-Interoperability
+Omnichain prot
+Messaging made simple
+Developers love
 {/meta}
