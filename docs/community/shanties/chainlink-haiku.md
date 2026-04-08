@@ -3,6 +3,6 @@ title: Chainlink Haiku
 ---
 
 Oracle network
-Data feeds
-Off chain
+Price feeds secure
+Off-chain data
 {/meta}
