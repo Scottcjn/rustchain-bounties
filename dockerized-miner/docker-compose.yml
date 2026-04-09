@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  rustchain-miner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustchain-miner
+    environment:
+      - WALLET_NAME=${WALLET_NAME:-your_wallet_name_here}
+      - NODE_URL=${NODE_URL:-https://50.28.86.131}
+    volumes:
+      - rustchain-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsk", "${NODE_URL:-https://50.28.86.131}/health"]
+      interval: 5m
+      timeout: 30s
+      retries: 3
+      start_period: 1m
+    # Note: Docker miners receive reduced rewards due to anti-VM detection
+
+volumes:
+  rustchain-data:
