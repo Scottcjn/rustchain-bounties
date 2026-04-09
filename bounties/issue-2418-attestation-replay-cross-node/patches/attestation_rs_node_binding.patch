@@ -1,0 +1,52 @@
+# Patch 1: attestation.rs — Bind nonce to node identity
+# This patch modifies rustchain-miner/src/attestation.rs
+# to include node_peer_id in the attestation commitment
+
+diff --git a/rustchain-miner/src/attestation.rs b/rustchain-miner/src/attestation.rs
+--- a/rustchain-miner/src/attestation.rs
++++ b/rustchain-miner/src/attestation.rs
+@@ -110,6 +110,11 @@ pub struct AttestationReport {
+     // Miner version
+     pub miner_version: String,
+     
++    // NEW: Node peer ID — binds this attestation to a specific node
++    // Prevents cross-node replay attacks
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub node_peer_id: Option<String>,
++
+     // Hardware fingerprint data (optional)
+     #[serde(skip_serializing_if = "Option::is_none")]
+     pub fingerprint: Option<FingerprintData>,
+@@ -140,6 +145,9 @@ pub async fn attest(
+     let challenge: serde_json::Value = response.json().await?;
+     let nonce = challenge
+         .get("nonce")
++        // NEW: Also extract node_id from challenge for binding
++        .and_then(|n| n.get("node_id"))
++        .and_then(|n| n.as_str())
+         .and_then(|n| n.as_str())
+         .unwrap_or("")
+         .to_string();
+@@ -155,8 +163,14 @@ pub async fn attest(
+     let entropy_json = serde_json::to_string(&entropy)?;
+     
+     // Step 3: Build commitment with node binding
+-    let commitment_string = format!("{}{}{}", nonce, wallet, entropy_json);
++    // NEW: Include node_id in commitment to prevent cross-node replay
++    let node_peer_id = challenge
++        .get("node_id")
++        .and_then(|n| n.as_str())
++        .unwrap_or("unknown");
++    
++    let commitment_string = format!("{}:{}:{}:{}", nonce, wallet, node_peer_id, entropy_json);
+     let commitment_hash = Sha256::digest(commitment_string.as_bytes());
+     let commitment = hex::encode(commitment_hash);
+ 
+@@ -181,6 +195,7 @@ pub async fn attest(
+             derived: entropy.clone(),
+             entropy_score: entropy.variance_ns,
+         },
++        node_peer_id: Some(node_peer_id.to_string()),
+         miner_version: env!("CARGO_PKG_VERSION").to_string(),
+     };
+ 

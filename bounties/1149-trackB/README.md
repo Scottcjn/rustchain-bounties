@@ -221,5 +221,5 @@ For questions about this bounty implementation:
 ---
 
 **Bounty Claim:** 75 RTC  
-**Wallet:** [Your RTC Wallet Address]  
+**Wallet:** 0x0C7996572221E7b12e0831356E11e11d0a9bE69e  
 **Deployment TX:** [Transaction Hash After Deployment]

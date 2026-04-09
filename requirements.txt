@@ -1,4 +1,4 @@
-# requirements.txt
-prometheus_client
-requests
-tabulate
+prometheus_client==0.24.1
+requests==2.33.1
+tabulate==0.10.0
+pytest

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Multiplier Growth Visualization</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #0f0; font-family: monospace; padding: 40px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 24px; margin-bottom: 30px; text-align: center; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+    .stat { background: #111; border: 1px solid #333; padding: 20px; text-align: center; }
+    .stat-value { font-size: 32px; color: #0f0; }
+    .stat-label { font-size: 12px; color: #666; margin-top: 8px; }
+    .progress { background: #111; border: 1px solid #333; padding: 20px; margin-bottom: 20px; }
+    .progress-bar { height: 20px; background: #222; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #0f0, #0c0); width: 0%; transition: width 0.5s; }
+    .timeline { background: #111; border: 1px solid #333; padding: 20px; }
+    .timeline-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
+    .timeline-item:last-child { border-bottom: none; }
+    .input-group { margin-bottom: 20px; }
+    input, select { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: #0f0; font-size: 14px; }
+    button { width: 100%; padding: 12px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { background: #0c0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Multiplier Growth Visualization</h1>
+    
+    <div class="input-group">
+      <input type="text" id="wallet" placeholder="Enter your RTC wallet address">
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="hwMultiplier">1.0</div>
+        <div class="stat-label">Hardware Multiplier</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="streakBonus">+0.0</div>
+        <div class="stat-label">Streak Bonus</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="effective">1.0</div>
+        <div class="stat-label">Effective Multiplier</div>
+      </div>
+    </div>
+    
+    <div class="progress">
+      <label>Streak Progress (max 30 days)</label>
+      <div class="progress-bar">
+        <div class="progress-fill" id="streakBar"></div>
+      </div>
+      <div style="margin-top:8px; font-size:12px; color:#666">
+        <span id="streakDays">0</span> / 30 days
+      </div>
+    </div>
+    
+    <div class="timeline">
+      <h3 style="margin-bottom:15px">Growth Timeline</h3>
+      <div id="timeline"></div>
+    </div>
+  </div>
+
+  <script>
+    // Multiplier tiers
+    const HW_TIERS = {
+      'modern': 1.0,
+      'gtx1080': 1.2,
+      'rx580': 1.3,
+      'g4': 1.4,
+      'g5': 1.6,
+      'power8': 1.8,
+      'n64': 2.0
+    };
+    
+    function calculateGrowth(hwType, currentStreak) {
+      const hwMultiplier = HW_TIERS[hwType] || 1.0;
+      const streakBonus = Math.min(currentStreak / 30, 1.0) * 0.2;
+      return hwMultiplier + streakBonus;
+    }
+    
+    function renderTimeline(hwType, currentStreak) {
+      const container = document.getElementById('timeline');
+      let html = '';
+      
+      for (let day = 0; day <= 30; day += 5) {
+        const effective = calculateGrowth(hwType, day);
+        const isCurrent = day === currentStreak;
+        html += `
+          <div class="timeline-item" style="${isCurrent ? 'color:#0f0;font-weight:bold' : ''}">
+            <span>Day ${day}</span>
+            <span>${effective.toFixed(2)}x</span>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    document.getElementById('wallet').addEventListener('input', (e) => {
+      const wallet = e.target.value;
+      if (wallet.startsWith('RTC') && wallet.length > 10) {
+        // Mock: derive hardware from wallet
+        const hwIndex = Math.abs(wallet.charCodeAt(3)) % 7;
+        const hwTypes = ['modern', 'gtx1080', 'rx580', 'g4', 'g5', 'power8', 'n64'];
+        const hwType = hwTypes[hwIndex];
+        const streak = Math.abs(wallet.charCodeAt(4)) % 31;
+        
+        const hwMult = HW_TIERS[hwType];
+        const streakBonus = Math.min(streak / 30, 1.0) * 0.2;
+        const effective = hwMult + streakBonus;
+        
+        document.getElementById('hwMultiplier').textContent = hwMult.toFixed(1);
+        document.getElementById('streakBonus').textContent = '+' + streakBonus.toFixed(1);
+        document.getElementById('effective').textContent = effective.toFixed(2);
+        document.getElementById('streakDays').textContent = streak;
+        document.getElementById('streakBar').style.width = (streak / 30 * 100) + '%';
+        
+        renderTimeline(hwType, streak);
+      }
+    });
+  </script>
+</body>
+</html>

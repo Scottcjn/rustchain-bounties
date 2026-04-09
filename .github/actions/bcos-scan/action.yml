@@ -1,0 +1,57 @@
+name: "BCOS Scan"
+description: "Reusable GitHub Action to scan, score, and attest PRs via BCOS v2 protocol"
+author: "RustChain BCOS"
+
+inputs:
+  tier:
+    description: "Review tier (L0, L1, L2)"
+    required: true
+    type: choice
+    options:
+      - L0
+      - L1
+      - L2
+  reviewer:
+    description: "GitHub login of the assigned reviewer"
+    required: false
+    type: string
+    default: ""
+  node-url:
+    description: "BCOS v2 node RPC URL (e.g. https://bcos.rustchain.org)"
+    required: false
+    type: string
+    default: "https://50.28.86.131"
+  pr-number:
+    description: "PR number to comment on (defaults to current PR)"
+    required: false
+    type: string
+    default: ""
+  repo-token:
+    description: "GitHub token for API calls"
+    required: true
+    type: string
+
+outputs:
+  trust_score:
+    description: "BCOS trust score (0-100)"
+    value: ${{ steps.scan.outputs.trust_score }}
+  cert_id:
+    description: "BCOS attestation certificate ID"
+    value: ${{ steps.scan.outputs.cert_id }}
+  tier_met:
+    description: "Whether the required tier was met (true/false)"
+    value: ${{ steps.scan.outputs.tier_met }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: scan
+      shell: bash
+      env:
+        INPUT_TIER: ${{ inputs.tier }}
+        INPUT_REVIEWER: ${{ inputs.reviewer }}
+        INPUT_NODE_URL: ${{ inputs.node-url }}
+        INPUT_PR_NUMBER: ${{ inputs.pr-number }}
+        INPUT_REPO_TOKEN: ${{ inputs.repo-token }}
+      run: ${{ github.action_path }}/entrypoint.sh
+      working-directory: ${{ github.workspace }}
