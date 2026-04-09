@@ -1,0 +1,63 @@
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types_or: [yaml, json5]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        args:
+          [
+            "--fix",
+            "--config",
+            "pyproject.toml",
+            "--configPointer",
+            "/tool/markdown/lint",
+          ]
+        types: [markdown]
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: Ruff Format
+        entry: uv run --frozen ruff
+        args: [format]
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: ruff
+        name: Ruff
+        entry: uv run --frozen ruff
+        args: ["check", "--fix", "--exit-non-zero-on-fix"]
+        types: [python]
+        language: system
+        pass_filenames: false
+        exclude: ^README\.md$
+      - id: pyright
+        name: pyright
+        entry: uv run --frozen pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: uv-lock-check
+        name: Check uv.lock is up to date
+        entry: uv lock --check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+      - id: doc-snippets
+        name: Check doc snippets are up to date
+        entry: uv run --frozen python scripts/update_doc_snippets.py --check
+        language: system
+        files: ^(README\.md|docs/.*\.md|examples/.*\.py|scripts/update_doc_snippets\.py)$
+        pass_filenames: false
