@@ -1,107 +1,71 @@
-<div align="center">
+# RustChain Protocol Documentation
 
-# RustChain Bounties
+> Complete technical documentation for the RustChain Proof-of-Antiquity blockchain.
+> Earn RTC by contributing: https://github.com/Scottcjn/rustchain-bounties
 
-### Earn RTC by contributing to the RustChain ecosystem
+## 📚 Documentation Index
 
-[![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=open%20bounties&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
+| Document | Description |
+|----------|-------------|
+| [01_PROTOCOL_OVERVIEW.md](./docs/01_PROTOCOL_OVERVIEW.md) | Full protocol spec — RIP-200 consensus, hardware checks, token economics, architecture |
+| [API_REFERENCE.md](./docs/API_REFERENCE.md) | Complete API reference with curl examples for all public endpoints |
+| [GLOSSARY.md](./docs/GLOSSARY.md) | All terms and definitions |
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+## 🔑 Quick Facts
 
-[![Total Paid](https://img.shields.io/badge/Total%20Paid-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
+| Property | Value |
+|----------|-------|
+| Token | RTC (RustChain Token) |
+| Consensus | RIP-200 Proof-of-Antiquity |
+| Chain | RustChain + Ergo anchoring |
+| Node | https://50.28.86.131 |
+| Explorer | https://50.28.86.131/explorer |
+| Version | 2.2.1-rip200 |
+| GitHub Bounties | [rustchain-bounties](https://github.com/Scottcjn/rustchain-bounties) |
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+## ⚡ Quick Start
 
-</div>
+```bash
+# Check node health
+curl -sk https://50.28.86.131/health
 
----
+# List active miners
+curl -sk https://50.28.86.131/api/miners | python3 -m json.tool
 
-## What is RTC?
+# See live network stats
+curl -sk https://50.28.86.131/api/miners | \
+  python3 -c "import json,sys; data=json.load(sys.stdin); \
+  print(f'Active miners: {len(data[\"miners\"])}')"
+```
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
+## 📂 For Developers
 
-Bounties are paid in RTC to your wallet address upon completion and verification.
+### Clone the docs repo
+```bash
+git clone https://github.com/Scottcjn/rustchain-bounties.git
+```
 
-## How to Earn
+### Run the API examples
+```bash
+# Get node health
+curl -sk https://50.28.86.131/health
 
-### 1. Pick a Bounty
-Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) and find one that matches your skills.
+# Get miner list sorted by antiquity
+curl -sk https://50.28.86.131/api/miners
+```
 
-| Difficulty | Label | Typical Reward |
-|-----------|-------|---------------|
-| Beginner | `good first issue` | 1-5 RTC |
-| Standard | `standard` | 5-25 RTC |
-| Major | `major` | 25-100 RTC |
-| Critical | `critical`, `red-team` | 100-200 RTC |
+## 🤝 Contributing
 
-### 2. Claim It
-Comment on the issue: **"I would like to work on this"**
+Found an error or want to improve these docs?
+→ Open an issue at https://github.com/Scottcjn/rustchain-bounties/issues
+→ Or submit a PR directly to this repo
 
-### 3. Submit Your Work
-- **Code bounties**: Open a PR to the relevant repo and link it in the issue
-- **Content bounties**: Post your content and link it in the issue
-- **Star/propagation bounties**: Follow the instructions in the issue
+## 📊 Live Network
 
-### 4. Get Paid
-Once verified, RTC is sent to your wallet. First time? We will help you set one up.
+```
+Current miners:  13
+Attestation nodes: 3
+Protocol version: 2.2.1-rip200
+```
 
-## Bounty Categories
-
-| Category | Examples | Count |
-|----------|---------|-------|
-| **Community** | Star repos, share content, recruit contributors | 30+ |
-| **Code** | Bug fixes, features, integrations, tests | 40+ |
-| **Content** | Tutorials, articles, videos, documentation | 20+ |
-| **Red Team** | Security audits, penetration testing, exploit finding | 6 |
-| **Propagation** | Awesome-list PRs, social media, cross-posting | 15+ |
-| **Integration** | Bridge to new chains, exchange listings, DEX pools | 10+ |
-
-## Featured Bounties
-
-| Bounty | Reward | Difficulty |
-|--------|--------|-----------|
-| [RustChain to 500 Stars](https://github.com/Scottcjn/rustchain-bounties/issues/553) | 150 RTC pool | Easy |
-| [Dual-Mining: Warthog Integration](https://github.com/Scottcjn/rustchain-bounties/issues/550) | 25 RTC | Major |
-| [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
-| [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
-| [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
-
-## Quick Links
-
-| Resource | Link |
-|----------|------|
-| **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Block Explorer** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
-| **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
-| **Wallet Setup** | Comment on any bounty and we will help |
-
-## Stats
-
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.10 USD
-
----
-
-<div align="center">
-
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
-
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
-
-</div>
-
-
----
-
-### Part of the Elyan Labs Ecosystem
-
-- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
-- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
-- [GitHub](https://github.com/Scottcjn)
+*Data fetched live from the RustChain node on 2026-04-09.*
