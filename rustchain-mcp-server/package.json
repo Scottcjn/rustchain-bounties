@@ -1,0 +1,17 @@
+{
+  "name": "rustchain-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for RustChain",
+  "main": "src/server.py",
+  "scripts": {
+    "start": "python src/server.py",
+    "dev": "python src/server.py"
+  },
+  "keywords": ["mcp", "model-context-protocol", "rustchain", "ai-agent", "blockchain"],
+  "author": "RustChain",
+  "license": "MIT",
+  "dependencies": {
+    "requests": "^2.31.0",
+    "mcp": "^1.0.0"
+  }
+}
