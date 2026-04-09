@@ -1,0 +1,18 @@
+# Example: How to use rtc-reward-action in your project
+name: RTC Reward
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: z1908990090-blip/rtc-reward-action@v1
+        with:
+          node-url: https://50.28.86.131
+          amount: 5
+          wallet-from: my-project-wallet
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}

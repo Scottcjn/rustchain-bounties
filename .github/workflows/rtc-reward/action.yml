@@ -1,0 +1,27 @@
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when PRs are merged'
+branding:
+  icon: 'gift'
+  color: 'purple'
+inputs:
+  node-url:
+    description: 'RustChain node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'RTC amount to award per merge'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Project wallet name'
+    required: true
+  admin-key:
+    description: 'RTC admin private key'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode'
+    required: false
+    default: 'false'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

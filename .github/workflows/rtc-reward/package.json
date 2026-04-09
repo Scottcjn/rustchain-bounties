@@ -1,0 +1,9 @@
+{
+  "name": "rtc-reward-action",
+  "version": "1.0.0",
+  "description": "Automatically award RTC tokens when PRs are merged",
+  "main": "index.js",
+  "dependencies": {
+    "@actions/core": "^1.10.0"
+  }
+}
