@@ -1,0 +1,124 @@
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when PRs are merged'
+author: 'RustChain'
+branding:
+  icon: 'award'
+  color: 'green'
+inputs:
+  node-url:
+    description: 'RustChain node URL'
+    required: false
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'RTC amount to award per merge'
+    required: false
+    default: '5'
+  wallet-from:
+    description: 'Project wallet name for funding rewards'
+    required: true
+  admin-key:
+    description: 'Admin key for the wallet (use secrets)'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode (no actual transactions)'
+    required: false
+    default: 'false'
+  min-pr-size:
+    description: 'Minimum PR size (lines changed) to qualify'
+    required: false
+    default: '1'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Extract contributor wallet
+      id: wallet
+      shell: bash
+      run: |
+        # Try to find wallet in PR body
+        BODY="${{ github.event.pull_request.body }}"
+        WALLET=""
+        
+        # Pattern 1: Wallet in PR body
+        if [[ "$BODY" =~ [Rr]TC.*wallet:?\s*([A-Za-z0-9_-]+) ]]; then
+          WALLET="${BASH_REMATCH[1]}"
+        elif [[ "$BODY" =~ wallet:?\s*([A-Za-z0-9_-]+) ]]; then
+          WALLET="${BASH_REMATCH[1]}"
+        fi
+        
+        # Pattern 2: Look for .rtc-wallet file in PR
+        # (Would need to checkout PR branch first)
+        
+        if [ -z "$WALLET" ]; then
+          echo "No wallet found in PR body"
+          echo "::set-output name=wallet_found::false"
+        else
+          echo "Found wallet: $WALLET"
+          echo "::set-output name=wallet::$WALLET"
+          echo "::set-output name=wallet_found::true"
+        fi
+
+    - name: Check PR size
+      id: pr-size
+      shell: bash
+      run: |
+        SIZE=$(curl -s "${{ github.api_url }}/pulls/${{ github.event.pull_request.number }}" \
+          -H "Authorization: token ${{ github.token }}" | python3 -c \
+          "import sys,json; d=json.load(sys.stdin); print(d.get('additions',0)+d.get('deletions',0))")
+        echo "PR size: $SIZE lines"
+        echo "::set-output name=size::$SIZE"
+        
+        MIN_SIZE=${{ inputs.min-pr-size }}
+        if [ "$SIZE" -lt "$MIN_SIZE" ]; then
+          echo "PR too small ($SIZE < $MIN_SIZE)"
+          echo "::set-output name=qualifies::false"
+        else
+          echo "::set-output name=qualifies::true"
+        fi
+
+    - name: Award RTC (Dry Run)
+      if: steps.wallet.outputs.wallet_found == 'true' && steps.pr-size.outputs.qualifies == 'true' && inputs.dry-run == 'true'
+      shell: bash
+      run: |
+        echo "=== DRY RUN MODE ==="
+        echo "Would award ${{ inputs.amount }} RTC to ${{ steps.wallet.outputs.wallet }}"
+        echo "From wallet: ${{ inputs.wallet-from }}"
+        echo "PR: #${{ github.event.pull_request.number }} by ${{ github.event.pull_request.user.login }}"
+        echo "========================"
+
+    - name: Award RTC (Live)
+      if: steps.wallet.outputs.wallet_found == 'true' && steps.pr-size.outputs.qualifies == 'true' && inputs.dry-run != 'true'
+      shell: bash
+      env:
+        NODE_URL: ${{ inputs.node-url }}
+        AMOUNT: ${{ inputs.amount }}
+        TO_WALLET: ${{ steps.wallet.outputs.wallet }}
+        FROM_WALLET: ${{ inputs.wallet-from }}
+      run: |
+        echo "Awarding $AMOUNT RTC to $TO_WALLET"
+        
+        # Call RustChain API to transfer RTC
+        RESPONSE=$(curl -s -X POST "$NODE_URL/api/transfer" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"from\": \"$FROM_WALLET\",
+            \"to\": \"$TO_WALLET\",
+            \"amount\": $AMOUNT
+          }")
+        
+        echo "Response: $RESPONSE"
+        
+        # Post comment on PR
+        curl -s -X POST "${{ github.api_url }}/issues/${{ github.event.pull_request.number }}/comments" \
+          -H "Authorization: token ${{ github.token }}" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"body\": \"## 🎉 RTC Reward Sent!\\n\\nAwarded **$AMOUNT RTC** to wallet \`$TO_WALLET\` for merged PR #${{ github.event.pull_request.number }}\\n\\nTx: \`$RESPONSE\`\"
+          }"
+
+    - name: No Wallet Found
+      if: steps.wallet.outputs.wallet_found != 'true'
+      shell: bash
+      run: |
+        echo "No contributor wallet found in PR #${{ github.event.pull_request.number }}"
+        echo "Contributor can add their wallet in PR body: RTC wallet: your_wallet_name"
