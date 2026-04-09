@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  miner:
+    build:
+      context: .
+      dockerfile: reproducible/Dockerfile
+    environment:
+      - WALLET=${WALLET}
+      - NODE_URL=${NODE_URL}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: "curl --fail http://localhost:8080 || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    external:
+      name: rustchain_net
