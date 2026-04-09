@@ -1,0 +1,62 @@
+{
+  "name": "rustchain-dashboard",
+  "displayName": "RustChain Dashboard",
+  "description": "RustChain wallet balance, miner status, and bounty browser for VS Code",
+  "version": "1.0.0",
+  "publisher": "scottcjn",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": ["Other", "Developer Tools"],
+  "activationEvents": ["*"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "RustChain",
+      "properties": {
+        "rustchain.walletName": {
+          "type": "string",
+          "default": "",
+          "description": "Your RustChain wallet name"
+        },
+        "rustchain.nodeUrl": {
+          "type": "string",
+          "default": "https://50.28.86.131",
+          "description": "RustChain node URL"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rustchain-sidebar",
+          "title": "RustChain",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "rustchain-sidebar": [
+        {
+          "id": "rustchain.dashboard",
+          "name": "Dashboard"
+        }
+      ]
+    },
+    "commands": {
+      "title": "Refresh Dashboard"
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
+  }
+}
