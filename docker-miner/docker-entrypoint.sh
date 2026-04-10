@@ -1,0 +1,1 @@
+#!/bin/bash\nif [ -z \"$WALLET_NAME\" ]; then\n  echo \"ERROR: WALLET_NAME not set.\"\n  exit 1\nfi\necho \"Starting miner for: $WALLET_NAME\"\nif [ -f \"miner.py\" ]; then\n  python miner.py --wallet \"$WALLET_NAME\"\nelse\n  echo \"miner.py not mounted.\"\nfi

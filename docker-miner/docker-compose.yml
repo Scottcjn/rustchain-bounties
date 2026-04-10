@@ -1,0 +1,1 @@
+version: '3.8'\nservices:\n  rustchain-miner:\n    build: .\n    restart: unless-stopped\n    environment:\n      - WALLET_NAME=huanxin\n    volumes:\n      - ./miner.py:/app/miner.py

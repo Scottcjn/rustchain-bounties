@@ -1,0 +1,1 @@
+FROM python:3.11-slim\nWORKDIR /app\nCOPY docker-entrypoint.sh /app/\nRUN chmod +x /app/docker-entrypoint.sh\nENTRYPOINT [\"/app/docker-entrypoint.sh\"]
