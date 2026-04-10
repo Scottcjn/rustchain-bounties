@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: MIT
+version: "3.8"
+
+services:
+  rustchain-miner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustchain-miner
+    environment:
+      - NODE_URL=${NODE_URL:-https://50.28.86.131}
+      - WALLET=${WALLET:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-f", "${NODE_URL:-https://50.28.86.131}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - rustchain
+
+networks:
+  rustchain:
+    driver: bridge
