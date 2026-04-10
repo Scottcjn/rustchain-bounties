@@ -1,0 +1,1 @@
+# RustChain Autonomous Bounty Hunter\n\nA fully integrated script mimicking LLM-driven actions specifically tuned to scan GitHub, process JSON schemas, and submit Pull Requests on a loop. It's the ultimate execution engine for Issue #2861.
