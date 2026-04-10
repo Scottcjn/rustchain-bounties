@@ -1,0 +1,7 @@
+{
+  "github_token": "ghp_YOUR_GITHUB_PAT_TOKEN_HERE",
+  "github_username": "your_github_username",
+  "rustchain_wallet": "your_rtc_wallet_address",
+  "fork_repo": "your_username/rustchain-bounties",
+  "submission_log": "submissions.json"
+}
