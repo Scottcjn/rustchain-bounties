@@ -1,137 +1,109 @@
 {
-  "name": "rustchain-dev",
-  "displayName": "RustChain Development Tools",
-  "description": "VS Code extension for RustChain development — RTC balance status bar, config highlighting, and code snippets.",
-  "version": "0.1.0",
-  "publisher": "rustchain",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Scottcjn/rustchain-bounties"
-  },
+  "name": "rustchain-dashboard",
+  "displayName": "RustChain Dashboard",
+  "version": "1.0.0",
+  "description": "VS Code extension for RustChain wallet balance, miner status, and bounty browser",
+  "publisher": "shuziyoumin2",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
-    "Programming Languages",
-    "Snippets",
-    "Other"
+    "Other",
+    "Developer Tools"
   ],
   "keywords": [
     "rustchain",
-    "rtc",
-    "blockchain",
-    "proof-of-attestation",
-    "mining"
+    "cryptocurrency",
+    "dashboard",
+    "wallet",
+    "miner",
+    "bounty"
   ],
   "activationEvents": [
-    "onLanguage:rustchain-config",
-    "workspaceContains:**/rustchain.toml",
-    "workspaceContains:**/rustchain.yaml"
+    "onView:rustchain-bounties",
+    "onCommand:rustchain.refresh",
+    "onCommand:rustchain.openBounty"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "RustChain",
-      "properties": {
-        "rustchain.nodeUrl": {
-          "type": "string",
-          "default": "https://50.28.86.131",
-          "description": "URL of the RustChain attestation node."
-        },
-        "rustchain.minerId": {
-          "type": "string",
-          "default": "",
-          "description": "Your miner/wallet ID for balance display (e.g. 'my-miner-name')."
-        },
-        "rustchain.balanceRefreshInterval": {
-          "type": "number",
-          "default": 120,
-          "minimum": 30,
-          "description": "How often (in seconds) to refresh the RTC balance in the status bar."
-        },
-        "rustchain.showBalance": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show RTC balance in the status bar."
-        },
-        "rustchain.rejectUnauthorized": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enforce TLS certificate validation for the node (the default node uses a self-signed cert)."
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rustchain-sidebar",
+          "title": "RustChain",
+          "icon": "media/icon.png"
         }
-      }
+      ]
     },
-    "languages": [
+    "views": [
       {
-        "id": "rustchain-config",
-        "aliases": [
-          "RustChain Config",
-          "rustchain"
-        ],
-        "extensions": [
-          ".rustchain.toml",
-          ".rustchain.yaml",
-          ".rustchain.yml"
-        ],
-        "filenames": [
-          "rustchain.toml",
-          "rustchain.yaml",
-          "rustchain.yml"
-        ],
-        "configuration": "./language-configuration.json"
+        "id": "rustchain-bounties",
+        "type": "webview",
+        "containerId": "rustchain-sidebar",
+        "name": "RustChain Dashboard"
       }
     ],
-    "grammars": [
+    "viewsWelcome": [
       {
-        "language": "rustchain-config",
-        "scopeName": "source.rustchain-config",
-        "path": "./syntaxes/rustchain-config.tmLanguage.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "python",
-        "path": "./snippets/rustchain-python.json"
-      },
-      {
-        "language": "shellscript",
-        "path": "./snippets/rustchain-shell.json"
-      },
-      {
-        "language": "rustchain-config",
-        "path": "./snippets/rustchain-config.json"
+        "view": "rustchain-bounties",
+        "contents": "## RustChain Dashboard\n\nConfigure your wallet in Settings to get started.\n\n**Settings:**\n- `rustchain.walletName`: Your RustChain wallet name\n- `rustchain.nodeUrl`: RustChain node URL (default: https://50.28.86.131)"
       }
     ],
     "commands": [
       {
-        "command": "rustchain.refreshBalance",
-        "title": "RustChain: Refresh RTC Balance"
+        "command": "rustchain.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
       },
       {
-        "command": "rustchain.setMinerId",
-        "title": "RustChain: Set Miner/Wallet ID"
+        "command": "rustchain.openBounty",
+        "title": "Open Bounty"
       },
       {
-        "command": "rustchain.checkNodeHealth",
-        "title": "RustChain: Check Node Health"
+        "command": "rustchain.claimBounty",
+        "title": "Claim Bounty"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "RustChain",
+        "properties": {
+          "rustchain.walletName": {
+            "type": "string",
+            "default": "",
+            "description": "Your RustChain wallet name"
+          },
+          "rustchain.nodeUrl": {
+            "type": "string",
+            "default": "https://50.28.86.131",
+            "description": "RustChain node URL"
+          },
+          "rustchain.refreshInterval": {
+            "type": "number",
+            "default": 60,
+            "description": "Auto-refresh interval in seconds"
+          }
+        }
+      }
+    ],
+    "statusBar": [
+      {
+        "id": "rustchain-balance",
+        "text": "$(rustchain-icon) Loading...",
+        "tooltip": "RustChain Balance",
+        "command": "rustchain.refresh"
       }
     ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/vscode": "^1.80.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.0",
-    "@vscode/test-electron": "^2.3.0"
+    "@types/node": "^16.0.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/test-electron": "^2.3.0",
+    "typescript": "^5.0.0"
   }
 }
