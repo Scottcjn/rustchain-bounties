@@ -1,0 +1,5 @@
+{
+  "name": "rtc-balance",
+  "description": "Check RustChain wallet balance",
+  "command": "python ../../claude-commands/rtc_balance.py $1"
+}
