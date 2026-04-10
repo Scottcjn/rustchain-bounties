@@ -1,5 +1,27 @@
 import * as vscode from 'vscode';
-import fetch from 'node-fetch';
+import * as https from 'https';
+
+// Type-safe fetch wrapper for VS Code
+async function httpGet<T = unknown>(url: string): Promise<{ ok: boolean; data: T | null }> {
+    return new Promise((resolve) => {
+        https.get(url, (res) => {
+            let data = '';
+            res.on('data', (chunk: string) => data += chunk);
+            res.on('end', () => {
+                try {
+                    resolve({
+                        ok: res.statusCode === 200,
+                        data: JSON.parse(data) as T
+                    });
+                } catch {
+                    resolve({ ok: false, data: null });
+                }
+            });
+        }).on('error', () => {
+            resolve({ ok: false, data: null });
+        });
+    });
+}
 
 // Configuration interface
 interface RustChainConfig {
@@ -20,10 +42,12 @@ interface EpochResponse {
     current_slot: number;
 }
 
-interface MinerStatus {
-    miner_id: string;
-    status: 'active' | 'inactive';
-    last_attestation: string;
+interface MinersResponse {
+    miners?: Array<{
+        miner_id: string;
+        status: string;
+        last_attestation?: string;
+    }>;
 }
 
 interface Bounty {
@@ -33,27 +57,38 @@ interface Bounty {
     html_url: string;
 }
 
+interface BountyIssue {
+    number: number;
+    title: string;
+    state: string;
+    html_url: string;
+}
+
+interface WebviewMessage {
+    command: string;
+    url?: string;
+}
+
 // Status bar item
 let statusBarItem: vscode.StatusBarItem | undefined;
-let refreshInterval: NodeJS.Timeout | undefined;
+let refreshInterval: ReturnType<typeof setInterval> | undefined;
 
 // Get configuration
 function getConfig(): RustChainConfig {
     const config = vscode.workspace.getConfiguration('rustchain');
     return {
-        walletName: config.get<string>('walletName', ''),
-        nodeUrl: config.get<string>('nodeUrl', 'https://50.28.86.131'),
-        refreshInterval: config.get<number>('refreshInterval', 60)
+        walletName: config.get<string>('walletName', '') || '',
+        nodeUrl: config.get<string>('nodeUrl', 'https://50.28.86.131') || 'https://50.28.86.131',
+        refreshInterval: config.get<number>('refreshInterval', 60) || 60
     };
 }
 
 // API calls
 async function fetchBalance(walletName: string, nodeUrl: string): Promise<number | null> {
     try {
-        const response = await fetch(`${nodeUrl}/wallet/balance?wallet_id=${encodeURIComponent(walletName)}`);
-        if (!response.ok) { return null; }
-        const data = await response.json() as BalanceResponse;
-        return data.balance_nrtc ?? data.balance ?? 0;
+        const response = await httpGet<BalanceResponse>(`${nodeUrl}/wallet/balance?wallet_id=${encodeURIComponent(walletName)}`);
+        if (!response.ok || !response.data) { return null; }
+        return response.data.balance_nrtc ?? response.data.balance ?? 0;
     } catch (error) {
         console.error('Failed to fetch balance:', error);
         return null;
@@ -62,9 +97,9 @@ async function fetchBalance(walletName: string, nodeUrl: string): Promise<number
 
 async function fetchEpoch(nodeUrl: string): Promise<EpochResponse | null> {
     try {
-        const response = await fetch(`${nodeUrl}/epoch`);
-        if (!response.ok) { return null; }
-        return await response.json() as EpochResponse;
+        const response = await httpGet<EpochResponse>(`${nodeUrl}/epoch`);
+        if (!response.ok || !response.data) { return null; }
+        return response.data;
     } catch (error) {
         console.error('Failed to fetch epoch:', error);
         return null;
@@ -73,10 +108,9 @@ async function fetchEpoch(nodeUrl: string): Promise<EpochResponse | null> {
 
 async function fetchMinerStatus(walletName: string, nodeUrl: string): Promise<boolean> {
     try {
-        const response = await fetch(`${nodeUrl}/api/miners`);
-        if (!response.ok) { return false; }
-        const data = await response.json() as { miners?: MinerStatus[] };
-        const miners = data.miners || [];
+        const response = await httpGet<MinersResponse>(`${nodeUrl}/api/miners`);
+        if (!response.ok || !response.data) { return false; }
+        const miners = response.data.miners || [];
         return miners.some(m => m.miner_id === walletName && m.status === 'active');
     } catch (error) {
         console.error('Failed to fetch miner status:', error);
@@ -86,10 +120,9 @@ async function fetchMinerStatus(walletName: string, nodeUrl: string): Promise<bo
 
 async function fetchBounties(): Promise<Bounty[]> {
     try {
-        const response = await fetch('https://api.github.com/repos/Scottcjn/rustchain-bounties/issues?state=open&labels=bounty&per_page=20');
-        if (!response.ok) { return []; }
-        const data = await response.json() as Array<{ number: number; title: string; state: string; html_url: string }>;
-        return data.map(item => ({
+        const response = await httpGet<BountyIssue[]>('https://api.github.com/repos/Scottcjn/rustchain-bounties/issues?state=open&labels=bounty&per_page=20');
+        if (!response.ok || !response.data) { return []; }
+        return response.data.map(item => ({
             number: item.number,
             title: item.title,
             state: item.state,
@@ -128,7 +161,7 @@ async function updateStatusBar(): Promise<void> {
 }
 
 // Create webview for bounty browser
-function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): string {
+function createBountyWebview(bounties: Bounty[]): string {
     const bountyList = bounties.map(b => `
         <div class="bounty-item" onclick="openBounty('${b.html_url}')">
             <div class="bounty-number">#${b.number}</div>
@@ -136,8 +169,7 @@ function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): st
         </div>
     `).join('');
 
-    return `
-<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -146,8 +178,8 @@ function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): st
         body { font-family: var(--vscode-font-family); padding: 10px; margin: 0; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .title { font-size: 16px; font-weight: 600; }
-        .refresh-btn { 
-            background: var(--vscode-button-background); 
+        .refresh-btn {
+            background: var(--vscode-button-background);
             color: var(--vscode-button-foreground);
             border: none; padding: 5px 12px; cursor: pointer; border-radius: 3px;
         }
@@ -158,13 +190,13 @@ function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): st
             border-radius: 4px; cursor: pointer;
         }
         .bounty-item:hover { background: var(--vscode-list-hoverBackground); }
-        .bounty-number { 
-            color: var(--vscode-textLink-foreground); 
+        .bounty-number {
+            color: var(--vscode-textLink-foreground);
             font-weight: 600; margin-right: 10px; min-width: 50px;
         }
         .bounty-title { font-size: 13px; overflow: hidden; text-overflow: ellipsis; }
-        .stats { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+        .stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
             margin-bottom: 15px;
         }
         .stat-box {
@@ -179,7 +211,7 @@ function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): st
 <body>
     <div class="header">
         <span class="title">🦀 RustChain Bounties</span>
-        <button class="refresh-btn" onclick="refresh()">↻ Refresh</button>
+        <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
     </div>
     <div class="stats">
         <div class="stat-box">
@@ -196,8 +228,12 @@ function createBountyWebview(panel: vscode.WebviewPanel, bounties: Bounty[]): st
     </div>
     <script>
         const vscode = acquireVsCodeApi();
-        function openBounty(url) { vscode.postMessage({ command: 'openUrl', url }); }
-        function refresh() { vscode.postMessage({ command: 'refresh' }); }
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            vscode.postMessage({ command: 'refresh' });
+        });
+        function openBounty(url) {
+            vscode.postMessage({ command: 'openUrl', url });
+        }
     </script>
 </body>
 </html>`;
@@ -213,25 +249,22 @@ function escapeHtml(text: string): string {
 }
 
 // Register commands
-function registerCommands(context: vscode.ExtensionContext): void {
-    // Refresh command
+function registerCommands(): void {
     vscode.commands.registerCommand('rustchain.refresh', async () => {
         await updateStatusBar();
         vscode.window.showInformationMessage('RustChain dashboard refreshed');
     });
 
-    // Open bounty URL
-    vscode.commands.registerCommand('rustchain.openBounty', async (bounty: Bounty) => {
+    vscode.commands.registerCommand('rustchain.openBounty', async (bounty?: Bounty) => {
         if (bounty?.html_url) {
             vscode.env.openExternal(vscode.Uri.parse(bounty.html_url));
         }
     });
 
-    // Claim bounty - opens PR template
     vscode.commands.registerCommand('rustchain.claimBounty', async () => {
         const issueNumber = await vscode.window.showInputBox({
             prompt: 'Enter the bounty issue number you want to claim',
-            validateInput: (value) => {
+            validateInput: (value: string) => {
                 const num = parseInt(value, 10);
                 return isNaN(num) ? 'Please enter a valid number' : '';
             }
@@ -244,27 +277,61 @@ function registerCommands(context: vscode.ExtensionContext): void {
     });
 }
 
+// Webview provider
+class RustChainBountyProvider implements vscode.WebviewViewProvider {
+    constructor(private readonly extensionContext: vscode.ExtensionContext) {}
+
+    resolveWebviewView(webviewView: vscode.WebviewView): void {
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this.extensionContext.extensionUri]
+        };
+
+        webviewView.webview.html = createBountyWebview([]);
+
+        webviewView.webview.onDidReceiveMessage((message: WebviewMessage) => {
+            switch (message.command) {
+                case 'openUrl':
+                    if (message.url) {
+                        vscode.env.openExternal(vscode.Uri.parse(message.url));
+                    }
+                    break;
+                case 'refresh':
+                    this.refreshWebview(webviewView);
+                    break;
+            }
+        });
+
+        this.refreshWebview(webviewView);
+    }
+
+    private async refreshWebview(webviewView: vscode.WebviewView): Promise<void> {
+        webviewView.webview.html = `<!DOCTYPE html>
+<html><body style="font-family: var(--vscode-font-family); padding: 20px; text-align: center;">
+    <p>⏳ Loading bounties...</p>
+</body></html>`;
+
+        const bounties = await fetchBounties();
+        webviewView.webview.html = createBountyWebview(bounties);
+    }
+}
+
 // Main activation
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     console.log('RustChain Dashboard extension activated');
 
-    // Register commands
-    registerCommands(context);
+    registerCommands();
 
-    // Create sidebar view
     const provider = new RustChainBountyProvider(context);
     vscode.window.registerWebviewViewProvider('rustchain-bounties', provider);
 
-    // Initial status bar update
-    updateStatusBar();
+    await updateStatusBar();
 
-    // Auto-refresh
     const config = getConfig();
     refreshInterval = setInterval(() => {
         updateStatusBar();
     }, config.refreshInterval * 1000);
 
-    // Watch configuration changes
     vscode.workspace.onDidChangeConfiguration((event) => {
         if (event.affectsConfiguration('rustchain')) {
             if (refreshInterval) {
@@ -277,53 +344,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             updateStatusBar();
         }
     });
-}
-
-// Webview provider
-class RustChainBountyProvider implements vscode.WebviewViewProvider {
-    constructor(private readonly context: vscode.ExtensionContext) {}
-
-    resolveWebviewView(webviewView: vscode.WebviewViewView): void {
-        webviewView.webview.options = {
-            enableScripts: true,
-            localResourceRoots: [this.context.extensionUri]
-        };
-
-        // Initial content
-        webviewView.webview.html = createBountyWebviewPanel('Loading...');
-
-        // Handle messages from webview
-        webviewView.webview.onDidReceiveMessage(async (message) => {
-            switch (message.command) {
-                case 'openUrl':
-                    vscode.env.openExternal(vscode.Uri.parse(message.url));
-                    break;
-                case 'refresh':
-                    await this.refreshWebview(webviewView);
-                    break;
-            }
-        });
-
-        // Load initial data
-        this.refreshWebview(webviewView);
-    }
-
-    private async refreshWebview(webviewView: vscode.WebviewViewView): Promise<void> {
-        webviewView.webview.html = createBountyWebviewPanel('Loading bounties...');
-        const bounties = await fetchBounties();
-        webviewView.webview.html = createBountyWebviewPanel(bounties);
-    }
-}
-
-function createBountyWebviewPanel(content: string | Bounty[]): string {
-    if (typeof content === 'string') {
-        return `
-<!DOCTYPE html>
-<html><body style="font-family: var(--vscode-font-family); padding: 20px;">
-    <p>${content}</p>
-</body></html>`;
-    }
-    return createBountyWebview({ webview: { html: '' } } as unknown as vscode.WebviewPanel, content);
 }
 
 // Deactivation
