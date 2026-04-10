@@ -1,0 +1,26 @@
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when a PR is merged'
+author: 'aiccnncom'
+inputs:
+  node-url:
+    description: 'RTC node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'Amount of RTC to award'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Project fund wallet name'
+    required: true
+  admin-key:
+    description: 'Admin key for the node'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode (no actual transactions)'
+    required: false
+    default: 'false'
+runs:
+  using: 'python'
+  python-location: 'python3'
+  program: 'rtc_reward.py'
