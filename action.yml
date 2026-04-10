@@ -1,0 +1,29 @@
+name: 'RTC Reward'
+description: 'Award RTC tokens on PR merge'
+inputs:
+  node-url:
+    description: 'Node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'RTC amount'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Source wallet'
+    required: true
+  admin-key:
+    description: 'Admin key'
+    required: true
+  dry-run:
+    description: 'Dry run'
+    required: false
+    default: 'false'
+outputs:
+  recipient:
+    description: 'Recipient wallet'
+  amount:
+    description: 'Amount transferred'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
