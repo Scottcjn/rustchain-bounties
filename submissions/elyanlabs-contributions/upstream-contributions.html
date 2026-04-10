@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upstream Contributions — Elyan Labs</title>
+  <meta name="description" content="44+ merged and in-review upstream contributions by Elyan Labs to major open-source projects: OpenSSL, NSA Ghidra, vLLM, LLVM, CPython, PyTorch and more.">
+  <style>
+    :root {
+      --bg: #0d0b09;
+      --bg2: #161310;
+      --border: #2a2520;
+      --accent: #c8a96e;
+      --accent2: #7eb8a4;
+      --text: #e8e0d0;
+      --text2: #9a9080;
+      --merged: #4a9e6a;
+      --review: #7eb8a4;
+      --merged-bg: #1a2e20;
+      --review-bg: #1a2830;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header .lab-name {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      color: var(--text2);
+      margin-top: 0.75rem;
+      max-width: 640px;
+    }
+
+    .stats-bar {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat .num {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .stat .label {
+      font-size: 0.8rem;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-merged {
+      background: var(--merged-bg);
+      color: var(--merged);
+      border: 1px solid var(--merged);
+    }
+
+    .badge-review {
+      background: var(--review-bg);
+      color: var(--review);
+      border: 1px solid var(--review);
+    }
+
+    .section h2 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+      transition: border-color 0.15s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .card .stars {
+      font-size: 0.75rem;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    .card .impact {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .pr-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .pr-link {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(200, 169, 110, 0.08);
+      border: 1px solid rgba(200, 169, 110, 0.2);
+      border-radius: 4px;
+      color: var(--accent);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .pr-link:hover {
+      background: rgba(200, 169, 110, 0.15);
+      text-decoration: none;
+    }
+
+    .card .category {
+      font-size: 0.7rem;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.3rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      max-width: 960px;
+      margin: 4rem auto 0;
+      padding: 2rem 1.5rem;
+      color: var(--text2);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .cards { grid-template-columns: 1fr; }
+      .stats-bar { gap: 1.5rem; }
+      header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="lab-name">ELYAN LABS — OPEN SOURCE</div>
+  <h1>Upstream Contributions</h1>
+  <p>Security fixes, performance improvements, and portability patches merged into major open-source projects. Focus: PowerPC / POWER8 / exotic hardware.</p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="num">44+</span>
+    <span class="label">Total PRs</span>
+  </div>
+  <div class="stat">
+    <span class="num">15+</span>
+    <span class="label">Projects touched</span>
+  </div>
+  <div class="stat">
+    <span class="num">200K+</span>
+    <span class="label">Stars across projects</span>
+  </div>
+  <div class="stat">
+    <span class="num">2</span>
+    <span class="label">Critical security fixes</span>
+  </div>
+</div>
+
+<!-- MERGED -->
+<div class="section">
+  <div class="section-header">
+    <h2>Merged to Mainline</h2>
+    <span class="badge badge-merged">✓ Merged</span>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Security</div>
+          <h3><a href="https://github.com/openssl/openssl" target="_blank">OpenSSL</a></h3>
+        </div>
+        <span class="stars">⭐ 26K</span>
+      </div>
+      <p class="impact">PowerPC AES-GCM security fixes — merged to <code>master</code> and 5 active release branches. Critical path: protects TLS traffic on millions of PowerPC servers.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/openssl/openssl/pull/30437" target="_blank">#30437</a>
+        <a class="pr-link" href="https://github.com/openssl/openssl/pull/30452" target="_blank">#30452</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Compression</div>
+          <h3><a href="https://github.com/Blosc/c-blosc2" target="_blank">c-blosc2</a></h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">PowerPC VSX SIMD fixes for the compression engine behind pandas, zarr, and PyTables. Prevents silent data corruption on PowerPC Linux.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/Blosc/c-blosc2/pull/723" target="_blank">#723</a>
+        <a class="pr-link" href="https://github.com/Blosc/c-blosc2/pull/725" target="_blank">#725</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Disassembly</div>
+          <h3><a href="https://github.com/capstone-engine/capstone" target="_blank">Capstone</a></h3>
+        </div>
+        <span class="stars">⭐ 8K</span>
+      </div>
+      <p class="impact">Multi-arch disassembly portability fix. Used by IDA Pro, radare2, and Ghidra — patch improves cross-platform reliability on exotic ISAs.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/capstone-engine/capstone/pull/2889" target="_blank">#2889</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Formal Verification</div>
+          <h3><a href="https://github.com/hacl-star/hacl-star" target="_blank">HACL*</a></h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">Microsoft's formally-verified cryptography library. AltiVec intrinsic fix for PowerPC — ensures the verified crypto compiles correctly on POWER hardware.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/hacl-star/hacl-star/pull/1068" target="_blank">#1068</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">SDK / Build</div>
+          <h3><a href="https://github.com/DragonMinded/libdragon" target="_blank">libdragon</a></h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">N64 homebrew SDK — macOS build fix. Enables macOS developers to build N64 ROMs without manual toolchain patches.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/DragonMinded/libdragon/pull/849" target="_blank">#849</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Project Contributions</div>
+          <h3>trajectly (12 PRs)</h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">12 merged pull requests across the trajectly project — broad infrastructure and feature contributions.</p>
+      <div class="pr-links">
+        <span class="pr-link">12 PRs merged</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Project Contributions</div>
+          <h3>kusari-oss/darnit (6 PRs)</h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">6 merged pull requests to the darnit project.</p>
+      <div class="pr-links">
+        <span class="pr-link">6 PRs merged</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Documentation / Features</div>
+          <h3>learnhouse (multiple PRs)</h3>
+        </div>
+        <span class="stars"></span>
+      </div>
+      <p class="impact">Multiple contributions to the learnhouse open-source learning platform.</p>
+      <div class="pr-links">
+        <span class="pr-link">Multiple merged</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- IN REVIEW -->
+<div class="section">
+  <div class="section-header">
+    <h2>In Review (CLA Signed)</h2>
+    <span class="badge badge-review">⏳ In Review</span>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">AI Inference</div>
+          <h3><a href="https://github.com/vllm-project/vllm" target="_blank">vLLM</a></h3>
+        </div>
+        <span class="stars">⭐ 30K</span>
+      </div>
+      <p class="impact">IBM POWER8 CPU backend — enables vLLM inference on POWER8 hardware. First step toward running modern LLMs on exotic server hardware at reduced cost.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/vllm-project/vllm/pull/37586" target="_blank">#37586</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Reverse Engineering</div>
+          <h3><a href="https://github.com/NationalSecurityAgency/ghidra" target="_blank">NSA Ghidra</a></h3>
+        </div>
+        <span class="stars">⭐ 53K</span>
+      </div>
+      <p class="impact">e200 VLE PowerPC reverse engineering support — enables security researchers to analyze embedded PowerPC firmware in Ghidra.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/NationalSecurityAgency/ghidra/pull/9036" target="_blank">#9036</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Compiler</div>
+          <h3><a href="https://github.com/llvm/llvm-project" target="_blank">LLVM</a></h3>
+        </div>
+        <span class="stars">⭐ 100K+</span>
+      </div>
+      <p class="impact">4 PowerPC-specific fixes — instruction selection, code generation, and portability improvements for the PowerPC backend of the world's most widely used compiler infrastructure.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/llvm/llvm-project/pull/188558" target="_blank">#188558</a>
+        <a class="pr-link" href="https://github.com/llvm/llvm-project/pull/188373" target="_blank">#188373</a>
+        <a class="pr-link" href="https://github.com/llvm/llvm-project/pull/187315" target="_blank">#187315</a>
+        <a class="pr-link" href="https://github.com/llvm/llvm-project/pull/187322" target="_blank">#187322</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Language Runtime</div>
+          <h3><a href="https://github.com/python/cpython" target="_blank">CPython</a></h3>
+        </div>
+        <span class="stars">⭐ 65K</span>
+      </div>
+      <p class="impact">BLAKE2 SIMD128 acceleration on POWER8 — cryptographic hash performance improvement for Python's standard library on IBM POWER8 servers.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/python/cpython/pull/146118" target="_blank">#146118</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">ML Framework</div>
+          <h3><a href="https://github.com/pytorch/pytorch" target="_blank">PyTorch</a></h3>
+        </div>
+        <span class="stars">⭐ 85K</span>
+      </div>
+      <p class="impact">POWER8 Kineto profiling guard — enables PyTorch performance profiling on POWER8 hardware without crashes.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/pytorch/pytorch/pull/179619" target="_blank">#179619</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="category">Security / TLS</div>
+          <h3><a href="https://github.com/wolfSSL/wolfssl" target="_blank">wolfSSL</a></h3>
+        </div>
+        <span class="stars">⭐ 2K</span>
+      </div>
+      <p class="impact">POWER8 hardware AES acceleration — 13-20× speedup for TLS on POWER8. CLA signed, in final review.</p>
+      <div class="pr-links">
+        <a class="pr-link" href="https://github.com/wolfSSL/wolfssl/pull/9932" target="_blank">#9932</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>Elyan Labs — <a href="https://elyanlabs.ai">elyanlabs.ai</a></span>
+  <span>Focus: PowerPC · POWER8 · Exotic hardware · AI inference</span>
+</footer>
+
+</body>
+</html>
