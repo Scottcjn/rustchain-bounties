@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://elynabs.ai/sitemap.xml
