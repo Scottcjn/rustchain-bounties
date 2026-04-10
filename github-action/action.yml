@@ -1,0 +1,62 @@
+name: "RustChain RTC Reward"
+description: "Automatically award RTC tokens to contributors when their pull request is merged."
+author: "RustChain Community"
+
+branding:
+  icon: "award"
+  color: "orange"
+
+inputs:
+  node-url:
+    description: "URL of the RustChain attestation node."
+    required: false
+    default: "https://50.28.86.131"
+
+  amount:
+    description: "Amount of RTC to award per merged PR."
+    required: false
+    default: "5"
+
+  wallet-from:
+    description: "Sender wallet ID (the project fund wallet)."
+    required: true
+
+  admin-key:
+    description: "Admin/private key for the sender wallet. Store in GitHub Secrets."
+    required: true
+
+  wallet-pattern:
+    description: |
+      Regex pattern to extract recipient wallet from PR body.
+      Default matches lines like: Wallet: my-wallet-name
+    required: false
+    default: "(?i)wallet[:\\s]+([a-zA-Z0-9_\\-\\.]{3,64})"
+
+  dry-run:
+    description: "If 'true', simulate the award without making real transfers."
+    required: false
+    default: "false"
+
+  comment-on-pr:
+    description: "If 'true', post a confirmation comment on the PR."
+    required: false
+    default: "true"
+
+  require-label:
+    description: "Only award if PR has this label (leave empty to award all merged PRs)."
+    required: false
+    default: ""
+
+outputs:
+  awarded:
+    description: "Whether RTC was actually awarded ('true' or 'false')."
+  recipient-wallet:
+    description: "The recipient wallet ID that received (or would receive) the RTC."
+  tx-id:
+    description: "Transaction ID from the RustChain node (empty in dry-run mode)."
+  amount-rtc:
+    description: "Amount of RTC awarded."
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

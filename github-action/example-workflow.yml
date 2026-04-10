@@ -1,0 +1,41 @@
+# Example: Add this to .github/workflows/rtc-reward.yml in your repo
+name: Award RTC on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    # Only run when the PR was actually merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write  # needed to post the confirmation comment
+
+    steps:
+      - uses: Scottcjn/rustchain-bounties/github-action@main
+        with:
+          # RustChain node URL (default node works out of the box)
+          node-url: https://50.28.86.131
+
+          # How much RTC to award per merged PR
+          amount: 5
+
+          # Your project's fund wallet ID
+          wallet-from: my-project-fund
+
+          # Store the admin key in GitHub Secrets — never hardcode it!
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+
+          # Post a "🎉 RTC Reward Sent!" comment on the PR (default: true)
+          comment-on-pr: true
+
+          # Optional: only reward PRs with a specific label
+          # require-label: "bounty"
+
+          # Optional: test mode — simulates without real transfer
+          # dry-run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
