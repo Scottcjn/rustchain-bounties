@@ -1,0 +1,53 @@
+{
+  "annotations": {
+    "list": [
+      { "builtIn": 1, "datasource": "-- Grafana --", "enable": true, "hide": true }]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "RustChain Miner Hashrate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": { "unit": "H/s" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Shares Submitted",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "title": "RTC Balance",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "RTC" } }
+    },
+    {
+      "title": "Miner Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Mining Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 12 }
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["rustchain", "mining"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "RustChain Miner Dashboard",
+  "version": 1
+}

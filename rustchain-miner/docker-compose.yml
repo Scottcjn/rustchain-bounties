@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  miner:
+    build: .
+    image: rustchain-miner
+    container_name: rtc-miner
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - WALLET=${WALLET:?WALLET is required}
+      - NODE_URL=${NODE_URL:-https://50.28.86.131}
+      - MINER_THREADS=${MINER_THREADS:-1}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
