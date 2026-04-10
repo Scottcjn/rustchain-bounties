@@ -1,0 +1,93 @@
+{
+  "name": "rustchain-dashboard",
+  "displayName": "RustChain Dashboard",
+  "description": "VS Code extension for RustChain wallet balance, miner status, and bounty board",
+  "version": "1.0.0",
+  "publisher": "digitalnomad",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "rustchain",
+    "crypto",
+    "dashboard",
+    "wallet",
+    "miner"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "RustChain",
+      "properties": {
+        "rustchain.wallet": {
+          "type": "string",
+          "default": "",
+          "description": "Your RustChain wallet name"
+        },
+        "rustchain.nodeUrl": {
+          "type": "string",
+          "default": "https://50.28.86.131",
+          "description": "RustChain node URL"
+        },
+        "rustchain.refreshInterval": {
+          "type": "number",
+          "default": 60,
+          "description": "Refresh interval in seconds"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": {
+        "rustchain": {
+          "id": "rustchain-view",
+          "title": "RustChain"
+        }
+      }
+    },
+    "views": {
+      "rustchain-view": [
+        {
+          "id": "bountyBrowser",
+          "name": "Bounties"
+        },
+        {
+          "id": "minerStatus",
+          "name": "Miner"
+        }
+      ]
+    },
+    "commands": {
+      "rustchain.refresh": {
+        "title": "Refresh RustChain Data"
+      },
+      "rustchain.openBounty": {
+        "title": "Open Bounty"
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

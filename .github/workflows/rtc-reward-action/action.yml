@@ -1,0 +1,37 @@
+name: 'RTC Reward GitHub Action'
+description: 'Automatically award RTC tokens when PRs are merged'
+author: 'Digital Nomad'
+branding:
+  icon: 'gift'
+  color: 'green'
+inputs:
+  node-url:
+    description: 'RustChain node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'Amount of RTC to award per PR merge'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Source wallet name for rewards'
+    required: true
+  admin-key:
+    description: 'Admin private key for wallet operations'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode for testing'
+    required: false
+    default: 'false'
+  comment-message:
+    description: 'Custom message for reward comment'
+    required: false
+    default: '🎉 RTC reward transferred! Thank you for your contribution!'
+outputs:
+  recipient:
+    description: 'Wallet address that received the reward'
+  amount:
+    description: 'Amount of RTC transferred'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
