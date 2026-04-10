@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain-sdk"
+version = "0.1.0"
+description = "Full-featured Python SDK for RustChain — interact with the chain from any Python script or agent."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "RustChain", email = "rustchain@example.com"}
+]
+keywords = ["rustchain", "blockchain", "crypto", "api-client", "sdk"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: Proxy",
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Scottcjn/rustchain-bounties"
+Repository = "https://github.com/Scottcjn/rustchain-bounties"
+Documentation = "https://github.com/Scottcjn/rustchain-bounties#readme"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "responses"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
