@@ -113,3 +113,17 @@ export async function fetchHealth(): Promise<NodeHealth> {
 export async function fetchEpoch(): Promise<EpochInfo> {
     return httpGet<EpochInfo>("/epoch");
 }
+
+export interface MinerInfo {
+    miner_id?: string;
+    antiquity_multiplier?: number;
+    device_arch?: string;
+}
+
+export interface MinersResponse {
+    miners: MinerInfo[];
+}
+
+export async function fetchMiners(): Promise<MinersResponse> {
+    return httpGet<MinersResponse>("/api/miners");
+}

@@ -25,6 +25,7 @@
     "mining"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onLanguage:rustchain-config",
     "workspaceContains:**/rustchain.toml",
     "workspaceContains:**/rustchain.yaml"
@@ -103,6 +104,41 @@
         "path": "./snippets/rustchain-config.json"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rustchain-sidebar",
+          "title": "RustChain",
+          "icon": "$(circuit-board)"
+        }
+      ]
+    },
+    "views": {
+      "rustchain-sidebar": [
+        {
+          "id": "rustchainBounties",
+          "name": "Open Bounties",
+          "icon": "$(circuit-board)",
+          "contextualTitle": "RustChain Bounties"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "rustchain.refreshBounties",
+          "when": "view == rustchainBounties",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "rustchain.claimBounty",
+          "when": "view == rustchainBounties && viewItem == bounty",
+          "group": "inline"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "rustchain.refreshBalance",
@@ -115,6 +151,16 @@
       {
         "command": "rustchain.checkNodeHealth",
         "title": "RustChain: Check Node Health"
+      },
+      {
+        "command": "rustchain.refreshBounties",
+        "title": "Refresh Bounties",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "rustchain.claimBounty",
+        "title": "Open in Browser",
+        "icon": "$(link-external)"
       }
     ]
   },
