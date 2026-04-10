@@ -32,6 +32,14 @@ const VM_VENDORS: &[&str] = &[
     "bochs",
 ];
 
+/// Additional RISC-V specific VM indicators (QEMU for RISC-V is common).
+const RISCV_VM_INDICATORS: &[&str] = &[
+    "qemu-riscv",
+    "riscv,qemu",
+    "virt, qemu",
+    "riscv-virtio",
+];
+
 /// Known virtual disk identifiers in SCSI info.
 #[allow(dead_code)]
 const VIRTUAL_SCSI: &[&str] = &[
@@ -107,6 +115,12 @@ fn detect_vm_indicators() -> Vec<String> {
             if lower.contains("hypervisor") {
                 indicators.push("cpuinfo:hypervisor_flag".to_string());
             }
+            // RISC-V QEMU detection via cpuinfo model name
+            for pattern in RISCV_VM_INDICATORS {
+                if lower.contains(pattern) {
+                    indicators.push(format!("riscv_vm:{}", pattern));
+                }
+            }
         }
 
         // Virtual SCSI devices
@@ -125,6 +139,16 @@ fn detect_vm_indicators() -> Vec<String> {
             let lower = cgroup.to_lowercase();
             if lower.contains("docker") || lower.contains("lxc") || lower.contains("kubepods") {
                 indicators.push("container:cgroup".to_string());
+            }
+        }
+
+        // RISC-V: check /proc/device-tree/compatible for QEMU
+        if let Ok(contents) = std::fs::read_to_string("/proc/device-tree/compatible") {
+            let lower = contents.to_lowercase();
+            for pattern in RISCV_VM_INDICATORS {
+                if lower.contains(pattern) {
+                    indicators.push(format!("device_tree:{}", pattern));
+                }
             }
         }
     }
@@ -197,6 +221,7 @@ pub fn run() -> CheckResult {
             "checks_performed": {
                 "dmi_vendor": cfg!(target_os = "linux"),
                 "cpuinfo_hypervisor": cfg!(target_os = "linux"),
+                "riscv_vm_detection": cfg!(target_os = "linux"),
                 "scsi_virtual": cfg!(target_os = "linux"),
                 "mac_oui": true,
                 "container_detection": cfg!(target_os = "linux"),

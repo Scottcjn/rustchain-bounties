@@ -1,0 +1,219 @@
+[project]
+name = "mcp"
+dynamic = ["version"]
+description = "Model Context Protocol SDK"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Anthropic, PBC." }]
+maintainers = [
+    { name = "David Soria Parra", email = "davidsp@anthropic.com" },
+    { name = "Justin Spahr-Summers", email = "justin@anthropic.com" },
+]
+keywords = ["git", "mcp", "llm", "automation"]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "anyio>=4.5",
+    "httpx>=0.27.1",
+    "httpx-sse>=0.4",
+    "pydantic>=2.11.0,<3.0.0",
+    "starlette>=0.27",
+    "python-multipart>=0.0.9",
+    "sse-starlette>=1.6.1",
+    "pydantic-settings>=2.5.2",
+    "uvicorn>=0.31.1; sys_platform != 'emscripten'",
+    "jsonschema>=4.20.0",
+    "pywin32>=310; sys_platform == 'win32'",
+    "pyjwt[crypto]>=2.10.1",
+    "typing-extensions>=4.9.0",
+    "typing-inspection>=0.4.1",
+]
+
+[project.optional-dependencies]
+rich = ["rich>=13.9.4"]
+cli = ["typer>=0.16.0", "python-dotenv>=1.0.0"]
+ws = ["websockets>=15.0.1"]
+
+[project.scripts]
+mcp = "mcp.cli:app [cli]"
+
+[tool.uv]
+default-groups = ["dev", "docs"]
+required-version = ">=0.9.5"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.400",
+    "pytest>=8.3.4",
+    "ruff>=0.8.5",
+    "trio>=0.26.2",
+    "pytest-flakefinder>=1.1.0",
+    "pytest-xdist>=3.6.1",
+    "pytest-examples>=0.0.14",
+    "pytest-pretty>=1.2.0",
+    "inline-snapshot>=0.23.0",
+    "dirty-equals>=0.9.0",
+    "coverage[toml]==7.10.7",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs-material[imaging]>=9.5.45",
+    "mkdocstrings-python>=1.12.2",
+]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+bump = true
+
+[project.urls]
+Homepage = "https://modelcontextprotocol.io"
+Repository = "https://github.com/modelcontextprotocol/python-sdk"
+Issues = "https://github.com/modelcontextprotocol/python-sdk/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src/mcp", "tests", "examples/servers", "examples/snippets"]
+venvPath = "."
+venv = ".venv"
+# The FastAPI style of using decorators in tests gives a `reportUnusedFunction` error.
+# See https://github.com/microsoft/pyright/issues/7771 for more details.
+# TODO(Marcelo): We should remove `reportPrivateUsage = false`. The idea is that we should test the workflow that uses
+# those private functions instead of testing the private functions directly. It makes it easier to maintain the code source
+# and refactor code that is not public.
+executionEnvironments = [
+    { root = "tests", extraPaths = ["."], reportUnusedFunction = false, reportPrivateUsage = false },
+    { root = "examples/servers", reportUnusedFunction = false },
+    { root = "examples/snippets/clients/logging_client.py", reportUndefinedVariable = false, reportUnknownArgumentType = false },
+    { root = "examples/snippets/clients/roots_example.py", reportUndefinedVariable = false, reportUnknownArgumentType = false, reportArgumentType = false },
+    { root = "examples/snippets/servers/embedded_resource_results.py", reportArgumentType = false },
+    { root = "examples/snippets/servers/embedded_resource_results_binary.py", reportArgumentType = false },
+    { root = "examples/snippets/servers/prompt_embedded_resources.py", reportArgumentType = false },
+    { root = "examples/snippets/servers/resource_subscriptions.py", reportUnknownParameterType = false, reportMissingParameterType = false, reportUnknownArgumentType = false },
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["README.md"]
+
+[tool.ruff.lint]
+select = [
+    "C4",   # flake8-comprehensions
+    "C90",  # mccabe
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "PERF", # Perflint
+    "PL",   # Pylint
+    "UP",   # pyupgrade
+]
+ignore = ["PERF203", "PLC0415", "PLR0402"]
+mccabe.max-complexity = 24 # Default is 10
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/server/fastmcp/test_func_metadata.py" = ["E501"]
+"tests/shared/test_progress_notifications.py" = ["PLW0603"]
+"examples/snippets/clients/logging_client.py" = ["F821"]
+"examples/snippets/clients/roots_example.py" = ["F821"]
+"examples/snippets/servers/set_logging_level.py" = ["PLW0603"]
+
+[tool.ruff.lint.pylint]
+allow-magic-value-types = ["bytes", "float", "int", "str"]
+max-args = 23                                              # Default is 5
+max-branches = 23                                          # Default is 12
+max-returns = 13                                           # Default is 6
+max-statements = 102                                       # Default is 50
+
+[tool.uv.workspace]
+members = ["examples/clients/*", "examples/servers/*", "examples/snippets"]
+
+[tool.uv.sources]
+mcp = { workspace = true }
+
+[tool.pytest.ini_options]
+log_cli = true
+xfail_strict = true
+addopts = """
+    --color=yes
+    --capture=fd
+    --numprocesses auto
+"""
+filterwarnings = [
+    "error",
+    # This should be fixed on Uvicorn's side.
+    "ignore::DeprecationWarning:websockets",
+    "ignore:websockets.server.WebSocketServerProtocol is deprecated:DeprecationWarning",
+    "ignore:Returning str or bytes.*:DeprecationWarning:mcp.server.lowlevel",
+    # pywin32 internal deprecation warning
+    "ignore:getargs.*The 'u' format is deprecated:DeprecationWarning",
+]
+
+[tool.markdown.lint]
+default = true
+MD004 = false    # ul-style - Unordered list style
+MD007.indent = 2 # ul-indent - Unordered list indentation
+MD013 = false    # line-length - Line length
+MD029 = false    # ol-prefix - Ordered list item prefix
+MD033 = false    # no-inline-html Inline HTML
+MD041 = false    # first-line-heading/first-line-h1
+MD046 = false    # indented-code-blocks
+MD059 = false    # descriptive-link-text
+
+# https://coverage.readthedocs.io/en/latest/config.html#run
+[tool.coverage.run]
+branch = true
+patch = ["subprocess"]
+concurrency = ["multiprocessing", "thread"]
+source = ["src", "tests"]
+relative_files = true
+omit = [
+    "src/mcp/client/__main__.py",
+    "src/mcp/server/__main__.py",
+    "src/mcp/os/posix/utilities.py",
+    "src/mcp/os/win32/utilities.py",
+]
+
+# https://coverage.readthedocs.io/en/latest/config.html#report
+[tool.coverage.report]
+fail_under = 100
+skip_covered = true
+show_missing = true
+ignore_errors = true
+precision = 2
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "raise NotImplementedError",
+    "^\\s*\\.\\.\\.\\s*$",
+]
+
+# https://coverage.readthedocs.io/en/latest/config.html#paths
+[tool.coverage.paths]
+source = [
+    "src/",
+    "/home/runner/work/python-sdk/python-sdk/src/",
+    'D:\a\python-sdk\python-sdk\src',
+]

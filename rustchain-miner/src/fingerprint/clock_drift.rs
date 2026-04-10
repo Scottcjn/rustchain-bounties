@@ -41,7 +41,21 @@ fn read_timestamp() -> u64 {
     val
 }
 
-#[cfg(not(any(target_arch = "x86_64", target_arch = "powerpc", target_arch = "powerpc64")))]
+#[cfg(target_arch = "riscv64")]
+#[inline(always)]
+fn read_timestamp() -> u64 {
+    let cycles: u64;
+    unsafe {
+        core::arch::asm!(
+            "csrr {0}, cycle",
+            out(reg) cycles,
+            options(nostack, nomem),
+        );
+    }
+    cycles
+}
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "powerpc", target_arch = "powerpc64", target_arch = "riscv64")))]
 #[inline(always)]
 fn read_timestamp() -> u64 {
     // Fallback: use Instant, convert to nanoseconds since an arbitrary epoch

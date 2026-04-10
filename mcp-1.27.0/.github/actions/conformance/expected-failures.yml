@@ -1,0 +1,4 @@
+# Known conformance test failures for v1.x
+# These are tracked and should be removed as they're fixed.
+server: []
+client: []
