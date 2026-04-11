@@ -1,8 +1,8 @@
 {
   "name": "rustchain-dev",
   "displayName": "RustChain Development Tools",
-  "description": "VS Code extension for RustChain development — RTC balance status bar, config highlighting, and code snippets.",
-  "version": "0.1.0",
+  "description": "VS Code extension for RustChain development — wallet balance, miner status, epoch countdown, bounty browser, config highlighting, and code snippets.",
+  "version": "0.2.0",
   "publisher": "rustchain",
   "license": "MIT",
   "repository": {
@@ -22,12 +22,16 @@
     "rtc",
     "blockchain",
     "proof-of-attestation",
-    "mining"
+    "mining",
+    "bounty",
+    "cryptocurrency"
   ],
   "activationEvents": [
     "onLanguage:rustchain-config",
     "workspaceContains:**/rustchain.toml",
-    "workspaceContains:**/rustchain.yaml"
+    "workspaceContains:**/rustchain.yaml",
+    "onCommand:rustchain.openBountyBrowser",
+    "onCommand:rustchain.claimBounty"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -54,6 +58,16 @@
           "type": "boolean",
           "default": true,
           "description": "Show RTC balance in the status bar."
+        },
+        "rustchain.showMinerStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show miner status (green/red indicator) in the status bar."
+        },
+        "rustchain.showEpochTimer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show epoch countdown timer in the status bar."
         },
         "rustchain.rejectUnauthorized": {
           "type": "boolean",
@@ -115,8 +129,51 @@
       {
         "command": "rustchain.checkNodeHealth",
         "title": "RustChain: Check Node Health"
+      },
+      {
+        "command": "rustchain.openBountyBrowser",
+        "title": "RustChain: Open Bounty Browser"
+      },
+      {
+        "command": "rustchain.claimBounty",
+        "title": "RustChain: Claim Bounty (Quick Action)"
+      },
+      {
+        "command": "rustchain.showEpochInfo",
+        "title": "RustChain: Show Epoch Info"
+      },
+      {
+        "command": "rustchain.openMinerStatus",
+        "title": "RustChain: Open Miner Status"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "rustchain.claimBounty",
+          "icon": "$(rocket)",
+          "when": "editorIsOpen"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "rustchain.openBountyBrowser",
+          "when": "true"
+        },
+        {
+          "command": "rustchain.claimBounty",
+          "when": "true"
+        },
+        {
+          "command": "rustchain.showEpochInfo",
+          "when": "true"
+        },
+        {
+          "command": "rustchain.openMinerStatus",
+          "when": "true"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -126,12 +183,15 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/mime-types": "^3.0.1",
     "@types/node": "^20.11.0",
+    "@types/retry": "^0.12.5",
     "@types/vscode": "^1.80.0",
+    "@types/yauzl": "^2.10.3",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
     "eslint": "^8.56.0",
-    "typescript": "^5.3.0",
-    "@vscode/test-electron": "^2.3.0"
+    "typescript": "^5.3.0"
   }
 }
