@@ -1,0 +1,40 @@
+{
+  "bounty_id": 2418,
+  "title": "Attestation Replay Cross-Node Attack - Full Analysis",
+  "reward": "200 RTC",
+  "wallet": "C4c7r9WPsnEe6CUfegMU9M7ReHD1pWg8qeSfTBoRcLbg",
+  "status": "analysis_complete",
+  "files": {
+    "analysis": "ATTESTATION_REPLAY_CROSS_NODE_ATTACK.md",
+    "patches": [
+      "patches/attestation_rs_node_binding.patch",
+      "patches/p2p_gossip_verification.patch"
+    ],
+    "tests": "test_cross_node_replay.py"
+  },
+  "vulnerability_summary": {
+    "root_cause": "Gossip layer trusts attestation announcements without verifying node binding",
+    "severity": "HIGH",
+    "impact": [
+      "Cross-node attestation theft",
+      "Reward manipulation",
+      "Sophia inspector pollution",
+      "Epoch consensus corruption"
+    ],
+    "attack_vector": "P2P network participation + gossip interception"
+  },
+  "fix_components": [
+    {
+      "file": "rustchain-miner/src/attestation.rs",
+      "change": "Bind nonce commitment to node_peer_id"
+    },
+    {
+      "file": "node/rustchain_p2p_gossip.py", 
+      "change": "Verify node_peer_id matches receiving node before accepting attestation"
+    },
+    {
+      "file": "node/sophia_attestation_inspector.py",
+      "change": "Enforce nonce uniqueness per (miner, node) pair"
+    }
+  ]
+}

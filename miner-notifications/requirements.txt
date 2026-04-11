@@ -1,0 +1,14 @@
+requests>=2.28.0
+
+# Optional dependencies for notification channels
+# Uncomment as needed:
+
+# Email support
+# smtplib (built-in)
+
+# Twitter/X support
+# tweepy>=4.14.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0

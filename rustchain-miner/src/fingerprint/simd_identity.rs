@@ -100,6 +100,28 @@ fn detect_simd_features() -> Vec<String> {
         }
     }
 
+    #[cfg(target_arch = "riscv64")]
+    {
+        // RISC-V Vector Extension (RVV) — detect via /proc/cpuinfo
+        // Most RISC-V Linux systems expose "v" (vector unit) in cpuinfo
+        if let Ok(cpuinfo) = std::fs::read_to_string("/proc/cpuinfo") {
+            let lower = cpuinfo.to_lowercase();
+            if lower.contains("riscv") && (lower.contains(" v ") || lower.contains("vector")) {
+                // Detect RVV version if available
+                if lower.contains("rvv1.0") || lower.contains("risc-v vector v1.0") {
+                    features.push("RVV-1.0".to_string());
+                } else if lower.contains("rvv0.7") || lower.contains("risc-v vector v0.7") {
+                    features.push("RVV-0.7".to_string());
+                } else {
+                    // Vector extension present but version undetermined
+                    features.push("RVV".to_string());
+                }
+            }
+        }
+        // Note: RISC-V Vector Extension is not yet fully standardized.
+        // The miner uses scalar fallback for RISC-V to ensure correctness.
+    }
+
     if features.is_empty() {
         features.push("none".to_string());
     }

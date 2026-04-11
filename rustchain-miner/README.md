@@ -7,7 +7,7 @@ Native Rust miner for [RustChain](https://github.com/Scottcjn/Rustchain) — a P
 - **Single binary** — no Python, pip, or venv needed
 - **Full RIP-PoA fingerprinting** — all 6 hardware fingerprint checks in native Rust
 - **Inline assembly** — `rdtsc` (x86_64) / `mftb` (PowerPC) for precise timing
-- **Cross-platform** — x86_64, aarch64, PowerPC targets
+- **Cross-platform** — x86_64, aarch64, PowerPC, RISC-V (riscv64gc) targets
 - **Self-signed TLS** — works with the RustChain node out of the box
 
 ## Quick Start
@@ -52,6 +52,10 @@ cargo build --release
 | PowerPC 750 | PowerPC | g3 | 1.8x |
 | Apple M1/M2/M3 | ARM | apple_silicon | 1.2x |
 | Core 2 | x86_64 | core2duo | 1.3x |
+| StarFive JH7110 | RISC-V | starfive_jh7110 | 1.1x |
+| SiFive Unmatched (FU740) | RISC-V | sifive_unmatched | 1.0x |
+| Milk-V Pioneer (SG2380) | RISC-V | milkv_pioneer | 0.9x |
+| Generic RISC-V 64-bit | RISC-V | riscv_modern | 0.95x |
 | Everything else | x86_64 | modern | 1.0x |
 
 ## API Endpoints
@@ -77,6 +81,7 @@ cargo install cross
 cross build --release --target x86_64-unknown-linux-musl
 cross build --release --target aarch64-unknown-linux-musl
 cross build --release --target powerpc64-unknown-linux-gnu
+cross build --release --target riscv64gc-unknown-linux-gnu
 ```
 
 ## Running as a Service (Linux)

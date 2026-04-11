@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain OTC Bridge</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 40px 0; border-bottom: 1px solid #334155; margin-bottom: 30px; }
+        h1 { font-size: 2.5rem; color: #f59e0b; margin-bottom: 10px; }
+        .subtitle { color: #94a3b8; }
+        .nav { display: flex; gap: 20px; margin-bottom: 30px; }
+        .nav button { background: #334155; border: none; color: #e2e8f0; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+        .nav button:hover { background: #475569; }
+        .nav button.active { background: #f59e0b; color: #0f172a; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .card h2 { color: #f59e0b; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; color: #94a3b8; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 1rem; }
+        input:focus, select:focus { outline: none; border-color: #f59e0b; }
+        button.primary { background: #f59e0b; color: #0f172a; border: none; padding: 14px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        button.primary:hover { background: #d97706; }
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .order-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .order-type { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.875rem; font-weight: 600; }
+        .order-type.buy { background: #16a34a; color: white; }
+        .order-type.sell { background: #dc2626; color: white; }
+        .order-amount { font-size: 1.5rem; font-weight: 700; color: #f59e0b; margin: 10px 0; }
+        .order-price { color: #94a3b8; }
+        .order-actions { margin-top: 16px; }
+        .order-actions button { width: 100%; background: #334155; border: none; color: #e2e8f0; padding: 10px; border-radius: 6px; cursor: pointer; }
+        .order-actions button:hover { background: #475569; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #f59e0b; }
+        .stat-label { color: #94a3b8; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+        th { color: #94a3b8; font-weight: 600; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #f59e0b; color: #0f172a; }
+        .status-completed { background: #16a34a; color: white; }
+        .status-cancelled { background: #dc2626; color: white; }
+        .alert { padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-error { background: #7f1d1d; color: #fecaca; }
+        .alert-success { background: #14532d; color: #bbf7d0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #1e293b; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; }
+        .modal h2 { color: #f59e0b; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .modal-actions button { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 RustChain OTC Bridge</h1>
+            <p class="subtitle">Peer-to-peer RTC Trading with Escrow</p>
+        </header>
+        
+        <div class="nav">
+            <button class="active" onclick="showSection('orders')">📋 Orders</button>
+            <button onclick="showSection('create')">➕ Create Order</button>
+            <button onclick="showSection('trades')">💱 My Trades</button>
+            <button onclick="showSection('stats')">📊 Stats</button>
+        </div>
+        
+        <!-- Orders Section -->
+        <div id="orders" class="section active">
+            <div class="card">
+                <h2>Open Orders</h2>
+                <div style="margin-bottom: 20px;">
+                    <select id="filterAsset" onchange="loadOrders()" style="max-width: 200px;">
+                        <option value="">All Assets</option>
+                        <option value="ETH">ETH</option>
+                        <option value="ERG">ERG</option>
+                        <option value="USDC">USDC</option>
+                        <option value="BTC">BTC</option>
+                    </select>
+                </div>
+                <div id="ordersList" class="orders-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Create Order Section -->
+        <div id="create" class="section">
+            <div class="card">
+                <h2>Create New Order</h2>
+                <div id="createAlert"></div>
+                <form id="createOrderForm">
+                    <div class="form-group">
+                        <label>Your Wallet Address</label>
+                        <input type="text" id="walletAddress" placeholder="Enter your RTC wallet address" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Order Type</label>
+                        <select id="orderType" required>
+                            <option value="sell">Sell RTC</option>
+                            <option value="buy">Buy RTC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Want to Trade (Crypto)</label>
+                        <select id="cryptoAsset" required>
+                            <option value="ETH">ETH</option>
+                            <option value="ERG">ERG</option>
+                            <option value="USDC">USDC</option>
+                            <option value="BTC">BTC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>RTC Amount</label>
+                        <input type="number" id="rtcAmount" placeholder="Amount of RTC" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price per RTC (USD)</label>
+                        <input type="number" id="pricePerRtc" placeholder="0.10" step="0.01" min="0.01" required>
+                    </div>
+                    <button type="submit" class="primary">Create Order</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- My Trades Section -->
+        <div id="trades" class="section">
+            <div class="card">
+                <h2>Trade History</h2>
+                <div id="tradesList"></div>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div id="stats" class="section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statOrders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statOpen">0</div>
+                    <div class="stat-label">Open Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTrades">0</div>
+                    <div class="stat-label">Completed Trades</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statVolume">0</div>
+                    <div class="stat-label">Volume (RTC)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trade Modal -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <h2>Execute Trade</h2>
+            <div id="tradeModalContent"></div>
+            <div class="modal-actions">
+                <button onclick="closeModal()">Cancel</button>
+                <button class="primary" onclick="confirmTrade()">Confirm Trade</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '';
+        let currentWallet = '';
+        let selectedOrder = null;
+        
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (id === 'orders') loadOrders();
+            if (id === 'trades') loadTrades();
+            if (id === 'stats') loadStats();
+        }
+        
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(API_URL + endpoint, {
+                    ...options,
+                    headers: { 'Content-Type': 'application/json', ...options.headers }
+                });
+                return await response.json();
+            } catch (e) {
+                console.error('API Error:', e);
+                return { error: e.message };
+            }
+        }
+        
+        async function loadOrders() {
+            const asset = document.getElementById('filterAsset').value;
+            let url = '/api/orders?status=open';
+            if (asset) url += `&crypto_asset=${asset}`;
+            
+            const result = await apiCall(url);
+            const container = document.getElementById('ordersList');
+            
+            if (!result.orders || result.orders.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">No open orders found</p>';
+                return;
+            }
+            
+            container.innerHTML = result.orders.map(order => `
+                <div class="order-card">
+                    <span class="order-type ${order.order_type}">${order.order_type.toUpperCase()}</span>
+                    <div class="order-amount">${order.rtc_amount} RTC</div>
+                    <div class="order-price">@ $${order.price_per_rtc}/RTC = $${(order.rtc_amount * order.price_per_rtc).toFixed(2)} ${order.crypto_asset}</div>
+                    <div class="order-price">Expires: ${new Date(order.expires_at).toLocaleString()}</div>
+                    <div class="order-actions">
+                        <button onclick="openTradeModal('${order.id}')">💱 Trade</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function loadTrades() {
+            if (!currentWallet) {
+                currentWallet = prompt('Enter your wallet address to view trades:') || '';
+            }
+            const result = await apiCall(`/api/trade/history?wallet=${currentWallet}`);
+            const container = document.getElementById('tradesList');
+            
+            if (!result.trades || result.trades.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">No trades found</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Trade ID</th>
+                            <th>Amount</th>
+                            <th>Asset</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.trades.map(t => `
+                            <tr>
+                                <td>${t.trade.id.substring(0, 8)}...</td>
+                                <td>${t.trade.rtc_amount} RTC</td>
+                                <td>${t.trade.crypto_asset}</td>
+                                <td><span class="status-badge status-${t.trade.status}">${t.trade.status}</span></td>
+                                <td>${new Date(t.trade.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        async function loadStats() {
+            const result = await apiCall('/api/stats');
+            document.getElementById('statOrders').textContent = result.total_orders || 0;
+            document.getElementById('statOpen').textContent = result.open_orders || 0;
+            document.getElementById('statTrades').textContent = result.completed_trades || 0;
+            document.getElementById('statVolume').textContent = (result.total_volume_rtc || 0).toFixed(2);
+        }
+        
+        function openTradeModal(orderId) {
+            selectedOrder = orderId;
+            const modal = document.getElementById('tradeModal');
+            document.getElementById('tradeModalContent').innerHTML = `
+                <p>To trade, you'll need to:</p>
+                <ol style="margin: 16px 0; padding-left: 20px;">
+                    <li>Deposit ${order.order_type === 'sell' ? 'ETH/ERG/USDC' : 'RTC'} to escrow</li>
+                    <li>Wait for counterparty to deposit</li>
+                    <li>Execute atomic swap</li>
+                </ol>
+                <p style="color: #94a3b8;">Demo mode - trade execution requires wallet integration.</p>
+            `;
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('tradeModal').classList.remove('active');
+            selectedOrder = null;
+        }
+        
+        function confirmTrade() {
+            alert('Trade simulation - integrate wallets for real trading');
+            closeModal();
+        }
+        
+        document.getElementById('createOrderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alertDiv = document.getElementById('createAlert');
+            
+            const data = {
+                wallet_address: document.getElementById('walletAddress').value,
+                order_type: document.getElementById('orderType').value,
+                crypto_asset: document.getElementById('cryptoAsset').value,
+                rtc_amount: parseFloat(document.getElementById('rtcAmount').value),
+                price_per_rtc: parseFloat(document.getElementById('pricePerRtc').value)
+            };
+            
+            const result = await apiCall('/api/orders', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            
+            if (result.error) {
+                alertDiv.innerHTML = `<div class="alert alert-error">${result.error}</div>`;
+            } else {
+                alertDiv.innerHTML = `<div class="alert alert-success">Order created! ID: ${result.order.id}</div>`;
+                document.getElementById('createOrderForm').reset();
+            }
+        });
+        
+        // Load orders on start
+        loadOrders();
+    </script>
+</body>
+</html>

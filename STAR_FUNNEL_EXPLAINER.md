@@ -120,10 +120,10 @@ Our ratio is **3-4x the industry average**. People aren't just clicking a star a
 ## What "Fake" Would Look Like
 
 If this were fake engagement, you'd see:
-- Stars from accounts with 0 repos and 0 activity ← we see the opposite
-- No forks, no issues, no PRs ← we have 436 forks and 200+ PRs
-- No ongoing engagement after starring ← 86 completed Agent Economy jobs
-- Ghost town repos with inflated star counts ← every repo has activity
+- Stars from accounts with 0 repos and 0 activity <- we see the opposite
+- No forks, no issues, no PRs <- we have 436 forks and 200+ PRs
+- No ongoing engagement after starring <- 86 completed Agent Economy jobs
+- Ghost town repos with inflated star counts <- every repo has activity
 
 What you actually see:
 - 210 unique humans/agents who wrote code, opened issues, or commented
@@ -162,6 +162,6 @@ Every star is a person who walked through the door. What they do after that is u
 
 *Elyan Labs — Every CPU Has a Voice*
 
-*Explorer: https://rustchain.org/explorer/*
+*Explorer: https://50.28.86.131/explorer*
 *Bounties: https://github.com/Scottcjn/rustchain-bounties*
 *Stats generated: March 6, 2026*
