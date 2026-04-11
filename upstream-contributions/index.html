@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upstream Contributions | elyanlabs.ai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 40px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            font-size: 1.3em;
+            color: #888;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        .stat {
+            text-align: center;
+            padding: 30px 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        .stat-label {
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .project-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .project-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stars {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .project-desc {
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .pr-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .pr-link {
+            padding: 8px 16px;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 20px;
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        .pr-link:hover {
+            background: rgba(0,212,255,0.2);
+        }
+        
+        .pr-link.merged {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.3);
+            color: #00ff88;
+        }
+        
+        .pr-link.in-review {
+            background: rgba(255,193,7,0.1);
+            border-color: rgba(255,193,7,0.3);
+            color: #ffc107;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge.merged { background: #00ff88; color: #000; }
+        .badge.review { background: #ffc107; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Upstream Contributions</h1>
+            <p class="subtitle">Contributing to the open-source ecosystem</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">44+</div>
+                <div class="stat-label">PRs Merged</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Projects</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">300K+</div>
+                <div class="stat-label">Total Stars</div>
+            </div>
+        </div>
+        
+        <div class="projects-grid">
+            <!-- OpenSSL -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🔐 OpenSSL</span>
+                    <span class="stars">⭐ 26K</span>
+                </div>
+                <p class="project-desc">PowerPC AES-GCM security fixes, merged to master + 5 release branches</p>
+                <div class="pr-list">
+                    <a href="https://github.com/openssl/openssl/pull/30437" class="pr-link merged">#30437</a>
+                    <a href="https://github.com/openssl/openssl/pull/30452" class="pr-link merged">#30452</a>
+                </div>
+            </div>
+            
+            <!-- libdragon -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🐉 libdragon</span>
+                    <span class="stars">⭐ N64</span>
+                </div>
+                <p class="project-desc">N64 homebrew SDK macOS build fix</p>
+                <div class="pr-list">
+                    <a href="https://github.com/DragonMoff/libdragon/pull/849" class="pr-link merged">#849</a>
+                </div>
+            </div>
+            
+            <!-- capstone -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🔍 capstone</span>
+                    <span class="stars">⭐ 8K</span>
+                </div>
+                <p class="project-desc">Multi-arch disassembly (IDA Pro, radare2, Ghidra) portability fix</p>
+                <div class="pr-list">
+                    <a href="https://github.com/capstone-engine/capstone/pull/2889" class="pr-link merged">#2889</a>
+                </div>
+            </div>
+            
+            <!-- c-blosc2 -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">📦 c-blosc2</span>
+                    <span class="stars">⭐ compression</span>
+                </div>
+                <p class="project-desc">Compression library behind pandas/zarr/PyTables — PowerPC VSX fixes</p>
+                <div class="pr-list">
+                    <a href="https://github.com/Blosc/c-blosc2/pull/723" class="pr-link merged">#723</a>
+                    <a href="https://github.com/Blosc/c-blosc2/pull/725" class="pr-link merged">#725</a>
+                </div>
+            </div>
+            
+            <!-- hacl-star -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🔒 hacl-star</span>
+                    <span class="stars">⭐ formal</span>
+                </div>
+                <p class="project-desc">Microsoft formal-verified crypto — AltiVec fix</p>
+                <div class="pr-list">
+                    <a href="https://github.com/hacspec/hacl-star/pull/1068" class="pr-link merged">#1068</a>
+                </div>
+            </div>
+            
+            <!-- wolfSSL -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🐺 wolfSSL</span>
+                    <span class="stars">⭐ 2K</span>
+                </div>
+                <p class="project-desc">POWER8 hardware AES (13-20x faster) — in review, CLA signed</p>
+                <div class="pr-list">
+                    <a href="https://github.com/wolfSSL/wolfssl/pull/9932" class="pr-link in-review">#9932 <span class="badge review">in review</span></a>
+                </div>
+            </div>
+            
+            <!-- NSA Ghidra -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">👻 NSA Ghidra</span>
+                    <span class="stars">⭐ 53K</span>
+                </div>
+                <p class="project-desc">e200 VLE PowerPC reverse engineering support — in review</p>
+                <div class="pr-list">
+                    <a href="https://github.com/NationalSecurityAgency/ghidra/pull/9036" class="pr-link in-review">#9036</a>
+                </div>
+            </div>
+            
+            <!-- vLLM -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">⚡ vLLM</span>
+                    <span class="stars">⭐ 30K</span>
+                </div>
+                <p class="project-desc">IBM POWER8 CPU backend — in review</p>
+                <div class="pr-list">
+                    <a href="https://github.com/vllm-project/vllm/pull/37586" class="pr-link in-review">#37586</a>
+                </div>
+            </div>
+            
+            <!-- CPython -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🐍 CPython</span>
+                    <span class="stars">⭐ 65K</span>
+                </div>
+                <p class="project-desc">BLAKE2 SIMD128 on POWER8 — in review</p>
+                <div class="pr-list">
+                    <a href="https://github.com/python/cpython/pull/146118" class="pr-link in-review">#146118</a>
+                </div>
+            </div>
+            
+            <!-- PyTorch -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🔥 PyTorch</span>
+                    <span class="stars">⭐ 85K</span>
+                </div>
+                <p class="project-desc">POWER8 Kineto guard — in review</p>
+                <div class="pr-list">
+                    <a href="https://github.com/pytorch/pytorch/pull/179619" class="pr-link in-review">#179619</a>
+                </div>
+            </div>
+            
+            <!-- LLVM -->
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-name">🛠️ LLVM</span>
+                    <span class="stars">⭐ 100K+</span>
+                </div>
+                <p class="project-desc">4 PowerPC fixes — in review</p>
+                <div class="pr-list">
+                    <a href="https://github.com/llvm/llvm-project/pull/188558" class="pr-link in-review">#188558</a>
+                    <a href="https://github.com/llvm/llvm-project/pull/188373" class="pr-link in-review">#188373</a>
+                    <a href="https://github.com/llvm/llvm-project/pull/187315" class="pr-link in-review">#187315</a>
+                    <a href="https://github.com/llvm/llvm-project/pull/187322" class="pr-link in-review">#187322</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

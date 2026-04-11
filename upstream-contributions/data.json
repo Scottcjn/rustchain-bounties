@@ -1,0 +1,20 @@
+{
+  "projects": [
+    {"name": "OpenSSL", "stars": "26K", "prs": ["#30437", "#30452"], "status": "merged", "impact": "PowerPC AES-GCM security fixes"},
+    {"name": "libdragon", "stars": "N64", "prs": ["#849"], "status": "merged", "impact": "N64 homebrew SDK macOS build fix"},
+    {"name": "capstone", "stars": "8K", "prs": ["#2889"], "status": "merged", "impact": "Multi-arch disassembly portability"},
+    {"name": "c-blosc2", "stars": "compression", "prs": ["#723", "#725"], "status": "merged", "impact": "PowerPC VSX fixes"},
+    {"name": "hacl-star", "stars": "formal", "prs": ["#1068"], "status": "merged", "impact": "AltiVec fix"},
+    {"name": "wolfSSL", "stars": "2K", "prs": ["#9932"], "status": "in-review", "impact": "POWER8 hardware AES"},
+    {"name": "NSA Ghidra", "stars": "53K", "prs": ["#9036"], "status": "in-review", "impact": "e200 VLE PowerPC support"},
+    {"name": "vLLM", "stars": "30K", "prs": ["#37586"], "status": "in-review", "impact": "IBM POWER8 CPU backend"},
+    {"name": "CPython", "stars": "65K", "prs": ["#146118"], "status": "in-review", "impact": "BLAKE2 SIMD128 on POWER8"},
+    {"name": "PyTorch", "stars": "85K", "prs": ["#179619"], "status": "in-review", "impact": "POWER8 Kineto guard"},
+    {"name": "LLVM", "stars": "100K+", "prs": ["#188558", "#188373", "#187315", "#187322"], "status": "in-review", "impact": "4 PowerPC fixes"}
+  ],
+  "stats": {
+    "total_prs": 44,
+    "total_projects": 11,
+    "total_stars": "300K+"
+  }
+}
