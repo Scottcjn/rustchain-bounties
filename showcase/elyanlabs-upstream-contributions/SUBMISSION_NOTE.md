@@ -6,4 +6,4 @@ Contents:
 - data.json
 - README.md
 
-This folder contains a responsive upstream contributions showcase page for elyanlabs.ai with 44 merged upstream PRs, a separate in-review section, star counts, and direct PR links.
+This folder contains a responsive upstream contributions showcase page for elyanlabs.ai with 44 merged upstream PRs, a separate tracked-status section for notable upstream PRs, star counts, and direct PR links.

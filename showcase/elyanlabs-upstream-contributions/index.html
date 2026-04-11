@@ -108,17 +108,17 @@
   <div class="wrap">
     <header class="hero">
       <div class="eyebrow">Elyan Labs · Upstream open-source credibility</div>
-      <h1>44 merged upstream contributions, with more in review.</h1>
-      <p class="lead">This page showcases verified external pull requests authored by <strong>Scott / Elyan Labs</strong> and merged into upstream repositories outside the Elyan Labs org, plus a short list of higher-profile PRs still under review. It is designed as a first-pass, submission-ready artifact for <code>elyanlabs.ai</code>.</p>
+      <h1>44 merged upstream contributions, plus notable tracked PRs.</h1>
+      <p class="lead">This page showcases verified external pull requests authored by <strong>Scott / Elyan Labs</strong> and merged into upstream repositories outside the Elyan Labs org, plus a short list of higher-profile upstream PRs with statuses captured separately. It is designed as a first-pass, submission-ready artifact for <code>elyanlabs.ai</code>.</p>
       <div class="summary" id="summary"></div>
-      <div class="note">Verification note: merged entries below were pulled from GitHub search for <code>author:Scottcjn is:pr is:merged -user:Scottcjn</code> on 2026-04-11. Pending entries were taken from the public portfolio and should be re-checked before final publication.</div>
+      <div class="note">Verification note: merged entries below were pulled from GitHub search for <code>author:Scottcjn is:pr is:merged -user:Scottcjn</code> on 2026-04-11. Repository star counts were captured at generation time on 2026-04-11. Tracked PR statuses were refreshed as of 2026-04-12.</div>
     </header>
 
     <section>
       <div class="section-head">
         <div>
           <h2>Merged upstream contributions</h2>
-          <p>Grouped by repository, with direct links to every merged PR and live star counts captured during generation.</p>
+          <p>Grouped by repository, with direct links to every merged PR and repository star counts captured on 2026-04-11.</p>
         </div>
       </div>
       <div class="grid" id="merged-grid"></div>
@@ -127,8 +127,8 @@
     <section>
       <div class="section-head">
         <div>
-          <h2>In review / high-value upstream targets</h2>
-          <p>Separate from merged work so the page signals momentum without overstating what has landed.</p>
+          <h2>Tracked high-value upstream targets</h2>
+          <p>Shown separately from merged work so the page signals momentum without overstating what has landed; statuses below are as of 2026-04-12.</p>
         </div>
       </div>
       <div class="grid" id="pending-grid"></div>
@@ -136,7 +136,7 @@
 
     <footer>
       <div class="footer-box">
-        Showcase snapshot generated for review. Before public deployment, re-check pending PR status, star counts, and whether any in-review items have merged since 2026-04-11.
+        Showcase snapshot generated for review. Merged list and star counts reflect a 2026-04-11 snapshot; tracked PR statuses were refreshed on 2026-04-12. Before public deployment, re-check both if the page will be published later.
       </div>
     </footer>
   </div>
@@ -162,7 +162,7 @@
           { k: fmt.format(data.summary.merged_count), l: 'Merged upstream PRs' },
           { k: fmt.format(data.summary.unique_merged_repos), l: 'External repositories' },
           { k: fmt.format(data.summary.total_stars_merged_repos), l: 'Combined repo stars' },
-          { k: fmt.format(data.summary.pending_count), l: 'PRs in review' },
+          { k: fmt.format(data.summary.pending_count), l: 'Tracked notable PRs' },
         ];
 
         document.getElementById('summary').innerHTML = summary.map(item => `
