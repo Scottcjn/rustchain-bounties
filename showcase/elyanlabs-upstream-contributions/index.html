@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elyan Labs — Upstream Contributions Showcase</title>
+  <meta name="description" content="A mobile-responsive showcase of Elyan Labs upstream open-source contributions, including merged PRs, in-review work, repository star counts, and direct links." />
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: rgba(12, 24, 43, 0.82);
+      --panel-2: rgba(18, 34, 60, 0.9);
+      --text: #e8f0ff;
+      --muted: #9ab0d1;
+      --line: rgba(255,255,255,0.08);
+      --accent: #69e2ff;
+      --accent-2: #8a7dff;
+      --ok: #3ddc97;
+      --warn: #ffcc66;
+      --chip: rgba(255,255,255,0.07);
+      --shadow: 0 16px 40px rgba(0,0,0,0.28);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(105,226,255,0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(138,125,255,0.16), transparent 24%),
+        linear-gradient(180deg, #07101c 0%, #091626 45%, #07111f 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    .hero { padding: 56px 0 28px; }
+    .eyebrow {
+      display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px;
+      border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,0.04);
+      color: var(--muted); font-size: 13px; letter-spacing: .02em;
+    }
+    h1 { font-size: clamp(2rem, 4.5vw, 4.5rem); line-height: 1.05; margin: 18px 0 14px; }
+    .lead { max-width: 820px; color: var(--muted); font-size: clamp(1rem, 1.4vw, 1.15rem); }
+    .summary {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 28px;
+    }
+    .stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 18px; box-shadow: var(--shadow); backdrop-filter: blur(12px);
+    }
+    .stat .k { font-size: 1.8rem; font-weight: 800; }
+    .stat .l { color: var(--muted); font-size: .92rem; }
+    section { padding: 18px 0 26px; }
+    .section-head { display:flex; justify-content:space-between; gap:16px; align-items:end; margin-bottom:16px; }
+    .section-head h2 { margin:0; font-size: 1.45rem; }
+    .section-head p { margin: 6px 0 0; color: var(--muted); }
+    .note {
+      background: rgba(255, 204, 102, 0.08); border: 1px solid rgba(255,204,102,.18); color: #ffe6ad;
+      border-radius: 16px; padding: 14px 16px; margin-top: 18px;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+    }
+    .card {
+      background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 18px; box-shadow: var(--shadow);
+    }
+    .repo-head { display:flex; gap:12px; align-items:center; margin-bottom: 12px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 14px; object-fit: cover; background: #13243d;
+      border: 1px solid var(--line);
+    }
+    .repo-title { font-size: 1.02rem; font-weight: 700; margin: 0; }
+    .repo-meta { color: var(--muted); font-size: .92rem; margin-top: 2px; }
+    .chips { display:flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
+    .chip {
+      background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
+      padding: 6px 10px; font-size: .84rem; color: var(--muted);
+    }
+    .chip.ok { color: #c7ffe8; border-color: rgba(61,220,151,.28); background: rgba(61,220,151,.08); }
+    .chip.warn { color: #ffe6ad; border-color: rgba(255,204,102,.28); background: rgba(255,204,102,.08); }
+    .pr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .pr-list li {
+      border-top: 1px solid var(--line); padding-top: 10px;
+    }
+    .pr-list li:first-child { border-top: 0; padding-top: 0; }
+    .pr-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .pr-title { font-weight: 600; }
+    .pr-date { color: var(--muted); font-size: .88rem; white-space: nowrap; }
+    .tiny { color: var(--muted); font-size: .88rem; }
+    footer { padding: 14px 0 40px; color: var(--muted); font-size: .9rem; }
+    .footer-box { border-top: 1px solid var(--line); padding-top: 16px; }
+    @media (max-width: 960px) {
+      .summary, .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 24px, 1180px); }
+      .hero { padding-top: 34px; }
+      .summary, .grid { grid-template-columns: 1fr; }
+      .pr-top { flex-direction: column; }
+      .section-head { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Elyan Labs · Upstream open-source credibility</div>
+      <h1>44 merged upstream contributions, with more in review.</h1>
+      <p class="lead">This page showcases verified external pull requests authored by <strong>Scott / Elyan Labs</strong> and merged into upstream repositories outside the Elyan Labs org, plus a short list of higher-profile PRs still under review. It is designed as a first-pass, submission-ready artifact for <code>elyanlabs.ai</code>.</p>
+      <div class="summary" id="summary"></div>
+      <div class="note">Verification note: merged entries below were pulled from GitHub search for <code>author:Scottcjn is:pr is:merged -user:Scottcjn</code> on 2026-04-11. Pending entries were taken from the public portfolio and should be re-checked before final publication.</div>
+    </header>
+
+    <section>
+      <div class="section-head">
+        <div>
+          <h2>Merged upstream contributions</h2>
+          <p>Grouped by repository, with direct links to every merged PR and live star counts captured during generation.</p>
+        </div>
+      </div>
+      <div class="grid" id="merged-grid"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div>
+          <h2>In review / high-value upstream targets</h2>
+          <p>Separate from merged work so the page signals momentum without overstating what has landed.</p>
+        </div>
+      </div>
+      <div class="grid" id="pending-grid"></div>
+    </section>
+
+    <footer>
+      <div class="footer-box">
+        Showcase snapshot generated for review. Before public deployment, re-check pending PR status, star counts, and whether any in-review items have merged since 2026-04-11.
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const fmt = new Intl.NumberFormat('en-US');
+    const shortDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+
+    fetch('./data.json')
+      .then(r => r.json())
+      .then(data => {
+        const grouped = new Map();
+        for (const pr of data.merged) {
+          if (!grouped.has(pr.repo)) grouped.set(pr.repo, []);
+          grouped.get(pr.repo).push(pr);
+        }
+
+        const mergedRepos = [...grouped.entries()]
+          .map(([repo, prs]) => ({ repo, prs, ...prs[0] }))
+          .sort((a, b) => (b.stars || 0) - (a.stars || 0));
+
+        const summary = [
+          { k: fmt.format(data.summary.merged_count), l: 'Merged upstream PRs' },
+          { k: fmt.format(data.summary.unique_merged_repos), l: 'External repositories' },
+          { k: fmt.format(data.summary.total_stars_merged_repos), l: 'Combined repo stars' },
+          { k: fmt.format(data.summary.pending_count), l: 'PRs in review' },
+        ];
+
+        document.getElementById('summary').innerHTML = summary.map(item => `
+          <div class="stat"><div class="k">${item.k}</div><div class="l">${item.l}</div></div>
+        `).join('');
+
+        document.getElementById('merged-grid').innerHTML = mergedRepos.map(repo => `
+          <article class="card">
+            <div class="repo-head">
+              <img class="avatar" src="${repo.avatar}" alt="${repo.repo} owner avatar" loading="lazy" />
+              <div>
+                <p class="repo-title"><a href="${repo.repo_url || `https://github.com/${repo.repo}`}" target="_blank" rel="noopener">${repo.repo}</a></p>
+                <div class="repo-meta">${repo.description || 'Open-source repository'} </div>
+              </div>
+            </div>
+            <div class="chips">
+              <span class="chip ok">Merged ${repo.prs.length} PR${repo.prs.length > 1 ? 's' : ''}</span>
+              <span class="chip">⭐ ${fmt.format(repo.stars || 0)} stars</span>
+            </div>
+            <ul class="pr-list">
+              ${repo.prs.sort((a,b) => (b.merged_at || '').localeCompare(a.merged_at || '')).map(pr => `
+                <li>
+                  <div class="pr-top">
+                    <div class="pr-title"><a href="${pr.url}" target="_blank" rel="noopener">PR #${pr.number}</a> — ${pr.title}</div>
+                    <div class="pr-date">${pr.merged_at ? shortDate(pr.merged_at) : 'Merged'}</div>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+          </article>
+        `).join('');
+
+        document.getElementById('pending-grid').innerHTML = data.pending
+          .sort((a,b) => (b.stars || 0) - (a.stars || 0))
+          .map(pr => `
+            <article class="card">
+              <div class="repo-head">
+                <img class="avatar" src="${pr.avatar}" alt="${pr.repo} owner avatar" loading="lazy" />
+                <div>
+                  <p class="repo-title"><a href="${pr.repo_url || `https://github.com/${pr.repo}`}" target="_blank" rel="noopener">${pr.repo}</a></p>
+                  <div class="repo-meta">${pr.description || 'Open-source repository'}</div>
+                </div>
+              </div>
+              <div class="chips">
+                <span class="chip warn">${pr.status}</span>
+                <span class="chip">⭐ ${fmt.format(pr.stars || 0)} stars</span>
+              </div>
+              <div class="pr-title"><a href="${pr.url}" target="_blank" rel="noopener">PR #${pr.number}</a> — ${pr.title}</div>
+            </article>
+          `).join('');
+      })
+      .catch(err => {
+        document.body.insertAdjacentHTML('beforeend', `<pre style="padding:16px;color:#ffb4b4">Failed to load data.json: ${String(err)}</pre>`);
+      });
+  </script>
+</body>
+</html>
