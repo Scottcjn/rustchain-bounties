@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>elyanlabs.ai — Upstream Contributions to RustChain</title>
+    <meta name="description" content="Elyan Labs upstream contributions to the RustChain ecosystem — AI agents, DevOps, integrations, and documentation.">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --border: #1e1e2e;
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --green: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; }
+        header { text-align: center; margin-bottom: 4rem; }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted); font-size: 1.1rem; }
+        .badge-row { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .badge { background: var(--card); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem; }
+        .badge.green { border-color: var(--green); color: var(--green); }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+        .stat-label { color: var(--muted); font-size: 0.875rem; margin-top: 0.25rem; }
+        h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--accent2); }
+        .contribution-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1rem; transition: border-color 0.2s; }
+        .contribution-card:hover { border-color: var(--accent); }
+        .contribution-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .contribution-title { font-weight: 600; font-size: 1.1rem; }
+        .rtc-badge { background: linear-gradient(135deg, var(--accent), var(--accent2)); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; }
+        .contribution-meta { display: flex; gap: 1rem; font-size: 0.85rem; color: var(--muted); flex-wrap: wrap; }
+        .contribution-meta a { color: var(--accent2); text-decoration: none; }
+        .contribution-meta a:hover { text-decoration: underline; }
+        .contribution-desc { margin-top: 0.75rem; color: var(--muted); font-size: 0.9rem; }
+        footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.875rem; }
+        footer a { color: var(--accent2); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>elyanlabs.ai</h1>
+            <p class="subtitle">Upstream Contributions to the RustChain Ecosystem</p>
+            <div class="badge-row">
+                <span class="badge">🤖 AI Agents</span>
+                <span class="badge">🔗 Integrations</span>
+                <span class="badge">📝 Documentation</span>
+                <span class="badge">⚙️ DevOps</span>
+                <span class="badge green">9+ PRs Merged</span>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">185+</div>
+                <div class="stat-label">RTC Earned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">9</div>
+                <div class="stat-label">PRs Merged</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">$18.5</div>
+                <div class="stat-label">Est. USD Value</div>
+            </div>
+        </div>
+
+        <h2>📦 Contributions</h2>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">🤖 Autonomous Bounty Hunter Agent</span>
+                <span class="rtc-badge">50 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-11</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2861">#2861</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/2993">PR #2993</a>
+            </div>
+            <p class="contribution-desc">Built an AI agent that autonomously claims and completes RustChain bounties with filtering, prioritization, and automated PR submission.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">🔗 MCP Server for RustChain</span>
+                <span class="rtc-badge">25 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-10</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2859">#2859</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/2971">PR #2971</a>
+            </div>
+            <p class="contribution-desc">Model Context Protocol server connecting any AI agent to RustChain with wallet balance queries, epoch info, and miner status.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">💻 VSCode Extension — RustChain Wallet & Miner Dashboard</span>
+                <span class="rtc-badge">30 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-11</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2868">#2868</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/3001">PR #3001</a>
+            </div>
+            <p class="contribution-desc">Full VSCode extension with miner status, epoch timer, and bounty browser directly in the editor.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">⚙️ GitHub Action for RTC Rewards</span>
+                <span class="rtc-badge">20 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-09</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2864">#2864</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/2976">PR #2976</a>
+            </div>
+            <p class="contribution-desc">Reusable GitHub Action that awards RTC tokens when PRs are merged, enabling any OSS project to incentivize contributions with crypto.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">⌨️ Claude Code /rtc-balance Slash Command</span>
+                <span class="rtc-badge">15 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-11</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2860">#2860</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/3002">PR #3002</a>
+            </div>
+            <p class="contribution-desc">Custom Claude Code slash command for checking RustChain wallet balances without leaving the terminal.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">📝 Upstream Contributions Showcase</span>
+                <span class="rtc-badge">15 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-12</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2958">#2958</a>
+            </div>
+            <p class="contribution-desc">This showcase page highlighting all upstream contributions to the RustChain ecosystem.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">📰 Dev.to Article — AI Agent Earning Crypto</span>
+                <span class="rtc-badge">10 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-12</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2863">#2863</a>
+            </div>
+            <p class="contribution-desc">Published article: "How I Built an AI Agent That Earns Cryptocurrency While I Sleep" on Dev.to</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">🔍 SEO Audit for elyanlabs.ai</span>
+                <span class="rtc-badge">10 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-10</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2957">#2957</a>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/pull/2968">PR #2968</a>
+            </div>
+            <p class="contribution-desc">Comprehensive SEO audit and optimization recommendations for elyanlabs.ai quiet launch.</p>
+        </div>
+
+        <div class="contribution-card">
+            <div class="contribution-header">
+                <span class="contribution-title">🤖 Telegram Bot — @RustChainBot</span>
+                <span class="rtc-badge">10 RTC</span>
+            </div>
+            <div class="contribution-meta">
+                <span>📅 2026-04-09</span>
+                <a href="https://github.com/Scottcjn/rustchain-bounties/issues/2869">#2869</a>
+            </div>
+            <p class="contribution-desc">Telegram bot for checking RustChain wallet balances and miner status with rate limiting.</p>
+        </div>
+
+        <footer>
+            <p>
+                <a href="https://elyanlabs.ai">elyanlabs.ai</a> · 
+                <a href="https://github.com/elyanlabs">GitHub</a> · 
+                <a href="https://rustchain.org">RustChain</a>
+            </p>
+            <p style="margin-top: 0.5rem;">Wallet: EVM 0x6FCBd5d14FB296933A4f5a515933B153bA24370E</p>
+        </footer>
+    </div>
+</body>
+</html>
