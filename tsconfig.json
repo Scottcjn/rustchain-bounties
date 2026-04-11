@@ -1,0 +1,7 @@
+{ "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "jsx": "react",
+    "types": ["jest", "mocha", "vscode", "./@types"]
+  }
+}
