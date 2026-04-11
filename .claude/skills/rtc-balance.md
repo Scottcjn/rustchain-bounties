@@ -1,35 +1,35 @@
 # /rtc-balance
 
-Check a RustChain wallet balance and network status from within Claude Code.
+Check a RustChain miner balance and network status from within Claude Code.
 
 ## Usage
 
 ```
-/rtc-balance <wallet_id>
+/rtc-balance <miner_id>
 ```
 
 ## Examples
 
 ```
-/rtc-balance my-wallet
-/rtc-balance developer-wallet
+/rtc-balance my-miner
+/rtc-balance developer-node
 ```
 
 ## What it does
 
 When invoked, this skill:
-1. Queries the RustChain node at `https://50.28.86.131/wallet/balance?wallet_id=<wallet_id>`
+1. Queries the RustChain node at `https://50.28.86.131/wallet/balance?miner_id=<miner_id>`
 2. Queries current epoch info from `https://50.28.86.131/epoch`
 3. Displays balance in RTC and USD (at $0.10/RTC)
 4. Shows epoch number and active miner count
-5. Handles errors gracefully (wallet not found, node offline)
+5. Handles errors gracefully (miner not found, node offline)
 
 ## Implementation
 
-Run this Python script with the wallet ID as argument:
+Run this Python script with the miner ID as argument:
 
 ```bash
-python3 claude-slash-command/check_balance.py <wallet_id>
+python3 claude-slash-command/check_balance.py <miner_id>
 ```
 
 Or use inline:
@@ -43,27 +43,27 @@ ctx.verify_mode = ssl.CERT_NONE
 
 NODE = "https://50.28.86.131"
 
-def rtc_balance(wallet_id):
+def rtc_balance(miner_id):
     try:
         r = urllib.request.urlopen(
-            f"{NODE}/wallet/balance?wallet_id={wallet_id}",
+            f"{NODE}/wallet/balance?miner_id={miner_id}",
             context=ctx, timeout=8
         )
         data = json.loads(r.read())
-        balance = float(data.get("balance", 0))
+        if not data.get("ok", True) and data.get("error"):
+            print(f"Error: {data['error']}")
+            return
+        balance = float(data.get("amount_rtc", 0))
         usd = balance * 0.10
-        
+
         epoch_r = urllib.request.urlopen(f"{NODE}/epoch", context=ctx, timeout=8)
         epoch = json.loads(epoch_r.read())
-        
-        print(f"Wallet:  {wallet_id}")
+
+        print(f"Miner:   {miner_id}")
         print(f"Balance: {balance:.2f} RTC (${usd:.2f} USD)")
-        print(f"Epoch:   {epoch.get('epoch', '?')} | Miners online: {epoch.get('miners_online', '?')}")
+        print(f"Epoch:   {epoch.get('epoch', '?')} | Miners online: {epoch.get('enrolled_miners', '?')}")
     except urllib.error.HTTPError as e:
-        if e.code == 404:
-            print(f"Wallet '{wallet_id}' not found on RustChain.")
-        else:
-            print(f"Node error: HTTP {e.code}")
+        print(f"Node error: HTTP {e.code}")
     except Exception as e:
         print(f"Node offline or unreachable: {e}")
 ```
@@ -71,7 +71,7 @@ def rtc_balance(wallet_id):
 ## Expected output
 
 ```
-Wallet:  my-wallet
+Miner:   my-miner
 Balance: 42.50 RTC ($4.25 USD)
 Epoch:   1847 | Miners online: 14
 ```
@@ -79,7 +79,7 @@ Epoch:   1847 | Miners online: 14
 ## Error output
 
 ```
-Wallet 'unknown-wallet' not found on RustChain.
+Error: miner_id or address required
 ```
 
 ```

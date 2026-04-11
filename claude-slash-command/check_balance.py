@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RustChain balance checker — Claude Code slash command helper.
-Usage: python3 check_balance.py <wallet_id>
+Usage: python3 check_balance.py <miner_id>
 """
 import sys
 import json
@@ -23,13 +23,13 @@ def fetch(path: str) -> dict:
     return json.loads(resp.read().decode())
 
 
-def check_balance(wallet_id: str) -> None:
-    # Wallet balance
+def check_balance(miner_id: str) -> None:
+    # Miner balance
     try:
-        data = fetch(f"/wallet/balance?wallet_id={wallet_id}")
+        data = fetch(f"/wallet/balance?miner_id={miner_id}")
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"Wallet '{wallet_id}' not found on RustChain.")
+            print(f"Miner '{miner_id}' not found on RustChain.")
             return
         print(f"Node error: HTTP {e.code}")
         return
@@ -37,7 +37,11 @@ def check_balance(wallet_id: str) -> None:
         print(f"Node offline or unreachable: {e}")
         return
 
-    balance = float(data.get("balance", 0))
+    if not data.get("ok", True) and data.get("error"):
+        print(f"Error: {data['error']}")
+        return
+
+    balance = float(data.get("amount_rtc", 0))
     usd = balance * 0.10
 
     # Epoch info (best-effort, non-fatal)
@@ -46,27 +50,27 @@ def check_balance(wallet_id: str) -> None:
     try:
         epoch_data = fetch("/epoch")
         epoch_str = str(epoch_data.get("epoch", "?"))
-        miners_str = str(epoch_data.get("miners_online", "?"))
+        miners_str = str(epoch_data.get("enrolled_miners", "?"))
     except Exception:
         pass
 
-    print(f"Wallet:  {wallet_id}")
+    print(f"Miner:   {miner_id}")
     print(f"Balance: {balance:.2f} RTC (${usd:.2f} USD)")
     print(f"Epoch:   {epoch_str} | Miners online: {miners_str}")
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python3 check_balance.py <wallet_id>")
-        print("Example: python3 check_balance.py my-wallet")
+        print("Usage: python3 check_balance.py <miner_id>")
+        print("Example: python3 check_balance.py my-miner")
         sys.exit(1)
 
-    wallet_id = sys.argv[1].strip()
-    if not wallet_id:
-        print("Error: wallet_id cannot be empty.")
+    miner_id = sys.argv[1].strip()
+    if not miner_id:
+        print("Error: miner_id cannot be empty.")
         sys.exit(1)
 
-    check_balance(wallet_id)
+    check_balance(miner_id)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # /rtc-balance — Claude Code Slash Command
 
-Check your RustChain wallet balance without leaving the terminal.
+Check your RustChain miner balance without leaving the terminal.
 
 ## Install
 
@@ -16,12 +16,12 @@ Or add the content to your project's `CLAUDE.md`.
 ## Use in Claude Code
 
 ```
-/rtc-balance my-wallet
+/rtc-balance my-miner
 ```
 
 Output:
 ```
-Wallet:  my-wallet
+Miner:   my-miner
 Balance: 42.50 RTC ($4.25 USD)
 Epoch:   1847 | Miners online: 14
 ```
@@ -29,7 +29,7 @@ Epoch:   1847 | Miners online: 14
 ## Use standalone
 
 ```bash
-python3 check_balance.py my-wallet
+python3 check_balance.py my-miner
 ```
 
 ## Requirements
@@ -42,7 +42,7 @@ python3 check_balance.py my-wallet
 
 | Situation | Output |
 |-----------|--------|
-| Wallet not found | `Wallet 'x' not found on RustChain.` |
+| Miner not found | `Error: miner_id or address required` |
 | Node offline | `Node offline or unreachable: ...` |
 | HTTP error | `Node error: HTTP 500` |
 
