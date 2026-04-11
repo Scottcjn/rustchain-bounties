@@ -1,0 +1,30 @@
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when PRs are merged'
+author: 'Digital Nomad'
+branding:
+  icon: 'gift'
+  color: 'green'
+
+inputs:
+  node-url:
+    description: 'RustChain node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'Amount of RTC to award'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Project wallet name'
+    required: true
+  admin-key:
+    description: 'Admin private key'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
