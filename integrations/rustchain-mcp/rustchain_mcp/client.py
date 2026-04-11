@@ -43,6 +43,20 @@ class RustChainClient:
                 continue
         raise RuntimeError(f"All RustChain nodes failed for GET {path}: {last_err}")
 
+    async def _post_json(self, path: str, json_data: Optional[Dict[str, Any]] = None) -> Any:
+        last_err: Optional[Exception] = None
+        for base in self._urls():
+            url = f"{base}{path}"
+            try:
+                async with httpx.AsyncClient(verify=False, timeout=self.timeout_s) as client:
+                    r = await client.post(url, json=json_data)
+                    r.raise_for_status()
+                    return r.json()
+            except Exception as e:
+                last_err = e
+                continue
+        raise RuntimeError(f"All RustChain nodes failed for POST {path}: {last_err}")
+
     async def health(self) -> Any:
         return await self._get_json("/health")
 
@@ -54,3 +68,14 @@ class RustChainClient:
 
     async def balance(self, miner_id: str) -> Any:
         return await self._get_json("/wallet/balance", params={"miner_id": miner_id})
+
+    async def register_wallet(self, wallet_name: str) -> Any:
+        """Register a new wallet on the RustChain network."""
+        return await self._post_json("/wallet/register", json_data={"wallet_id": wallet_name})
+
+    async def submit_attestation(self, wallet_name: str, hardware_signature: str = "") -> Any:
+        """Submit a hardware attestation for a wallet."""
+        payload: Dict[str, Any] = {"wallet_id": wallet_name}
+        if hardware_signature:
+            payload["hardware_signature"] = hardware_signature
+        return await self._post_json("/attestation", json_data=payload)

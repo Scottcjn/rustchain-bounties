@@ -4,17 +4,17 @@ This MCP server lets **Claude Code** (and any MCP-compatible client) query the R
 
 ## Features
 
-Required tools (bounty minimum):
+Core tools:
 - `rustchain_health` — check node health (with automatic failover)
 - `rustchain_miners` — list active miners and architectures
 - `rustchain_epoch` — fetch current epoch info
 - `rustchain_balance` — fetch RTC balance for a wallet/miner_id
 - `rustchain_transfer` — **stub** (requires private key / signing; see below)
 
-Bonus tools (optional):
-- `rustchain_ledger` — stub
-- `rustchain_register_wallet` — stub
-- `rustchain_bounties` — list bounties from this repo (local file parsing)
+Agent tools (bounty #2859):
+- `rustchain_register_wallet` — register a new agent wallet on the RustChain network
+- `rustchain_submit_attestation` — submit hardware fingerprint / proof-of-physical-AI attestation
+- `rustchain_bounties` — list open bounties from the GitHub issue tracker (filterable by label)
 
 ## Install (Claude Code)
 
@@ -40,6 +40,13 @@ claude mcp add rustchain "$(pwd)/run.sh"
   - `rustchain_epoch`
 - Balance:
   - `rustchain_balance miner_id=WALLET_NAME`
+- Register wallet:
+  - `rustchain_register_wallet wallet_name=my-agent-wallet`
+- Submit attestation:
+  - `rustchain_submit_attestation wallet_name=my-agent-wallet`
+- List bounties:
+  - `rustchain_bounties`
+  - `rustchain_bounties label=easy max_results=5`
 
 ## Transfer tool (important)
 
@@ -56,6 +63,11 @@ You can override nodes via environment variables:
 
 - `RUSTCHAIN_PRIMARY_URL`
 - `RUSTCHAIN_FALLBACK_URLS` (comma-separated)
+
+## GitHub integration (bounties)
+
+`rustchain_bounties` calls the GitHub REST API to list open bounty issues.
+Set `GITHUB_TOKEN` environment variable to avoid rate limiting.
 
 ## Security
 
