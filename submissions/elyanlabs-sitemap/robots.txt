@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://elyanlabs.ai/sitemap.xml
+
+# Disallow admin or private paths (none currently, but good practice)
+Disallow: /admin/
+Disallow: /private/
