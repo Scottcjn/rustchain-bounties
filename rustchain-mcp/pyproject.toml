@@ -1,0 +1,5 @@
+[project]
+name = "rustchain-mcp"
+version = "1.0.0"
+description = "MCP server for RustChain blockchain"
+requires-python = ">=3.8"

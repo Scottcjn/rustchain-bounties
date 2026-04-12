@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "rustchain": {
+      "command": "python3",
+      "args": ["-m", "rustchain_mcp.server"],
+      "env": {
+        "RUSTCHAIN_NODE_URL": "https://50.28.86.131"
+      }
+    }
+  }
+}
