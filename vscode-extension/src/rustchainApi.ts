@@ -10,7 +10,7 @@ import * as https from "https";
 import * as vscode from "vscode";
 
 // ---------------------------------------------------------------------------
-// Types (match API response shapes from docs/API_REFERENCE.md)
+// Types
 // ---------------------------------------------------------------------------
 
 export interface WalletBalance {
@@ -34,10 +34,29 @@ export interface EpochInfo {
     epoch: number;
     epoch_pot: number;
     slot: number;
+    /** Seconds until next epoch settlement (may not be present on all nodes) */
+    seconds_until_next?: number;
+}
+
+export interface MinerInfo {
+    miner_id: string;
+    wallet_id?: string;
+    last_seen?: number;
+    attestations?: number;
+    status?: string;
+}
+
+export interface GitHubIssue {
+    number: number;
+    title: string;
+    html_url: string;
+    labels: Array<{ name: string; color: string }>;
+    created_at: string;
+    reward?: string;
 }
 
 // ---------------------------------------------------------------------------
-// API client
+// Internal HTTP helper
 // ---------------------------------------------------------------------------
 
 function getConfig(): { nodeUrl: string; rejectUnauthorized: boolean } {
@@ -48,62 +67,61 @@ function getConfig(): { nodeUrl: string; rejectUnauthorized: boolean } {
     };
 }
 
-/**
- * Perform an HTTPS GET request against the configured RustChain node.
- *
- * The default node uses a self-signed certificate, so we allow disabling
- * TLS verification via the `rustchain.rejectUnauthorized` setting.
- */
 function httpGet<T>(path: string, timeoutMs: number = 10_000): Promise<T> {
     const { nodeUrl, rejectUnauthorized } = getConfig();
     const url = new URL(path, nodeUrl);
 
     return new Promise((resolve, reject) => {
-        const req = https.get(
-            url,
-            { rejectUnauthorized, timeout: timeoutMs },
-            (res) => {
-                if (res.statusCode === 429) {
-                    reject(new Error("Rate limited (HTTP 429) — try again later."));
-                    return;
+        const req = https.get(url, { rejectUnauthorized, timeout: timeoutMs }, (res) => {
+            if (res.statusCode === 429) {
+                reject(new Error("Rate limited (HTTP 429) — try again later."));
+                return;
+            }
+            if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+                reject(new Error(`HTTP ${res.statusCode} from ${url.pathname}`));
+                return;
+            }
+            const chunks: Buffer[] = [];
+            res.on("data", (chunk: Buffer) => chunks.push(chunk));
+            res.on("end", () => {
+                try {
+                    resolve(JSON.parse(Buffer.concat(chunks).toString("utf-8")) as T);
+                } catch {
+                    reject(new Error(`Failed to parse response from ${url.pathname}`));
                 }
-                if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
-                    reject(new Error(`HTTP ${res.statusCode} from ${url.pathname}`));
-                    return;
-                }
-
-                const chunks: Buffer[] = [];
-                res.on("data", (chunk: Buffer) => chunks.push(chunk));
-                res.on("end", () => {
-                    try {
-                        const body = Buffer.concat(chunks).toString("utf-8");
-                        resolve(JSON.parse(body) as T);
-                    } catch (err) {
-                        reject(new Error(`Failed to parse response from ${url.pathname}`));
-                    }
-                });
-            },
-        );
-
-        req.on("error", (err) => reject(err));
-        req.on("timeout", () => {
-            req.destroy();
-            reject(new Error(`Request to ${url.pathname} timed out after ${timeoutMs}ms`));
+            });
         });
+        req.on("error", reject);
+        req.on("timeout", () => { req.destroy(); reject(new Error(`Timeout: ${url.pathname}`)); });
+    });
+}
+
+function httpsGet<T>(url: string, timeoutMs: number = 10_000): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const req = https.get(url, { timeout: timeoutMs }, (res) => {
+            const chunks: Buffer[] = [];
+            res.on("data", (chunk: Buffer) => chunks.push(chunk));
+            res.on("end", () => {
+                try {
+                    resolve(JSON.parse(Buffer.concat(chunks).toString("utf-8")) as T);
+                } catch {
+                    reject(new Error("Failed to parse GitHub response"));
+                }
+            });
+        });
+        req.setHeader("User-Agent", "RustChain-VSCode-Extension/0.2.0");
+        req.on("error", reject);
+        req.on("timeout", () => { req.destroy(); reject(new Error("GitHub request timed out")); });
     });
 }
 
 // ---------------------------------------------------------------------------
-// Public API functions
+// Public API
 // ---------------------------------------------------------------------------
 
 export async function fetchBalance(minerId: string): Promise<WalletBalance> {
-    if (!minerId) {
-        throw new Error("No miner ID configured.");
-    }
-    return httpGet<WalletBalance>(
-        `/wallet/balance?miner_id=${encodeURIComponent(minerId)}`,
-    );
+    if (!minerId) throw new Error("No miner ID configured.");
+    return httpGet<WalletBalance>(`/wallet/balance?miner_id=${encodeURIComponent(minerId)}`);
 }
 
 export async function fetchHealth(): Promise<NodeHealth> {
@@ -112,4 +130,25 @@ export async function fetchHealth(): Promise<NodeHealth> {
 
 export async function fetchEpoch(): Promise<EpochInfo> {
     return httpGet<EpochInfo>("/epoch");
+}
+
+export async function fetchMiners(): Promise<MinerInfo[]> {
+    const result = await httpGet<MinerInfo[] | { miners?: MinerInfo[] }>("/api/miners");
+    return Array.isArray(result) ? result : (result.miners ?? []);
+}
+
+export async function fetchBounties(): Promise<GitHubIssue[]> {
+    const url =
+        "https://api.github.com/repos/Scottcjn/rustchain-bounties/issues" +
+        "?state=open&labels=bounty&per_page=30&sort=created&direction=desc";
+    const issues = await httpsGet<GitHubIssue[]>(url);
+    return issues.map((issue) => ({
+        ...issue,
+        reward: extractReward(issue.title),
+    }));
+}
+
+function extractReward(title: string): string | undefined {
+    const m = title.match(/\[BOUNTY:\s*([^\]]+)\]/i);
+    return m ? m[1].trim() : undefined;
 }

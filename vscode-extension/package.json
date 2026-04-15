@@ -1,8 +1,8 @@
 {
   "name": "rustchain-dev",
   "displayName": "RustChain Development Tools",
-  "description": "VS Code extension for RustChain development — RTC balance status bar, config highlighting, and code snippets.",
-  "version": "0.1.0",
+  "description": "VS Code extension for RustChain development — RTC balance, miner status, epoch timer, bounty browser, and code snippets.",
+  "version": "0.2.0",
   "publisher": "rustchain",
   "license": "MIT",
   "repository": {
@@ -22,12 +22,15 @@
     "rtc",
     "blockchain",
     "proof-of-attestation",
-    "mining"
+    "mining",
+    "bounty",
+    "cryptocurrency"
   ],
   "activationEvents": [
     "onLanguage:rustchain-config",
     "workspaceContains:**/rustchain.toml",
-    "workspaceContains:**/rustchain.yaml"
+    "workspaceContains:**/rustchain.yaml",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -42,7 +45,7 @@
         "rustchain.minerId": {
           "type": "string",
           "default": "",
-          "description": "Your miner/wallet ID for balance display (e.g. 'my-miner-name')."
+          "description": "Your miner/wallet ID for balance and status display (e.g. 'my-miner-name')."
         },
         "rustchain.balanceRefreshInterval": {
           "type": "number",
@@ -58,27 +61,16 @@
         "rustchain.rejectUnauthorized": {
           "type": "boolean",
           "default": false,
-          "description": "Enforce TLS certificate validation for the node (the default node uses a self-signed cert)."
+          "description": "Enforce TLS certificate validation (the default node uses a self-signed cert)."
         }
       }
     },
     "languages": [
       {
         "id": "rustchain-config",
-        "aliases": [
-          "RustChain Config",
-          "rustchain"
-        ],
-        "extensions": [
-          ".rustchain.toml",
-          ".rustchain.yaml",
-          ".rustchain.yml"
-        ],
-        "filenames": [
-          "rustchain.toml",
-          "rustchain.yaml",
-          "rustchain.yml"
-        ],
+        "aliases": ["RustChain Config", "rustchain"],
+        "extensions": [".rustchain.toml", ".rustchain.yaml", ".rustchain.yml"],
+        "filenames": ["rustchain.toml", "rustchain.yaml", "rustchain.yml"],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -90,32 +82,16 @@
       }
     ],
     "snippets": [
-      {
-        "language": "python",
-        "path": "./snippets/rustchain-python.json"
-      },
-      {
-        "language": "shellscript",
-        "path": "./snippets/rustchain-shell.json"
-      },
-      {
-        "language": "rustchain-config",
-        "path": "./snippets/rustchain-config.json"
-      }
+      { "language": "python",       "path": "./snippets/rustchain-python.json" },
+      { "language": "shellscript",  "path": "./snippets/rustchain-shell.json" },
+      { "language": "rustchain-config", "path": "./snippets/rustchain-config.json" }
     ],
     "commands": [
-      {
-        "command": "rustchain.refreshBalance",
-        "title": "RustChain: Refresh RTC Balance"
-      },
-      {
-        "command": "rustchain.setMinerId",
-        "title": "RustChain: Set Miner/Wallet ID"
-      },
-      {
-        "command": "rustchain.checkNodeHealth",
-        "title": "RustChain: Check Node Health"
-      }
+      { "command": "rustchain.refreshBalance",    "title": "RustChain: Refresh RTC Balance" },
+      { "command": "rustchain.setMinerId",        "title": "RustChain: Set Miner/Wallet ID" },
+      { "command": "rustchain.checkNodeHealth",   "title": "RustChain: Check Node Health & Epoch Info" },
+      { "command": "rustchain.openBountyBrowser", "title": "RustChain: Browse Open Bounties" },
+      { "command": "rustchain.refreshBounties",   "title": "RustChain: Refresh Bounty Browser" }
     ]
   },
   "scripts": {
