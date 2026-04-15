@@ -98,7 +98,15 @@ function httpGet<T>(path: string, timeoutMs: number = 10_000): Promise<T> {
 
 function httpsGet<T>(url: string, timeoutMs: number = 10_000): Promise<T> {
     return new Promise((resolve, reject) => {
-        const req = https.get(url, { timeout: timeoutMs }, (res) => {
+        const options = {
+            timeout: timeoutMs,
+            headers: { "User-Agent": "RustChain-VSCode-Extension/0.2.0" },
+        };
+        const req = https.get(url, options, (res) => {
+            if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+                reject(new Error(`GitHub API returned HTTP ${res.statusCode}`));
+                return;
+            }
             const chunks: Buffer[] = [];
             res.on("data", (chunk: Buffer) => chunks.push(chunk));
             res.on("end", () => {
@@ -109,7 +117,6 @@ function httpsGet<T>(url: string, timeoutMs: number = 10_000): Promise<T> {
                 }
             });
         });
-        req.setHeader("User-Agent", "RustChain-VSCode-Extension/0.2.0");
         req.on("error", reject);
         req.on("timeout", () => { req.destroy(); reject(new Error("GitHub request timed out")); });
     });

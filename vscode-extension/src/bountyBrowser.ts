@@ -11,6 +11,14 @@
 import * as vscode from "vscode";
 import { fetchBounties, GitHubIssue } from "./rustchainApi";
 
+// ---------------------------------------------------------------------------
+// Utility
+// ---------------------------------------------------------------------------
+
+export function escapeHtml(s: string): string {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export class BountyBrowserPanel {
     public static currentPanel: BountyBrowserPanel | undefined;
     private static readonly viewType = "rustchainBounties";
@@ -175,8 +183,4 @@ function refresh() { vscode.postMessage({ command: 'refresh' }); }
 </body>
 </html>`;
     }
-}
-
-function escapeHtml(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
