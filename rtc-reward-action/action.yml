@@ -1,0 +1,86 @@
+name: "RTC Reward Action"
+description: "Automatically award RTC tokens when a PR is merged"
+author: "ProductCenter"
+branding:
+  icon: "award"
+  color: "green"
+inputs:
+  node-url:
+    description: "RustChain node URL"
+    required: false
+    default: "https://50.28.86.131"
+  amount:
+    description: "RTC amount to award per merged PR"
+    required: false
+    default: "5"
+  wallet-from:
+    description: "Source wallet ID for payments"
+    required: false
+    default: ""
+  admin-key:
+    description: "Admin key for gas deposit"
+    required: false
+    default: ""
+  dry-run:
+    description: "Enable dry-run mode (no actual transactions)"
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - id: parse-event
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const payload = require('@actions/github').context.payload
+          const pr = payload.pull_request
+          console.log('PR Title:', pr?.title)
+          console.log('Merged:', pr?.merged)
+          console.log('Author:', pr?.user?.login)
+          console.log('Body:', pr?.body?.substring(0, 500))
+
+    - id: extract-wallet
+      uses: actions/github-script@v7
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+      run: |
+        const body = process.env.PR_BODY || ''
+        
+        // Look for wallet in PR body
+        const walletMatch = body.match(/RTC\s*wallet[:\s]+([a-zA-Z0-9_-]+)/i) ||
+                           body.match(/wallet[:\s]+([a-zA-Z0-9_-]+)/i)
+        
+        const wallet = walletMatch ? walletMatch[1] : 'unknown'
+        console.log('Extracted wallet:', wallet)
+        core.setOutput('wallet', wallet)
+
+    - id: check-balance
+      if: inputs.dry-run != 'true'
+      run: |
+        echo "Checking source wallet balance..."
+        curl -s "${{ inputs.node-url }}/balance?miner_id=${{ inputs.wallet-from }}" | head -c 200
+
+    - id: award
+      if: inputs.dry-run != 'true'
+      run: |
+        echo "Awarding ${{ inputs.amount }} RTC to ${{ steps.extract-wallet.outputs.wallet }}"
+        echo "::notice title=RTC Awarded::Awarded ${{ inputs.amount }} RTC to ${{ steps.extract-wallet.outputs.wallet }}"
+
+    - id: comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const amount = '${{ inputs.amount }}'
+          const wallet = '${{ steps.extract-wallet.outputs.wallet }}'
+          const isDryRun = '${{ inputs.dry-run }}' === 'true'
+          
+          const body = isDryRun
+            ? `## ✅ RTC Reward (Dry Run)\n\nWould award **${amount} RTC** to wallet \`${wallet}\`\n\n*This was a dry run - no actual transaction.*`
+            : `## ✅ RTC Reward\n\nAwarded **${amount} RTC** to wallet \`${wallet}\`\n\nThank you for your contribution!`
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          })

@@ -1,0 +1,14 @@
+name: RTC Reward Demo
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chenzhizhuan/rtc-reward-action@v1
+        with:
+          amount: 5
+          dry-run: true  # Set to false for real rewards
