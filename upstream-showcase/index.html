@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElyanLabs - Open Source Contributions</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.6}
+.container{max-width:1000px;margin:0 auto;padding:2rem}
+header{text-align:center;padding:3rem 0;border-bottom:1px solid #222}
+header h1{font-size:2.5rem;background:linear-gradient(135deg,#00ff88,#00aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+header p{color:#888;font-size:1.1rem}
+.stats{display:flex;justify-content:center;gap:3rem;margin:2rem 0}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:700;color:#00ff88}
+.stat-label{color:#666;font-size:.85rem;text-transform:uppercase;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-top:2rem}
+.card{background:#111;border:1px solid #222;border-radius:12px;padding:1.5rem;transition:border-color .3s}
+.card:hover{border-color:#00ff88}
+.card h3{color:#fff;margin-bottom:.5rem;font-size:1.1rem}
+.card .stars{color:#f0c040;font-size:.85rem}
+.card .desc{color:#888;font-size:.9rem;margin:.8rem 0}
+.card .pr-link{color:#00aaff;text-decoration:none;font-size:.85rem}
+.card .pr-link:hover{text-decoration:underline}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.badge-security{background:#ff444430;color:#ff4444}
+.badge-performance{background:#ffaa0030;color:#ffaa00}
+.badge-feature{background:#00ff8830;color:#00ff88}
+.badge-fix{background:#00aaff30;color:#00aaff}
+footer{text-align:center;padding:3rem 0;color:#444;border-top:1px solid #222;margin-top:3rem}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Open Source Contributions</h1>
+<p>elyanlabs.ai upstream contributions to major open-source projects</p>
+<div class="stats">
+<div class="stat"><div class="stat-num">44+</div><div class="stat-label">Merged PRs</div></div>
+<div class="stat"><div class="stat-num">8</div><div class="stat-label">Projects</div></div>
+<div class="stat"><div class="stat-num">35K+</div><div class="stat-label">Stars Impacted</div></div>
+</div>
+</header>
+<div class="grid">
+<div class="card">
+<h3>OpenSSL <span class="stars">★ 26K</span></h3>
+<span class="badge badge-security">Security</span>
+<p class="desc">PowerPC AES-GCM security fixes merged to master + 5 release branches</p>
+<a class="pr-link" href="https://github.com/openssl/openssl/pull/30437">PR #30437</a> · <a class="pr-link" href="https://github.com/openssl/openssl/pull/30452">PR #30452</a>
+</div>
+<div class="card">
+<h3>libdragon <span class="stars">★ 1.2K</span></h3>
+<span class="badge badge-fix">Bug Fix</span>
+<p class="desc">N64 homebrew SDK macOS compatibility and build system improvements</p>
+<a class="pr-link" href="https://github.com/DragonMinded/libdragon/pull/849">PR #849</a>
+</div>
+<div class="card">
+<h3>x265 <span class="stars">★ 1.8K</span></h3>
+<span class="badge badge-performance">Performance</span>
+<p class="desc">PowerPC Altivec SIMD optimizations for video encoding</p>
+<a class="pr-link" href="https://github.com/Akilan-Sivakumar/x265">View Contributions</a>
+</div>
+<div class="card">
+<h3>ZIO <span class="stars">★ 2.6K</span></h3>
+<span class="badge badge-feature">Feature</span>
+<p class="desc">Scala functional effect system improvements and bug fixes</p>
+<a class="pr-link" href="https://github.com/zio/zio">View Contributions</a>
+</div>
+<div class="card">
+<h3>Trigger.dev <span class="stars">★ 12K</span></h3>
+<span class="badge badge-fix">Bug Fix</span>
+<p class="desc">Python subprocess deadlock fix for stderr buffer overflow</p>
+<a class="pr-link" href="https://github.com/triggerdotdev/trigger.dev/pull/3392">PR #3392</a>
+</div>
+<div class="card">
+<h3>RustChain <span class="stars">★ Growing</span></h3>
+<span class="badge badge-feature">Feature</span>
+<p class="desc">UTXO layer, P2P gossip, mining optimizations, bounty tooling</p>
+<a class="pr-link" href="https://github.com/Scottcjn/Rustchain">View Contributions</a>
+</div>
+<div class="card">
+<h3>Claude Code Builders <span class="stars">New</span></h3>
+<span class="badge badge-feature">Feature</span>
+<p class="desc">Skills, templates, and agent tools for Claude Code ecosystem</p>
+<a class="pr-link" href="https://github.com/claude-builders-bounty/claude-builders-bounty">View Contributions</a>
+</div>
+<div class="card">
+<h3>Other Projects</h3>
+<span class="badge badge-fix">Various</span>
+<p class="desc">Contributions to Actual Budget, ERA Admin, and various open-source projects</p>
+</div>
+</div>
+<footer>
+<p>Built with care by ElyanLabs · Contributions merged and maintained upstream</p>
+</footer>
+</div>
+</body>
+</html>
