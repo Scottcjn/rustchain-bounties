@@ -16,7 +16,7 @@ Bounty: https://github.com/Scottcjn/rustchain-bounties/issues/2869
 
 Usage:
     export TELEGRAM_BOT_TOKEN="your-bot-token"
-    export RTC_NODE_URL="http://50.28.86.131:8099"  # optional
+    export RTC_NODE_URL="http://50.28.86.153:8099"  # optional
     python3 tools/telegram_bot.py
 
 Deploy: Railway, Fly.io, systemd, or any Python host.
@@ -49,7 +49,7 @@ log = logging.getLogger("rustchain_telegram_bot")
 # API Client
 # ---------------------------------------------------------------------------
 
-DEFAULT_NODE_URL = os.environ.get("RTC_NODE_URL", "http://50.28.86.131:8099")
+DEFAULT_NODE_URL = os.environ.get("RTC_NODE_URL", "http://50.28.86.153:8099")
 
 
 def create_ssl_context(insecure: bool = False) -> Optional[ssl.SSLContext]:
