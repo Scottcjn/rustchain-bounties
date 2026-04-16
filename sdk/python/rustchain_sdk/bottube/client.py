@@ -393,6 +393,164 @@ class BoTTubeClient:
         """
         return self._get(f"/api/agents/{agent_id}")
 
+    def search(
+        self,
+        query: str,
+        limit: int = 20,
+        cursor: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        date_range: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Search for videos on BoTTube
+
+        Args:
+            query: Search query string
+            limit: Maximum number of results (default: 20, max: 100)
+            cursor: Pagination cursor
+            sort_by: Sort by 'relevance', 'date', 'views', or 'votes' (default: 'relevance')
+            date_range: Filter by date: 'day', 'week', 'month', 'year', or 'all' (default: 'all')
+
+        Returns:
+            Dict with search results and pagination info
+
+        Example:
+            >>> client.search("python tutorial", limit=10)
+            {'videos': [...], 'next_cursor': 'abc123', 'total': 50}
+        """
+        params: Dict[str, Any] = {"q": query, "limit": min(limit, 100)}
+        if cursor:
+            params["cursor"] = cursor
+        if sort_by:
+            params["sort_by"] = sort_by
+        if date_range:
+            params["date_range"] = date_range
+        return self._get("/api/search", params)
+
+    def comments(
+        self,
+        video_id: str,
+        limit: int = 20,
+        cursor: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get comments for a video
+
+        Args:
+            video_id: Video ID
+            limit: Maximum number of comments (default: 20, max: 100)
+            cursor: Pagination cursor
+
+        Returns:
+            Dict with comments list and pagination info
+
+        Example:
+            >>> client.comments("abc123", limit=10)
+            {'comments': [...], 'next_cursor': 'xyz789', 'total': 25}
+        """
+        params: Dict[str, Any] = {"limit": min(limit, 100)}
+        if cursor:
+            params["cursor"] = cursor
+        return self._get(f"/api/videos/{video_id}/comments", params)
+
+    def comment_create(
+        self,
+        video_id: str,
+        text: str,
+        parent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a comment on a video (requires auth)
+
+        Args:
+            video_id: Video ID
+            text: Comment text (1-2000 chars)
+            parent_id: Optional parent comment ID for replies
+
+        Returns:
+            Dict with created comment data
+
+        Example:
+            >>> client.comment_create("abc123", "Great video!")
+            {'id': 'comment123', 'text': 'Great video!', 'created_at': '...'}
+        """
+        if not self.api_key:
+            raise AuthenticationError("API key required for commenting")
+
+        data: Dict[str, Any] = {"text": text}
+        if parent_id:
+            data["parent_id"] = parent_id
+
+        return self._post(f"/api/videos/{video_id}/comments", data=data)
+
+    def comment_delete(self, video_id: str, comment_id: str) -> Dict[str, Any]:
+        """
+        Delete a comment (requires auth, owner only)
+
+        Args:
+            video_id: Video ID
+            comment_id: Comment ID
+
+        Returns:
+            Dict with deletion confirmation
+
+        Example:
+            >>> client.comment_delete("abc123", "comment123")
+            {'deleted': True, 'comment_id': 'comment123'}
+        """
+        if not self.api_key:
+            raise AuthenticationError("API key required for deleting comments")
+
+        from urllib.parse import urlencode
+        data = {"comment_id": comment_id}
+        return self._request("DELETE", f"/api/videos/{video_id}/comments", data=data)
+
+    def vote(
+        self,
+        video_id: str,
+        vote_type: str
+    ) -> Dict[str, Any]:
+        """
+        Vote on a video (requires auth)
+
+        Args:
+            video_id: Video ID
+            vote_type: Vote type - 'up' or 'down'
+
+        Returns:
+            Dict with vote confirmation and updated counts
+
+        Example:
+            >>> client.vote("abc123", "up")
+            {'vote_type': 'up', 'upvotes': 42, 'downvotes': 3}
+        """
+        if not self.api_key:
+            raise AuthenticationError("API key required for voting")
+
+        if vote_type not in ("up", "down"):
+            raise BoTTubeError("vote_type must be 'up' or 'down'")
+
+        return self._post(f"/api/videos/{video_id}/vote", data={"type": vote_type})
+
+    def vote_remove(self, video_id: str) -> Dict[str, Any]:
+        """
+        Remove vote from a video (requires auth)
+
+        Args:
+            video_id: Video ID
+
+        Returns:
+            Dict with removal confirmation and updated counts
+
+        Example:
+            >>> client.vote_remove("abc123")
+            {'removed': True, 'upvotes': 41, 'downvotes': 3}
+        """
+        if not self.api_key:
+            raise AuthenticationError("API key required for removing votes")
+
+        return self._request("DELETE", f"/api/videos/{video_id}/vote")
+
     def analytics(
         self,
         video_id: Optional[str] = None,

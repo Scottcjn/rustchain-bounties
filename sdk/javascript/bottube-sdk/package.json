@@ -1,0 +1,30 @@
+{
+  "name": "bottube-sdk",
+  "version": "0.1.0",
+  "description": "JavaScript/TypeScript SDK for BoTTube video platform API - Upload, search, comment, vote",
+  "main": "bottube.js",
+  "types": "bottube.d.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "bottube",
+    "video",
+    "api",
+    "sdk",
+    "blockchain",
+    "rustchain"
+  ],
+  "author": "RustChain Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nock": "^13.4.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
