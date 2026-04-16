@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: chenzhizhuan/rtc-reward-action@v1
         with:
-          node-url: https://50.28.86.131
+          node-url: http://50.28.86.153:8099
           amount: 5
           wallet-from: your-project-wallet
           admin-key: ${{ secrets.RTC_ADMIN_KEY }}
@@ -34,7 +34,7 @@ jobs:
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `node-url` | RustChain node URL | `https://50.28.86.131` |
+| `node-url` | RustChain node URL | `http://50.28.86.153:8099` |
 | `amount` | RTC to award per PR | `5` |
 | `wallet-from` | Source wallet ID | - |
 | `admin-key` | Admin key for transactions | - |
