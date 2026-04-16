@@ -1,8 +1,8 @@
 {
   "name": "rustchain-dev",
   "displayName": "RustChain Development Tools",
-  "description": "VS Code extension for RustChain development — RTC balance status bar, config highlighting, and code snippets.",
-  "version": "0.1.0",
+  "description": "VS Code extension for RustChain development — RTC balance status bar, wallet dashboard, miner listing, transfer, and bounty claiming.",
+  "version": "0.2.0",
   "publisher": "rustchain",
   "license": "MIT",
   "repository": {
@@ -59,6 +59,11 @@
           "type": "boolean",
           "default": false,
           "description": "Enforce TLS certificate validation for the node (the default node uses a self-signed cert)."
+        },
+        "rustchain.useMockApi": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use mock API responses when the node is unreachable (for development/demo)."
         }
       }
     },
@@ -115,6 +120,26 @@
       {
         "command": "rustchain.checkNodeHealth",
         "title": "RustChain: Check Node Health"
+      },
+      {
+        "command": "rustchain.openWalletView",
+        "title": "RustChain: Open Wallet Dashboard"
+      },
+      {
+        "command": "rustchain.listMiners",
+        "title": "RustChain: List Active Miners"
+      },
+      {
+        "command": "rustchain.transfer",
+        "title": "RustChain: Transfer RTC"
+      },
+      {
+        "command": "rustchain.viewTransactions",
+        "title": "RustChain: View Transactions"
+      },
+      {
+        "command": "rustchain.claimBounty",
+        "title": "RustChain: Claim Bounty"
       }
     ]
   },
