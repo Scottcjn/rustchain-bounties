@@ -1,0 +1,17 @@
+name: RTC Reward
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Award RTC
+        uses: liuyuzhe530/rtc-reward-action@v1
+        with:
+          amount: 5
+          node-url: ${{ secrets.RTC_NODE_URL }}
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
