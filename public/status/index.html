@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RustChain Network Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-green { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .status-ok { animation: pulse-green 2s ease-in-out infinite }
+    .status-error { animation: pulse-red 1s ease-in-out infinite }
+    .card { backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-emerald-400 mb-2">⚡ RustChain Network</h1>
+      <p class="text-gray-400">Real-time network status and health monitoring</p>
+      <p class="text-xs text-gray-500 mt-2" id="updated">Last updated: --</p>
+    </header>
+
+    <!-- Epoch Card -->
+    <div class="card bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-700">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <p class="text-gray-400 text-sm">Current Epoch</p>
+          <p class="text-3xl font-bold text-yellow-400" id="epoch">--</p>
+        </div>
+        <div class="text-right">
+          <p class="text-gray-400 text-sm">Slot</p>
+          <p class="text-xl font-mono" id="slot">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Blocks/Epoch</p>
+          <p class="text-xl" id="blocks/epoch">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Total Supply</p>
+          <p class="text-xl" id="supply">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Epoch POT</p>
+          <p class="text-xl" id="pot">--</p>
+        </div>
+      </div>
+      <!-- Epoch Progress Bar -->
+      <div class="mt-4">
+        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div id="epoch-progress" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1" id="epoch-progress-text">-- / 144 slots</p>
+      </div>
+    </div>
+
+    <!-- Node Health -->
+    <h2 class="text-xl font-semibold mb-4">🔗 Attestation Nodes</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="nodes">
+      <div class="card bg-gray-800 rounded-xl p-4 border border-gray-700 text-center">
+        <div class="text-4xl mb-2">⏳</div>
+        <p class="text-gray-400 text-sm">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Miner Stats -->
+    <h2 class="text-xl font-semibold mb-4">⛏️ Miners</h2>
+    <div class="card bg-gray-800 rounded-2xl p-6 mb-6 border border-gray-700">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div>
+          <p class="text-gray-400 text-sm">Active Miners</p>
+          <p class="text-3xl font-bold text-emerald-400" id="miner-count">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Network Version</p>
+          <p class="text-lg font-mono" id="version">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">DB Status</p>
+          <p class="text-lg" id="db-status">--</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Uptime</p>
+          <p class="text-lg" id="uptime">--</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm mt-8">
+      <p>Auto-refreshes every 60 seconds • Data from RustChain nodes</p>
+      <p class="mt-1">Not affiliated with any exchange • Use at your own risk</p>
+    </footer>
+  </div>
+
+  <script>
+    const NODES = [
+      { name: 'Node 131', url: 'http://50.28.86.131:8099', fallback: true },
+      { name: 'Node 153', url: 'http://50.28.86.153:8099', fallback: false },
+    ];
+    const BLOCKS_PER_EPOCH = 144;
+
+    async function fetchJSON(url) {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function formatUptime(seconds) {
+      const d = Math.floor(seconds / 86400);
+      const h = Math.floor((seconds % 86400) / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      if (d > 0) return `${d}d ${h}h`;
+      if (h > 0) return `${h}h ${m}m`;
+      return `${m}m`;
+    }
+
+    function formatNumber(n) {
+      if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    async function updateEpoch() {
+      // Try primary node first
+      let data = await fetchJSON('http://50.28.86.153:8099/epoch');
+      
+      if (!data) {
+        // Fallback to 131
+        data = await fetchJSON('http://50.28.86.131:8099/epoch');
+      }
+
+      if (data) {
+        document.getElementById('epoch').textContent = data.epoch || '--';
+        document.getElementById('slot').textContent = data.slot || '--';
+        document.getElementById('blocks/epoch').textContent = data.blocks_per_epoch || BLOCKS_PER_EPOCH;
+        document.getElementById('supply').textContent = formatNumber(data.total_supply_rtc || 0) + ' RTC';
+        document.getElementById('pot').textContent = (data.epoch_pot || 0) + 'x';
+
+        const slot = data.slot || 0;
+        const progress = Math.min((slot % BLOCKS_PER_EPOCH) / BLOCKS_PER_EPOCH * 100, 100);
+        document.getElementById('epoch-progress').style.width = progress + '%';
+        document.getElementById('epoch-progress-text').textContent = 
+          `${slot % BLOCKS_PER_EPOCH} / ${BLOCKS_PER_EPOCH} slots`;
+      }
+    }
+
+    async function updateNode(nodeEl, node) {
+      const data = await fetchJSON(node.url + '/health');
+      if (data) {
+        const ok = data.ok;
+        const emoji = ok ? '✅' : '❌';
+        const statusClass = ok ? 'status-ok' : 'status-error';
+        const borderClass = ok ? 'border-emerald-500' : 'border-red-500';
+        nodeEl.innerHTML = `
+          <div class="text-4xl mb-2 ${statusClass}">${emoji}</div>
+          <p class="font-semibold">${node.name}</p>
+          <p class="text-xs text-gray-400 mt-1">${node.url}</p>
+          <p class="text-xs text-gray-500 mt-2">Uptime: ${formatUptime(data.uptime_s || 0)}</p>
+        `;
+        nodeEl.className = `card bg-gray-800 rounded-xl p-4 border-2 ${borderClass} text-center`;
+      } else {
+        nodeEl.innerHTML = `
+          <div class="text-4xl mb-2 status-error">❌</div>
+          <p class="font-semibold">${node.name}</p>
+          <p class="text-xs text-gray-400 mt-1">${node.url}</p>
+          <p class="text-xs text-red-400 mt-2">Unreachable</p>
+        `;
+        nodeEl.className = 'card bg-gray-800 rounded-xl p-4 border-2 border-red-500 text-center';
+      }
+    }
+
+    async function updateNodes() {
+      const container = document.getElementById('nodes');
+      container.innerHTML = '';
+      for (const node of NODES) {
+        const el = document.createElement('div');
+        el.className = 'card bg-gray-800 rounded-xl p-4 border border-gray-700 text-center';
+        el.innerHTML = `<div class="text-4xl mb-2">⏳</div><p class="text-gray-400 text-sm">Checking...</p>`;
+        container.appendChild(el);
+        updateNode(el, node);
+      }
+    }
+
+    async function updateHealth() {
+      // Try to get health from any node
+      let data = await fetchJSON('http://50.28.86.153:8099/health');
+      if (!data) data = await fetchJSON('http://50.28.86.131:8099/health');
+
+      if (data) {
+        document.getElementById('version').textContent = data.version || '--';
+        document.getElementById('db-status').textContent = data.db_rw ? '🟢 RW' : '🟡 R';
+        document.getElementById('uptime').textContent = formatUptime(data.uptime_s || 0);
+      }
+
+      // Miner count - endpoint might not exist
+      const minersData = await fetchJSON('http://50.28.86.153:8099/miners');
+      const enrolled = minersData?.enrolled_miners ?? minersData?.miners?.length ?? '--';
+      document.getElementById('miner-count').textContent = enrolled;
+    }
+
+    function updateTimestamp() {
+      const now = new Date();
+      document.getElementById('updated').textContent = 
+        'Last updated: ' + now.toLocaleTimeString();
+    }
+
+    async function refresh() {
+      await Promise.all([updateEpoch(), updateNodes(), updateHealth()]);
+      updateTimestamp();
+    }
+
+    // Initial load
+    refresh();
+    // Auto-refresh every 60s
+    setInterval(refresh, 60000);
+  </script>
+</body>
+</html>
