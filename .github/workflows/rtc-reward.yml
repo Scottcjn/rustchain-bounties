@@ -1,0 +1,56 @@
+name: RTC Reward Action
+
+on:
+  workflow_call:
+    inputs:
+      amount:
+        description: 'RTC amount to reward per merged PR'
+        required: false
+        default: '5'
+        type: string
+      wallet-from:
+        description: 'Source wallet name on RustChain VPS'
+        required: false
+        default: 'founder_community'
+        type: string
+      dry-run:
+        description: 'Enable dry-run mode (no actual transfer)'
+        required: false
+        default: 'false'
+        type: string
+    secrets:
+      rtc-admin-key:
+        description: 'Admin key for RustChain VPS transfer API'
+        required: true
+      rtc-vps-host:
+        description: 'RustChain VPS host IP'
+        required: true
+
+jobs:
+  reward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run RTC Reward
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          RTC_VPS_HOST: ${{ secrets.rtc-vps-host }}
+          RTC_ADMIN_KEY: ${{ secrets.rtc-admin-key }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          AMOUNT: ${{ inputs.amount }}
+          FROM_WALLET: ${{ inputs.wallet-from }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: python scripts/rtc_reward.py
