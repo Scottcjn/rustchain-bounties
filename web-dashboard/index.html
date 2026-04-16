@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 28px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #888;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.error {
+            background: #f87171;
+            animation: none;
+        }
+        .status-dot.loading {
+            background: #fbbf24;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,215,0,0.3);
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .stat-value.gold {
+            color: #ffd700;
+        }
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+            color: #4ade80;
+        }
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 18px;
+            color: #fff;
+        }
+        .refresh-info {
+            font-size: 12px;
+            color: #666;
+        }
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .transactions-table th,
+        .transactions-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .transactions-table th {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .transactions-table td {
+            font-size: 14px;
+        }
+        .tx-hash {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #60a5fa;
+            font-size: 13px;
+        }
+        .tx-amount {
+            color: #4ade80;
+            font-weight: 600;
+        }
+        .tx-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .tx-type.reward {
+            background: rgba(74,222,128,0.2);
+            color: #4ade80;
+        }
+        .tx-type.transfer {
+            background: rgba(96,165,250,0.2);
+            color: #60a5fa;
+        }
+        .tx-type.stake {
+            background: rgba(251,191,36,0.2);
+            color: #fbbf24;
+        }
+        .last-updated {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .transactions-table {
+                font-size: 12px;
+            }
+            .transactions-table th,
+            .transactions-table td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RustChain Dashboard</h1>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Current Epoch</div>
+                <div class="stat-value" id="epoch">--</div>
+                <div class="stat-change" id="epochChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Miners</div>
+                <div class="stat-value" id="miners">--</div>
+                <div class="stat-change" id="minersChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total RTC Supply</div>
+                <div class="stat-value gold" id="supply">--</div>
+                <div class="stat-change" id="supplyChange"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Network Hashrate</div>
+                <div class="stat-value" id="hashrate">--</div>
+                <div class="stat-change" id="hashrateChange"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>Recent Transactions</h2>
+                <span class="refresh-info">Auto-refresh every 30s</span>
+            </div>
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Hash</th>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Amount</th>
+                        <th>Epoch</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                    <tr><td colspan="6" style="text-align:center;padding:40px;color:#666;">Loading transactions...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="last-updated">
+            Last updated: <span id="lastUpdated">--</span>
+        </div>
+
+        <div class="footer">
+            RustChain Bounty #1600 | <a href="https://github.com/Scottcjn/rustchain-bounties/issues/1600">Claim Issue</a> | Reward: 5 RTC
+        </div>
+    </div>
+
+    <script>
+        // RustChain Node API Configuration
+        const API_BASE = 'https://50.28.86.131:8099';
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        const MAX_TRANSACTIONS = 15;
+
+        // Mock data for fallback (when node is unreachable)
+        const MOCK_DATA = {
+            epoch: 4852,
+            miners: 127,
+            supply: '12,847,293.45',
+            hashrate: '4.2 TH/s',
+            transactions: [
+                { hash: '0x7f4e...8a2d', type: 'reward', from: 'PoA-Miner', to: 'RTCd5f...921e', amount: '245.00', epoch: 4852 },
+                { hash: '0x8b3a...9c1e', type: 'transfer', from: 'RTCa2e...7f91', to: 'RTCb4c...3d82', amount: '1,500.00', epoch: 4852 },
+                { hash: '0x2d7f...5a8b', type: 'stake', from: 'RTCc9d...1e47', to: 'StakingPool', amount: '3,200.00', epoch: 4852 },
+                { hash: '0x9c4e...3f2a', type: 'reward', from: 'PoA-Miner', to: 'RTCe8f...6a93', amount: '180.50', epoch: 4851 },
+                { hash: '0x1a8f...7b4d', type: 'transfer', from: 'RTCf2a...9c84', to: 'RTCd7e...2b61', amount: '890.25', epoch: 4851 },
+                { hash: '0x5d3c...8e9a', type: 'reward', from: 'PoA-Miner', to: 'RTCa1b...4c72', amount: '312.75', epoch: 4851 },
+                { hash: '0x6b9e...2f5c', type: 'transfer', from: 'RTCb8c...3a95', to: 'RTCe4d...7f28', amount: '2,450.00', epoch: 4850 },
+                { hash: '0x4f2a...1d8b', type: 'stake', from: 'RTCc5e...8b34', to: 'StakingPool', amount: '5,000.00', epoch: 4850 },
+                { hash: '0x8e7c...6a3f', type: 'reward', from: 'PoA-Miner', to: 'RTCd2f...9a17', amount: '198.30', epoch: 4850 },
+                { hash: '0x3a9b...5c7e', type: 'transfer', from: 'RTCf6a...2d48', to: 'RTCb1c...8e95', amount: '675.80', epoch: 4850 },
+                { hash: '0x7c5d...9f2b', type: 'reward', from: 'PoA-Miner', to: 'RTCa8e...3b62', amount: '267.40', epoch: 4849 },
+                { hash: '0x2b8f...4a6d', type: 'transfer', from: 'RTCe3b...7c91', to: 'RTCf9a...4d28', amount: '1,125.00', epoch: 4849 },
+                { hash: '0x9a3c...1e5b', type: 'stake', from: 'RTCd7c...6f84', to: 'StakingPool', amount: '8,500.00', epoch: 4849 },
+                { hash: '0x6d4e...8a2f', type: 'reward', from: 'PoA-Miner', to: 'RTCb5a...9c37', amount: '156.90', epoch: 4849 },
+                { hash: '0x1f7c...3b9e', type: 'transfer', from: 'RTCc2d...8a46', to: 'RTCe8b...2d19', amount: '340.60', epoch: 4848 }
+            ]
+        };
+
+        // State
+        let useMockData = false;
+        let lastFetchTime = null;
+
+        // DOM Elements
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const epochEl = document.getElementById('epoch');
+        const minersEl = document.getElementById('miners');
+        const supplyEl = document.getElementById('supply');
+        const hashrateEl = document.getElementById('hashrate');
+        const transactionsBody = document.getElementById('transactionsBody');
+        const lastUpdatedEl = document.getElementById('lastUpdated');
+
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Truncate address
+        function truncateAddress(addr) {
+            if (!addr) return '--';
+            if (addr.length <= 12) return addr;
+            return addr.slice(0, 6) + '...' + addr.slice(-4);
+        }
+
+        // Update status indicator
+        function setStatus(status, message) {
+            statusDot.className = 'status-dot';
+            if (status === 'connected') {
+                statusDot.classList.add('connected');
+                statusText.textContent = message || 'Live';
+            } else if (status === 'error') {
+                statusDot.classList.add('error');
+                statusText.textContent = message || 'Using Mock Data';
+            } else if (status === 'loading') {
+                statusDot.classList.add('loading');
+                statusText.textContent = message || 'Refreshing...';
+            }
+        }
+
+        // Fetch data from RustChain node
+        async function fetchFromNode(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.warn(`Node API unreachable: ${endpoint}`, error.message);
+                return null;
+            }
+        }
+
+        // Update dashboard with data
+        function updateDashboard(data) {
+            // Epoch
+            epochEl.textContent = formatNumber(data.epoch);
+
+            // Miners
+            minersEl.textContent = formatNumber(data.miners);
+
+            // Supply
+            supplyEl.textContent = data.supply;
+
+            // Hashrate
+            hashrateEl.textContent = data.hashrate;
+
+            // Transactions
+            renderTransactions(data.transactions);
+
+            // Last updated
+            lastUpdatedEl.textContent = new Date().toLocaleTimeString();
+        }
+
+        // Render transactions table
+        function renderTransactions(transactions) {
+            if (!transactions || transactions.length === 0) {
+                transactionsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#666;">No transactions found</td></tr>';
+                return;
+            }
+
+            transactionsBody.innerHTML = transactions.slice(0, MAX_TRANSACTIONS).map(tx => `
+                <tr>
+                    <td><span class="tx-hash">${tx.hash}</span></td>
+                    <td><span class="tx-type ${tx.type}">${tx.type}</span></td>
+                    <td><span class="tx-hash">${truncateAddress(tx.from)}</span></td>
+                    <td><span class="tx-hash">${truncateAddress(tx.to)}</span></td>
+                    <td><span class="tx-amount">${tx.amount} RTC</span></td>
+                    <td>${tx.epoch}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Fetch all dashboard data
+        async function fetchDashboardData() {
+            setStatus('loading', 'Refreshing...');
+
+            try {
+                // Try to fetch from node
+                const [epochData, statsData, txData] = await Promise.all([
+                    fetchFromNode('/api/epoch'),
+                    fetchFromNode('/api/stats'),
+                    fetchFromNode('/api/transactions?limit=' + MAX_TRANSACTIONS)
+                ]);
+
+                if (epochData && statsData && txData) {
+                    // Use real data
+                    useMockData = false;
+                    setStatus('connected', 'Live');
+
+                    updateDashboard({
+                        epoch: epochData.current_epoch || epochData.epoch || 0,
+                        miners: statsData.active_miners || statsData.miners || 0,
+                        supply: statsData.total_supply || statsData.supply || '0',
+                        hashrate: statsData.hashrate || '0 TH/s',
+                        transactions: txData.transactions || txData || []
+                    });
+                } else {
+                    throw new Error('Incomplete data from node');
+                }
+            } catch (error) {
+                console.warn('Using mock data:', error.message);
+                useMockData = true;
+                setStatus('error', 'Mock Data');
+
+                // Increment mock data slightly to simulate live updates
+                MOCK_DATA.epoch += Math.floor(Math.random() * 3);
+                MOCK_DATA.miners = 120 + Math.floor(Math.random() * 20);
+
+                updateDashboard(MOCK_DATA);
+            }
+
+            lastFetchTime = new Date();
+        }
+
+        // Initialize dashboard
+        async function init() {
+            await fetchDashboardData();
+
+            // Auto-refresh every 30 seconds
+            setInterval(fetchDashboardData, REFRESH_INTERVAL);
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
