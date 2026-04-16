@@ -1,0 +1,96 @@
+{
+  "name": "rustchain-dashboard",
+  "displayName": "RustChain Dashboard",
+  "description": "RustChain wallet balance, miner status, and bounty browser for VS Code",
+  "version": "1.0.0",
+  "publisher": "elyanlabs",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rustchain",
+          "title": "RustChain",
+          "icon": "media/rc-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "rustchain": [
+        {
+          "id": "rustchain.wallet",
+          "name": "Wallet"
+        },
+        {
+          "id": "rustchain.miners",
+          "name": "Miner Status"
+        },
+        {
+          "id": "rustchain.bounties",
+          "name": "Bounty Board"
+        },
+        {
+          "id": "rustchain.epoch",
+          "name": "Epoch Timer"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "rustchain.refresh",
+        "title": "RustChain: Refresh"
+      },
+      {
+        "command": "rustchain.claimBounty",
+        "title": "RustChain: Claim Bounty"
+      },
+      {
+        "command": "rustchain.openNode",
+        "title": "RustChain: Open Node URL"
+      },
+      {
+        "command": "rustchain.copyAddress",
+        "title": "RustChain: Copy Wallet Address"
+      }
+    ],
+    "configuration": {
+      "title": "RustChain",
+      "properties": {
+        "rustchain.nodeUrl": {
+          "type": "string",
+          "default": "https://50.28.86.131",
+          "description": "RustChain node URL"
+        },
+        "rustchain.walletAddress": {
+          "type": "string",
+          "default": "",
+          "description": "Your RTC wallet address"
+        },
+        "rustchain.refreshInterval": {
+          "type": "number",
+          "default": 30,
+          "description": "Refresh interval in seconds"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
