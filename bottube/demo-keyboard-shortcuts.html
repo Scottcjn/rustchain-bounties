@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoTTube Keyboard Shortcuts Demo - Bounty #2140</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f0f0f;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ff4444;
+        }
+        
+        .header .bounty {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .wallet-info {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+            font-family: monospace;
+        }
+        
+        .player-wrapper {
+            max-width: 900px;
+            margin: 0 auto 30px;
+        }
+        
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        
+        video {
+            width: 100%;
+            display: block;
+        }
+        
+        .shortcuts-panel {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .shortcuts-panel h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .shortcut-item {
+            background: #252525;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+        
+        .shortcut-item:hover {
+            background: #333;
+        }
+        
+        .shortcut-key {
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .shortcut-desc {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .tip-box {
+            background: #252525;
+            border-left: 4px solid #ff4444;
+            border-radius: 0 8px 8px 0;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .tip-box strong {
+            color: #fff;
+        }
+        
+        /* Overlay animation for demo */
+        .bottube-shortcut-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .bottube-shortcut-overlay.show {
+            opacity: 1;
+        }
+        
+        .controls-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: #444;
+        }
+        
+        .control-btn.active {
+            background: #ff4444;
+            border-color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 BoTTube Keyboard Shortcuts</h1>
+        <span class="bounty">Bounty #2140 - 5 RTC</span>
+        <div class="wallet-info">
+            Claim: Scottcjn/rustchain-bounties#2140 | Wallet: RTCd5fbce79a0e0826d41a3736cfeacd5a5b921e6e5
+        </div>
+    </div>
+    
+    <div class="player-wrapper">
+        <div class="video-container" id="player-container">
+            <!-- Sample video from public domain -->
+            <video id="video-player" controls>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="controls-bar">
+            <button class="control-btn" id="toggle-shortcuts">Shortcuts: ON</button>
+            <button class="control-btn" id="show-list">Show Shortcut List</button>
+        </div>
+    </div>
+    
+    <div class="shortcuts-panel">
+        <h2>⌨️ Available Keyboard Shortcuts</h2>
+        <div class="shortcuts-grid" id="shortcuts-grid">
+            <div class="shortcut-item">
+                <span class="shortcut-key">Space / K</span>
+                <span class="shortcut-desc">Play / Pause</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">J</span>
+                <span class="shortcut-desc">Seek back 10 seconds</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">L</span>
+                <span class="shortcut-desc">Seek forward 10 seconds</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">M</span>
+                <span class="shortcut-desc">Mute / Unmute</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">F</span>
+                <span class="shortcut-desc">Toggle Fullscreen</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">←</span>
+                <span class="shortcut-desc">Seek back 5 seconds</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">→</span>
+                <span class="shortcut-desc">Seek forward 5 seconds</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">↑</span>
+                <span class="shortcut-desc">Volume up 10%</span>
+            </div>
+            <div class="shortcut-item">
+                <span class="shortcut-key">↓</span>
+                <span class="shortcut-desc">Volume down 10%</span>
+            </div>
+        </div>
+        
+        <div class="tip-box">
+            <strong>💡 Tip:</strong> Keyboard shortcuts are automatically disabled when you're typing in a comment box, search field, or any text input.
+        </div>
+    </div>
+    
+    <script>
+        /**
+         * BoTTube Keyboard Shortcuts Module - Standalone Implementation
+         * Issue: Scottcjn/rustchain-bounties#2140 - 5 RTC
+         * Wallet: RTCd5fbce79a0e0826d41a3736cfeacd5a5b921e6e5
+         */
+        (function() {
+            'use strict';
+
+            const DEFAULT_SEEK_SECONDS = 10;
+            const DEFAULT_SEEK_SHORT = 5;
+            const DEFAULT_VOLUME_STEP = 0.1;
+            const DEFAULT_OVERLAY_DURATION = 800;
+
+            class KeyboardShortcuts {
+                constructor(videoElement, containerElement) {
+                    this.video = videoElement;
+                    this.container = containerElement || videoElement.parentElement;
+                    this.overlay = null;
+                    this.overlayTimeout = null;
+                    this.isEnabled = true;
+                    
+                    this.createOverlay();
+                    this.attach();
+                }
+
+                createOverlay() {
+                    this.overlay = document.createElement('div');
+                    this.overlay.className = 'bottube-shortcut-overlay';
+                    this.overlay.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.75);
+                        color: white;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        font-size: 16px;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        opacity: 0;
+                        transition: opacity 0.15s ease-in-out;
+                        pointer-events: none;
+                        z-index: 1000;
+                    `;
+                    this.container.style.position = 'relative';
+                    this.container.appendChild(this.overlay);
+                }
+
+                isTypingInInput() {
+                    const activeElement = document.activeElement;
+                    if (!activeElement) return false;
+                    
+                    const tagName = activeElement.tagName.toLowerCase();
+                    if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+                        return true;
+                    }
+                    
+                    if (activeElement.getAttribute('contenteditable') === 'true') {
+                        return true;
+                    }
+                    
+                    return false;
+                }
+
+                showOverlay(icon, text) {
+                    this.overlay.innerHTML = `<span style="font-size: 20px;">${icon}</span><span>${text}</span>`;
+                    this.overlay.classList.add('show');
+
+                    if (this.overlayTimeout) {
+                        clearTimeout(this.overlayTimeout);
+                    }
+
+                    this.overlayTimeout = setTimeout(() => {
+                        this.overlay.classList.remove('show');
+                    }, DEFAULT_OVERLAY_DURATION);
+                }
+
+                togglePlayPause() {
+                    if (this.video.paused) {
+                        this.video.play();
+                        this.showOverlay('▶️', 'Play');
+                    } else {
+                        this.video.pause();
+                        this.showOverlay('⏸️', 'Pause');
+                    }
+                }
+
+                seekBackward() {
+                    this.video.currentTime = Math.max(0, this.video.currentTime - DEFAULT_SEEK_SECONDS);
+                    this.showOverlay('⏪', `-${DEFAULT_SEEK_SECONDS}s`);
+                }
+
+                seekForward() {
+                    this.video.currentTime = Math.min(this.video.duration, this.video.currentTime + DEFAULT_SEEK_SECONDS);
+                    this.showOverlay('⏩', `+${DEFAULT_SEEK_SECONDS}s`);
+                }
+
+                seekShort(seconds) {
+                    const newTime = Math.max(0, Math.min(this.video.duration, this.video.currentTime + seconds));
+                    this.video.currentTime = newTime;
+                    const direction = seconds > 0 ? '+' : '';
+                    this.showOverlay('⏱️', `${direction}${seconds}s`);
+                }
+
+                toggleMute() {
+                    this.video.muted = !this.video.muted;
+                    this.showOverlay('🔇', this.video.muted ? 'Muted' : 'Unmuted');
+                }
+
+                toggleFullscreen() {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                        this.showOverlay('⛶', 'Exit Fullscreen');
+                    } else {
+                        this.container.requestFullscreen();
+                        this.showOverlay('⛶', 'Fullscreen');
+                    }
+                }
+
+                adjustVolume(delta) {
+                    const newVolume = Math.max(0, Math.min(1, this.video.volume + delta));
+                    this.video.volume = newVolume;
+                    
+                    const volumePercent = Math.round(newVolume * 100);
+                    let icon = '🔊';
+                    if (newVolume === 0) icon = '🔇';
+                    else if (newVolume < 0.3) icon = '🔈';
+                    else if (newVolume < 0.7) icon = '🔉';
+                    
+                    this.showOverlay(icon, `Volume: ${volumePercent}%`);
+                }
+
+                handleKeyDown(e) {
+                    if (this.isTypingInInput()) return;
+                    if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+                    let handled = false;
+
+                    switch (e.key.toLowerCase()) {
+                        case ' ':
+                        case 'k':
+                            e.preventDefault();
+                            this.togglePlayPause();
+                            handled = true;
+                            break;
+
+                        case 'j':
+                            e.preventDefault();
+                            this.seekBackward();
+                            handled = true;
+                            break;
+
+                        case 'l':
+                            e.preventDefault();
+                            this.seekForward();
+                            handled = true;
+                            break;
+
+                        case 'm':
+                            e.preventDefault();
+                            this.toggleMute();
+                            handled = true;
+                            break;
+
+                        case 'f':
+                            e.preventDefault();
+                            this.toggleFullscreen();
+                            handled = true;
+                            break;
+
+                        case 'arrowleft':
+                            e.preventDefault();
+                            this.seekShort(-DEFAULT_SEEK_SHORT);
+                            handled = true;
+                            break;
+
+                        case 'arrowright':
+                            e.preventDefault();
+                            this.seekShort(DEFAULT_SEEK_SHORT);
+                            handled = true;
+                            break;
+
+                        case 'arrowup':
+                            e.preventDefault();
+                            this.adjustVolume(DEFAULT_VOLUME_STEP);
+                            handled = true;
+                            break;
+
+                        case 'arrowdown':
+                            e.preventDefault();
+                            this.adjustVolume(-DEFAULT_VOLUME_STEP);
+                            handled = true;
+                            break;
+                    }
+
+                    if (handled) {
+                        e.preventDefault();
+                    }
+                }
+
+                attach() {
+                    this.boundHandler = this.handleKeyDown.bind(this);
+                    document.addEventListener('keydown', this.boundHandler);
+                }
+
+                detach() {
+                    document.removeEventListener('keydown', this.boundHandler);
+                    if (this.overlayTimeout) {
+                        clearTimeout(this.overlayTimeout);
+                    }
+                    if (this.overlay && this.overlay.parentNode) {
+                        this.overlay.parentNode.removeChild(this.overlay);
+                    }
+                }
+
+                setEnabled(enabled) {
+                    this.isEnabled = enabled;
+                }
+            }
+
+            // Initialize keyboard shortcuts
+            const video = document.getElementById('video-player');
+            const container = document.getElementById('player-container');
+            const shortcuts = new KeyboardShortcuts(video, container);
+
+            // Toggle button
+            const toggleBtn = document.getElementById('toggle-shortcuts');
+            let isEnabled = true;
+            
+            toggleBtn.addEventListener('click', () => {
+                isEnabled = !isEnabled;
+                shortcuts.setEnabled(isEnabled);
+                toggleBtn.textContent = `Shortcuts: ${isEnabled ? 'ON' : 'OFF'}`;
+                toggleBtn.classList.toggle('active', isEnabled);
+            });
+
+            // Show list highlight effect
+            const showListBtn = document.getElementById('show-list');
+            const gridItems = document.querySelectorAll('.shortcut-item');
+            
+            showListBtn.addEventListener('click', () => {
+                gridItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.background = '#ff4444';
+                        setTimeout(() => {
+                            item.style.background = '#252525';
+                        }, 300);
+                    }, index * 80);
+                });
+            });
+
+            console.log('🎮 BoTTube Keyboard Shortcuts initialized - Bounty #2140');
+            console.log('Shortcuts: Space/K=Play/Pause, J/L=Seek ±10s, M=Mute, F=Fullscreen, Arrows=Seek/Volume');
+        })();
+    </script>
+</body>
+</html>
