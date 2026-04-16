@@ -1,0 +1,31 @@
+name: 'Auto-Award RTC on PR Merge'
+description: 'Automatically awards RTC tokens to contributors when their PR is merged'
+author: '大鹏'
+
+inputs:
+  reward_rtc:
+    description: 'Amount of RTC to award (default: 10)'
+    required: false
+    default: '10'
+  node_url:
+    description: 'RustChain node URL'
+    required: false
+    default: 'https://50.28.86.131'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Award RTC to contributor
+      shell: bash
+      env:
+        RUSTCHAIN_NODE_URL: ${{ inputs.node_url }}
+        ADMIN_KEY: ${{ env.RUSTCHAIN_ADMIN_KEY }}
+        CONTRIBUTOR: ${{ github.event.pull_request.user.login }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REWARD_RTC: ${{ inputs.reward_rtc }}
+      run: |
+        python ${{ github.action_path }}/award_rtc.py
+
+branding:
+  icon: 'award'
+  color: 'orange'
