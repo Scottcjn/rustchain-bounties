@@ -1,79 +1,62 @@
-const core = require('@actions/core');
-const github = require('@actions/core');
-const https = require('https');
-const http = require('http');
+const core = require("@actions/core");
+const github = require("@actions/github");
+const https = require("https");
+const http = require("http");
 
 async function run() {
   try {
-    // Only run on merged PRs
     const payload = github.context.payload;
-    if (payload.action !== 'closed' || !payload.pull_request?.merged) {
-      core.info('PR not merged, skipping reward');
-      return;
+    if (payload.action !== "closed" || !payload.pull_request || !payload.pull_request.merged) {
+      core.info("PR not merged, skipping"); return;
     }
-
-    const nodeUrl = core.getInput('node-url', { required: true });
-    const amount = parseInt(core.getInput('amount', { required: true }));
-    const walletFrom = core.getInput('wallet-from', { required: true });
-    const walletKey = core.getInput('wallet-key', { required: true });
-    const walletTo = core.getInput('wallet-to') || payload.pull_request.user.login;
-
-    const prNumber = payload.pull_request.number;
-    const prAuthor = payload.pull_request.user.login;
+    const nodeUrl = core.getInput("node-url", { required: true });
+    const amount = parseInt(core.getInput("amount", { required: true }), 10);
+    const walletFrom = core.getInput("wallet-from", { required: true });
+    const walletKey = core.getInput("wallet-key", { required: true });
+    const walletTo = core.getInput("wallet-to") || payload.pull_request.user.login;
+    const prNum = payload.pull_request.number;
     const prTitle = payload.pull_request.title;
-
-    core.info(`PR #${prNumber} merged by ${prAuthor}: "${prTitle}"`);
-    core.info(`Awarding ${amount} RTC from ${walletFrom} to ${walletTo}`);
-
-    // Build transaction
-    const txData = {
-      from: walletFrom,
-      to: walletTo,
-      amount: amount,
-      memo: `PR #${prNumber} merged: ${prTitle}`.substring(0, 128),
+    if (isNaN(amount) || amount <= 0) { core.setFailed("Invalid amount"); return; }
+    core.info("PR #" + prNum + " merged. Awarding " + amount + " RTC to " + walletTo);
+    const txData = JSON.stringify({
+      from: walletFrom, to: walletTo, amount: amount,
+      memo: ("PR #" + prNum + ": " + prTitle).substring(0, 128),
       timestamp: Date.now()
-    };
-
-    // Send to RustChain node
-    const url = new URL('/api/transfer', nodeUrl);
-    const transport = url.protocol === 'https:' ? https : http;
-
-    const postData = JSON.stringify(txData);
-
-    const req = transport.request(url, {
-      method: 'POST',
+    });
+    const url = new URL("/api/transfer", nodeUrl);
+    const transport = url.protocol === "https:" ? https : http;
+    const options = {
+      hostname: url.hostname,
+      port: url.port || (url.protocol === "https:" ? 443 : 80),
+      path: url.pathname,
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-        'Authorization': `Bearer ${walletKey}`
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(txData),
+        "Authorization": "Bearer " + walletKey
       }
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
+    };
+    const req = transport.request(options, function(res) {
+      var data = "";
+      res.on("data", function(c) { data += c; });
+      res.on("end", function() {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          core.info(`✅ Reward sent: ${amount} RTC to ${walletTo}`);
-          core.setOutput('tx_hash', data);
-          core.setOutput('amount', amount.toString());
-          core.setOutput('recipient', walletTo);
+          core.info("Sent " + amount + " RTC to " + walletTo);
+          core.setOutput("tx_hash", data);
+          core.setOutput("amount", String(amount));
+          core.setOutput("recipient", walletTo);
         } else {
-          core.warning(`Node returned ${res.statusCode}: ${data}`);
-          core.setOutput('status', 'pending');
+          core.warning("Node " + res.statusCode + ": " + data);
+          core.setOutput("status", "pending");
         }
       });
     });
-
-    req.on('error', (e) => {
-      core.warning(`Failed to send reward: ${e.message}`);
-      core.setOutput('status', 'error');
+    req.on("error", function(e) {
+      core.warning("Error: " + e.message);
+      core.setOutput("status", "error");
     });
-
-    req.write(postData);
+    req.write(txData);
     req.end();
-
-  } catch (error) {
-    core.setFailed(error.message);
-  }
+  } catch (error) { core.setFailed(error.message); }
 }
-
 run();
