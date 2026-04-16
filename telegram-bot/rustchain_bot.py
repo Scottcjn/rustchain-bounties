@@ -53,8 +53,7 @@ async def balance_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     data = await api_get(f"/api/balance/{wallet}")
     if data and "balance" in data:
         bal = data["balance"]
-        await update.message.reply_text(f"Wallet: {wallet}
-Balance: {bal} RTC")
+        await update.message.reply_text("Wallet: " + wallet + "\nBalance: " + str(bal) + " RTC")
     else:
         await update.message.reply_text("Could not fetch balance. Node may be offline.")
 
@@ -65,11 +64,11 @@ async def miners_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         return
     data = await api_get("/api/miners")
     if data and isinstance(data, list):
-        lines = [f"Miners ({len(data)} active):"]
+        lines = ["Miners (" + str(len(data)) + " active):"]
         for m in data[:10]:
             addr = str(m.get("address", "???"))[:12]
             status = "🟢" if m.get("active") else "🔴"
-            lines.append(f"{status} {addr}...")
+            lines.append(status + " " + addr + "...")
         await update.message.reply_text("
 ".join(lines))
     else:
@@ -84,8 +83,7 @@ async def epoch_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if data:
         current = data.get("current_epoch", "?")
         next_e = data.get("next_epoch", "?")
-        await update.message.reply_text(f"Current Epoch: {current}
-Next Epoch: {next_e}")
+        await update.message.reply_text("Current Epoch: " + str(current) + "\nNext Epoch: " + str(next_e))
     else:
         await update.message.reply_text("Could not fetch epoch info. Node may be offline.")
 
