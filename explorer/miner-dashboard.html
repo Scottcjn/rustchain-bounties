@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Block Explorer - Miner Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'JetBrains Mono',monospace,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh}
+.header{background:#16213e;padding:1.5rem 2rem;border-bottom:2px solid #f39c12;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:1.5rem;color:#f39c12}
+.header .status{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:#888}
+.header .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:#16213e;border:1px solid #2a2a4a;border-radius:8px;padding:1.2rem;text-align:center}
+.stat-card .value{font-size:2rem;font-weight:700;color:#f39c12}
+.stat-card .label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:1px;margin-top:.3rem}
+.table-wrap{background:#16213e;border:1px solid #2a2a4a;border-radius:8px;overflow:hidden}
+.table-header{padding:1rem 1.5rem;border-bottom:1px solid #2a2a4a;display:flex;justify-content:space-between;align-items:center}
+.table-header h2{font-size:1rem;color:#f39c12}
+.table-header .refresh-btn{background:none;border:1px solid #f39c12;color:#f39c12;padding:.3rem .8rem;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.75rem}
+.table-header .refresh-btn:hover{background:#f39c12;color:#1a1a2e}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.8rem 1rem;font-size:.75rem;color:#888;text-transform:uppercase;border-bottom:1px solid #2a2a4a}
+td{padding:.7rem 1rem;font-size:.85rem;border-bottom:1px solid #1a1a2e}
+tr:hover{background:rgba(243,156,18,0.05)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.badge-powerpc{background:#9b59b6;color:#fff}
+.badge-arm{background:#27ae60;color:#fff}
+.badge-x86{background:#3498db;color:#fff}
+.badge-other{background:#555;color:#ccc}
+.multiplier{color:#f39c12;font-weight:600}
+.online{color:#2ecc71}
+.offline{color:#e74c3c}
+.footer{text-align:center;padding:2rem;color:#444;font-size:.75rem}
+.loading{text-align:center;padding:3rem;color:#888}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.loading::after{content:'...';animation:pulse 1s infinite}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>RustChain Miner Dashboard</h1>
+<div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Connecting...</span></div>
+</div>
+<div class="container">
+<div class="stats" id="stats">
+<div class="stat-card"><div class="value" id="totalMiners">--</div><div class="label">Total Miners</div></div>
+<div class="stat-card"><div class="value" id="onlineMiners">--</div><div class="label">Online Now</div></div>
+<div class="stat-card"><div class="value" id="avgMultiplier">--</div><div class="label">Avg Multiplier</div></div>
+<div class="stat-card"><div class="value" id="archCount">--</div><div class="label">Architectures</div></div>
+</div>
+<div class="table-wrap">
+<div class="table-header">
+<h2>Active Miners</h2>
+<button class="refresh-btn" onclick="loadData()">Refresh</button>
+</div>
+<table>
+<thead><tr><th>Miner</th><th>Hardware</th><th>Architecture</th><th>Multiplier</th><th>First Seen</th><th>Last Attest</th><th>Status</th></tr></thead>
+<tbody id="minerTable"><tr><td colspan="7" class="loading">Loading miner data</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="footer">RustChain Block Explorer v1.0 | Data from explorer.rustchain.org</div>
+<script>
+const API = 'https://explorer.rustchain.org';
+
+function timeAgo(ts) {
+  const d = Date.now() / 1000 - ts;
+  if (d < 60) return Math.floor(d) + 's ago';
+  if (d < 3600) return Math.floor(d/60) + 'm ago';
+  if (d < 86400) return Math.floor(d/3600) + 'h ago';
+  return Math.floor(d/86400) + 'd ago';
+}
+
+function formatDate(ts) {
+  return new Date(ts * 1000).toLocaleDateString();
+}
+
+function archBadge(family) {
+  if (!family) return '<span class="badge badge-other">Unknown</span>';
+  const f = family.toLowerCase();
+  if (f.includes('powerpc') || f.includes('ppc')) return '<span class="badge badge-powerpc">PowerPC</span>';
+  if (f.includes('arm') || f.includes('aarch')) return '<span class="badge badge-arm">ARM</span>';
+  if (f.includes('x86') || f.includes('intel') || f.includes('windows') || f.includes('linux')) return '<span class="badge badge-x86">x86</span>';
+  return '<span class="badge badge-other">' + family + '</span>';
+}
+
+function isOnline(ts) {
+  return (Date.now() / 1000 - ts) < 300;
+}
+
+async function loadData() {
+  try {
+    const r = await fetch(API + '/api/miners');
+    const data = await r.json();
+    const miners = data.miners || [];
+    
+    // Update stats
+    const online = miners.filter(m => isOnline(m.last_attest));
+    const archs = new Set(miners.map(m => m.device_family));
+    const avgMul = miners.length > 0 ? (miners.reduce((s,m) => s + m.antiquity_multiplier, 0) / miners.length).toFixed(2) : '0';
+    
+    document.getElementById('totalMiners').textContent = miners.length;
+    document.getElementById('onlineMiners').textContent = online.length;
+    document.getElementById('avgMultiplier').textContent = avgMul + 'x';
+    document.getElementById('archCount').textContent = archs.size;
+    
+    // Sort by last_attest desc
+    miners.sort((a, b) => b.last_attest - a.last_attest);
+    
+    // Build table
+    const rows = miners.map(m => {
+      const online = isOnline(m.last_attest);
+      return '<tr>' +
+        '<td>' + m.miner + '</td>' +
+        '<td>' + (m.hardware_type || '-') + '</td>' +
+        '<td>' + archBadge(m.device_family) + '</td>' +
+        '<td class="multiplier">' + m.antiquity_multiplier.toFixed(4) + 'x</td>' +
+        '<td>' + formatDate(m.first_attest) + '</td>' +
+        '<td>' + timeAgo(m.last_attest) + '</td>' +
+        '<td class="' + (online ? 'online' : 'offline') + '">' + (online ? 'ONLINE' : 'OFFLINE') + '</td>' +
+        '</tr>';
+    }).join('');
+    
+    document.getElementById('minerTable').innerHTML = rows || '<tr><td colspan="7">No miners found</td></tr>';
+    
+    document.getElementById('statusDot').style.background = '#2ecc71';
+    document.getElementById('statusText').textContent = 'Live | ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById('statusDot').style.background = '#e74c3c';
+    document.getElementById('statusText').textContent = 'Error: ' + e.message;
+  }
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
