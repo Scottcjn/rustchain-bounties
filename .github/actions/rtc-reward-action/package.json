@@ -1,0 +1,17 @@
+{
+  "name": "rtc-reward-action",
+  "version": "1.0.0",
+  "description": "GitHub Action to award RTC tokens on PR merge",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build index.js -o dist",
+    "test": "echo \"no tests yet\""
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.0"
+  }
+}
