@@ -1,0 +1,28 @@
+# Example workflow — copy to .github/workflows/rtc-reward.yml
+
+name: RTC Reward on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Award RTC to contributor
+        uses: ./  # or Scottcjn/rtc-reward-action@v1
+        with:
+          node-url: https://50.28.86.131
+          amount: 5
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+
+      - name: Dry run test (recommended first)
+        uses: ./
+        with:
+          amount: 1
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+          dry-run: true
