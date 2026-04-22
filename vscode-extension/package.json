@@ -115,6 +115,34 @@
       {
         "command": "rustchain.checkNodeHealth",
         "title": "RustChain: Check Node Health"
+      },
+      {
+        "command": "rustchain.refreshBounties",
+        "title": "RustChain: Refresh Bounty Board",
+        "icon": "$(refresh)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rustchain-explorer",
+          "title": "RustChain",
+          "icon": "public/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "rustchain-explorer": [
+        {
+          "id": "rustchain-bounties",
+          "name": "Bounty Board"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "rustchain-bounties",
+        "contents": "No open bounties found. [Refresh](command:rustchain.refreshBounties)"
       }
     ]
   },

@@ -13,6 +13,7 @@
 import * as vscode from "vscode";
 import { BalanceStatusBar } from "./balanceStatusBar";
 import { NodeHealthChecker } from "./nodeHealth";
+import { BountyBrowserProvider } from "./bountyBrowser";
 
 let balanceStatusBar: BalanceStatusBar | undefined;
 let nodeHealthChecker: NodeHealthChecker | undefined;
@@ -26,10 +27,26 @@ export function activate(context: vscode.ExtensionContext): void {
     // --- Node health checker ---
     nodeHealthChecker = new NodeHealthChecker();
 
+    // --- Bounty Browser ---
+    const bountyProvider = new BountyBrowserProvider();
+    vscode.window.registerTreeDataProvider('rustchain-bounties', bountyProvider);
+
     // --- Commands ---
     context.subscriptions.push(
         vscode.commands.registerCommand("rustchain.refreshBalance", () => {
             balanceStatusBar?.refresh();
+        }),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand("rustchain.openBounty", (url: string) => {
+            vscode.env.openExternal(vscode.Uri.parse(url));
+        }),
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand("rustchain.refreshBounties", () => {
+            bountyProvider.refresh();
         }),
     );
 
