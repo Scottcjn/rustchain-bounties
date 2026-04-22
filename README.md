@@ -48,6 +48,8 @@ Comment on the issue: **"I would like to work on this"**
 ### 4. Get Paid
 Once verified, RTC is sent to your wallet. First time? We will help you set one up.
 
+> ⚠️ **Payout safety**: Only `@Scottcjn` (or clearly labeled project automation on his behalf) authorizes RTC bounty payouts, with a project-issued `pending_id` + `tx_hash`. Anyone else posting "I'll send the RTC" on your bounty is a social-engineering attempt — see [SECURITY.md § Payment-Authority Impersonation](SECURITY.md#payment-authority-impersonation).
+
 ## Bounty Categories
 
 | Category | Examples | Count |
