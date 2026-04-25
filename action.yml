@@ -1,0 +1,24 @@
+name: 'RTC Reward Action'
+description: 'Award RTC tokens for merged pull requests'
+inputs:
+  node-url:
+    description: 'RustChain node URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'Amount of RTC to award per merge'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Sender wallet name'
+    required: true
+  admin-key:
+    description: 'Private key for sender wallet (secret)'
+    required: true
+  dry-run:
+    description: 'Enable dry-run mode (no actual transaction)'
+    required: false
+    default: 'false'
+branding:
+  icon: 'gift'
+  color: 'yellow'
