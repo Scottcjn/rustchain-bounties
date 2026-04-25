@@ -1,0 +1,35 @@
+{
+  "name": "rtc-reward-action",
+  "version": "1.0.0",
+  "description": "GitHub Action to award RTC tokens for merged PRs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build index.js --license licenses.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scottcjn/rtc-reward-action.git"
+  },
+  "keywords": [
+    "github",
+    "action",
+    "rtc",
+    "reward",
+    "pull-request"
+  ],
+  "author": "Scottcjn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Scottcjn/rtc-reward-action/issues"
+  },
+  "homepage": "https://github.com/Scottcjn/rtc-reward-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.36.1"
+  }
+}
