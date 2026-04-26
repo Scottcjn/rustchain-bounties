@@ -1,0 +1,6 @@
+ESP32-S3 hums
+Deep sleep, then wake to compute
+One cent, all day
+
+tags: soc_chip, esp32, iot_mining
+miner_id: flintleng-soc-chip
