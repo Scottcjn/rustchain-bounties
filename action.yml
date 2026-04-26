@@ -4,7 +4,7 @@ description: 'Automatically award RTC tokens when a pull request is merged'
 inputs:
   node-url:
     description: 'RustChain node URL to connect to'
-    required: true
+    required: false
     default: 'https://50.28.86.131'
   amount:
     description: 'Amount of RTC to award per merged PR'
