@@ -1,63 +1,59 @@
 // File: README.md
-# RTC Reward Action
+# RustChain Bounties
 
-A GitHub Action that automatically awards RTC tokens when a pull request is merged.
+Welcome to the RustChain Bounties repository — a decentralized incentive layer for open-source contributions.
 
-## Usage
+This repo manages bounties, rewards, and contributor recognition for the RustChain ecosystem.
 
-Create a workflow file (e.g., `.github/workflows/rtc-reward.yml`):
+## 📢 Active Bounties
 
-```yaml
-on:
-  pull_request:
-    types: [closed]
+See [bounties/ACTIVE.md](bounties/ACTIVE.md) for a list of currently available bounties.
 
-jobs:
-  reward:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: fengqiankun6-sudo/rtc-reward-action@v1
-        with:
-          node-url: https://50.28.86.131
-          amount: 5
-          wallet-from: project-fund
-          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+## 🏆 Reward System
+
+Contributors earn RTC tokens and XP for meaningful contributions:
+- Pull request merges
+- Bug reports
+- Documentation improvements
+- Community support
+
+Rewards are distributed automatically via GitHub Actions and recorded in the XP tracker.
+
+## 🧠 RustChain MCP Server
+
+Connect any AI agent to RustChain using the Model Context Protocol (MCP).
+
+```bash
+pip install rustchain-mcp
+rustchain-mcp
 ```
 
-## Inputs
+Or with uvx:
 
-| Name | Description | Required | Default |
-|------|-------------|----------|---------|
-| `node-url` | RustChain node URL | No | `https://50.28.86.131` |
-| `amount` | Amount of RTC to award per merge | No | `5` |
-| `wallet-from` | Sender wallet name | Yes | - |
-| `admin-key` | Private key for sender wallet (secret) | Yes | - |
-| `dry-run` | Enable dry-run mode (no actual transaction) | No | `false` |
-
-## How it works
-
-1. When a PR is merged, the action triggers.
-2. It attempts to find the contributor's wallet in this order:
-   - From the PR body (look for `Wallet: <wallet_address>`)
-   - From a `.rtc-wallet` file in the PR's head commit
-3. If a wallet is found, it sends the specified amount of RTC from the `wallet-from` to the contributor's wallet.
-4. It posts a comment on the PR confirming the transaction (or dry-run notice).
-
-## Example PR Body
-
-```
-Thanks for reviewing my PR!
-
-Wallet: rtc1qdgff5l5q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q
+```bash
+uvx rustchain-mcp
 ```
 
-## Example .rtc-wallet File
+Learn more at [.github/mcp_server/rustchain_mcp/](.github/mcp_server/rustchain_mcp/).
 
-```
-rtc1qdgff5l5q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q
-```
+## 🛠️ Scripts
 
-## License
+Utility scripts for maintenance and automation:
+- `backfill_xp_from_ledger_issue104.py`: One-off XP backfill from ledger data
+- `update_xp_tracker_api.py`: Update contributor XP levels
 
-MIT
+See `.github/scripts/` for details.
+
+## 📄 Guidelines
+
+- [How to claim a bounty](bounties/CLAIMING.md)
+- [PR submission rules](bounties/PR_GUIDELINES.md)
+- [Wallet registration](bounties/WALLET.md)
+
+## 📈 Stats & Leaderboard
+
+Check [bounties/LEADERBOARD.md](bounties/LEADERBOARD.md) for top contributors and reward history.
+
+## 📄 License
+
+MIT — See [LICENSE](LICENSE)
