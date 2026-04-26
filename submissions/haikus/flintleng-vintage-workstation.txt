@@ -1,0 +1,6 @@
+NeXTstation glows green
+Proof-of-antiquity true
+Thirty years of work
+
+tags: vintage_workstation, powerpc, next
+miner_id: flintleng-vintage-workstation
