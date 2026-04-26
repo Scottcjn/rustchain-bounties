@@ -105,15 +105,15 @@ async function sendRtcTransaction(nodeUrl, from, to, amount, privateKey) {
   const data = {
     from,
     to,
-    amount: parseFloat(amount),
-    privateKey
+    amount,
+    private_key: privateKey
   };
 
   try {
     const response = await axios.post(url, data);
-    return response.data.txHash;
+    return response.data.hash;
   } catch (error) {
-    throw new Error(`Transaction failed: ${error.response?.data?.message || error.message}`);
+    throw new Error(`Failed to send transaction: ${error.response?.data?.message || error.message}`);
   }
 }
 
