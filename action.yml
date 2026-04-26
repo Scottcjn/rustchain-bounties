@@ -1,23 +1,23 @@
 // File: action.yml
 name: 'RTC Reward Action'
-description: 'Award RTC tokens for merged pull requests'
+description: 'Automatically award RTC tokens when a pull request is merged'
 inputs:
   node-url:
-    description: 'RustChain node URL'
+    description: 'RustChain node URL to connect to'
     required: true
     default: 'https://50.28.86.131'
   amount:
-    description: 'Amount of RTC to award per merge'
+    description: 'Amount of RTC to award per merged PR'
     required: true
     default: '5'
   wallet-from:
-    description: 'Sender wallet address'
+    description: 'Sender wallet address authorized to send RTC'
     required: true
   admin-key:
-    description: 'Private key for sender wallet (secret)'
+    description: 'Private key for the sender wallet (must be kept secret)'
     required: true
   dry-run:
-    description: 'Enable dry-run mode (no actual transaction)'
+    description: 'If true, simulate transaction without sending'
     required: false
     default: 'false'
 runs:
