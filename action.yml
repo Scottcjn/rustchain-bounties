@@ -20,6 +20,9 @@ inputs:
     description: 'Enable dry-run mode (no actual transaction)'
     required: false
     default: 'false'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
 branding:
   icon: 'gift'
   color: 'yellow'
