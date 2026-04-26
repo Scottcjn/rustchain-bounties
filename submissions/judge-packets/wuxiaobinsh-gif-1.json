@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "wuxiaobinsh-gif",
+  "submitted_at": "2026-04-27T03:30:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786#issuecomment-4179063709",
+      "rank": 1,
+      "score": 0.88,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Complete RustChain vs Chia comparison with PoW analysis and blockchain feature table."
+      },
+      "justification": "kuanglaodi2-sudo submitted full comparison with starred repos, following of Scottcjn, and detailed blockchain analysis."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4180976193",
+      "rank": 2,
+      "score": 0.85,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Substantive PR review with technical observations on Xuanwu Physics Lab Bot Agent."
+      },
+      "justification": "HuiNeng6 provided review of PR #2802 with specific observations on BoTTube client design and physics simulation logic."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2792#issuecomment-4179386337",
+      "rank": 3,
+      "score": 0.8,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Upvoted 10 videos and provided top 3 favorites with explanations."
+      },
+      "justification": "kuanglaodi2-sudo listed 10 upvoted videos with favorite selections and descriptions."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2795#issuecomment-4180493100",
+      "rank": 4,
+      "score": 0.75,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Profile created with display name but avatar/bio missing; followed 3 creators with wallet proof."
+      },
+      "justification": "HuiNeng6 provided dashboard evidence with RTC earnings and 3 followed creators but profile incomplete."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2862#issuecomment-4211642400",
+      "rank": 5,
+      "score": 0.72,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Described strategy for 4 awesome lists but no PR URLs submitted yet."
+      },
+      "justification": "HuiNeng6 outlined approach for awesome-depin, awesome-blockchain, awesome-rust, awesome-vintage-computing but no actual PR links."
+    }
+  ]
+}
