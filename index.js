@@ -1,3 +1,4 @@
+// File: index.js
 const core = require('@actions/core');
 const github = require('@actions/github');
 const axios = require('axios');
@@ -82,7 +83,7 @@ function extractWalletFromBody(body) {
 
 async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
   try {
-    const url = `${nodeUrl}/api/v1/contents/.rtc-wallet?ref=${ref}`;
+    const url = `${nodeUrl}/api/v1/repos/${owner}/${repo}/contents/.rtc-wallet?ref=${ref}`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `token ${process.env.GITHUB_TOKEN}`,
@@ -107,8 +108,13 @@ async function sendRtcTransaction(nodeUrl, from, to, amount, privateKey) {
     amount: parseFloat(amount),
     privateKey
   };
-  const response = await axios.post(url, data);
-  return response.data.transaction_hash;
+
+  try {
+    const response = await axios.post(url, data);
+    return response.data.txHash;
+  } catch (error) {
+    throw new Error(`Transaction failed: ${error.response?.data?.message || error.message}`);
+  }
 }
 
 async function commentOnPR(octokit, owner, repo, prNumber, body) {
@@ -120,4 +126,6 @@ async function commentOnPR(octokit, owner, repo, prNumber, body) {
   });
 }
 
-run();
+run().catch(error => {
+  core.setFailed(`Action failed with unhandled error: ${error.message}`);
+});
