@@ -1,0 +1,8 @@
+NAS LEDs blink
+Data spins in quiet drive
+Synology hums
+
+archetype: vintage_powerpc
+hardware: Synology DS920+ 4-bay NAS
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
