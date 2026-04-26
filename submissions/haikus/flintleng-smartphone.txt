@@ -1,0 +1,6 @@
+Old iPhone 6
+Battery swollen, screen cracked
+Still mines in standby
+
+tags: smartphone, mobile_mining, arm_device
+miner_id: flintleng-smartphone
