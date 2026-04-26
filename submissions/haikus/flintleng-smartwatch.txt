@@ -1,0 +1,6 @@
+Watch face dark, still
+Calculating yesterday's hash
+On a single core
+
+tags: smartwatch, wearable, arm_mining
+miner_id: flintleng-smartwatch
