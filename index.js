@@ -86,46 +86,60 @@ async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
     const url = `${nodeUrl}/api/v1/repos/${owner}/${repo}/contents/.rtc-wallet?ref=${ref}`;
     const response = await axios.get(url, {
       headers: {
-        Authorization: `token ${process.env.GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github.v3+json'
+        Authorization: `token ${process.env.GITHUB_TOKEN}`
       }
     });
+
     const content = Buffer.from(response.data.content, 'base64').toString('utf8');
-    return content.trim().split('\n')[0].trim() || null;
+    const wallet = content.trim();
+    return wallet;
   } catch (error) {
     if (error.response && error.response.status === 404) {
+      core.info('.rtc-wallet file not found in PR');
       return null;
     }
-    throw error;
+    throw new Error(`Failed to fetch .rtc-wallet file: ${error.message}`);
   }
 }
 
-async function sendRtcTransaction(nodeUrl, from, to, amount, privateKey) {
-  const url = `${nodeUrl}/api/v1/send_transaction`;
-  const data = {
-    from,
-    to,
-    amount,
-    private_key: privateKey
-  };
-
+async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKey) {
   try {
-    const response = await axios.post(url, data);
-    return response.data.hash;
+    const response = await axios.post(
+      `${nodeUrl}/api/v1/transactions`,
+      {
+        from: fromWallet,
+        to: toWallet,
+        amount: parseFloat(amount)
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${adminKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data && response.data.hash) {
+      return response.data.hash;
+    } else {
+      throw new Error('Transaction failed: no hash returned');
+    }
   } catch (error) {
-    throw new Error(`Failed to send transaction: ${error.response?.data?.message || error.message}`);
+    throw new Error(`Transaction failed: ${error.message}`);
   }
 }
 
 async function commentOnPR(octokit, owner, repo, prNumber, body) {
-  await octokit.rest.issues.createComment({
-    owner,
-    repo,
-    issue_number: prNumber,
-    body
-  });
+  try {
+    await octokit.rest.issues.createComment({
+      owner,
+      repo,
+      issue_number: prNumber,
+      body
+    });
+  } catch (error) {
+    throw new Error(`Failed to comment on PR: ${error.message}`);
+  }
 }
 
-run().catch(error => {
-  core.setFailed(`Action failed with unhandled error: ${error.message}`);
-});
+run();
