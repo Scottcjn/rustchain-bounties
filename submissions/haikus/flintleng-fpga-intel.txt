@@ -1,0 +1,7 @@
+Logic cells hum
+Stratix boots without a fan
+Parallel dreams
+archetype: exotic_fpga
+hardware: Intel Stratix 10 GX
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
