@@ -1,4 +1,3 @@
-// File: README.md
 # RustChain Bounties
 
 Welcome to the RustChain Bounties repository — a decentralized incentive layer for open-source contributions.
