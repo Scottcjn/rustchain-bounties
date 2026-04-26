@@ -1,0 +1,7 @@
+Garden of Pis
+Many cores computing slow
+Harmony grows
+archetype: vintage_powerpc
+hardware: Raspberry Pi 4 Cluster 4x ARM Cortex-A72
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
