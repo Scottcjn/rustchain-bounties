@@ -5,16 +5,22 @@ const axios = require('axios');
 
 async function run() {
   try {
-    const nodeUrl = core.getInput('node-url');
-    const amount = core.getInput('amount');
-    const walletFrom = core.getInput('wallet-from');
-    const adminKey = core.getInput('admin-key');
+    const nodeUrl = core.getInput('node-url', { required: true });
+    const amount = core.getInput('amount', { required: true });
+    const walletFrom = core.getInput('wallet-from', { required: true });
+    const adminKey = core.getInput('admin-key', { required: true });
     const dryRun = core.getInput('dry-run') === 'true';
 
     const context = github.context;
-    const pr = context.payload.pull_request;
+    const payload = context.payload;
+    const pr = payload.pull_request;
 
-    if (!pr || !pr.merged) {
+    if (!pr) {
+      core.info('No pull_request payload found. Exiting.');
+      return;
+    }
+
+    if (!pr.merged) {
       core.info('PR is not merged. Exiting.');
       return;
     }
@@ -86,7 +92,8 @@ async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
     const url = `${nodeUrl}/api/v1/repos/${owner}/${repo}/contents/.rtc-wallet?ref=${ref}`;
     const response = await axios.get(url, {
       headers: {
-        Authorization: `token ${process.env.GITHUB_TOKEN}`
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        'X-Gitea-Admin': adminKey
       }
     });
 
@@ -95,17 +102,19 @@ async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
     return wallet;
   } catch (error) {
     if (error.response && error.response.status === 404) {
-      core.info('.rtc-wallet file not found in PR');
+      core.info('.rtc-wallet file not found in PR branch');
       return null;
     }
-    throw new Error(`Failed to fetch .rtc-wallet file: ${error.message}`);
+    core.warning(`Failed to fetch .rtc-wallet: ${error.message}`);
+    return null;
   }
 }
 
 async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKey) {
   try {
+    const url = `${nodeUrl}/api/v1/transactions/send`;
     const response = await axios.post(
-      `${nodeUrl}/api/v1/transactions`,
+      url,
       {
         from: fromWallet,
         to: toWallet,
@@ -113,8 +122,8 @@ async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKe
       },
       {
         headers: {
-          'Authorization': `Bearer ${adminKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminKey}`
         }
       }
     );
@@ -122,10 +131,10 @@ async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKe
     if (response.data && response.data.hash) {
       return response.data.hash;
     } else {
-      throw new Error('Transaction failed: no hash returned');
+      throw new Error('No transaction hash returned from node');
     }
   } catch (error) {
-    throw new Error(`Transaction failed: ${error.message}`);
+    throw new Error(`Transaction failed: ${error.response?.data?.message || error.message}`);
   }
 }
 
@@ -138,7 +147,7 @@ async function commentOnPR(octokit, owner, repo, prNumber, body) {
       body
     });
   } catch (error) {
-    throw new Error(`Failed to comment on PR: ${error.message}`);
+    core.warning(`Failed to comment on PR: ${error.message}`);
   }
 }
 
