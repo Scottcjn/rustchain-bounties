@@ -1,0 +1,6 @@
+Qubit decoheres
+The FPGA just keeps hashing
+Some things don't need quantum
+
+tags: quantum_fpga, fpga_mining, exotic_fpga
+miner_id: flintleng-quantum-fpga
