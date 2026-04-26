@@ -1,0 +1,6 @@
+Orange Pi 5 MAX
+Eight cores, PCIe, SATA—
+Your Pi was better
+
+tags: arm_sbc, orange_pi, exotic_arm
+miner_id: flintleng-arm-sbc
