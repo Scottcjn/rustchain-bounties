@@ -106,50 +106,44 @@ async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
     return wallet;
   } catch (error) {
     if (error.response && error.response.status === 404) {
-      core.info('.rtc-wallet file not found in PR branch');
+      core.info('.rtc-wallet file not found in PR');
       return null;
     }
-    core.warning(`Failed to fetch .rtc-wallet: ${error.message}`);
+    core.warning(`Failed to fetch .rtc-wallet file: ${error.message}`);
     return null;
   }
 }
 
-async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKey) {
-  const payload = {
-    method: 'sendtoaddress',
-    params: [toWallet, parseFloat(amount), '', '', false, false, 1, 'UNSET', fromWallet],
-    id: 1
-  };
-
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${Buffer.from(`admin:${adminKey}`).toString('base64')}`
-    }
-  };
-
+async function sendRtcTransaction(nodeUrl, from, to, amount, adminKey) {
   try {
-    const response = await axios.post(nodeUrl, payload, config);
-    if (response.data.error) {
-      throw new Error(`Node error: ${response.data.error.message}`);
+    const response = await axios.post(
+      `${nodeUrl}/api/send`,
+      { from, to, amount },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        }
+      }
+    );
+
+    if (response.data && response.data.hash) {
+      return response.data.hash;
+    } else {
+      throw new Error('Invalid response from node: missing transaction hash');
     }
-    return response.data.result;
   } catch (error) {
-    throw new Error(`Transaction failed: ${error.response?.data?.error?.message || error.message}`);
+    throw new Error(`Transaction failed: ${error.response?.data?.error || error.message}`);
   }
 }
 
 async function commentOnPR(octokit, owner, repo, prNumber, body) {
-  try {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body
-    });
-  } catch (error) {
-    core.warning(`Failed to comment on PR: ${error.message}`);
-  }
+  await octokit.rest.issues.createComment({
+    owner,
+    repo,
+    issue_number: prNumber,
+    body
+  });
 }
 
 run();
