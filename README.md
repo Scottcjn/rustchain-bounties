@@ -17,7 +17,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: Scottcjn/rtc-reward-action@v1
+      - uses: fengqiankun6-sudo/rtc-reward-action@v1
         with:
           node-url: https://50.28.86.131
           amount: 5
