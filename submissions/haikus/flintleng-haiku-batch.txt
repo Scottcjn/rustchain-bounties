@@ -1,0 +1,41 @@
+The fan spins slow
+Old Mac boots slow and steady—
+Power hums on
+
+archetype: vintage_powerpc
+hardware: 1.67 GHz Power Mac G5
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
+
+---
+
+Silicon dreams
+Raspberry Pi runs quiet—
+Garden grows code
+
+archetype: vintage_powerpc
+hardware: Raspberry Pi 3B+ 1.4 GHz ARM Cortex-A53
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
+
+---
+
+Frost on the chip
+Cold server room hums softly—
+Data breathes ice
+
+archetype: power_server
+hardware: IBM POWER8 Server
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
+
+---
+
+ASIC roars loud
+Hot fans, bright LEDs burning—
+Gold dust found fast
+
+archetype: asic_miner
+hardware: Bitmain Antminer S19 Pro
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
