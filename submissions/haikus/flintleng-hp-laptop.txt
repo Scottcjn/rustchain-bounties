@@ -1,0 +1,8 @@
+Laptop hums low
+HP screen glows in the dark
+Clock ticks slowly
+
+archetype: vintage_powerpc
+hardware: HP EliteBook 840 G3 Intel i5-6300U
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
