@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC019e78d600fb3131c29d7ba80aba8fe644be426e",
+  "submitted_at": "2026-04-26T13:45:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6483",
+      "rank": 1,
+      "score": 0.93,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 10,
+        "rationale": "PR #6482 adds 11 files / 151 lines with 2 confirmed HIGH-severity findings (unverified crypto import, SSL disable via env var); both verifiable from source"
+      },
+      "justification": "Self-audit of rustchain_wallet_secure.py with 2 HIGH + 3 MEDIUM + 2 LOW findings; PR #6482 has 11 tracked file changes (SHA e99d84e) confirming real deliverable"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6461",
+      "rank": 2,
+      "score": 0.72,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 7,
+        "rationale": "7 Dependabot PRs reviewed; volume justifies payout but reviews are inherently shallow since Dependabot updates are auto-generated; partial credit recommended"
+      },
+      "justification": "Batch claim covers 7 PRs (#6445/#6443/#6442/#6441/#6440/#6439/#6438) all confirmed open in rustchain-bounties repo; volume is real but review depth per PR is minimal"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6463",
+      "rank": 3,
+      "score": 0.65,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1.5,
+        "rationale": "PR #2700 is open (not yet merged); claim pre-dates resolution; partial credit for proactive review effort, discount for pending PR status"
+      },
+      "justification": "PR #2700 confirmed open in Rustchain repo (title: docs fix whitepaper links); claim by jaxint with wallet AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG, effort is real but limited depth"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6462",
+      "rank": 4,
+      "score": 0.62,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1.5,
+        "rationale": "PR #2701 is open (docs comment addition); claim structure matches #6463; partial credit for contributing review input before merge"
+      },
+      "justification": "PR #2701 confirmed open (adds descriptive comment to balance check command); same jaxint account as #6463; legitimate effort but shallow technical contribution"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6464",
+      "rank": 5,
+      "score": 0.28,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0.25,
+        "rationale": "Only 3 reactions cited across 3 issues; no evidence repository; very low effort for 1 RTC payout; discount heavily"
+      },
+      "justification": "jaxint claims 3 GitHub reactions on #6461/#6462/#6463 \u2014 no emoji URLs, no reaction IDs, no screenshots; effort unverifiable; jaxint account is new (low karma)"
+    }
+  ]
+}
