@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL",
+  "submitted_at": "2026-04-26T14:16:01Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6490",
+      "rank": 1,
+      "score": 0.93,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "Detailed adversarial steelman with concrete evidence links and a viable 4-point patch proposal. High technical depth."
+      },
+      "justification": "Strongest claim: structured YAML with Sybil-risk analysis, TVL critique, extraction tokenomics, and four concrete patch proposals linking repo artifacts."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6485",
+      "rank": 2,
+      "score": 0.85,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Meta-survey ranks 5 claims with fraud-risk tiers, payout differentiation, and technical depth scoring. Good methodology."
+      },
+      "justification": "Solid analytical work: provides ranked table with fraud-risk labels and distinct payout recommendations, demonstrating rigorous comparative judgment."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6358",
+      "rank": 3,
+      "score": 0.72,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Contains a link to an actual PR review on BoTTube repo with 4+ specific technical observations."
+      },
+      "justification": "Higher substance than generic PR reviews: references real review URL and lists specific issues (README replacement risk, node-url conflict, Dockerfile absence)."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6463",
+      "rank": 4,
+      "score": 0.6,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Standard PR review claim with proof link but low detail in the issue body itself."
+      },
+      "justification": "Acceptable but thin: only a generic summary in the issue body; proof exists externally, requiring verifier to click through."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6467",
+      "rank": 5,
+      "score": 0.35,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Minimal content (single haiku + hardware tag). Genuine but lowest effort-per-RTC ratio among the 5."
+      },
+      "justification": "Lowest depth: 5-7-5 haiku is valid but provides no additional evidence or technical context beyond the minimum requirement."
+    }
+  ]
+}
