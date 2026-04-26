@@ -1,0 +1,7 @@
+Blinks and boots fast
+FPGA gates flicker coldly
+Speed conquers all
+archetype: exotic_fpga
+hardware: Xilinx Virtex-7 V100
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+bounty: #2844
