@@ -1,3 +1,4 @@
+// File: README.md
 # RTC Reward Action
 
 A GitHub Action that automatically awards RTC tokens when a pull request is merged.
@@ -38,7 +39,7 @@ jobs:
 
 1. When a PR is merged, the action triggers.
 2. It attempts to find the contributor's wallet in this order:
-   - From the PR body (look for `Wallet: <wallet_name>`)
+   - From the PR body (look for `Wallet: <wallet_address>`)
    - From a `.rtc-wallet` file in the PR's head commit
 3. If a wallet is found, it sends the specified amount of RTC from the `wallet-from` to the contributor's wallet.
 4. It posts a comment on the PR confirming the transaction (or dry-run notice).
@@ -48,16 +49,15 @@ jobs:
 ```
 Thanks for reviewing my PR!
 
-Wallet: my_awesome_wallet
+Wallet: rtc1qdgff5l5q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q
 ```
 
 ## Example .rtc-wallet File
 
 ```
-my_awesome_wallet
+rtc1qdgff5l5q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q55q
 ```
 
 ## License
 
 MIT
-```
