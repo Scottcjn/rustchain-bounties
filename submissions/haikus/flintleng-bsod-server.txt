@@ -1,0 +1,6 @@
+Blue screen of death
+But the miner keeps running
+Windows, you betray
+
+tags: vintage_windows, bsod, desktop_mining
+miner_id: flintleng-bsod-server
