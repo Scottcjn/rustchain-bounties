@@ -89,16 +89,20 @@ function extractWalletFromBody(body) {
 
 async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
   try {
-    const url = `${nodeUrl}/api/v1/repos/${owner}/${repo}/contents/.rtc-wallet?ref=${ref}`;
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `token ${process.env.GITHUB_TOKEN}`,
-        'X-Gitea-Admin': adminKey
-      }
-    });
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/.rtc-wallet?ref=${ref}`;
+    const headers = {
+      'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3.raw'
+    };
 
-    const content = Buffer.from(response.data.content, 'base64').toString('utf8');
-    const wallet = content.trim();
+    const response = await axios.get(url, { headers });
+    const wallet = response.data.trim();
+
+    if (!wallet) {
+      core.warning('.rtc-wallet file found but empty or invalid');
+      return null;
+    }
+
     return wallet;
   } catch (error) {
     if (error.response && error.response.status === 404) {
@@ -111,30 +115,27 @@ async function getWalletFromFile(nodeUrl, owner, repo, ref, adminKey) {
 }
 
 async function sendRtcTransaction(nodeUrl, fromWallet, toWallet, amount, adminKey) {
-  try {
-    const url = `${nodeUrl}/api/v1/transactions/send`;
-    const response = await axios.post(
-      url,
-      {
-        from: fromWallet,
-        to: toWallet,
-        amount: parseFloat(amount)
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminKey}`
-        }
-      }
-    );
+  const payload = {
+    method: 'sendtoaddress',
+    params: [toWallet, parseFloat(amount), '', '', false, false, 1, 'UNSET', fromWallet],
+    id: 1
+  };
 
-    if (response.data && response.data.hash) {
-      return response.data.hash;
-    } else {
-      throw new Error('No transaction hash returned from node');
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${Buffer.from(`admin:${adminKey}`).toString('base64')}`
     }
+  };
+
+  try {
+    const response = await axios.post(nodeUrl, payload, config);
+    if (response.data.error) {
+      throw new Error(`Node error: ${response.data.error.message}`);
+    }
+    return response.data.result;
   } catch (error) {
-    throw new Error(`Transaction failed: ${error.response?.data?.message || error.message}`);
+    throw new Error(`Transaction failed: ${error.response?.data?.error?.message || error.message}`);
   }
 }
 
