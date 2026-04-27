@@ -107,3 +107,11 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 - [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
 - [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
 - [GitHub](https://github.com/Scottcjn)
+
+## 💰 Bounty Contribution
+
+- **Task:** [BOUNTY: 1 RTC] Run the RustChain Miner for 24 Hours and Share Your Hardware Rep
+- **Reward:** $1
+- **Source:** GitHub-Bounty
+- **Date:** 2026-04-27
+
