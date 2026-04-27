@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC9a39ca2c84f61ca27d96463bcf65b6022b827f85",
+  "submitted_at": "2026-04-27T11:45:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6557",
+      "rank": 1,
+      "score": 0.92,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 10,
+        "rationale": "Self-audit of contributor_registry.py (168 lines) with PR reference #6541; wallet RTC00a134... verified"
+      },
+      "justification": "Claims self-audit of contributor_registry.py (168 lines) with PR #6541 linked; wallet RTC00a1347cc03c2aea1d6b35df16178fad4e9d6712 confirmed in body"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6490",
+      "rank": 2,
+      "score": 0.88,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "Adversarial steelman with PR #6489; wallet RTC019e78... but same wallet as #6545 and #6485 \u2014 potential same-operator"
+      },
+      "justification": "Claims adversarial steelman with PR #6489 referenced; wallet RTC019e78d600fb3131c29d7ba80aba8fe644be426e matches #6545 and #6485"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6545",
+      "rank": 3,
+      "score": 0.8,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Awesome lists PR with wallet but has 1 comment (dispute flag); same wallet as #6490 and #6485"
+      },
+      "justification": "Claims 5 awesome list PRs for bounty #2862; wallet RTC019e78d600fb3131c29d7ba80aba8fe644be426e already observed in #6490 and #6485; 1 comment suggests dispute"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6485",
+      "rank": 4,
+      "score": 0.75,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Judge packet claim for #6459 with PR #6484 but no actual JSON file proof; wallet reused across 3 claims"
+      },
+      "justification": "Claims judge packet submission with PR #6484; wallet RTC019e78d600fb3131c29d7ba80aba8fe644be426e reused; no JSON excerpt in body"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6467",
+      "rank": 5,
+      "score": 0.7,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "Haiku claim with non-standard wallet format (not RTC-prefixed), potential alt-wallet pattern; ASIC miner hardware plausible but unverified"
+      },
+      "justification": "Haiku claim wallet 'AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG' does not match RTC prefix pattern; hardware ASIC miner but no mining evidence provided"
+    }
+  ]
+}
