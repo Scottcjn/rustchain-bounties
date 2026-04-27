@@ -1,0 +1,7 @@
+Silicon dreams wake
+Vintage chips hum ancient songs
+Time rewards the old
+
+archetype: vintage_powerpc
+hardware: 1.67 GHz Power Mac G5 (PowerMac7,3)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
