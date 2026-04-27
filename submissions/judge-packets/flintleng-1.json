@@ -1,0 +1,46 @@
+{
+  "judge_wallet": "RTC019e78d600fb3131c29d7ba80aba8fe644be426e",
+  "submitted_at": "2026-04-27T07:45:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6609",
+      "rank": 1,
+      "score": 0.75,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 3, "rationale": "Legitimate finding of broken links in INSTALL.md — low-effort but real and verifiable"},
+      "justification": "Wallet AhqbFaPB... claims a specific doc finding (broken links in Homebrew INSTALL.md) — concrete, verifiable, and low-risk for duplication"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6785",
+      "rank": 2,
+      "score": 0.55,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 1.5, "rationale": "Claim body is generic — no link to actual comparison comment on #2786; jaxint has no visible comment on that issue"},
+      "justification": "Wallet RTC00a1347... claims 'RustChain vs Bitcoin comparison' but body lists only bullet categories with no link to actual comment; jaxint has 4 prior steelman claims (#6562, #6559, #6608, #6784) suggesting pattern of duplicate submissions"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6786",
+      "rank": 3,
+      "score": 0.45,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 2, "rationale": "Self-audit claims 2 medium + 2 minor issues with patches — plausible but body lacks links to actual audit artifact"},
+      "justification": "Same wallet RTC00a1347... claims self-audit of clawrtc-rs miner with '7/10 confidence' and '2 recommended patches' but no link to PR, gist, or commit showing the audit output"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6784",
+      "rank": 4,
+      "score": 0.30,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 0, "rationale": "Duplicate — jaxint already filed steelman claims #6559 and #6608 for the same bounty #6458"},
+      "justification": "Wallet RTC00a1347... filed claim #6784 for steelman #6458 but already has claims #6559 and #6608 for the same bounty — triple-dipping same pool"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6639",
+      "rank": 5,
+      "score": 0.10,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 0, "rationale": "Bot-generated spam — body says 'Automated contribution' with no haiku content; wrong format for haiku bounty"},
+      "justification": "carycooper777 submitted 'Haiku Bounty #2844 - MacBook Pro' but body contains zero haiku text, just a template table saying 'Automated contribution' — clearly bot-generated with no actual work product"
+    }
+  ]
+}
