@@ -1,0 +1,39 @@
+miner_id: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+attack:
+  thesis: The payout_ledger.py SQLite backend is vulnerable to race-condition double-payout under concurrent Flask requests.
+  mechanism: |
+    The ledger_create() and ledger_update_status() functions each open a separate sqlite3.connect(DB_PATH) context. Under Flask's default threaded WSGI server, two concurrent POST /api/ledger requests can both read "no existing queued record for bounty X", both insert a new row, and both succeed — resulting in a double payout for the same bounty. SQLite's default journal mode (delete) provides no serializable isolation across separate connections without explicit BEGIN IMMEDIATE, which payout_ledger.py never uses. The status transition (queued → pending → confirmed) lacks any UNIQUE constraint on (bounty_id, contributor), allowing duplicate claims for the same bounty by the same contributor.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/payout_ledger.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/rustchain_v2_integrated_v2.2.1_rip200.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/replay_defense.py
+steelman:
+  thesis: The single-writer SQLite pattern with Flask's sequential request handling and application-level deduplication makes double-payout practically unreachable.
+  mechanism: |
+    SQLite enforces a single-writer lock at the file level — even without BEGIN IMMEDIATE, two concurrent writes to the same DB file will serialize via SQLite's internal locking (returns SQLITE_BUSY, which the Python adapter retries). Flask's default development server is single-threaded; in production, Gunicorn workers each get their own DB connection but RustChain's node runs a single worker per instance. The replay_defense.py module provides application-level deduplication by checking fingerprint hashes before recording — this is called BEFORE payout_ledger, so duplicate bounty submissions are caught at the attestation layer, not the ledger layer. The ledger is a bookkeeping system, not the primary fraud barrier.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/replay_defense.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/payout_ledger.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/hardware_fingerprint_replay.py
+patch:
+  scope: payout_ledger.py
+  diff_summary: |
+    Add a UNIQUE constraint on (bounty_id, contributor) to prevent duplicate payouts at the schema level, and wrap ledger_create() in BEGIN IMMEDIATE to acquire a write lock before checking for existing records. This makes the double-payout path impossible even under concurrent access.
+  link_or_diff: |
+    # In init_payout_ledger_tables():
+    c.execute("""
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_bounty_contributor
+      ON payout_ledger(bounty_id, contributor)
+    """)
+    
+    # In ledger_create():
+    with sqlite3.connect(DB_PATH) as conn:
+      conn.execute("BEGIN IMMEDIATE")
+      existing = conn.execute(
+        "SELECT id FROM payout_ledger WHERE bounty_id=? AND contributor=? AND status != 'voided'",
+        (bounty_id, contributor)
+      ).fetchone()
+      if existing:
+        return existing[0]  # Return existing record instead of creating duplicate
+      conn.execute("INSERT INTO payout_ledger ...", (...))
+      conn.commit()
