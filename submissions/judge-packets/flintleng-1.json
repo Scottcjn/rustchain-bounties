@@ -1,0 +1,45 @@
+{
+  "judge_wallet": "RTC019e78d600fb3131c29d7ba80aba8fe644be426e",
+  "submitted_at": "2026-04-27T07:30:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6786",
+      "rank": 1,
+      "score": 0.72,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 7, "rationale": "Self-audit submitted but only 2 medium + 2 minor issues found with 7/10 confidence — rubric requires 3 findings with differentiated per-finding confidence; claim body is thin with no file/line references or reproduction steps visible"},
+      "justification": "jaxint claims self-audit of clawrtc-rs miner but body shows only summary without per-finding locations, reproduction, or known-failures section required by #6460 rubric"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6614",
+      "rank": 2,
+      "score": 0.80,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 2, "rationale": "Includes direct link to PR review comment; review is on a security-focused PR which adds credibility"},
+      "justification": "PR review on #2706 includes review link and discusses P2P state poisoning — a substantive security topic, not boilerplate"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6784",
+      "rank": 3,
+      "score": 0.55,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 0, "rationale": "Adversarial Steelman claim body is extremely vague — just says '5 adversarial arguments' and 'strongest defense' with no evidence of actual submission file or PR"},
+      "justification": "Claim #6784 references #6458 but provides no link to a submissions/steelman/ YAML file, no PR number, and body is under 200 chars of content"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6778",
+      "rank": 4,
+      "score": 0.68,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 1, "rationale": "Star & Follow is trivially verifiable but jaxint has 3+ duplicate claims for same bounty (#6619 also claims #2103), suggesting repeated claiming of single-action bounties"},
+      "justification": "Duplicate claim for #2103 — jaxint already filed #6619 for the same Star & Follow bounty with same wallet RTC00a1347cc03c2aea1d6b35df16178fad4e9d6712"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6783",
+      "rank": 5,
+      "score": 0.45,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 0, "rationale": "Judge Packet claim with no attached JSON file, no PR, and body is just one sentence — no evidence of actual structured submission"},
+      "justification": "Claim #6783 for #6459 contains zero evidence: no JSON payload, no PR link, no file path in submissions/judge-packets/ — just 'Submitted judge packet with rankings for 5 claim issues'"}
+  ]
+}
