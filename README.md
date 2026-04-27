@@ -107,3 +107,11 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 - [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
 - [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
 - [GitHub](https://github.com/Scottcjn)
+
+## 💰 Bounty Contribution
+
+- **Task:** [EASY BOUNTY: 5 RTC] Write a blog post or Dev.to article about any Elyan Labs pr
+- **Reward:** $5
+- **Source:** GitHub-Bounty
+- **Date:** 2026-04-27
+
