@@ -1,0 +1,37 @@
+miner_id: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+attack:
+  thesis: Fingerprint-based Proof of Antiquity is spoofable at the hardware boundary — the attestation chain breaks because the "antiquity" signal depends on untrusted client-reported data.
+  mechanism: |
+    RustChain's Proof of Antiquity relies on hardware fingerprints (CPU model, cache sizes, architecture) submitted by the miner client (see node/rustchain_v2_integrated_v2.2.1_rip200.py lines 2702-2780). An attacker can intercept and modify these values before they reach the /attest/submit endpoint. The replay_defense.py module only checks for duplicate submissions — it does not verify that the fingerprint data actually came from the reported hardware. The hardware_spoof_lib.py file even exists in the repo as a spoofing utility, demonstrating that the project acknowledges this surface. A modified client can claim any CPU vintage and receive PoA rewards disproportionate to actual hardware age.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/replay_defense.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/hardware_spoof_lib.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/replay_attack_poc.py
+steelman:
+  thesis: RustChain's layered defense-in-depth — fingerprint submission + replay detection + network consensus — makes spoofing economically irrational, not just technically difficult.
+  mechanism: |
+    While individual fingerprint reports are client-supplied, RustChain validates them through multiple layers: (1) replay_defense.py prevents the same fingerprint from being submitted twice, blocking mass-duplication attacks; (2) the network consensus cross-validates submissions across nodes, so a single spoofed fingerprint must be consistent with what other miners on the same subnet report; (3) the payout_ledger.py tracks all disbursements with status tracking (queued → confirmed), enabling retroactive voiding of detected fraud. The existence of hardware_spoof_lib.py is itself evidence of defense-in-depth — it's a red-team tool, not a vulnerability, because it allows the project to test its own detection. The attack assumes no cross-node validation, but node/integrated_node.py shows P2P state exchange that would flag inconsistencies.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/payout_ledger.py
+    - https://github.com/Scottcjn/Rustchain/blob/main/integrated_node.py
+patch:
+  scope: replay_defense.py + node/rustchain_v2_integrated_v2.2.1_rip200.py
+  diff_summary: |
+    Add a server-side hardware challenge-response: when /attest/submit receives a fingerprint, the server issues a computational challenge seeded by the claimed CPU model + cache size. The client must return a result within a time bound that is physically achievable on the claimed hardware but not on faster modern hardware spoofing as vintage. This binds the "antiquity" claim to a measurable timing property.
+  link_or_diff: |
+    # In replay_defense.py, add:
+    def issue_hardware_challenge(fingerprint: dict) -> dict:
+        """Generate a challenge that validates the claimed hardware vintage."""
+        seed = hash(frozenset({k: v for k, v in fingerprint.items() if k in ('cpu_model', 'l1_cache', 'architecture')})) 
+        iterations = _vintage_iterations(fingerprint.get('cpu_model', ''))
+        return {"seed": seed, "iterations": iterations, "timeout_ms": iterations * 0.05}
+    
+    def verify_challenge_response(challenge: dict, response: dict, fingerprint: dict) -> bool:
+        """Verify the response was computed on the claimed hardware class."""
+        expected = _compute_expected(challenge["seed"], challenge["iterations"])
+        if response.get("result") != expected:
+            return False
+        elapsed_ms = response.get("elapsed_ms", 0)
+        # Vintage hardware should be SLOW; too-fast = spoofed
+        min_time = challenge["iterations"] * 0.01
+        return elapsed_ms >= min_time
