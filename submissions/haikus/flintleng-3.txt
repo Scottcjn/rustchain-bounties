@@ -1,0 +1,7 @@
+SPARC waits patient
+Oracle hums with heat
+Proof never lies
+
+archetype: sparc
+hardware: Sun UltraSPARC T2 1.2GHz 64-thread
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e

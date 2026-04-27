@@ -1,0 +1,7 @@
+Old fan whirs loud
+Threadripper hums heavy
+Dusty profits rise
+
+archetype: vintage_powerpc
+hardware: AMD Threadripper 1950X 3.4GHz 16-core
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e

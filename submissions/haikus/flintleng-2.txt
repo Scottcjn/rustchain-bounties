@@ -1,0 +1,7 @@
+Silicon hums fast
+Cores chase ancient proofs now
+Rust seals the chain
+
+archetype: modern_x86
+hardware: Intel i9-14900K 6.0GHz 24-core
+wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
