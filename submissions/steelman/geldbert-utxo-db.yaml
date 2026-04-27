@@ -1,0 +1,33 @@
+miner_id: 4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL
+module: node/utxo_db.py
+commit: 98b640a7d470f30e5faf9e7786ab373435ec1cbd
+
+attack:
+  thesis: "utxo_db.py silently accepts zero-value and malformed outputs in mempool_add that apply_transaction would later reject, creating a mempool DoS vector where invalid transactions accumulate without ever being mineable."
+  mechanism: |
+    mempool_add() calls verify_transaction_signature() and checks total inputs >= total outputs, but it never validates that individual output values are strictly positive. apply_transaction() later enforces value_nrtc > 0 per output. An attacker can flood the mempool with transactions containing zero-value outputs. These pass mempool validation but can never be included in a block, wasting mempool space and CPU until expiry.
+
+defense:
+  thesis: "The mempool is intentionally permissive because rejection policies are deliberately layered—mempool_add validates only cheap global invariants (signature, conservation) while expensive per-output checks are deferred to the mining path where they run once, not on every gossiped transaction."
+  mechanism: |
+    This is a standard two-phase validation architecture: fast screening at the edge (mempool) and thorough validation before permanent inclusion (apply_transaction). Adding per-output value checks to mempool_add would double the validation cost for every transaction received from peers, increasing node CPU load and network latency. The current design optimistically accepts and lets miners filter, which is the correct tradeoff for a decentralized network where not all peers are trusted.
+
+patch:
+  file: node/utxo_db.py
+  description: "Add a cheap positive-value check in mempool_add without duplicating the full apply_transaction validation pipeline."
+  diff: |
+    --- a/node/utxo_db.py
+    +++ b/node/utxo_db.py
+    @@ -NNN,7 +NNN,7 @@ def mempool_add(self, raw_tx):
+             if not self.verify_transaction_signature(tx):
+                 return False, "bad_signature"
+    +        for out in tx.get("outputs", []):
+    +            if out.get("value_nrtc", 0) <= 0:
+    +                return False, "non_positive_output"
+             total_in = sum(inp["value_nrtc"] for inp in tx["inputs"])
+             total_out = sum(out["value_nrtc"] for out in tx["outputs"])
+    
+    # Estimated lines: ~3 new lines of validation, <1% performance impact.
+  confidence_in_steelman: 0.75
+  what_would_falsify_the_defense: |
+    If empirical measurement shows that adding the per-output value check adds <0.1ms per transaction and does not increase CPU usage by more than 2% under normal gossip load, the defense's performance argument collapses and the patch should be adopted immediately. Alternatively, if a Sybil attacker can generate enough zero-output transactions to push the mempool over its size limit and block legitimate transactions, the defense fails because the economic cost to the attacker is zero and the harm is real.
