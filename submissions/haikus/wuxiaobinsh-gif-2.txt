@@ -1,0 +1,7 @@
+UltraSPARC IIi
+Solaris whispers, RISC dreams
+POW miners rest
+
+archetype: sparc
+hardware: Sun UltraSPARC IIi 400MHz, 512MB ECC RAM, 1999 Sun workstation
+wallet: RTC9a39ca2c84f61ca27d96463bcf65b6022b827f85
