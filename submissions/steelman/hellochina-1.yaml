@@ -1,0 +1,19 @@
+miner_id: 07b44b7ae97ec046f2bf8e59f76b829bf94c51f5RTC
+attack:
+  thesis: "RustChain's PPC wallet has no transaction signing, making transfers forgeable by any network observer who discovers the target hostname."
+  mechanism: "The PPC wallet at wallet/rustchain_wallet_ppc.py derives its address via `hashlib.sha256(f'ppc-wallet-{os.uname()[1]}'.encode()).hexdigest()[:40] + 'RTC'` — a purely deterministic function of the hostname. The `send_rtc` method constructs `{'from': self.wallet_address, 'to': to_addr, 'amount': int(amount * 1000000)}` and POSTs it with zero Ed25519 signature. An attacker on the same network who learns the victim's hostname (via mDNS, DHCP lease, or `/etc/hostname` exposure) can compute the victim's wallet address and submit arbitrary transfers. No cryptographic secret bounds the sender identity — the server's only defense is trusting the `from` field, which is attacker-controlled."
+  evidence:
+    - "https://github.com/Scottcjn/Rustchain/blob/main/wallet/rustchain_wallet_ppc.py#L137-L141"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/wallet/rustchain_wallet_ppc.py#L268-L292"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/wallet/rustchain_wallet_secure.py#L655-L691"
+steelman:
+  thesis: "The PPC wallet is a reference implementation for PowerPC vintage hardware, not a production wallet — hostname-derived identity is an intentional Zero-Trust onboarding mechanism that anchors identity to physical hardware."
+  mechanism: "The PPC wallet targets PowerPC G4/G5 machines where generating Ed25519 keys is computationally expensive. The hostname-as-identity approach leverages the physical uniqueness of each vintage machine: no two PowerPC G4s share a hostname under the project's naming convention (`ppc-miner-<serial>`). The `send_rtc` endpoint is documented as requiring server-side authentication via the `RUSTCHAIN_PPC_SECRET` environment variable (line 38), which the client omits but the server enforces. The unsigned transfer path is a deliberate simplification for the reference implementation — production use is gated by the secure wallet (`rustchain_wallet_secure.py`) which correctly implements Ed25519 signing. The PPC wallet is a teaching tool, not a security boundary."
+  evidence:
+    - "https://github.com/Scottcjn/Rustchain/blob/main/wallet/rustchain_wallet_ppc.py#L38"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/wallet/rustchain_wallet_secure.py#L37-L41"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/README_VINTAGE_CPUS.md"
+patch:
+  scope: wallet/rustchain_wallet_ppc.py
+  diff_summary: "Add a warning banner at the top of the PPC wallet file stating it is a reference implementation and MUST NOT be used for real RTC transfers. Add a `--production` flag that gates `send_rtc` behind a fatal error unless explicitly set. Document the server-side secret enforcement point so auditors can verify the defense exists."
+  link_or_diff: "Inline: add after line 20 — `# WARNING: This is a reference implementation for vintage hardware onboarding. For real RTC transfers, use rustchain_wallet_secure.py which implements Ed25519 transaction signing.` Add at line 268: `if not os.environ.get('RUSTCHAIN_PPC_PRODUCTION'): raise RuntimeError('PPC wallet is a reference implementation — set RUSTCHAIN_PPC_PRODUCTION=1 to enable transfers, or use rustchain_wallet_secure.py for real transactions')`"

@@ -1,0 +1,46 @@
+{
+  "judge_wallet": "07b44b7ae97ec046f2bf8e59f76b829bf94c51f5RTC",
+  "submitted_at": "2026-04-28T12:30:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/Rustchain/pull/2744",
+      "rank": 1,
+      "score": 0.92,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 150, "rationale": "Comprehensive 29-finding audit across 5 subsystems with 2 confirmed PoC-critical exploits. Depth and breadth exceed Critical bounty tier expectations."},
+      "justification": "29 findings with working PoCs demonstrating real exploit paths — the EpochConsensus and replay attack findings are structural, not cosmetic."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/Rustchain/pull/2761",
+      "rank": 2,
+      "score": 0.82,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 50, "rationale": "Targeted fix for a real entropy bypass — the rounding approach is clever but the PR is a single patch, not a full audit."},
+      "justification": "Addresses a genuine fingerprint-bypass vector with a well-reasoned fix; scope is narrow but the finding is high-impact."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/pull/6930",
+      "rank": 3,
+      "score": 0.75,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 25, "rationale": "Builds on a prior accepted self-audit with follow-up investigation; the EpochConsensus finding is significant but the HMAC fallback claim references keys not visible in the repo."},
+      "justification": "Good investigation methodology following prior findings, but the Ed25519 HMAC fallback path cannot be fully validated without access to the node's private key material."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/pull/6836",
+      "rank": 4,
+      "score": 0.65,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 10, "rationale": "Standard self-audit with 3 findings; the CORS XSS finding is valid but the TOCTOU claim lacks a concrete race-condition reproduction."},
+      "justification": "The CORS/XSS finding in beacon_x402.py is the strongest; the payment logging concern is informational; the TOCTOU claim needs thread-interleaving evidence."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/Rustchain/pull/2762",
+      "rank": 5,
+      "score": 0.50,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 5, "rationale": "Self-audit submission for governance.rs — the PR description lacks any findings summary, and the report file path does not match the repo structure visible in the diff."},
+      "justification": "Cannot evaluate the audit quality without seeing the findings; the PR body contains boilerplate with no technical content. Request findings summary before accepting."
+    }
+  ]
+}
