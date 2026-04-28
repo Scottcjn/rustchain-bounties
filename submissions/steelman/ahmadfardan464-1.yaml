@@ -1,0 +1,47 @@
+miner_id: "RTC-ahmadfardan464-cmyk"
+attack:
+  thesis: "The Proof-of-Antiquity hardware fingerprinting system fails to prevent VM-based Sybil attacks because its identity hash is computationally collision-vulnerable and its fingerprint normalizer silently ignores unhandled check types."
+  mechanism: "An attacker running multiple VMs can spoof the 4 fingerprint fields that normalize_fingerprint() extracts (clock_drift cv/mean, thermal variance, cache hierarchy ratio, cpu_serial) while the 16-hex-char identity hash (64 bits) allows birthday-paradox collisions at ~2³² attempts. Since unrecognized check types are dropped, any new anti-spoofing checks added to the attestation pipeline won't contribute to machine identity."
+  evidence:
+    - "https://github.com/Scottcjn/Rustchain/blob/main/node/anti_double_mining.py#L47 — identity hash truncated to [:16]"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/node/anti_double_mining.py#L62-L95 — normalize_fingerprint only extracts 4 check types, drops all others"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/node/hardware_spoof_lib.py — hardware spoof library demonstrates fingerprint spoofing is anticipated"
+steelman:
+  thesis: "RustChain's multi-layer attestation system (fingerprint + epoch enrollment + time-aged weighting) makes Sybil attacks economically unviable because spoofing requires matching a real machine's thermal, cache, and clock characteristics simultaneously — not just one dimension."
+  mechanism: "Even if an attacker collides the 16-char identity hash or spoofs the 4 extracted fingerprint fields, they must also pass the epoch_enroll snapshot (which locks miner participation at epoch start), the entropy_score threshold, and the time-aged weight multiplier that penalizes modern hardware. The defense-in-depth means breaking one layer doesn't break the system."
+  evidence:
+    - "https://github.com/Scottcjn/Rustchain/blob/main/node/anti_double_mining.py#L148-L162 — epoch_enroll provides a per-epoch snapshot that prevents post-hoc miner injection"
+    - "https://github.com/Scottcjn/Rustchain/blob/main/node/rip_200_round_robin_1cpu1vote.py — time-aged multiplier gives vintage hardware 2.5x weight, making VM-based mining economically inferior"
+patch:
+  scope: "node/anti_double_mining.py"
+  diff_summary: |
+    1. Extend identity hash from 16 to 32 hex chars (128-bit collision resistance)
+    2. Add catch-all hash for unrecognized fingerprint check types in normalize_fingerprint()
+    3. Add empty-input guard in select_representative_miner()
+  link_or_diff: |
+    diff --git a/node/anti_double_mining.py b/node/anti_double_mining.py
+    --- a/node/anti_double_mining.py
+    +++ b/node/anti_double_mining.py
+    @@ -44,7 +44,7 @@ def compute_machine_identity_hash(device_arch: str, fingerprint_profile: Dict[s
+             profile_json = json.dumps(canonical_profile, sort_keys=True, separators=(",", ":"))
+    -    return hashlib.sha256(profile_json.encode()).hexdigest()[:16]
+    +    return hashlib.sha256(profile_json.encode()).hexdigest()[:32]
+     
+    @@ -92,6 +92,14 @@ def normalize_fingerprint(fingerprint_data: Optional[Dict[str, Any]]) -> Dict[str
+                     if serial:
+                         normalized["cpu_serial"] = serial
+    +
+    +        # Catch-all: hash any unrecognized check types to preserve identity stability
+    +        recognized = {"clock_drift", "thermal_entropy", "thermal_drift", "cache_timing", "cpu_serial"}
+    +        if unrecognized := set(checks.keys()) - recognized:
+    +            normalized["extra_checks_hash"] = hashlib.sha256(
+    +                json.dumps({k: checks[k] for k in sorted(unrecognized)}, sort_keys=True).encode()
+    +            ).hexdigest()[:16]
+         
+             return normalized
+     
+    @@ -200,6 +208,8 @@ def select_representative_miner(
+         if len(miner_ids) == 1:
+             return miner_ids[0]
+    +    if not miner_ids:
+    +        return ""
