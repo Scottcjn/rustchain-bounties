@@ -1,0 +1,35 @@
+miner_id: RTC9a39ca2c84f61ca27d96463bcf65b6022b827f85
+attack:
+  thesis: The x402 payment ledger in beacon_x402.py is writable by any agent with a valid admin key, allowing payment history inflation.
+  mechanism: |
+    The POST /api/agents/<id>/wallet endpoint accepts any coinbase_address that passes basic 0x/42-char validation.
+    More critically, the x402_beacon_payments INSERT at lines 132-137 records "unknown" as the payer for all free-tier
+    actions, meaning an attacker with a stolen admin key can POST fabricated payment records with arbitrary action names
+    and amounts, inflating the payment history that the beacon dashboard uses to assess agent activity. Since the payment
+    table has no cryptographic proof (no tx_hash verification for non-on-chain entries), the ledger is append-only and
+    unaudited by design.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_x402.py#L132-L137
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_x402.py#L182-L194
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_x402.py#L40-L57
+steelman:
+  thesis: The x402 payment system is a read-optimized audit log, not a financial ledger — free actions use "unknown" payer by design to avoid PII leakage, and the real economic settlement happens on-chain via x402 facilitators.
+  mechanism: |
+    The x402_beacon_payments table is explicitly a view table (GET /api/x402/payments) for historical record, not a
+    source of truth for balances. All paid actions require an actual X-PAYMENT header with a valid on-chain tx_hash
+    verified by the x402 protocol (lines 113-125 _check_x402_payment). The "unknown" payer for free actions is cosmetic
+    — the actual authorization gate is the X-PAYMENT header presence. Since the beacon treasury only disburses from
+    on-chain settlements (BEACON_TREASURY is a multisig), fabricated INSERT records cannot drain real funds. The attack
+    surface is limited to dashboard UX pollution, not financial loss.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_x402.py#L105-L125
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_x402.py#L322-L339
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/beacon_identity.py#L27-L28
+patch:
+  scope: node/beacon_x402.py
+  diff_summary: |
+    1. Add optional tx_hash column to x402_beacon_payments schema (nullable for free actions).
+    2. In _check_x402_payment, record the resolved payer_address (not "unknown") for free actions from X-PAYMENT header.
+    3. In POST /api/agents/<id>/wallet, validate address format more strictly (EIP-55 checksum) before INSERT.
+    4. Add read-only GET /api/x402/verify/<payment_id> endpoint that re-checks on-chain status via facilitator.
+  link_or_diff: PR to be created
