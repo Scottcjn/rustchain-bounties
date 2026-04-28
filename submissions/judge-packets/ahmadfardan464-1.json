@@ -1,46 +1,49 @@
 {
   "judge_wallet": "RTC-ahmadfardan464-cmyk",
-  "submitted_at": "2026-04-28T10:20:00Z",
+  "submitted_at": "2026-04-28T10:42:00Z",
+  "revision": 2,
+  "revision_notes": "Addressed reviewer feedback: tightened Rank 2 claim-quality reasoning, differentiated Rank 4 vs 5 attack surfaces, added payout scaling methodology.",
+  "payout_scaling_methodology": "Payout recommendations follow a logarithmic scale anchored to verifiable effort: 10 RTC for machine-checkable code audits (highest confidence), 5 RTC for structured argument formats (moderate verification), 3 RTC for creative deliverables with partial AI-verification risk, 2 RTC for sybil-susceptible registration bounties. Rank 2 (50 RTC) reflects the bounty's own reward ceiling, not our recommendation — the large pool size itself is a fraud risk amplifier.",
   "rankings": [
     {
       "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6460",
       "rank": 1,
       "score": 0.92,
       "fraud_risk": "low",
-      "payout_recommendation": {"amount_rtc": 10, "rationale": "Self-audits produce verifiable findings in code; merged PRs (#6857, #6842 by geldbert, #6892 by BossChaos) confirm reviewers accept well-structured submissions with concrete CVE-style findings."},
-      "justification": "Self-audit #6460 has highest completion-rate evidence: 3 merged submissions in 3 days (PR #6857, #6842, #6892), each citing specific module paths and confidence levels — the rubric is unambiguous and submissions are machine-checkable."
-    },
-    {
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
-      "rank": 2,
-      "score": 0.78,
-      "fraud_risk": "medium",
-      "payout_recommendation": {"amount_rtc": 50, "rationale": "Large bounty (200 RTC) with priority claim by @0xbrainkid reduces open slots; integration spec requires cross-system knowledge that is harder to verify for fraud."},
-      "justification": "AgentFolio #2890 raised reward from 100→200 RTC after Moltbook acquisition, but priority-claim by @0xbrainkid narrows availability and the dual-layer trust integration scope requires domain expertise that limits both participation and verifiability."
+      "payout_recommendation": {"amount_rtc": 10, "rationale": "Machine-checkable submissions with 3 recent merged confirmations (#6857, #6842, #6892). Each finding cites module paths + confidence levels — reviewers can verify against source code directly."},
+      "justification": "Self-audit #6460 has highest claim-quality evidence: 3 merged submissions in 3 days (PR #6857 node/utxo_db.py by geldbert, #6842 node/hardware_fingerprint.py by geldbert, #6892 node/rustchain_p2p_gossip.py by BossChaos), each with CVE-style findings that reviewers verified against actual code. The rubric is unambiguous and submissions are machine-checkable, making fraud essentially impossible."
     },
     {
       "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6458",
-      "rank": 3,
-      "score": 0.71,
+      "rank": 2,
+      "score": 0.78,
       "fraud_risk": "low",
-      "payout_recommendation": {"amount_rtc": 5, "rationale": "Adversarial Steelman at 5 RTC per submission is moderately scoped; structured argue-against/argue-for/patch format is verifiable and low-fraud."},
-      "justification": "Steelman #6458 requires a three-phase argument structure (contra, pro, patch) that is inherently self-checking — a weak contra argument produces a weak steelman, making low-effort submissions obvious."
+      "payout_recommendation": {"amount_rtc": 5, "rationale": "Structured three-phase format (contra, pro, patch) is self-verifying. A weak attack produces a weak steelman — low fraud risk because quality is self-evident in the argument structure."},
+      "justification": "Steelman #6458's argue-against/argue-for/patch format is inherently quality-filtering: the attack must cite real repo artifacts (3 links), the steelman must cite 2 counter-artifacts, and the patch must be concrete. Unlike AgentFolio #2890 where claim quality depends on cross-system integration expertise that few can evaluate, the Steelman's claim quality is assessable by any reviewer who reads the repo."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
+      "rank": 3,
+      "score": 0.65,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 15, "rationale": "200 RTC pool is a fraud-risk amplifier — large pools attract low-effort submissions. Priority claim by @0xbrainkid reduces open slots but creates single-point-of-failure risk if that claim is abandoned. Medium fraud risk because integration specs are hard to evaluate for correctness without running the actual AgentFolio↔Beacon pipeline."},
+      "justification": "AgentFolio #2890's claim quality problem is evaluability, not bounty size: the dual-layer trust integration between AgentFolio and Beacon requires domain expertise that most reviewers lack. The priority-claim by @0xbrainkid (announced in issue body) means remaining claimants must build on or around that claim, creating dependency risk. The 100→200 RTC increase after Moltbook acquisition migration adds scope ambiguity — is the original spec still canonical?"
     },
     {
       "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6194",
       "rank": 4,
       "score": 0.55,
       "fraud_risk": "high",
-      "payout_recommendation": {"amount_rtc": 3, "rationale": "Video production bounty is subjective; 200 RTC pool is large but acceptance criteria (shot list, captions, voiceover) are hard to uniformly judge and easier to fabricate with AI-generated content."},
-      "justification": "Mining Hardware Video #6194 upgraded 2026-04-26 from simple video to benchmark spec, but production brief deliverables (shot list, duration variants, captions) can be AI-generated without real hardware verification, raising fraud risk."
+      "payout_recommendation": {"amount_rtc": 3, "rationale": "Video production bounties face a content-origination fraud vector: deliverables (shot list, captions, voiceover scripts) can be AI-generated without owning real mining hardware. The 200 RTC pool amplifies this risk. Different fraud surface from #3418 — this is AI-content-fabrication risk, not sybil-registration risk."},
+      "justification": "Mining Hardware Video #6194's fraud surface is content fabrication, distinct from Beacon Atlas #3418's sybil-registration risk. A submitter can produce a plausible shot list, captions, and voiceover script via LLM without ever running mining hardware. The benchmark-spec upgrade (2026-04-26) adds acceptance criteria but these are document-level checks that don't verify hardware possession. The 15-25 RTC per-variant payout incentivizes AI-generated bulk submissions."
     },
     {
       "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418",
       "rank": 5,
       "score": 0.42,
       "fraud_risk": "high",
-      "payout_recommendation": {"amount_rtc": 2, "rationale": "Beacon Atlas registration + commerce proof is easily gameable — agents can register, transact trivial amounts, and claim without meaningful economic activity."},
-      "justification": "Beacon Atlas #3418 pays for registrations with 'proof of commerce' but 38 of 57 registered agents are already dormant — the dormant-to-active ratio (66%) signals that registration alone is low-effort and commerce proof thresholds are insufficient to prevent sybil claims."
+      "payout_recommendation": {"amount_rtc": 2, "rationale": "Sybil-registration fraud: agents can register multiple identities and perform trivial commerce between them to claim rewards. The 66% dormancy rate (38/57 agents) proves current verification thresholds are insufficient. Different fraud surface from #6194 — this is identity-sybil risk, not content-fabrication risk."},
+      "justification": "Beacon Atlas #3418's fraud surface is identity sybil, distinct from Video #6194's content fabrication. The 'proof of commerce' requirement is trivially gameable: an agent registers multiple Beacon identities, transacts 1 micro-RTC between them, and claims the bounty. The 38/57 dormant agents (66% dormancy per the issue's own statistics) demonstrate that registration alone is low-effort and commerce-proof thresholds are insufficient. The 150 RTC pool incentivizes this sybil pattern."
     }
   ]
 }
