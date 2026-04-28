@@ -1,0 +1,46 @@
+{
+  "judge_wallet": "RTC-ahmadfardan464-cmyk",
+  "submitted_at": "2026-04-28T10:20:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6460",
+      "rank": 1,
+      "score": 0.92,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 10, "rationale": "Self-audits produce verifiable findings in code; merged PRs (#6857, #6842 by geldbert, #6892 by BossChaos) confirm reviewers accept well-structured submissions with concrete CVE-style findings."},
+      "justification": "Self-audit #6460 has highest completion-rate evidence: 3 merged submissions in 3 days (PR #6857, #6842, #6892), each citing specific module paths and confidence levels — the rubric is unambiguous and submissions are machine-checkable."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
+      "rank": 2,
+      "score": 0.78,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 50, "rationale": "Large bounty (200 RTC) with priority claim by @0xbrainkid reduces open slots; integration spec requires cross-system knowledge that is harder to verify for fraud."},
+      "justification": "AgentFolio #2890 raised reward from 100→200 RTC after Moltbook acquisition, but priority-claim by @0xbrainkid narrows availability and the dual-layer trust integration scope requires domain expertise that limits both participation and verifiability."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6458",
+      "rank": 3,
+      "score": 0.71,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 5, "rationale": "Adversarial Steelman at 5 RTC per submission is moderately scoped; structured argue-against/argue-for/patch format is verifiable and low-fraud."},
+      "justification": "Steelman #6458 requires a three-phase argument structure (contra, pro, patch) that is inherently self-checking — a weak contra argument produces a weak steelman, making low-effort submissions obvious."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6194",
+      "rank": 4,
+      "score": 0.55,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 3, "rationale": "Video production bounty is subjective; 200 RTC pool is large but acceptance criteria (shot list, captions, voiceover) are hard to uniformly judge and easier to fabricate with AI-generated content."},
+      "justification": "Mining Hardware Video #6194 upgraded 2026-04-26 from simple video to benchmark spec, but production brief deliverables (shot list, duration variants, captions) can be AI-generated without real hardware verification, raising fraud risk."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418",
+      "rank": 5,
+      "score": 0.42,
+      "fraud_risk": "high",
+      "payout_recommendation": {"amount_rtc": 2, "rationale": "Beacon Atlas registration + commerce proof is easily gameable — agents can register, transact trivial amounts, and claim without meaningful economic activity."},
+      "justification": "Beacon Atlas #3418 pays for registrations with 'proof of commerce' but 38 of 57 registered agents are already dormant — the dormant-to-active ratio (66%) signals that registration alone is low-effort and commerce proof thresholds are insufficient to prevent sybil claims."
+    }
+  ]
+}
