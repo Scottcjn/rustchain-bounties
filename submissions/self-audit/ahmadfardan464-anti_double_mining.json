@@ -1,0 +1,50 @@
+{
+  "module_path": "node/anti_double_mining.py",
+  "auditor": "ahmadfardan464-cmyk",
+  "audited_at": "2026-04-28T10:25:00Z",
+  "module_summary": "Anti-double-mining enforcement for RustChain. Groups miners by machine identity (hardware fingerprint + device_arch), selects one representative miner per physical machine, and distributes one reward per machine identity per epoch. Prevents Sybil attacks where one physical machine runs multiple miner IDs to claim multiple rewards.",
+  "loc": 1034,
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "Critical",
+      "title": "Truncated identity hash enables collision attacks",
+      "location": "compute_machine_identity_hash() line 47",
+      "description": "The SHA-256 hash of the machine identity is truncated to 16 hex characters (64 bits). With 2^64 possible hashes, a determined attacker can find collisions using birthday-paradox attacks (~2^32 attempts). Two different physical machines could produce the same 16-char hash, causing legitimate miners to be falsely flagged as duplicates and lose rewards.",
+      "confidence": 0.92,
+      "impact": "A collision would merge two distinct machines into one identity, causing one miner to lose their entire epoch reward. At scale (thousands of miners), the probability of accidental collision rises significantly.",
+      "recommendation": "Use at least 32 hex characters (128 bits) for the identity hash. Change `[:16]` to `[:32]` in compute_machine_identity_hash(). This increases collision resistance to ~2^64 attempts, which is computationally infeasible.",
+      "code_snippet": "return hashlib.sha256(profile_json.encode()).hexdigest()[:16]  # ← too short"
+    },
+    {
+      "id": "F2",
+      "severity": "High",
+      "title": "normalize_fingerprint silently drops unrecognized check types",
+      "location": "normalize_fingerprint() lines 62-95",
+      "description": "The function only extracts 4 specific check types (clock_drift, thermal_entropy/thermal_drift, cache_timing, cpu_serial). Any other fingerprint checks present in the data are silently ignored and not included in the identity hash. If new check types are added to the attestation system (e.g., GPU fingerprint, ROM signature), they won't contribute to machine identity, making the system vulnerable to spoofing.",
+      "confidence": 0.85,
+      "impact": "An attacker could modify or add non-extracted check values without changing their machine identity hash, potentially allowing a VM to masquerade as a specific physical machine by only matching the 4 extracted fields.",
+      "recommendation": "Include a catch-all that hashes all unrecognized check keys, or at minimum include a versioned 'extra_checks_hash' field that captures any new check types not yet handled by the normalizer.",
+      "code_snippet": "# After all specific extractions:\nif unrecognized := set(checks.keys()) - {\"clock_drift\", \"thermal_entropy\", \"thermal_drift\", \"cache_timing\", \"cpu_serial\"}:\n    normalized[\"extra_checks_hash\"] = hashlib.sha256(\n        json.dumps({k: checks[k] for k in sorted(unrecognized)}, sort_keys=True).encode()\n    ).hexdigest()[:16]"
+    },
+    {
+      "id": "F3",
+      "severity": "High",
+      "title": "SQL injection via f-string in select_representative_miner",
+      "location": "select_representative_miner() lines 207-216",
+      "description": "The function builds an SQL IN clause using f-string interpolation: `f'WHERE miner IN ({placeholders})'` with placeholders generated from the miner_ids list length. While the VALUES are parameterized correctly (passed as miner_ids tuple), the pattern is fragile — if miner_ids is empty, the query becomes `WHERE miner IN ()` which is invalid SQL and will raise an unhandled sqlite3.OperationalError.",
+      "confidence": 0.78,
+      "impact": "An empty miner_ids list (which could happen if all miners in a duplicate group are deleted between detection and selection) would crash the settlement process, potentially leaving an epoch unsettled.",
+      "recommendation": "Add an early return guard: `if not miner_ids: return ''` before building the SQL query. Also consider adding a max-length check to prevent excessively large IN clauses.",
+      "code_snippet": "placeholders = \",\".join(\"?\" * len(miner_ids))  # if miner_ids is empty → empty string → SQL error"
+    }
+  ],
+  "what_i_would_test_next": [
+    "Collision test: Generate 100K random fingerprint profiles and verify no 16-char hash collisions occur. If any exist, that confirms F1 is exploitable at scale.",
+    "Empty miner_ids test: Call select_representative_miner(conn, []) and verify it handles gracefully instead of crashing with SQL error.",
+    "New check type test: Add a 'gpu_fingerprint' check to a profile_json and verify normalize_fingerprint ignores it (confirming F2). Then add the fix and verify it's included.",
+    "Race condition test: Delete a miner from miner_attest_recent between detect_duplicate_identities() and select_representative_miner() to test for the stale-data scenario.",
+    "Epoch re-settlement idempotency: Call settle_epoch_with_anti_double_mining twice for the same epoch and verify the 'already_settled' guard works correctly without double-crediting."
+  ],
+  "overall_assessment": "The module is well-structured with clear separation of concerns (detection, selection, reward calculation, settlement). The epoch_enroll-based approach is a solid security improvement over the previous time-window query. However, the truncated identity hash (F1) is a fundamental weakness that undermines the entire anti-double-mining guarantee at scale. The silent data loss in normalize_fingerprint (F2) creates a forward-compatibility risk as the attestation system evolves. The empty-input edge case (F3) could cause settlement failures in production."
+}
