@@ -1,0 +1,21 @@
+import unittest
+from articles.beacon_tutorial import TUTORIAL_CONTENT
+
+class TestBeaconTutorial(unittest.TestCase):
+    def test_content_presence(self):
+        self.assertIsInstance(TUTORIAL_CONTENT, str)
+        self.assertIn("Beacon 2.6", TUTORIAL_CONTENT)
+        self.assertIn("Heartbeat", TUTORIAL_CONTENT)
+        self.assertIn("Mayday", TUTORIAL_CONTENT)
+
+    def test_syntax_requirements(self):
+        # Ensure em-dash was replaced with double hyphen as per comments
+        self.assertNotIn("—", TUTORIAL_CONTENT)
+        self.assertIn("--", TUTORIAL_CONTENT)
+
+    def test_bounty_metadata(self):
+        self.assertIn("Bounty: 50 RTC", TUTORIAL_CONTENT)
+        self.assertIn("Requirements: 500+ words", TUTORIAL_CONTENT)
+
+if __name__ == "__main__":
+    unittest.main()
