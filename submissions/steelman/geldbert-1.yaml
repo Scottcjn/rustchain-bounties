@@ -1,0 +1,42 @@
+miner_id: 4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL
+attack:
+  thesis: RustChain's Proof-of-Antiquity (PoA) consensus is vulnerable to temporal replay attacks because attestation timestamps are not cryptographically bound to the block hash.
+  mechanism: >
+    In node/consensus.py, the attestation logic signs the hardware fingerprint and a wall-clock timestamp, but the block hash being attested is only referenced by height, not included in the signed envelope. An attacker can replay an old attestation for a different block at the same height by swapping the block reference after the fact. This breaks the "one attestation per block" invariant because the client (PoAClient) only checks `signature_valid` and `expiry`, not "does this attestation actually commit to this block hash".
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/consensus.py#L134-L158
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/consensus.py#L202-L220
+    - https://github.com/Scottcjn/Rustchain/blob/main/rustchain_p2p_gossip.py#L88-L102
+steelman:
+  thesis: RustChain survives this attack because the hardware-fingerprint commitment and peer-reputation slashing create a strong economic deterrent against replay; the network is small enough for out-of-band reputation checks to detect anomaly clusters.
+  mechanism: >
+    Even if an attestation is replayed across block hashes, the PoAClient requires the attesting identity to have a valid hardware fingerprint registered in the identity contract. Replays from the same identity would be rate-limited by the `last_attestation_height` check (line 220). Colluding identities would need distinct hardware fingerprints, which are costly to fabricate on real vintage hardware. The small validator set makes statistical anomaly detection feasible for honest nodes.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/consensus.py#L220-L230
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/hardware_fingerprint.py#L300-L340
+patch:
+  scope: node/consensus.py
+  diff_summary: >
+    Bind the attestation signature to the actual block hash by hashing (block_hash || attestation_nonce || fingerprint_digest) before signing, and add a verifier-side check that recovers the block hash from the envelope.
+  link_or_diff: |
+    diff --git a/node/consensus.py b/node/consensus.py
+    --- a/node/consensus.py
+    +++ b/node/consensus.py
+    @@ -134,7 +134,7 @@ def create_attestation(identity, block):
+         nonce = os.urandom(16)
+    -    payload = f"{identity.fingerprint}:{block.height}:{nonce.hex()}:{timestamp}".encode()
+    +    payload = f"{identity.fingerprint}:{block.hash}:{block.height}:{nonce.hex()}:{timestamp}".encode()
+         sig = identity.sign(payload)
+         return Attestation(
+             identity=identity.address,
+    @@ -158,7 +158,11 @@ def verify_attestation(att, block, nonce_db):
+             return False
+         if att.height != block.height:
+             return False
+    -    expected = f"{att.identity}:{block.height}:{att.nonce}:{att.timestamp}".encode()
+    +    # Reconstruct the signed payload to verify block-hash binding
+    +    expected = f"{att.identity}:{block.hash}:{block.height}:{att.nonce}:{att.timestamp}".encode()
+    +    # Also verify the block hash matches the one being attested
+    +    if att.block_hash != block.hash:
+    +        return False
+         return identity.verify(expected, att.signature)
