@@ -6,7 +6,7 @@ langchain-core>=0.1.0
 langchain-openai>=0.0.5
 
 # Agent frameworks (choose one or both)
-crewai>=0.1.0
+crewai>=0.11.2
 langgraph>=1.1.9
 
 # HTTP client
