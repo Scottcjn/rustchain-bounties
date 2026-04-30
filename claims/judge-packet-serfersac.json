@@ -1,0 +1,8 @@
+
+[
+    {"id": 1, "rank": 10, "reason": "Excellent documentation with clear examples and comprehensive explanations"},
+    {"id": 2, "rank": 8, "reason": "High-quality implementation with robust error handling and edge case coverage"},
+    {"id": 3, "rank": 6, "reason": "Good functionality but could benefit from additional test cases"},
+    {"id": 4, "rank": 4, "reason": "Basic implementation that works but lacks documentation and testing"},
+    {"id": 5, "rank": 2, "reason": "Minimal implementation with no documentation or tests"}
+]
