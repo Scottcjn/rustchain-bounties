@@ -1,0 +1,7 @@
+Rack of GPUs hum
+Hashing through the quiet night
+Proof by wattage spent
+
+archetype: gpu_cluster
+hardware: 8x NVIDIA A100 40GB cluster
+wallet: 4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL
