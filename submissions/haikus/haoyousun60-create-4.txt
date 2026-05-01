@@ -1,0 +1,7 @@
+Code compiles at dawn
+Old G4 fans hum softly
+Gold mines from old chips
+
+archetype: vintage_powerpc
+hardware: 1.67 GHz Power Mac G5 Dual
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba

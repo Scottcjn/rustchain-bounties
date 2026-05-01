@@ -1,0 +1,7 @@
+ARM chip whispers low
+Orange Pi blinks its blue light
+Proof in silicon
+
+archetype: exotic_arm
+hardware: Orange Pi 5 MAX (RK3588)
+wallet: 4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL

@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC24f319a3dc4ecda8927b59af074d05d8350159d0",
+  "submitted_at": "2026-05-01T08:42:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/160",
+      "rank": 1,
+      "score": 0.88,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 40,
+        "rationale": "50 RTC stated bounty but content quality is hard to verify at scale; 40 RTC accounts for review overhead and risk of low-effort AI-generated posts slipping through"
+      },
+      "justification": "Issue #160 requires a published tutorial with working code examples on Dev.to/Medium/Hashnode — verifiable via URL and code execution, but 94 comments suggest high volume of submissions with variable quality."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2844",
+      "rank": 2,
+      "score": 0.82,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 8,
+        "rationale": "5 RTC base + 3 RTC bonus for hardware proof; the archetype enum and syllable count create a deterministic acceptance gate that's hard to game"
+      },
+      "justification": "Issue #2844 (Hybrid Haiku) has a clear 6-point rubric with archetype enum validation — the structured grammar makes automated review feasible and fraud detection straightforward."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/Rustchain/issues/303",
+      "rank": 3,
+      "score": 0.65,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Social media posts are trivial to fabricate (fake accounts, deleted posts, screenshot manipulation); reduce from stated 3 RTC to 2 RTC to account for verification cost"
+      },
+      "justification": "Issue #303 (social media post) relies on screenshot/link verification which is easily gamed with throwaway accounts — the 25 comments and 150 RTC pool suggest active exploitation risk."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2103",
+      "rank": 4,
+      "score": 0.55,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Star & Follow is the lowest-skill bounty; 1 RTC is appropriate given that GitHub API star verification is deterministic but mass-farming with bot accounts is trivial"
+      },
+      "justification": "Issue #2103 (Star & Follow) has 703 comments indicating massive bot participation — GitHub API verification is solid but the 1 RTC reward already self-selects for low-value contributions."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/438",
+      "rank": 5,
+      "score": 0.48,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Discord join verification requires server-side check (bot can confirm membership) but throwaway Discord accounts are cheap; 1 RTC reflects the minimal effort and verification overhead"
+      },
+      "justification": "Issue #438 (Discord join) has only 8 comments despite being open since Feb 26 — low engagement suggests either low visibility or that the 2 RTC reward doesn't attract serious contributors."
+    }
+  ]
+}

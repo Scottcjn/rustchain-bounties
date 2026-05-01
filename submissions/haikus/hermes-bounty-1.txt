@@ -1,0 +1,7 @@
+RISC-V board awake
+Tiny core mines through the night
+Open silicon
+
+archetype: riscv
+hardware: SiFive FU740-C000 (1.0 GHz, 4+1 U74 cores)
+wallet: RTC91112d254522ddabf139219efed0d15054349ed8

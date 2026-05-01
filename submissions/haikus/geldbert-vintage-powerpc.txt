@@ -1,0 +1,7 @@
+Fans spin in the dark
+G5 towers hum with purpose
+Antiquity lives
+
+archetype: vintage_powerpc
+hardware: 2.0 GHz Power Mac G5 Dual
+wallet: 4TRdrSRZvShfgxhiXjBDFaaySzbK2rH3VijoTBGWpEcL

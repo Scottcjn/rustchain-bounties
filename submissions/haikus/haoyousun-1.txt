@@ -1,0 +1,7 @@
+Old G4 hums alive
+Proof of Antiquity rewards
+Vintage silicon
+
+archetype: vintage_powerpc
+hardware: 1.67 GHz Power Mac G5 (2005), PowerPC 970
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba

@@ -1,0 +1,7 @@
+Pentium dreams on
+Blocks mined on forgotten chips
+Value from the old
+
+archetype: retro_x86
+hardware: 233 MHz Pentium MMX (1997), Socket 7
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba

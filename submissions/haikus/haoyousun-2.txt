@@ -1,0 +1,7 @@
+Rust chains bind the past
+SPARC workstation earns its keep
+Bridges old and new
+
+archetype: sparc
+hardware: 400 MHz UltraSPARC IIi, Sun Blade 100 (2000)
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba

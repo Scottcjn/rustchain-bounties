@@ -1,0 +1,8 @@
+Ryzen core spins fast
+Six cores hunting for the block
+Silicon power
+
+archetype: modern_x86
+hardware: AMD Ryzen 5 8400F 6-Core Processor
+wallet: RTCdcd37074b6eff6af4825dea579401ccc71297209
+bounty: #2844

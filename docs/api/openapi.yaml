@@ -1,0 +1,141 @@
+
+openapi: 3.0.0
+info:
+  title: RustChain Node API
+  description: API for interacting with RustChain blockchain node
+  version: 1.0.0
+servers:
+  - url: https://api.rustchain.org/v1
+    description: Production server
+  - url: https://testnet.rustchain.org/v1
+    description: Testnet server
+
+paths:
+  /blocks:
+    get:
+      tags:
+        - Blockchain
+      summary: Get blockchain state
+      description: Returns the current blockchain state including block headers and hashes
+      responses:
+        '200':
+          description: A list of block headers with metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blocks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hash:
+                          type: string
+                          format: uuid
+                          description: Block hash identifier
+                        height:
+                          type: integer
+                          description: Block height in the chain
+                        parent_hash:
+                          type: string
+                          format: uuid
+                          description: Parent block hash
+                        timestamp:
+                          type: string
+                          format: date-time
+                          description: Block creation timestamp
+                        transactions:
+                          type: integer
+                          description: Number of transactions in block
+                        difficulty:
+                          type: string
+                          description: Mining difficulty
+                        nonce:
+                          type: string
+                          description: Mining nonce
+                  chain_id:
+                    type: string
+                    description: Current chain identifier
+                  latest_block:
+                    type: string
+                    format: uuid
+                    description: Hash of the latest block
+                  sync_status:
+                    type: string
+                    description: Current sync status (synced, syncing, etc.)
+        '400':
+          description: Invalid request parameters
+        '500':
+          description: Internal server error
+
+  /tx:
+    post:
+      tags:
+        - Transactions
+      summary: Submit a new transaction
+      description: Submit a new transaction to the network
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - from
+                - to
+                - amount
+              properties:
+                from:
+                  type: string
+                  description: Sender address
+                to:
+                  type: string
+                  description: Recipient address
+                amount:
+                  type: string
+                  description: Transaction amount in chain units
+                data:
+                  type: string
+                  description: Optional transaction data
+                gas_limit:
+                  type: string
+                  description: Gas limit for transaction execution
+                gas_price:
+                  type: string
+                  description: Gas price in chain units
+                nonce:
+                  type: integer
+                  description: Transaction nonce
+      responses:
+        '200':
+          description: Transaction submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx_hash:
+                    type: string
+                    format: uuid
+                    description: Transaction hash
+                  block_hash:
+                    type: string
+                    format: uuid
+                    description: Block hash where transaction was included
+                  block_height:
+                    type: integer
+                    description: Block height where transaction was included
+                  status:
+                    type: string
+                    description: Transaction status (confirmed, pending, failed)
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Transaction submission timestamp
+        '400':
+          description: Invalid transaction data
+        '401':
+          description: Unauthorized (insufficient funds or invalid signature)
+        '500':
+          description: Internal server error

@@ -1,0 +1,7 @@
+Amiga lights blink
+Sixty-eight thousand whispers
+Chain remembers all
+
+archetype: m68k
+hardware: Motorola 68040 25 MHz Amiga 4000
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba

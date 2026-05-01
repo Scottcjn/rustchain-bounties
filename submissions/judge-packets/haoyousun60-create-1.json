@@ -1,0 +1,46 @@
+{
+  "judge_wallet": "RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba",
+  "submitted_at": "2026-05-01T07:20:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819",
+      "rank": 1,
+      "score": 0.95,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 150, "rationale": "Red team UTXO implementation is high-value security work that directly improves the chain"},
+      "justification": "Security audits are critical for blockchain projects and this bounty specifically targets UTXO implementation bugs"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
+      "rank": 2,
+      "score": 0.90,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 100, "rationale": "AgentFolio-Beacon integration creates lasting infrastructure value"},
+      "justification": "Integration specs enable new use cases and attract more developers to the ecosystem"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2868",
+      "rank": 3,
+      "score": 0.85,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 30, "rationale": "VS Code extension improves developer experience significantly"},
+      "justification": "IDE integrations lower the barrier to entry for new contributors"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864",
+      "rank": 4,
+      "score": 0.80,
+      "fraud_risk": "medium",
+      "payout_recommendation": {"amount_rtc": 20, "rationale": "GitHub Action automates RTC awards but needs careful review for gaming prevention"},
+      "justification": "Automation is valuable but must include anti-gaming measures to prevent abuse"
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2869",
+      "rank": 5,
+      "score": 0.75,
+      "fraud_risk": "low",
+      "payout_recommendation": {"amount_rtc": 10, "rationale": "Telegram bot provides mobile access to miner status and balances"},
+      "justification": "Mobile access is convenient but lower priority than security and developer tools"
+    }
+  ]
+}

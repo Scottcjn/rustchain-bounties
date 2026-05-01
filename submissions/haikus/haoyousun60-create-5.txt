@@ -1,0 +1,7 @@
+Pentium awakes
+Blockchain threads through copper wires
+Antiquity pays
+
+archetype: retro_x86
+hardware: Intel Pentium 4 3.0 GHz
+wallet: RTC4642c5ee8467f61ed91b5775b0eeba984dd776ba
