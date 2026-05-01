@@ -1,0 +1,7 @@
+UltraSPARC aglow
+Sun blade hashes in the heat
+Solaris endures
+
+archetype: sparc
+hardware: UltraSPARC IIi 333 MHz (Sun Blade 100)
+wallet: RTC91112d254522ddabf139219efed0d15054349ed8

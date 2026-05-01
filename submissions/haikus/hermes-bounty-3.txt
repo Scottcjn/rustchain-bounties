@@ -1,0 +1,7 @@
+Six-eighty forty
+Amiga mines block by block
+Copper strikes again
+
+archetype: m68k
+hardware: Motorola 68040 25 MHz (Amiga 4000)
+wallet: RTC91112d254522ddabf139219efed0d15054349ed8
