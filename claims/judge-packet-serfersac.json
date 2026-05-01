@@ -1,0 +1,7 @@
+[
+  {"id": 7400, "rank": 9, "reason": "Excellent technical depth and clear documentation."},
+  {"id": 7412, "rank": 7, "reason": "Good implementation, but missing unit tests."},
+  {"id": 7390, "rank": 8, "reason": "Creative solution, very readable code."},
+  {"id": 7420, "rank": 4, "reason": "Incomplete submission, missing setup guide."},
+  {"id": 7405, "rank": 10, "reason": "Flawless execution, beyond the required scope."}
+]
