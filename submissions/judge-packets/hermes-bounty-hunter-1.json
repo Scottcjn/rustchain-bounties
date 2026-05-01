@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC91112d254522ddabf139219efed0d15054349ed8",
+  "submitted_at": "2026-05-01T09:40:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/160",
+      "rank": 1,
+      "score": 0.92,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 50,
+        "rationale": "Multiple high-quality tutorials published with working code; maintainer Scottcjn explicitly verified @SamHuang0927's repo and queued 50 RTC payout on 2026-04-27. Published content at nibaijing.eu.org and github.com/SamHuang0927/beacon-tutorial."
+      },
+      "justification": "Only claim thread with maintainer verification (Scottcjn comment queued 50 RTC to SamHuang0927); actual published tutorials with 500+ words and code examples substantiate the work."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2844",
+      "rank": 2,
+      "score": 0.78,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "2262 comments show massive participation. @geldbert submitted 3 haikus with correct 5-7-5 syllable counts on specific hardware (ThinkPad T480, RPi 4, OptiPlex 7010). @vivekghodekar001 similarly creative. However, AI-generated content is indistinguishable and the /apply bots dilute quality."
+      },
+      "justification": "High engagement (2262 comments) with genuine creative submissions like @geldbert's 'Old ThinkPad hums soft / Hashes drift through silicon dreams / RustChain earns its sleep', but fraud risk elevated due to ease of AI generation and wallet RTC53fdf727dd3 appearing across 4+ accounts."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2866",
+      "rank": 3,
+      "score": 0.71,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "@yw13931835525-cyber submitted verifiable proof: Dev.to article at yw13931835525-cyber.github.io and Reddit post with links. PR #2934 provides additional documentation."
+      },
+      "justification": "Verifiable external proof links (Dev.to article + Reddit post by @yw13931835525-cyber) make claims checkable; lower comment count (29) means less noise and easier triage."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2959",
+      "rank": 4,
+      "score": 0.55,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Two PRs submitted (#2963 by @yw13931835525-cyber, #2965 by @wocaoac-cpu) with sitemap.xml files. Sitemaps are trivially generated; Google Search Console verification is harder to prove without screenshots."
+      },
+      "justification": "PRs exist (#2963, #2965) but sitemap.xml is auto-generatable content; no maintainer verification yet, and Google Search Console submission cannot be independently confirmed without access logs."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2103",
+      "rank": 5,
+      "score": 0.35,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0,
+        "rationale": "698 comments dominated by bot-generated claims. @zhuzhushiwojia posted 4+ near-identical claims all pointing to wallet RTC53fdf727dd3. @achievefibromyalgia-lgtm claims 163+ repos starred with no verifiable proof. Star/follow actions are trivially automatable with zero audit trail."
+      },
+      "justification": "Wallet RTC53fdf727dd301da40ee7974d8c04d2fb4 reused across 4+ comments by @zhuzhushiwojia (possible sybil); '163 repos starred' claims by @achievefibromyalgia-lgtm are unverifiable without API audit; 698 comments indicate severe spam/abuse."
+    }
+  ]
+}
