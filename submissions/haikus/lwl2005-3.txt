@@ -1,0 +1,7 @@
+Small board works all night
+Pi mines coins while the world sleeps
+Tiny, yet it earns
+
+archetype: modern_arm
+hardware: Raspberry Pi 4 Model B 1.5GHz Cortex-A72 (Broadcom BCM2711)
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0

@@ -1,0 +1,7 @@
+Pentium Four hums
+Blue screen glows in the dark room
+Old coins slowly rise
+
+archetype: retro_x86
+hardware: Intel Pentium 4 630 3.0GHz HT (Prescott, 2005)
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0

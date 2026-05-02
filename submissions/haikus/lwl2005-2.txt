@@ -1,0 +1,7 @@
+PowerPC wakes
+Fan spins stories of the past
+Gentle profits come
+
+archetype: vintage_powerpc
+hardware: Apple PowerBook G4 1.67GHz (7447A, 2005)
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0
