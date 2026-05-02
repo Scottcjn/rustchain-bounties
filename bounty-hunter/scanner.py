@@ -41,7 +41,7 @@ class BountyScanner:
         """Get detailed info about a specific issue"""
         repo = self.github.get_repo(f"{self.repo_owner}/{self.repo_name}")
         issue = repo.get_issue(issue_number)
-        
+
         return {
             'id': issue.number,
             'title': issue.title,
@@ -49,3 +49,20 @@ class BountyScanner:
             'comments': issue.get_comments(),
             'labels': [l.name for l in issue.labels],
         }
+
+    async def add_reaction(self, issue_number: int, reaction: str = "+1") -> bool:
+        """Add an emoji reaction to an issue"""
+        try:
+            repo = self.github.get_repo(f"{self.repo_owner}/{self.repo_name}")
+            issue = repo.get_issue(issue_number)
+            issue.create_reaction(reaction)
+            return True
+        except Exception:
+            return False
+
+    async def add_reactions_to_issues(self, issue_numbers: List[int], reaction: str = "+1") -> Dict[int, bool]:
+        """Add an emoji reaction to multiple issues; returns a map of issue number to success"""
+        results = {}
+        for number in issue_numbers:
+            results[number] = await self.add_reaction(number, reaction)
+        return results
