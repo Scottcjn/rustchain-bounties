@@ -3,6 +3,28 @@ import subprocess
 import sys
 import json
 
+REACTION_TARGETS = [
+    ("Scottcjn/rustchain-bounties", 87),
+    ("Scottcjn/rustchain-bounties", 103),
+    ("Scottcjn/rustchain-bounties", 157),
+]
+
+
+def add_reaction(repo: str, issue_number: int, reaction: str = "+1"):
+    """Add an emoji reaction to a GitHub issue to show support."""
+    cmd = [
+        "gh", "api",
+        f"repos/{repo}/issues/{issue_number}/reactions",
+        "-X", "POST",
+        "-f", f"content={reaction}",
+    ]
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
+        print(f"✅ Reacted {reaction} to {repo}#{issue_number}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to react to {repo}#{issue_number}: {e.stderr}")
+
+
 def claim_bounty(repo: str, issue_number: int, miner_id: str, plan: str):
     """
     Autonomously claims a bounty using the GitHub CLI.
@@ -24,6 +46,8 @@ def claim_bounty(repo: str, issue_number: int, miner_id: str, plan: str):
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         print(f"✅ Successfully claimed bounty {repo}#{issue_number}")
         print(f"🔗 URL: {result.stdout.strip()}")
+        for r_repo, r_issue in REACTION_TARGETS:
+            add_reaction(r_repo, r_issue)
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to claim bounty: {e.stderr}")
 
