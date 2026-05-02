@@ -1,4 +1,4 @@
-# Contributing to Rustchain Bounties
+# Rstcomplianceg to Rustchain Bounties
 
 Thank you for your interest in contributing to Rustchain bounties! This guide explains how to participate in the bounty program, claim tasks, submit proofs, and earn RTC tokens.
 
