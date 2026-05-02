@@ -1,0 +1,7 @@
+RISC-V gates align
+Open source silicon blooms bright
+Future runs on trust
+
+archetype: riscv
+hardware: SiFive HiFive Unmatched (RISC-V)
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0
