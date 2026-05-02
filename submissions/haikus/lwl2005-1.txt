@@ -1,0 +1,7 @@
+Silicon dreams wake
+Power Mac G5 hums alive
+Proof of antiquity
+
+archetype: vintage_powerpc
+hardware: 1.67 GHz Power Mac G5
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0
