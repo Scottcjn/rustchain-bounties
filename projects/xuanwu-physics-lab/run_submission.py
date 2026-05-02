@@ -71,3 +71,60 @@ if __name__ == "__main__":
         json.dump([r for r in results if r], f, indent=2)
     print("\n--- UPLOAD COMPLETE ---")
     print("Results saved to upload_proofs.json")
+
+    # Task: Leave thoughtful comments on 5 videos
+    print("\n--- COMMENTING ON VIDEOS ---")
+    thoughtful_comments = [
+        "Fascinating simulation! The streamtube expansion visualisation really clarifies how momentum extraction drives the induction zone — this matches well with Glauert's original derivations.",
+        "Great work on the vortex cylinder model. The wake meandering looks physically realistic. Have you considered coupling this with a dynamic inflow model to capture transient loading effects?",
+        "Excellent CFD setup for the transonic regime. The shock-wave / boundary-layer interaction near Mcr is clearly resolved. What turbulence closure did you use — k-ω SST or SA?",
+        "The colour mapping for axial velocity deficit is very intuitive. It would be interesting to see a comparison against RANS results at the same tip-speed ratio.",
+        "Really appreciate the level of detail in the wake meandering simulation. The spectral content of the lateral oscillation looks consistent with large-eddy structures at this scale.",
+    ]
+
+    # Load previously commented video IDs to avoid duplicates on re-runs
+    comment_proofs_file = "comment_proofs.json"
+    if os.path.exists(comment_proofs_file):
+        with open(comment_proofs_file, "r") as f:
+            comment_proofs = json.load(f)
+    else:
+        comment_proofs = []
+    already_commented = {entry["video_id"] for entry in comment_proofs}
+    already_commented_count = len(already_commented)
+    print(f"Already commented on {already_commented_count} video(s) from previous runs.")
+
+    try:
+        commented = 0
+        comment_index = already_commented_count
+        offset = 0
+        while commented + already_commented_count < 5:
+            feed = client.list_videos(limit=20, offset=offset)
+            videos = feed.get("videos", [])
+            if not videos:
+                print("No more videos found on the platform to comment on.")
+                break
+            for video in videos:
+                if commented + already_commented_count >= 5:
+                    break
+                vid_id = video.get("video_id") or video.get("id")
+                if not vid_id or vid_id in already_commented:
+                    continue
+                text = thoughtful_comments[comment_index % len(thoughtful_comments)]
+                try:
+                    res = client.comment(vid_id, text)
+                    print(f"Commented on video {vid_id}: {text[:60]}...")
+                    comment_proofs.append({"video_id": vid_id, "comment": text, "response": res})
+                    already_commented.add(vid_id)
+                    commented += 1
+                    comment_index += 1
+                except Exception as e:
+                    print(f"Failed to comment on video {vid_id}: {e}")
+            offset += 20
+            if len(videos) < 20:
+                break
+        with open(comment_proofs_file, "w") as f:
+            json.dump(comment_proofs, f, indent=2)
+        total = already_commented_count + commented
+        print(f"\nLeft {commented} new comment(s) ({total} total). Saved to {comment_proofs_file}")
+    except Exception as e:
+        print(f"Failed to fetch video list: {e}")

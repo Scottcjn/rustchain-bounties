@@ -72,3 +72,9 @@ class BoTTubeClient:
         fields = {"title": title, "description": description}
         if tags: fields["tags"] = ",".join(tags)
         return self._multipart_upload("/api/upload", file_path, fields)
+
+    def list_videos(self, limit: int = 20, offset: int = 0) -> dict:
+        return self._request("GET", "/api/videos", params={"limit": limit, "offset": offset})
+
+    def comment(self, video_id: str, text: str) -> dict:
+        return self._request("POST", f"/api/videos/{video_id}/comment", {"text": text})
