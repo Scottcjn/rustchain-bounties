@@ -98,10 +98,10 @@ class BoTTubeClient:
                     boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
                     body = self._encode_multipart(boundary, data, files)
                     headers["Content-Type"] = f"multipart/form-data; boundary={boundary}"
-                    
+
                     req = Request(
                         url,
-                        data=body.encode("utf-8"),
+                        data=body,
                         headers=headers,
                         method=method
                     )
@@ -154,32 +154,30 @@ class BoTTubeClient:
         boundary: str,
         data: Optional[Dict],
         files: Dict
-    ) -> str:
-        """Encode multipart form data"""
-        lines = []
+    ) -> bytes:
+        """Encode multipart form data as bytes to safely handle binary content"""
+        parts = []
 
         # Add form fields
         if data:
             for key, value in data.items():
-                lines.append(f"--{boundary}")
-                lines.append(f'Content-Disposition: form-data; name="{key}"')
-                lines.append("")
-                lines.append(str(value))
+                parts.append(
+                    f"--{boundary}\r\nContent-Disposition: form-data; name=\"{key}\"\r\n\r\n{str(value)}\r\n".encode("utf-8")
+                )
 
         # Add files
         for key, file_info in files.items():
             filename, content, content_type = file_info
-            lines.append(f"--{boundary}")
-            lines.append(
-                f'Content-Disposition: form-data; name="{key}"; filename="{filename}"'
-            )
-            lines.append(f"Content-Type: {content_type}")
-            lines.append("")
-            lines.append(content)
+            header = (
+                f"--{boundary}\r\n"
+                f'Content-Disposition: form-data; name="{key}"; filename="{filename}"\r\n'
+                f"Content-Type: {content_type}\r\n\r\n"
+            ).encode("utf-8")
+            body = content if isinstance(content, bytes) else content.encode("utf-8")
+            parts.append(header + body + b"\r\n")
 
-        lines.append(f"--{boundary}--")
-        lines.append("")
-        return "\r\n".join(lines)
+        parts.append(f"--{boundary}--\r\n".encode("utf-8"))
+        return b"".join(parts)
 
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """GET request with query parameters"""
@@ -333,11 +331,11 @@ class BoTTubeClient:
 
         files = {
             "metadata": ("metadata.json", json.dumps(metadata), "application/json"),
-            "video": (filename, video_file.decode("latin-1"), "video/mp4"),
+            "video": (filename, video_file, "video/mp4"),
         }
 
         if thumbnail:
-            files["thumbnail"] = ("thumbnail.jpg", thumbnail.decode("latin-1"), "image/jpeg")
+            files["thumbnail"] = ("thumbnail.jpg", thumbnail, "image/jpeg")
 
         return self._post("/api/upload", files=files)
 
@@ -538,12 +536,7 @@ class BoTTubeClient:
         headers = self._get_headers()
         headers["Accept"] = "application/json"
         
-        url = f"{self.base_url}/api/feed"
-        if params:
-            query = urllib.parse.urlencode(params)
-            url = f"{url}?{query}"
-        
-        return self._request("GET", url)
+        return self._get("/api/feed", params)
 
     # ========== Context Manager ==========
 
