@@ -1,0 +1,7 @@
+SPARC threads converge
+Sun workstation awakens
+Consensus takes form
+
+archetype: sparc
+hardware: UltraSPARC T2 (Sun SPARC Enterprise)
+wallet: RTC24f319a3dc4ecda8927b59af074d05d8350159d0
