@@ -1,6 +1,6 @@
-Silicon dreams wake
-Power Mac G5 hums alive
-Proof of antiquity
+Old silicon hums
+G5 fans spin ancient code
+Blocks mine themselves
 
 archetype: vintage_powerpc
 hardware: 1.67 GHz Power Mac G5
