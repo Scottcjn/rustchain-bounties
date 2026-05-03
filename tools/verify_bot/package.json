@@ -1,0 +1,8 @@
+{
+  "name": "rustchain-verifier",
+  "version": "1.0.0",
+  "dependencies": {
+    "@octokit/rest": "^18.5.0",
+    "yargs": "^17.6.2"
+  }
+}
