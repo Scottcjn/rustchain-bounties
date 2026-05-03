@@ -1,0 +1,7 @@
+An-cient chip hums low
+Intel Core 2 Duo
+Runs slow, keeps its worth
+
+archetype: retro_x86
+hardware: Intel Core 2 Duo E6600 2.4 GHz (Conroe, 65nm)
+wallet: RTCebbd3d1731cbd8e85cc72df7837ff025ccea96bd
