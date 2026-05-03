@@ -1,0 +1,5 @@
+{
+  "videoLink": "https://bottube.ai/video/abc123-def456",
+  "review": "I watched 'Building a Decentralized Chat App with WebRTC' on BoTTube and it was incredibly insightful. The creator did a fantastic job breaking down complex concepts like signaling and peer-to-peer connections into digestible steps. The live coding session was particularly helpful, as it showed real-time debugging and implementation. What I liked most was the practical approach—no fluff, just pure code and explanation. However, the audio quality could be improved; there were occasional background noises that were distracting. Also, the video could benefit from a summary slide at the end to reinforce key takeaways. Overall, it's a solid tutorial for intermediate developers looking to dive into WebRTC. I'd rate it 4 out of 5 stars.",
+  "rating": 4
+}
