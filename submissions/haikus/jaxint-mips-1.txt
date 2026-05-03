@@ -1,0 +1,7 @@
+Indigo light glows
+MIPS hums through all four seasons
+SGI dreams end
+
+archetype: mips
+hardware: SGI Indy R5000 SC 180 MHz (IP28, R10000 upgrade)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
