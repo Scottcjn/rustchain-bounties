@@ -1,0 +1,7 @@
+Sun fires its gold
+UltraSPARC hums at the core
+Server stands tall
+
+archetype: sparc
+hardware: Sun UltraSPARC III 900 MHz (Sun Fire V480)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
