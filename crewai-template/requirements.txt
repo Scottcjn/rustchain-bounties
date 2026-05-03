@@ -7,7 +7,7 @@ langchain-openai>=0.0.5
 
 # Agent frameworks (choose one or both)
 crewai>=0.11.2
-langgraph>=1.1.9
+langgraph>=1.1.10
 
 # HTTP client
 requests>=2.33.1
