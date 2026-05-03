@@ -1,0 +1,1 @@
+[![RustChain](https://img.shields.io/badge/RustChain-Contributor-brightgreen?style=for-the-badge&logo=rust)](https://github.com/rustchain/rustchain)
