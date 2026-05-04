@@ -3,7 +3,7 @@
 # Core
 langchain>=1.2.15
 langchain-core>=1.3.2
-langchain-openai>=0.0.5
+langchain-openai>=1.2.1
 
 # Agent frameworks (choose one or both)
 crewai>=0.11.2
