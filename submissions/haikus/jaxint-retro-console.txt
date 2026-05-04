@@ -1,0 +1,7 @@
+Console hums to life
+two sprites flicker on the screen
+glory in eight bits
+
+archetype: retro_console
+hardware: Nintendo Entertainment System, MOS 6502 @ 1.79 MHz, 2KB RAM (1983)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
