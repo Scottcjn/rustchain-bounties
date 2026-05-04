@@ -1,0 +1,7 @@
+Black plastic case
+rubber keys click in the night
+ZX Spectrum lives
+
+archetype: z80
+hardware: Sinclair ZX Spectrum 48K, Zilog Z80A @ 3.5 MHz, 48KB RAM (1982)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
