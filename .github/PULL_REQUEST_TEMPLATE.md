@@ -11,6 +11,28 @@
 > RustChain is a long-term project. Bounties grow the ecosystem — not for quick cash-outs.
 > If you won't support what you build, don't build it.
 
+## PR Review Bounty Claim
+
+<!-- Complete this section if claiming a PR review bounty -->
+
+**Reviews Completed**:
+- PR #XXXX - [Title] ([Author])
+  - URL: [PR_URL]
+  - Review ID: [REVIEW_ID]
+  - Assessment: [SUMMARY]
+
+- PR #XXXX - [Title] ([Author])
+  - URL: [PR_URL]
+  - Review ID: [REVIEW_ID]
+  - Assessment: [SUMMARY]
+
+**Review Quality Evidence**:
+- [ ] Constructive feedback provided
+- [ ] Code quality assessed
+- [ ] Security considerations reviewed
+- [ ] Testing approach evaluated
+- [ ] Documentation completeness checked
+
 ## BCOS Checklist (Required For Non-Doc PRs)
 
 - [ ] Add a tier label: `BCOS-L1` or `BCOS-L2` (also accepted: `bcos:l1`, `bcos:l2`)
@@ -64,4 +86,5 @@ Proof details:
 - Dependency diff summary:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
+
 
