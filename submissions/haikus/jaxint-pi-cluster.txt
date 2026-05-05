@@ -1,0 +1,7 @@
+Rack fans hum in sync
+Forty-eight cores racing coin
+Heat climbs, gains are found
+
+archetype: modern_arm
+hardware: 1.5GHz Quad-Core ARM Cortex-A72 SBC Cluster (Raspberry Pi 4)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
