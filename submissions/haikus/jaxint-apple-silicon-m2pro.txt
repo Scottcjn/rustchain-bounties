@@ -1,0 +1,7 @@
+Neon glows on chip
+Eight efficiency cores hum
+Neural engines dream
+
+archetype: apple_silicon
+hardware: Apple M2 Pro 12-core CPU @ 3.5 GHz (MacBook Pro 14-inch, 2023)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
