@@ -1,0 +1,6 @@
+M2 Pro hums softly
+Six fingerprints passed with grace
+Antique heart beats true
+
+archetype: apple_silicon
+hardware: Apple Mac Mini M2 Pro, 12-core CPU, 16GB RAM
