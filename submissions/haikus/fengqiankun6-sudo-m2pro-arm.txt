@@ -1,0 +1,6 @@
+ARM cores in rows
+M2 Pro calculates fast
+Time stands still for age
+
+archetype: apple_silicon
+hardware: Apple Mac Mini M2 Pro, 12-core CPU, 16GB RAM, Darwin 25.3.0
