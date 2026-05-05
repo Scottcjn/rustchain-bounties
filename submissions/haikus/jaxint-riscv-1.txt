@@ -1,0 +1,6 @@
+SiFive cores wake
+RISC-V instructions dance
+Open hardware forever
+archetype: riscv
+hardware: Allwinner D1 1GHz Single-Core RISC-V (SiFive XuanTie C906), 64-bit, 22nm TSMC
+wallet: RTCfapbplmmialdza9whqcyvv4hmxitelhpk3nhg1ig

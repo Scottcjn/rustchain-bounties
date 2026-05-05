@@ -1,0 +1,6 @@
+POWER9 hums so loud
+Redhat enterprise mainframe
+Silicon heavyweight
+archetype: power_server
+hardware: IBM POWER9 S922 4-core @ 3.8GHz, 16GB DDR4 ECC, 14nm SOI
+wallet: RTCfapbplmmialdza9whqcyvv4hmxitelhpk3nhg1ig

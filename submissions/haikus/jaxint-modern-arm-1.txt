@@ -1,0 +1,6 @@
+Snapdragon hums low
+ARMv8 instructions flowing
+Phone in my pocket
+archetype: modern_arm
+hardware: Snapdragon 8 Gen 3, Cortex-X4 @ 3.3GHz + 5 cores aarch64, 4nm TSMC
+wallet: RTCfapbplmmialdza9whqcyvv4hmxitelhpk3nhg1ig

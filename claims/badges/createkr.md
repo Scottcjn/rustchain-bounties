@@ -1,2 +1,0 @@
-- Repo: https://github.com/createkr/bottube-python-bot-template
-- Wallet: createker02140054RTC

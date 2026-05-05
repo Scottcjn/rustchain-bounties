@@ -1,2 +1,0 @@
-requests==2.33.1
-PyGithub==2.9.0
