@@ -1,0 +1,7 @@
+LUTs flip in dusk
+Xilinx talks in HDL dreams
+Logic weaves its web
+
+archetype: exotic_other
+hardware: Xilinx Virtex-7 FPGA (XC7V690T, 693K logic cells)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
