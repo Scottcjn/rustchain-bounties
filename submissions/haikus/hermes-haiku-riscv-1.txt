@@ -1,0 +1,7 @@
+RISC-V hums low
+RISC-V hums low in silicon
+Time's free and open
+
+archetype: riscv
+hardware: SiFive HiFive Unmatched (RISC-V RV64GC, 4.2 GHz)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
