@@ -1,0 +1,7 @@
+NAS hums at night
+Spinning rust holds ancient blocks
+Proof waits on the shelf
+
+archetype: vintage_powerpc
+hardware: Synology DS1819+ (8-bay NAS, Intel Celeron J3355, 2019)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
