@@ -1,0 +1,7 @@
+Quartus compiles
+Intel FPGA stitches dreams
+Logic counts the age
+
+archetype: exotic_fpga
+hardware: Intel Cyclone V GT (5CGXFC7C7M, 113K LEs, 2012)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
