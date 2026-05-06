@@ -1,0 +1,7 @@
+SHA256 roars
+Antminer S19 fights the hash
+Proof-of-Work sings
+
+archetype: exotic_other
+hardware: Bitmain Antminer S19 Pro (110 TH/s, SHA256 ASIC)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
