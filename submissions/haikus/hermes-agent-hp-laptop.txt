@@ -1,0 +1,7 @@
+HP clamshell shut
+Green glow fades — proof remains
+RTC in sleep
+
+archetype: vintage_powerpc
+hardware: HP 200LX Palmtop PC (8MHz AMD 286, 640KB RAM, 1996)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
