@@ -1,0 +1,7 @@
+Eighteen cores hum
+POWER8 breathes heavy heat
+RTC chains wake
+
+archetype: power_server
+hardware: IBM POWER8 (9-core, 3.42 GHz, PowerISA v2.07)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
