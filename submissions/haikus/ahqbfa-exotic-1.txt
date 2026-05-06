@@ -1,0 +1,7 @@
+Logic in the wire
+LUTs hum with pre-computed dreams
+FPGAs hum low and deep
+
+archetype: exotic_other
+hardware: Xilinx Virtex-7 XC7V690T FPGA (433K logic cells)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
