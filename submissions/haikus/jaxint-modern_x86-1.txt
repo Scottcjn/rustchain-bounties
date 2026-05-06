@@ -1,0 +1,7 @@
+Eight cores roar loud
+AVX hums in perfect rhythm
+Tokens never sleep
+
+archetype: modern_x86
+hardware: Intel Core i7-12700K 5.0 GHz (12-core, Alder Lake, 2021)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
