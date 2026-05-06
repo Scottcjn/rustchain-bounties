@@ -1,0 +1,7 @@
+Keys embedded
+Pi 400 rests on desk
+Time mines the chain
+
+archetype: vintage_powerpc
+hardware: Raspberry Pi 400 (4-core 1.8GHz ARM Cortex-A72, 2020)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
