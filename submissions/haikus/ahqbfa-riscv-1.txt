@@ -1,0 +1,7 @@
+Five-Tweet threads
+RISC-V specs float free and bright
+Open silicon sings
+
+archetype: riscv
+hardware: SiFive Freedom U540 1.5 GHz (RISC-V 64-bit SBC)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
