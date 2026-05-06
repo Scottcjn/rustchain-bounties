@@ -17,7 +17,6 @@ import json
 import re
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Dict, List
 
 
@@ -215,109 +214,113 @@ def parse_bullet_entry(block: str, source: str) -> List[LedgerEntry]:
     return out
 
 
-def parse_comment_entries(comment_text: str, source: str) -> List[LedgerEntry]:
-    """Parse a comment for ledger entries from bullet blocks and table rows."""
+def parse_comment_body(body: str, comment_id: str) -> List[LedgerEntry]:
+    """Parse a comment for both bullet blocks and table rows."""
     entries: List[LedgerEntry] = []
+    source = f"comment-{comment_id}"
 
     # Parse table-like rows
-    entries.extend(parse_table_like_rows(comment_text, source))
+    entries.extend(parse_table_like_rows(body, source))
 
     # Parse bullet blocks
-    bullet_blocks = split_bullet_blocks(comment_text)
+    bullet_blocks = split_bullet_blocks(body)
     for block in bullet_blocks:
         entries.extend(parse_bullet_entry(block, source))
 
     return entries
 
 
-def load_entries(args: argparse.Namespace) -> List[LedgerEntry]:
-    """Load all entries from issue body and comments."""
-    entries: List[LedgerEntry] = []
+def apply_xp_update(entry: LedgerEntry, tracker_path: str, dry_run: bool) -> bool:
+    """Apply XP update using the API script."""
+    tier = tier_for_amount(entry.amount)
 
-    if not args.comments_only:
-        # Parse issue body
-        if Path(args.issue_json).exists():
-            with open(args.issue_json) as f:
-                issue_data = json.load(f)
-            body = issue_data.get("body", "")
-            entries.extend(parse_ledger_table(body, "body"))
+    cmd = [
+        "python3",
+        ".github/scripts/update_xp_tracker_api.py",
+        "--mode",
+        "local",
+        "--tracker",
+        tracker_path,
+        "--user",
+        entry.user,
+        "--tier",
+        tier,
+        "--source",
+        f"backfill-{entry.source}-{entry.pending_id}",
+    ]
 
-    # Parse comments
-    if Path(args.comments_json).exists():
-        with open(args.comments_json) as f:
-            comments_data = json.load(f)
+    if dry_run:
+        print(f"DRY RUN: {' '.join(cmd)}")
+        return True
 
-        for i, comment in enumerate(comments_data):
-            comment_body = comment.get("body", "")
-            source = f"comment-{i + 1}"
-            entries.extend(parse_comment_entries(comment_body, source))
-
-    return entries
-
-
-def apply_xp_updates(
-    entries: List[LedgerEntry], tracker_path: str, dry_run: bool = False
-) -> None:
-    """Apply XP updates using the update_xp_tracker_api.py script."""
-    valid_entries = [e for e in entries if e.status != "voided" and e.amount > 0]
-
-    print(f"Applying XP for {len(valid_entries)} valid entries...")
-
-    for entry in valid_entries:
-        tier = tier_for_amount(entry.amount)
-        print(
-            f"  {entry.user}: {entry.amount} RTC -> {tier} tier (source: {entry.source})"
-        )
-
-        if not dry_run:
-            cmd = [
-                "python3",
-                ".github/scripts/update_xp_tracker_api.py",
-                "--local",
-                "--tracker",
-                tracker_path,
-                "--user",
-                entry.user,
-                "--tier",
-                tier,
-                "--source",
-                f"backfill-issue104-{entry.pending_id}",
-            ]
-
-            try:
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-                print(f"    ✓ Updated {entry.user}")
-            except subprocess.CalledProcessError as e:
-                print(f"    ✗ Failed to update {entry.user}: {e.stderr}")
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        print(f"Applied XP for {entry.user}: {tier} tier ({entry.amount} RTC)")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to apply XP for {entry.user}: {e}")
+        print(f"stdout: {e.stdout}")
+        print(f"stderr: {e.stderr}")
+        return False
 
 
 def main() -> None:
     args = parse_args()
 
-    print("Loading ledger entries...")
-    entries = load_entries(args)
+    entries: List[LedgerEntry] = []
 
-    print(f"Found {len(entries)} total entries")
-    valid_entries = [e for e in entries if e.status != "voided"]
-    print(f"Found {len(valid_entries)} non-voided entries")
+    # Parse issue body if not comments-only
+    if not args.comments_only:
+        try:
+            with open(args.issue_json) as f:
+                issue_data = json.load(f)
+            body_entries = parse_ledger_table(issue_data["body"], "body")
+            entries.extend(body_entries)
+            print(f"Parsed {len(body_entries)} entries from issue body")
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            print(f"Could not parse issue body: {e}")
+
+    # Parse comments
+    try:
+        with open(args.comments_json) as f:
+            comments_data = json.load(f)
+
+        for comment in comments_data:
+            comment_entries = parse_comment_body(comment["body"], str(comment["id"]))
+            entries.extend(comment_entries)
+
+        print(
+            f"Parsed {len([e for e in entries if e.source.startswith('comment')])} entries from comments"
+        )
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Could not parse comments: {e}")
+
+    # Filter out voided entries
+    active_entries = [e for e in entries if e.status != "voided"]
+    print(
+        f"Found {len(active_entries)} active entries (filtered out {len(entries) - len(active_entries)} voided)"
+    )
 
     # Group by user for summary
-    user_totals: Dict[str, float] = {}
-    for entry in valid_entries:
-        user_totals[entry.user] = user_totals.get(entry.user, 0) + entry.amount
+    user_summary: Dict[str, List[LedgerEntry]] = {}
+    for entry in active_entries:
+        user_summary.setdefault(entry.user, []).append(entry)
 
-    print("\nUser totals:")
-    for user, total in sorted(user_totals.items()):
-        tier = tier_for_amount(total)
-        print(f"  {user}: {total} RTC -> {tier}")
+    print("\nSummary by user:")
+    for user, user_entries in user_summary.items():
+        total_rtc = sum(e.amount for e in user_entries)
+        tiers = [tier_for_amount(e.amount) for e in user_entries]
+        print(
+            f"  {user}: {len(user_entries)} entries, {total_rtc} RTC total, tiers: {tiers}"
+        )
 
-    if args.dry_run:
-        print("\n[DRY RUN] Would apply XP updates")
-    else:
-        print("\nApplying XP updates...")
+    # Apply XP updates
+    success_count = 0
+    for entry in active_entries:
+        if apply_xp_update(entry, args.tracker, args.dry_run):
+            success_count += 1
 
-    apply_xp_updates(valid_entries, args.tracker, args.dry_run)
-    print("Done!")
+    print(f"\nApplied XP for {success_count}/{len(active_entries)} entries")
 
 
 if __name__ == "__main__":
