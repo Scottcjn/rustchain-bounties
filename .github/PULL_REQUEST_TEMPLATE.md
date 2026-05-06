@@ -5,8 +5,12 @@
 **RTC Wallet**: YOUR_WALLET_NAME
 
 > **RTC wallets are string names** (e.g. `my-wallet`, `alice`, `builder-fred`).
-> Do NOT use ETH/SOL/ERG addresses. Pick any name and start mining:
+> Do NOT use ETH/SOL/ERG addresses (0x..., bc1..., 9A..., etc.).
+> Pick any name and start mining:
 > `pip install clawrtc && clawrtc --wallet your-name`
+>
+> ❌ WRONG: `0x019e78d600fb3131c29d7ba80aba8fe644be426e`
+> ✅ CORRECT: `fengqiankun6-sudo` or `my-wallet-name`
 >
 > RustChain is a long-term project. Bounties grow the ecosystem — not for quick cash-outs.
 > If you won't support what you build, don't build it.
@@ -64,4 +68,5 @@ Proof details:
 - Dependency diff summary:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
+
 
