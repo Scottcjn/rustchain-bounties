@@ -50,6 +50,17 @@ Suggested gate for maintainers: >=13/20 total and Correctness > 0.
 - [ ] No secrets or credentials committed
 - [ ] Submission does not match any global disqualifier
 
+## Emoji Reaction Claims
+
+> **For emoji reaction bounty claims only**
+> Provide a table listing each issue and confirmation of emoji reaction:
+
+| Issue # | Emoji Added | Verified |
+|---------|-------------|----------|
+| #XXXX   | 🚀          | ✅       |
+
+**Total Reactions:** X
+**RTC Requested:** X RTC
 
 ## Supply-Chain Proof (Required if changed)
 
@@ -64,4 +75,5 @@ Proof details:
 - Dependency diff summary:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
+
 
