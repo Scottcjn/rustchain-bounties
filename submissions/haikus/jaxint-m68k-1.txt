@@ -1,0 +1,7 @@
+Six-eight-k hums on
+Amiga hums in neon light
+Pixels paint the past
+
+archetype: m68k
+hardware: Motorola 68040 @ 25 MHz (Amiga 4000, 1994)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
