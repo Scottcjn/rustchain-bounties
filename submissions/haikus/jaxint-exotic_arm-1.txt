@@ -1,0 +1,7 @@
+ARM-dancer twirls light
+StrongARM spins in morning dew
+Palmtop wakes the world
+
+archetype: exotic_arm
+hardware: StrongARM SA-110 @ 233 MHz (Compaq iPAQ, 1999)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
