@@ -1,0 +1,7 @@
+MIPS hums slow and deep
+MIPS hums slow into the night
+Always working through
+
+archetype: mips
+hardware: SGI Indy R5000 180 MHz (MIPS R5000)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
