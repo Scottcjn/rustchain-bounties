@@ -1,0 +1,7 @@
+POWER hums deep
+Eight cores of IBM design
+Mining never sleeps
+
+archetype: power_server
+hardware: IBM POWER9 AC922 3.26 GHz (19-core, dual-socket)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
