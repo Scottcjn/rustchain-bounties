@@ -1,0 +1,7 @@
+SPARC hums in sunlight
+UltraSPARC hums in daylight
+Proof of time, renewed
+
+archetype: sparc
+hardware: Sun UltraSPARC II 300 MHz (SPARC v9, Ultra Architecture)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
