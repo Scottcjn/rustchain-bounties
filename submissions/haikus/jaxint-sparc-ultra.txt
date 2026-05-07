@@ -4,4 +4,4 @@ X paints blue on the sky
 
 archetype: sparc
 hardware: Sun UltraSPARC IIi (333MHz, 1997)
-wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
