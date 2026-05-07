@@ -4,4 +4,4 @@ X window draws the night
 
 archetype: mips
 hardware: SGI Indy R5000 (150MHz, 1993)
-wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
