@@ -1,0 +1,7 @@
+Indy boots in blue
+MIPS R5000 hums all night long
+X window opens
+
+archetype: mips
+hardware: SGI Indy R5000 (150MHz, 1993)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
