@@ -1,0 +1,7 @@
+G4 chip hums loud
+Power Mac in silver case
+Still runs OS nine
+
+archetype: vintage_powerpc
+hardware: 867 MHz Power Mac G4 (QuickSilver 2002)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
