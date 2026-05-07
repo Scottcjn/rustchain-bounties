@@ -1,0 +1,7 @@
+FPGA fabric wakes
+ARM hums beside DSP gates
+Data sings in parallel
+
+archetype: exotic_other
+hardware: Xilinx Zynq UltraScale+ MPSoC ZU9EG (4x A53 + 2520 DSP + 504K LC, 16nm FinFET+)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
