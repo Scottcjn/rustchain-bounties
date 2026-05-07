@@ -1,0 +1,7 @@
+NetBurst fires hot
+Hyperthread dream of speed
+Warming the whole room
+
+archetype: retro_x86
+hardware: Intel Pentium 4 3.8GHz (2004)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
