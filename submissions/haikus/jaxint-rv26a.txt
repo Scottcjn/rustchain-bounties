@@ -1,0 +1,7 @@
+Thirty-two threads burst
+Freedom metal speaks in RISC
+Endless silicon
+
+archetype: riscv
+hardware: SiFive HiFive Unmatched (Freedom U740 RISC-V, 1.4GHz, 4+1 cores)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
