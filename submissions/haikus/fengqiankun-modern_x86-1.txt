@@ -1,0 +1,7 @@
+Zen four core hums loud
+Thirty-two threads tear through the heat
+AMD wins again
+
+archetype: modern_x86
+hardware: AMD Ryzen 9 7950X, 5.7 GHz boost, 16 cores, AM5 socket
+wallet: RTCDavidtangCodex1234567890123456789012abcd

@@ -1,0 +1,7 @@
+Snapdragon hums fast
+Eight cores crush through any task
+Mobile wins again
+
+archetype: modern_arm
+hardware: Qualcomm Snapdragon 8 Gen 3, 3.3 GHz Kryo Prime, 4nm
+wallet: RTCDavidtangCodex1234567890123456789012abcd

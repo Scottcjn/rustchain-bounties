@@ -1,0 +1,7 @@
+FPGA streams fast data
+Adaptable fabric hums cool
+Versal wakes up now
+
+archetype: exotic_other
+hardware: AMD Xilinx Versal VCK190, ACAP platform, 400 Compute Units
+wallet: RTCDavidtangCodex1234567890123456789012abcd
