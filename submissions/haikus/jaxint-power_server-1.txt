@@ -1,0 +1,7 @@
+Server room hums
+POWER8 threads in parallel
+Big iron wakes up
+
+archetype: power_server
+hardware: IBM POWER8 (Tyan GT24-B5532, 2014)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
