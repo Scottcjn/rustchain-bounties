@@ -1,0 +1,7 @@
+Sixteen cores blazing
+AMD runs at five gigs
+Threads like rain pour down
+
+archetype: modern_x86
+hardware: AMD Ryzen 9 7950X (Zen 4, 5nm, 5.7GHz boost, 16 cores)
+wallet: RTCa1347cc03c2aea1d6b35df16178fad4e9d6712
