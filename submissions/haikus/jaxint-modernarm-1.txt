@@ -1,0 +1,7 @@
+M4 whispers low
+Forty gigs in harmony
+Speed without a fan
+
+archetype: modern_arm
+hardware: Apple M4 Mac Mini (3nm, 40GB unified memory, 2024)
+wallet: RTCa1347cc03c2aea1d6b35df16178fad4e9d6712
