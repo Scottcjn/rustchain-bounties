@@ -1,6 +1,6 @@
-Data flows
-FPGA dreams and fabric hums
-Zynq streams through silicon
+Zynq FPGA streams slow
+Fabric hums and dreams on chip
+FPGA dreams data
 
 archetype: exotic_other
 hardware: Xilinx Zynq UltraScale+ MPSoC (2020)
