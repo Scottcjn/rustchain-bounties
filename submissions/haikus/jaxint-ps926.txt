@@ -1,0 +1,7 @@
+Rack hums at forty watts
+Power hums through every thread
+Mining never sleeps
+
+archetype: power_server
+hardware: IBM POWER9 AC922 (2x POWER9, 20 cores, 4.0 GHz, NVLink 2.0)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
