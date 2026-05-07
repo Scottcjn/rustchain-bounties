@@ -1,0 +1,7 @@
+Six-teen cores at full
+AMD runs at five point seven
+Speed burns through the heat
+
+archetype: modern_x86
+hardware: AMD Ryzen 9 7950X (Zen 4, 5nm, 5.7GHz boost, 16 cores/32 threads)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
