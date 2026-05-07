@@ -1,0 +1,7 @@
+GPU fans roar loud
+RTX four-oh-ninety blazes
+Proof by watts spent
+
+archetype: exotic_other
+hardware: 8x NVIDIA RTX 4090 GPU cluster (72GB GDDR6X, 2.4kW TDP)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
