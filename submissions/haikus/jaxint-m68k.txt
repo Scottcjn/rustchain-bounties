@@ -1,0 +1,7 @@
+Amiga boots slow
+Six-eight-zero runs the show
+Colors bloom on screen
+
+archetype: m68k
+hardware: Motorola 68030 @ 25 MHz (Amiga 3000, 1990)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
