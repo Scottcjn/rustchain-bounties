@@ -1,5 +1,5 @@
-Server room hums
-POWER8 threads in parallel
+Server room hums loud
+POWER8 threads run parallel
 Big iron wakes up
 
 archetype: power_server
