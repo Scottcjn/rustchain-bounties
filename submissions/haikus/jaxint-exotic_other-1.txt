@@ -1,0 +1,7 @@
+Data flows
+FPGA dreams and fabric hums
+Zynq streams through silicon
+
+archetype: exotic_other
+hardware: Xilinx Zynq UltraScale+ MPSoC (2020)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
