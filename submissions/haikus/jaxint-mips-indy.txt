@@ -1,6 +1,6 @@
 Indy boots in blue
-MIPS R5000 hums all night long
-X window opens
+MIPS hums soft and slow through night
+X window draws the night
 
 archetype: mips
 hardware: SGI Indy R5000 (150MHz, 1993)
