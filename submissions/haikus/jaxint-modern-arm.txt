@@ -4,4 +4,4 @@ ARM sings low aloud
 
 archetype: modern_arm
 hardware: Raspberry Pi 5 (8GB, Broadcom BCM2712 2.4GHz, aarch64)
-wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
