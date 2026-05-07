@@ -1,6 +1,6 @@
 Pi five boots up fast
-Broadcom hums eight cores running loud
-ARM sings its code
+Broadcom hums eight cores running
+ARM sings low aloud
 
 archetype: modern_arm
 hardware: Raspberry Pi 5 (8GB, Broadcom BCM2712 2.4GHz, aarch64)
