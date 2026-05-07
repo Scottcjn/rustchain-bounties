@@ -1,6 +1,6 @@
 Sun workstation hums
-UltraSPARC IIi hums and spins all night
-Colors bloom on screen
+UltraSPARC hums through the night
+X paints blue on the sky
 
 archetype: sparc
 hardware: Sun UltraSPARC IIi (333MHz, 1997)
