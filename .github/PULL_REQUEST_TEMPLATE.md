@@ -10,6 +10,9 @@
 >
 > RustChain is a long-term project. Bounties grow the ecosystem — not for quick cash-outs.
 > If you won't support what you build, don't build it.
+>
+> **For Star Bounties**: Please convert your wallet address to an RTC wallet name format.
+> Star bounty claims should include proof of starring the specified repositories.
 
 ## BCOS Checklist (Required For Non-Doc PRs)
 
@@ -64,4 +67,5 @@ Proof details:
 - Dependency diff summary:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
+
 
