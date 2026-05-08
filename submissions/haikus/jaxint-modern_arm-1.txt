@@ -1,0 +1,7 @@
+Grace Hopper reborn
+ARM meets HPC in silence
+144 cores awaken
+
+archetype: modern_arm
+hardware: NVIDIA Grace ARM CPU Superchip (2023)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
