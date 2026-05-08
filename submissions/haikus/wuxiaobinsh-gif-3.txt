@@ -1,7 +1,0 @@
-MIPS 24K cores
-Broadcom silicon chip router
-Mining behind NAT
-
-archetype: mips
-hardware: Broadcom MIPS 24Kc 500MHz, 128MB DDR, WiFi router 2010
-wallet: RTC9a39ca2c84f61ca27d96463bcf65b6022b827f85

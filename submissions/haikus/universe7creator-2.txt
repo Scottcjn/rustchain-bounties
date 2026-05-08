@@ -1,7 +1,0 @@
-Cold iron sleeps still
-MIPS chip counts each opcode
-R4000 wakes chains
-
-archetype: mips
-hardware: SGI Indy R5000 (48 MHz MIPS R5000A)
-wallet: RTC52d4fe5e93bda2349cb848ee33ffebeca9b2f68f

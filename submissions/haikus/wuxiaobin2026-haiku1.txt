@@ -1,7 +1,0 @@
-PowerPC G4 alone
-Fan spins loud as tigers roar
-Hashrate zero proud
-
-archetype: vintage_powerpc
-hardware: "PowerPC G4 1.67 GHz, 512MB RAM, 2003 Mac"
-wallet: wuxiaobinsh-gif

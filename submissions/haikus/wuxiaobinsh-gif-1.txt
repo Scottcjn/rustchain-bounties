@@ -1,7 +1,0 @@
-Pentium III sings
-AGP bus hums, 128 MB RAM
-Ancient砖也能挖
-
-archetype: retro_x86
-hardware: Intel Pentium III 600MHz, 128MB SDRAM, 1999 laptop
-wallet: RTC9a39ca2c84f61ca27d96463bcf65b6022b827f85
