@@ -1,7 +1,7 @@
-ARM-dancer twirls light
-StrongARM spins in morning dew
-Palmtop wakes the world
+Chips like feathers fall
+Archimedes dreams in ARM
+Circuit wind does blow
 
 archetype: exotic_arm
-hardware: StrongARM SA-110 @ 233 MHz (Compaq iPAQ, 1999)
-wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
+hardware: Acorn ARM2 8MHz (Archimedes A5000, 1987)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
