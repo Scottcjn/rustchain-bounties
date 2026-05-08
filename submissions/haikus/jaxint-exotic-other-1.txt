@@ -1,0 +1,7 @@
+FPGA dreams in LUT
+Virtex hums with parallel
+Gates flow like rivers
+
+archetype: exotic_other
+hardware: Xilinx Virtex-7 XC7VX690T FPGA (2011)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
