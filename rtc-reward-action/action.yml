@@ -1,49 +1,44 @@
-# This is a wrapper that delegates to BossChaos/rtc-reward-action@v1.0.0
-# For the full TypeScript implementation, see:
-# https://github.com/BossChaos/rtc-reward-action
-name: "RTC Reward on PR Merge"
-description: "Automatically award RTC tokens to contributors when their PR is merged (v2 - TypeScript)"
-author: "BossChaos"
+name: 'RTC Reward Action'
+description: 'Awards RTC tokens to contributors when PRs are merged'
+author: 'Akibuzzaman Akib'
+branding:
+  icon: 'gift'
+  color: 'blue'
 
 inputs:
-  rtc-amount:
-    description: "Amount of RTC tokens to award"
+  node-url:
+    description: 'RustChain node URL'
     required: false
-    default: "20"
-  wallet-address:
-    description: "Default RTC wallet address for the sender"
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'RTC amount to award'
     required: false
-    default: "RTC6d1f27d28961279f1034d9561c2403697eb55602"
-  dry-run:
-    description: "If true, simulate the reward without actual transfer"
+    default: '5'
+  wallet-from:
+    description: 'Source wallet name'
     required: false
-    default: "false"
-  github-token:
-    description: "GitHub token for API access"
+    default: 'project-fund'
+  admin-key:
+    description: 'Admin key for RTC node'
     required: true
-    default: ${{ github.token }}
-  contributor-wallet-map:
-    description: "JSON map of GitHub usernames to RTC wallet addresses"
+  dry-run:
+    description: 'Test mode without actual payment'
     required: false
-    default: "{}"
-  comment-on-success:
-    description: "Whether to post a comment on successful reward"
-    required: false
-    default: "true"
+    default: 'false'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Delegate to rtc-reward-action
-      uses: BossChaos/rtc-reward-action@v1.0.0
-      with:
-        rtc-amount: ${{ inputs.rtc-amount }}
-        wallet-address: ${{ inputs.wallet-address }}
-        dry-run: ${{ inputs.dry-run }}
-        github-token: ${{ inputs.github-token }}
-        contributor-wallet-map: ${{ inputs.contributor-wallet-map }}
-        comment-on-success: ${{ inputs.comment-on-success }}
-
-branding:
-  icon: "award"
-  color: "blue"
+    - name: Award RTC Reward
+      shell: python
+      env:
+        INPUT_NODE_URL: ${{ inputs.node-url }}
+        INPUT_AMOUNT: ${{ inputs.amount }}
+        INPUT_WALLET_FROM: ${{ inputs.wallet-from }}
+        INPUT_ADMIN_KEY: ${{ inputs.admin-key }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_EVENT_PATH: ${{ github.event_path }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        python rtc-reward-action.py
