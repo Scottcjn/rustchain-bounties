@@ -1,0 +1,7 @@
+Rack hums with POWER
+Eight threads dream in silicon
+Big iron wakes up
+
+archetype: power_server
+hardware: IBM POWER8 Tyan GT24-B5532 2U (12-core, 3.5GHz, 2014)
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
