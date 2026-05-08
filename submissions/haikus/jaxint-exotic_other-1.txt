@@ -1,0 +1,7 @@
+Synergistic cores
+SPE dances with PPE's power
+TheCell hums still
+
+archetype: exotic_other
+hardware: IBM Cell BE (PlayStation 3, 2006)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
