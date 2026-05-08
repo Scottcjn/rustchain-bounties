@@ -1,0 +1,10 @@
+{
+  "name": "Wrapped RustChain",
+  "symbol": "wRTC",
+  "description": "Wrapped RustChain token on Solana for DeFi applications",
+  "address": "12TAdKXxcGf6oCv4rqDz2NkgxjyHq6HQKoxKZYGf5i4X",
+  "decimals": 6,
+  "chainId": 101,
+  "tags": ["wrapped", "defi"],
+  "logoURI": "https://raw.githubusercontent.com/rustchain/wrtc/main/logo.png"
+}
