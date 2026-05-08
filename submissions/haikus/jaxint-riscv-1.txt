@@ -1,0 +1,7 @@
+Five stages of dream
+RISC-V awakens in gold
+Open silicon
+
+archetype: riscv
+hardware: SiFive HiFive Unmatched RISC-V (2020)
+wallet: RTCAhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
