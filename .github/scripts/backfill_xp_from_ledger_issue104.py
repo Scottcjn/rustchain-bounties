@@ -215,140 +215,129 @@ def parse_bullet_entry(block: str, source: str) -> List[LedgerEntry]:
     return out
 
 
-def parse_comment_payouts(comments: List[dict]) -> List[LedgerEntry]:
+def parse_comment_entries(comment_body: str, source: str) -> List[LedgerEntry]:
+    """Parse comment for both bullet blocks and table rows."""
     out: List[LedgerEntry] = []
-    for c in comments:
-        body = c.get("body", "")
-        source = f"comment:{c.get('id', 'unknown')}"
-        out.extend(parse_table_like_rows(body, source=source))
-        for block in split_bullet_blocks(body):
-            out.extend(parse_bullet_entry(block, source=source))
+
+    # Parse table-like rows
+    out.extend(parse_table_like_rows(comment_body, source))
+
+    # Parse bullet blocks
+    bullet_blocks = split_bullet_blocks(comment_body)
+    for block in bullet_blocks:
+        out.extend(parse_bullet_entry(block, source))
+
     return out
 
 
+def load_entries(args: argparse.Namespace) -> List[LedgerEntry]:
+    """Load all ledger entries from issue and comments."""
+    all_entries: List[LedgerEntry] = []
+
+    if not args.comments_only:
+        # Parse issue body
+        issue_path = Path(args.issue_json)
+        if issue_path.exists():
+            with open(issue_path) as f:
+                issue_data = json.load(f)
+            body = issue_data.get("body", "")
+            all_entries.extend(parse_ledger_table(body, "issue-body"))
+
+    # Parse comments
+    comments_path = Path(args.comments_json)
+    if comments_path.exists():
+        with open(comments_path) as f:
+            comments_data = json.load(f)
+
+        for i, comment in enumerate(comments_data):
+            comment_body = comment.get("body", "")
+            source = f"comment-{i + 1}"
+            all_entries.extend(parse_comment_entries(comment_body, source))
+
+    return all_entries
+
+
 def dedupe_entries(entries: List[LedgerEntry]) -> List[LedgerEntry]:
-    dedup: Dict[str, LedgerEntry] = {}
+    """Remove duplicates, preferring comments over issue body."""
+    seen: Dict[str, LedgerEntry] = {}
+
     for entry in entries:
-        key = entry.pending_id or entry.tx_hash or f"{entry.user}:{entry.amount}:{entry.status}"
-        existing = dedup.get(key)
-        if not existing:
-            dedup[key] = entry
+        key = f"{entry.user}:{entry.pending_id}"
+        if key not in seen or entry.source.startswith("comment"):
+            seen[key] = entry
+
+    return list(seen.values())
+
+
+def apply_xp_updates(entries: List[LedgerEntry], args: argparse.Namespace) -> None:
+    """Apply XP updates using the tracker API."""
+    script_path = Path(".github/scripts/update_xp_tracker_api.py")
+    if not script_path.exists():
+        print(f"ERROR: {script_path} not found")
+        return
+
+    for entry in entries:
+        if entry.status == "voided":
+            print(
+                f"SKIP voided: {entry.user} {entry.amount} RTC (pending #{entry.pending_id})"
+            )
             continue
-        if not existing.tx_hash and entry.tx_hash:
-            dedup[key] = entry
-        elif existing.user.lower() == "unknown" and entry.user.lower() != "unknown":
-            dedup[key] = entry
-    return list(dedup.values())
 
+        tier = tier_for_amount(entry.amount)
+        cmd = [
+            "python3",
+            str(script_path),
+            "--mode=local",
+            f"--tracker={args.tracker}",
+            f"--user={entry.user}",
+            f"--tier={tier}",
+            f"--reason=Backfill from issue #104 ledger (pending #{entry.pending_id})",
+        ]
 
-def apply_xp(entry: LedgerEntry, tracker: str, dry_run: bool) -> None:
-    if "voided" in entry.status:
-        return
-
-    tier = tier_for_amount(entry.amount)
-    labels = f"{tier},ledger"
-
-    cmd = [
-        "python3",
-        ".github/scripts/update_xp_tracker_api.py",
-        "--actor",
-        entry.user,
-        "--event-type",
-        "workflow_dispatch",
-        "--event-action",
-        "ledger-backfill",
-        "--issue-number",
-        "104",
-        "--labels",
-        labels,
-        "--pr-merged",
-        "false",
-        "--local-file",
-        tracker,
-    ]
-
-    if dry_run:
-        print("DRY", " ".join(cmd))
-        return
-
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
-
-
-def ensure_maintainer_row(tracker: str, dry_run: bool) -> None:
-    text = Path(tracker).read_text(encoding="utf-8")
-    if "| @Scottcjn |" in text:
-        return
-
-    cmd = [
-        "python3",
-        ".github/scripts/update_xp_tracker_api.py",
-        "--actor",
-        "Scottcjn",
-        "--event-type",
-        "pull_request",
-        "--event-action",
-        "closed",
-        "--issue-number",
-        "105",
-        "--labels",
-        "maintainer",
-        "--pr-merged",
-        "true",
-        "--local-file",
-        tracker,
-    ]
-
-    if dry_run:
-        print("DRY", " ".join(cmd))
-        return
-
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+        if args.dry_run:
+            print(f"DRY-RUN: {' '.join(cmd)}")
+        else:
+            print(
+                f"APPLY: {entry.user} +{tier} XP (from {entry.amount} RTC, pending #{entry.pending_id})"
+            )
+            try:
+                subprocess.run(cmd, check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"ERROR applying XP for {entry.user}: {e}")
+                print(f"STDERR: {e.stderr}")
 
 
 def main() -> None:
     args = parse_args()
-    issue = json.loads(Path(args.issue_json).read_text(encoding="utf-8"))
 
-    entries: List[LedgerEntry] = []
-    if not args.comments_only:
-        entries.extend(parse_ledger_table(issue.get("body", ""), source="body"))
-
-    if Path(args.comments_json).exists():
-        comments = json.loads(Path(args.comments_json).read_text(encoding="utf-8"))
-        comment_entries = parse_comment_payouts(comments)
-        if not args.comments_only and entries:
-            body_ids = {e.pending_id for e in entries if e.pending_id}
-            comment_entries = [e for e in comment_entries if e.pending_id not in body_ids]
-        entries.extend(comment_entries)
+    print(f"Loading entries from {args.issue_json} and {args.comments_json}...")
+    entries = load_entries(args)
+    print(f"Found {len(entries)} raw entries")
 
     entries = dedupe_entries(entries)
+    print(f"After deduplication: {len(entries)} entries")
 
-    ensure_maintainer_row(args.tracker, args.dry_run)
+    # Filter out voided entries for summary
+    active_entries = [e for e in entries if e.status != "voided"]
+    print(f"Active entries (non-voided): {len(active_entries)}")
 
-    applied = 0
-    skipped = 0
-    by_source: Dict[str, int] = {}
+    if not entries:
+        print("No entries found to process")
+        return
+
+    print("\nEntries to process:")
     for entry in entries:
-        if "voided" in entry.status:
-            skipped += 1
-            continue
-        apply_xp(entry, args.tracker, args.dry_run)
-        applied += 1
-        by_source[entry.source] = by_source.get(entry.source, 0) + 1
-
-    print(
-        json.dumps(
-            {
-                "entries": len(entries),
-                "applied": applied,
-                "skipped": skipped,
-                "comments_file": str(Path(args.comments_json)),
-                "sources_used": len(by_source),
-                "mode": "comments-only" if args.comments_only else "body+comments",
-            },
-            indent=2,
+        tier = tier_for_amount(entry.amount)
+        status_marker = "[VOIDED]" if entry.status == "voided" else ""
+        print(
+            f"  {entry.user}: {entry.amount} RTC -> {tier} XP (#{entry.pending_id}) {status_marker}"
         )
-    )
+
+    if args.dry_run:
+        print("\nDRY RUN - no changes will be made")
+
+    apply_xp_updates(entries, args)
+    print("\nBackfill complete!")
 
 
 if __name__ == "__main__":
