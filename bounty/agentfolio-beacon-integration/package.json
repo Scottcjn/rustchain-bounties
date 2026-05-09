@@ -1,0 +1,22 @@
+{
+  "name": "agentfolio-beacon-unified",
+  "version": "1.0.0",
+  "description": "Unified MCP server — AgentFolio tools + Beacon (RustChain) integration for dual-layer agent trust",
+  "type": "module",
+  "main": "unified-mcp-server.js",
+  "bin": {
+    "agentfolio-beacon-unified": "unified-mcp-server.js"
+  },
+  "scripts": {
+    "start": "node unified-mcp-server.js",
+    "test": "node --test unified-mcp-server.js"
+  },
+  "keywords": ["mcp", "model-context-protocol", "agentfolio", "beacon", "rustchain", "ai-agents", "trust"],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
