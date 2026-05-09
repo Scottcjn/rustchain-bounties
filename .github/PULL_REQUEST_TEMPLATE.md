@@ -50,6 +50,35 @@ Suggested gate for maintainers: >=13/20 total and Correctness > 0.
 - [ ] No secrets or credentials committed
 - [ ] Submission does not match any global disqualifier
 
+## Red Team Security Audit (For Security Bounties)
+
+**Complete this section if claiming a security audit bounty or reporting vulnerabilities.**
+
+### Audit Scope
+- Files audited (with line counts):
+- Attack vectors analyzed:
+- Testing methodology:
+
+### Findings Summary
+| Severity | Count | Description |
+|----------|-------|-----------|
+| Critical |   |   |
+| High     |   |   |
+| Medium   |   |   |
+| Low      |   |   |
+
+### Critical & High Findings Detail
+**[SEVERITY-ID] Title**
+- **File:** `path/to/file.ext:line-range`
+- **Attack:** Brief exploit scenario
+- **Impact:** Business/security impact
+- **Fix:** Recommended mitigation
+
+### Evidence
+- [ ] Proof-of-concept code or reproduction steps provided
+- [ ] Attack scenarios documented with expected vs actual behavior
+- [ ] Mitigation strategies tested and validated
+- [ ] Full detailed report attached or referenced
 
 ## Supply-Chain Proof (Required if changed)
 
@@ -64,4 +93,5 @@ Proof details:
 - Dependency diff summary:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
+
 
