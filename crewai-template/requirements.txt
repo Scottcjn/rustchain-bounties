@@ -1,7 +1,7 @@
 # RustChain CrewAI/LangGraph Template Dependencies
 
 # Core
-langchain>=1.2.17
+langchain>=1.2.18
 langchain-core>=1.3.3
 langchain-openai>=1.2.1
 
