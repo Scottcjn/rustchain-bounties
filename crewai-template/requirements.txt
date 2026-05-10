@@ -2,7 +2,7 @@
 
 # Core
 langchain>=1.2.17
-langchain-core>=1.3.2
+langchain-core>=1.3.3
 langchain-openai>=1.2.1
 
 # Agent frameworks (choose one or both)
