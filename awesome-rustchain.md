@@ -15,7 +15,7 @@ A curated list of RustChain resources, tools, and community contributions.
 - [LangChain RustChain Tool](https://github.com/zhaog100/langchain-rustchain) - AI agent toolkit
 
 ## Mining
-- [RustChain Miner](https://github.com/Scottcjn/Rustchain/tree/main/miner) - Official miner
+- [RustChain Miner](https://github.com/Scottcjn/Rustchain/tree/main/miners) - Official miner
 - [Docker RustChain Miner](https://hub.docker.com/r/rustchain/miner) - One-command mining
 - [Mining Hardware Guide](https://github.com/Scottcjn/rustchain-bounties/issues/2870) - Hardware reports
 
