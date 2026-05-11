@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-"""
-RustChainBot — Telegram bot for checking RTC balance and miner status.
-Bounty: Scottcjn/rustchain-bounties#2869 (10 RTC)
-"""
-import os, time, logging
+"""RustChainBot — Telegram bot for RTC balance/miner/epoch checks."""
+import os, time, logging, aiohttp
 from datetime import datetime
 from functools import wraps
 from telegram import Update
@@ -12,7 +9,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("RustChainBot")
 
-API_BASE = os.getenv("RUSTCHAIN_API", "https://rustchain.org/api")
+API_BASE = os.getenv("RUSTCHAIN_API", "https://rustchain.org")
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 RTC_PRICE = 0.10
 RATE_LIMIT_SEC = 5
@@ -32,7 +29,6 @@ def rate_limit(func):
 
 async def fetch_json(path, default=None):
     try:
-        import aiohttp
         async with aiohttp.ClientSession() as s:
             async with s.get(f"{API_BASE}{path}", timeout=10) as r:
                 if r.status == 200:
@@ -40,8 +36,6 @@ async def fetch_json(path, default=None):
     except Exception as e:
         logger.error(f"API error: {e}")
     return default
-
-# ── Commands ────────────────────────────────────────
 
 @rate_limit
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -51,7 +45,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/miners — Active miners\n"
         "/epoch — Current epoch info\n"
         "/price — RTC price ($0.10)\n"
-        "/status — Node status\n"
         "/help — Commands"
     )
 
@@ -62,13 +55,13 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Usage: /balance <wallet_address>")
         return
     try:
-        data = await fetch_json(f"/wallet/{wallet}")
-        if data and "balance" in data:
-            bal = float(data["balance"])
-            usd = bal * RTC_PRICE
+        data = await fetch_json(f"/wallet/balance?address={wallet}")
+        if data and "amount_rtc" in data:
+            rtc = float(data["amount_rtc"])
+            usd = rtc * RTC_PRICE
             await update.message.reply_text(
                 f"💰 Wallet: `{wallet[:10]}...`\n"
-                f"Balance: {bal:.2f} RTC (~${usd:.2f} USD)",
+                f"Balance: {rtc:.4f} RTC (~${usd:.2f} USD)",
                 parse_mode="Markdown"
             )
         else:
@@ -79,10 +72,11 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @rate_limit
 async def miners(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        data = await fetch_json("/miners")
+        data = await fetch_json("/api/miners")
         if data:
-            count = data.get("active_count", data.get("total", 0)) if isinstance(data, dict) else len(data)
-            await update.message.reply_text(f"⛏️ Active miners: {count}")
+            miners_list = data.get("miners", [])
+            total = data.get("pagination", {}).get("total", len(miners_list))
+            await update.message.reply_text(f"⛏️ Active miners: {total}")
         else:
             await update.message.reply_text("⚠️ Miner data unavailable")
     except Exception as e:
@@ -107,15 +101,6 @@ async def epoch(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def price(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"💎 RTC Reference Price: ${RTC_PRICE}/token")
 
-@rate_limit
-async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        data = await fetch_json("/status")
-        online = "✅ Online" if data else "❌ Offline"
-        await update.message.reply_text(f"🟢 Node: {online}")
-    except:
-        await update.message.reply_text("❌ Node unreachable")
-
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await start(update, context)
 
@@ -126,8 +111,7 @@ def main():
     app = Application.builder().token(BOT_TOKEN).build()
     for cmd, handler in [
         ("start", start), ("balance", balance), ("miners", miners),
-        ("epoch", epoch), ("price", price), ("status", status),
-        ("help", help_cmd)
+        ("epoch", epoch), ("price", price), ("help", help_cmd)
     ]:
         app.add_handler(CommandHandler(cmd, handler))
     logger.info("RustChainBot started")
