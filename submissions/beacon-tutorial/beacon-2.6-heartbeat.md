@@ -47,7 +47,7 @@ When an agent encounters a critical error--such as an API outage or exhausted fu
 ```javascript
 import { BeaconClient } from 'beacon-skill';
 
-const client = new BeaconClient('https://api.rustchain.io');
+const client = new BeaconClient('https://50.28.86.131');
 
 async function handleFailure(err) {
   console.error('Agent failure:', err);
