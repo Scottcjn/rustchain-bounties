@@ -1,0 +1,18 @@
+I’m blocked from implementing a code fix in this workspace.
+
+- No changes were made.
+- Why blocked: the target files you listed (`node/utxo_db.py`, `node/test_utxo_db.py`, `node/utxo_genesis_migration.py`, `node/rustchain_v2_integrated_v2.2.1_rip200.py`) are not present in this repository snapshot.
+- Evidence:
+  - `rg`/`find` scans for filenames and symbols returned no matches.
+  - `git ls-tree -r origin/HEAD` and `git log --all --name-only` show no history containing those files/paths.
+- Files changed: `none`.
+- Security impact line: `Not applicable (no code changes possible in current checkout).`
+
+Verification I ran:
+1. `find . -type f -name 'utxo_db.py' ...`
+2. `rg -n "UTXO_DUAL_WRITE|utxo_db|utxo_genesis_migration" -S .`
+3. `git ls-tree -r --name-only origin/HEAD | rg 'utxo_db.py|utxo_genesis_migration.py|node/'`
+4. `git log --all --name-only --oneline -- node/utxo_db.py ...`
+
+Assumption:
+- This bounty references the RustChain node implementation in a different repository (`Scottcjn/Rustchain`) than the current checkout (`Scottcjn/rustchain-bounties`), so I need the correct target repo/checkout to apply the security fix.
