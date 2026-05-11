@@ -225,7 +225,7 @@ MIT License - See LICENSE file for details
 - Bounty Issue: #2850
 - Reward: 40 RTC
 - RustChain: https://rustchain.org
-- API Docs: https://rustchain.org/api
+- API status endpoint: https://rustchain.org/api/miners
 
 ---
 
