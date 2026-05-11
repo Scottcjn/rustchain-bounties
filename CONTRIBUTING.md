@@ -1,6 +1,6 @@
-# Contributing to Rustchain Bounties
+# Contributing to RustChain Bounties
 
-Thank you for your interest in contributing to Rustchain bounties! This guide explains how to participate in the bounty program, claim tasks, submit proofs, and earn RTC tokens.
+Thank you for your interest in contributing to RustChain bounties! This guide explains how to participate in the bounty program, claim tasks, submit proofs, and earn RTC tokens.
 
 ## 🚀 Quick Start
 
@@ -188,4 +188,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ---
 
-**Happy contributing! Every PR brings Rustchain closer to its vision.** 🦀⛓️
+**Happy contributing! Every PR brings RustChain closer to its vision.** 🦀⛓️
