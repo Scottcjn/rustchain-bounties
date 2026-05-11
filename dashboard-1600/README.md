@@ -49,7 +49,7 @@ Then visit `http://localhost:8080`
 
 The dashboard is configured to work with:
 
-- **REST API**: `https://api.rustchain.io`
+- **REST API**: `https://50.28.86.131`
 - **RPC Node**: `https://50.28.86.131`
 
 If these endpoints are unavailable, the dashboard automatically falls back to demo mode with mock data.
