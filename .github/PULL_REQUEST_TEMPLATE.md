@@ -65,3 +65,23 @@ Proof details:
 - SHA/checksum/digest:
 - Repro command used by reviewer:
 
+## Bounty Claim (For Review Claims)
+
+Complete this section if claiming a bounty for PR review work.
+
+**Bounty Type**: PR Review
+
+**Review Details**:
+- **PR URL**: [Link to reviewed PR]
+- **Review Summary**: [Brief description of review performed]
+- **Approval Status**: [Approved/Changes Requested/Commented]
+- **Review Timestamp**: [ISO timestamp]
+
+**Reward Requested**: [Amount in RTC]
+
+**Review Evidence**:
+- [ ] Provided constructive feedback
+- [ ] Identified issues or improvements
+- [ ] Verified functionality/correctness
+- [ ] Checked code quality and standards
+
