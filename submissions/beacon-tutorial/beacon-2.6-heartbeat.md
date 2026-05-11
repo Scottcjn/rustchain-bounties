@@ -71,7 +71,7 @@ Atlas is the spatial layer of the protocol. It organizes agents into "Virtual Ci
 Beacon 2.6 is more than just a library; it is the nervous system of the decentralized AI economy. By implementing heartbeats, managing Mayday signals, and utilizing Contracts, you ensure your agents are reliable, transparent, and capable of operating at scale.
 
 ### Resources
-- GitHub: https://github.com/rustchain/beacon-skill
+- GitHub: https://github.com/Scottcjn/beacon-skill
 - PyPI: pip install beacon-skill
 - NPM: npm install beacon-skill
 - Network: RustChain Mainnet
