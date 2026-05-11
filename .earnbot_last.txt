@@ -1,33 +1,24 @@
-Implemented on branch `earnbot/sec-Scottcjn-rustchain-bounties-1112`.
+No source edits were made.
 
-- Commit: `f08fb56`
-- Files changed:
-  - [scripts/stress_test/fuzz_attest_submit.py](/Users/zheliu/Documents/Codex/2026-05-11/now-go-out-and-make-at-2/data/work/Scottcjn__rustchain-bounties/scripts/stress_test/fuzz_attest_submit.py)
+1. Files changed
+- None.
 
-What this changes:
-1. Adds a dedicated endpoint fuzzing runner for `POST /attest/submit`.
-2. Generates at least 100 deterministic malformed/adversarial cases across:
-   - missing fields
-   - wrong types
-   - oversized inputs
-   - injection-style payloads (including raw invalid JSON)
-3. Fetches fresh nonce per case from `/attest/challenge`.
-4. Emits structured JSON + Markdown reports with per-category and per-class response outcome summaries.
-5. Explicitly classifies results into:
-   - handled validation failures (4xx)
-   - server-side faults (5xx)
-   - transport errors
+2. Why
+- I could not find the issue files in the assigned repo (`/Users/zheliu/Documents/Codex/2026-05-11/now-go-out-and-make-at-2/data/work/Scottcjn__rustchain-bounties`), specifically:
+  - `node/utxo_db.py`
+  - `node/utxo_endpoints.py`
+  - `node/utxo_genesis_migration.py`
+- Verification showed these paths are absent from the working tree, from `HEAD`, and from all reachable history/branches (`git ls-tree`, `git rev-list --all` scans).
+- I found these files in a separate sibling checkout (`.../Scottcjn__Rustchain/...`), which is a different repository, so patching them would violate your “target repository only” constraint.
+- `git status` is clean except for an existing untracked session file (`.omx/state/active-sessions/mcp-4499.json`), which I did not change.
 
-Verification run:
-1. Command run:
-   - `python3 scripts/stress_test/fuzz_attest_submit.py --count 120 --concurrency 4 --timeout 20 --out-json /tmp/fuzz_results_1112.json --out-md /tmp/fuzz_report_1112.md`
-2. Summary from that run:
-   - Total cases: 120
-   - Handled validation: 120
-   - Server-side faults (5xx): 0
-   - Transport errors: 0
-   - Status distribution: `400: 16`, `422: 2`, `429: 102` (plus no `2xx/5xx` outcomes beyond those)
-3. Reproducible run outputs are written to `/tmp/fuzz_results_1112.json` and `/tmp/fuzz_report_1112.md` when needed.
+3. Verification run
+- `ls -la && git status --short && git branch --show-current`
+- `git ls-tree -r HEAD --name-only | rg '^node/'`
+- `git rev-list --all | while read c; do git ls-tree -r --name-only $c | rg 'utxo_db.py|utxo_endpoints.py|utxo_genesis_migration.py'; done`
+- `find /Users/.../data/work -type f -name 'utxo_db.py'`
 
-Security-impact one-liner:
-- `/attest/submit` appears to fail malformed/adversarial requests in expected non-5xx classes (validation/rate-limit responses), with no server-side crashes/exceptions observed in this 120-case run.
+Security impact line item
+- No code-level mitigation was applied in this repo because required files are not present; the bounty issue remains unaddressed in this checkout.
+
+If you want, I can continue in the sibling `Scottcjn__Rustchain` repo path where the UTXO code exists, but that would be outside the requested repo.
