@@ -114,7 +114,7 @@ def fetch_node_json(
 ) -> Optional[Any]:
     """Fetch JSON from the RustChain node API."""
     url = f"{base_url.rstrip('/')}{path}"
-    ctx = ssl._create_unverified_context() if url.startswith("https://") else None
+    ctx = ssl.create_default_context() if url.startswith("https://") else None
 
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/json")

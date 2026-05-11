@@ -74,9 +74,7 @@ def _request_json(
         if v:
             req.add_header(k, v)
 
-    context = None
-    if url.startswith("https://") and not verify_tls:
-        context = ssl._create_unverified_context()
+    context = ssl.create_default_context() if url.startswith("https://") else None
 
     try:
         with urllib.request.urlopen(req, timeout=timeout_s, context=context) as resp:
@@ -560,7 +558,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--verify-tls",
         action="store_true",
-        help="Verify TLS certs (off by default because official node uses self-signed TLS)",
+        help="Deprecated compatibility flag. TLS certificates are always verified.",
     )
     p.add_argument(
         "--admin-key",

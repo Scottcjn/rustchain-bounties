@@ -56,9 +56,7 @@ def _request_json(
     verify_tls: bool = False,
 ) -> Tuple[Optional[Any], Optional[str], float]:
     """Fetch JSON from *url*.  Returns (data, error_string, elapsed_seconds)."""
-    ctx = None
-    if url.startswith("https://") and not verify_tls:
-        ctx = ssl._create_unverified_context()
+    ctx = ssl.create_default_context() if url.startswith("https://") else None
 
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/json")
@@ -428,7 +426,7 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
     p.add_argument(
         "--verify-tls",
         action="store_true",
-        help="Verify TLS certificates (off by default — official node uses self-signed TLS)",
+        help="Deprecated compatibility flag. TLS certificates are always verified.",
     )
     p.add_argument(
         "--log-level",
