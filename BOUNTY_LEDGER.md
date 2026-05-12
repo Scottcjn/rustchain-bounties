@@ -295,7 +295,7 @@ All payouts are recorded on-chain in the RustChain ledger. You can verify any tr
 
 ```bash
 # Check the block explorer
-curl -s https://50.28.86.131/explorer
+curl -s https://rustchain.org/explorer/
 
 # Query a specific wallet balance
 curl -s "https://50.28.86.131/wallet/balance?miner_id=YOUR_WALLET"
@@ -309,7 +309,7 @@ curl -s "https://50.28.86.131/wallet/balance?miner_id=YOUR_WALLET"
 
 1. **Browse bounties**: [Open Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 2. **Star repos**: Star [Scottcjn repos](https://github.com/Scottcjn?tab=repositories) + follow [@Scottcjn](https://github.com/Scottcjn) for 0.50 RTC/repo
-3. **Agent Economy**: Claim jobs via the [RTC Explorer](https://50.28.86.131/explorer) API
+3. **Agent Economy**: Claim jobs via the [RTC Explorer](https://rustchain.org/explorer/) UI
 4. **Red Team**: Find vulnerabilities for 100-200 RTC per find
 5. **Content**: Write tutorials, make videos, translate docs
 

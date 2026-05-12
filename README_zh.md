@@ -55,7 +55,7 @@
 | 资源 | 链接 |
 |----------|------|
 | **RustChain** | [github.com/Scottcjn/Rustchain](https://github.com/Scottcjn/Rustchain) |
-| **区块浏览器** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
+| **区块浏览器** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
 
 ---

@@ -76,7 +76,7 @@ Nach der Verifizierung werden RTC an deine Wallet gesendet. Erstmalig? Wir helfe
 | Ressource          | Link |
 |--------------------|------|
 | **RustChain**      | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Block-Explorer** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
+| **Block-Explorer** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Traktionsbericht** | [Q1 2026 Entwickler-Traktion](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
 | **Discord**        | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
 | **Wallet-Einrichtung** | Kommentiere zu einer Belohnung und wir helfen dir |
