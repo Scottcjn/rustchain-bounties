@@ -5,7 +5,7 @@ info:
   description: API for interacting with RustChain blockchain node
   version: 1.0.0
 servers:
-  - url: https://50.28.86.131
+  - url: https://rustchain.org
     description: Production node
 
 paths:
