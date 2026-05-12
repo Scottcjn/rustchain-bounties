@@ -88,10 +88,13 @@ async def epoch(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         data = await fetch_json("/epoch")
         if data:
+            supply = data.get('total_supply_rtc', '?')
             await update.message.reply_text(
                 f"🌐 Epoch: {data.get('epoch','?')}\n"
-                f"Height: {data.get('height','?')}\n"
-                f"Time: {data.get('timestamp', datetime.now().isoformat())}"
+                f"📊 Slot: {data.get('slot','?')}\n"
+                f"⛏️ Miners: {data.get('enrolled_miners','?')}\n"
+                f"💰 Epoch Pot: {data.get('epoch_pot','?')} RTC\n"
+                f"🔒 Supply: {supply} RTC"
             )
         else:
             await update.message.reply_text("⚠️ Epoch data unavailable")
