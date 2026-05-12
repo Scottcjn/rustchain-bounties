@@ -13,7 +13,7 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://50.28.86.131
+  - url: https://rustchain.org
     description: Production node
 
 paths:
