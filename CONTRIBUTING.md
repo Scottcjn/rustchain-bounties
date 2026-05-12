@@ -170,7 +170,7 @@ Closes #<issue_number>
 
 ## 🎯 Good First Issues
 
-New to Rustchain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
+New to RustChain? Start with issues labeled [`good first issue`](https://github.com/Scottcjn/Rustchain/labels/good%20first%20issue). These are specifically designed for newcomers.
 
 ## ⚖️ Code of Conduct
 
