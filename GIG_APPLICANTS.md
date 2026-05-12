@@ -1,6 +1,6 @@
 # Welcome, ugig Applicants
 
-If you found us through a [ugig](https://ugig.io) posting for **RustChain Open Bounties** or any similar Elyan Labs gig — read this first.
+If you found us through a ugig posting for **RustChain Open Bounties** or any similar Elyan Labs gig — read this first.
 
 ## Two things you need to know
 
