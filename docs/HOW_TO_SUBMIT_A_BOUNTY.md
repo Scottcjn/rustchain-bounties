@@ -12,7 +12,7 @@ Follow these and your PR will be reviewed fairly. Ignore them and your PR will b
 **The RustChain node lives at `https://50.28.86.131`.**
 
 It is NOT at any of these hallucinated URLs:
-- ❌ `https://api.rustchain.io`
+- ❌ `https://rustchain.org`
 - ❌ `https://api.rustchain.io/v1`
 - ❌ `https://rustchain.org/api`
 
