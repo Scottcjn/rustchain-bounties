@@ -47,12 +47,12 @@ Then visit `http://localhost:8080`
 
 ## API Configuration
 
-The dashboard is configured to work with:
+The dashboard talks to the following live RustChain endpoints:
 
-- **REST API**: `https://rustchain.org/api/miners`
+- **Miners API endpoint** (REST, returns active miner data): `https://rustchain.org/api/miners`
 - **RPC Node**: `https://50.28.86.131`
 
-If these endpoints are unavailable, the dashboard automatically falls back to demo mode with mock data.
+The value above is the specific miners endpoint the dashboard reads from, not a general REST API base URL. If these endpoints are unavailable, the dashboard automatically falls back to demo mode with mock data.
 
 To use your own node, edit the `API_BASE` and `RPC_NODE` constants in `index.html`:
 
