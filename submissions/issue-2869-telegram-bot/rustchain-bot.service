@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=nobody
 Environment=TELEGRAM_BOT_TOKEN=YOUR_TOKEN
-Environment=RUSTCHAIN_API=https://rustchain.org/api
+Environment=RUSTCHAIN_API=https://rustchain.org
 WorkingDirectory=/opt/rustchain-bot
 ExecStart=/usr/bin/python3 bot.py
 Restart=on-failure

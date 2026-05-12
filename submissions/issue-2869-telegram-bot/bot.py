@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 #!/usr/bin/env python3
 """RustChainBot — Telegram bot for RTC balance/miner/epoch checks."""
 import os, time, logging, aiohttp
