@@ -1,5 +1,5 @@
-# SPDX-License-Identifier: MIT
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """RustChainBot — Telegram bot for RTC balance/miner/epoch checks."""
 import os, time, logging, aiohttp
 from datetime import datetime
