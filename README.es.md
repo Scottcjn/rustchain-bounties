@@ -95,14 +95,14 @@ En lugar de recompensar a quienes pueden quemar más electricidad, RustChain pre
 3. **Trabaja en la Beca**:
    - Revisa los detalles de la beca y las expectativas
    - Sigue las instrucciones específicas proporcionadas
-   - Si tienes preguntas, comenta en el problema para obtener clarificaciones
+   - is tienes preguntas, comenta en el problema para obtener clarificaciones
 
 4. **Envía tu Trabajo**:
    - **Para becas de código**: Abre un PR al repositorio relevante y enlázalo en el problema
    - **Para becas de contenido**: Publica tu contenido (artículos, tutoriales, videos, etc.) y enlázalo en el problema
    - **Para becas de estrellas/propagación**: Sigue las instrucciones específicas en el problema
 
-5. **Recibe tu Pago**: Una vez que tu trabajo sea verificado por los mantenedores del proyecto, los RTC se enviarán a tu billetera. Si es tu primera vez, te ayudaremos a configurar una billetera.
+5. **Recibe tu Pago**: Una vez que tu trabajo sea verificado por los mantenedores del proyecto, los RTC se enviarán a tu billetera. is es tu primera vez, te ayudaremos a configurar una billetera.
 
 6. **Seguridad en Pagos**: Solo `@Scottcjn` (o automatización del proyecto claramente etiquetada en su nombre) autoriza los pagos de becas en RTC, con un `pending_id` y `tx_hash` emitidos por el proyecto. Cualquier otra persona que te diga "enviaré los RTC" en tu beca es un intento de ingeniería social.
 
