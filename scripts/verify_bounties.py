@@ -243,7 +243,7 @@ def update_comment(comment_id: int, body: str) -> bool:
 GITHUB_USERNAME_RE = re.compile(r"@([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})")
 RTC_WALLET_RE = re.compile(r"(RTC[a-f0-9]{40})", re.IGNORECASE)
 GENERIC_WALLET_RE = re.compile(
-    r"(?:wallet|address)\s*[:=]?\s*([a-z0-9_-]{3,40})",
+    r"(?:wallet\s+address|wallet|address)\s*[:=]?\s*([a-z0-9_-]{3,80})",
     re.IGNORECASE,
 )
 

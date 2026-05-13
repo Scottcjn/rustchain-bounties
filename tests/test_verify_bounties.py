@@ -76,6 +76,29 @@ class TestVerifyBounties(unittest.TestCase):
         self.assertEqual(mod.find_existing_bot_comment(comments), 11)
         self.assertIsNone(mod.find_existing_bot_comment([{"id": 13, "body": "none"}]))
 
+    def test_extract_claimants_handles_wallet_address_phrase(self):
+        mod = load_verify_bounties()
+        comments = [
+            {
+                "id": 20,
+                "user": {"login": "alice"},
+                "body": "Wallet address: bai-su",
+            },
+            {
+                "id": 21,
+                "user": {"login": "bob"},
+                "body": "Wallet address: 6Da5nELroja5ngTwYZuofFur5V7gZCLvKVRX7iUahwz2",
+            },
+        ]
+
+        claimants = mod.extract_claimants(comments, issue_number=1589)
+
+        self.assertEqual(claimants[0]["wallet"], "bai-su")
+        self.assertEqual(
+            claimants[1]["wallet"],
+            "6Da5nELroja5ngTwYZuofFur5V7gZCLvKVRX7iUahwz2",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
