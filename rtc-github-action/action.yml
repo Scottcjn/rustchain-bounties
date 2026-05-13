@@ -1,0 +1,40 @@
+name: 'RTC Balance Query'
+description: 'Query RustChain (RTC) wallet balance information from PR context. Read-only — no transfer/send functionality.'
+author: 'legendhy'
+
+inputs:
+  wallet-address:
+    description: 'RustChain wallet address to query (overrides PR body / .rtc-wallet file)'
+    required: false
+    default: ''
+  query-amount:
+    description: 'Expected RTC amount to display in the comment (informational only)'
+    required: false
+    default: '20'
+  api-base-url:
+    description: 'RustChain API base URL'
+    required: false
+    default: 'https://rustchain.org'
+  github-token:
+    description: 'GitHub token for posting PR comments'
+    required: true
+  dry-run:
+    description: 'If true, only log results without posting a PR comment'
+    required: false
+    default: 'false'
+
+outputs:
+  balance:
+    description: 'The wallet balance retrieved from RustChain API'
+  wallet-address:
+    description: 'The wallet address that was queried'
+  status:
+    description: 'Query status: success or error'
+
+runs:
+  using: 'node20'
+  main: 'index.js'
+
+branding:
+  icon: 'search'
+  color: 'green'

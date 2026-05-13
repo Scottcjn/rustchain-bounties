@@ -1,0 +1,16 @@
+{
+  "name": "rtc-github-action",
+  "version": "1.0.0",
+  "description": "GitHub Action to query RustChain (RTC) wallet balance — read-only, no transfers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["github-action", "rustchain", "rtc", "balance-query", "read-only"],
+  "author": "legendhy",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0"
+  }
+}
