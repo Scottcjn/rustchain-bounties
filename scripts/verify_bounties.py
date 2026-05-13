@@ -14,6 +14,8 @@ Checks:
 Posts a verification comment on the bounty issue with results.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import json
@@ -239,7 +241,11 @@ def update_comment(comment_id: int, body: str) -> bool:
 # Patterns people use to claim bounties
 # We look for GitHub usernames in comments that aren't from bots or the owner
 GITHUB_USERNAME_RE = re.compile(r"@([a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38})")
-WALLET_RE = re.compile(r"(RTC[a-f0-9]{40}|[a-z0-9_-]{3,40})", re.IGNORECASE)
+RTC_WALLET_RE = re.compile(r"(RTC[a-f0-9]{40})", re.IGNORECASE)
+GENERIC_WALLET_RE = re.compile(
+    r"(?:wallet|address)\s*[:=]?\s*([a-z0-9_-]{3,40})",
+    re.IGNORECASE,
+)
 
 
 def extract_claimants(comments: list[dict], issue_number: int) -> list[dict]:
@@ -273,7 +279,7 @@ def extract_claimants(comments: list[dict], issue_number: int) -> list[dict]:
         seen.add(user.lower())
 
         # Try to extract a wallet address from the comment
-        wallet_match = WALLET_RE.search(body)
+        wallet_match = RTC_WALLET_RE.search(body) or GENERIC_WALLET_RE.search(body)
         wallet = wallet_match.group(1) if wallet_match else ""
 
         claimants.append({
