@@ -279,21 +279,33 @@ def main() -> None:
                     [
                         "python3",
                         ".github/scripts/update_xp_tracker_api.py",
-                        "--actor", user,
-                        "--event-type", "backfill",
-                        "--event-action", "xp_award",
-                        "--issue-number", "104",
-                        "--labels", f"{tier},backfill",
-                        "--pr-merged", "false",
-                        "--tracker-path", args.tracker,
-                        "--local-file", args.tracker,
+                        "--actor",
+                        user,
+                        "--event-type",
+                        "issues",
+                        "--event-action",
+                        "closed",
+                        "--issue-number",
+                        "104",
+                        "--labels",
+                        f"tier-{tier}",
+                        "--pr-merged",
+                        "false",
+                        "--tracker-path",
+                        args.tracker,
+                        "--local-file",
+                        args.tracker,
                     ],
-                    check=True,
                     capture_output=True,
                     text=True,
+                    check=True,
                 )
+                print(f"  Successfully updated XP for {user}")
             except subprocess.CalledProcessError as e:
-                print(f"Error updating XP for {user}: {e.stderr.strip()}", file=sys.stderr)
+                print(f"Error updating XP for {user}: {e.stderr.strip()}")
+                sys.exit(1)
+            except FileNotFoundError as e:
+                print(f"Error updating XP for {user}: {e}")
                 sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
