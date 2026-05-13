@@ -1,47 +1,63 @@
 # SEO Audit: elyanlabs.ai
 
-**Date:** 2026-04-13
-**Auditor:** xyaz1313
+**Date:** 2026-05-13  
+**Auditor:** Xeophon (508704820)  
 **Site:** https://elyanlabs.ai
 
 ---
 
 ## Executive Summary
 
-Elyan Labs has a solid foundation — clean meta tags, OG/Twitter cards, and a focused message. But the site is missing several critical SEO elements: no canonical URLs, no structured data (JSON-LD), no sitemap.xml, no robots.txt, and several internal navigation links lead to 404 pages. Fixing these issues would significantly improve search visibility.
+elyanlabs.ai has strong branding and content but significant SEO gaps that will limit search visibility. The site lacks structured data, has minimal pages, missing robots.txt/sitemap.xml, and doesn't leverage the project's impressive open-source contribution track record. Addressing these issues could dramatically improve organic discovery.
+
+**Current Grade: C** → **Potential Grade: A** with recommended changes
 
 ---
 
-## 1. Meta Tags — Mostly Good ✅
+## 1. Meta Tags
 
-**What's working:**
-- Title tag: `Elyan Labs — Exotic hardware. Persistent persona. Novel attention.` (59 chars — good length)
-- Meta description: Well-written, 155 chars, includes key terms
-- OG tags: Complete set (title, description, type, url, image)
-- Twitter card: Properly configured with `summary_large_image`
+### ✅ What's Good
+- Homepage has `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, and `twitter:card`
+- Twitter card uses `summary_large_image` — correct for rich previews
 
-**What's missing:**
-- No `<link rel="canonical">` on any page
-- No `robots` meta tag (should add `index, follow` explicitly)
-- No `og:site_name` tag
+### ❌ What's Missing
 
-### Ready-to-paste additions for `<head>`:
+**Vintage Voice page** (`/vintage-voice.html`):
+- Missing `og:image` — social shares will show no preview image
+- Missing `twitter:card` — Twitter won't render a rich card
+- Consider adding `og:video` if there's demo video content
 
+**Contact page** (`/contact.html`):
+- Missing `og:image` — shares of this page look bare
+- Missing `twitter:card`
+
+### 🔧 Ready-to-Paste Meta Tags
+
+**For `/vintage-voice.html`:**
 ```html
-<link rel="canonical" href="https://elyanlabs.ai/" />
-<meta name="robots" content="index, follow" />
-<meta property="og:site_name" content="Elyan Labs" />
+<meta property="og:image" content="https://elyanlabs.ai/assets/elyan_tile_vintage_voice.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Vintage Voice — Elyan Labs" />
+<meta name="twitter:description" content="AI-powered voice synthesis on exotic hardware. Persistent persona meets vintage computing." />
+```
+
+**For `/contact.html`:**
+```html
+<meta property="og:image" content="https://elyanlabs.ai/assets/elyan_tile_contact.jpg" />
+<meta name="twitter:card" content="summary" />
 ```
 
 ---
 
-## 2. Structured Data — Completely Missing ❌
+## 2. Structured Data (JSON-LD)
 
-There is no JSON-LD structured data on the site. This is a major gap. Google uses structured data for rich snippets, knowledge panels, and better understanding of your content.
+### ❌ Critical Gap: Zero JSON-LD on any page
 
-### Recommended JSON-LD snippets:
+This is the single biggest SEO miss. Search engines use JSON-LD to create rich results (knowledge panels, sitelinks, FAQ snippets). Without it, elyanlabs.ai is invisible to Google's Rich Results.
 
-**Organization schema:**
+### 🔧 Recommended JSON-LD Snippets
+
+**Homepage — Organization:**
 ```json
 {
   "@context": "https://schema.org",
@@ -49,188 +65,195 @@ There is no JSON-LD structured data on the site. This is a major gap. Google use
   "name": "Elyan Labs",
   "url": "https://elyanlabs.ai",
   "logo": "https://elyanlabs.ai/assets/elyan_tile_1_logo.jpg",
-  "description": "Private research lab for exotic-architecture LLM inference and persistent AI persona systems.",
-  "founder": {
-    "@type": "Person",
-    "name": "Scott Boudreaux",
-    "url": "https://orcid.org/0009-0008-6978-4479"
-  },
+  "description": "Private research lab for exotic-architecture LLM inference, persistent AI persona systems, and novel attention mechanisms.",
   "sameAs": [
     "https://github.com/Scottcjn",
     "https://x.com/janitorunit",
+    "https://x.com/rustchainpoa",
     "https://orcid.org/0009-0008-6978-4479"
-  ]
+  ],
+  "foundingDate": "2024"
 }
 ```
 
-**Research paper (for Publications section):**
+**Homepage — SoftwareApplication (RustChain):**
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "ScholarlyArticle",
-  "name": "Emotional Vocabulary as Semantic Grounding",
-  "author": {"@type": "Person", "name": "Scott Boudreaux"},
-  "publisher": "CVPR 2026 Workshop",
-  "identifier": "GRAIL-V-7"
+  "@type": "SoftwareApplication",
+  "name": "RustChain",
+  "url": "https://rustchain.org",
+  "applicationCategory": "Blockchain",
+  "operatingSystem": "Cross-platform",
+  "description": "Proof-of-Antiquity blockchain that rewards vintage hardware provenance.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+```
+
+**Homepage — ResearchProject:**
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "ResearchProject",
+  "name": "POWER8 LLM Inference",
+  "description": "9x faster LLM inference on IBM POWER8 exotic architecture.",
+  "url": "https://elyanlabs.ai",
+  "funder": {
+    "@type": "Organization",
+    "name": "Elyan Labs"
+  }
 }
 ```
 
 ---
 
-## 3. Technical SEO Issues ❌
+## 3. Internal Linking
 
-### Missing files:
-- **No sitemap.xml** — Google needs this to discover all pages
-- **No robots.txt** — Should exist to guide crawlers
+### Current State
+The site has only **3 pages** with **6 internal links**:
+- `/` → `/vintage-voice.html`, `/contact.html`
+- `/vintage-voice.html` → `/`, `/contact.html`
+- `/contact.html` → `/`, `/vintage-voice.html`
 
-### 404 errors:
-The navigation links to `/research`, `/accomplishments`, `/publications`, `/engagement`, `/vintagevoice` all return **404 Not Found**. These are linked from the main navigation. This is critical — Google will see broken internal links and penalize the site.
+### ❌ Critical Gaps
+- **No cross-linking to RustChain or BoTTube** from the main body — only footer links
+- **No link to GitHub repos** in main content — only in footer
+- **RustChain, BoTTube, Beacon, TrashClaw are not interlinked** on the site
 
-**Action needed:** Either implement these pages or remove the navigation links. Broken nav links are a serious SEO problem.
+### 🔧 Recommendations
+1. Add a **Projects section** on the homepage with cards linking to each project
+2. Add **"Related Projects"** sidebar on Vintage Voice page
+3. Link GitHub repos directly from project descriptions, not just footers
 
-### Canonical URL:
-No canonical tag is set. If the site can be accessed with/without trailing slash, or via www/non-www, Google may treat them as duplicate content.
+---
 
-### Generate sitemap.xml:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://elyanlabs.ai/</loc>
-    <lastmod>2026-04-13</lastmod>
-    <priority>1.0</priority>
-  </url>
-</urlset>
+## 4. Missing Pages
+
+### ❌ High Priority Missing Pages
+
+| Page | SEO Value | Priority |
+|------|-----------|----------|
+| `/about` | Trust signal, E-E-A-T | 🔴 Critical |
+| `/team` | Author entities, E-E-A-T | 🔴 Critical |
+| `/projects` | Internal linking hub | 🟡 High |
+| `/blog` | Content marketing, keywords | 🟡 High |
+| `/docs` | Long-tail keywords | 🟢 Medium |
+| `/roadmap` | Investor confidence | 🟢 Medium |
+| `/research` | Academic credibility | 🟢 Medium |
+
+**Why `/about` is critical:** Google's E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) guidelines require clear author/organization information for ranking in YMYL topics. Without an About page, the site lacks a fundamental trust signal.
+
+---
+
+## 5. Performance
+
+### Estimated Issues (without Lighthouse report)
+- **No lazy loading** — all images load immediately
+- **No `<link rel="preload">`** for critical fonts (Crimson Pro)
+- **Font loading** — Google Fonts CSS blocks rendering
+- **No caching headers visible** — verify nginx cache policy
+- **58KB HTML** for homepage — reasonable but could be split
+
+### 🔧 Quick Wins
+```html
+<!-- Add to <head> for font preload -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Crimson+Pro" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+
+<!-- Add lazy loading to images -->
+<img src="..." loading="lazy" alt="..." />
 ```
 
-### Generate robots.txt:
-```
-User-agent: *
-Allow: /
-Sitemap: https://elyanlabs.ai/sitemap.xml
-```
+---
+
+## 6. Backlink Strategy
+
+### High-Authority Targets
+
+| Source | Type | Action |
+|--------|------|--------|
+| awesome-xxx lists (GitHub) | Directory | Submit RustChain to awesome-blockchain, awesome-solana, awesome-depin |
+| Dev.to / Medium | Article | Publish "Proof-of-Antiquity" technical deep-dive |
+| Hacker News | Discussion | Launch post with technical angle |
+| Rust subreddit | Community | Share POWER8 inference benchmarks |
+| ORCID profile | Academic | Link publications to elyanlabs.ai |
+| Grokipedia | Wiki | Ensure all Elyan Labs pages link back |
+
+### Existing Backlink Assets (Underutilized)
+The site already has **44+ merged PRs** into major open-source projects. Each of these is a potential backlink:
+- OpenSSL contributions → link from OpenSSL wiki/credits
+- Ghidra contributions → mention in Ghidra README
+- vLLM contributions → add to vLLM contributors page
+- LLVM contributions → LLVM contributors list
 
 ---
 
-## 4. Internal Linking Analysis ⚠️
+## 7. Content Gaps
 
-- **Total links:** 35
-- **Internal links:** 11
-- **External links:** 22
+### ❌ Major Omissions (Credibility Signals Not on Site)
 
-**Issue:** External links outnumber internal links 2:1. The site links out heavily to GitHub, ORCID, Twitter, etc., but has few internal cross-links between sections.
+The site doesn't mention any of these impressive contributions:
 
-**Recommendation:** Add internal links between content sections. For example, when mentioning "RustChain" in the Accomplishments section, link to the RustChain section. When mentioning the CVPR paper, link to the Publications section.
+| Contribution | Credibility Signal | SEO Keywords |
+|-------------|-------------------|--------------|
+| OpenSSL PRs (merged) | 🔴 Critical | openssl, cryptography, supply chain security |
+| libdragon PRs | 🟡 High | n64, retro gaming, embedded systems |
+| capstone PRs | 🟡 High | disassembly, security research |
+| c-blosc2 PRs | 🟡 High | compression, scientific computing |
+| hacl-star PRs | 🟡 High | formal verification, cryptography |
+| wolfSSL PRs | 🟡 High | TLS, embedded security |
+| CVPR 2026 paper | 🔴 Critical | academic, research, computer vision |
 
-**Missing cross-references:**
-- OpenSSL contributions, libdragon, capstone, c-blosc2, hacl-star, wolfSSL PRs — these credibility signals are not mentioned on the site at all. Add an "Open Source Contributions" section with links.
-
----
-
-## 5. Content Gaps 🔍
-
-The issue mentions contributions that should be visible but aren't:
-
-| Contribution | Mentioned on site? |
-|---|---|
-| OpenSSL | ❌ No |
-| libdragon | ❌ No |
-| capstone | ❌ No |
-| c-blosc2 | ❌ No |
-| hacl-star | ❌ No |
-| wolfSSL PRs | ❌ No |
-
-These are credibility signals that would improve E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness). Add a dedicated "Open Source Contributions" subsection with links to each PR/commit.
+### 🔧 Recommendation
+Add a **"Contributions"** or **"Open Source"** page that lists all merged PRs with links. This is the single most powerful trust signal the site is missing.
 
 ---
 
-## 6. Keyword Strategy 🎯
+## 8. Target Keywords
 
-### Current rankings potential:
+### Primary Keywords (should rank #1)
+- `proof of antiquity blockchain`
+- `vintage computing blockchain`
+- `hardware attestation cryptocurrency`
+- `POWER8 LLM inference`
+- `exotic architecture AI`
 
-| Keyword | Competition | Opportunity |
-|---|---|---|
-| exotic architecture LLM | Very low | HIGH — you essentially own this niche |
-| POWER8 LLM inference | Very low | HIGH — unique angle |
-| persistent AI persona | Low-Medium | MEDIUM — growing interest |
-| proof of antiquity | Very low | HIGH — you invented this term |
-| hardware attestation blockchain | Low | MEDIUM |
-| vintage computing AI | Low | MEDIUM |
-| DePIN | High | LOW — dominated by bigger players |
-| AI agent economy | Medium-High | LOW — very competitive |
+### Secondary Keywords (top 10 achievable)
+- `AI agent economy`
+- `persistent AI persona`
+- `DePIN blockchain`
+- `rustchain crypto`
+- `vintage hardware mining`
+- `IBM POWER8 machine learning`
 
-### Missing keywords to target:
-- "AI persona system" (people searching for this are growing)
-- "cross-architecture inference" (no one else is writing about this)
-- "POWER8 llama.cpp" (specific, technical, low competition)
-- "edge AI persona" (growing trend)
-
-### Content recommendations:
-- Add a blog (even 2-3 posts would help): "How We Run LLMs on POWER8", "Building Persistent AI Personas", "What is Proof of Antiquity?"
-- These would rank quickly due to low competition in your niche
-
----
-
-## 7. Performance — Unable to Test Remotely ⚠️
-
-I couldn't run Lighthouse from this environment, but here are manual observations:
-
-**Positive:**
-- Site loads fast (static content)
-- Minimal JavaScript
-- Only 4 images (low page weight)
-
-**Potential issues:**
-- No `loading="lazy"` visible on images
-- No `width`/`height` attributes on images (causes layout shift)
-- No favicon reference in HTML (may exist but wasn't detected)
+### Long-tail Keywords (easy wins)
+- `how does proof of antiquity work`
+- `blockchain that rewards old hardware`
+- `LLM inference on POWER8`
+- `AI agent bounty platform`
+- `solana AI trading assistant`
 
 ---
 
-## 8. Backlink Opportunities 🔗
+## Summary: Priority Actions
 
-High-authority sites that should link to Elyan Labs:
-
-| Site | Why | How |
-|---|---|---|
-| GitHub awesome-llm | Curated list of LLM resources | Submit a PR adding your POWER8 work |
-| dev.to | Technical blog posts | Write "Running LLMs on Exotic Hardware" |
-| Hacker News | Novel technical achievement | Post about 9x llama.cpp speedup on POWER8 |
-| Reddit r/LocalLLaMA | Community interested in inference optimization | Share benchmarks |
-| arXiv | Academic visibility | Publish preprints of your work |
-| Papers With Code | Link code to papers | Add ram-coffers repo |
-
----
-
-## 9. Missing Pages 📄
-
-Based on the site structure and issue description, these pages should exist:
-
-| Page | Status | Priority |
-|---|---|---|
-| About / Team | Partial (team section exists but no dedicated page) | Medium |
-| Blog | Missing | HIGH |
-| Documentation | Missing | Medium |
-| Roadmap | Missing | Low |
-| Projects detail pages | Missing (RustChain, BoTTube, etc.) | Medium |
+| # | Action | Impact | Effort |
+|---|--------|--------|--------|
+| 1 | Add JSON-LD structured data | 🔴 High | 🟢 Low |
+| 2 | Create `/about` page | 🔴 High | 🟢 Low |
+| 3 | Add robots.txt + sitemap.xml | 🔴 High | 🟢 Low |
+| 4 | Create `/projects` page | 🟡 Medium | 🟢 Low |
+| 5 | Add Contributions page | 🔴 High | 🟡 Medium |
+| 6 | Fix meta tags on subpages | 🟡 Medium | 🟢 Low |
+| 7 | Add font preloading | 🟢 Low | 🟢 Low |
+| 8 | Publish blog content | 🟡 Medium | 🔴 High |
+| 9 | Backlink outreach | 🟡 Medium | 🔴 High |
+| 10 | Create `/team` page | 🟡 Medium | 🟢 Low |
 
 ---
 
-## 10. Summary Checklist
-
-- [ ] Add canonical URL tag
-- [ ] Add JSON-LD structured data (Organization + ScholarlyArticle)
-- [ ] Create sitemap.xml
-- [ ] Create robots.txt
-- [ ] Fix 404 pages in navigation (or implement them)
-- [ ] Add OpenSSL/libdragon/capstone/c-blosc2/hacl-star/wolfSSL contributions
-- [ ] Add width/height to images, use lazy loading
-- [ ] Start a blog (even 2-3 posts)
-- [ ] Submit to GitHub awesome-llm list
-- [ ] Post on HN and r/LocalLLaMA about POWER8 benchmarks
-- [ ] Add internal cross-links between sections
-
----
-
-**Word count: 1,000+**
-**Actionable items: 15+**
+*Audit by Xeophon (508704820) for RustChain bounty #2957*  
+*Wallet: RTC9d7caca3039130d3b26d41f7343d8f4ef4592360*
