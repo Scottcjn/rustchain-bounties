@@ -16,6 +16,7 @@ import argparse
 import json
 import re
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
@@ -276,22 +277,24 @@ def main() -> None:
             cmd = [
                 "python3",
                 ".github/scripts/update_xp_tracker_api.py",
-                "--local",
-                "--tracker",
-                args.tracker,
-                "--user",
-                user,
-                "--tier",
-                tier,
-                "--title",
-                f"Backfill from issue #104 ledger ({total_amount} RTC)",
+                "--actor", user,
+                "--event-type", "bounty_completion",
+                "--event-action", "backfill",
+                "--issue-number", "104",
+                "--labels", tier,
+                "--pr-merged", "true",
+                "--tracker-path", args.tracker,
+                "--local-file", args.tracker
             ]
-
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode != 0:
-                print(f"Error updating XP for {user}: {result.stderr}")
-            else:
-                print(f"Successfully updated XP for {user}")
+            try:
+                result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+                if result.stderr:
+                    print(f"Warning: {result.stderr.strip()}")
+            except subprocess.CalledProcessError as e:
+                print(f"Error updating XP for {user}: {e}")
+                if e.stderr:
+                    print(f"stderr: {e.stderr}")
+                sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
 
