@@ -283,20 +283,17 @@ def main() -> None:
                         "--event-type", "backfill",
                         "--event-action", "xp_award",
                         "--issue-number", "104",
-                        "--labels", tier,
+                        "--labels", f"{tier},backfill",
+                        "--pr-merged", "false",
                         "--tracker-path", args.tracker,
-                        "--local-file", args.tracker
+                        "--local-file", args.tracker,
                     ],
                     check=True,
                     capture_output=True,
-                    text=True
+                    text=True,
                 )
-                print(f"XP updated for {user}")
             except subprocess.CalledProcessError as e:
                 print(f"Error updating XP for {user}: {e.stderr.strip()}", file=sys.stderr)
-                sys.exit(1)
-            except Exception as e:
-                print(f"Error updating XP for {user}: {e}", file=sys.stderr)
                 sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
