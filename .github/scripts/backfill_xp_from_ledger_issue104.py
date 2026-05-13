@@ -275,37 +275,24 @@ def main() -> None:
 
         if not args.dry_run:
             try:
-                result = subprocess.run(
-                    [
-                        "python3",
-                        ".github/scripts/update_xp_tracker_api.py",
-                        "--actor",
-                        user,
-                        "--event-type",
-                        "issues",
-                        "--event-action",
-                        "closed",
-                        "--issue-number",
-                        "104",
-                        "--labels",
-                        f"tier-{tier}",
-                        "--pr-merged",
-                        "false",
-                        "--tracker-path",
-                        args.tracker,
-                        "--local-file",
-                        args.tracker,
-                    ],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                print(f"  Successfully updated XP for {user}")
+                cmd = [
+                    "python3",
+                    ".github/scripts/update_xp_tracker_api.py",
+                    "--actor", user,
+                    "--event-type", "backfill",
+                    "--event-action", "xp_award",
+                    "--issue-number", "104",
+                    "--labels", tier,
+                    "--pr-merged", "false",
+                    "--tracker-path", args.tracker,
+                    "--local-file", args.tracker,
+                ]
+                result = subprocess.run(cmd, check=True, capture_output=True, text=True)
             except subprocess.CalledProcessError as e:
-                print(f"Error updating XP for {user}: {e.stderr.strip()}")
+                print(f"Error updating XP for {user}: {e.stderr}", file=sys.stderr)
                 sys.exit(1)
-            except FileNotFoundError as e:
-                print(f"Error updating XP for {user}: {e}")
+            except Exception as e:
+                print(f"Error updating XP for {user}: {e}", file=sys.stderr)
                 sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
