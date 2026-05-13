@@ -280,8 +280,8 @@ def main() -> None:
                         "python3",
                         ".github/scripts/update_xp_tracker_api.py",
                         "--actor", user,
-                        "--event-type", "bounty_claim",
-                        "--event-action", "backfill",
+                        "--event-type", "backfill",
+                        "--event-action", "xp_award",
                         "--issue-number", "104",
                         "--labels", tier,
                         "--tracker-path", args.tracker,
@@ -291,8 +291,12 @@ def main() -> None:
                     capture_output=True,
                     text=True
                 )
+                print(f"XP updated for {user}")
             except subprocess.CalledProcessError as e:
-                print(f"Error updating XP for {user}: {e.stderr}")
+                print(f"Error updating XP for {user}: {e.stderr.strip()}", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                print(f"Error updating XP for {user}: {e}", file=sys.stderr)
                 sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
