@@ -23,7 +23,7 @@
 
 **RTC (RustChain Token)** est la cryptomonnaie native de [RustChain](https://github.com/Scottcjn/RustChain), une blockchain Proof-of-Antiquity où le matériel ancien permet d'obtenir des récompenses de minage plus élevées. Taux de référence RTC: **0,10 USD**.
 
-Les récompenses sont versées en RTC sur votre adresse de portefeuille après validation et vérification.
+Les récompenses sont versées en RTC sur votre address de portefeuille après validation et vérification.
 
 ## Comment Gagner des RTC
 
