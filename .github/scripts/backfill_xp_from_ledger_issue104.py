@@ -274,26 +274,22 @@ def main() -> None:
         print(f"Applying XP: {user} -> {total_amount} RTC -> {tier} tier")
 
         if not args.dry_run:
+            cmd = [
+                "python3",
+                ".github/scripts/update_xp_tracker_api.py",
+                "--actor", user,
+                "--event-type", "bounty_completion",
+                "--event-action", "backfill_xp",
+                "--issue-number", "104",
+                "--labels", f"tier:{tier}",
+                "--pr-merged", "false",
+                "--tracker-path", args.tracker,
+                "--local-file", args.tracker,
+            ]
             try:
-                subprocess.run(
-                    [
-                        "python3",
-                        ".github/scripts/update_xp_tracker_api.py",
-                        "--actor",
-                        user,
-                        "--event-type",
-                        "bounty",
-                        "--event-action",
-                        "completed",
-                        "--tracker-path",
-                        args.tracker,
-                        "--local-file",
-                        args.tracker,
-                    ],
-                    check=True,
-                )
+                result = subprocess.run(cmd, check=True, capture_output=True, text=True)
             except subprocess.CalledProcessError as e:
-                print(f"Error updating XP for {user}: {e}")
+                print(f"Error updating XP for {user}: {e.stderr}", file=sys.stderr)
                 sys.exit(1)
 
     print(f"Backfill complete. Processed {len(user_totals)} users.")
