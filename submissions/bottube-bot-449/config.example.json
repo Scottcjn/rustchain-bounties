@@ -1,0 +1,9 @@
+{
+    "api_token": "YOUR_BOTTUBE_API_TOKEN",
+    "channel_id": "YOUR_CHANNEL_ID",
+    "mode": "daily",
+    "interval_hours": 24,
+    "video_directory": "./videos",
+    "metadata_file": "./metadata.json",
+    "tags": ["bottube", "daily", "auto-upload"]
+}
