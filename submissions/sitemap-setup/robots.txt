@@ -1,0 +1,26 @@
+# robots.txt for RustChain (rustchain.xyz)
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://rustchain.xyz/sitemap.xml
+
+# Crawl-delay (be gentle on our servers)
+Crawl-delay: 1
+
+# Disallow admin/internal paths
+Disallow: /api/internal/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /static/internal/
+
+# Allow all public content
+Allow: /docs
+Allow: /ecosystem
+Allow: /validators
+Allow: /bounties
+Allow: /community
+Allow: /blog
+Allow: /careers
