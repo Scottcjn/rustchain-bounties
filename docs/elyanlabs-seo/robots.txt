@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://elyanlabs.ai/sitemap.xml
+
+# Elyan Labs — Proof of Antiquity Research
+# RustChain | BoTTube | Beacon | TrashClaw
