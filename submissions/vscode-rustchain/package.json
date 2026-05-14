@@ -1,0 +1,77 @@
+{
+  "name": "rustchain-wallet-miner",
+  "displayName": "RustChain Wallet & Miner Dashboard",
+  "description": "Monitor your RustChain wallet balance, miner status, and network info directly in VS Code.",
+  "version": "1.0.0",
+  "publisher": "rustchain",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "rustchain",
+    "blockchain",
+    "wallet",
+    "miner",
+    "crypto",
+    "rtc"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rustchain.showBalance",
+        "title": "RustChain: Show Wallet Balance"
+      },
+      {
+        "command": "rustchain.showNetworkStatus",
+        "title": "RustChain: Show Network Status"
+      },
+      {
+        "command": "rustchain.openDashboard",
+        "title": "RustChain: Open Dashboard"
+      },
+      {
+        "command": "rustchain.refreshData",
+        "title": "RustChain: Refresh Data"
+      }
+    ],
+    "configuration": {
+      "title": "RustChain",
+      "properties": {
+        "rustchain.apiUrl": {
+          "type": "string",
+          "default": "https://api.rustchain.xyz",
+          "description": "RustChain API base URL"
+        },
+        "rustchain.walletAddress": {
+          "type": "string",
+          "default": "",
+          "description": "Your RustChain wallet address (e.g. zp6)"
+        },
+        "rustchain.refreshInterval": {
+          "type": "number",
+          "default": 60,
+          "description": "Auto-refresh interval in seconds (0 to disable)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "echo \"No linter configured\""
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zp6/RustChain"
+  }
+}
