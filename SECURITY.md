@@ -4,34 +4,28 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| main    | :white_check_mark: |
-| latest  | :white_check_mark: |
+| 0.8.x   | :white_check_mark: |
+| < 0.8   | :x:                |
 
 ## Reporting a Vulnerability
 
 We take security vulnerabilities seriously. If you discover a security issue:
 
-1. **Do not** open a public GitHub issue.
-2. Email the maintainers or use GitHub's private vulnerability reporting feature.
+1. **Do NOT** open a public GitHub issue
+2. Email the maintainers or use GitHub's private vulnerability reporting
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
    - Potential impact
    - Suggested fix (if any)
 
-We will acknowledge your report within 48 hours and provide a resolution timeline within 7 days.
+## Security Considerations
 
-## Automated Dependency Updates
+- RustChain uses self-signed TLS certificates for node communication
+- All API endpoints should use HTTPS
+- Wallet private keys should never be shared or committed
+- Bridge operations require additional verification
 
-This project uses [Dependabot](https://docs.github.com/en/code-security/dependabot) to automatically check for dependency updates and security patches. Dependabot will:
+## Known Security Advisories
 
-- Check for outdated dependencies weekly
-- Automatically create pull requests for updates
-- Flag known security vulnerabilities
-
-## Security Best Practices
-
-- Keep dependencies up to date
-- Review Dependabot PRs promptly
-- Never commit secrets or credentials
-- Use environment variables for sensitive configuration
+See [SECURITY.md](./SECURITY.md) for the latest advisories.

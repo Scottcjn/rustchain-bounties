@@ -5,21 +5,19 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "deps(npm)"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "jaxint"
     labels:
       - "dependencies"
-      - "npm"
+      - "automated"
 
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/sdk/python"
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "deps(pip)"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "python"
@@ -29,9 +27,6 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "ci(deps)"
     labels:
       - "dependencies"
-      - "github-actions"
+      - "ci"
