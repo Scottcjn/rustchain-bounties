@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustChain — Proof of Antiquity Blockchain</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal section { text-align: left; }
+        .reveal .center { text-align: center; }
+        .reveal table { font-size: 0.65em; margin: 0.5em 0; }
+        .reveal table th { background: rgba(255,255,255,0.1); }
+        .reveal table td, .reveal table th { padding: 6px 12px; border: 1px solid rgba(255,255,255,0.15); }
+        .reveal pre { width: 100%; font-size: 0.55em; }
+        .reveal code { font-size: 0.75em; }
+        .reveal .highlight { color: #ffc107; }
+        .reveal .green { color: #4caf50; }
+        .reveal .red { color: #f44336; }
+        .reveal .blue { color: #42a5f5; }
+        .reveal blockquote { border-left: 4px solid #ffc107; padding-left: 1em; font-style: italic; }
+        .tier-legendary { color: #ff9800; font-weight: bold; }
+        .tier-epic { color: #9c27b0; font-weight: bold; }
+        .tier-rare { color: #2196f3; font-weight: bold; }
+        .tier-flagged { color: #f44336; font-weight: bold; }
+        .emoji { font-size: 1.2em; }
+        .reveal .slide-number { font-size: 0.5em; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Slide 1: Title -->
+            <section>
+                <h1 class="center">⚡ RustChain</h1>
+                <h2 class="center highlight">Proof of Antiquity Blockchain</h2>
+                <h3 class="center">Where Vintage Hardware Mines Again</h3>
+                <blockquote class="center">"Your 2005 laptop isn't e-waste. It's a mining rig."</blockquote>
+            </section>
+
+            <!-- Slide 2: What is RustChain? -->
+            <section>
+                <h2>What is RustChain?</h2>
+                <p>A lightweight blockchain ecosystem written in <span class="highlight">Rust</span> that rewards vintage hardware over modern silicon.</p>
+                <ul>
+                    <li><span class="red">Anti-arms-race</span> by design</li>
+                    <li><span class="green">Ultra-low overhead</span> — runs on &lt; 32 MB RAM</li>
+                    <li><span class="blue">Hardware diversity</span> as a security model</li>
+                    <li>Rust for memory safety &amp; bare-metal performance</li>
+                </ul>
+            </section>
+
+            <!-- Slide 3: The Problem -->
+            <section>
+                <h2>The Problem with Modern Blockchain</h2>
+                <ul>
+                    <li>🔥 <strong>E-waste skyrocketing</strong> — functional hardware in landfills</li>
+                    <li>🏭 <strong>Centralization</strong> — mining controlled by industrial farms</li>
+                    <li>💰 <strong>Priced out</strong> — 32 ETH (~$80,000) to validate on Ethereum</li>
+                    <li>⚡ <strong>Energy waste</strong> — ASICs consuming megawatts for trust</li>
+                </ul>
+                <p class="fragment">The original promise of blockchain — <em>anyone can participate</em> — is dead.</p>
+            </section>
+
+            <!-- Slide 4: The Solution -->
+            <section>
+                <h2>The Solution: Reverse Proof-of-Work</h2>
+                <table>
+                    <tr><th>Traditional Blockchain</th><th>RustChain</th></tr>
+                    <tr><td>Newest hardware wins</td><td class="highlight">Oldest hardware wins</td></tr>
+                    <tr><td>Hash rate is king</td><td>Antiquity is king</td></tr>
+                    <tr><td>$80,000 stake required</td><td class="green">$20 eBay laptop</td></tr>
+                    <tr><td>Centralized farms</td><td>Distributed enthusiasts</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 5: Consensus — Proof of Antiquity -->
+            <section>
+                <h2>Consensus: Proof of Antiquity (PoA)</h2>
+                <p>Rewards the <span class="highlight">age and authenticity</span> of physical hardware.</p>
+                <ul>
+                    <li><strong>Hardware fingerprinting</strong> — 6+1 cryptographic checks</li>
+                    <li><strong>Anti-emulation</strong> — VMs and containers rejected (0x)</li>
+                    <li><strong>Vintage multiplier</strong> — older, rarer silicon earns more</li>
+                    <li><strong>Physical commitment</strong> — SHA-256(nonce + wallet + entropy)</li>
+                </ul>
+            </section>
+
+            <!-- Slide 6: Hardware Fingerprinting -->
+            <section>
+                <h2>Hardware Fingerprinting: 6+1 Checks</h2>
+                <table>
+                    <tr><th>#</th><th>Check</th><th>What It Measures</th></tr>
+                    <tr><td>1</td><td>Clock-Skew &amp; Oscillator Drift</td><td>Timing variance via rdtsc/mftb</td></tr>
+                    <tr><td>2</td><td>Cache Timing Fingerprint</td><td>L1/L2/L3 latency patterns</td></tr>
+                    <tr><td>3</td><td>SIMD Unit Identity</td><td>SSE/AVX/AltiVec/NEON timing</td></tr>
+                    <tr><td>4</td><td>Thermal Drift Entropy</td><td>Entropy across thermal states</td></tr>
+                    <tr><td>5</td><td>Instruction Path Jitter</td><td>Cycle-level jitter (int/FP/branch)</td></tr>
+                    <tr><td>6</td><td>Anti-Emulation</td><td>VM/hypervisor detection</td></tr>
+                    <tr><td>+1</td><td>Physical Context</td><td>Serials + MAC consistency</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 7: Certification Flow -->
+            <section>
+                <h2>Hardware Certification Flow</h2>
+                <pre><code>Miner Request ──▶ Challenge (Nonce) ──▶ Fingerprint (6+1) ──▶ Submit Report
+                                                                      │
+                                                                      ▼
+                                                              Node Validation
+                                                              ✓ Nonce fresh?
+                                                              ✓ Commitment valid?
+                                                              ✓ Fingerprint passed?
+                                                              ✓ Architecture match?</code></pre>
+            </section>
+
+            <!-- Slide 8: Attestation Payload -->
+            <section>
+                <h2>Attestation Payload</h2>
+                <pre><code>{
+  "miner": "WALLET_ADDRESS",
+  "miner_id": "my-powerbook-g4",
+  "nonce": "SERVER_PROVIDED_NONCE",
+  "report": {
+    "commitment": "sha256(nonce + wallet + entropy_data)",
+    "entropy_score": 0.0045
+  },
+  "device": {
+    "family": "PowerPC", "arch": "g4",
+    "model": "PowerMac3,6", "serial": "CK245..."
+  },
+  "fingerprint": { "all_passed": true }
+}</code></pre>
+            </section>
+
+            <!-- Slide 9: Antiquity Multipliers -->
+            <section>
+                <h2>Antiquity Multipliers</h2>
+                <table>
+                    <tr><th>Tier</th><th>Multiplier</th><th>Examples</th></tr>
+                    <tr><td class="tier-legendary">Legendary</td><td>4.0x</td><td>Intel 386, 68000, MIPS R2000</td></tr>
+                    <tr><td class="tier-epic">Epic</td><td>2.5x</td><td>PowerPC G4, 486, Pentium I</td></tr>
+                    <tr><td class="tier-rare">Rare</td><td>2.0x</td><td>PowerPC G5, DEC Alpha, SPARC</td></tr>
+                    <tr><td>Common</td><td>0.8–1.0x</td><td>Modern x86_64 (Skylake+, Zen 3+)</td></tr>
+                    <tr><td class="tier-flagged">Flagged</td><td>0x</td><td>VMs, Emulators</td></tr>
+                </table>
+                <p>A 2003 PowerPC G4 iBook earns <span class="highlight">2.5×</span> more than a modern Threadripper.</p>
+            </section>
+
+            <!-- Slide 10: Multiplier Formula -->
+            <section>
+                <h2>Multiplier Formula</h2>
+                <h3>Time Decay (Vintage Hardware)</h3>
+                <pre><code>decay_factor = 1.0 - (0.15 × years_since_genesis)
+final_multiplier = 1.0 + (vintage_bonus × decay_factor)</code></pre>
+                <p>Vintage bonus decays <strong>15% per year</strong> from chain genesis (2025).</p>
+                <h3>Loyalty Bonus (Modern Hardware)</h3>
+                <pre><code>+15% per year uptime, capped at +50% (1.5x total)</code></pre>
+                <h3>Server Hardware Bonus</h3>
+                <pre><code>Xeon / EPYC / Opteron → flat +10%</code></pre>
+            </section>
+
+            <!-- Slide 11: Token Economics -->
+            <section>
+                <h2>Token Economics</h2>
+                <ul>
+                    <li><strong>Token</strong>: RTC (RustChain Token)</li>
+                    <li><strong>Reference rate</strong>: $0.10 USD</li>
+                    <li><span class="green">No ICO, no presale, no VC funding</span> — self-funded</li>
+                    <li><strong>Distribution</strong>: 100% via mining &amp; bounty rewards</li>
+                    <li><strong>Epoch</strong>: ~10 minutes (144 blocks/day)</li>
+                </ul>
+                <pre><code>Reward_miner = (Weight_miner / Σ Weight_all) × TotalEpochPot</code></pre>
+            </section>
+
+            <!-- Slide 12: Epoch Reward -->
+            <section>
+                <h2>Epoch Reward Mechanism</h2>
+                <pre><code>┌──────────────────────────────────────────────────┐
+│                 EPOCH (~10 min)                    │
+│                                                    │
+│  Miners enroll → Attest → Submit fingerprints     │
+│                                                    │
+│  At epoch end:                                     │
+│  1. Sum all attestation weights                    │
+│  2. Calculate each miner's share                   │
+│  3. Distribute RTC proportionally                  │
+│                                                    │
+│  Next epoch begins...                              │
+└──────────────────────────────────────────────────┘</code></pre>
+            </section>
+
+            <!-- Slide 13: vs Bitcoin PoW -->
+            <section>
+                <h2>vs Bitcoin Proof-of-Work</h2>
+                <table>
+                    <tr><th>Aspect</th><th>Bitcoin PoW</th><th>RustChain PoA</th></tr>
+                    <tr><td>Consensus</td><td>SHA-256 hash race</td><td>Hardware antiquity</td></tr>
+                    <tr><td>Hardware</td><td>ASIC miners ($10K+)</td><td class="green">Vintage Mac ($20–100)</td></tr>
+                    <tr><td>Energy</td><td>~150 TWh/year</td><td class="green">Negligible</td></tr>
+                    <tr><td>Sybil resistance</td><td>Computational cost</td><td>Physical hardware ID</td></tr>
+                    <tr><td>E-waste</td><td class="red">Generates massive e-waste</td><td class="green">Repurposes hardware</td></tr>
+                    <tr><td>Entry cost</td><td>Thousands of dollars</td><td class="green">A trip to eBay</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 14: vs Ethereum PoS -->
+            <section>
+                <h2>vs Ethereum Proof-of-Stake</h2>
+                <table>
+                    <tr><th>Aspect</th><th>Ethereum PoS</th><th>RustChain PoA</th></tr>
+                    <tr><td>Stake required</td><td>32 ETH (~$80K)</td><td class="green">Physical hardware</td></tr>
+                    <tr><td>Barrier to entry</td><td>Financial capital</td><td>A vintage computer</td></tr>
+                    <tr><td>Finality</td><td>~12.8 min</td><td>Per-block</td></tr>
+                    <tr><td>Sybil resistance</td><td>Economic slashing</td><td>Hardware fingerprinting</td></tr>
+                    <tr><td>Centralization risk</td><td class="red">Lido ~30%</td><td>No stake pooling</td></tr>
+                    <tr><td>Hardware</td><td>Modern server</td><td class="green">256 MB RAM sufficient</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 15: Security Model -->
+            <section>
+                <h2>Security Model</h2>
+                <h3>Multi-layered Defense</h3>
+                <ol>
+                    <li><strong>Nonce replay protection</strong> — 10-min TTL</li>
+                    <li><strong>6+1 fingerprint checks</strong> — VM/emulator detection</li>
+                    <li><strong>No mock signatures</strong> — mandatory admin key</li>
+                    <li><strong>Validated JSON</strong> — strict schema</li>
+                    <li><strong>Hardware serial verification</strong> — manufacturing DB cross-check</li>
+                    <li><strong>Antiquity multiplier</strong> — disincentivizes farms</li>
+                </ol>
+                <pre><code>Chain security: no_mock_sigs | mandatory_admin_key | replay_protection | validated_json</code></pre>
+            </section>
+
+            <!-- Slide 16: Developer Tools -->
+            <section>
+                <h2>Developer Tools</h2>
+                <table>
+                    <tr><th>Tool</th><th>Description</th></tr>
+                    <tr><td>Rust Miner</td><td>Cross-platform: x86_64, ARM, PowerPC, RISC-V</td></tr>
+                    <tr><td>Apple II Miner</td><td>6502 assembly — 4.0× on real Apple II</td></tr>
+                    <tr><td>Python SDK</td><td>pip install clawrtc</td></tr>
+                    <tr><td>MCP Server</td><td>AI agent integration (Model Context Protocol)</td></tr>
+                    <tr><td>VS Code Extension</td><td>Syntax highlighting + wallet</td></tr>
+                    <tr><td>Grafana Dashboards</td><td>Real-time monitoring</td></tr>
+                    <tr><td>Prometheus</td><td>Standard /metrics endpoint</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 17: API Reference -->
+            <section>
+                <h2>API Reference</h2>
+                <p><code>Base: https://50.28.86.131</code> (self-signed TLS)</p>
+                <table>
+                    <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+                    <tr><td>/api/stats</td><td>GET</td><td>System statistics</td></tr>
+                    <tr><td>/health</td><td>GET</td><td>Node health check</td></tr>
+                    <tr><td>/epoch</td><td>GET</td><td>Current epoch info</td></tr>
+                    <tr><td>/balance/{miner}</td><td>GET</td><td>Balance lookup</td></tr>
+                    <tr><td>/attest/challenge</td><td>POST</td><td>Request nonce</td></tr>
+                    <tr><td>/attest/submit</td><td>POST</td><td>Submit attestation</td></tr>
+                    <tr><td>/epoch/enroll</td><td>POST</td><td>Enroll in epoch</td></tr>
+                    <tr><td>/withdraw/*</td><td>POST/GET</td><td>Withdrawal mgmt</td></tr>
+                    <tr><td>/metrics</td><td>GET</td><td>Prometheus metrics</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 18: BoTTube -->
+            <section>
+                <h2>📺 BoTTube Integration</h2>
+                <p>RustChain's built-in video platform for the community.</p>
+                <ul>
+                    <li><strong>Embedded player</strong> — lightweight HTML5</li>
+                    <li><strong>Content bounties</strong> — earn RTC for tutorials</li>
+                    <li><strong>API-driven</strong> — /api/videos/{id}/stream</li>
+                    <li><strong>Upload Bot</strong> — automated video pipeline</li>
+                </ul>
+                <pre><code>&lt;!-- Embed anywhere --&gt;
+&lt;iframe src="https://rustchain.org/bottube/{video_id}"&gt;&lt;/iframe&gt;</code></pre>
+            </section>
+
+            <!-- Slide 19: Roadmap -->
+            <section>
+                <h2>Roadmap</h2>
+                <table>
+                    <tr><th>Phase</th><th>Status</th><th>Goals</th></tr>
+                    <tr><td>Phase 1</td><td class="green">✅ Complete</td><td>Core chain, miners, BCOS</td></tr>
+                    <tr><td>Phase 2</td><td class="highlight">🔄 Active</td><td>500+ stars, exchanges, dual-mining</td></tr>
+                    <tr><td>Phase 3</td><td>Planned</td><td>Cross-chain bridges, mobile, DAO</td></tr>
+                    <tr><td>Phase 4</td><td>Future</td><td>Museum partnerships, global network</td></tr>
+                </table>
+                <p><strong>Active:</strong> Warthog integration · Red team bounties (200 RTC each) · i18n docs</p>
+            </section>
+
+            <!-- Slide 20: Supported Architectures -->
+            <section>
+                <h2>Supported Architectures</h2>
+                <table>
+                    <tr><th>CPU</th><th>Family</th><th>Multiplier</th></tr>
+                    <tr><td>Apple II (6502)</td><td>6502</td><td class="highlight">4.0x ⭐</td></tr>
+                    <tr><td>PowerPC 7450</td><td>PowerPC G4</td><td class="highlight">2.5x</td></tr>
+                    <tr><td>PowerPC 970</td><td>PowerPC G5</td><td>2.0x</td></tr>
+                    <tr><td>PowerPC 750</td><td>PowerPC G3</td><td>1.8x</td></tr>
+                    <tr><td>Intel Core 2</td><td>x86_64</td><td>1.3x</td></tr>
+                    <tr><td>Apple M1/M2/M3</td><td>ARM</td><td>1.2x</td></tr>
+                    <tr><td>StarFive JH7110</td><td>RISC-V</td><td>1.1x</td></tr>
+                    <tr><td>Modern x86_64</td><td>x86_64</td><td>1.0x</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 21: Get Started -->
+            <section>
+                <h2>Get Started in 4 Steps</h2>
+                <pre><code># 1. Clone the miner
+git clone https://github.com/Scottcjn/RustChain.git
+cd rustchain-miner
+
+# 2. Build
+cargo build --release
+
+# 3. Start mining
+./target/release/rustchain-miner --wallet YOUR_WALLET
+
+# 4. Check your balance
+curl -sk https://50.28.86.131/balance/YOUR_WALLET</code></pre>
+                <p>Or earn via bounties: <a href="https://github.com/Scottcjn/rustchain-bounties">131 open bounties</a>, 5,900+ RTC available</p>
+            </section>
+
+            <!-- Slide 22: Community -->
+            <section>
+                <h2>Community &amp; Links</h2>
+                <table>
+                    <tr><th>Resource</th><th>Link</th></tr>
+                    <tr><td>RustChain</td><td>github.com/Scottcjn/RustChain</td></tr>
+                    <tr><td>Block Explorer</td><td>50.28.86.131/explorer</td></tr>
+                    <tr><td>Discord</td><td>discord.gg/VqVVS2CW9Q</td></tr>
+                    <tr><td>Bounties</td><td>github.com/Scottcjn/rustchain-bounties</td></tr>
+                    <tr><td>BCOS</td><td>rustchain.org/bcos/</td></tr>
+                    <tr><td>Traction Report</td><td>Q1 2026 Developer Traction</td></tr>
+                </table>
+            </section>
+
+            <!-- Slide 23: Q&A -->
+            <section class="center">
+                <h1>⚡ Questions?</h1>
+                <h2>RustChain — <span class="highlight">We put the power back in the old circuits.</span></h2>
+                <p>⭐ Star us · 💬 Join Discord · 📧 Contribute &amp; Earn RTC</p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            progress: true,
+            controls: true,
+            center: false,
+            transition: 'slide',
+            plugins: [ RevealHighlight, RevealNotes ],
+            width: 1200,
+            height: 700
+        });
+    </script>
+</body>
+</html>
