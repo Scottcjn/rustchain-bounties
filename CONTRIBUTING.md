@@ -189,3 +189,16 @@ By contributing, you agree that your contributions will be licensed under the sa
 ---
 
 **Happy contributing! Every PR brings Rustchain closer to its vision.** 🦀⛓️
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|--------|
+| Fork repo | Click Fork on GitHub |
+| Create branch | git checkout -b my-fix |
+| Push changes | git push origin my-fix |
+| Open PR | Use GitHub PR UI against main |
+| Check balance | curl -k https://50.28.86.131/balance/WALLET_ID |
+| Explorer | https://explorer.rustchain.org/ |
