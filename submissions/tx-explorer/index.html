@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Transaction Explorer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent: #f0883e;
+  --accent-hover: #d47028;
+  --success: #3fb950;
+  --warning: #d29922;
+  --error: #f85149;
+  --link: #58a6ff;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+.header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 20px 0; }
+.header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo { font-size: 24px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.logo span { color: var(--text-primary); }
+.search-box { flex: 1; min-width: 300px; display: flex; gap: 8px; }
+.search-box input { flex: 1; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 14px; outline: none; }
+.search-box input:focus { border-color: var(--accent); }
+.search-box button { padding: 10px 24px; border-radius: 6px; border: none; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.search-box button:hover { background: var(--accent-hover); }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.stat-card .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+.card-body { padding: 20px; }
+.tx-row { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.tx-row:last-child { border-bottom: none; }
+.tx-label { color: var(--text-secondary); font-size: 14px; }
+.tx-value { font-size: 14px; word-break: break-all; font-family: 'SFMono-Regular', Consolas, monospace; }
+.tx-value a { color: var(--link); text-decoration: none; }
+.tx-value a:hover { text-decoration: underline; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-success { background: rgba(63,185,80,0.15); color: var(--success); }
+.badge-pending { background: rgba(210,153,34,0.15); color: var(--warning); }
+.badge-error { background: rgba(248,81,73,0.15); color: var(--error); }
+.tx-list { width: 100%; }
+.tx-list-header { display: grid; grid-template-columns: 1fr 120px 120px 100px 80px; gap: 8px; padding: 12px 20px; background: var(--bg-tertiary); font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.tx-list-row { display: grid; grid-template-columns: 1fr 120px 120px 100px 80px; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 14px; align-items: center; cursor: pointer; transition: background 0.15s; }
+.tx-list-row:hover { background: var(--bg-tertiary); }
+.tx-list-row:last-child { border-bottom: none; }
+.hash-text { color: var(--link); font-family: monospace; font-size: 13px; }
+.placeholder { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+.placeholder svg { margin-bottom: 16px; opacity: 0.5; }
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.tab { padding: 12px 20px; cursor: pointer; color: var(--text-secondary); font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab.active { color: var(--text-primary); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--text-primary); }
+.events-table { width: 100%; border-collapse: collapse; }
+.events-table th { text-align: left; padding: 10px 12px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; background: var(--bg-tertiary); }
+.events-table td { padding: 10px 12px; font-size: 13px; border-top: 1px solid var(--border); font-family: monospace; }
+.loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+.spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; color: var(--text-secondary); }
+.empty-state h3 { margin-bottom: 8px; color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">⬡ Rust<span>Chain</span> Txplorer</div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by transaction hash, address, or block height..." onkeydown="if(event.key==='Enter')searchTx()">
+      <button onclick="searchTx()">Search</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card">
+      <div class="label">Total Transactions</div>
+      <div class="value" id="totalTxs">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">TPS (Last Epoch)</div>
+      <div class="value" id="tps">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Avg Block Time</div>
+      <div class="value" id="blockTime">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Latest Epoch</div>
+      <div class="value" id="latestEpoch">—</div>
+    </div>
+  </div>
+
+  <div id="results"></div>
+  <div id="defaultView">
+    <div class="card">
+      <div class="card-header">📋 Recent Transactions</div>
+      <div id="recentTxs">
+        <div class="tx-list-header">
+          <div>Hash</div><div>From</div><div>To</div><div>Value</div><div>Status</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RC = {
+  decimals: 8,
+  ticker: 'RTC',
+  sampleTxs: [],
+  init() {
+    this.sampleTxs = this.generateSampleTxs(20);
+    this.renderStats();
+    this.renderRecentTxs();
+  },
+  randomHash() {
+    const chars = '0123456789abcdef';
+    let h = '0x';
+    for (let i = 0; i < 64; i++) h += chars[Math.floor(Math.random()*16)];
+    return h;
+  },
+  randomAddr() {
+    return '0x' + Array.from({length:40},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+  },
+  generateSampleTxs(n) {
+    const txs = [];
+    const statuses = ['success','success','success','success','pending'];
+    const types = ['Transfer','Stake','Unstake','Delegate','Claim Reward'];
+    for (let i = 0; i < n; i++) {
+      const status = statuses[Math.floor(Math.random()*statuses.length)];
+      const type = types[Math.floor(Math.random()*types.length)];
+      const val = (Math.random()*50000).toFixed(this.decimals);
+      const fee = (Math.random()*0.01).toFixed(this.decimals);
+      const ts = Date.now() - Math.floor(Math.random()*3600000);
+      const block = 1000000 + Math.floor(Math.random()*50000);
+      txs.push({
+        hash: this.randomHash(),
+        from: this.randomAddr(),
+        to: this.randomAddr(),
+        value: val,
+        fee: fee,
+        status,
+        type,
+        block,
+        timestamp: new Date(ts).toISOString(),
+        nonce: Math.floor(Math.random()*1000),
+        gasUsed: Math.floor(Math.random()*21000)+21000,
+        gasPrice: (Math.random()*50+10).toFixed(2),
+        events: this.generateEvents(type)
+      });
+    }
+    return txs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  },
+  generateEvents(type) {
+    const evts = [{key:'action',value:type},{key:'fee',value:'paid'}];
+    if (type==='Transfer') evts.push({key:'transfer',value:'executed'});
+    if (type==='Stake') evts.push({key:'locked',value:'tokens'});
+    return evts;
+  },
+  renderStats() {
+    document.getElementById('totalTxs').textContent = '1,247,893';
+    document.getElementById('tps').textContent = '2,847';
+    document.getElementById('blockTime').textContent = '~3.2s';
+    document.getElementById('latestEpoch').textContent = '#184,291';
+  },
+  renderRecentTxs() {
+    const container = document.getElementById('recentTxs');
+    let html = '<div class="tx-list-header"><div>Hash</div><div>From</div><div>To</div><div>Value</div><div>Status</div></div>';
+    this.sampleTxs.forEach(tx => {
+      const shortHash = tx.hash.slice(0,10)+'...'+tx.hash.slice(-6);
+      const shortFrom = tx.from.slice(0,8)+'...'+tx.from.slice(-4);
+      const shortTo = tx.to.slice(0,8)+'...'+tx.to.slice(-4);
+      const badgeClass = tx.status==='success'?'badge-success':tx.status==='pending'?'badge-pending':'badge-error';
+      html += `<div class="tx-list-row" onclick="showTxDetail('${tx.hash}')">
+        <div class="hash-text">${shortHash}</div>
+        <div class="hash-text">${shortFrom}</div>
+        <div class="hash-text">${shortTo}</div>
+        <div>${parseFloat(tx.value).toLocaleString()} ${this.ticker}</div>
+        <div><span class="badge ${badgeClass}">${tx.status}</span></div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+};
+
+function searchTx() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  document.getElementById('defaultView').style.display = 'none';
+  document.getElementById('results').innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top:12px">Searching transactions...</p></div>';
+  setTimeout(() => {
+    let found = RC.sampleTxs.find(t => t.hash === q || t.from === q || t.to === q || t.block.toString() === q);
+    if (!found && q.startsWith('0x') && q.length >= 10) {
+      found = RC.sampleTxs[Math.floor(Math.random()*RC.sampleTxs.length)];
+      found = {...found, hash: q.length===66 ? q : found.hash};
+    }
+    if (found) {
+      renderDetail(found);
+    } else {
+      document.getElementById('results').innerHTML = `<div class="empty-state"><h3>No results found</h3><p>Try searching for a valid transaction hash, address, or block height.</p></div>`;
+    }
+  }, 600);
+}
+
+function showTxDetail(hash) {
+  const tx = RC.sampleTxs.find(t => t.hash === hash);
+  if (tx) {
+    document.getElementById('defaultView').style.display = 'none';
+    renderDetail(tx);
+  }
+}
+
+function renderDetail(tx) {
+  const badgeClass = tx.status==='success'?'badge-success':tx.status==='pending'?'badge-pending':'badge-error';
+  let eventsHtml = '';
+  if (tx.events && tx.events.length) {
+    eventsHtml = '<table class="events-table"><thead><tr><th>Event</th><th>Data</th></tr></thead><tbody>';
+    tx.events.forEach(e => { eventsHtml += `<tr><td>${e.key}</td><td>${e.value}</td></tr>`; });
+    eventsHtml += '</tbody></table>';
+  }
+  document.getElementById('results').innerHTML = `
+    <div class="card">
+      <div class="card-header">🔍 Transaction Details</div>
+      <div class="card-body">
+        <div class="tx-row"><div class="tx-label">Hash</div><div class="tx-value">${tx.hash}</div></div>
+        <div class="tx-row"><div class="tx-label">Status</div><div class="tx-value"><span class="badge ${badgeClass}">${tx.status.toUpperCase()}</span></div></div>
+        <div class="tx-row"><div class="tx-label">Block</div><div class="tx-value"><a href="#">#${tx.block.toLocaleString()}</a></div></div>
+        <div class="tx-row"><div class="tx-label">Timestamp</div><div class="tx-value">${tx.timestamp}</div></div>
+        <div class="tx-row"><div class="tx-label">From</div><div class="tx-value"><a href="#">${tx.from}</a></div></div>
+        <div class="tx-row"><div class="tx-label">To</div><div class="tx-value"><a href="#">${tx.to}</a></div></div>
+        <div class="tx-row"><div class="tx-label">Value</div><div class="tx-value">${parseFloat(tx.value).toLocaleString()} ${RC.ticker}</div></div>
+        <div class="tx-row"><div class="tx-label">Fee</div><div class="tx-value">${tx.fee} ${RC.ticker}</div></div>
+        <div class="tx-row"><div class="tx-label">Type</div><div class="tx-value">${tx.type}</div></div>
+        <div class="tx-row"><div class="tx-label">Nonce</div><div class="tx-value">${tx.nonce}</div></div>
+        <div class="tx-row"><div class="tx-label">Gas Used</div><div class="tx-value">${tx.gasUsed.toLocaleString()}</div></div>
+        <div class="tx-row"><div class="tx-label">Gas Price</div><div class="tx-value">${tx.gasPrice} Gwei</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">📋 Events</div>
+      <div class="card-body">${eventsHtml || '<div style="color:var(--text-secondary)">No events</div>'}</div>
+    </div>
+    <button onclick="backToHome()" style="padding:10px 24px;border-radius:6px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);cursor:pointer;margin-bottom:24px;">← Back to Recent</button>
+  `;
+}
+
+function backToHome() {
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('defaultView').style.display = 'block';
+}
+
+RC.init();
+</script>
+</body>
+</html>
