@@ -1,0 +1,9 @@
+{
+  "node_url": "https://50.28.86.131",
+  "wallet": "zp6",
+  "poll_interval_seconds": 60,
+  "history_csv": "history.csv",
+  "log_level": "INFO",
+  "verify_ssl": false,
+  "notify_command": ""
+}
