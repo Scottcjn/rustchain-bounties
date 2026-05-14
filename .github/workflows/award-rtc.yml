@@ -1,0 +1,36 @@
+# Auto-Award RTC on PR Merge — using BossChaos/rtc-reward-action
+#
+# This workflow uses the improved TypeScript-based action that:
+# - Supports configurable RTC amounts
+# - Maps contributor GitHub usernames to wallet addresses
+# - Supports dry-run mode
+# - Auto-comments on merged PRs with payment confirmation
+#
+# See: https://github.com/BossChaos/rtc-reward-action
+
+name: RTC Reward on PR Merge
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  pull-requests: write
+  issues: read
+
+jobs:
+  award-rtc:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Award 20 RTC to contributor
+        uses: BossChaos/rtc-reward-action@v1.0.0
+        with:
+          rtc-amount: '20'
+          wallet-address: 'RTC6d1f27d28961279f1034d9561c2403697eb55602'
+          dry-run: 'true'  # Set to 'false' to enable live payments
+          contributor-wallet-map: '{}'
+          comment-on-success: 'true'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
