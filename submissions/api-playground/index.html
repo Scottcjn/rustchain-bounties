@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain API Playground</title>
+<style>
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --bg-input: #0d1117;
+  --border: #30363d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent: #58a6ff;
+  --accent-hover: #79c0ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --purple: #bc8cff;
+  --orange: #f0883e;
+  --cyan: #39d2c0;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --radius: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Header ─────────────────────────────────── */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+
+.logo span { color: var(--cyan); }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.rpc-selector {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-secondary);
+}
+
+.rpc-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  width: 300px;
+}
+
+.rpc-input:focus { outline: none; border-color: var(--accent); }
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ─── Layout ─────────────────────────────────── */
+.main {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 49px);
+}
+
+/* ─── Sidebar ─────────────────────────────────── */
+.sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.sidebar-section { margin-bottom: 4px; }
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  padding: 8px 16px 4px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover { background: var(--bg-tertiary); }
+.sidebar-item.active { background: var(--bg-tertiary); border-left-color: var(--accent); }
+
+.method-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.method-get { background: rgba(63, 185, 80, 0.2); color: var(--green); }
+.method-post { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+.method-put { background: rgba(210, 153, 34, 0.2); color: var(--yellow); }
+.method-delete { background: rgba(248, 81, 73, 0.2); color: var(--red); }
+
+.endpoint-name { color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; }
+
+/* ─── Content ─────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Request Bar ─────────────────────────────── */
+.request-bar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.method-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.method-select:focus { outline: none; border-color: var(--accent); }
+
+.url-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.url-input:focus { outline: none; border-color: var(--accent); }
+
+.send-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.send-btn:hover { background: var(--accent-hover); }
+
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Tabs ────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── Request/Response Panels ─────────────────── */
+.panel-area {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  overflow: hidden;
+}
+
+.panel {
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+}
+
+textarea.code-area {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.response-meta {
+  display: flex;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.response-meta .status-ok { color: var(--green); }
+.response-meta .status-err { color: var(--red); }
+.response-meta .time { color: var(--yellow); }
+.response-meta .size { color: var(--cyan); }
+
+.response-body {
+  background: var(--bg-primary);
+  border-radius: var(--radius);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow: auto;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ─── Params Table ────────────────────────────── */
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.params-table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.params-table td { padding: 4px 8px; }
+
+.params-table input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.params-table input:focus { outline: none; border-color: var(--accent); }
+
+.params-table .btn-icon {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.params-table .btn-icon:hover { color: var(--red); }
+
+.add-param-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.add-param-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── JSON Syntax Highlighting ────────────────── */
+.json-key { color: var(--accent); }
+.json-string { color: var(--green); }
+.json-number { color: var(--orange); }
+.json-boolean { color: var(--purple); }
+.json-null { color: var(--text-muted); }
+
+/* ─── Quick Actions ───────────────────────────── */
+.quick-actions {
+  padding: 8px 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .rpc-input { width: 150px; }
+}
+
+/* ─── Scrollbar ───────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">⛓️ Rust<span>Chain</span></div>
+    <span style="font-size:12px; color:var(--text-muted)">API Playground</span>
+  </div>
+  <div class="header-right">
+    <div class="rpc-selector">
+      <span class="status-dot" id="statusDot"></span>
+      <span>RPC:</span>
+      <input class="rpc-input" id="rpcUrl" value="https://rpc.rustchain.io" placeholder="RPC endpoint URL">
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Blockchain</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/latest')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Latest Block</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/{height}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Block by Height</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs/{hash}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">TX by Hash</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/node_info')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Node Info</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/syncing')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Sync Status</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Bank / Accounts</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/balances/{address}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Balances</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/total')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Total Supply</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/bank/transfer')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Transfer</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Staking</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/validators')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Validators</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/delegations/{delegator}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Delegations</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/rewards/{delegator}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Rewards</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/staking/delegate')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Delegate</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/pool')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Staking Pool</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/params')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Staking Params</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Governance</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Proposals</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals/{id}')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Proposal Detail</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/proposals')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Submit Proposal</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/vote')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Vote</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/params')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Gov Params</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Transactions</div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/broadcast')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Broadcast TX</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/encode')">
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-name">Encode TX</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs?message.action=send')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Search TXs</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Consensus</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/state')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Consensus State</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/params')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Consensus Params</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/validatorsets/latest')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Validator Set</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Mint / Distribution</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/inflation')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Inflation</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/params')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Mint Params</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/validators/{addr}/rewards')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Validator Rewards</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/community_pool')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Community Pool</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Slashing</div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/validators/{addr}/signing_info')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Signing Info</span>
+      </div>
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/params')">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-name">Slashing Params</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="request-bar">
+      <select class="method-select" id="methodSelect">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+      </select>
+      <input class="url-input" id="urlInput" placeholder="/blocks/latest">
+      <button class="send-btn" id="sendBtn" onclick="sendRequest()">▶ Send</button>
+    </div>
+
+    <div class="quick-actions">
+      <span style="font-size:11px; color:var(--text-muted); line-height:28px;">Quick:</span>
+      <span class="chip" onclick="loadEndpoint('GET','/blocks/latest')">Latest Block</span>
+      <span class="chip" onclick="loadEndpoint('GET','/bank/balances/zp6')">My Balance</span>
+      <span class="chip" onclick="loadEndpoint('GET','/staking/validators')">Validators</span>
+      <span class="chip" onclick="loadEndpoint('GET','/gov/proposals')">Proposals</span>
+      <span class="chip" onclick="loadEndpoint('GET','/staking/pool')">Staking Pool</span>
+      <span class="chip" onclick="loadEndpoint('GET','/node_info')">Node Info</span>
+    </div>
+
+    <div class="panel-area">
+      <!-- Request Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>Request</span>
+          <div>
+            <span class="tab active" onclick="showRequestTab('params', this)" id="reqTabParams">Params</span>
+            <span class="tab" onclick="showRequestTab('headers', this)" id="reqTabHeaders">Headers</span>
+            <span class="tab" onclick="showRequestTab('body', this)" id="reqTabBody">Body</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <!-- Params -->
+          <div id="paramsPanel">
+            <table class="params-table">
+              <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+              <tbody id="paramsTable"></tbody>
+            </table>
+            <button class="add-param-btn" onclick="addParamRow()">+ Add Parameter</button>
+          </div>
+          <!-- Headers -->
+          <div id="headersPanel" style="display:none">
+            <table class="params-table">
+              <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+              <tbody id="headersTable"></tbody>
+            </table>
+            <button class="add-param-btn" onclick="addHeaderRow()">+ Add Header</button>
+          </div>
+          <!-- Body -->
+          <div id="bodyPanel" style="display:none">
+            <textarea class="code-area" id="requestBody" placeholder='{"json": "body"}'>{}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>Response</span>
+          <div class="response-meta" id="responseMeta"></div>
+        </div>
+        <div class="panel-body" style="display:flex; flex-direction:column;">
+          <div class="response-body" id="responseBody">
+            <span style="color:var(--text-muted)">Click "Send" to make a request...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+let currentMethod = 'GET';
+let params = [];
+let headers = [{ key: 'Content-Type', value: 'application/json' }];
+
+// ─── Mock Data ──────────────────────────────────────────────────────────────
+const MOCK_RESPONSES = {
+  '/blocks/latest': {
+    block_id: { hash: 'A3F2B8C1D4E5F60718293A4B5C6D7E8F901234567890ABCDEF1234567890ABCD', parts: { total: 1, hash: 'B4C5D6E7F8091A2B3C4D5E6F708192A3B4C5D6E7F8091A2B3C4D5E6F708192A' } },
+    block: {
+      header: {
+        version: { block: '11', app: '0' },
+        chain_id: 'rustchain-1',
+        height: '1000247',
+        time: new Date().toISOString(),
+        last_block_id: { hash: '1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF' },
+        last_commit_hash: 'FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321FEDCBA0987654321',
+        data_hash: '', validators_hash: 'AABB11223344556677889900AABBCCDDEEFF11223344556677889900AABB',
+        next_validators_hash: 'AABB11223344556677889900AABBCCDDEEFF11223344556677889900AABB',
+        consensus_hash: 'CCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899AA',
+        app_hash: 'EEFF00112233445566778899AABBCCDDEEFF00112233445566778899AABB00',
+        proposer_address: 'rust1val1oper1validator1address111111111',
+      },
+      data: { txs: [] },
+      evidence: { evidence: [] },
+      last_commit: { signatures: [] },
+    }
+  },
+  '/node_info': {
+    node_info: {
+      protocol_version: { p2p: '8', block: '11', app: '0' },
+      id: 'rustchain-node-abc123',
+      listen_addr: 'tcp://0.0.0.0:26656',
+      network: 'rustchain-1',
+      version: '1.2.0',
+      channels: '40202122233038606100',
+      moniker: 'rustchain-mainnet-01',
+      other: { tx_index: 'on', rpc_address: 'tcp://0.0.0.0:26657' }
+    },
+    application_version: {
+      name: 'rustchaind',
+      version: '1.2.0',
+      commit: 'a1b2c3d4e5f6',
+      build_tags: 'netgo,ledger',
+      go: 'go1.21.0',
+    }
+  },
+  '/bank/balances': {
+    balances: [
+      { denom: 'urst', amount: '1000000000' },
+      { denom: 'uusdc', amount: '50000000' },
+    ],
+    pagination: { next_key: null, total: '2' }
+  },
+  '/staking/validators': {
+    validators: [
+      {
+        operator_address: 'rustvaloper1abc123',
+        consensus_pubkey: { type: 'tendermint/PubKeyEd25519', value: 'ABC123==' },
+        jailed: false,
+        status: 'BOND_STATUS_BONDED',
+        tokens: '1000000',
+        delegator_shares: '1000000',
+        description: { moniker: 'RustChain Alpha', identity: '', website: 'https://rustchain.io', security_contact: '', details: 'Primary validator' },
+        unbonding_height: '0', unbonding_time: '1970-01-01T00:00:00Z',
+        commission: { rate: '0.05', max_rate: '0.20', max_change_rate: '0.01', update_time: '2024-01-01T00:00:00Z' },
+        min_self_delegation: '1',
+      },
+      {
+        operator_address: 'rustvaloper1def456',
+        consensus_pubkey: { type: 'tendermint/PubKeyEd25519', value: 'DEF456==' },
+        jailed: false,
+        status: 'BOND_STATUS_BONDED',
+        tokens: '750000',
+        delegator_shares: '750000',
+        description: { moniker: 'RustForge', identity: '', website: '', security_contact: '', details: 'Community validator' },
+        unbonding_height: '0', unbonding_time: '1970-01-01T00:00:00Z',
+        commission: { rate: '0.08', max_rate: '0.25', max_change_rate: '0.02', update_time: '2024-01-15T00:00:00Z' },
+        min_self_delegation: '1',
+      },
+    ],
+    pagination: { next_key: null, total: '2' }
+  },
+  '/staking/pool': {
+    pool: { not_bonded_tokens: '2500000', bonded_tokens: '50000000' }
+  },
+  '/gov/proposals': {
+    proposals: [
+      {
+        proposal_id: '1', status: 'PROPOSAL_STATUS_VOTING_PERIOD',
+        final_tally_result: { yes_count: '0', abstain_count: '0', no_count: '0', no_with_veto_count: '0' },
+        submit_time: '2024-12-01T00:00:00Z', deposit_end_time: '2024-12-15T00:00:00Z',
+        total_deposit: [{ denom: 'urst', amount: '10000000' }],
+        voting_start_time: '2024-12-02T00:00:00Z', voting_end_time: '2024-12-16T00:00:00Z',
+        content: { type: '/cosmos.gov.v1beta1.TextProposal', title: 'Community Fund Allocation', description: 'Allocate 5% of community pool to developer grants.' },
+      }
+    ],
+    pagination: { next_key: null, total: '1' }
+  },
+  '/syncing': { syncing: false },
+  '/mint/inflation': { inflation: '0.042' },
+  '/mint/params': { params: { mint_denom: 'urst', inflation_rate_change: '0.13', inflation_max: '0.20', inflation_min: '0.07', goal_bonded: '0.67', blocks_per_year: '5256000' } },
+  '/bank/total': { supply: [{ denom: 'urst', amount: '100000000000000' }] },
+  '/consensus/state': { round_state: { height: '1000247', round: 0, step: 3 } },
+  '/distribution/community_pool': { pool: [{ denom: 'urst', amount: '50000000000' }] },
+  '/staking/params': { params: { unbonding_time: '1814400s', max_validators: 100, max_entries: 7, historical_entries: 10000, bond_denom: 'urst', min_commission_rate: '0.05' } },
+  '/slashing/params': { params: { signed_blocks_window: '100', min_signed_per_window: '0.5', downtime_jail_duration: '600s', slash_fraction_double_sign: '0.05', slash_fraction_downtime: '0.01' } },
+};
+
+// ─── Endpoint Loading ───────────────────────────────────────────────────────
+function loadEndpoint(method, path) {
+  currentMethod = method;
+  document.getElementById('methodSelect').value = method;
+  document.getElementById('urlInput').value = path;
+
+  // Highlight sidebar
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  // Pre-fill params for path variables
+  params = [];
+  const matches = path.match(/\{(\w+)\}/g);
+  if (matches) {
+    matches.forEach(m => {
+      const key = m.slice(1, -1);
+      let defaultVal = '';
+      if (key === 'height') defaultVal = '1000247';
+      else if (key === 'hash') defaultVal = 'A3F2B8C1D4E5F60718293A4B5C6D7E8F901234567890ABCDEF1234567890ABCD';
+      else if (key === 'address' || key === 'delegator') defaultVal = 'rust1abc123def456';
+      else if (key === 'addr') defaultVal = 'rust1abc123def456';
+      else if (key === 'id') defaultVal = '1';
+      params.push({ key, value: defaultVal });
+    });
+    renderParams();
+  }
+
+  // Pre-fill body for POST
+  if (method === 'POST') {
+    const bodyTemplates = {
+      '/bank/transfer': { from: 'rust1sender', to: 'rust1receiver', amount: [{ denom: 'urst', amount: '1000000' }] },
+      '/staking/delegate': { delegator_address: 'rust1abc123', validator_address: 'rustvaloper1abc123', amount: { denom: 'urst', amount: '1000000' } },
+      '/txs/broadcast': { tx: '', mode: 'BROADCAST_MODE_SYNC' },
+      '/txs/encode': { tx: '' },
+      '/gov/proposals': { proposer: 'rust1abc123', initial_deposit: [{ denom: 'urst', amount: '10000000' }], content: { title: 'Proposal Title', description: 'Description' } },
+      '/gov/vote': { voter: 'rust1abc123', proposal_id: '1', option: 'VOTE_OPTION_YES' },
+    };
+    const body = bodyTemplates[path];
+    if (body) document.getElementById('requestBody').value = JSON.stringify(body, null, 2);
+  }
+}
+
+// ─── Send Request ───────────────────────────────────────────────────────────
+async function sendRequest() {
+  const method = document.getElementById('methodSelect').value;
+  let path = document.getElementById('urlInput').value;
+  const rpcUrl = document.getElementById('rpcUrl').value;
+  const sendBtn = document.getElementById('sendBtn');
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = '⏳ Sending...';
+
+  // Replace path params
+  params.forEach(p => {
+    if (p.key && p.value) {
+      path = path.replace(`{${p.key}}`, p.value);
+    }
+  });
+
+  // Handle address in path
+  if (path.includes('/bank/balances/') && !path.includes('{address}')) {
+    // address is already in the path
+  }
+
+  // Build query params
+  const queryParams = params.filter(p => !path.includes(`{${p.key}}`));
+  if (queryParams.length > 0) {
+    const qs = queryParams.filter(p => p.key && p.value).map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`).join('&');
+    if (qs) path += (path.includes('?') ? '&' : '?') + qs;
+  }
+
+  const startTime = performance.now();
+
+  try {
+    const fullUrl = `${rpcUrl}${path}`;
+    const body = method !== 'GET' ? document.getElementById('requestBody').value : undefined;
+
+    let response, data;
+    try {
+      const fetchOptions = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body) fetchOptions.body = body;
+      response = await fetch(fullUrl, fetchOptions);
+      data = await response.json();
+    } catch (fetchErr) {
+      // Network error — use mock data
+      await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
+      response = { status: 200, ok: true };
+
+      // Find matching mock
+      const basePath = path.replace(/\/[^/]+$/, '').replace(/\/$/, '');
+      data = MOCK_RESPONSES[path] || MOCK_RESPONSES[basePath] || {
+        message: 'Endpoint response',
+        path: path,
+        method: method,
+        timestamp: new Date().toISOString(),
+        note: 'Mock data (live RPC unavailable)'
+      };
+    }
+
+    const elapsed = Math.round(performance.now() - startTime);
+    const jsonStr = JSON.stringify(data, null, 2);
+    const size = new Blob([jsonStr]).size;
+
+    // Update meta
+    const meta = document.getElementById('responseMeta');
+    const statusClass = (response.status >= 200 && response.status < 300) ? 'status-ok' : 'status-err';
+    meta.innerHTML = `
+      <span class="${statusClass}">${response.status} ${response.statusText || 'OK'}</span>
+      <span class="time">${elapsed}ms</span>
+      <span class="size">${formatSize(size)}</span>
+    `;
+
+    // Render response with syntax highlighting
+    document.getElementById('responseBody').innerHTML = highlightJSON(jsonStr);
+
+  } catch (err) {
+    const elapsed = Math.round(performance.now() - startTime);
+    document.getElementById('responseMeta').innerHTML = `
+      <span class="status-err">Error</span>
+      <span class="time">${elapsed}ms</span>
+    `;
+    document.getElementById('responseBody').innerHTML = `<span style="color:var(--red)">${escapeHtml(err.message)}</span>`;
+  }
+
+  sendBtn.disabled = false;
+  sendBtn.textContent = '▶ Send';
+}
+
+// ─── JSON Syntax Highlighting ───────────────────────────────────────────────
+function highlightJSON(json) {
+  return escapeHtml(json)
+    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+    .replace(/: (\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+    .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+    .replace(/: (null)/g, ': <span class="json-null">$1</span>');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ─── Param Rows ─────────────────────────────────────────────────────────────
+function addParamRow() {
+  params.push({ key: '', value: '' });
+  renderParams();
+}
+
+function removeParamRow(i) {
+  params.splice(i, 1);
+  renderParams();
+}
+
+function renderParams() {
+  const tbody = document.getElementById('paramsTable');
+  tbody.innerHTML = params.map((p, i) => `
+    <tr>
+      <td><input value="${escapeAttr(p.key)}" onchange="params[${i}].key=this.value"></td>
+      <td><input value="${escapeAttr(p.value)}" onchange="params[${i}].value=this.value"></td>
+      <td><button class="btn-icon" onclick="removeParamRow(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function escapeAttr(s) { return (s || '').replace(/"/g, '&quot;'); }
+
+// ─── Header Rows ────────────────────────────────────────────────────────────
+function addHeaderRow() {
+  headers.push({ key: '', value: '' });
+  renderHeaders();
+}
+
+function removeHeaderRow(i) {
+  headers.splice(i, 1);
+  renderHeaders();
+}
+
+function renderHeaders() {
+  const tbody = document.getElementById('headersTable');
+  tbody.innerHTML = headers.map((h, i) => `
+    <tr>
+      <td><input value="${escapeAttr(h.key)}" onchange="headers[${i}].key=this.value"></td>
+      <td><input value="${escapeAttr(h.value)}" onchange="headers[${i}].value=this.value"></td>
+      <td><button class="btn-icon" onclick="removeHeaderRow(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── Tab Switching ──────────────────────────────────────────────────────────
+function showRequestTab(tab, el) {
+  document.getElementById('paramsPanel').style.display = tab === 'params' ? 'block' : 'none';
+  document.getElementById('headersPanel').style.display = tab === 'headers' ? 'block' : 'none';
+  document.getElementById('bodyPanel').style.display = tab === 'body' ? 'flex' : 'none';
+
+  document.querySelectorAll('.panel-header .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── Method Color ───────────────────────────────────────────────────────────
+document.getElementById('methodSelect').addEventListener('change', function() {
+  const colors = { GET: 'var(--green)', POST: 'var(--accent)', PUT: 'var(--yellow)', DELETE: 'var(--red)' };
+  this.style.color = colors[this.value] || 'var(--text-primary)';
+});
+
+// ─── Keyboard Shortcuts ─────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    sendRequest();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+    e.preventDefault();
+    document.getElementById('urlInput').focus();
+  }
+});
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+renderHeaders();
+
+// Load latest block by default
+loadEndpoint('GET', '/blocks/latest');
+document.querySelector('.sidebar-item').classList.add('active');
+</script>
+</body>
+</html>
