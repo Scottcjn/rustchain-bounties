@@ -171,8 +171,8 @@ def run(cfg: dict) -> None:
 
         # balance
         bal_data = fetch_json(session, f"{base}/balance/{wallet}") or {}
-        balance = str(bal_data.get("balance_rtc", 0)))
-        pending = str(bal_data.get("pending_rtc", 0)))
+        balance = str(bal_data.get("balance_rtc", 0))
+        pending = str(bal_data.get("pending_rtc", 0))
 
         # detect balance change
         if last_balance is not None and balance != last_balance:
