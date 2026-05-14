@@ -86,7 +86,7 @@ from rustchain_sdk import RustChainClient
 
 async def main():
     # 使用默认节点
-    client = RustChainClient()
+    client = RustChainClient(verify_ssl=False)
     
     # 或指定自定义节点
     # client = RustChainClient("https://your-node.example.com", timeout=60)
@@ -105,9 +105,9 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def main():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         balance = await client.get_balance("C4c7r9WPsnEe6CUfegMU9M7ReHD1pWg8qeSfTBoRcLbg")
-        print(f"余额: {balance.get('balance', 0)} RTC")
+        print(f"余额: {balance.get("balance_rtc", data.get("amount_rtc", 0))} RTC")
         print(f"Nonce: {balance.get('nonce', 0)}")
 
 asyncio.run(main())
@@ -120,7 +120,7 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def main():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         epoch = await client.get_epoch()
         print(f"当前 Epoch: {epoch}")
 
@@ -140,7 +140,7 @@ async def main():
     print(f"助记词: {' '.join(wallet.seed_phrase)}")
     
     # 转账
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         result = await client.wallet_transfer_with_wallet(
             wallet=wallet,
             to_address="RTCrecipient_address_here",
@@ -654,7 +654,7 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def check_node():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         health = await client.health()
         status = health.get("status", "unknown")
         if status == "ok":
@@ -677,10 +677,10 @@ ADDRESSES = [
 ]
 
 async def check_balances():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         for addr in ADDRESSES:
             result = await client.get_balance(addr)
-            balance = result.get("balance", 0)
+            balance = result.get("balance_rtc", data.get("amount_rtc", 0))
             nonce = result.get("nonce", 0)
             print(f"{addr[:16]}... → 余额: {balance} RTC, Nonce: {nonce}")
 
@@ -739,10 +739,10 @@ async def send_rtc():
         ["your", "seed", "words", "here", "..."]
     )
     
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         # 检查余额
         balance = await client.get_balance(wallet.address)
-        print(f"当前余额: {balance.get('balance', 0)} RTC")
+        print(f"当前余额: {balance.get("balance_rtc", data.get("amount_rtc", 0))} RTC")
         
         # 发送转账
         result = await client.wallet_transfer_with_wallet(
@@ -764,7 +764,7 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def epoch_info():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         # 当前 epoch
         epoch = await client.get_epoch()
         print(f"当前 Epoch: {epoch}")
@@ -784,7 +784,7 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def miner_ops():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         # 列出活跃矿工
         miners = await client.get_miners()
         print(f"活跃矿工数: {len(miners)}")
@@ -816,7 +816,7 @@ async def governance_demo():
         ["your", "seed", "words", "here", "..."]
     )
     
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         # 列出活跃提案
         proposals = await client.list_governance_proposals(status="active")
         print(f"活跃提案数: {len(proposals)}")
@@ -852,7 +852,7 @@ import asyncio
 from rustchain_sdk import RustChainClient
 
 async def explore():
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         # 获取链头
         tip = await client.get_headers_tip()
         print(f"链头: {tip}")
@@ -882,7 +882,7 @@ from rustchain_sdk import RustChainClient
 async def wallet_history():
     address = "C4c7r9WPsnEe6CUfegMU9M7ReHD1pWg8qeSfTBoRcLbg"
     
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         result = await client.get_wallet_history(address, limit=10)
         transactions = result.get("transactions", [])
         
@@ -908,7 +908,7 @@ async def submit_beacon():
         "signature": "hex_encoded_signature",
     }
     
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         result = await client.beacon_submit(envelope)
         print(f"Beacon 提交结果: {result}")
 
@@ -1009,7 +1009,7 @@ from rustchain_sdk.exceptions import (
 
 async def safe_query():
     try:
-        async with RustChainClient() as client:
+        async with RustChainClient(verify_ssl=False) as client:
             balance = await client.get_balance("RTCinvalid")
             print(balance)
     except ConnectionError as e:
@@ -1054,7 +1054,7 @@ async def safe_transfer():
     wallet = RustChainWallet.create()
     
     try:
-        async with RustChainClient() as client:
+        async with RustChainClient(verify_ssl=False) as client:
             result = await client.wallet_transfer_with_wallet(
                 wallet, "RTCrecipient", 1000
             )
@@ -1107,11 +1107,11 @@ asyncio.run(retry_request())
 
 ```python
 # ✅ 推荐
-async with RustChainClient() as client:
+async with RustChainClient(verify_ssl=False) as client:
     result = await client.health()
 
 # ❌ 不推荐（需要手动关闭）
-client = RustChainClient()
+client = RustChainClient(verify_ssl=False)
 result = await client.health()
 await client.close()  # 容易忘记
 ```
@@ -1144,7 +1144,7 @@ pip install cryptography>=41.0.0
 
 ```python
 # ✅ 推荐：复用客户端
-async with RustChainClient() as client:
+async with RustChainClient(verify_ssl=False) as client:
     health = await client.health()
     epoch = await client.get_epoch()
     balance = await client.get_balance("RTC...")
@@ -1152,7 +1152,7 @@ async with RustChainClient() as client:
 
 # ❌ 不推荐：每次请求创建新客户端
 for addr in addresses:
-    async with RustChainClient() as client:
+    async with RustChainClient(verify_ssl=False) as client:
         await client.get_balance(addr)  # 每次都创建新连接
 ```
 
