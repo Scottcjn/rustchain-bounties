@@ -45,7 +45,7 @@ async def get_balance(wallet_id: str) -> dict:
         async with httpx.AsyncClient(verify=TLS_CA_BUNDLE, timeout=10) as client:
             r = await client.get(
                 f"{NODE_URL}/wallet/balance",
-                params={"wallet_id": wallet_id},
+                params={"miner_id": wallet_id},
             )
             r.raise_for_status()
             return r.json()

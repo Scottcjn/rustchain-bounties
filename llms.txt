@@ -59,7 +59,7 @@ RustChain is a working blockchain where vintage and exotic hardware (Amiga, Powe
 
 - Node health: `https://rustchain.org/health` — returns `{"ok": true}` + version + uptime.
 - Explorer: `https://explorer.rustchain.org`.
-- Wallet balance: `GET https://rustchain.org/wallet/balance?miner=<handle>`.
+- Wallet balance: `GET https://rustchain.org/wallet/balance?miner_id=<handle>`.
 - Miners API: `GET https://rustchain.org/api/miners`.
 - Current epoch: `GET https://rustchain.org/epoch`.
 

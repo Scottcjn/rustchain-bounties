@@ -41,7 +41,7 @@ python bot.py
 | Endpoint | Purpose |
 |---|---|
 | `GET /health` | Node health |
-| `GET /wallet/balance?wallet_id=<id>` | Wallet balance |
+| `GET /wallet/balance?miner_id=<id>` | Wallet balance |
 | `GET /api/miners` | Active miners list |
 | `GET /epoch` | Epoch info |
 
