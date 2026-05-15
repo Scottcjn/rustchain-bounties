@@ -70,7 +70,7 @@ python3 miner_monitor.py
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `api_url` | string | `https://rustchain.org/api` | RustChain API endpoint |
+| `api_url` | string | `https://rustchain.org/api` | RustChain API base URL; the monitor appends endpoint paths such as `/miners` |
 | `poll_interval` | int | `600` | How often to check miners (seconds) |
 | `offline_threshold` | int | `2` | Epochs before alerting (1 epoch = 10 min) |
 | `alert_cooldown` | int | `3600` | Min time between alerts (seconds) |

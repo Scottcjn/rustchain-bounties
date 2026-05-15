@@ -1,0 +1,15 @@
+[Unit]
+Description=RustChain Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+Environment=TELEGRAM_BOT_TOKEN=YOUR_TOKEN
+Environment=RUSTCHAIN_API=https://rustchain.org
+WorkingDirectory=/opt/rustchain-bot
+ExecStart=/usr/bin/python3 bot.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
