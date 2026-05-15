@@ -25,7 +25,7 @@
     "api_endpoints": {
       "list_bounties": "https://api.github.com/repos/Scottcjn/rustchain-bounties/issues?state=open&labels=bounty",
       "submit_claim": "POST issue comment with wallet + intent",
-      "check_balance": "https://rustchain.org/wallet/balance?miner=<handle>",
+      "check_balance": "https://rustchain.org/wallet/balance?miner_id=<handle>",
       "node_health": "https://rustchain.org/health"
     },
     "notable_autonomous_contributors": [
