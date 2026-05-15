@@ -5,10 +5,8 @@ info:
   description: API for interacting with RustChain blockchain node
   version: 1.0.0
 servers:
-  - url: https://api.rustchain.org/v1
-    description: Production server
-  - url: https://testnet.rustchain.org/v1
-    description: Testnet server
+  - url: https://rustchain.org
+    description: Production node
 
 paths:
   /blocks:

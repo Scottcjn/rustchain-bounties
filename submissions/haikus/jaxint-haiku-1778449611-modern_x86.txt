@@ -1,0 +1,7 @@
+Xeon hums all day
+Xeon hums through endless night
+Rust returns to steel
+
+archetype: modern_x86
+hardware: Intel Xeon E5-2680 v4 (Broadwell, 14C/28T) @ 2.4 GHz — data center server
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG

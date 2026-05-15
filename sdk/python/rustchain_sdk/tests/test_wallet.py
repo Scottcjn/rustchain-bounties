@@ -166,3 +166,35 @@ class TestRustChainWalletExportImport:
         """Invalid word count raises ValueError."""
         with pytest.raises(ValueError, match="Seed phrase must be 12 or 24"):
             RustChainWallet.from_seed_phrase(["abandon"] * 10)
+
+class TestRustChainWalletEdgeCases:
+    """Additional wallet edge-case tests for import and signing helpers."""
+
+    def test_from_seed_phrase_unknown_word_still_derives_wallet(self):
+        """from_seed_phrase derives from arbitrary words without wordlist lookup."""
+        words = ["not-a-bip39-word"] * 12
+        wallet = RustChainWallet.from_seed_phrase(words)
+        assert wallet.seed_phrase == words
+        assert wallet.address.startswith("RTC")
+        assert len(wallet.private_key_hex) == 64
+
+    def test_import_missing_seed_phrase_raises_key_error(self):
+        """Import requires the exported seed_phrase field."""
+        with pytest.raises(KeyError):
+            RustChainWallet.import_({"version": 1})
+
+    def test_sign_transfer_default_fee_is_zero(self):
+        """Transfers omit fee argument default to zero."""
+        wallet = RustChainWallet.create(strength=128)
+        transfer = wallet.sign_transfer("RTCrecipient123", 42)
+        assert transfer["fee"] == 0
+        assert transfer["amount"] == 42
+        assert len(transfer["signature"]) == 128
+
+    def test_repr_contains_address_without_private_key_or_seed(self):
+        """repr is safe: address only, no private key or seed words."""
+        wallet = RustChainWallet.create(strength=128)
+        rendered = repr(wallet)
+        assert wallet.address in rendered
+        assert wallet.private_key_hex not in rendered
+        assert " ".join(wallet.seed_phrase) not in rendered

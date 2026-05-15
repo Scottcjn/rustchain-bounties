@@ -13,10 +13,8 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://api.rustchain.org/v1
-    description: Production server
-  - url: https://testnet-api.rustchain.org/v1
-    description: Testnet server
+  - url: https://rustchain.org
+    description: Production node
 
 paths:
   /health:

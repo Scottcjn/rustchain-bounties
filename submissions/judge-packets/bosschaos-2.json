@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC6d1f27d28961279f1034d9561c2403697eb55602",
+  "submitted_at": "2026-05-09T09:00:00Z",
+  "rankings": [
+    {
+      "rank": 1,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8899",
+      "score": 0.9,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Complete with wallet and date fields properly formatted"
+      },
+      "justification": "Complete with wallet and date fields properly formatted"
+    },
+    {
+      "rank": 2,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8890",
+      "score": 0.85,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Good reaction count across repos with some enumeration"
+      },
+      "justification": "Good reaction count across repos with some enumeration"
+    },
+    {
+      "rank": 3,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8889",
+      "score": 0.8,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Covers multiple repos but summary lacks specific counts"
+      },
+      "justification": "Covers multiple repos but summary lacks specific counts"
+    },
+    {
+      "rank": 4,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8888",
+      "score": 0.72,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Duplicate claim territory; claims old issues without verification"
+      },
+      "justification": "Duplicate claim territory; claims old issues without verification"
+    },
+    {
+      "rank": 5,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8887",
+      "score": 0.68,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0.5,
+        "rationale": "Very vague; no specific issue count or repo list; likely low effort"
+      },
+      "justification": "Very vague; no specific issue count or repo list; likely low effort"
+    }
+  ]
+}

@@ -5,7 +5,7 @@
 | Version | Supported          |
 | ------- | ------------------ |
 | latest  | :white_check_mark: |
-| < latest | :x:               |
+| &lt; latest | :x:               |
 
 ## Reporting a Vulnerability
 
@@ -71,10 +71,7 @@ The following are in scope for security reports:
 
 ## Disclosure Policy
 
-<<<<<<< HEAD
 We follow a 90-day coordinated disclosure policy. After a fix is deployed, we will publish a security advisory crediting the reporter.
-=======
-
 
 ## Payment-Authority Impersonation
 
@@ -104,4 +101,3 @@ A legitimate RustChain bounty payout notice includes the amount, recipient walle
 3. Screenshot the impersonating comment — it may later be edited or deleted.
 
 No retaliation against good-faith reporters. See Safe Harbor above.
->>>>>>> 7a8dbb2 (docs(security): add Payment-Authority Impersonation appendix)

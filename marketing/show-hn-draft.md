@@ -59,7 +59,7 @@ I'd love feedback on:
 
 Website: https://rustchain.org
 GitHub: https://github.com/Scottcjn/Rustchain
-Docs: https://docs.rustchain.org
+Docs: https://rustchain.org
 
 Happy to answer technical questions about the implementation, the hardware verification process, or why your old iMac might be worth mining with.
 
