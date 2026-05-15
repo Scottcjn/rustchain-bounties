@@ -76,7 +76,7 @@ Une fois vérifié, les RTC sont envoyés à votre portefeuille. Première fois 
 | Ressource          | Lien                          |
 |--------------------|-------------------------------|
 | **RustChain**      | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Explorateur de Bloc** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
+| **Explorateur de Bloc** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Rapport de Trafic** | [Q1 2026 Développeur Trafic](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
 | **Discord**        | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
 | **Configuration de Portefeuille** | Commentez sur n'importe quelle récompense et nous vous aiderons |

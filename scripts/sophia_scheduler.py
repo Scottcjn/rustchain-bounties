@@ -111,10 +111,11 @@ def fetch_node_json(
     base_url: str,
     path: str,
     timeout: int = 15,
+    verify_tls: bool = True,
 ) -> Optional[Any]:
     """Fetch JSON from the RustChain node API."""
     url = f"{base_url.rstrip('/')}{path}"
-    ctx = ssl._create_unverified_context() if url.startswith("https://") else None
+    ctx = ssl.create_default_context() if url.startswith("https://") else None
 
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/json")
@@ -128,9 +129,9 @@ def fetch_node_json(
         return None
 
 
-def fetch_active_miners(node_url: str) -> List[Dict[str, Any]]:
+def fetch_active_miners(node_url: str, verify_tls: bool = True) -> List[Dict[str, Any]]:
     """Fetch the list of active miners from the node."""
-    data = fetch_node_json(node_url, "/api/miners")
+    data = fetch_node_json(node_url, "/api/miners", verify_tls=verify_tls)
     if isinstance(data, list):
         return data
     if isinstance(data, dict) and "miners" in data:
@@ -139,9 +140,9 @@ def fetch_active_miners(node_url: str) -> List[Dict[str, Any]]:
     return []
 
 
-def fetch_epoch(node_url: str) -> Optional[int]:
+def fetch_epoch(node_url: str, verify_tls: bool = True) -> Optional[int]:
     """Fetch the current epoch number."""
-    data = fetch_node_json(node_url, "/epoch")
+    data = fetch_node_json(node_url, "/epoch", verify_tls=verify_tls)
     if isinstance(data, dict):
         return data.get("epoch")
     return None
@@ -207,6 +208,7 @@ def batch_inspect(
     sophia_url: str,
     delay: float = DEFAULT_DELAY,
     skip_recent: bool = True,
+    verify_tls: bool = True,
 ) -> Dict[str, Any]:
     """Inspect all active miners in a batch.
 
@@ -222,11 +224,11 @@ def batch_inspect(
     logger.info("Starting batch inspection...")
 
     # Fetch current epoch
-    epoch = fetch_epoch(node_url)
+    epoch = fetch_epoch(node_url, verify_tls=verify_tls)
     logger.info("Current epoch: %s", epoch)
 
     # Fetch all active miners
-    miners = fetch_active_miners(node_url)
+    miners = fetch_active_miners(node_url, verify_tls=verify_tls)
     logger.info("Found %d active miners", len(miners))
 
     if not miners:
@@ -296,6 +298,7 @@ def run_daemon(
     sophia_url: str,
     interval: int = DEFAULT_INTERVAL,
     delay: float = DEFAULT_DELAY,
+    verify_tls: bool = True,
 ) -> None:
     """Run the scheduler as a daemon, performing batch inspections periodically."""
     lock = SchedulerLock()
@@ -310,7 +313,7 @@ def run_daemon(
             try:
                 results = batch_inspect(
                     node_url, sophia_url,
-                    delay=delay, skip_recent=True,
+                    delay=delay, skip_recent=True, verify_tls=verify_tls,
                 )
                 logger.info("Batch result: %s", json.dumps(results, indent=2))
             except Exception as e:
