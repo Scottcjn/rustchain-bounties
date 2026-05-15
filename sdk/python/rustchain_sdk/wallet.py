@@ -154,12 +154,20 @@ _BIP39_WORDLIST: List[str] = [
 ]
 
 
-def _to_words(data: bytes, wordlist: List[str]) -> List[str]:
+def _to_words(data: bytes, wordlist: List[str], count: Optional[int] = None) -> List[str]:
     """Convert raw bytes to BIP39-style words."""
+    if count is None:
+        count = (len(data) + 1) // 2
+
     words: List[str] = []
-    for i in range(0, len(data), 2):
-        word_index = int.from_bytes(data[i : i + 2], byteorder="big") % len(wordlist)
-        words.append(wordlist[word_index])
+    stream = data
+    while len(words) < count:
+        for i in range(0, len(stream), 2):
+            if len(words) >= count:
+                break
+            word_index = int.from_bytes(stream[i : i + 2], byteorder="big") % len(wordlist)
+            words.append(wordlist[word_index])
+        stream = hashlib.sha256(stream).digest()
     return words
 
 
@@ -266,8 +274,8 @@ class RustChainWallet:
         checksum = hashlib.sha256(raw_bytes).digest()[:1]
         extended = raw_bytes + checksum
 
-        # Convert to words
-        words = _to_words(extended, _BIP39_WORDLIST)
+        # Convert to the expected mnemonic length.
+        words = _to_words(extended, _BIP39_WORDLIST, 12 if strength == 128 else 24)
 
         # Derive seed from words
         seed = _hmac_sha512(b"mnemonic", " ".join(words).encode("utf-8"))

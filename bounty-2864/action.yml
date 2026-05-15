@@ -1,0 +1,57 @@
+name: 'Award RTC on PR Merge'
+description: 'Automatically award RTC tokens when a PR is merged'
+inputs:
+  rtc-amount:
+    description: 'Amount of RTC to award'
+    required: true
+    default: '5'
+  wallet-address:
+    description: 'Recipient BTC/RTC wallet address'
+    required: true
+  rpc-endpoint:
+    description: 'RustChain RPC endpoint'
+    required: true
+    default: 'https://rpc.rustchain.network'
+runs:
+  using: 'composite'
+  steps:
+    - name: Award RTC
+      shell: bash
+      run: |
+        echo "Awarding ${{ inputs.rtc-amount }} RTC to ${{ inputs.wallet-address }}"
+        
+        # Build the award transaction
+        AWARD_DATA=$(cat <<EOF
+        {
+          "method": "award_tokens",
+          "params": {
+            "address": "${{ inputs.wallet-address }}",
+            "amount": ${{ inputs.rtc-amount }},
+            "reason": "PR merge reward",
+            "pr_url": "${{ github.event.pull_request.html_url }}",
+            "pr_number": ${{ github.event.pull_request.number }},
+            "merged_by": "${{ github.actor }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+        }
+        EOF
+        )
+        
+        # Submit to RustChain RPC
+        RESPONSE=$(curl -s -X POST           -H "Content-Type: application/json"           -d "$AWARD_DATA"           "${{ inputs.rpc-endpoint }}/api/v1/award")
+        
+        TX_ID=$(echo "$RESPONSE" | jq -r '.tx_id // .error // "unknown"')
+        echo "Award TX: $TX_ID"
+        echo "rtc_tx_id=$TX_ID" >> $GITHUB_OUTPUT
+        
+        # Post comment on the PR
+        COMMENT="## 🏆 RTC Reward Awarded\n\n"
+        COMMENT+="${{ inputs.rtc-amount }} RTC sent to \`${{ inputs.wallet-address }}\`\n\n"
+        COMMENT+="TX ID: \`$TX_ID\`\n\n"
+        COMMENT+="Thank you for your contribution! 🚀"
+        
+        curl -s -X POST           -H "Authorization: token ${{ github.token }}"           -H "Content-Type: application/json"           -d "{\"body\": \"$COMMENT\"}"           "${{ github.event.pull_request.base.repo.url }}/issues/${{ github.event.pull_request.number }}/comments"
+
+branding:
+  icon: 'award'
+  color: 'orange'

@@ -18,7 +18,6 @@ jobs:
         with:
           tier: L1
           reviewer: octocat
-          node-url: https://bcos.rustchain.org
           pr-number: ${{ github.event.pull_request.number }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 ```

@@ -5,7 +5,7 @@
 This API provides endpoints for interacting with a mobile wallet, enabling users to check balances, sign transactions, and view transaction history.
 
 ## Base URL
-`https://api.rustchain-bounties.com/v1`
+`https://rustchain.org`
 
 ## Authentication
 All endpoints require a valid JWT token in the `Authorization` header:

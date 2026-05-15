@@ -77,7 +77,7 @@ Após verificação, o RTC é enviado para sua carteira. Primeiro? Nós o ajudar
 | Recurso          | Link                          |
 |------------------|-------------------------------|
 | **RustChain**    | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Explorador de Blocos** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
+| **Explorador de Blocos** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Relatório de Tração** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
 | **Discord**      | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
 | **Configuração de Carteira** | Comente em qualquer recompensa e nós o ajudaremos |
