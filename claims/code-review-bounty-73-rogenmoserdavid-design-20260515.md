@@ -4,9 +4,9 @@ Claimant: `rogenmoserdavid-design`
 
 Bounty: Scottcjn/rustchain-bounties#73
 
-Wallet ID: pending
+Wallet ID: `rogenmoserdavid-design`
 
-Status: submitted for maintainer assessment. Wallet/miner details can be provided before payout.
+Status: submitted for maintainer assessment. Wallet/miner ID uses the contributor GitHub username, matching the repository auto-pay recipient logic.
 
 ## Reviews Submitted
 
