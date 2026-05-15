@@ -61,6 +61,17 @@ Summary:
 - Confirmed the patch prevents negative limits from reaching SQLite unbounded.
 - Suggested regression coverage and a `min_impressions` lower-bound follow-up.
 
+### 6. Scottcjn/bottube#1031 — Changes Requested
+
+Review: https://github.com/Scottcjn/bottube/pull/1031#pullrequestreview-4295353650
+
+Summary:
+
+- Verified the alias fix compiles.
+- Reproduced that the PR still joins `votes.video_id` to the integer `videos.id` primary key.
+- An in-memory SQLite fixture with `videos.video_id = "public-video-abc"` and `votes.video_id = "public-video-abc"` returned 0 rows under the PR query and 1 row when joined on `vid.video_id`.
+- Requested the remaining issue #1009 join-key fix plus a regression case with a non-numeric public `video_id`.
+
 ## Local Verification Evidence
 
 Commands run across the reviewed PRs included:
@@ -75,6 +86,7 @@ python3 -m py_compile translations.py x402_payment.py tests/test_translations.py
 PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --with pytest python -m pytest -p no:cacheprovider tests/test_translations.py tests/test_x402_payment.py -q
 PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --with pytest python -m pytest -p no:cacheprovider tests/test_x402_payment.py tests/test_syndication_adapter.py -q
 python3 -m py_compile bottube_server.py
+python3 -m py_compile interactions_blueprint.py
 git diff --check origin/main...HEAD
 ```
 
@@ -82,7 +94,7 @@ git diff --check origin/main...HEAD
 
 Please assess under the #73 reward structure:
 
-- 3 changes-requested reviews with reproduced blockers or repo-gate failures.
+- 4 changes-requested reviews with reproduced blockers or repo-gate failures.
 - 2 standard functional reviews with local verification and follow-up recommendations.
 
 Reference rate in #73: `1 RTC = $0.10 USD`.
