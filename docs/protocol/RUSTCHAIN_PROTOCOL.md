@@ -88,8 +88,8 @@ A RustChain full node consists of the following core components:
 │              RustChain Full Node             │
 ├─────────────────────────────────────────────┤
 │  REST API Layer (Actix-Web / Axum)          │
-│  ├── /health, /api/stats, /epoch, /balance  │
-│  └── /block, /tx, /miner                    │
+│  ├── /health, /epoch, /wallet/balance       │
+│  └── /block, /tx                            │
 ├─────────────────────────────────────────────┤
 │  Consensus Engine                            │
 │  ├── Epoch Manager                           │
@@ -434,21 +434,13 @@ Returns node health status.
 
 ### 8.2 Chain Statistics
 
-#### `GET /api/stats`
+Chain-wide statistics are available through the `/epoch` endpoint (see §8.3),
+which returns aggregated fields such as `enrolled_miners`, `total_supply_rtc`,
+and `blocks_per_epoch`. A dedicated `/api/stats` endpoint does not currently
+exist on the live service.
 
-Returns global chain statistics.
-
-**Response:**
-```json
-{
-  "block_height": 123456,
-  "current_epoch": 123,
-  "current_slot": 456,
-  "total_transactions": 9876543,
-  "active_miners": 1024,
-  "hash_rate_equivalent": "N/A (PoA)"
-}
-```
+> **Note:** The endpoint `GET /api/stats` documented in earlier drafts returns
+> 404 on the current public RustChain service. Use `/epoch` instead.
 
 ### 8.3 Epoch Information
 
@@ -456,7 +448,24 @@ Returns global chain statistics.
 
 Returns current epoch details.
 
-**Response:**
+**Response (live service):**
+```json
+{
+  "blocks_per_epoch": 144,
+  "enrolled_miners": 15,
+  "epoch": 162,
+  "epoch_pot": 1.5,
+  "slot": 23451,
+  "total_supply_rtc": 8388608
+}
+```
+
+> **Note:** The response schema below was documented in earlier drafts but does
+> not match the current live service. It is retained for reference only.
+
+<details>
+<summary>Legacy schema (not live)</summary>
+
 ```json
 {
   "epoch_number": 123,
@@ -470,17 +479,37 @@ Returns current epoch details.
 }
 ```
 
+</details>
+
 #### `GET /epoch/{number}`
 
 Returns details for a specific epoch.
 
+> **Note:** This endpoint currently returns 404 on the live service.
+> Only `GET /epoch` (without a number) is active.
+
 ### 8.4 Balance
 
-#### `GET /balance/{address}`
+#### `GET /wallet/balance?miner_id={miner_id}`
 
-Returns the RTC balance for a given address.
+Returns the RTC balance for a given miner.
 
-**Response:**
+**Response (live service):**
+```json
+{
+  "amount_i64": 0,
+  "amount_rtc": 0.0,
+  "miner_id": "iamdinhthuan"
+}
+```
+
+> **Note:** The canonical wallet balance endpoint is
+> `GET /wallet/balance?miner_id=...`. The earlier-documented
+> `GET /balance/{address}` returns 404 on the live service.
+
+<details>
+<summary>Legacy schema (not live)</summary>
+
 ```json
 {
   "address": "rc1q...",
@@ -490,6 +519,8 @@ Returns the RTC balance for a given address.
   "staked_rtc": "100.00000000"
 }
 ```
+
+</details>
 
 ### 8.5 Block
 
@@ -553,6 +584,14 @@ Submit a new transaction.
 ```
 
 ### 8.7 Miner
+
+> **Note:** The endpoint `GET /miner/{address}` currently returns 404 on the
+> live service. Miner-related data can be obtained indirectly via
+> `GET /wallet/balance?miner_id=...` (see §8.4). This section is retained for
+> reference should the endpoint be re-enabled.
+
+<details>
+<summary>Legacy endpoint and schema (not live)</summary>
 
 #### `GET /miner/{address}`
 
