@@ -119,6 +119,7 @@ assert r.status_code == 200, f"Real node returned {r.status_code}"
 
 # 2. Check the files you reference
 import subprocess
+your_referenced_files = ["node/main.py", "miners/miner.py"] # Example files
 for path in your_referenced_files:
     result = subprocess.run(
         ["gh", "api", f"repos/Scottcjn/Rustchain/contents/{path}"],
@@ -127,6 +128,7 @@ for path in your_referenced_files:
     assert result.returncode == 0, f"File {path} does not exist in the real repo"
 
 # 3. Check that your code imports don't reference fake modules
+your_imports = ["requests", "subprocess"] # Example imports
 for module in your_imports:
     try:
         __import__(module)

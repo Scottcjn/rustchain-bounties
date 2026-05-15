@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC6d1f27d28961279f1034d9561c2403697eb55602",
+  "submitted_at": "2026-05-09T08:00:00Z",
+  "rankings": [
+    {
+      "rank": 1,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8915",
+      "score": 0.92,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "7 reactions across 3 repos with full table detail"
+      },
+      "justification": "Complete table format with repo/issue/comment columns showing verifiable URLs"
+    },
+    {
+      "rank": 2,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8913",
+      "score": 0.88,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "16 reactions across 6 repos documented"
+      },
+      "justification": "Good scope (6 repos) but reaction count verification harder without per-issue URLs"
+    },
+    {
+      "rank": 3,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8912",
+      "score": 0.82,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Multiple repos but old issues may have pre-existing reactions"
+      },
+      "justification": "Claims old issues but verification of oldness not provided; wallet format non-standard"
+    },
+    {
+      "rank": 4,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8911",
+      "score": 0.78,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "Full Coverage claim is unverifiable without specific issue list"
+      },
+      "justification": "Vague all-issues claim without enumeration creates high audit burden"
+    },
+    {
+      "rank": 5,
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8910",
+      "score": 0.75,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0.5,
+        "rationale": "Duplicate territory with #8911, no new value-add"
+      },
+      "justification": "Same grazer-skill repo already covered by #8911; incremental claim reduces marginal value"
+    }
+  ]
+}

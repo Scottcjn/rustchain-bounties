@@ -2,7 +2,7 @@
 
 A standalone Prometheus exporter that polls your RustChain node's JSON APIs and re-exposes them as Prometheus-compatible metrics on `GET /metrics`.
 
-**Bounty:** [#765 — Prometheus Metrics Exporter — Observable RustChain](https://github.com/RustChainOrg/rustchain-bounties/issues/765)
+**Bounty:** [#765 — Prometheus Metrics Exporter — Observable RustChain](https://github.com/Scottcjn/rustchain-bounties/issues/765)
 
 ---
 

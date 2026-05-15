@@ -53,12 +53,10 @@ LATENCY_BUCKETS = (0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)
 def _request_json(
     url: str,
     timeout_s: int = DEFAULT_POLL_TIMEOUT,
-    verify_tls: bool = False,
+    verify_tls: bool = True,
 ) -> Tuple[Optional[Any], Optional[str], float]:
     """Fetch JSON from *url*.  Returns (data, error_string, elapsed_seconds)."""
-    ctx = None
-    if url.startswith("https://") and not verify_tls:
-        ctx = ssl._create_unverified_context()
+    ctx = ssl.create_default_context() if url.startswith("https://") else None
 
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/json")
@@ -87,7 +85,7 @@ def fetch_endpoint(
     base_url: str,
     path: str,
     timeout_s: int = DEFAULT_POLL_TIMEOUT,
-    verify_tls: bool = False,
+    verify_tls: bool = True,
 ) -> Tuple[Optional[Any], Optional[str], float]:
     """Fetch a RustChain API endpoint.  Thin wrapper around _request_json."""
     url = f"{base_url.rstrip('/')}{path}"
@@ -98,7 +96,7 @@ def fetch_wallet_balance(
     base_url: str,
     miner_id: str,
     timeout_s: int = DEFAULT_POLL_TIMEOUT,
-    verify_tls: bool = False,
+    verify_tls: bool = True,
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str], float]:
     """Fetch balance for a single wallet."""
     encoded = urllib.parse.quote(miner_id, safe="")
@@ -127,7 +125,7 @@ class RustChainCollector:
         self,
         node_url: str = DEFAULT_NODE_URL,
         poll_timeout: int = DEFAULT_POLL_TIMEOUT,
-        verify_tls: bool = False,
+        verify_tls: bool = True,
         tracked_wallets: Optional[List[str]] = None,
     ) -> None:
         self.node_url = node_url.rstrip("/")
@@ -428,7 +426,7 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
     p.add_argument(
         "--verify-tls",
         action="store_true",
-        help="Verify TLS certificates (off by default — official node uses self-signed TLS)",
+        help="Deprecated compatibility flag. TLS certificates are always verified.",
     )
     p.add_argument(
         "--log-level",
@@ -436,6 +434,7 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         help="Logging level",
     )
+    p.set_defaults(verify_tls=True)
     return p.parse_args(argv)
 
 

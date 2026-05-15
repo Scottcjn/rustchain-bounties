@@ -162,6 +162,6 @@ Every star is a person who walked through the door. What they do after that is u
 
 *Elyan Labs — Every CPU Has a Voice*
 
-*Explorer: https://50.28.86.131/explorer*
-*Bounties: https://github.com/Scottcjn/rustchain-bounties*
+*Explorer:* https://50.28.86.131/explorer
+*Bounties:* https://github.com/Scottcjn/rustchain-bounties
 *Stats generated: March 6, 2026*

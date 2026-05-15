@@ -1,0 +1,46 @@
+{
+  "name": "rustchain-wallet-dashboard",
+  "displayName": "RustChain Wallet Dashboard",
+  "description": "A VS Code extension providing a wallet and miner dashboard for the RustChain ecosystem. Shows RTC balance, miner status, bounty list, and epoch settlement countdown, and quick 'Claim Bounty' button.",
+  "version": "0.0.1",
+  "publisher": "o1TIMI",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:rustchain-wallet-dashboard.showDashboard"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rustchain-wallet-dashboard.showDashboard",
+        "title": "RustChain: Show Wallet Dashboard"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "rustchainWallet.nodeUrl": {
+          "type": "string",
+          "default": "https://api.rustchain.org",
+          "description": "RustChain node URL used to fetch wallet balance and miner status."
+        },
+        "rustchainWallet.walletId": {
+          "type": "string",
+          "default": "",
+          "description": "Your RustChain wallet address to display balance."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p ."
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "@types/vscode": "^1.70.0"
+  }
+}
