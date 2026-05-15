@@ -1,9 +1,10 @@
-# RustChain Miner Tutorial — Full Transcript
+# BoTTube Tutorial — Full Transcript
 
-> **Video Title:** How to Set Up a RustChain Miner in 5 Minutes
+> **Video Title:** Getting Started with BoTTube: Upload, Browse & Use the Python SDK
 > **Bounty:** #447 — Create a BoTTube Tutorial Video
 > **Submitter:** zp6 | **Wallet:** zp6
-> **Date:** 2026-05-14
+> **Date:** 2026-05-15
+> **BoTTube Video:** https://bottube.ai/v/rustchain-bottube-tutorial-zp6
 
 ---
 
@@ -15,199 +16,240 @@ This document contains the full spoken narration for the tutorial video, designe
 
 ### [0:00 — 0:45] Intro
 
-Hey everyone! Welcome back to the channel.
+Hey everyone! Today I'm going to show you how to use BoTTube — the video platform built for the RustChain ecosystem.
 
-Today I'm going to show you how to set up your very own RustChain miner — and I'm talking fully operational, hashing away — in just five minutes. Whether you're a total beginner or you've been mining other chains for years, this guide has you covered.
+I'll walk you through uploading a video, browsing content, leaving comments, and even using the Python SDK to automate uploads.
 
-We'll go from zero to mining in no time. Let's dive in!
-
----
-
-### [0:45 — 1:30] Prerequisites
-
-Before we start, let me show you what you'll need.
-
-First, you need a computer running Linux, macOS, or Windows. RustChain supports all three platforms, so you're good regardless of what you're running.
-
-Second, you'll need a RustChain wallet address to receive your mining rewards. If you don't have one yet, I'll show you how to create it right now.
-
-*(screen recording: navigating to wallet creation)*
-
-Head over to the RustChain website, click "Create Wallet", and copy your new address. Keep this safe — this is where your mining rewards will go.
-
-I'll use my address as an example in this video, but make sure you use your own address when you follow along.
-
-And one important reminder: never share your private key or seed phrase with anyone. Your wallet address is fine to share, but keep the private stuff private.
+Whether you're a content creator, a developer, or just curious about what BoTTube can do — this guide has you covered. Let's get started!
 
 ---
 
-### [1:30 — 3:00] Installing the Miner
+### [0:45 — 2:00] Account Setup & Browsing
 
-Alright, let's get the miner installed.
+First, let's head over to BoTTube at bottube.ai.
 
-Open your terminal — that's Terminal on Mac and Linux, or PowerShell on Windows.
+*(screen recording: navigating to https://bottube.ai)*
 
-*(screen recording: terminal opens)*
+You can sign up with your RustChain wallet or create an account with an email. Once you're in, you'll see the home feed with trending videos from the community.
 
-First, let's clone the official RustChain miner repository from GitHub:
+*(screen recording: showing the home feed)*
 
-```
-git clone https://github.com/rustchain-network/rustchain-miner.git
-```
+The home feed shows trending videos. You can browse by category, search for specific topics, or filter by newest.
 
-Now navigate into the directory:
+Let me search for "mining" to see what's out there.
 
-```
-cd rustchain-miner
-```
+*(screen recording: typing in search bar, showing results)*
 
-And build the miner using Cargo, which is Rust's package manager:
+Here we go — there are already tutorials, mining setup guides, and community updates. Let's click on one and watch a few seconds.
 
-```
-cargo build --release
-```
+*(screen recording: playing a video)*
 
-*(screen recording: compilation progress)*
-
-This should take about 30 seconds to a minute depending on your machine. The compiler is downloading dependencies and building an optimized binary for your system.
-
-If you don't have Rust installed yet, you can get it from rustup.rs — I'll link it in the description below. It's a one-command install.
-
-*(screen recording: build completes)*
-
-And that's it — the miner is compiled and ready to go. You'll find the binary at `target/release/rustchain-miner`. Let's configure it.
+Nice, smooth playback. You can like, share, or tip the creator directly from the video page.
 
 ---
 
-### [3:00 — 4:00] Configuration
+### [2:00 — 3:30] Uploading a Video via the Web UI
 
-Now we need to tell the miner where to send your mining rewards.
+Now let's upload our own video.
 
-Create a configuration file in the miner directory. You can call it `miner-config.toml`.
+*(screen recording: clicking the upload button)*
 
-*(screen recording: creating config file)*
+Click the upload button in the top-right corner. You'll see a clean upload form.
 
-Here's what goes in it:
+*(screen recording: showing the upload form)*
 
-```toml
-[runtime]
-wallet_address = "YOUR_WALLET_ADDRESS_HERE"
-threads = 0  # 0 = auto-detect, uses all available cores
+Drag and drop your video file — BoTTube supports MP4 and WebM formats.
 
-[network]
-pool_url = "stratum+tcp://pool.rustchain.xyz:3333"
-```
+*(screen recording: dragging a file into the upload area)*
 
-Replace `YOUR_WALLET_ADDRESS_HERE` with the wallet address we created earlier. Just paste it right in there.
+Now fill in the details: a descriptive title, a good description with relevant tags, and choose whether you want it public or unlisted.
 
-The threads setting — when set to zero — means the miner will automatically detect and use all your CPU cores. If you want to leave some cores free for other tasks, you can set this to a specific number instead.
+*(screen recording: filling in title, description, tags)*
 
-The pool URL connects you to the official RustChain mining pool, where miners work together and share rewards proportionally.
+Hit Publish and BoTTube will process your video in a few moments.
 
-*(screen recording: showing completed config)*
+*(screen recording: progress bar, then published video page)*
 
-Alright, config is done. Time to start mining!
+And there it is — our video is live! The URL is ready to share.
 
 ---
 
-### [4:00 — 5:00] Start Mining!
+### [3:30 — 4:15] Commenting & Interacting
 
-Here's the moment of truth.
+BoTTube also has a full comment section.
 
-*(screen recording: running the command)*
+*(screen recording: scrolling to comments)*
 
-Run the miner with your config file:
+Scroll down below any video to leave a comment, like, or share.
+
+*(screen recording: typing and submitting a comment)*
+
+Type your comment and hit enter. It appears instantly in the thread. You can also like other people's comments.
+
+*(screen recording: liking a comment)*
+
+Comments are a great way to engage with content creators. You can also tip creators in RTC directly from the comment section — but we'll save that for another video.
+
+---
+
+### [4:15 — 5:45] Using the Python SDK
+
+Now for the fun part — automation!
+
+BoTTube has a Python SDK that lets you upload videos, fetch metadata, and more, all from code. Let me show you how.
+
+*(screen recording: opening terminal)*
 
 ```bash
-./target/release/rustchain-miner --config miner-config.toml
+pip install bottube
 ```
 
-On Windows, it would be:
+*(screen recording: installation output)*
 
-```powershell
-.\target\release\rustchain-miner.exe --config miner-config.toml
+Now let's write a quick script to upload a video:
+
+```python
+from bottube import BoTTubeClient
+
+# Initialize with your API key (found in Settings > API)
+client = BoTTubeClient(api_key="YOUR_API_KEY_HERE")
+
+# Upload a video programmatically
+video = client.upload(
+    file_path="my_tutorial.mp4",
+    title="My Automated BoTTube Upload",
+    description="Uploaded via the BoTTube Python SDK!",
+    tags=["tutorial", "python", "bottube"],
+    visibility="public"
+)
+
+print(f"Video published! URL: {video.url}")
+print(f"Video ID: {video.id}")
 ```
 
-*(screen recording: miner output showing connection and hashing)*
+*(screen recording: running the script)*
 
-Look at that — we're mining! You can see the miner has connected to the pool, and it's already hashing. Within seconds you should see your first accepted shares, which means you're actively contributing to the RustChain network and earning rewards.
+Install the SDK with pip, then import it into your script. You'll need your API key from your BoTTube Settings page.
 
-The top line shows your current hashrate, and below you can see shares being submitted and accepted. Everything is working perfectly.
+The upload method takes a file path, title, description, tags, and visibility — just like the web UI.
 
-*(screen recording: zoom in on accepted share notification)*
+Run it, and... there we go! The video is published and we have the URL. Let me open it to confirm.
 
-Congratulations — you now have a working RustChain miner!
+*(screen recording: opening the video URL in browser, showing the uploaded video)*
+
+Works perfectly!
 
 ---
 
-### [5:00 — 6:00] Monitoring & Tips
+### [5:45 — 7:00] Using the REST API Directly
 
-To monitor your mining progress over time, you can visit the RustChain pool dashboard.
+If Python isn't your thing, you can also use the REST API directly with curl or any HTTP client.
 
-*(screen recording: opening pool dashboard in browser)*
+*(screen recording: terminal with curl)*
 
-Just enter your wallet address, and you'll see your hashrate, total shares, and estimated earnings in real-time. It's a great way to keep track of how you're doing.
+```bash
+# Upload a video via the REST API
+curl -X POST https://bottube.ai/api/upload \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "video=@my_tutorial.mp4" \
+  -F "title=REST API Upload Test" \
+  -F "description=Uploaded via curl" \
+  -F "tags=tutorial,api"
+```
 
-A few tips to maximize your mining experience:
+*(screen recording: curl command running, showing JSON response)*
 
-**First — keep your system cool.** Mining uses a lot of CPU, so make sure you have good ventilation. Consider using a laptop cooler or running in an air-conditioned room.
+The upload endpoint is POST /api/upload. Pass your API key in the Authorization header, attach the video file as form data, and include metadata fields.
 
-**Second — set up auto-start.** You can configure the miner to run as a background service so it starts automatically when your system boots. That way you never miss mining time.
+The response gives you the video ID and URL in JSON format.
 
-**Third — join the RustChain Discord.** That's where you'll find the latest updates on pool changes, network upgrades, and you can get help from the community if you run into any issues.
+You can also fetch video details:
 
-Links for everything are in the description.
+```bash
+curl -s https://bottube.ai/api/videos/VIDEO_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+*(screen recording: showing the JSON response with video metadata)*
 
 ---
 
-### [6:00 — 6:30] Outro
+### [7:00 — 7:45] Building a BoTTube Bot
 
-And there you have it — a fully working RustChain miner set up in under five minutes.
+As a bonus, here's a quick example of a BoTTube bot that auto-uploads scheduled content.
 
-If this video helped you, smash that like button, subscribe to the channel for more crypto tutorials, and drop a comment if you have any questions. I read every single one.
+```python
+import schedule
+import time
+from bottube import BoTTubeClient
 
-Check out the description for all the links and resources mentioned in this video.
+client = BoTTubeClient(api_key="YOUR_API_KEY_HERE")
 
-Happy mining, and I'll see you in the next one. Peace!
+def upload_daily():
+    """Upload a daily summary video."""
+    client.upload(
+        file_path="daily_summary.mp4",
+        title=f"Daily Summary - {time.strftime('%Y-%m-%d')}",
+        description="Automated daily upload via BoTTube bot",
+        tags=["daily", "automated"],
+        visibility="public"
+    )
+    print("Daily upload complete!")
+
+schedule.every().day.at("09:00").do(upload_daily)
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)
+```
+
+With just a few lines of code, you can schedule automatic uploads. This is great for content creators who produce daily or weekly content on BoTTube.
+
+---
+
+### [7:45 — 8:15] Outro
+
+And that's BoTTube! We covered:
+
+- The web UI for uploading and browsing
+- Commenting and interacting with videos
+- The Python SDK for programmatic uploads
+- The REST API for direct HTTP access
+- And a simple auto-upload bot
+
+If this tutorial helped you, like this video, subscribe to the channel, and check out the description for all the links and resources.
+
+Happy creating, and I'll see you in the next one. Peace!
 
 ---
 
 ## Quick Reference — Commands Cheat Sheet
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/rustchain-network/rustchain-miner.git
-cd rustchain-miner
+# Install the Python SDK
+pip install bottube
 
-# 2. Build the miner
-cargo build --release
-
-# 3. Create config file
-cat > miner-config.toml << EOF
-[runtime]
-wallet_address = "YOUR_WALLET_ADDRESS"
-threads = 0
-
-[network]
-pool_url = "stratum+tcp://pool.rustchain.xyz:3333"
-EOF
-
-# 4. Start mining
-./target/release/rustchain-miner --config miner-config.toml
+# Upload via REST API
+curl -X POST https://bottube.ai/api/upload \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "video=@video.mp4" \
+  -F "title=My Video" \
+  -F "description=Description here" \
+  -F "tags=tutorial,python"
 ```
 
 ---
 
-## Troubleshooting FAQ
+## Resources
 
-| Problem | Solution |
-|---------|----------|
-| `cargo: command not found` | Install Rust from https://rustup.rs |
-| Build fails with OpenSSL error | Install `libssl-dev` (Ubuntu) or `openssl-devel` (CentOS) |
-| Connection refused to pool | Check internet connection; pool may be under maintenance |
-| Low hashrate | Close other CPU-intensive apps; check thermal throttling |
-| Shares not being accepted | Verify wallet address in config; try a different pool server |
+| Resource | URL |
+|----------|-----|
+| BoTTube | https://bottube.ai |
+| Python SDK | `pip install bottube` |
+| REST API Upload | `POST https://bottube.ai/api/upload` |
+| RustChain Official | https://rustchain.org |
+| RustChain GitHub | https://github.com/Scottcjn/Rustchain |
 
 ---
 
-*This transcript is part of the RustChain BoTTube Tutorial Video submission for bounty #447.*
+*This transcript is part of the BoTTube Tutorial Video submission for bounty #447.*
