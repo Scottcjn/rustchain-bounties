@@ -1,6 +1,6 @@
 # Welcome, ugig Applicants
 
-If you found us through a [ugig](https://ugig.io) posting for **RustChain Open Bounties** or any similar Elyan Labs gig — read this first.
+If you found us through a ugig posting for **RustChain Open Bounties** or any similar Elyan Labs gig — read this first.
 
 ## Two things you need to know
 
@@ -57,9 +57,9 @@ Expected delivery: <date or "PR linked below">
 ## Wallets & payouts
 
 - You don't need to set up a wallet before claiming. Your GitHub handle works as a wallet identifier by default.
-- If you want a specific RTC address (RTC + 40-char hex), generate one via [rustchain-wallet](https://github.com/Scottcjn/rustchain-wallet) or just tell us the string you want in your first claim.
+- If you want a specific RTC address (RTC + 40-char hex), generate one via the [`clawrtc`](https://pypi.org/project/clawrtc/) wallet CLI or just tell us the string you want in your first claim.
 - Payouts land within 24h of a maintainer confirming the deliverable. Same-day in most cases.
-- Track your balance: `curl https://rustchain.org/wallet/balance?miner=<your_wallet>`
+- Track your balance: `curl https://rustchain.org/wallet/balance?miner_id=<your_wallet>`
 
 ## Questions
 

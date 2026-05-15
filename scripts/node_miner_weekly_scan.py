@@ -65,7 +65,7 @@ def _request_json(
     url: str,
     timeout_s: int = DEFAULT_TIMEOUT_SECONDS,
     headers: Optional[Dict[str, str]] = None,
-    verify_tls: bool = False,
+    verify_tls: bool = True,
 ) -> Tuple[Optional[Any], Optional[str]]:
     req = urllib.request.Request(url)
     req.add_header("Accept", "application/json")
@@ -74,9 +74,7 @@ def _request_json(
         if v:
             req.add_header(k, v)
 
-    context = None
-    if url.startswith("https://") and not verify_tls:
-        context = ssl._create_unverified_context()
+    context = ssl.create_default_context() if url.startswith("https://") else None
 
     try:
         with urllib.request.urlopen(req, timeout=timeout_s, context=context) as resp:
@@ -100,7 +98,7 @@ def fetch_json(
     path: str,
     timeout_s: int = DEFAULT_TIMEOUT_SECONDS,
     headers: Optional[Dict[str, str]] = None,
-    verify_tls: bool = False,
+    verify_tls: bool = True,
 ) -> Tuple[Optional[Any], Optional[str]]:
     url = f"{base_url.rstrip('/')}{path}"
     return _request_json(url, timeout_s=timeout_s, headers=headers, verify_tls=verify_tls)
@@ -560,7 +558,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--verify-tls",
         action="store_true",
-        help="Verify TLS certs (off by default because official node uses self-signed TLS)",
+        help="Deprecated compatibility flag. TLS certificates are always verified.",
     )
     p.add_argument(
         "--admin-key",
@@ -569,6 +567,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--out-json", default="", help="Write machine-readable JSON report to this path")
     p.add_argument("--out-md", default="", help="Write markdown report to this path")
+    p.set_defaults(verify_tls=True)
     return p.parse_args()
 
 

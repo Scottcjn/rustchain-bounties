@@ -1,0 +1,7 @@
+ARM hums fast today
+ARM hums through endless night
+Rust returns to dust
+
+archetype: modern_arm
+hardware: AWS Graviton2 (Neoverse N1, 64-core aarch64) — cloud server
+wallet: AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG
