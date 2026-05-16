@@ -417,23 +417,23 @@ textarea.code-area {
   <div class="sidebar">
     <div class="sidebar-section">
       <div class="sidebar-title">Blockchain</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/latest')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/latest', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Latest Block</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/{height}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/blocks/{height}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Block by Height</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs/{hash}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs/{hash}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">TX by Hash</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/node_info')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/node_info', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Node Info</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/syncing')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/syncing', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Sync Status</span>
       </div>
@@ -441,15 +441,15 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Bank / Accounts</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/balances/{address}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/balances/{address}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Balances</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/total')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/bank/total', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Total Supply</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/bank/transfer')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/bank/transfer', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Transfer</span>
       </div>
@@ -457,27 +457,27 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Staking</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/validators')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/validators', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Validators</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/delegations/{delegator}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/delegations/{delegator}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Delegations</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/rewards/{delegator}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/rewards/{delegator}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Rewards</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/staking/delegate')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/staking/delegate', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Delegate</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/pool')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/pool', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Staking Pool</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/params')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/staking/params', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Staking Params</span>
       </div>
@@ -485,23 +485,23 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Governance</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Proposals</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals/{id}')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/proposals/{id}', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Proposal Detail</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/proposals')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/proposals', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Submit Proposal</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/vote')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/gov/vote', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Vote</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/params')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/gov/params', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Gov Params</span>
       </div>
@@ -509,15 +509,15 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Transactions</div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/broadcast')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/broadcast', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Broadcast TX</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/encode')">
+      <div class="sidebar-item" onclick="loadEndpoint('POST', '/txs/encode', this)">
         <span class="method-badge method-post">POST</span>
         <span class="endpoint-name">Encode TX</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs?message.action=send')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/txs?message.action=send', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Search TXs</span>
       </div>
@@ -525,15 +525,15 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Consensus</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/state')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/state', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Consensus State</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/params')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/consensus/params', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Consensus Params</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/validatorsets/latest')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/validatorsets/latest', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Validator Set</span>
       </div>
@@ -541,19 +541,19 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Mint / Distribution</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/inflation')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/inflation', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Inflation</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/params')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/mint/params', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Mint Params</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/validators/{addr}/rewards')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/validators/{addr}/rewards', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Validator Rewards</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/community_pool')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/distribution/community_pool', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Community Pool</span>
       </div>
@@ -561,11 +561,11 @@ textarea.code-area {
 
     <div class="sidebar-section">
       <div class="sidebar-title">Slashing</div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/validators/{addr}/signing_info')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/validators/{addr}/signing_info', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Signing Info</span>
       </div>
-      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/params')">
+      <div class="sidebar-item" onclick="loadEndpoint('GET', '/slashing/params', this)">
         <span class="method-badge method-get">GET</span>
         <span class="endpoint-name">Slashing Params</span>
       </div>
@@ -582,17 +582,17 @@ textarea.code-area {
         <option value="DELETE">DELETE</option>
       </select>
       <input class="url-input" id="urlInput" placeholder="/blocks/latest">
-      <button class="send-btn" id="sendBtn" onclick="sendRequest()">▶ Send</button>
+      <button class="send-btn" id="sendBtn" onclick="sendRequest()">�?Send</button>
     </div>
 
     <div class="quick-actions">
       <span style="font-size:11px; color:var(--text-muted); line-height:28px;">Quick:</span>
-      <span class="chip" onclick="loadEndpoint('GET','/blocks/latest')">Latest Block</span>
-      <span class="chip" onclick="loadEndpoint('GET','/bank/balances/zp6')">My Balance</span>
-      <span class="chip" onclick="loadEndpoint('GET','/staking/validators')">Validators</span>
-      <span class="chip" onclick="loadEndpoint('GET','/gov/proposals')">Proposals</span>
-      <span class="chip" onclick="loadEndpoint('GET','/staking/pool')">Staking Pool</span>
-      <span class="chip" onclick="loadEndpoint('GET','/node_info')">Node Info</span>
+      <span class="chip" onclick="loadEndpoint('GET','/blocks/latest', this)">Latest Block</span>
+      <span class="chip" onclick="loadEndpoint('GET','/bank/balances/zp6', this)">My Balance</span>
+      <span class="chip" onclick="loadEndpoint('GET','/staking/validators', this)">Validators</span>
+      <span class="chip" onclick="loadEndpoint('GET','/gov/proposals', this)">Proposals</span>
+      <span class="chip" onclick="loadEndpoint('GET','/staking/pool', this)">Staking Pool</span>
+      <span class="chip" onclick="loadEndpoint('GET','/node_info', this)">Node Info</span>
     </div>
 
     <div class="panel-area">
@@ -757,14 +757,14 @@ const MOCK_RESPONSES = {
 };
 
 // ─── Endpoint Loading ───────────────────────────────────────────────────────
-function loadEndpoint(method, path) {
+function loadEndpoint(method, path, clickedEl) {
   currentMethod = method;
   document.getElementById('methodSelect').value = method;
   document.getElementById('urlInput').value = path;
 
   // Highlight sidebar
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (clickedEl) clickedEl.classList.add('active');
 
   // Pre-fill params for path variables
   params = [];
@@ -806,7 +806,7 @@ async function sendRequest() {
   const sendBtn = document.getElementById('sendBtn');
 
   sendBtn.disabled = true;
-  sendBtn.textContent = '⏳ Sending...';
+  sendBtn.textContent = '�?Sending...';
 
   // Replace path params
   params.forEach(p => {
@@ -833,14 +833,15 @@ async function sendRequest() {
     const fullUrl = `${rpcUrl}${path}`;
     const body = method !== 'GET' ? document.getElementById('requestBody').value : undefined;
 
-    let response, data;
+    let response, data, usedMock = false;
     try {
       const fetchOptions = { method, headers: { 'Content-Type': 'application/json' } };
       if (body) fetchOptions.body = body;
       response = await fetch(fullUrl, fetchOptions);
       data = await response.json();
     } catch (fetchErr) {
-      // Network error — use mock data
+      // Network error -- using mock data
+      usedMock = true;
       await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
       response = { status: 200, ok: true };
 
@@ -862,7 +863,9 @@ async function sendRequest() {
     // Update meta
     const meta = document.getElementById('responseMeta');
     const statusClass = (response.status >= 200 && response.status < 300) ? 'status-ok' : 'status-err';
+    const mockBadge = usedMock ? '<span style="color:var(--yellow);font-weight:600">\u26A0 MOCK DATA</span>' : '';
     meta.innerHTML = `
+      ${mockBadge}
       <span class="${statusClass}">${response.status} ${response.statusText || 'OK'}</span>
       <span class="time">${elapsed}ms</span>
       <span class="size">${formatSize(size)}</span>
@@ -881,7 +884,7 @@ async function sendRequest() {
   }
 
   sendBtn.disabled = false;
-  sendBtn.textContent = '▶ Send';
+  sendBtn.textContent = '�?Send';
 }
 
 // ─── JSON Syntax Highlighting ───────────────────────────────────────────────
@@ -921,7 +924,7 @@ function renderParams() {
     <tr>
       <td><input value="${escapeAttr(p.key)}" onchange="params[${i}].key=this.value"></td>
       <td><input value="${escapeAttr(p.value)}" onchange="params[${i}].value=this.value"></td>
-      <td><button class="btn-icon" onclick="removeParamRow(${i})">✕</button></td>
+      <td><button class="btn-icon" onclick="removeParamRow(${i})">�?/button></td>
     </tr>
   `).join('');
 }
@@ -945,7 +948,7 @@ function renderHeaders() {
     <tr>
       <td><input value="${escapeAttr(h.key)}" onchange="headers[${i}].key=this.value"></td>
       <td><input value="${escapeAttr(h.value)}" onchange="headers[${i}].value=this.value"></td>
-      <td><button class="btn-icon" onclick="removeHeaderRow(${i})">✕</button></td>
+      <td><button class="btn-icon" onclick="removeHeaderRow(${i})">�?/button></td>
     </tr>
   `).join('');
 }
