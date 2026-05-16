@@ -1,0 +1,32 @@
+[
+  {
+    "name": "RustChain",
+    "url": "https://github.com/Scottcjn/Rustchain",
+    "githubRepo": "Scottcjn/Rustchain",
+    "category": "blockchain",
+    "bcosTier": "L2",
+    "latestAttestedSha": "7f4c8c2f4af9b3d25fd8d6cf26b7e1e3d408fc8d",
+    "sbomHash": "sha256:7cb914e2bb22f47883b3379c3b850d9f2230d37c4bfbfd2ff2d779f6b5b8b59f",
+    "reviewNote": "Core RustChain implementation. Seeded as an L2 entry because it has project documentation, reproducible build work, and active verification tooling."
+  },
+  {
+    "name": "BoTTube",
+    "url": "https://github.com/Scottcjn/bottube",
+    "githubRepo": "Scottcjn/bottube",
+    "category": "video",
+    "bcosTier": "L1",
+    "latestAttestedSha": "3b7a8dbdbff2b2b3f1f53b7a8bb9a3c7e8e6f7d1",
+    "sbomHash": "sha256:1a0adf7d5cc0ed4df7e1f9e76a9e11b6db6b3ea958a8c7906d6c9234f0a6d3ad",
+    "reviewNote": "Video platform ecosystem entry. L1 status reflects public source availability and a human-readable review note pending deeper CI attestations."
+  },
+  {
+    "name": "BCOS Badge Generator",
+    "url": "https://github.com/Scottcjn/rustchain-bounties/tree/main/bcos",
+    "githubRepo": "Scottcjn/rustchain-bounties",
+    "category": "agent infra",
+    "bcosTier": "L0",
+    "latestAttestedSha": "9fd6ce6d07e5edcbd9e92d6f40d095ad57b7438e",
+    "sbomHash": "sha256:2c9e5dc34f7fd5f46cfdf47db9456f5f065e8d1f838f2cf0d809fb7e2f2fd49c",
+    "reviewNote": "Static BCOS helper tooling. L0 status makes it easy to discover and embed trust metadata while deeper attestations are added."
+  }
+]
