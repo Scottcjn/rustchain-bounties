@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RustChain Explorer Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">RustChain Explorer</p>
+        <h1>Miner Dashboard</h1>
+      </div>
+      <div class="status-cluster">
+        <span id="healthBadge" class="health-badge pending">Checking</span>
+        <span id="updatedAt" class="muted">Not loaded</span>
+        <button id="refreshBtn" class="primary-action" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <section class="metrics-grid" aria-label="Explorer summary">
+      <article class="metric-tile">
+        <span class="metric-label">Active Miners</span>
+        <strong id="minerCount">0</strong>
+        <small id="onlineCount">0 online</small>
+      </article>
+      <article class="metric-tile">
+        <span class="metric-label">Vintage Nodes</span>
+        <strong id="vintageCount">0</strong>
+        <small>Multiplier above modern baseline</small>
+      </article>
+      <article class="metric-tile">
+        <span class="metric-label">Top Multiplier</span>
+        <strong id="topMultiplier">0x</strong>
+        <small id="topMiner">No miner</small>
+      </article>
+      <article class="metric-tile">
+        <span class="metric-label">Agent Volume</span>
+        <strong id="agentVolume">0 RTC</strong>
+        <small id="agentJobs">0 jobs completed</small>
+      </article>
+    </section>
+
+    <section id="errorPanel" class="error-panel" hidden></section>
+
+    <section class="workspace">
+      <div class="panel miners-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Miners</h2>
+            <p id="minerCaption">Live attestations from the explorer API</p>
+          </div>
+          <div class="controls">
+            <label>
+              <span>Search</span>
+              <input id="minerSearch" type="search" placeholder="miner or hardware">
+            </label>
+            <label>
+              <span>Family</span>
+              <select id="familyFilter">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="statusFilter">
+                <option value="all">All</option>
+                <option value="online">Online</option>
+                <option value="stale">Stale</option>
+              </select>
+            </label>
+            <label>
+              <span>Sort</span>
+              <select id="sortSelect">
+                <option value="last_attest">Latest attest</option>
+                <option value="antiquity_multiplier">Multiplier</option>
+                <option value="device_family">Family</option>
+                <option value="miner">Miner</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Miner</th>
+                <th>Family</th>
+                <th>Hardware</th>
+                <th>Multiplier</th>
+                <th>Last Attest</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="minerRows">
+              <tr>
+                <td colspan="6" class="empty-cell">Loading miners...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="side-stack">
+        <section class="panel">
+          <div class="panel-header compact">
+            <h2>Architecture Mix</h2>
+          </div>
+          <div id="archBars" class="bar-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header compact">
+            <h2>Agent Economy</h2>
+          </div>
+          <dl class="stats-list">
+            <div>
+              <dt>Active agents</dt>
+              <dd id="activeAgents">0</dd>
+            </div>
+            <div>
+              <dt>Open jobs</dt>
+              <dd id="openJobs">0</dd>
+            </div>
+            <div>
+              <dt>Escrow</dt>
+              <dd id="escrowBalance">0 RTC</dd>
+            </div>
+            <div>
+              <dt>Fee rate</dt>
+              <dd id="feeRate">0%</dd>
+            </div>
+          </dl>
+          <div id="categoryBars" class="bar-list compact-bars"></div>
+          <div class="lookup-box">
+            <label>
+              <span>Reputation Lookup</span>
+              <input id="reputationWallet" type="search" placeholder="wallet or agent id">
+            </label>
+            <button id="reputationBtn" type="button">Lookup</button>
+            <p id="reputationResult" class="lookup-result">No wallet selected.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="panel jobs-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Marketplace Jobs</h2>
+          <p id="jobCaption">Current claimable Agent Economy jobs</p>
+        </div>
+        <div class="jobs-actions">
+          <label>
+            <span>Category</span>
+            <select id="jobCategoryFilter">
+              <option value="all">All</option>
+            </select>
+          </label>
+          <code class="curl-chip">curl https://explorer.rustchain.org/agent/jobs</code>
+        </div>
+      </div>
+      <div class="lifecycle" aria-label="Job lifecycle">
+        <span>Posted</span>
+        <span>Claimed</span>
+        <span>Delivered</span>
+        <span>Completed</span>
+      </div>
+      <div id="jobList" class="job-list">
+        <p class="empty-state">Loading jobs...</p>
+      </div>
+    </section>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
