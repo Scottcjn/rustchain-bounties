@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: Scottcjn/rtc-reward-action@v1
         with:
-          node-url: https://50.28.86.131
+          node-url: https://rustchain.org
           amount: 5
           wallet-from: your-project-fund
           admin-key: ${{ secrets.RTC_ADMIN_KEY }}
@@ -34,7 +34,7 @@ jobs:
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `node-url` | No | `https://50.28.86.131` | RustChain node URL |
+| `node-url` | No | `https://rustchain.org` | RustChain node URL |
 | `amount` | No | `5` | RTC per merged PR |
 | `wallet-from` | **Yes** | — | Source wallet name |
 | `admin-key` | **Yes** | — | Admin key (store in GitHub Secret) |
