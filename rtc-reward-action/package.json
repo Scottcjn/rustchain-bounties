@@ -1,0 +1,18 @@
+{
+  "name": "rtc-reward-action",
+  "version": "1.0.0",
+  "description": "GitHub Action that awards RTC tokens for merged pull requests",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js -o dist --source-map --license licenses.txt",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
+  },
+  "license": "MIT"
+}

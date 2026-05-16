@@ -1,49 +1,34 @@
-# This is a wrapper that delegates to BossChaos/rtc-reward-action@v1.0.0
-# For the full TypeScript implementation, see:
-# https://github.com/BossChaos/rtc-reward-action
 name: "RTC Reward on PR Merge"
-description: "Automatically award RTC tokens to contributors when their PR is merged (v2 - TypeScript)"
-author: "BossChaos"
+description: "Award RTC tokens to contributors when pull requests are merged"
+author: "RustChain Community"
 
 inputs:
-  rtc-amount:
-    description: "Amount of RTC tokens to award"
+  node-url:
+    description: "RustChain node API URL"
+    required: true
+  amount:
+    description: "RTC amount to award per merged pull request"
     required: false
-    default: "20"
-  wallet-address:
-    description: "Default RTC wallet address for the sender"
+    default: "5"
+  wallet-from:
+    description: "Funding wallet name or address"
+    required: true
+  admin-key:
+    description: "Admin key used by the RustChain reward endpoint"
+    required: true
+  github-token:
+    description: "GitHub token used to read PR data and post comments"
     required: false
-    default: "RTC6d1f27d28961279f1034d9561c2403697eb55602"
+    default: ${{ github.token }}
   dry-run:
-    description: "If true, simulate the reward without actual transfer"
+    description: "If true, validate inputs and post a dry-run comment without sending RTC"
     required: false
     default: "false"
-  github-token:
-    description: "GitHub token for API access"
-    required: true
-    default: ${{ github.token }}
-  contributor-wallet-map:
-    description: "JSON map of GitHub usernames to RTC wallet addresses"
-    required: false
-    default: "{}"
-  comment-on-success:
-    description: "Whether to post a comment on successful reward"
-    required: false
-    default: "true"
 
 runs:
-  using: "composite"
-  steps:
-    - name: Delegate to rtc-reward-action
-      uses: BossChaos/rtc-reward-action@v1.0.0
-      with:
-        rtc-amount: ${{ inputs.rtc-amount }}
-        wallet-address: ${{ inputs.wallet-address }}
-        dry-run: ${{ inputs.dry-run }}
-        github-token: ${{ inputs.github-token }}
-        contributor-wallet-map: ${{ inputs.contributor-wallet-map }}
-        comment-on-success: ${{ inputs.comment-on-success }}
+  using: "node20"
+  main: "dist/index.js"
 
 branding:
   icon: "award"
-  color: "blue"
+  color: "orange"

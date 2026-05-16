@@ -1,49 +1,40 @@
-# Auto-Award RTC on PR Merge
+# RTC Reward Action
 
-A reusable GitHub Action that automatically rewards RTC tokens to contributors when their PR is merged.
-
-## Quick Start
-
-Use the action directly from BossChaos/rtc-reward-action:
+Award RTC tokens automatically when a pull request is merged.
 
 ```yaml
 on:
-  pull_request_target:
+  pull_request:
     types: [closed]
 
 jobs:
-  award-rtc:
+  reward:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: BossChaos/rtc-reward-action@v1.0.0
+      - uses: Scottcjn/rtc-reward-action@v1
         with:
-          rtc-amount: '20'
-          wallet-address: 'RTC6d1f27d28961279f1034d9561c2403697eb55602'
-          dry-run: 'true'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          node-url: https://50.28.86.131
+          amount: 5
+          wallet-from: project-fund
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+          dry-run: true
 ```
 
-## Features
+## Wallet discovery
 
-- ✅ **Configurable RTC amount** — set any reward amount
-- 👛 **Contributor wallet mapping** — JSON map of GitHub username → RTC wallet
-- 🧪 **Dry-run mode** — test without sending real tokens
-- 💬 **Auto-comment** — confirmation comment on merged PR
-- 🔄 **Reusable** — works across any RustChain repo
+The action pays the contributor wallet found in either:
+
+1. the PR body, for example `RTC wallet: alice-wallet`; or
+2. a `.rtc-wallet` file in the pull request branch.
 
 ## Inputs
 
-| Input | Description | Default |
-|---|---|---|
-| `rtc-amount` | Amount of RTC to award | `20` |
-| `wallet-address` | Default sender wallet | `RTC6d1f27d28961279f1034d9561c2403697eb55602` |
-| `dry-run` | Simulate transfer | `false` |
-| `github-token` | GitHub token | `${{ github.token }}` |
-| `contributor-wallet-map` | JSON: username → wallet | `{}` |
-| `comment-on-success` | Post PR comment | `true` |
-| `comment-template` | Custom comment template | Default |
-
-## Full Documentation
-
-See: https://github.com/BossChaos/rtc-reward-action
+| Input | Required | Default | Description |
+| --- | --- | --- | --- |
+| `node-url` | yes | | RustChain node API URL |
+| `amount` | no | `5` | RTC amount per merged PR |
+| `wallet-from` | yes | | funding wallet name/address |
+| `admin-key` | yes | | secret used by reward endpoint |
+| `github-token` | no | `${{ github.token }}` | token for PR reads/comments |
+| `dry-run` | no | `false` | validate and comment without transfer |
