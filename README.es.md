@@ -5,16 +5,16 @@
 
 [![Becas Abiertas](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=becas%20abiertas&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![Estrellas](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![Pozo de RTC](https://img.shields.io/badge/Pozo%20de%20RTC-5%2C900%2B%20RTC-oro)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
+[![Pozo de RTC](https://img.shields.io/badge/Pozo%20de%20RTC-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![BCOS](https://img.shields.io/badge/BCOS-Certificado%20L1-azul)](https://github.com/Scottcjn/RustChain)
 
 **131 becas abiertas · 5,900+ RTC disponibles · Sin experiencia requerida para muchas tareas**
 
-[![Pago Total](https://img.shields.io/badge/Pago%20Total-22%2C756%20RTC-oro)](BOUNTY_LEDGER.md)
+[![Pago Total](https://img.shields.io/badge/Pago%20Total-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
 
 ### Gana RTC contribuyendo al ecosistema de RustChain
 
-[Explorar Todas las Becas](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Becas Fáciles](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Equipo Rojo](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**¿Cómo Presentar una Beca →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Registro de Pagos](BOUNTY_LEDGER.md) · [¿Qué es RustChain?](https://github.com/Scottcjn/RustChain)
+[Explorar Todas las Becas](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Becas Fáciles](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good%20first%20issue%22) · [Equipo Rojo](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**¿Cómo Presentar una Beca →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Registro de Pagos](BOUNTY_LEDGER.md) · [¿Qué es RustChain?](https://github.com/Scottcjn/RustChain)
 
 ---
 
