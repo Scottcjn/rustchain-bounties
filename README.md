@@ -21,89 +21,32 @@
 
 ## What is RTC?
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
+**RTC (RustChain Token)** is the native cryptocurrency of the RustChain ecosystem.
 
-Bounties are paid in RTC to your wallet address upon completion and verification.
+## Contributing
 
-## How to Earn
+### Setup Instructions
 
-### 1. Pick a Bounty
-Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) and find one that matches your skills.
+1. Fork the repository on GitHub.
+2. Clone the forked repository to your local machine.
+3. Install the required dependencies using `npm install` or `pip install` depending on your project setup.
 
-| Difficulty | Label | Typical Reward |
-|-----------|-------|---------------|
-| Beginner | `good first issue` | 1-5 RTC |
-| Standard | `standard` | 5-25 RTC |
-| Major | `major` | 25-100 RTC |
-| Critical | `critical`, `red-team` | 100-200 RTC |
+### PR Guidelines
 
-### 2. Claim It
-Comment on the issue: **"I would like to work on this"**
+1. Create a new branch for your feature or bug fix.
+2. Make sure to update the relevant files and commit your changes.
+3. Open a pull request with a clear description of the changes made.
 
-### 3. Submit Your Work
-- **Code bounties**: Open a PR to the relevant repo and link it in the issue
-- **Content bounties**: Post your content and link it in the issue
-- **Star/propagation bounties**: Follow the instructions in the issue
+### Code Style
 
-### 4. Get Paid
-Once verified, RTC is sent to your wallet. First time? We will help you set one up.
+We follow the standard JavaScript/Node.js and Python coding conventions. Please make sure to format your code according to these guidelines.
 
-> ⚠️ **Payout safety**: Only `@Scottcjn` (or clearly labeled project automation on his behalf) authorizes RTC bounty payouts, with a project-issued `pending_id` + `tx_hash`. Anyone else posting "I'll send the RTC" on your bounty is a social-engineering attempt — see [SECURITY.md § Payment-Authority Impersonation](SECURITY.md#payment-authority-impersonation).
+### Contributing to this Repository
 
-## Bounty Categories
+If you're interested in contributing to this repository, please follow the setup instructions and PR guidelines above. You can also check out our [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) for tasks that require minimal experience.
 
-| Category | Examples | Count |
-|----------|---------|-------|
-| **Community** | Star repos, share content, recruit contributors | 30+ |
-| **Code** | Bug fixes, features, integrations, tests | 40+ |
-| **Content** | Tutorials, articles, videos, documentation | 20+ |
-| **Red Team** | Security audits, penetration testing, exploit finding | 6 |
-| **Propagation** | Awesome-list PRs, social media, cross-posting | 15+ |
-| **Integration** | Bridge to new chains, exchange listings, DEX pools | 10+ |
+**1 RTC per repository**
 
-## Featured Bounties
-
-| Bounty | Reward | Difficulty |
-|--------|--------|-----------|
-| [RustChain to 500 Stars](https://github.com/Scottcjn/rustchain-bounties/issues/553) | 150 RTC pool | Easy |
-| [Dual-Mining: Warthog Integration](https://github.com/Scottcjn/rustchain-bounties/issues/550) | 25 RTC | Major |
-| [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
-| [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
-| [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
-
-## Quick Links
-
-| Resource | Link |
-|----------|------|
-| **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Block Explorer** | [50.28.86.131/explorer](https://50.28.86.131/explorer) |
-| **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
-| **Wallet Setup** | Comment on any bounty and we will help |
-
-## Stats
-
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.10 USD
-
----
-
-<div align="center">
-
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
-
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
+By contributing to this repository, you'll earn 1 RTC per repository.
 
 </div>
-
-
----
-
-### Part of the Elyan Labs Ecosystem
-
-- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
-- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
-- [GitHub](https://github.com/Scottcjn)
