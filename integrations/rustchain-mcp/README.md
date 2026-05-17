@@ -30,6 +30,30 @@ pip install -r requirements.txt
 claude mcp add rustchain "$(pwd)/run.sh"
 ```
 
+## MCP Registry
+
+The official MCP Registry manifest is available at `server.json`.
+It targets the published PyPI package `rustchain-mcp` version `0.3.0`,
+which includes the required hidden ownership marker:
+
+```markdown
+<!-- mcp-name: io.github.Scottcjn/rustchain-mcp -->
+```
+
+To publish with the official `mcp-publisher` CLI:
+
+```bash
+cd integrations/rustchain-mcp
+mcp-publisher login github
+mcp-publisher publish
+```
+
+After publishing, verify the listing:
+
+```bash
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Scottcjn/rustchain-mcp"
+```
+
 ## Usage examples
 
 - Health:
