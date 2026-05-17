@@ -20,25 +20,18 @@
       },
       "environmentVariables": [
         {
-          "name": "RUSTCHAIN_NODE",
-          "description": "Optional RustChain node URL override.",
+          "name": "RUSTCHAIN_PRIMARY_URL",
+          "description": "Optional primary RustChain node URL override.",
           "format": "string",
           "isRequired": false,
           "default": "https://50.28.86.131"
         },
         {
-          "name": "BOTTUBE_URL",
-          "description": "Optional BoTTube API base URL override.",
+          "name": "RUSTCHAIN_FALLBACK_URLS",
+          "description": "Optional comma-separated RustChain fallback node URLs.",
           "format": "string",
           "isRequired": false,
-          "default": "https://bottube.ai"
-        },
-        {
-          "name": "BEACON_URL",
-          "description": "Optional Beacon API base URL override.",
-          "format": "string",
-          "isRequired": false,
-          "default": "https://rustchain.org/beacon"
+          "default": ""
         }
       ]
     }
