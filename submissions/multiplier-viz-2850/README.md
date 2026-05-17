@@ -19,8 +19,8 @@ Visualize how your RustChain mining rewards grow over time with hardware aging a
 
 ```bash
 # Clone or download
-git clone https://github.com/zhaog100/rustchain-multiplier-viz.git
-cd rustchain-multiplier-viz
+git clone https://github.com/Scottcjn/rustchain-bounties.git
+cd rustchain-bounties/submissions/multiplier-viz-2850
 
 # Open in browser
 open index.html
