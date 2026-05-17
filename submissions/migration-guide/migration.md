@@ -11,7 +11,7 @@ A practical guide for developers and operators transitioning dApps, smart contra
 3. [Smart Contract Migration](#smart-contract-migration)
 4. [Tooling Comparison](#tooling-comparison)
 5. [Wallet & Account Migration](#wallet--account-migration)
-6. [Node Operation Migration](#node-operation-migration)
+6. [Node & Miner Operation](#node--miner-operation)
 7. [Network Configuration](#network-configuration)
 8. [Common Pitfalls](#common-pitfalls)
 9. [FAQ](#faq)
@@ -20,141 +20,132 @@ A practical guide for developers and operators transitioning dApps, smart contra
 
 ## Overview
 
-RustChain is an EVM-compatible blockchain built on the BCOS framework with a Rust-based implementation. This means most Ethereum smart contracts and tools work on RustChain with minimal changes. The primary differences are in **consensus (PoA vs PoW)**, **chain ID**, and **block timing**.
+RustChain is a lightweight blockchain ecosystem written in Rust with a fundamentally different philosophy from Ethereum. Rather than competing on computational power, RustChain uses **RIP-200 Proof-of-Antiquity (PoAn)** consensus, where vintage and low-power hardware earns higher mining rewards. The core motto: *"Your 2005 laptop isn't e-waste. It's a mining rig."*
 
 ### Why Migrate?
 
 | Feature | Ethereum | Ethereum Classic | RustChain |
 |---|---|---|---|
-| Consensus | PoS | PoW | PoA |
-| Block Time | ~12s | ~15s | ~2-3s |
-| Finality | Minutes | Minutes | Seconds |
-| Gas Cost | High | Medium | Low |
-| EVM Compatible | ✅ | ✅ | ✅ |
+| Consensus | PoS | PoW | Proof-of-Antiquity (RIP-200) |
+| Block Time | ~12s | ~15s | Epoch-based |
+| Hardware Requirements | High (validators) | High (ASICs/GPUs) | Ultra-low (32MB RAM minimum) |
+| Mining | Staking 32 ETH | ASIC/GPU mining | Hardware attestation on any device |
 | Language | Go | Go | Rust |
+| Philosophy | Institutional DeFi | Code is Law | Anti-e-waste, absolute decentralization |
+
+### Key Philosophical Difference
+
+Unlike Ethereum's Proof-of-Stake or ETC's Proof-of-Work, RustChain's **Reverse-Proof-of-Work (RPoW)** actively rewards miners who use older, less powerful hardware. The protocol scales to run on devices as humble as a Pentium III or a Nintendo 64. This means:
+
+- No expensive hardware required
+- No energy arms race
+- Real hardware attestation (not simulated)
+- 1.5 RTC per epoch distributed among active miners
 
 ---
 
 ## Key Differences
 
-### 1. Chain ID
-- Ethereum Mainnet: `1`
-- Ethereum Classic: `61`
-- RustChain Mainnet: Check `rustchain-cli chain-id`
-- RustChain Testnet: Check testnet documentation
+### 1. Consensus: Proof-of-Antiquity (RIP-200)
 
-Update your deployment scripts and wallet configurations with the correct Chain ID.
+RustChain uses hardware attestation rather than hash power or stake:
 
-### 2. Consensus Model
-RustChain uses **Proof of Authority (PoA)** instead of Proof of Stake (PoS) or Proof of Work (PoW). This means:
-- No staking required for basic users (validators are pre-approved)
-- Faster block times and finality
-- Different block reward distribution
-- No uncle/ommer blocks
+- Miners run attestation scripts that prove they are running on real hardware
+- VMs may attest but rewards can be penalized or denied
+- Older and more exotic hardware earns higher rewards
+- **1.5 RTC per epoch** distributed among all active miners
 
-### 3. Gas Economics
-RustChain gas prices are significantly lower. Recommended starting point:
-```
-Gas Price: 1 Gwei (vs 20+ Gwei on Ethereum)
-Gas Limit: Same calculation methods apply
-```
+### 2. No Traditional Gas Market
+
+Unlike Ethereum's complex gas auction, RustChain has minimal transaction costs:
+
+- Gas prices are negligible compared to Ethereum
+- No MEV extraction concerns
+- No priority fee auction
+
+### 3. Hardware-First Architecture
+
+RustChain is designed for real hardware, not cloud infrastructure:
+
+- Ultra-low overhead miner (< 32MB RAM)
+- Python-based miner scripts for Linux, macOS, and Windows
+- No special hardware required (no ASICs, no GPUs)
+- Exotic hardware bounties reward ports to unusual platforms
 
 ### 4. Block Structure
-- Blocks are produced by a rotating set of validators
-- Block headers include PoA-specific fields (validator signature, epoch info)
-- No difficulty field in the traditional PoW sense
+
+- Epoch-based rather than traditional block-by-block
+- Miner attestations form the basis of consensus
+- No difficulty adjustment algorithm (not hash-based)
+- No uncle/ommer blocks
 
 ---
 
 ## Smart Contract Migration
 
-### Step 1: Audit Your Contracts
+### Step 1: Understand EVM Compatibility
+
+RustChain is a Rust-based blockchain with its own runtime. Smart contract compatibility depends on the specific integration layer. Check the current documentation for the latest on EVM compatibility support.
+
+### Step 2: Identify Ethereum-Specific Code
 
 Review your Solidity contracts for Ethereum-specific assumptions:
 
 ```solidity
-// ❌ May cause issues - relies on specific block.difficulty
+// May not translate - relies on PoW-specific block.difficulty
 uint256 randomness = uint256(block.difficulty);
 
-// ✅ RustChain alternative - use block timestamp + proposer
+// Use alternative randomness sources
 uint256 randomness = uint256(keccak256(abi.encodePacked(block.timestamp, block.coinbase)));
 ```
 
-### Step 2: Update Hardhat Configuration
+### Step 3: Adapt Development Tooling
+
+If EVM compatibility is available, update your tool configurations:
 
 ```javascript
-// hardhat.config.js
+// hardhat.config.js - update RPC endpoint and chain ID
 module.exports = {
   solidity: "0.8.x",
   networks: {
     rustchain: {
-      url: "https://rpc.rustchain.io",
+      url: process.env.RUSTCHAIN_RPC_URL || "http://localhost:8545",
       accounts: [process.env.PRIVATE_KEY],
-      chainId: <RUSTCHAIN_CHAIN_ID>,
-      gasPrice: 1000000000, // 1 Gwei
-    },
-    rustchainTestnet: {
-      url: "https://rpc.testnet.rustchain.io",
-      accounts: [process.env.PRIVATE_KEY],
-      chainId: <TESTNET_CHAIN_ID>,
-      gasPrice: 1000000000,
+      chainId: parseInt(process.env.RUSTCHAIN_CHAIN_ID || "0"),
     },
   },
 };
 ```
-
-### Step 3: Update Foundry Configuration
 
 ```toml
 # foundry.toml
 [rpc_endpoints]
-rustchain = "https://rpc.rustchain.io"
-rustchain_testnet = "https://rpc.testnet.rustchain.io"
+rustchain = "${RUSTCHAIN_RPC_URL}"
 
 [profile.rustchain]
-chain_id = <RUSTCHAIN_CHAIN_ID>
-rpc_url = "https://rpc.rustchain.io"
+chain_id = "${RUSTCHAIN_CHAIN_ID}"
+rpc_url = "${RUSTCHAIN_RPC_URL}"
 ```
 
-### Step 4: Update Truffle Configuration
+### Step 4: Test and Deploy
 
-```javascript
-// truffle-config.js
-module.exports = {
-  networks: {
-    rustchain: {
-      provider: () => new HDWalletProvider(mnemonic, "https://rpc.rustchain.io"),
-      network_id: "<RUSTCHAIN_CHAIN_ID>",
-      gasPrice: 1000000000,
-      confirmations: 2,
-      timeoutBlocks: 200,
-    },
-  },
-};
-```
-
-### Step 5: Redeploy Contracts
-
-1. Compile contracts with the same Solidity version
-2. Deploy to RustChain testnet first
-3. Verify all functions work correctly
-4. Run integration tests against the testnet
-5. Deploy to RustChain mainnet
+1. Set up a local RustChain node for testing
+2. Compile contracts and verify compatibility
+3. Deploy to a test environment
+4. Run integration tests
+5. Deploy to the RustChain network
 
 ### Contract Compatibility Checklist
 
-| Feature | Compatible? | Notes |
-|---|---|---|
-| Solidity 0.6.x | ✅ | Fully supported |
-| Solidity 0.7.x | ✅ | Fully supported |
-| Solidity 0.8.x | ✅ | Fully supported |
-| ERC-20 tokens | ✅ | Deploy as-is |
-| ERC-721 (NFTs) | ✅ | Deploy as-is |
-| ERC-1155 | ✅ | Deploy as-is |
-| block.difficulty | ⚠️ | Returns 0 or fixed value in PoA |
-| block.basefee | ⚠️ | May behave differently |
-| SELFDESTRUCT | ⚠️ | Avoid; being deprecated across EVM chains |
-| Precompiles | ✅ | Standard EVM precompiles supported |
+| Feature | Notes |
+|---|---|
+| Solidity 0.8.x | Check current EVM support status |
+| ERC-20 tokens | May require adapter layer |
+| ERC-721 (NFTs) | May require adapter layer |
+| block.difficulty | Not applicable in PoAn consensus |
+| block.basefee | May behave differently |
+| SELFDESTRUCT | Avoid; being deprecated across chains |
+| Precompiles | Check RustChain documentation |
 
 ---
 
@@ -164,117 +155,143 @@ module.exports = {
 
 | Tool | Ethereum | RustChain | Migration Effort |
 |---|---|---|---|
-| Hardhat | ✅ | ✅ | Change RPC URL & chain ID |
-| Foundry | ✅ | ✅ | Change RPC URL & chain ID |
-| Truffle | ✅ | ✅ | Change RPC URL & chain ID |
-| Remix | ✅ | ✅ | Change provider in Remix |
-| Brownie | ✅ | ✅ | Add network config |
+| Hardhat | ✅ | Check docs | Update RPC URL & chain ID |
+| Foundry | ✅ | Check docs | Update RPC URL & chain ID |
+| Truffle | ✅ | Check docs | Update RPC URL & chain ID |
+| Remix | ✅ | Check docs | Update provider |
+| rustchain-cli | — | ✅ | Native CLI tool |
 
 ### Wallets
 
 | Wallet | Ethereum | RustChain | Notes |
 |---|---|---|---|
-| MetaMask | ✅ | ✅ | Add custom network |
-| WalletConnect | ✅ | ✅ | Configure RPC URL |
-| Hardware Wallets | ✅ | ✅ | Same derivation path |
+| MetaMask | ✅ | If EVM-compatible | Add custom network |
 | rustchain-cli | — | ✅ | Native CLI wallet |
+| Hardware Wallets | ✅ | Check docs | Same secp256k1 keys |
 
-### Monitoring & Analytics
+### Mining & Monitoring
 
-| Tool | Purpose | RustChain Alternative |
+| Tool | Ethereum | RustChain |
 |---|---|---|
-| Etherscan | Block explorer | RustChain Block Explorer |
-| The Graph | Indexing | Custom subgraph or RustChain indexer |
-| Tenderly | Monitoring | Custom alerting via RPC |
-| Alchemy/Infura | RPC provider | Self-hosted or official RPC |
-
-### Setting Up MetaMask for RustChain
-
-1. Open MetaMask → Settings → Networks → Add Network
-2. Enter:
-   - **Network Name:** RustChain Mainnet
-   - **RPC URL:** `https://rpc.rustchain.io`
-   - **Chain ID:** `<RUSTCHAIN_CHAIN_ID>`
-   - **Currency Symbol:** RTC
-   - **Block Explorer:** `https://explorer.rustchain.io`
+| Mining | ASICs/GPUs/staking | Python miner scripts |
+| Block Explorer | Etherscan | RustChain dashboard widgets |
+| Monitoring | Tenderly/Alchemy | Custom Prometheus metrics |
+| Node Software | Geth/Besu/Nethermind | RustChain node (Rust) |
 
 ---
 
 ## Wallet & Account Migration
 
-### Same Address, New Chain
+### Same Cryptography, Different Chain
 
-RustChain uses the same account format as Ethereum (secp256k1). Your Ethereum private keys and addresses work on RustChain.
+RustChain uses secp256k1 for account keys, the same curve as Ethereum. Your Ethereum addresses and keys are mathematically compatible.
 
-⚠️ **Important:** Never reuse the same private key across chains without understanding the risks. Best practice is to generate a fresh key for RustChain.
+**Important:** Best practice is to generate a fresh key for RustChain rather than reusing Ethereum private keys.
 
 ### Migration Steps
 
-1. **Generate a new RustChain address** (or import existing):
+1. **Set up a miner identity** (your wallet/miner ID):
+
    ```bash
-   rustchain-cli account new
-   # or import:
-   rustchain-cli account import --private-key <KEY>
+   # Clone the RustChain repo
+   git clone https://github.com/Scottcjn/Rustchain.git
+   cd Rustchain
    ```
 
-2. **Fund the address** with RTC from an exchange or faucet (testnet)
+2. **Start mining to earn RTC** (see Node & Miner Operation below)
 
-3. **Update your dApp frontend** to connect to RustChain RPC
+3. **Check your balance**:
 
-4. **Migrate token balances** by bridging or redeploying tokens
+   ```bash
+   curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_MINER_ID"
+   ```
+
+4. **If EVM-compatible layer exists**, configure your dApp frontend to connect to the RustChain RPC endpoint
 
 ---
 
-## Node Operation Migration
+## Node & Miner Operation
 
-### From Geth/Parity to RustChain Node
+### From Geth/Parity to RustChain Miner
+
+Unlike Ethereum's heavy node requirements, RustChain mining is lightweight:
 
 ```bash
-# Install RustChain node
-git clone https://github.com/rustchain/rustchain-node
-cd rustchain-node
-cargo build --release
+# Linux miner
+python3 miners/linux/rustchain_linux_miner.py --wallet YOUR_MINER_ID
 
-# Initialize with genesis
-./target/release/rustchain-node init --genesis genesis.json
+# macOS miner
+python3 miners/macos/rustchain_mac_miner_v2.4.py --wallet YOUR_MINER_ID --node https://50.28.86.131
 
-# Start syncing
-./target/release/rustchain-node start --network mainnet
+# Windows miner (GUI)
+python miners\windows\rustchain_windows_miner.py
 ```
 
-### Configuration Differences
+### Key Differences from Ethereum Node Operation
 
-| Setting | Geth | RustChain |
+| Setting | Geth/Parity | RustChain Miner |
 |---|---|---|
-| Data Directory | `~/.ethereum` | `~/.rustchain` |
-| RPC Port | 8545 | 8545 (configurable) |
-| WebSocket Port | 8546 | 8546 (configurable) |
-| P2P Port | 30303 | 30303 (configurable) |
-| Sync Mode | Full/Fast/Snap | Full |
+| Hardware | Server-grade | Any real hardware |
+| RAM | 8GB+ | < 32MB |
+| Storage | 1TB+ SSD | Minimal |
+| Network | High bandwidth | Low bandwidth |
+| Setup Complexity | High | Low (Python script) |
+| Consensus Participation | Stake 32 ETH or buy ASICs | Run miner on any device |
 
-### Running an API Node
+### Autostart Your Miner (Linux)
 
 ```bash
-./target/release/rustchain-node start \
-  --network mainnet \
-  --rpc \
-  --rpc-addr 0.0.0.0 \
-  --rpc-port 8545 \
-  --ws \
-  --ws-addr 0.0.0.0 \
-  --ws-port 8546
+sudo tee /etc/systemd/system/rustchain-miner.service >/dev/null <<'UNIT'
+[Unit]
+Description=RustChain Miner
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/Rustchain
+ExecStart=/usr/bin/python3 miners/linux/rustchain_linux_miner.py --wallet YOUR_MINER_ID
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+sudo systemctl enable rustchain-miner
+sudo systemctl start rustchain-miner
+```
+
+### Verify Your Miner Is Working
+
+```bash
+# Download miner data
+curl -sk https://50.28.86.131/api/miners > miners_data.json
+
+# Check active miners
+python3 -c "
+import json
+with open('miners_data.json', 'r') as f:
+    miners = json.load(f)
+print('active_miners:', len(miners))
+"
 ```
 
 ---
 
 ## Network Configuration
 
-### Endpoints
+### Current Node Endpoints
 
-| Network | RPC URL | WebSocket | Explorer |
-|---|---|---|---|
-| Mainnet | `https://rpc.rustchain.io` | `wss://ws.rustchain.io` | `https://explorer.rustchain.io` |
-| Testnet | `https://rpc.testnet.rustchain.io` | `wss://ws.testnet.rustchain.io` | `https://explorer.testnet.rustchain.io` |
+The RustChain network uses direct node endpoints. Check the official repository and documentation for current RPC URLs:
+
+| Resource | URL |
+|---|---|
+| Main Repository | https://github.com/Scottcjn/Rustchain |
+| Bounty Repository | https://github.com/Scottcjn/rustchain-bounties |
+| Default Node | https://50.28.86.131 |
+
+**Note:** Endpoint URLs may change. Always refer to the official RustChain repository for the latest configuration.
 
 ### Python SDK Configuration
 
@@ -282,83 +299,76 @@ cargo build --release
 from rustchain_sdk import RustChainClient
 
 client = RustChainClient(
-    rpc_url="https://rpc.rustchain.io",
-    chain_id=<RUSTCHAIN_CHAIN_ID>,
+    node_url="https://50.28.86.131",
 )
 ```
 
-### JavaScript/ethers.js Configuration
+### API Endpoints
 
-```javascript
-const { ethers } = require("ethers");
+```bash
+# Check miner status
+curl -sk https://50.28.86.131/api/miners
 
-const provider = new ethers.JsonRpcProvider("https://rpc.rustchain.io");
-const signer = new ethers.Wallet(privateKey, provider);
-```
-
-### Web3.js Configuration
-
-```javascript
-const Web3 = require("web3");
-const web3 = new Web3("https://rpc.rustchain.io");
+# Check wallet balance
+curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_MINER_ID"
 ```
 
 ---
 
 ## Common Pitfalls
 
-### 1. Incorrect Chain ID
-**Problem:** Transactions fail with "invalid chain id"  
-**Fix:** Double-check the chain ID in all configurations (Hardhat, MetaMask, scripts)
+### 1. Assuming EVM Compatibility
+**Problem:** Expecting all Ethereum tooling to work out of the box
+**Fix:** RustChain has its own runtime. Check current documentation for EVM compatibility status before migrating contracts.
 
-### 2. Gas Price Too High
-**Problem:** Overpaying for transactions  
-**Fix:** RustChain gas prices are ~1 Gwei. Don't copy Ethereum gas price settings.
+### 2. Using Hash-Power Mental Models
+**Problem:** Thinking in terms of hash rate, difficulty, and mining pools
+**Fix:** RustChain uses hardware attestation (Proof-of-Antiquity). Older hardware earns more, not less. There are no mining pools in the traditional sense.
 
-### 3. Block Difficulty Assumptions
-**Problem:** Contracts using `block.difficulty` for randomness break  
-**Fix:** Use Chainlink VRF or commit-reveal schemes for randomness
+### 3. Running Miners in VMs
+**Problem:** VM-based miners may get penalized or denied rewards
+**Fix:** Run the miner on real hardware. That is the entire point of RustChain.
 
-### 4. Uncle Blocks
-**Problem:** Code expects uncle block data  
-**Fix:** PoA chains don't produce uncle blocks. Remove related logic.
+### 4. Expecting Instant Finality Like PoA
+**Problem:** Confusing Proof-of-Antiquity with traditional Proof-of-Authority
+**Fix:** PoAn is hardware-attestation-based, not validator-approval-based. There are no pre-approved validators. Anyone with real hardware can participate.
 
-### 5. Pending Transaction Queue
-**Problem:** Different transaction pool behavior  
-**Fix:** Test transaction submission patterns on testnet first
+### 5. Ignoring the E-Waste Mission
+**Problem:** Building infrastructure that requires new, powerful hardware
+**Fix:** Embrace the vintage hardware philosophy. RustChain rewards running on older, low-power devices.
 
-### 6. Contract Verification
-**Problem:** Can't verify contracts on explorer  
-**Fix:** Use the RustChain explorer's verification tool with correct compiler settings
+### 6. Using Stale RPC Endpoints
+**Problem:** Hardcoded RPC URLs that stop working
+**Fix:** Use environment variables for all endpoint configuration and check the official repository for current URLs.
 
 ---
 
 ## FAQ
 
 ### Q: Can I use the same Solidity contracts?
-**A:** Yes, with minor exceptions. Review the compatibility checklist above. Most contracts deploy without changes.
+**A:** Check the current RustChain documentation for EVM compatibility status. The chain is primarily Rust-based with its own runtime. Smart contract support may require adapter layers.
 
 ### Q: Do I need to learn Rust?
-**A:** Only if you're modifying the node software or building native modules. For dApp and smart contract development, Solidity works perfectly.
+**A:** For dApp development, not necessarily. For contributing to the core protocol or building native modules, yes. The miner scripts are Python-based.
 
-### Q: How do I bridge assets from Ethereum?
-**A:** Use the official RustChain bridge or a supported third-party bridge. Check the official documentation for current bridge endpoints.
+### Q: How do I earn RTC?
+**A:** Run a RustChain miner on real hardware. Miners earn RTC through hardware attestation. The base reward is 1.5 RTC per epoch, distributed among active miners.
 
-### Q: Are OpenZeppelin contracts supported?
-**A:** Yes. All OpenZeppelin contracts work on RustChain since it's EVM-compatible.
+### Q: What hardware do I need to mine?
+**A:** Any real hardware. Older and more exotic hardware earns higher rewards. A 2005 ThinkPad, a Pentium III, or even a Nintendo 64 can mine RTC.
 
-### Q: What about oracles?
-**A:** Deploy your own oracle contracts or use compatible oracle services. The integration pattern is identical to Ethereum.
+### Q: How are rewards different from Ethereum?
+**A:** Ethereum uses staking rewards (32 ETH to participate) or PoW mining (expensive hardware). RustChain rewards anyone with real hardware. There are no minimum stake requirements and no hardware arms race.
 
-### Q: Can I use The Graph?
-**A:** You'll need to set up a custom Graph node pointing to RustChain's RPC. The subgraph definition process is the same.
+### Q: Is there a testnet?
+**A:** Check the official RustChain repository and Discord for current testnet availability and faucet information.
 
-### Q: How are validator rewards different?
-**A:** In PoA, rewards go to authorized validators. There's no mining reward. Delegators earn by staking to validators.
+### Q: Can I run multiple miners?
+**A:** Each miner requires unique real hardware. Running multiple instances on the same machine does not increase rewards proportionally, as the attestation is hardware-based.
 
-### Q: Is there a testnet faucet?
-**A:** Yes, the testnet faucet provides RTC for development. Check the official Discord or documentation for the faucet URL.
+### Q: Where can I get help?
+**A:** Join the RustChain community on Discord, star the repositories on GitHub, and check the documentation in the rustchain-bounties repository.
 
 ---
 
-*Last updated: 2025-05*
+*Last updated: 2026-05*
