@@ -1,7 +1,7 @@
 # Human Funnel Stage 2 Origin Story Pack
 
-Bounty: [#316](https://github.com/Scottcjn/rustchain-bounties/issues/316)  
-Contributor: `@kekehanshujun`  
+Bounty: [#316](https://github.com/Scottcjn/rustchain-bounties/issues/316)
+Contributor: `@kekehanshujun`
 RTC wallet: `RTC02811ff5e2bb4bb4b95eee44c5429cd9525496e7`
 
 This pack is written as founder-facing campaign copy for RustChain's human onboarding funnel. It avoids fabricated user counts, fake earnings, nonexistent GUI flows, and guaranteed-return language. The copy centers on the actual RustChain angle: real hardware, Proof-of-Antiquity, modest RTC rewards, and the command-line `clawrtc` setup path.
