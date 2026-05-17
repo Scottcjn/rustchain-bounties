@@ -1,4 +1,4 @@
-# RustChain Troubleshooting Guide
+﻿# RustChain Troubleshooting Guide
 
 Common issues and solutions organized by category. Use this guide to diagnose and resolve problems when working with RustChain mining, wallets, and APIs.
 
@@ -28,8 +28,10 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 1. **Check endpoint connectivity:**
    ```bash
    # Test health endpoint
-   curl -s https://rustchain.org/health
-   # Expected: {"status": "ok"}
+   curl -sk https://rustchain.org/health
+   # Expected: {"ok": true, "version": "2.2.1-rip200", ...}
+   # Note: The node uses a self-signed certificate; -k skips verification.
+   # Direct node access: curl -sk https://50.28.86.131/health
    ```
 
 2. **Check firewall rules:**
@@ -65,7 +67,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 2. **Test connectivity from container:**
    ```bash
-   docker exec -it rustchain-miner curl -s https://rustchain.org/health
+   docker exec -it rustchain-miner curl -sk https://rustchain.org/health
    ```
 
 3. **Check docker-compose network config:**
@@ -89,7 +91,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check balance via API:**
    ```bash
-   curl -s https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/wallet/balance
    ```
 
 2. **Verify wallet address:**
@@ -98,7 +100,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 3. **Check if rewards have been distributed:**
    - Mining rewards are distributed per epoch (1.5 RTC/epoch to active miners)
-   - Check miner status: `curl -s https://rustchain.org/api/miners`
+   - Check miner status: `curl -sk https://rustchain.org/api/miners`
 
 ### Cannot Send Transaction
 
@@ -110,7 +112,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check sufficient balance:**
    ```bash
-   curl -s https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/wallet/balance
    ```
 
 2. **Verify transaction parameters:**
@@ -120,7 +122,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 3. **Check node health:**
    ```bash
-   curl -s https://rustchain.org/health
+   curl -sk https://rustchain.org/health
    ```
 
 ### Cannot Import Wallet
@@ -160,7 +162,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Verify miner is in active list:**
    ```bash
-   curl -s https://rustchain.org/api/miners
+   curl -sk https://rustchain.org/api/miners
    # Check your miner appears as active
    ```
 
@@ -171,7 +173,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 3. **Check node health:**
    ```bash
-   curl -s https://rustchain.org/health
+   curl -sk https://rustchain.org/health
    ```
 
 4. **Review miner logs:**
@@ -286,15 +288,15 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 1. **Check endpoint is correct:**
    ```bash
    # All endpoints are under rustchain.org (not *.rustchain.io)
-   curl -s https://rustchain.org/health
-   curl -s https://rustchain.org/api/miners
-   curl -s https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/health
+   curl -sk https://rustchain.org/api/miners
+   curl -sk https://rustchain.org/wallet/balance
    ```
 
 2. **Verify response format:**
    ```bash
    # Pretty-print JSON response
-   curl -s https://rustchain.org/api/miners | python -m json.tool
+   curl -sk https://rustchain.org/api/miners | python -m json.tool
    ```
 
 3. **Check for stale cached data:**
@@ -311,7 +313,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Verify endpoint:**
    ```bash
-   curl -v https://rustchain.org/health
+   curl -vsk https://rustchain.org/health
    ```
 
 2. **Check if miner process is running:**
@@ -338,8 +340,8 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check miner status:**
    ```bash
-   curl -s https://rustchain.org/health
-   curl -s https://rustchain.org/api/miners
+   curl -sk https://rustchain.org/health
+   curl -sk https://rustchain.org/api/miners
    ```
 
 2. **Restart sync:**
@@ -426,7 +428,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check if node is healthy:**
    ```bash
-   curl -s https://rustchain.org/health
+   curl -sk https://rustchain.org/health
    ```
 
 2. **Use connection pooling:**
@@ -434,7 +436,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
    import requests
 
    session = requests.Session()
-   response = session.get("https://rustchain.org/api/miners")
+   response = session.get("https://rustchain.org/api/miners", verify=False)
    ```
 
 3. **Cache frequently accessed data:**
@@ -449,9 +451,9 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 When something isn't working, check these in order:
 
 - [ ] **Miner running?** `docker ps | grep rustchain`
-- [ ] **Health OK?** `curl -s https://rustchain.org/health`
-- [ ] **Miner active?** `curl -s https://rustchain.org/api/miners`
-- [ ] **Balance correct?** `curl -s https://rustchain.org/wallet/balance`
+- [ ] **Health OK?** `curl -sk https://rustchain.org/health`
+- [ ] **Miner active?** `curl -sk https://rustchain.org/api/miners`
+- [ ] **Balance correct?** `curl -sk https://rustchain.org/wallet/balance`
 - [ ] **Disk space?** `df -h` (need free space)
 - [ ] **Memory available?** `free -h`
 - [ ] **Docker OK?** `docker logs rustchain-miner --tail 50`
@@ -460,4 +462,4 @@ When something isn't working, check these in order:
 
 ---
 
-*Last updated: 2025-05*
+*Last updated: 2026-05*
