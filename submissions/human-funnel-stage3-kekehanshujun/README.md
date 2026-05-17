@@ -222,7 +222,7 @@ clawrtc wallet show
 If the local wallet command cannot reach the network, you can check the public balance endpoint with your RTC address:
 
 ```bash
-curl -k "https://50.28.86.131/wallet/balance?miner_id=YOUR_RTC_ADDRESS"
+curl "https://rustchain.org/wallet/balance?miner_id=YOUR_RTC_ADDRESS"
 ```
 
 Screenshot placeholder: status output and a public balance response. Redact private paths if posting publicly.
