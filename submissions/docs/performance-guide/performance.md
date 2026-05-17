@@ -1,12 +1,12 @@
-﻿# RustChain Performance Optimization Guide
+# RustChain Performance Optimization Guide
 
-> Maximize throughput, minimize latency, and scale your RustChain infrastructure effectively.
+> Maximize throughput, minimize latency, and scale your RustChain miner infrastructure effectively.
 
 ---
 
 ## Table of Contents
 
-1. [Node Optimization](#node-optimization)
+1. [Miner Performance Optimization](#miner-performance-optimization)
 2. [API Optimization](#api-optimization)
 3. [Caching Strategies](#caching-strategies)
 4. [Database Optimization](#database-optimization)
@@ -15,57 +15,72 @@
 
 ---
 
-## Node Optimization
+## Miner Performance Optimization
 
 ### Hardware Recommendations
 
-| Component | Minimum | Recommended | High Performance |
-|-----------|---------|-------------|------------------|
-| CPU | 4 cores | 8 cores (3.5+ GHz) | 16+ cores (4.0+ GHz) |
-| RAM | 8 GB | 32 GB | 64+ GB |
-| Storage | 500 GB SSD | 1 TB NVMe SSD | 2+ TB NVMe RAID |
-| Network | 100 Mbps | 1 Gbps | 10 Gbps |
-| OS | Ubuntu 20.04 | Ubuntu 22.04 LTS | Ubuntu 22.04 LTS |
+RustChain uses Proof-of-Antiquity (RIP-200) which rewards vintage hardware attestation. Performance recommendations differ from typical blockchain nodes.
+
+| Component | Minimum | Recommended | Notes |
+|-----------|---------|-------------|-------|
+| CPU | 1 core (any arch) | 2 cores | Vintage architectures (PowerPC, SPARC, MIPS) welcome |
+| RAM | 256 MB | 1 GB | Python miner is lightweight |
+| Storage | 100 MB | 1 GB SSD | SQLite database, minimal disk usage |
+| Network | 1 Mbps | 10 Mbps | API calls to rustchain.org are lightweight |
+| OS | Linux/macOS | Ubuntu 22.04 LTS | Windows supported via WSL |
 
 ### Configuration Tuning
 
-```toml
-# rustchain-node.toml 鈥?Performance-tuned configuration
+The RustChain miner is configured via environment variables and `config.json`:
 
-[server]
-# Match worker threads to CPU cores
-worker_threads = 8
-# Increase max connections for high-throughput scenarios
-max_connections = 10000
-# Request timeout (increase for complex queries)
-request_timeout = "30s"
+```json
+{
+    "miner_id": "your-miner-id",
+    "api_endpoint": "https://rustchain.org",
+    "epoch_interval": 300,
+    "hardware_fingerprint": true,
+    "log_level": "INFO"
+}
+```
 
-[blockchain]
-# Parallel block processing
-parallel_verification = true
-verification_threads = 4
-# State pruning to manage disk usage
-pruning_mode = "archive"  # or "recent" for lower disk usage
-pruning_depth = 100000
+Key environment variables:
 
-[mempool]
-# Increase for high-TPS scenarios
-max_size = 100_000
-# Transaction expiry
-max_tx_age = "30m"
-# Minimum gas price to prevent spam
-min_gas_price = 1_000
+```bash
+# RustChain miner configuration
+export RUSTCHAIN_ENDPOINT="https://rustchain.org"
+export RUSTCHAIN_MINER_ID="your-miner-id"
+export RUSTCHAIN_LOG_LEVEL="INFO"
 
-[network]
-# Optimize peer count for your bandwidth
-max_peers = 50
-min_peers = 10
-# Batch gossip for efficiency
-batch_gossip = true
-batch_size = 100
-# Compression
-enable_compression = true
-compression_level = 3  # 1-9, lower = faster
+# Python performance tuning
+export PYTHONUNBUFFERED=1
+export PYTHONDONTWRITEBYTECODE=1
+```
+
+### Docker Deployment
+
+RustChain uses local Docker builds (no pre-built images):
+
+```bash
+# Build the miner image
+docker build -f Dockerfile.miner -t rustchain-miner .
+
+# Run with docker-compose
+docker-compose up -d
+```
+
+Example `docker-compose.yml`:
+
+```yaml
+version: "3.8"
+services:
+  miner:
+    build:
+      context: .
+      dockerfile: Dockerfile.miner
+    environment:
+      - RUSTCHAIN_ENDPOINT=https://rustchain.org
+      - RUSTCHAIN_MINER_ID=${MINER_ID}
+    restart: unless-stopped
 ```
 
 ### System-Level Tuning (Linux)
@@ -75,35 +90,29 @@ compression_level = 3  # 1-9, lower = faster
 echo "* soft nofile 65536" >> /etc/security/limits.conf
 echo "* hard nofile 65536" >> /etc/security/limits.conf
 
-# Network buffer optimization
+# Network buffer optimization (for API polling)
 sysctl -w net.core.rmem_max=134217728
 sysctl -w net.core.wmem_max=134217728
-sysctl -w net.ipv4.tcp_rmem="4096 87380 67108864"
-sysctl -w net.ipv4.tcp_wmem="4096 65536 67108864"
 
-# Disable swap for consistent performance
-swapoff -a
-
-# I/O scheduler for NVMe
+# For NVMe storage (if used for SQLite WAL)
 echo "none" > /sys/block/nvme0n1/queue/scheduler
 ```
 
-### Memory Management
+### Python-Specific Tuning
 
-```rust
-// Use memory pools for frequent allocations
-use rustchain_sdk::pool::MemoryPool;
+```python
+# Use connection pooling for API requests
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-let pool = MemoryPool::new()
-    .with_block_size(4096)
-    .with_max_blocks(10000)
-    .with_prealloc(1000);
+session = requests.Session()
+retry = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
+adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
+session.mount("https://rustchain.org", adapter)
 
-// Reuse buffers instead of reallocating
-let mut buffer = pool.acquire();
-buffer.clear();
-// ... use buffer ...
-pool.release(buffer);
+# Reuse session across all API calls
+response = session.get("https://rustchain.org/health")
 ```
 
 ---
@@ -112,89 +121,88 @@ pool.release(buffer);
 
 ### Connection Pooling
 
-```rust
-use rustchain_sdk::client::ConnectionPool;
+```python
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-let pool = ConnectionPool::builder()
-    .max_connections(100)
-    .min_idle_connections(10)
-    .idle_timeout(Duration::from_secs(300))
-    .connection_timeout(Duration::from_secs(5))
-    .build()?;
-
-let client = RustChainClient::from_pool(pool);
+def create_api_session():
+    """Create a pooled, retry-capable session for RustChain API."""
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=0.5,
+        status_forcelist=[500, 502, 503, 504],
+    )
+    adapter = HTTPAdapter(
+        max_retries=retry,
+        pool_connections=10,
+        pool_maxsize=20,
+    )
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
 ```
 
 ### Request Batching
 
-```rust
-// Instead of individual requests:
-// BAD
-for addr in addresses {
-    let balance = client.get_balance(&addr).await?;
-    balances.push(balance);
-}
+```python
+# BAD: Individual requests in a loop
+for miner_id in miner_ids:
+    resp = requests.get(f"https://rustchain.org/api/miners/{miner_id}")
+    miners.append(resp.json())
 
-// GOOD 鈥?Batch requests
-let balances = client.get_balances_batch(&addresses).await?;
+# GOOD: Batch where possible, reuse session
+session = create_api_session()
+for miner_id in miner_ids:
+    resp = session.get(f"https://rustchain.org/api/miners/{miner_id}")
+    miners.append(resp.json())
 ```
 
 ### Response Compression
 
-```rust
-use rustchain_sdk::middleware::Compression;
+The RustChain API at `rustchain.org` supports gzip compression:
 
-let app = Router::new()
-    .route("/api/v1/*", any(handler))
-    .layer(Compression::new()
-        .gzip()
-        .deflate()
-        .quality(6));
+```python
+session = requests.Session()
+session.headers.update({"Accept-Encoding": "gzip, deflate"})
 ```
 
 ### Pagination Best Practices
 
-```rust
-// Use cursor-based pagination for large datasets
-#[derive(Deserialize)]
-struct ListTransactions {
-    after: Option<String>,  // cursor (tx hash)
-    limit: Option<u32>,     // max 100
-}
-
-async fn list_transactions(params: ListTransactions) -> Json<Vec<Transaction>> {
-    let limit = params.limit.unwrap_or(50).min(100);
-    let query = match params.after {
-        Some(cursor) => tx_table.query().after(cursor),
-        None => tx_table.query(),
-    };
-    
-    Json(query.limit(limit).execute().await)
-}
+```python
+def list_miners(session, limit=50, offset=0):
+    """Paginate through miner listings."""
+    miners = []
+    while True:
+        resp = session.get(
+            "https://rustchain.org/api/miners",
+            params={"limit": limit, "offset": offset},
+        )
+        batch = resp.json()
+        if not batch:
+            break
+        miners.extend(batch)
+        offset += limit
+    return miners
 ```
 
 ### Async Processing
 
-```rust
-// Use background workers for heavy operations
-use rustchain_sdk::queue::TaskQueue;
+```python
+import asyncio
+import aiohttp
 
-#[derive(Serialize)]
-struct IndexTask {
-    block_range: Range<u64>,
-    priority: u8,
-}
+async def fetch_miner_status(session, miner_id):
+    """Fetch individual miner status asynchronously."""
+    async with session.get(f"https://rustchain.org/api/miners/{miner_id}") as resp:
+        return await resp.json()
 
-let queue = TaskQueue::new("block-indexing", redis_url)
-    .workers(4)
-    .retry_limit(3)
-    .build()?;
-
-// Enqueue heavy work
-queue.push(IndexTask {
-    block_range: 1000000..1001000,
-    priority: 1,
-}).await?;
+async def fetch_all_miners(miner_ids):
+    """Fetch multiple miner statuses concurrently."""
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_miner_status(session, mid) for mid in miner_ids]
+        return await asyncio.gather(*tasks, return_exceptions=True)
 ```
 
 ---
@@ -204,176 +212,137 @@ queue.push(IndexTask {
 ### Multi-Layer Caching Architecture
 
 ```
-鈹屸攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?鈹?  Client     鈹? 鈫?Browser/SDK-level cache
-鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?鈹?  CDN/Edge   鈹? 鈫?Static responses, public data
-鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?鈹?  API Cache  鈹? 鈫?In-memory (Redis/Memcached)
-鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?鈹?  DB Cache   鈹? 鈫?Query result cache
-鈹溾攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?鈹?  Blockchain  鈹? 鈫?Source of truth
-鈹斺攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹?```
+Layer 1    Client-side     ->  Local Python cache / in-memory dict
+Layer 2    API Cache       ->  Redis or Memcached
+Layer 3    SQLite Cache    ->  Local query result cache
+Layer 4    RustChain API   ->  Source of truth (rustchain.org)
+```
 
 ### Redis Caching
 
-```rust
-use redis::AsyncCommands;
+```python
+import redis
+import json
 
-struct CachedBlockchainService {
-    client: RustChainClient,
-    redis: redis::aio::Connection,
-}
+r = redis.Redis(host="localhost", port=6379, db=0)
 
-impl CachedBlockchainService {
-    async fn get_balance(&mut self, address: &str) -> Result<u64> {
-        let cache_key = format!("balance:{}", address);
-        
-        // Try cache first
-        if let Some(cached) = self.redis.get::<Option<String>>(&cache_key).await? {
-            return Ok(cached.parse::<u64>()?);
-        }
-        
-        // Cache miss 鈥?fetch from chain
-        let balance = self.client.get_balance(address).await?;
-        
-        // Cache with TTL (balances change frequently)
-        self.redis.set_ex(&cache_key, balance.to_string(), 10).await?;
-        
-        Ok(balance)
-    }
-    
-    async fn get_transaction(&mut self, tx_hash: &str) -> Result<Transaction> {
-        let cache_key = format!("tx:{}", tx_hash);
-        
-        // Confirmed transactions are immutable 鈥?long TTL
-        if let Some(cached) = self.redis.get::<Option<String>>(&cache_key).await? {
-            return Ok(serde_json::from_str(&cached)?);
-        }
-        
-        let tx = self.client.get_transaction(tx_hash).await?;
-        
-        if tx.confirmed {
-            // Immutable 鈥?cache for 24 hours
-            self.redis.set_ex(&cache_key, serde_json::to_string(&tx)?, 86400).await?;
-        } else {
-            // Pending 鈥?short TTL
-            self.redis.set_ex(&cache_key, serde_json::to_string(&tx)?, 5).await?;
-        }
-        
-        Ok(tx)
-    }
-}
+def get_wallet_balance(address: str) -> float:
+    """Get wallet balance with caching."""
+    cache_key = f"balance:{address}"
+
+    # Try cache first
+    cached = r.get(cache_key)
+    if cached:
+        return float(cached)
+
+    # Cache miss - fetch from API
+    resp = requests.get(f"https://rustchain.org/wallet/balance?address={address}")
+    balance = resp.json()["balance"]
+
+    # Cache with short TTL (balances change frequently)
+    r.setex(cache_key, 10, str(balance))
+    return balance
 ```
 
 ### Cache Invalidation Strategies
 
 | Strategy | Use Case | TTL |
 |----------|----------|-----|
-| Time-based (TTL) | Balances, pending transactions | 5-30s |
-| Event-driven | Account state changes | On new block |
+| Time-based (TTL) | Wallet balances, miner status | 5-30s |
+| Event-driven | Epoch settlement changes | On new epoch |
 | Write-through | Critical data that must be fresh | Immediate |
 | Cache-aside | General purpose, read-heavy | Varies |
 
 ### Recommended TTLs
 
 ```
-Balance queries:         10 seconds
-Transaction status:      5 seconds (pending), 24h (confirmed)
-Block data:              1 hour (confirmed blocks)
-Smart contract state:    30 seconds
-Token metadata:          1 hour
+Wallet balance:          10 seconds
+Miner status:            30 seconds
+Health endpoint:         60 seconds
 Network statistics:      60 seconds
-Gas price estimates:     15 seconds
-Validator info:          5 minutes
+Miner leaderboard:       5 minutes
+Epoch info:              30 seconds (active), 5 min (settled)
 ```
 
 ---
 
 ## Database Optimization
 
-### Indexing Strategy
+### SQLite Indexing
+
+RustChain uses SQLite for local storage. Proper indexing is critical:
 
 ```sql
--- Critical indexes for blockchain data
-CREATE INDEX idx_transactions_hash ON transactions (hash);
-CREATE INDEX idx_transactions_from ON transactions (from_address, block_number DESC);
-CREATE INDEX idx_transactions_to ON transactions (to_address, block_number DESC);
-CREATE INDEX idx_transactions_block ON transactions (block_number DESC);
-CREATE INDEX idx_blocks_number ON blocks (number DESC);
-CREATE INDEX idx_blocks_hash ON blocks (hash);
+-- Critical indexes for miner data
+CREATE INDEX IF NOT EXISTS idx_miners_id ON miners (miner_id);
+CREATE INDEX IF NOT EXISTS idx_epochs_settled ON epochs (settled_at DESC);
+CREATE INDEX IF NOT EXISTS idx_attestations_miner ON attestations (miner_id, epoch);
 
--- Partial index for pending transactions
-CREATE INDEX idx_transactions_pending ON transactions (hash)
-WHERE confirmed = false;
+-- Partial index for active miners
+CREATE INDEX IF NOT EXISTS idx_miners_active ON miners (miner_id)
+WHERE active = 1;
 ```
 
 ### Query Optimization
 
-```rust
-// BAD: N+1 queries
-async fn get_account_history_bad(address: &str) -> Vec<Transaction> {
-    let tx_hashes = get_tx_hashes(address).await; // Query 1
-    let mut txs = Vec::new();
-    for hash in tx_hashes {
-        txs.push(get_transaction(&hash).await); // N queries!
-    }
-    txs
-}
+```python
+# BAD: N+1 queries
+def get_miner_history_bad(miner_id):
+    epoch_ids = get_epoch_ids(miner_id)  # Query 1
+    results = []
+    for eid in epoch_ids:
+        results.append(get_attestation(eid))  # N queries!
+    return results
 
-// GOOD: Single optimized query
-async fn get_account_history(address: &str, limit: u32) -> Vec<Transaction> {
-    sqlx::query_as!(
-        Transaction,
-        "SELECT * FROM transactions 
-         WHERE from_address = $1 OR to_address = $1
-         ORDER BY block_number DESC, tx_index DESC
-         LIMIT $2",
-        address, limit
+# GOOD: Single optimized query
+def get_miner_history(miner_id, limit=50):
+    cursor = db.execute(
+        """
+        SELECT a.*, e.settled_at
+        FROM attestations a
+        JOIN epochs e ON a.epoch = e.id
+        WHERE a.miner_id = ?
+        ORDER BY e.settled_at DESC
+        LIMIT ?
+        """,
+        (miner_id, limit),
     )
-    .fetch_all(&pool)
-    .await
-}
+    return cursor.fetchall()
 ```
 
-### Partitioning
+### WAL Mode for Concurrency
 
-For large-scale deployments, partition tables by block number ranges:
+```python
+# Enable WAL mode for better concurrent read performance
+import sqlite3
 
-```sql
--- Partition transactions by block range (e.g., 1M blocks per partition)
-CREATE TABLE transactions (
-    hash TEXT NOT NULL,
-    block_number BIGINT NOT NULL,
-    from_address TEXT NOT NULL,
-    to_address TEXT NOT NULL,
-    value BIGINT NOT NULL,
-    data BYTEA,
-    PRIMARY KEY (hash, block_number)
-) PARTITION BY RANGE (block_number);
-
-CREATE TABLE transactions_0 PARTITION OF transactions
-    FOR VALUES FROM (0) TO (1000000);
-CREATE TABLE transactions_1 PARTITION OF transactions
-    FOR VALUES FROM (1000000) TO (2000000);
--- Continue as needed...
+conn = sqlite3.connect("rustchain.db")
+conn.execute("PRAGMA journal_mode=WAL")
+conn.execute("PRAGMA synchronous=NORMAL")
+conn.execute("PRAGMA cache_size=-64000")  # 64MB cache
+conn.execute("PRAGMA temp_store=MEMORY")
 ```
 
 ---
 
 ## Network Optimization
 
-### RPC Endpoint Load Balancing
+### API Endpoint Load Balancing
+
+If running multiple API consumers, use nginx to balance:
 
 ```nginx
-upstream rustchain_rpc {
+upstream rustchain_api {
     least_conn;
-    server node1.internal:8545 weight=3;
-    server node2.internal:8545 weight=3;
-    server node3.internal:8545 weight=2;
-    server node4.internal:8545 weight=1 backup;
+    server consumer1.internal:8080 weight=3;
+    server consumer2.internal:8080 weight=3;
+    server consumer3.internal:8080 weight=2;
 }
 
 server {
-    listen 8545;
+    listen 8080;
     location / {
-        proxy_pass http://rustchain_rpc;
+        proxy_pass https://rustchain.org;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_connect_timeout 5s;
@@ -382,21 +351,33 @@ server {
 }
 ```
 
-### WebSocket vs HTTP
+### Polling vs Webhooks
 
-Use WebSocket for real-time data, HTTP for one-off queries:
+For miner monitoring, use efficient polling intervals:
 
-```rust
-// Real-time: WebSocket
-let ws = RustChainClient::websocket("wss://rpc.rustchain.io/ws").await?;
-let mut stream = ws.subscribe_new_blocks().await?;
-while let Some(block) = stream.next().await {
-    process_block(block)?;
-}
+```python
+import time
 
-// One-off: HTTP
-let client = RustChainClient::http("https://rpc.rustchain.io")?;
-let balance = client.get_balance("rc1q...").await?;
+# Recommended polling intervals
+HEALTH_CHECK_INTERVAL = 60      # seconds
+MINER_STATUS_INTERVAL = 30      # seconds
+WALLET_BALANCE_INTERVAL = 60    # seconds
+EPOCH_CHECK_INTERVAL = 15       # seconds (during epoch settlement)
+
+def poll_miner_status(session):
+    """Efficient polling loop for miner status."""
+    last_epoch = None
+    while True:
+        resp = session.get("https://rustchain.org/api/miners")
+        status = resp.json()
+
+        current_epoch = status.get("current_epoch")
+        if current_epoch != last_epoch:
+            # Epoch changed - process settlement
+            process_epoch_settlement(status)
+            last_epoch = current_epoch
+
+        time.sleep(MINER_STATUS_INTERVAL)
 ```
 
 ---
@@ -406,7 +387,7 @@ let balance = client.get_balance("rc1q...").await?;
 ### Load Testing with k6
 
 ```javascript
-// load-test.js
+// load-test.js - Test RustChain API endpoints
 import http from 'k6/http';
 import { check } from 'k6';
 
@@ -425,59 +406,55 @@ export let options = {
 };
 
 export default function () {
-    let res = http.get('https://your-node.example/api/v1/block/latest');
+    let res = http.get('https://rustchain.org/health');
     check(res, { 'status 200': (r) => r.status === 200 });
 }
 ```
 
-### Rust Profiling
+### Python Profiling
 
 ```bash
-# Build with profiling symbols
-cargo build --release --features profiling
+# Profile the miner with cProfile
+python -m cProfile -o miner.prof miner.py
 
-# CPU profiling with perf
-perf record -g ./target/release/rustchain-node
-perf report
+# Analyze the profile
+python -m pstats miner.prof
 
-# Flame graph generation
-perf script | stackcollapse-perf.pl | flamegraph.pl > flamegraph.svg
-
-# Memory profiling with valgrind
-valgrind --tool=massif ./target/release/rustchain-node
-ms_print massif.out.*
+# Memory profiling with memory_profiler
+pip install memory_profiler
+python -m memory_profiler miner.py
 ```
 
 ### Performance Metrics to Monitor
 
 | Metric | Target | Alert Threshold |
 |--------|--------|----------------|
-| Block processing time | < 100ms | > 500ms |
-| API response time (p50) | < 50ms | > 200ms |
+| API response time (p50) | < 100ms | > 500ms |
 | API response time (p99) | < 500ms | > 2000ms |
-| Memory usage | < 70% of total | > 85% |
-| CPU usage (sustained) | < 60% | > 80% |
-| Disk I/O wait | < 5ms | > 20ms |
-| Peer propagation latency | < 100ms | > 500ms |
-| Mempool size | < 50% capacity | > 80% |
+| Miner heartbeat interval | < 30s drift | > 60s drift |
+| SQLite query time | < 10ms | > 50ms |
+| Memory usage | < 200 MB | > 500 MB |
+| CPU usage (sustained) | < 10% | > 50% |
+| Epoch settlement time | < 5s | > 30s |
+| Attestation success rate | > 99% | < 95% |
 
 ---
 
 ## Quick Wins Checklist
 
-- [ ] Enable response compression (gzip/brotli)
-- [ ] Implement connection pooling
-- [ ] Add Redis caching for hot data
-- [ ] Use cursor-based pagination
+- [ ] Enable API response compression (gzip)
+- [ ] Implement connection pooling with retries
+- [ ] Add local caching for wallet balance and miner status
+- [ ] Use SQLite WAL mode for concurrent reads
 - [ ] Batch API requests where possible
-- [ ] Tune system ulimits and network buffers
-- [ ] Set up load balancing for RPC endpoints
-- [ ] Enable parallel block verification
+- [ ] Tune Python environment variables
+- [ ] Set up Docker health checks
+- [ ] Monitor epoch settlement timing
 - [ ] Configure appropriate cache TTLs per data type
-- [ ] Set up monitoring and alerting
+- [ ] Set up monitoring and alerting for miner health
 
 ---
 
 *This document is maintained by the RustChain community. Contributions welcome!*
 
-*Last updated: 2025-01-15*
+*Last updated: 2026-05-17*
