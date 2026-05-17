@@ -91,7 +91,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check balance via API:**
    ```bash
-   curl -sk https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID
    ```
 
 2. **Verify wallet address:**
@@ -112,7 +112,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 1. **Check sufficient balance:**
    ```bash
-   curl -sk https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID
    ```
 
 2. **Verify transaction parameters:**
@@ -281,7 +281,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
 
 **Symptoms:**
 - `/api/miners` returns unexpected data
-- `/wallet/balance` shows wrong value
+- `/wallet/balance?miner_id=YOUR_MINER_ID` shows wrong value
 
 **Solutions:**
 
@@ -290,7 +290,7 @@ Common issues and solutions organized by category. Use this guide to diagnose an
    # All endpoints are under rustchain.org (not *.rustchain.io)
    curl -sk https://rustchain.org/health
    curl -sk https://rustchain.org/api/miners
-   curl -sk https://rustchain.org/wallet/balance
+   curl -sk https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID
    ```
 
 2. **Verify response format:**
@@ -453,7 +453,7 @@ When something isn't working, check these in order:
 - [ ] **Miner running?** `docker ps | grep rustchain`
 - [ ] **Health OK?** `curl -sk https://rustchain.org/health`
 - [ ] **Miner active?** `curl -sk https://rustchain.org/api/miners`
-- [ ] **Balance correct?** `curl -sk https://rustchain.org/wallet/balance`
+- [ ] **Balance correct?** `curl -sk https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID`
 - [ ] **Disk space?** `df -h` (need free space)
 - [ ] **Memory available?** `free -h`
 - [ ] **Docker OK?** `docker logs rustchain-miner --tail 50`
