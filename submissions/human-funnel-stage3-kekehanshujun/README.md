@@ -1,7 +1,7 @@
 # Human Funnel Stage 3 Proof Pack
 
-Bounty: [#317](https://github.com/Scottcjn/rustchain-bounties/issues/317)  
-Contributor: `@kekehanshujun`  
+Bounty: [#317](https://github.com/Scottcjn/rustchain-bounties/issues/317)
+Contributor: `@kekehanshujun`
 RTC wallet: `RTC02811ff5e2bb4bb4b95eee44c5429cd9525496e7`
 
 This proof pack is written for skeptical non-developer users. It uses proof placeholders instead of fabricated testimonials or fake earnings. Every balance, uptime, and device detail is designed to be filled with the user's actual command output.
@@ -31,31 +31,31 @@ If you have an old computer that still boots, do the dry-run before you recycle 
 Start: https://rustchain.org
 ```
 
-Objection handled: "This sounds too good to be true."  
+Objection handled: "This sounds too good to be true."
 Response: frames the first step as a dry-run and asks for actual proof, not trust.
 
-### Template 2: The Non-Technical Windows User
+### Template 2: The Windows User Blocked by Current Install Support
 
 ```text
 I am not a command-line person.
 
-The first RustChain attempt was not perfect on my Windows machine. Some paths were confusing, and I had to read the output carefully. But the useful thing was that the tool told me what it was trying to do.
+My first RustChain attempt was on Windows, and the current published `clawrtc==1.8.0` install path is not beginner-ready on Windows yet. The honest proof is the blocker itself: `clawrtc install --dry-run` reports that Windows is unsupported and recommends Linux or macOS.
 
 My proof:
 
 - Machine: [device model]
 - Windows version: [version]
-- Wallet: [public RTC address only]
-- Command that worked: [command]
-- Command that confused me: [command or error]
-- What helped: [one sentence]
+- Wallet: [public RTC address only, if already created elsewhere]
+- Command tested: `clawrtc install --dry-run`
+- Result: `[ERROR] Unsupported platform: Windows. Use Linux or macOS.`
+- Safe next step: try the Linux/macOS path on a supported machine or wait for documented Windows support
 
-This is not "one click and rich." It is a small open-source mining experiment that rewards real hardware. The honest first win is getting your old machine identified and your wallet visible.
+This is not "one click and rich." It is a small open-source mining experiment that rewards real hardware, and the current Windows proof should be framed as a clear support gap rather than a successful beginner install.
 
-Try the dry-run first. Do not paste private keys anywhere.
+Do not paste private keys anywhere.
 ```
 
-Objection handled: "I am not technical enough."  
+Objection handled: "I am not technical enough."
 Response: normalizes setup friction while giving a safe proof format.
 
 ### Template 3: The Retro Hardware Person
@@ -80,7 +80,7 @@ If it still computes, test it.
 https://rustchain.org
 ```
 
-Objection handled: "Why would old hardware matter?"  
+Objection handled: "Why would old hardware matter?"
 Response: explains the Proof-of-Antiquity angle in plain language.
 
 ### Template 4: The Sustainability-Minded User
@@ -103,7 +103,7 @@ The point is not guaranteed income. The point is extending the life of useful ma
 Before you recycle a working computer, test it once.
 ```
 
-Objection handled: "Crypto is wasteful."  
+Objection handled: "Crypto is wasteful."
 Response: positions RustChain as reuse-first, without overstating environmental impact.
 
 ### Template 5: The Small Workshop / Family Computer User
@@ -131,12 +131,12 @@ Even an error is useful if it helps the next beginner.
 Try it: https://rustchain.org
 ```
 
-Objection handled: "What if it fails?"  
+Objection handled: "What if it fails?"
 Response: makes failed setup evidence useful for onboarding feedback.
 
 ## Deliverable 2: Zero to Mining in 5 Minutes Guide
 
-Audience: first-time user with an old laptop or desktop that still boots.
+Audience: first-time user with an old laptop or desktop running Linux or macOS. Windows users should use the blocked-status template above until the published CLI supports Windows install/mining.
 
 Safety rule: never share `C:\Users\...\default.json`, seed phrases, private keys, passwords, or full logs containing secrets. Only share public RTC addresses and redacted command output.
 
@@ -161,7 +161,7 @@ Run the dry-run:
 clawrtc install --dry-run
 ```
 
-This is the safest first command because it previews the install path. If it fails, copy only the public error message and redact usernames if desired.
+This is the safest first command on Linux/macOS because it previews the install path. On Windows with `clawrtc==1.8.0`, this currently exits with an unsupported-platform error; treat that as a blocker report, not as a beginner-ready install proof. If any command fails, copy only the public error message and redact usernames if desired.
 
 Screenshot placeholder: dry-run output showing target paths and no private key material.
 
@@ -231,7 +231,7 @@ Screenshot placeholder: status output and a public balance response. Redact priv
 
 | Objection | Plain response | Proof to show |
 |---|---|---|
-| "Is this a scam?" | Do not deposit money. Start with dry-run and a public wallet check. | `clawrtc install --dry-run` output |
+| "Is this a scam?" | Do not deposit money. Start with a Linux/macOS dry-run and a public wallet check; on Windows, show the unsupported-platform output honestly. | `clawrtc install --dry-run` output or Windows unsupported-platform output |
 | "Will it make me rich?" | No guarantee. Rewards are modest and depend on network rules and uptime. | Actual balance endpoint after a real run |
 | "Will it damage my computer?" | Treat it like any sustained compute workload. Watch heat, fans, and stability. Stop if the machine struggles. | `clawrtc status`, OS temperature tools if available |
 | "I am not technical." | The first useful step is only a dry-run. Errors can be shared safely if secrets are removed. | Short redacted command output |
@@ -247,7 +247,7 @@ RustChain proof snapshot
 Machine: [model and approximate year]
 OS: [Windows/macOS/Linux/version]
 Public RTC wallet: [RTC address only]
-Command tested: [dry-run / wallet show / start / status]
+Command tested: [Linux/macOS dry-run / wallet show / start / status / Windows unsupported-platform check]
 Result: [worked / failed with short error]
 Current balance if available: [actual RTC value from wallet or balance endpoint]
 Private material removed: yes
