@@ -1,7 +1,7 @@
 # Human Funnel Stage 4-5 Conversion Pack
 
-Bounty: [#318](https://github.com/Scottcjn/rustchain-bounties/issues/318)  
-Contributor: `@kekehanshujun`  
+Bounty: [#318](https://github.com/Scottcjn/rustchain-bounties/issues/318)
+Contributor: `@kekehanshujun`
 RTC wallet: `RTC02811ff5e2bb4bb4b95eee44c5429cd9525496e7`
 
 This submission includes an implementation-ready static start-flow page plus the conversion copy and engineering notes requested by the bounty. The page is intentionally drop-in: plain HTML/CSS/JavaScript, no build step, no CDN dependencies, no analytics, and no private-key collection.
