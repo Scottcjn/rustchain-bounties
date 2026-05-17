@@ -2,11 +2,15 @@
 
 ## 概述
 
-本指南涵盖 RustChain 节点部署、CI/CD 流水线、监控告警和运维最佳实践。
+本指南涵盖 RustChain 矿工节点部署、CI/CD 流水线、监控告警和运维最佳实践。RustChain 使用 RIP-200 Proof-of-Antiquity (PoAn) 共识协议，基于硬件认证挖矿。
+
+- **端点**: https://rustchain.org
+- **项目结构**: Python 为主（pyproject.toml, tests/），Rust 钱包（rustchain-wallet 子目录）
+- **挖矿奖励**: 1.5 RTC/epoch
 
 ---
 
-## 1. 节点部署
+## 1. 矿工节点部署
 
 ### 1.1 系统要求
 
@@ -20,39 +24,47 @@
 
 ### 1.2 Docker 部署（推荐）
 
-```bash
-# 拉取官方镜像
-docker pull rustchain/node:latest
+RustChain 矿工通过本地源码构建 Docker 镜像，**没有预构建镜像**：
 
-# 启动全节点
-docker run -d \
-  --name rustchain-node \
-  -p 26656:26656 \
-  -p 26657:26657 \
-  -v ~/.rustchain:/root/.rustchain \
-  rustchain/node:latest \
-  rustchain start
+```bash
+# 从源码构建矿工镜像
+docker build -f Dockerfile.miner -t rustchain-miner .
+
+# 使用 docker-compose 启动
+docker-compose up -d
 ```
 
-### 1.3 验证者节点部署
+> **注意**：不存在 `rustchain/node:latest` 等预构建镜像。所有镜像必须从仓库源码本地构建。
+
+### 1.3 docker-compose.yml 示例
+
+```yaml
+version: "3.8"
+services:
+  miner:
+    build:
+      context: .
+      dockerfile: Dockerfile.miner
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    environment:
+      - RUSTCHAIN_ENDPOINT=https://rustchain.org
+```
+
+### 1.4 矿工注册与硬件认证
 
 ```bash
-# 初始化节点
-rustchain init <moniker> --chain-id rustchain-1
+# 检查节点健康状态
+curl https://rustchain.org/health
 
-# 创建钱包
-rustchain keys add validator
+# 查看当前矿工列表
+curl https://rustchain.org/api/miners
 
-# 获取代币（测试网从 faucet）
-rustchain query bank balances <address>
-
-# 创建验证者
-rustchain tx staking create-validator \
-  --amount 1000000urtc \
-  --pubkey $(rustchain tendermint show-validator) \
-  --moniker "<moniker>" \
-  --chain-id rustchain-1 \
-  --from validator
+# 查询钱包余额
+curl https://rustchain.org/wallet/balance
 ```
 
 ---
@@ -60,6 +72,8 @@ rustchain tx staking create-validator \
 ## 2. CI/CD 流水线
 
 ### 2.1 GitHub Actions 示例
+
+RustChain 项目以 Python 为主，Rust 钱包在 `rustchain-wallet` 子目录：
 
 ```yaml
 name: RustChain CI
@@ -70,68 +84,83 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
-  test:
+  python-test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run pytest
+        run: pytest tests/ -v
+
+  rust-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rustchain-wallet
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
-      - name: Run tests
-        run: cargo test --all-features
+      - name: Run Rust tests
+        run: cargo test
       - name: Run clippy
         run: cargo clippy -- -D warnings
       - name: Check formatting
         run: cargo fmt -- --check
 
-  build:
-    needs: test
+  docker-build:
+    needs: [python-test, rust-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Build release
-        run: cargo build --release
       - name: Build Docker image
-        run: docker build -t rustchain/node:${{ github.sha }} .
-
-  deploy-testnet:
-    needs: build
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to testnet
-        run: |
-          echo "Deploying to testnet..."
-          # 滚动升级测试网节点
+        run: docker build -f Dockerfile.miner -t rustchain-miner:${{ github.sha }} .
 ```
 
-### 2.2 发布流程
+### 2.2 关键 CI 要点
+
+- **Python 测试为主**：`pytest tests/` 覆盖核心逻辑
+- **Rust 测试**：`working-directory: rustchain-wallet`，在该子目录下运行 `cargo test`
+- **没有根目录 Cargo.toml**：Rust 代码仅存在于 `rustchain-wallet/` 子目录
+- **Docker 构建**：使用 `Dockerfile.miner` 本地构建
+
+### 2.3 发布流程
 
 1. **代码审查**：所有 PR 至少 1 人 review
-2. **自动化测试**：单元测试 + 集成测试必须通过
+2. **自动化测试**：pytest + cargo test 必须通过
 3. **版本打 tag**：`vX.Y.Z` 语义化版本
-4. **构建发布包**：交叉编译多平台二进制
+4. **构建矿工镜像**：`docker build -f Dockerfile.miner`
 5. **部署测试网**：先在测试网验证
-6. **主网升级**：治理提案 → 投票 → 执行
+6. **主网发布**：矿工升级节点软件
 
 ---
 
 ## 3. 监控与告警
 
-### 3.1 Prometheus + Grafana
+### 3.1 健康检查端点
 
-#### 节点指标（Prometheus 配置）
+```bash
+# 节点健康检查
+curl -s https://rustchain.org/health
+# 预期返回: {"status": "ok"}
+
+# 矿工状态
+curl -s https://rustchain.org/api/miners
+```
+
+### 3.2 Prometheus 指标
 
 ```yaml
 scrape_configs:
-  - job_name: 'rustchain'
+  - job_name: 'rustchain-miner'
     static_configs:
-      - targets: ['localhost:26660']
+      - targets: ['localhost:8080']
     metrics_path: /metrics
     scrape_interval: 15s
 ```
@@ -140,45 +169,35 @@ scrape_configs:
 
 | 指标 | 说明 | 告警阈值 |
 |------|------|----------|
-| `block_height` | 当前区块高度 | 停止增长 > 60s |
-| `block_time` | 出块时间 | > 10s |
-| `peers_connected` | 连接的对等节点数 | < 3 |
-| `mempool_size` | 内存池交易数 | > 10000 |
-| `consensus_rounds` | 共识轮次 | > 3（频繁重投票）|
-| `validator_missed_blocks` | 验证者漏块数 | > 10 |
+| `rustchain_health_status` | 节点健康状态 | != 1 |
+| `rustchain_epoch_rewards` | Epoch 奖励发放 | 未按预期发放 |
+| `rustchain_miners_active` | 活跃矿工数 | < 预期值 |
+| `rustchain_block_height` | 当前区块高度 | 停止增长 > 60s |
 | `cpu_usage` | CPU 使用率 | > 80% |
 | `disk_usage_percent` | 磁盘使用率 | > 85% |
 
-### 3.2 Grafana 仪表板
+### 3.3 Grafana 仪表板
 
 推荐创建以下面板：
-- **网络概览**：区块高度、TPS、活跃验证者数
-- **节点健康**：CPU、内存、磁盘、网络 I/O
-- **共识状态**：提案数、投票情况、轮次统计
-- **内存池**：交易数、Gas 使用、排队时间
+- **网络概览**：区块高度、活跃矿工数、epoch 奖励
+- **节点健康**：CPU、内存、磁盘、网络 I/O、`/health` 状态
+- **矿工状态**：在线矿工、硬件认证状态、epoch 参与
+- **钱包**：余额变化、交易历史
 
-### 3.3 告警配置
+### 3.4 告警配置
 
 ```yaml
 # AlertManager 规则示例
 groups:
   - name: rustchain
     rules:
-      - alert: NodeStuck
-        expr: rate(block_height[5m]) == 0
+      - alert: MinerDown
+        expr: rustchain_health_status != 1
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "节点停止出块"
-
-      - alert: HighMissedBlocks
-        expr: validator_missed_blocks > 10
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "验证者漏块过多"
+          summary: "矿工节点不健康"
 
       - alert: DiskSpaceLow
         expr: disk_usage_percent > 85
@@ -187,6 +206,14 @@ groups:
           severity: warning
         annotations:
           summary: "磁盘空间不足"
+
+      - alert: NoEpochRewards
+        expr: rate(rustchain_epoch_rewards[30m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "超过30分钟未收到epoch奖励"
 ```
 
 ---
@@ -196,11 +223,11 @@ groups:
 ### 4.1 日志级别
 
 ```bash
-# 设置日志级别
-rustchain start --log-level info
+# 设置日志级别（环境变量）
+export RUSTCHAIN_LOG_LEVEL=info
 
-# 按模块设置
-rustchain start --log-level "rustchain=info,tendermint=debug"
+# Docker 中通过环境变量
+RUSTCHAIN_LOG_LEVEL=debug docker-compose up
 ```
 
 ### 4.2 结构化日志
@@ -209,9 +236,7 @@ RustChain 输出 JSON 格式日志，方便日志聚合：
 
 ```bash
 # 使用 jq 过滤错误日志
-rustchain start 2>&1 | jq 'select(.level=="error")'
-
-# 使用 Loki + Grafana 聚合
+docker logs rustchain-miner 2>&1 | jq 'select(.level=="error")'
 ```
 
 ### 4.3 日志轮转
@@ -239,26 +264,29 @@ rustchain start 2>&1 | jq 'select(.level=="error")'
 DATE=$(date +%Y%m%d)
 BACKUP_DIR="/backup/rustchain/$DATE"
 
-# 备份节点密钥和配置
+# 备份钱包和配置
 mkdir -p $BACKUP_DIR
-cp -r ~/.rustchain/config $BACKUP_DIR/
-cp -r ~/.rustchain/keyring $BACKUP_DIR/
-
-# 备份数据快照
-rustchain export --height $(rustchain status | jq .sync_info.latest_block_height)
-mv ~/.rustchain/data/export.json $BACKUP_DIR/
+cp -r ./data/config $BACKUP_DIR/
+cp -r ./data/wallet $BACKUP_DIR/
 
 # 压缩并上传
 tar czf $BACKUP_DIR.tar.gz $BACKUP_DIR
-# aws s3 cp $BACKUP_DIR.tar.gz s3://your-backup-bucket/
 ```
 
 ### 5.2 恢复流程
 
 ```bash
-# 从快照恢复
-rustchain unsafe-reset-all
-rustchain start --snapshot-uri s3://your-snapshot-bucket/latest.tar.gz
+# 停止矿工
+docker-compose down
+
+# 恢复数据
+tar xzf /backup/rustchain/latest.tar.gz -C ./data/
+
+# 重启
+docker-compose up -d
+
+# 验证
+curl https://rustchain.org/health
 ```
 
 ---
@@ -269,9 +297,9 @@ rustchain start --snapshot-uri s3://your-snapshot-bucket/latest.tar.gz
 
 ```bash
 # 只开放必要端口
-ufw allow 26656/tcp  # P2P
-ufw allow 26657/tcp  # RPC（可限制 IP）
-ufw deny 26660/tcp   # Prometheus 仅内网访问
+ufw allow 8080/tcp  # 矿工 API
+ufw allow 443/tcp   # HTTPS
+ufw deny 8080/tcp   # 如不需要外部访问 API
 ufw enable
 ```
 
@@ -279,7 +307,7 @@ ufw enable
 
 - **不要将私钥存储在节点上**：使用硬件签名模块（HSM）或 KMS
 - **密钥轮换**：定期更换节点密钥
-- **多重签名**：大额操作使用 multisig
+- **钱包安全**：Rust 钱包（rustchain-wallet）密钥妥善保管
 
 ### 6.3 自动安全更新
 
@@ -296,40 +324,19 @@ dpkg-reconfigure -plow unattended-upgrades
 ### 7.1 滚动升级流程
 
 ```bash
-# 1. 编译新版本
-cargo build --release
+# 1. 拉取最新代码
+git pull origin main
 
-# 2. 停止节点
-systemctl stop rustchain
+# 2. 重新构建 Docker 镜像
+docker build -f Dockerfile.miner -t rustchain-miner .
 
-# 3. 备份
-cp -r ~/.rustchain ~/.rustchain.backup
+# 3. 重启矿工
+docker-compose down
+docker-compose up -d
 
-# 4. 替换二进制
-cp target/release/rustchain /usr/local/bin/
-
-# 5. 启动
-systemctl start rustchain
-
-# 6. 验证
-rustchain status
-journalctl -u rustchain -f
-```
-
-### 7.2 协议升级
-
-- 通过治理提案发起升级
-- 达成共识后，所有节点在指定高度切换
-- 使用 `cosmovisor` 自动管理升级：
-
-```bash
-# 安装 cosmovisor
-go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
-
-# 配置自动升级
-export DAEMON_NAME=rustchain
-export DAEMON_HOME=~/.rustchain
-cosmovisor run start
+# 4. 验证
+curl https://rustchain.org/health
+curl https://rustchain.org/api/miners
 ```
 
 ---
@@ -338,23 +345,25 @@ cosmovisor run start
 
 | 问题 | 症状 | 解决方案 |
 |------|------|----------|
-| 节点不同步 | 区块高度落后 | 检查网络连接、重启节点 |
+| 矿工离线 | /health 返回异常 | 检查 Docker 日志、重启容器 |
+| 不同步 | 区块高度落后 | 检查网络连接、确认端点可达 |
 | 内存不足 | OOM killed | 增加内存或减少缓存 |
 | 磁盘满 | 写入失败 | 清理旧数据、扩容 |
-| 共识超时 | 频繁 round | 检查网络延迟、验证者在线数 |
-| 交易失败 | Gas 不足 | 调整 Gas 限制和价格 |
+| Epoch 无奖励 | 余额不变 | 检查硬件认证状态、确认矿工活跃 |
+| 钱包连接失败 | API 超时 | 检查 https://rustchain.org 可达性 |
 
 ---
 
 ## 9. 最佳实践清单
 
-- [x] 使用 Docker 或 systemd 管理节点进程
+- [x] 使用 Docker + docker-compose 管理矿工进程
+- [x] 本地构建镜像（Dockerfile.miner），不依赖预构建镜像
 - [x] 配置 Prometheus + Grafana 监控
+- [x] 定期检查 /health 和 /api/miners 端点
 - [x] 设置日志轮转和归档
-- [x] 定期备份密钥和配置
+- [x] 定期备份钱包和配置
 - [x] 启用防火墙，只开放必要端口
-- [x] 使用 CI/CD 自动化构建和测试
-- [x] 监控验证者漏块和签名情况
+- [x] 使用 CI/CD 自动化测试（pytest + cargo test）
 - [x] 保持节点软件最新版本
 - [x] 准备灾难恢复计划
 - [x] 文档化所有运维操作
