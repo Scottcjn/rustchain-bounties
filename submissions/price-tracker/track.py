@@ -160,7 +160,7 @@ class PriceTracker:
             writer.writeheader()
             for entry in self.history:
                 writer.writerow({k: entry.get(k, "") for k in ["timestamp", "price_usd", "source", "volume_24h"]})
-        print(f"✅ Exported {len(self.history)} records to {output}")
+        print(f"[OK] Exported {len(self.history)} records to {output}")
 
 
 def main():
@@ -204,9 +204,9 @@ def main():
 
     if args.command == "record":
         entry, triggered = tracker.record_price(args.price, args.source, args.volume)
-        print(f"✅ Recorded: ${args.price} at {entry['timestamp']}")
+        print(f"[OK] Recorded: ${args.price} at {entry['timestamp']}")
         for a in triggered:
-            print(f"🚨 ALERT TRIGGERED: {a['type']} @ ${a.get('target_price', 'N/A')}")
+            print(f"[ALERT] ALERT TRIGGERED: {a['type']} @ ${a.get('target_price', 'N/A')}")
 
     elif args.command == "history":
         data = tracker.get_history(limit=args.limit, sort="asc" if args.asc else "desc")
@@ -221,7 +221,7 @@ def main():
         if "error" in stats:
             print(stats["error"])
         else:
-            print(f"📊 RTC Price Statistics")
+            print(f"[STATS] RTC Price Statistics")
             print(f"  Current:      ${stats['current']:.6f}")
             print(f"  High:         ${stats['high']:.6f}")
             print(f"  Low:          ${stats['low']:.6f}")
@@ -231,7 +231,7 @@ def main():
 
     elif args.command == "add-alert":
         alert = tracker.add_alert(args.type, args.target, args.percent, args.note)
-        print(f"✅ Alert added: {alert['type']} (ID: {alert['id']})")
+        print(f"[OK] Alert added: {alert['type']} (ID: {alert['id']})")
 
     elif args.command == "list-alerts":
         alerts = tracker.list_alerts()
@@ -243,9 +243,9 @@ def main():
 
     elif args.command == "remove-alert":
         if tracker.remove_alert(args.id):
-            print(f"✅ Alert {args.id} removed")
+            print(f"[OK] Alert {args.id} removed")
         else:
-            print(f"❌ Alert {args.id} not found")
+            print(f"[FAIL] Alert {args.id} not found")
 
     elif args.command == "export":
         tracker.export_csv(args.output)
