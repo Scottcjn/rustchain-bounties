@@ -1,4 +1,4 @@
-# RustChain DevOps 指南
+﻿# RustChain DevOps 指南
 
 ## 概述
 
@@ -58,13 +58,13 @@ services:
 
 ```bash
 # 检查节点健康状态
-curl https://rustchain.org/health
+curl -sk https://rustchain.org/health
 
 # 查看当前矿工列表
-curl https://rustchain.org/api/miners
+curl -sk https://rustchain.org/api/miners
 
 # 查询钱包余额
-curl https://rustchain.org/wallet/balance
+curl -sk "https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID"
 ```
 
 ---
@@ -148,7 +148,7 @@ jobs:
 ```bash
 # 节点健康检查
 curl -s https://rustchain.org/health
-# 预期返回: {"status": "ok"}
+# Expected: {"ok": true, "version": "2.2.1-rip200", ...}
 
 # 矿工状态
 curl -s https://rustchain.org/api/miners
@@ -286,7 +286,7 @@ tar xzf /backup/rustchain/latest.tar.gz -C ./data/
 docker-compose up -d
 
 # 验证
-curl https://rustchain.org/health
+curl -sk https://rustchain.org/health
 ```
 
 ---
@@ -335,8 +335,8 @@ docker-compose down
 docker-compose up -d
 
 # 4. 验证
-curl https://rustchain.org/health
-curl https://rustchain.org/api/miners
+curl -sk https://rustchain.org/health
+curl -sk https://rustchain.org/api/miners
 ```
 
 ---
