@@ -155,19 +155,19 @@ rpc_url = "${RUSTCHAIN_RPC_URL}"
 
 | Tool | Ethereum | RustChain | Migration Effort |
 |---|---|---|---|
-| Hardhat | âœ… | Check docs | Update RPC URL & chain ID |
-| Foundry | âœ… | Check docs | Update RPC URL & chain ID |
-| Truffle | âœ… | Check docs | Update RPC URL & chain ID |
-| Remix | âœ… | Check docs | Update provider |
-| rustchain-cli | â€” | âœ… | Native CLI tool |
+| Hardhat | âœ?| Check docs | Update RPC URL & chain ID |
+| Foundry | âœ?| Check docs | Update RPC URL & chain ID |
+| Truffle | âœ?| Check docs | Update RPC URL & chain ID |
+| Remix | âœ?| Check docs | Update provider |
+| rustchain-cli | â€?| âœ?| Native CLI tool |
 
 ### Wallets
 
 | Wallet | Ethereum | RustChain | Notes |
 |---|---|---|---|
-| MetaMask | âœ… | If EVM-compatible | Add custom network |
-| rustchain-cli | â€” | âœ… | Native CLI wallet |
-| Hardware Wallets | âœ… | Check docs | Same secp256k1 keys |
+| MetaMask | âœ?| If EVM-compatible | Add custom network |
+| rustchain-cli | â€?| âœ?| Native CLI wallet |
+| Hardware Wallets | âœ?| Check docs | Same secp256k1 keys |
 
 ### Mining & Monitoring
 
@@ -203,7 +203,7 @@ RustChain uses secp256k1 for account keys, the same curve as Ethereum. Your Ethe
 3. **Check your balance**:
 
    ```bash
-   curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_MINER_ID"
+   curl -sk "https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID"
    ```
 
 4. **If EVM-compatible layer exists**, configure your dApp frontend to connect to the RustChain RPC endpoint
@@ -221,7 +221,7 @@ Unlike Ethereum's heavy node requirements, RustChain mining is lightweight:
 python3 miners/linux/rustchain_linux_miner.py --wallet YOUR_MINER_ID
 
 # macOS miner
-python3 miners/macos/rustchain_mac_miner_v2.4.py --wallet YOUR_MINER_ID --node https://50.28.86.131
+python3 miners/macos/rustchain_mac_miner_v2.4.py --wallet YOUR_MINER_ID --node https://rustchain.org
 
 # Windows miner (GUI)
 python miners\windows\rustchain_windows_miner.py
@@ -266,7 +266,7 @@ sudo systemctl start rustchain-miner
 
 ```bash
 # Download miner data
-curl -sk https://50.28.86.131/api/miners > miners_data.json
+curl -sk https://rustchain.org/api/miners > miners_data.json
 
 # Check active miners
 python3 -c "
@@ -289,7 +289,7 @@ The RustChain network uses direct node endpoints. Check the official repository 
 |---|---|
 | Main Repository | https://github.com/Scottcjn/Rustchain |
 | Bounty Repository | https://github.com/Scottcjn/rustchain-bounties |
-| Default Node | https://50.28.86.131 |
+| Default Node | https://rustchain.org |
 
 **Note:** Endpoint URLs may change. Always refer to the official RustChain repository for the latest configuration.
 
@@ -299,7 +299,7 @@ The RustChain network uses direct node endpoints. Check the official repository 
 from rustchain_sdk import RustChainClient
 
 client = RustChainClient(
-    node_url="https://50.28.86.131",
+    node_url="https://rustchain.org",
 )
 ```
 
@@ -307,10 +307,10 @@ client = RustChainClient(
 
 ```bash
 # Check miner status
-curl -sk https://50.28.86.131/api/miners
+curl -sk https://rustchain.org/api/miners
 
 # Check wallet balance
-curl -sk "https://50.28.86.131/wallet/balance?miner_id=YOUR_MINER_ID"
+curl -sk "https://rustchain.org/wallet/balance?miner_id=YOUR_MINER_ID"
 ```
 
 ---
