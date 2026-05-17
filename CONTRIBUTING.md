@@ -99,7 +99,7 @@ Only `@Scottcjn` (or a clearly labeled project automation account speaking on hi
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/rustchain-bounties.git
+git clone https://github.com/Scottcjn/rustchain-bounties.git
 cd rustchain-bounties
 
 # Install dependencies
