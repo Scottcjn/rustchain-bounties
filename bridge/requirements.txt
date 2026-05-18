@@ -1,0 +1,10 @@
+# All dependencies pinned to specific versions for supply-chain security
+flask==2.3.3
+requests==2.31.0
+
+# Test dependencies
+pytest==7.4.3
+pytest-cov==4.1.0
+flake8==6.1.0
+mypy==1.7.1
+black==23.12.1
