@@ -1,0 +1,11 @@
+.vscode/**
+**/*.ts
+**/*.map
+node_modules/**
+src/**
+!extension.js
+!src/walletPanel.js
+!src/apiClient.js
+!src/statusBar.js
+.gitignore
+**/test/**
