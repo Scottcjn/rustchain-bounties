@@ -9,7 +9,7 @@ const exhibits = [
     title: "PowerBook G4 Collection",
     summary: "Portable PowerPC machines representing the highest-antiquity laptop story.",
     multiplier: "2.5x target",
-    keywords: ["g4", "powerbook", "powerpc"],
+    keywords: ["powerbook", "powerbook g4", "powerbook_g4"],
     position: [-10, 0, -8],
     accent: 0xe2e8f0,
     build: "laptop",
@@ -19,7 +19,7 @@ const exhibits = [
     title: "Power Mac G4 MDD + G5 Dual",
     summary: "Tower-era Apple hardware with a visible repair-and-reuse path.",
     multiplier: "2.0x target",
-    keywords: ["g5", "g4", "powerpc"],
+    keywords: ["power mac", "powermac", "g4 mdd", "g5 dual", "powermac_g4", "powermac_g5"],
     position: [-5, 0, -11],
     accent: 0xb8c2cc,
     build: "tower",
@@ -392,6 +392,12 @@ function scoreMiner(exhibit, miner) {
     miner.device_family,
     miner.hardware_type,
   ].join(" ").toLowerCase();
+
+  if (exhibit.id === "powerbook-g4" || exhibit.id === "powermac-g4-g5") {
+    const isPower8 = text.includes("power8") || text.includes("s824");
+    if (isPower8) return 0;
+  }
+
   return exhibit.keywords.reduce((score, keyword) => score + (text.includes(keyword) ? 1 : 0), 0);
 }
 
