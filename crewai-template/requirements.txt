@@ -10,7 +10,7 @@ crewai>=0.11.2
 langgraph>=1.1.10
 
 # HTTP client
-requests>=2.33.1
+requests>=2.34.2
 
 # Environment variables
 python-dotenv>=1.2.2
