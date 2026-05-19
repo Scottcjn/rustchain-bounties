@@ -1,61 +1,61 @@
 {
   "judge_wallet": "RTC6d1f27d28961279f1034d9561c2403697eb55602",
-  "submitted_at": "2026-05-09T08:00:00Z",
+  "submitted_at": "2026-04-28T05:00:00Z",
   "rankings": [
     {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819#issuecomment-2958995099",
       "rank": 1,
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8915",
       "score": 0.92,
       "fraud_risk": "low",
       "payout_recommendation": {
-        "amount_rtc": 1,
-        "rationale": "7 reactions across 3 repos with full table detail"
+        "amount_rtc": 150,
+        "rationale": "createkr submitted 11 merged fix PRs with real UTXO bugs; Scottcjn confirmed payouts in status update \u2014 highest confidence claimant."
       },
-      "justification": "Complete table format with repo/issue/comment columns showing verifiable URLs"
+      "justification": "11 merged PRs (#2059, #2060, #2063, #2096, #2098, #2094, #2084, #2082, #2080, #2104, + others) with concrete fixes; maintainer explicitly confirmed payouts."
     },
     {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819#issuecomment-2958995115",
       "rank": 2,
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8913",
-      "score": 0.88,
-      "fraud_risk": "low",
-      "payout_recommendation": {
-        "amount_rtc": 1,
-        "rationale": "16 reactions across 6 repos documented"
-      },
-      "justification": "Good scope (6 repos) but reaction count verification harder without per-issue URLs"
-    },
-    {
-      "rank": 3,
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8912",
-      "score": 0.82,
-      "fraud_risk": "medium",
-      "payout_recommendation": {
-        "amount_rtc": 1,
-        "rationale": "Multiple repos but old issues may have pre-existing reactions"
-      },
-      "justification": "Claims old issues but verification of oldness not provided; wallet format non-standard"
-    },
-    {
-      "rank": 4,
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8911",
       "score": 0.78,
       "fraud_risk": "medium",
       "payout_recommendation": {
-        "amount_rtc": 1,
-        "rationale": "Full Coverage claim is unverifiable without specific issue list"
+        "amount_rtc": 50,
+        "rationale": "ArokyaMatthew submitted 7 fix PRs including critical conservation law bypass \u2014 quality claims but some PRs may overlap with createkr's findings."
       },
-      "justification": "Vague all-issues claim without enumeration creates high audit burden"
+      "justification": "7 PRs submitted including CRIT-1 conservation bypass (#2067); PRs are closed, need to verify if merged or rejected."
     },
     {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819#issuecomment-2958995103",
+      "rank": 3,
+      "score": 0.65,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 30,
+        "rationale": "kuanglaodi2-sudo submitted 3 PRs including genesis migration duplicate attack \u2014 solid finding but overlaps with zhuzhushiwojia's similar genesis migration claim."
+      },
+      "justification": "PR #2064 (genesis migration duplicate) overlaps with zhuzhushiwojia's similar finding; potential duplicate claim."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2868#issuecomment-2946307184",
+      "rank": 4,
+      "score": 0.55,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 20,
+        "rationale": "zhaog100 submitted a VS Code extension repo; needs verification that it's published to marketplace and meets all 5 feature requirements."
+      },
+      "justification": "Claims submission at github.com/zhaog100/rustchain-vscode \u2014 needs marketplace publish verification; feature completeness unclear from comments alone."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864#issuecomment-2945756396",
       "rank": 5,
-      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/8910",
-      "score": 0.75,
+      "score": 0.35,
       "fraud_risk": "high",
       "payout_recommendation": {
-        "amount_rtc": 0.5,
-        "rationale": "Duplicate territory with #8911, no new value-add"
+        "amount_rtc": 5,
+        "rationale": "21 PRs already submitted for this bounty; most are low-quality single-file actions. daletyler1737 only posted /apply 3 times with no actual submission \u2014 likely bot behavior."
       },
-      "justification": "Same grazer-skill repo already covered by #8911; incremental claim reduces marginal value"
+      "justification": "daletyler1737 posted identical /apply messages 3 times across #2864 and #2868 with zero code \u2014 pure bot behavior, no deliverable."
     }
   ]
 }
