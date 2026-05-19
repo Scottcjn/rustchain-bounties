@@ -1,4 +1,7 @@
 import unittest
+import json
+import os
+import tempfile
 
 from scripts import bounty_claim_verifier as verifier
 
@@ -55,6 +58,27 @@ class BountyClaimVerifierTests(unittest.TestCase):
         body = verifier.render_report(claim, [verifier.Check("Wallet", "verified", "ok")])
         self.assertIn("<!-- bounty-claim-verifier comment:123 -->", body)
         self.assertIn("| Wallet | verified | ok |", body)
+
+    def test_main_skips_bot_report_comments(self):
+        claim = verifier.Claim("github-actions[bot]", 747, 123, "https://example.com/c", "Claiming", "wallet1", [])
+        event = {
+            "issue": {"number": 747},
+            "comment": {
+                "id": 124,
+                "html_url": "https://github.com/x/y/issues/747#issuecomment-124",
+                "body": verifier.render_report(claim, [verifier.Check("Wallet", "verified", "ok")]),
+                "user": {"login": "github-actions[bot]"},
+            },
+        }
+
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False) as fh:
+            json.dump(event, fh)
+            event_path = fh.name
+
+        try:
+            self.assertEqual(verifier.main(["--event-path", event_path]), 0)
+        finally:
+            os.unlink(event_path)
 
     def test_text_extractor_counts_visible_text(self):
         parser = verifier.TextExtractor()

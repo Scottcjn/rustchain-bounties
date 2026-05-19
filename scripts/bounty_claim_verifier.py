@@ -24,8 +24,10 @@ OWNER = "Scottcjn"
 REPO = "rustchain-bounties"
 BOT_MARKER = "<!-- bounty-claim-verifier"
 GITHUB_API = "https://api.github.com"
-RUSTCHAIN_BALANCE_URL = "https://50.28.86.131/wallet/balance"
+DEFAULT_RUSTCHAIN_BALANCE_URL = "https://rustchain.org/wallet/balance"
+RUSTCHAIN_BALANCE_URL = os.environ.get("RUSTCHAIN_BALANCE_URL", DEFAULT_RUSTCHAIN_BALANCE_URL)
 CLAIM_WORDS = ("claim", "claiming", "wallet", "miner", "stars", "github", "proof")
+AUTOMATION_USERS = {"github-actions[bot]", "github-actions"}
 
 WALLET_RE = re.compile(
     r"(?i)\b(?:wallet|wallet\s+address|miner[_\-\s]?id|address)\s*[:=]\s*([A-Za-z0-9_\-]{3,96})"
@@ -66,6 +68,12 @@ class TextExtractor(HTMLParser):
 def looks_like_claim(body: str) -> bool:
     text = body.lower()
     return any(word in text for word in CLAIM_WORDS) or bool(URL_RE.search(body))
+
+
+def should_skip_comment(claim: "Claim") -> bool:
+    if BOT_MARKER in claim.body:
+        return True
+    return claim.user.lower() in AUTOMATION_USERS
 
 
 def extract_wallet(body: str) -> str:
@@ -302,6 +310,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     with open(args.event_path, "r", encoding="utf-8") as fh:
         event = json.load(fh)
     claim = claim_from_event(event)
+    if should_skip_comment(claim):
+        print("Comment is an automated verifier report; skipping.")
+        return 0
     if not looks_like_claim(claim.body):
         print("Comment does not look like a bounty claim; skipping.")
         return 0
