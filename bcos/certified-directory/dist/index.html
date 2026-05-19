@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BCOS Certified Directory</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f14;
+      --panel: #111923;
+      --panel-strong: #172331;
+      --text: #eef5f0;
+      --muted: #94a8a0;
+      --line: #263545;
+      --green: #65d685;
+      --cyan: #55c7e8;
+      --amber: #e6c15c;
+      --red: #f17474;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: #0f1720;
+      padding: 32px 20px 24px;
+    }
+    main, .header-inner {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      letter-spacing: 0;
+    }
+    .lede {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      gap: 12px;
+      margin: 24px 0;
+    }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      min-height: 44px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      padding: 16px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 1.55rem;
+      color: var(--green);
+    }
+    .stat span {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .project-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+    }
+    .project-card[hidden] { display: none; }
+    .card-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: .86rem;
+      text-transform: uppercase;
+    }
+    .tier {
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-weight: 700;
+    }
+    .tier-l2 { color: var(--green); }
+    .tier-l1 { color: var(--cyan); }
+    .tier-l0 { color: var(--amber); }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    dl {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+    dl div {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+    dt {
+      color: var(--muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    dd { margin: 0; overflow-wrap: anywhere; }
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: .86rem;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0c1218;
+      padding: 10px;
+    }
+    footer {
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding: 18px 0 32px;
+      font-size: .9rem;
+    }
+    @media (max-width: 720px) {
+      .toolbar, .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>BCOS Certified Directory</h1>
+      <p class="lede">Browse certified RustChain ecosystem projects with trust metadata upfront: tier, repo, latest attested SHA, SBOM hash, and a short review note.</p>
+    </div>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="Directory filters">
+      <input id="search" type="search" placeholder="Search project, repo, category, SHA, or review note">
+      <select id="category">
+        <option value="">All categories</option>
+        <option value="agent infra">agent infra</option><option value="blockchain">blockchain</option><option value="video">video</option>
+      </select>
+    </section>
+    <section class="stats" aria-label="Directory summary">
+      <div class="stat"><strong>3</strong><span>certified projects</span></div>
+      <div class="stat"><strong>1</strong><span>L2 projects</span></div>
+      <div class="stat"><strong>3</strong><span>categories</span></div>
+      <div class="stat"><strong>2026-05-16</strong><span>generated</span></div>
+    </section>
+    <section id="projects" class="project-grid">
+
+        <article class="project-card" data-name="rustchain" data-category="blockchain" data-tier="L2">
+          <div class="card-topline">
+            <span class="tier tier-l2">L2</span>
+            <span class="category">blockchain</span>
+          </div>
+          <h2><a href="https://github.com/Scottcjn/Rustchain">RustChain</a></h2>
+          <dl>
+            <div>
+              <dt>GitHub</dt>
+              <dd><a href="https://github.com/Scottcjn/Rustchain">Scottcjn/Rustchain</a></dd>
+            </div>
+            <div>
+              <dt>Latest SHA</dt>
+              <dd><code>7f4c8c2f4af9b3d25fd8d6cf26b7e1e3d408fc8d</code></dd>
+            </div>
+            <div>
+              <dt>SBOM Hash</dt>
+              <dd><code>sha256:7cb914e2bb22f47883b3379c3b850d9f2230d37c4bfbfd2ff2d779f6b5b8b59f</code></dd>
+            </div>
+          </dl>
+          <p>Core RustChain implementation. Seeded as an L2 entry because it has project documentation, reproducible build work, and active verification tooling.</p>
+          <details>
+            <summary>Badge embed</summary>
+            <pre>[![BCOS L2](https://50.28.86.131/bcos/badge/Scottcjn%2FRustchain-L2.svg)](https://github.com/Scottcjn/Rustchain)</pre>
+          </details>
+        </article>
+
+        <article class="project-card" data-name="bottube" data-category="video" data-tier="L1">
+          <div class="card-topline">
+            <span class="tier tier-l1">L1</span>
+            <span class="category">video</span>
+          </div>
+          <h2><a href="https://github.com/Scottcjn/bottube">BoTTube</a></h2>
+          <dl>
+            <div>
+              <dt>GitHub</dt>
+              <dd><a href="https://github.com/Scottcjn/bottube">Scottcjn/bottube</a></dd>
+            </div>
+            <div>
+              <dt>Latest SHA</dt>
+              <dd><code>3b7a8dbdbff2b2b3f1f53b7a8bb9a3c7e8e6f7d1</code></dd>
+            </div>
+            <div>
+              <dt>SBOM Hash</dt>
+              <dd><code>sha256:1a0adf7d5cc0ed4df7e1f9e76a9e11b6db6b3ea958a8c7906d6c9234f0a6d3ad</code></dd>
+            </div>
+          </dl>
+          <p>Video platform ecosystem entry. L1 status reflects public source availability and a human-readable review note pending deeper CI attestations.</p>
+          <details>
+            <summary>Badge embed</summary>
+            <pre>[![BCOS L1](https://50.28.86.131/bcos/badge/Scottcjn%2Fbottube-L1.svg)](https://github.com/Scottcjn/bottube)</pre>
+          </details>
+        </article>
+
+        <article class="project-card" data-name="bcos badge generator" data-category="agent infra" data-tier="L0">
+          <div class="card-topline">
+            <span class="tier tier-l0">L0</span>
+            <span class="category">agent infra</span>
+          </div>
+          <h2><a href="https://github.com/Scottcjn/rustchain-bounties/tree/main/bcos">BCOS Badge Generator</a></h2>
+          <dl>
+            <div>
+              <dt>GitHub</dt>
+              <dd><a href="https://github.com/Scottcjn/rustchain-bounties">Scottcjn/rustchain-bounties</a></dd>
+            </div>
+            <div>
+              <dt>Latest SHA</dt>
+              <dd><code>9fd6ce6d07e5edcbd9e92d6f40d095ad57b7438e</code></dd>
+            </div>
+            <div>
+              <dt>SBOM Hash</dt>
+              <dd><code>sha256:2c9e5dc34f7fd5f46cfdf47db9456f5f065e8d1f838f2cf0d809fb7e2f2fd49c</code></dd>
+            </div>
+          </dl>
+          <p>Static BCOS helper tooling. L0 status makes it easy to discover and embed trust metadata while deeper attestations are added.</p>
+          <details>
+            <summary>Badge embed</summary>
+            <pre>[![BCOS L0](https://50.28.86.131/bcos/badge/Scottcjn%2Frustchain-bounties-L0.svg)](https://github.com/Scottcjn/rustchain-bounties/tree/main/bcos)</pre>
+          </details>
+        </article>
+    </section>
+    <footer>
+      Add a project by editing <code>data/projects.json</code> and running <code>node build.mjs</code>. Generated at 2026-05-16T16:01:35.245Z.
+    </footer>
+  </main>
+  <script>
+    const search = document.getElementById("search");
+    const category = document.getElementById("category");
+    const cards = [...document.querySelectorAll(".project-card")];
+
+    function applyFilters() {
+      const query = search.value.trim().toLowerCase();
+      const selectedCategory = category.value;
+      for (const card of cards) {
+        const matchesQuery = !query || card.textContent.toLowerCase().includes(query);
+        const matchesCategory = !selectedCategory || card.dataset.category === selectedCategory;
+        card.hidden = !(matchesQuery && matchesCategory);
+      }
+    }
+
+    search.addEventListener("input", applyFilters);
+    category.addEventListener("change", applyFilters);
+  </script>
+</body>
+</html>

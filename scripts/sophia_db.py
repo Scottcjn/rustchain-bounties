@@ -5,7 +5,7 @@
 SQLite storage for Sophia Elya inspection verdicts, historical fingerprints,
 and admin override audit trail.
 
-RIP-306: https://github.com/ArokyaMatthew/rustchain-bounties/docs/protocol/RIP-0306-sophia-attestation-inspector.md
+RIP-306: https://github.com/Scottcjn/rustchain-bounties/blob/main/docs/protocol/RIP-0306-sophia-attestation-inspector.md
 """
 
 from __future__ import annotations

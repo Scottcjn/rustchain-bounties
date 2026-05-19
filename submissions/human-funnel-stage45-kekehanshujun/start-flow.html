@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RustChain Start Flow</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101522;
+      --panel: #182033;
+      --panel-soft: #202a40;
+      --line: #33405e;
+      --text: #f5f7fb;
+      --muted: #aeb8ca;
+      --gold: #f3b33d;
+      --green: #41d081;
+      --blue: #6da8ff;
+      --red: #ff7f7f;
+      --ink: #0b1020;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--blue);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: #0d1220;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 26px;
+      height: 26px;
+      border: 2px solid var(--gold);
+      transform: rotate(45deg);
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .hero {
+      padding: 44px 0 32px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 28px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .hero-copy {
+      max-width: 760px;
+      font-size: 18px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button, .button {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: var(--gold);
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    button.secondary, .button.secondary {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .hero-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .stat {
+      display: grid;
+      gap: 3px;
+      padding: 12px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .stat strong {
+      color: var(--green);
+      font-size: 22px;
+    }
+
+    section {
+      padding: 34px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(109, 168, 255, 0.14);
+      color: #bcd5ff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.green {
+      background: rgba(65, 208, 129, 0.14);
+      color: #b9f0d1;
+    }
+
+    .tag.gold {
+      background: rgba(243, 179, 61, 0.16);
+      color: #ffe0a3;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0e1422;
+      color: var(--text);
+      font: inherit;
+      padding: 10px;
+    }
+
+    textarea {
+      min-height: 112px;
+      resize: vertical;
+    }
+
+    pre {
+      overflow: auto;
+      background: #0b1020;
+      color: #d9e5ff;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .flow-list li {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .num {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 560px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0b1020;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 24px 0;
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="wrap" aria-label="Main navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>RustChain Start Flow</span>
+      </div>
+      <div class="nav-links">
+        <a href="#start">Start</a>
+        <a href="#micro-bounties">Micro-bounties</a>
+        <a href="#referral">Referral</a>
+        <a href="#brag-card">Brag card</a>
+        <a href="#handoff">Engineering</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <h1>Your old computer still has work to do.</h1>
+          <p class="hero-copy">RustChain lets real machines try Proof-of-Antiquity mining without buying new hardware. Start with a safe dry-run, create a public RTC wallet, and only mine if the setup looks right.</p>
+          <div class="cta-row">
+            <a class="button" href="#start">Run Safe Dry-Run</a>
+            <a class="button secondary" href="#micro-bounties">Earn First Setup Proof</a>
+          </div>
+        </div>
+        <div class="panel hero-panel" aria-label="Trust points">
+          <div class="stat">
+            <strong>No deposit</strong>
+            <span class="small">Begin with a local command and a public wallet.</span>
+          </div>
+          <div class="stat">
+            <strong>Dry-run first</strong>
+            <span class="small">Preview paths and setup before starting live mining.</span>
+          </div>
+          <div class="stat">
+            <strong>Old hardware welcome</strong>
+            <span class="small">Proof-of-Antiquity values real machines that still compute.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="wrap">
+        <h2>Start Flow</h2>
+        <div class="grid-3">
+          <div class="card">
+            <span class="tag gold">Step 1</span>
+            <h3>Find a working machine</h3>
+            <p>Use an old laptop, desktop, Mac, workstation, or spare server that still boots and can run Python.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">Step 2</span>
+            <h3>Run the safe test</h3>
+            <p>Start with `clawrtc install --dry-run` so beginners can see what will happen before changing anything.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">Step 3</span>
+            <h3>Start mining only after proof</h3>
+            <p>Create or view a public wallet, start the miner, and share only redacted status output.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 16px;">
+          <div class="panel">
+            <h3>Start Mining Button Copy</h3>
+            <ul class="flow-list">
+              <li><span class="num">1</span><span><strong>Primary:</strong> Run Safe Dry-Run</span></li>
+              <li><span class="num">2</span><span><strong>After dry-run:</strong> Create or Show Wallet</span></li>
+              <li><span class="num">3</span><span><strong>After wallet:</strong> Start Mining</span></li>
+              <li><span class="num">4</span><span><strong>After start:</strong> Check Status</span></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Command Generator</h3>
+            <label for="wallet">Public wallet or miner ID</label>
+            <input id="wallet" value="RTC02811ff5e2bb4bb4b95eee44c5429cd9525496e7" autocomplete="off">
+            <label for="commands">Safe command flow</label>
+            <pre id="commands"></pre>
+            <button type="button" id="copyCommands">Copy Commands</button>
+            <p class="small" id="copyStatus" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="micro-bounties">
+      <div class="wrap">
+        <h2>Micro-Bounties for First-Time Users</h2>
+        <div class="grid-3">
+          <article class="card">
+            <span class="tag green">1 RTC</span>
+            <h3>Machine Story</h3>
+            <p>Post one old machine you want to save from storage or recycling.</p>
+            <p><strong>Proof:</strong> model/year if known, whether it boots, and one sentence about where it came from.</p>
+            <p><strong>Time:</strong> 5 minutes.</p>
+          </article>
+          <article class="card">
+            <span class="tag green">2 RTC</span>
+            <h3>Safe Dry-Run Output</h3>
+            <p>Run the dry-run and share a redacted result.</p>
+            <p><strong>Proof:</strong> OS, public wallet if available, whether dry-run completed, and one useful error if it failed.</p>
+            <p><strong>Time:</strong> 5-10 minutes.</p>
+          </article>
+          <article class="card">
+            <span class="tag green">1 RTC</span>
+            <h3>Help the Next Beginner</h3>
+            <p>Turn your first setup friction into one clear doc improvement.</p>
+            <p><strong>Proof:</strong> confusing step, better wording, and why it would help a non-technical user.</p>
+            <p><strong>Time:</strong> 5-10 minutes.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="referral">
+      <div class="wrap grid-2">
+        <div>
+          <h2>Referral Invite Loop</h2>
+          <p>Invite someone with a real old computer. They earn the base micro-bounty when they post a valid first proof. The referrer earns only after the new user completes a real first action.</p>
+          <ul class="flow-list">
+            <li><span class="num">1</span><span>Share an invite code or link.</span></li>
+            <li><span class="num">2</span><span>New user posts machine story or dry-run proof with "Referred by: @username".</span></li>
+            <li><span class="num">3</span><span>Reviewer checks that the machine/proof is not copied, fake, or self-referred.</span></li>
+            <li><span class="num">4</span><span>Base micro-bounty pays first; referral bonus follows after verification.</span></li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Invite Message Template</h3>
+          <textarea id="inviteText">I found a project called RustChain that rewards real working computers, especially older ones. If you have an old laptop or desktop that still boots, run the safe dry-run before mining.
+
+Start here: https://rustchain.org
+Use my referral: @YOUR_USERNAME
+
+Do not paste private keys, seed phrases, passwords, or wallet files in public.</textarea>
+          <button type="button" id="copyInvite">Copy Invite</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="brag-card">
+      <div class="wrap grid-2">
+        <div>
+          <h2>Brag Card Generator Spec</h2>
+          <p>Purpose: create a shareable proof image after dry-run completion, mining start, first RTC, or hall-of-fame placement. Cards must not expose private material.</p>
+          <h3>Inputs</h3>
+          <ul>
+            <li>display name</li>
+            <li>public miner ID or RTC wallet</li>
+            <li>machine label</li>
+            <li>operating system</li>
+            <li>milestone type</li>
+            <li>timestamp</li>
+          </ul>
+          <h3>Outputs</h3>
+          <ul>
+            <li>1200x630 PNG for social sharing</li>
+            <li>1080x1080 square PNG</li>
+            <li>plain text share caption</li>
+            <li>copyable proof link when server-side rendering exists</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Local Preview</h3>
+          <label for="displayName">Display name</label>
+          <input id="displayName" value="kekehanshujun">
+          <label for="machine">Machine label</label>
+          <input id="machine" value="Old laptop dry-run">
+          <label for="milestone">Milestone</label>
+          <input id="milestone" value="Safe dry-run complete">
+          <div class="cta-row">
+            <button type="button" id="renderCard">Render Preview</button>
+          </div>
+          <canvas id="cardCanvas" width="1200" height="630" aria-label="Brag card preview"></canvas>
+          <p class="small">Rendering approach: this demo uses browser canvas. Production can move the same fields to Playwright, Satori, or another server-side renderer.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="hall">
+      <div class="wrap">
+        <h2>Weekly Hall of Fame</h2>
+        <div class="grid-3">
+          <div class="card">
+            <span class="tag gold">15 RTC</span>
+            <h3>Oldest Working Machine</h3>
+            <p>Verified by real model/year evidence and public mining or dry-run proof.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">10 RTC</span>
+            <h3>Most Consistent Uptime</h3>
+            <p>Based on verifiable status, logs, or public node activity. No private logs required.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">10 RTC</span>
+            <h3>Best First Setup Story</h3>
+            <p>Most helpful beginner narrative with one clear obstacle and one clear fix.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">5 RTC</span>
+            <h3>Most Helpful Beginner Tip</h3>
+            <p>A specific wording or documentation improvement that helps the next user.</p>
+          </div>
+          <div class="card">
+            <span class="tag gold">10 RTC</span>
+            <h3>Most Successful Inviter</h3>
+            <p>Referral winner based on real new users who complete a valid first proof.</p>
+          </div>
+          <div class="card">
+            <span class="tag">Rules</span>
+            <h3>Anti-Abuse</h3>
+            <p>No self-referrals, copied logs, fake machines, generated wallet clusters, or private-key screenshots.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="handoff">
+      <div class="wrap">
+        <h2>Engineering Handoff Notes</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Recommended Routes</h3>
+            <pre>/start
+/start/dry-run
+/start/install
+/start/proof
+/referrals
+/brag-card
+/hall-of-fame</pre>
+          </div>
+          <div class="card">
+            <h3>Data to Store</h3>
+            <pre>public_miner_id
+display_handle
+machine_label
+operating_system
+referral_source
+proof_url
+brag_card_url
+payout_status</pre>
+          </div>
+          <div class="card">
+            <h3>Implementation Priorities</h3>
+            <ol>
+              <li>Dry-run command generator.</li>
+              <li>Proof submission form with secret redaction warnings.</li>
+              <li>Referral attribution field.</li>
+              <li>Brag card generation after proof milestones.</li>
+              <li>Hall-of-fame dashboard after enough verified submissions exist.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>Safety Requirements</h3>
+            <ol>
+              <li>Never request private keys or seed phrases.</li>
+              <li>Warn before posting logs publicly.</li>
+              <li>Rate-limit proof and brag-card generation.</li>
+              <li>Strip arbitrary HTML from user fields.</li>
+              <li>Keep dry-run as the first CTA.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      RustChain conversion asset pack for bounty #318. Public wallet: RTC02811ff5e2bb4bb4b95eee44c5429cd9525496e7.
+    </div>
+  </footer>
+
+  <script>
+    const walletInput = document.getElementById('wallet');
+    const commands = document.getElementById('commands');
+    const copyStatus = document.getElementById('copyStatus');
+
+    function sanitizeWallet(value) {
+      return (value || 'YOUR_RTC_WALLET').replace(/[^\w@.-]/g, '').slice(0, 96) || 'YOUR_RTC_WALLET';
+    }
+
+    function updateCommands() {
+      const wallet = sanitizeWallet(walletInput.value);
+      commands.textContent = [
+        'pip install clawrtc',
+        'clawrtc install --dry-run',
+        'clawrtc wallet show',
+        'clawrtc start',
+        'clawrtc status',
+        'curl "https://rustchain.org/wallet/balance?miner_id=' + wallet + '"'
+      ].join('\n');
+    }
+
+    async function copyText(text, statusEl) {
+      try {
+        await navigator.clipboard.writeText(text);
+        statusEl.textContent = 'Copied.';
+      } catch (error) {
+        statusEl.textContent = 'Copy failed; select and copy manually.';
+      }
+    }
+
+    function renderCard() {
+      const canvas = document.getElementById('cardCanvas');
+      const ctx = canvas.getContext('2d');
+      const name = document.getElementById('displayName').value.trim() || 'RustChain miner';
+      const machine = document.getElementById('machine').value.trim() || 'Old hardware';
+      const milestone = document.getElementById('milestone').value.trim() || 'Safe dry-run complete';
+      const wallet = sanitizeWallet(walletInput.value);
+
+      ctx.fillStyle = '#0b1020';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f3b33d';
+      ctx.fillRect(0, 0, canvas.width, 16);
+      ctx.fillStyle = '#182033';
+      ctx.fillRect(64, 72, 1072, 486);
+      ctx.strokeStyle = '#33405e';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(64, 72, 1072, 486);
+
+      ctx.fillStyle = '#f5f7fb';
+      ctx.font = '700 58px Arial, Helvetica, sans-serif';
+      ctx.fillText('I put old hardware back to work', 104, 170);
+
+      ctx.fillStyle = '#41d081';
+      ctx.font = '700 40px Arial, Helvetica, sans-serif';
+      ctx.fillText(milestone.slice(0, 42), 104, 242);
+
+      ctx.fillStyle = '#aeb8ca';
+      ctx.font = '30px Arial, Helvetica, sans-serif';
+      ctx.fillText('Miner: ' + name.slice(0, 32), 104, 312);
+      ctx.fillText('Machine: ' + machine.slice(0, 42), 104, 360);
+      ctx.fillText('Public ID: ' + wallet.slice(0, 26) + (wallet.length > 26 ? '...' : ''), 104, 408);
+
+      ctx.fillStyle = '#6da8ff';
+      ctx.font = '700 28px Arial, Helvetica, sans-serif';
+      ctx.fillText('Start yours at rustchain.org', 104, 500);
+
+      ctx.fillStyle = '#f3b33d';
+      ctx.fillRect(916, 338, 146, 146);
+      ctx.fillStyle = '#0b1020';
+      ctx.fillRect(934, 356, 110, 110);
+      ctx.fillStyle = '#f5f7fb';
+      ctx.font = '700 20px Arial, Helvetica, sans-serif';
+      ctx.fillText('PUBLIC', 954, 416);
+      ctx.fillText('PROOF', 964, 444);
+    }
+
+    walletInput.addEventListener('input', updateCommands);
+    document.getElementById('copyCommands').addEventListener('click', () => copyText(commands.textContent, copyStatus));
+    document.getElementById('copyInvite').addEventListener('click', () => {
+      const status = document.createElement('span');
+      document.getElementById('copyInvite').after(status);
+      copyText(document.getElementById('inviteText').value, status);
+      setTimeout(() => status.remove(), 1800);
+    });
+    document.getElementById('renderCard').addEventListener('click', renderCard);
+    updateCommands();
+    renderCard();
+  </script>
+</body>
+</html>
