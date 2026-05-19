@@ -6,6 +6,21 @@ import tempfile
 from scripts import bounty_claim_verifier as verifier
 
 
+class FakeResponse:
+    def __init__(self, status, body):
+        self.status = status
+        self.body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def read(self):
+        return self.body.encode("utf-8")
+
+
 class BountyClaimVerifierTests(unittest.TestCase):
     def test_extract_wallet_and_urls(self):
         body = "Claiming. Wallet: miner_abc123 Proof: https://dev.to/example/post."
@@ -79,6 +94,22 @@ class BountyClaimVerifierTests(unittest.TestCase):
             self.assertEqual(verifier.main(["--event-path", event_path]), 0)
         finally:
             os.unlink(event_path)
+
+    def test_wallet_check_does_not_verify_zero_balance_response(self):
+        def opener(_req, timeout=20):
+            return FakeResponse(
+                200,
+                json.dumps({
+                    "amount_i64": 0,
+                    "amount_rtc": 0.0,
+                    "miner_id": "definitely-not-real",
+                }),
+            )
+
+        check = verifier.check_wallet_exists("definitely-not-real", opener=opener)
+
+        self.assertEqual(check.status, "needs-review")
+        self.assertIn("zero balance", check.detail)
 
     def test_text_extractor_counts_visible_text(self):
         parser = verifier.TextExtractor()

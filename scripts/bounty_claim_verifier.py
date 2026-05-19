@@ -186,7 +186,19 @@ def check_wallet_exists(wallet: str, opener: Callable[..., Any] = urllib.request
         with opener(req, timeout=20) as resp:
             text = resp.read().decode("utf-8", errors="replace")
             if resp.status == 200:
-                return Check("Wallet", "verified", f"`{wallet}` returned HTTP 200.")
+                try:
+                    payload = json.loads(text)
+                except json.JSONDecodeError:
+                    return Check("Wallet", "needs-review", f"`{wallet}` returned HTTP 200 but no parseable balance JSON.")
+                amount_i64 = payload.get("amount_i64") if isinstance(payload, dict) else None
+                amount_rtc = payload.get("amount_rtc") if isinstance(payload, dict) else None
+                if amount_i64 in (0, "0") or amount_rtc in (0, 0.0, "0", "0.0"):
+                    return Check(
+                        "Wallet",
+                        "needs-review",
+                        f"`{wallet}` returned HTTP 200 with zero balance; endpoint reachability does not prove wallet existence.",
+                    )
+                return Check("Wallet", "verified", f"`{wallet}` returned HTTP 200 with balance data.")
             return Check("Wallet", "needs-review", f"`{wallet}` returned HTTP {resp.status}: {text[:120]}")
     except Exception as exc:
         return Check("Wallet", "needs-review", f"`{wallet}` could not be verified: {exc}")
