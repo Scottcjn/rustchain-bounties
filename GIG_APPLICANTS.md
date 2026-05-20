@@ -55,7 +55,7 @@ Usually that means opening a Pull Request to this repository. Before you submit:
 Once the PR is reviewed and merged:
 - RTC tokens are credited to your wallet name within 24–48 hours.
 - Check the [BOUNTY_LEDGER.md](BOUNTY_LEDGER.md) for payout confirmations.
-- You can verify your balance at: `https://50.28.86.131/wallet/balance?miner_id=<your-wallet-name>`
+- You can verify your balance at: `https://rustchain.org/wallet/balance?miner_id=<your-wallet-name>`
 
 ---
 

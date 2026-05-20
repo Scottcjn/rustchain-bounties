@@ -31,8 +31,6 @@ If you've already committed `node_modules/` or `dist/`, remove them from trackin
 
 ```bash
 git rm -r --cached --ignore-unmatch node_modules/ dist/ out/
-git rm -r --cached dist/
-git rm -r --cached out/
 ```
 
 ### 3. Commit the cleanup
@@ -151,8 +149,6 @@ echo "out/" >> .gitignore
 echo ".env" >> .gitignore
 echo "*.log" >> .gitignore
 git rm -r --cached --ignore-unmatch node_modules/ dist/ out/ 2>/dev/null
-git rm -r --cached dist/ 2>/dev/null
-git rm -r --cached out/ 2>/dev/null
 git add .gitignore
 git commit -m "chore: add .gitignore, remove build artifacts from tracking"
 git push origin HEAD
