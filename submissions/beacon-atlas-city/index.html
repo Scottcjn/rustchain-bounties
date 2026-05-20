@@ -8,51 +8,85 @@
 </head>
 <body>
     <header>
-        <h1>🏙️ Beacon Atlas City</h1>
-        <div class="controls">
+        <div>
+            <h1>Beacon Atlas City</h1>
+            <p>Interactive map of agents, properties, values, heartbeat links, contracts, and mayday signals.</p>
+        </div>
+        <div class="controls" aria-label="Visualization filters">
             <select id="citySelect">
-                <option value="all">All Cities</option>
+                <option value="all">All cities</option>
                 <option value="genesis">Genesis City</option>
                 <option value="aurora">Aurora City</option>
                 <option value="nexus">Nexus City</option>
             </select>
-            <input type="text" id="searchInput" placeholder="Search agents...">
-            <button id="refreshBtn">🔄 Refresh</button>
+            <select id="roleSelect">
+                <option value="all">All roles</option>
+                <option value="miner">Miner</option>
+                <option value="validator">Validator</option>
+                <option value="maker">Maker</option>
+                <option value="sentinel">Sentinel</option>
+            </select>
+            <select id="propertySelect">
+                <option value="all">All property types</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="industrial">Industrial</option>
+                <option value="compute">Compute</option>
+            </select>
+            <input type="search" id="searchInput" placeholder="Search agents">
+            <button id="resetViewBtn" type="button">Reset view</button>
         </div>
     </header>
 
     <main>
         <aside class="sidebar">
             <section class="stats">
-                <h2>📊 City Statistics</h2>
+                <h2>City Statistics</h2>
                 <div class="stat-item">
-                    <span class="label">Total Agents:</span>
+                    <span class="label">Visible agents</span>
                     <span class="value" id="totalAgents">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="label">Total Properties:</span>
+                    <span class="label">Properties</span>
                     <span class="value" id="totalProperties">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="label">Total Value:</span>
+                    <span class="label">Network value</span>
                     <span class="value" id="totalValue">$0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Mayday signals</span>
+                    <span class="value warning" id="maydayCount">0</span>
                 </div>
             </section>
 
+            <section class="legend">
+                <h2>Connections</h2>
+                <div><span class="swatch heartbeat"></span>Heartbeat</div>
+                <div><span class="swatch contract"></span>Contract</div>
+                <div><span class="swatch mayday"></span>Mayday</div>
+            </section>
+
             <section class="agent-list">
-                <h2>👥 Top Agents</h2>
+                <h2>Agents</h2>
                 <ul id="agentList"></ul>
+            </section>
+
+            <section class="details">
+                <h2>Selected Agent</h2>
+                <div id="detailContent" class="detail-empty">Click an agent node or list row to inspect role, heartbeat status, properties, and valuation.</div>
             </section>
         </aside>
 
-        <section class="visualization">
+        <section class="visualization" aria-label="Beacon Atlas city canvas">
             <canvas id="cityCanvas"></canvas>
             <div id="tooltip" class="tooltip"></div>
+            <div class="canvas-help">Wheel to zoom. Drag to pan. Click a node for details.</div>
         </section>
     </main>
 
     <footer>
-        <p>Beacon Atlas — Proof of Physical AI Network</p>
+        Beacon Atlas static visualization submission for bounty #159.
     </footer>
 
     <script src="app.js"></script>

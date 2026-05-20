@@ -5,16 +5,16 @@
 
 ### Gagnez des RTC en contribuant à l'écosystème RustChain
 
-[![Récompenses Ouvertes](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=récompenses%20ouvertes&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
+[![Récompenses Ouvertes](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=r%C3%A9compenses%20ouvertes&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![Étoiles](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![Pool RTC](https://img.shields.io/badge/Pool%20RTC-5%2C900%2B%20RTC-or)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-Certifié%20L1-blue)](https://github.com/Scottcjn/RustChain)
+[![Pool RTC](https://img.shields.io/badge/Pool%20RTC-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
+[![BCOS](https://img.shields.io/badge/BCOS-Certifi%C3%A9%20L1-blue)](https://github.com/Scottcjn/RustChain)
 
 **131 récompenses ouvertes · 5 900+ RTC disponibles · Aucune expérience requise pour de nombreuses missions**
 
-[![Total Versé](https://img.shields.io/badge/Total%20Versé-22%2C756%20RTC-or)](BOUNTY_LEDGER.md)
+[![Total Versé](https://img.shields.io/badge/Total%20Vers%C3%A9-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
 
-[Consulter Toutes les Récompenses](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Récompenses Faciles](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22bonne%20première%20mission%22) · [Équipe Rouge](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**Comment Soumettre →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Journal des Paiements](BOUNTY_LEDGER.md) · [Qu'est-ce que RustChain?](https://github.com/Scottcjn/RustChain)
+[Consulter Toutes les Récompenses](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Récompenses Faciles](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good%20first%20issue%22) · [Équipe Rouge](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**Comment Soumettre →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Journal des Paiements](BOUNTY_LEDGER.md) · [Qu'est-ce que RustChain?](https://github.com/Scottcjn/RustChain)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 **RTC (RustChain Token)** est la cryptomonnaie native de [RustChain](https://github.com/Scottcjn/RustChain), une blockchain Proof-of-Antiquity où le matériel ancien permet d'obtenir des récompenses de minage plus élevées. Taux de référence RTC: **0,10 USD**.
 
-Les récompenses sont versées en RTC sur votre adresse de portefeuille après validation et vérification.
+Les récompenses sont versées en RTC sur votre address de portefeuille après validation et vérification.
 
 ## Comment Gagner des RTC
 

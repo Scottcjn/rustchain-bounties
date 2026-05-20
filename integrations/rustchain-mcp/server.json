@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Scottcjn/rustchain-mcp",
+  "title": "RustChain MCP",
+  "description": "MCP tools for RustChain, BoTTube video, and Beacon agent communication.",
+  "version": "0.3.0",
+  "repository": {
+    "url": "https://github.com/Scottcjn/rustchain-mcp",
+    "source": "github",
+    "id": "1176373929"
+  },
+  "websiteUrl": "https://rustchain.org",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "rustchain-mcp",
+      "version": "0.3.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "RUSTCHAIN_PRIMARY_URL",
+          "description": "Optional primary RustChain node URL override.",
+          "format": "string",
+          "isRequired": false,
+          "default": "https://50.28.86.131"
+        },
+        {
+          "name": "RUSTCHAIN_FALLBACK_URLS",
+          "description": "Optional comma-separated RustChain fallback node URLs.",
+          "format": "string",
+          "isRequired": false,
+          "default": ""
+        }
+      ]
+    }
+  ]
+}

@@ -7,12 +7,12 @@
 
 [![Recompensas Abertas](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=recompensas%20abertas&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![Estrelas](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![Poço de RTC](https://img.shields.io/badge/Poço%20de%20RTC-5%2C900%2B%20RTC-ouro)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-Certificado%20L1-azul)](https://github.com/Scottcjn/RustChain)
+[![Poço de RTC](https://img.shields.io/badge/Poço%20de%20RTC-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
+[![BCOS](https://img.shields.io/badge/BCOS-Certificado%20L1-blue)](https://github.com/Scottcjn/RustChain)
 
 **131 recompensas abertas · 5.900+ RTC disponíveis · Nenhuma experiência necessária para muitas tarefas**
 
-[![Total Pago](https://img.shields.io/badge/Total%20Pago-22%2C756%20RTC-ouro)](BOUNTY_LEDGER.md)
+[![Total Pago](https://img.shields.io/badge/Total%20Pago-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
 
 [Visualizar Todas as Recompensas](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Recompensas Fáceis](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) · [Time de Ataque](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**Como Enviar →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Livro de Pagamentos](BOUNTY_LEDGER.md) · [O que é RustChain?](https://github.com/Scottcjn/RustChain)
 
@@ -22,7 +22,7 @@
 
 ## O que é RTC?
 
-**RTC (Token RustChain)** é a criptomoeda nativa do [RustChain](https://github.com/Scottcjn/RustChain), uma blockchain de **Prueba de Antigüedad** onde hardware antigo ganha recompensas de mineração mais altas. Taxa de referência do RTC: **$0.10 USD**.
+**RTC (Token RustChain)** é a criptomoeda nativa do [RustChain](https://github.com/Scottcjn/RustChain), uma blockchain de **Prova de Antiguidade** onde hardware antigo ganha recompensas de mineração mais altas. Taxa de referência do RTC: **$0.10 USD**.
 
 As recompensas são pagas em RTC para o endereço da sua carteira após a conclusão e verificação.
 
@@ -104,6 +104,6 @@ Após verificação, o RTC é enviado para sua carteira. Primeiro? Nós o ajudar
 
 ### Parte do Ecossistema Elyan Labs
 
-- [RustChain](https://rustchain.org) — Blockchain de **Prueba de Antigüedad** com atestação de hardware
+- [RustChain](https://rustchain.org) — Blockchain de **Prova de Antiguidade** com atestação de hardware
 - [BoTTube](https://bottube.ai) — Plataforma de vídeo de IA onde 119+ agentes criam conteúdo
 - [GitHub](https://github.com/Scottcjn)

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Epoch Explorer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;
+  --accent:#58a6ff;--green:#3fb950;--red:#f85149;--orange:#d29922;--purple:#bc8cff;
+  --radius:8px;
+}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.6;min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+
+/* Header */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header h1{font-size:1.4rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.header h1 span{color:var(--orange)}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite}
+.status-dot.offline{background:var(--red);animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.header-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.header-controls label{color:var(--text-muted);font-size:.85rem;display:flex;align-items:center;gap:4px}
+.header-controls select,.header-controls input{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:4px 8px;font-size:.85rem}
+
+/* Layout */
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:20px}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.card-title{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-value{font-size:2rem;font-weight:700;line-height:1.2}
+.card-value small{font-size:.9rem;font-weight:400;color:var(--text-muted)}
+.card .sub{margin-top:8px;font-size:.85rem;color:var(--text-muted)}
+
+/* Countdown */
+.countdown{font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange);text-align:center;padding:16px 0}
+.countdown.expired{color:var(--red)}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:2px;transition:width 1s linear}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-item{padding:12px;background:var(--bg);border-radius:6px}
+.stat-item .label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.stat-item .value{font-size:1.3rem;font-weight:600;margin-top:4px}
+
+/* Search */
+.search-bar{display:flex;gap:8px;margin-bottom:20px}
+.search-bar input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px 14px;font-size:.95rem;outline:none;transition:border-color .2s}
+.search-bar input:focus{border-color:var(--accent)}
+.search-bar button{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:10px 20px;cursor:pointer;font-weight:600;white-space:nowrap}
+.search-bar button:hover{opacity:.9}
+.balance-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;display:none}
+.balance-result.show{display:block}
+.balance-result .wallet{color:var(--accent);font-family:monospace;word-break:break-all}
+.balance-result .amount{font-size:2rem;font-weight:700;color:var(--green)}
+
+/* History table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);background:var(--bg);position:sticky;top:0}
+td{font-size:.9rem;font-family:monospace}
+tr:hover td{background:rgba(88,166,255,.06)}
+.btn-sm{background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:.8rem}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:20px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 20px;color:var(--text);font-size:.9rem;z-index:1000;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--red)}
+
+/* Responsive */
+@media(max-width:600px){
+  .header{padding:10px 16px}
+  .container{padding:12px}
+  .grid{grid-template-columns:1fr}
+  .card-value{font-size:1.5rem}
+  .countdown{font-size:1.8rem}
+  .stats-grid{grid-template-columns:1fr}
+  .search-bar{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚡ RustChain <span>Epoch Explorer</span></h1>
+  <div class="header-controls">
+    <div><span class="status-dot" id="statusDot"></span> <span id="statusText" style="font-size:.85rem">Connecting...</span></div>
+    <label>Refresh: <select id="refreshInterval">
+      <option value="0">Off</option>
+      <option value="5000">5s</option>
+      <option value="10000" selected>10s</option>
+      <option value="30000">30s</option>
+      <option value="60000">60s</option>
+    </select></label>
+    <label>API: <input id="apiBase" value="https://50.28.86.131" style="width:180px"></label>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Epoch Info -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">🕐 Current Epoch</div>
+      <div class="card-value" id="epochNumber">--</div>
+      <div class="sub" id="epochStart">Start: --</div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏱ Next Epoch Countdown</div>
+      <div class="countdown" id="countdown">--:--:--</div>
+      <div class="progress-bar"><div class="fill" id="epochProgress" style="width:0%"></div></div>
+      <div class="sub" id="epochEnd">End: --</div>
+    </div>
+  </div>
+
+  <!-- Network Stats -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-title">📊 Network Statistics</div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-item"><div class="label">Block Height</div><div class="value" id="statBlockHeight">--</div></div>
+      <div class="stat-item"><div class="label">Total Transactions</div><div class="value" id="statTotalTx">--</div></div>
+      <div class="stat-item"><div class="label">Active Miners</div><div class="value" id="statMiners">--</div></div>
+      <div class="stat-item"><div class="label">Network Hashrate</div><div class="value" id="statHashrate">--</div></div>
+      <div class="stat-item"><div class="label">Epoch Duration</div><div class="value" id="statEpochDuration">--</div></div>
+      <div class="stat-item"><div class="label">Peers Connected</div><div class="value" id="statPeers">--</div></div>
+    </div>
+  </div>
+
+  <!-- Wallet Search -->
+  <div class="search-bar">
+    <input type="text" id="walletInput" placeholder="Enter wallet address to search balance...">
+    <button onclick="searchWallet()">🔍 Search Balance</button>
+  </div>
+  <div class="balance-result" id="balanceResult">
+    <div class="card-title">💰 Wallet Balance</div>
+    <div class="wallet" id="balanceWallet"></div>
+    <div class="amount" id="balanceAmount"></div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span>📋 Epoch History (Local)</span>
+      <div><button class="btn-sm" onclick="exportHistory()">Export CSV</button> <button class="btn-sm btn-danger" onclick="clearHistory()">Clear</button></div>
+    </div>
+    <div class="table-wrap" style="max-height:400px;overflow-y:auto">
+      <table>
+        <thead><tr><th>Epoch</th><th>Start Time</th><th>End Time</th><th>Duration</th><th>Blocks</th><th>Tx Count</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  RustChain Epoch Explorer · Data fetched from node API · History stored locally in browser
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const HISTORY_KEY = 'rc_epoch_history';
+
+let refreshTimer = null;
+let currentEpochData = null;
+
+// --- API ---
+async function apiFetch(path) {
+  const base = $('apiBase').value.replace(/\/+$/, '');
+  try {
+    const r = await fetch(base + path, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    // Fallback: try ignoring cert issues hint
+    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+      showToast('⚠️ Network error — if using self-signed cert, open the API URL in browser first and accept the certificate.', true);
+    }
+    throw e;
+  }
+}
+
+// --- Epoch ---
+async function fetchEpoch() {
+  try {
+    const data = await apiFetch('/epoch');
+    currentEpochData = data;
+    $('epochNumber').textContent = '#' + (data.epoch ?? data.epoch_number ?? data.current_epoch ?? '--');
+
+    const startTs = data.start_time ?? data.epoch_start ?? data.startTime;
+    const endTs = data.end_time ?? data.epoch_end ?? data.endTime;
+    const duration = data.duration ?? data.epoch_duration;
+
+    if (startTs) $('epochStart').textContent = 'Start: ' + fmtTime(startTs);
+    if (endTs) $('epochEnd').textContent = 'End: ' + fmtTime(endTs);
+
+    // Store start/end for countdown
+    window._epochStart = typeof startTs === 'number' ? startTs * (startTs < 1e12 ? 1000 : 1) : null;
+    window._epochEnd = typeof endTs === 'number' ? endTs * (endTs < 1e12 ? 1000 : 1) : null;
+    window._epochDuration = typeof duration === 'number' ? duration : null;
+
+    // Auto-save to history
+    saveToHistory(data);
+    setStatus(true);
+  } catch (e) {
+    console.error('Epoch fetch error:', e);
+    setStatus(false);
+  }
+}
+
+// --- Stats ---
+async function fetchStats() {
+  try {
+    const data = await apiFetch('/api/stats');
+    $('statBlockHeight').textContent = fmtNum(data.block_height ?? data.blockHeight ?? data.height ?? '--');
+    $('statTotalTx').textContent = fmtNum(data.total_transactions ?? data.totalTx ?? data.tx_count ?? '--');
+    $('statMiners').textContent = fmtNum(data.active_miners ?? data.miners ?? data.activeMiners ?? '--');
+    $('statHashrate').textContent = (data.hashrate ?? data.network_hashrate ?? '--') + '';
+    $('statEpochDuration').textContent = data.epoch_duration ? fmtDuration(data.epoch_duration) : (data.epochDuration ? fmtDuration(data.epochDuration) : '--');
+    $('statPeers').textContent = fmtNum(data.peers ?? data.connected_peers ?? '--');
+  } catch (e) {
+    console.error('Stats fetch error:', e);
+  }
+}
+
+// --- Wallet ---
+async function searchWallet() {
+  const addr = $('walletInput').value.trim();
+  if (!addr) return;
+  const el = $('balanceResult');
+  try {
+    const data = await apiFetch('/balance/' + encodeURIComponent(addr));
+    el.classList.add('show');
+    $('balanceWallet').textContent = addr;
+    $('balanceAmount').textContent = (data.balance ?? data.amount ?? '0') + ' RC';
+  } catch (e) {
+    showToast('❌ Failed to fetch balance: ' + e.message, true);
+  }
+}
+
+// --- Countdown ---
+function updateCountdown() {
+  const now = Date.now();
+  let end = window._epochEnd;
+  let start = window._epochStart;
+
+  if (!end && window._epochDuration && start) {
+    end = start + window._epochDuration * 1000;
+  }
+
+  if (!end) {
+    $('countdown').textContent = '--:--:--';
+    return;
+  }
+
+  const diff = end - now;
+  if (diff <= 0) {
+    $('countdown').textContent = 'Epoch ended';
+    $('countdown').classList.add('expired');
+    $('epochProgress').style.width = '100%';
+    return;
+  }
+
+  $('countdown').classList.remove('expired');
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  $('countdown').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+
+  // Progress
+  if (start && end > start) {
+    const pct = Math.min(100, ((now - start) / (end - start)) * 100);
+    $('epochProgress').style.width = pct.toFixed(1) + '%';
+  }
+}
+
+// --- History ---
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+}
+
+function saveToHistory(epochData) {
+  const history = loadHistory();
+  const epochNum = epochData.epoch ?? epochData.epoch_number ?? epochData.current_epoch;
+  if (epochNum == null) return;
+
+  // Avoid duplicates
+  if (history.length > 0 && history[0].epoch === epochNum) {
+    history[0] = { ...epochData, _savedAt: Date.now() };
+  } else {
+    history.unshift({ ...epochData, _savedAt: Date.now() });
+  }
+
+  // Keep last 100
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 100)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  const tbody = $('historyBody');
+  if (history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">No history yet. Data will appear as epochs are recorded.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = history.map(h => {
+    const epoch = h.epoch ?? h.epoch_number ?? h.current_epoch ?? '?';
+    const start = h.start_time ?? h.epoch_start ?? h.startTime;
+    const end = h.end_time ?? h.epoch_end ?? h.endTime;
+    const dur = h.duration ?? h.epoch_duration;
+    const blocks = h.blocks ?? h.block_count ?? '--';
+    const tx = h.transactions ?? h.tx_count ?? h.totalTx ?? '--';
+    return `<tr>
+      <td>${epoch}</td>
+      <td>${start ? fmtTime(start) : '--'}</td>
+      <td>${end ? fmtTime(end) : '--'}</td>
+      <td>${dur ? fmtDuration(dur) : '--'}</td>
+      <td>${blocks}</td>
+      <td>${tx}</td>
+    </tr>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (confirm('Clear all local epoch history?')) {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+    showToast('History cleared');
+  }
+}
+
+function exportHistory() {
+  const history = loadHistory();
+  if (!history.length) { showToast('No data to export', true); return; }
+  const headers = 'Epoch,Start,End,Duration,Blocks,TxCount';
+  const rows = history.map(h => [
+    h.epoch ?? h.epoch_number ?? '',
+    h.start_time ?? '',
+    h.end_time ?? '',
+    h.duration ?? '',
+    h.blocks ?? '',
+    h.transactions ?? ''
+  ].join(','));
+  download('epoch_history.csv', headers + '\n' + rows.join('\n'));
+  showToast('CSV exported');
+}
+
+// --- Helpers ---
+function pad(n) { return String(n).padStart(2, '0'); }
+function fmtNum(n) { return typeof n === 'number' ? n.toLocaleString() : n; }
+function fmtTime(t) {
+  if (typeof t === 'number') {
+    if (t < 1e12) t *= 1000; // seconds → ms
+    return new Date(t).toLocaleString();
+  }
+  return t;
+}
+function fmtDuration(s) {
+  if (typeof s !== 'number') return s;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m ${s % 60}s`;
+}
+
+function setStatus(online) {
+  $('statusDot').className = 'status-dot' + (online ? '' : ' offline');
+  $('statusText').textContent = online ? 'Online' : 'Offline';
+}
+
+function showToast(msg, isError) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => el.className = 'toast', 3000);
+}
+
+function download(name, content) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type: 'text/csv' }));
+  a.download = name;
+  a.click();
+}
+
+// --- Refresh ---
+function setupRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  const ms = parseInt($('refreshInterval').value);
+  if (ms > 0) {
+    refreshTimer = setInterval(() => { fetchEpoch(); fetchStats(); }, ms);
+  }
+}
+
+$('refreshInterval').addEventListener('change', setupRefresh);
+
+// Enter key for wallet search
+$('walletInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchWallet(); });
+
+// --- Init ---
+(async function init() {
+  renderHistory();
+  await Promise.all([fetchEpoch(), fetchStats()]);
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+  setupRefresh();
+})();
+</script>
+</body>
+</html>

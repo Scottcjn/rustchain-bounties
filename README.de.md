@@ -23,7 +23,7 @@
 
 **RTC (RustChain Token)** ist die native Kryptowährung von [RustChain](https://github.com/Scottcjn/RustChain), einem Proof-of-Antiquity Blockchain, bei dem veraltetes Hardware höhere Mining-Belohnungen verdient. RTC-Kurs: **$0.10 USD**.
 
-Belohnungen werden in RTC an Ihre Wallet-Adresse ausgezahlt, sobald die Arbeit abgeschlossen und verifiziert wurde.
+Belohnungen werden in RTC an Ihre Wallet-Address ausgezahlt, sobald die Arbeit abgeschlossen und verifiziert wurde.
 
 ## Wie man verdient
 
