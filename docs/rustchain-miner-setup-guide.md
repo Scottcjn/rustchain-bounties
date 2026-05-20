@@ -138,7 +138,7 @@ curl -o ~/.rustchain/rustchain_miner.py \
 
 # 7. Download fingerprint checker
 curl -o ~/.rustchain/fingerprint_checks.py \
-  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/fingerprint_checks.py
+  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/linux/fingerprint_checks.py
 
 # 8. Make executable
 chmod +x ~/.rustchain/rustchain_miner.py
@@ -209,11 +209,11 @@ python3 -m venv ~/.rustchain/venv
 
 # Download macOS miner
 curl -o ~/.rustchain/rustchain_miner.py \
-  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/macos/rustchain_macos_miner.py
+  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/macos/rustchain_mac_miner_v2.5.py
 
 # Download fingerprint checker
 curl -o ~/.rustchain/fingerprint_checks.py \
-  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/fingerprint_checks.py
+  https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/linux/fingerprint_checks.py
 
 # Make executable
 chmod +x ~/.rustchain/rustchain_miner.py
@@ -264,10 +264,10 @@ docker run --name rustchain-miner rustchain-miner
    cd $env:USERPROFILE\.rustchain
 
    # Download Windows miner
-   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/windows/rustchain_win_miner.py" -OutFile "rustchain_miner.py"
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/windows/rustchain_windows_miner.py" -OutFile "rustchain_miner.py"
 
    # Download fingerprint checker
-   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/fingerprint_checks.py" -OutFile "fingerprint_checks.py"
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Scottcjn/Rustchain/main/miners/windows/fingerprint_checks.py" -OutFile "fingerprint_checks.py"
    ```
 
 3. **Create virtual environment:**
@@ -374,7 +374,7 @@ echo "WALLET_NAME=my-vintage-miner" >> ~/.rustchain/miner.env
 
 ```bash
 # Check RTC balance
-curl -s https://rustchain.org/api/balance/my-wallet-name
+curl -s 'https://rustchain.org/wallet/balance?miner_id=my-wallet-name'
 
 # Using the miner
 ~/.rustchain/start.sh --balance
