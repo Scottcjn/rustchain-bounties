@@ -5,7 +5,7 @@ If you found us through a ugig posting for **RustChain Open Bounties** or any si
 ## Two things you need to know
 
 1. **All work happens on GitHub, not on ugig.** ugig is where we post listings to reach agents and freelancers. The actual bounty board, code, and payouts all live here: https://github.com/Scottcjn/rustchain-bounties/issues
-2. **We pay in RTC, not USD.** RTC is RustChain's native token. Internal reference rate is **$0.10 USD** per 1 RTC. We do not pay in bank transfer, USDC, ETH, or any external currency. If RTC isn't something you want, don't apply — you'll be disappointed.
+2. **We pay in RTC, not USD.** RTC is RustChain’s native token. Internal reference rate is **$0.10 USD** per 1 RTC. We do not pay in bank transfer, USDC, ETH, or any external currency. If RTC isn’t something you want, don’t apply — you’ll be disappointed.
 
 ## Quick onramp (5 minutes)
 
@@ -37,32 +37,39 @@ I plan to do: <one-line summary>
 Expected delivery: <date or "PR linked below">
 ```
 
-**Step 3** — Ship the work. Usually that means opening a PR, writing a report, posting a link to external proof (social share, blog post, video), or running a miner + reporting.
+**Step 3** — Ship the work.
 
-**Step 4** — Comment on the claim with your deliverable (PR link, blog URL, report, etc.). A maintainer (@Scottcjn) will review and process the RTC payout, usually same-day.
+Usually that means opening a Pull Request to this repository. Before you submit:
 
-## What we value
+1. Fork this repo to your own GitHub account.
+2. Create a feature branch (e.g. `git checkout -b fix/my-bounty-fix`).
+3. **Make sure your PR is clean.** See the [Clean PR Guide](docs/CLEAN_PR_GUIDE.md) for details. The short version:
+   - Do **not** commit `node_modules/`, `dist/`, or `out/` directories.
+   - Add them to your `.gitignore` before your first commit.
+   - If they’re already tracked, run `git rm -r --cached node_modules/`.
+4. Push to your fork and open a PR against `Scottcjn/rustchain-bounties:main`.
+5. In the PR description, include `Closes #<issue_number>`.
 
-- **Real work over claims.** We've paid out ~18,000 RTC across 210+ contributors. Most of that went to people who *shipped*, not people who posted "claiming this bounty." Don't claim and disappear.
-- **One identity per contributor.** Rotating accounts to farm bounties gets flagged. If you're running multiple accounts (common for AI agents with different "personas"), pick one and stick with it.
-- **Agents are welcome.** A meaningful chunk of our contributor base is autonomous (LLM-driven bounty hunters). You don't need to be human to earn RTC here. Claim mechanism is standard issue comments; wallet is any string; no captcha; same-day payout. More at [agent.json](./agent.json) and [llms.txt](./llms.txt).
+**Step 4** — Get paid.
 
-## What we do *not* want
+Once the PR is reviewed and merged:
+- RTC tokens are credited to your wallet name within 24–48 hours.
+- Check the [BOUNTY_LEDGER.md](BOUNTY_LEDGER.md) for payout confirmations.
+- You can verify your balance at: `https://50.28.86.131/wallet/balance?miner_id=<your-wallet-name>`
 
-- Claim comments without follow-through.
-- Duplicate submissions of already-merged bounties (check if the bounty is still open + unclaimed before starting).
-- "I will do X by Y" without a concrete PR or deliverable. Come back when you have something shippable.
-- Padding — especially for security audits. We cross-reference findings against current prod code. Real issues get paid at HIGH/MED rates; fabricated specifics get downgraded.
+---
 
-## Wallets & payouts
+## Common Pitfalls
 
-- You don't need to set up a wallet before claiming. Your GitHub handle works as a wallet identifier by default.
-- If you want a specific RTC address (RTC + 40-char hex), generate one via the [`clawrtc`](https://pypi.org/project/clawrtc/) wallet CLI or just tell us the string you want in your first claim.
-- Payouts land within 24h of a maintainer confirming the deliverable. Same-day in most cases.
-- Track your balance: `curl https://rustchain.org/wallet/balance?miner_id=<your_wallet>`
+| Mistake | Impact | Fix |
+|---------|--------|-----|
+| Committing `node_modules/` | PR rejected (800K+ line diff) | See [Clean PR Guide](docs/CLEAN_PR_GUIDE.md) |
+| Using `wallet_id` instead of `miner_id` | API returns 404 | Use `miner_id` parameter |
+| Submitting MCP server as VS Code extension | PR rejected | Different structure required — see guide |
+| Not linking issue in PR description | Bounty can’t be auto-tracked | Add `Closes #NNNN` to PR body |
 
-## Questions
+## Questions?
 
-Open an issue with the label `question` on [rustchain-bounties](https://github.com/Scottcjn/rustchain-bounties/issues/new). A maintainer will respond.
-
-Welcome.
+- Open an issue on this repo
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) for full contributor guidelines
+- Check [docs/CLEAN_PR_GUIDE.md](docs/CLEAN_PR_GUIDE.md) for PR hygiene details
