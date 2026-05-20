@@ -32,6 +32,13 @@ Outcome: no blocking issue found. The review verified the missing `miner_header_
 
 Outcome: no blocking issue found. The review verified SDK JSON object-response hardening and noted a non-blocking strictness follow-up for malformed list envelopes.
 
+### PR 5933 review
+
+- Claim file: `claims/pr5933-review-claim.md`
+- Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/5933
+
+Outcome: blocking issue found. The Agent Miner RPC webhook delivery still follows redirects by default, so a public webhook URL can redirect `requests.post()` to loopback, metadata, or RFC1918 targets even after registration-time DNS/IP validation is improved. Direct upstream review/comment posting failed with GitHub app `403`, so the claim file records the review publicly in this active claim branch.
+
 ## Current external feedback
 
 - PR #11480 received an approving review from @jaxint: https://github.com/Scottcjn/rustchain-bounties/pull/11480#pullrequestreview-4328746927
