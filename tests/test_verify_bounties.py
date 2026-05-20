@@ -55,15 +55,41 @@ class TestVerifyBounties(unittest.TestCase):
                 "user": {"login": "bob"},
                 "body": "I can verify this manually.",
             },
+            {
+                "id": 7,
+                "user": {"login": "carol"},
+                "body": "I starred the tracked repos and followed Scottcjn.",
+            },
         ]
 
         claimants = mod.extract_claimants(comments, issue_number=1589)
 
-        self.assertEqual([c["username"] for c in claimants], ["alice", "bob"])
+        self.assertEqual([c["username"] for c in claimants], ["alice", "carol"])
         self.assertEqual(claimants[0]["comment_id"], 1)
         self.assertTrue(claimants[0]["wallet"].startswith("RTCabcdef"))
-        self.assertEqual(claimants[1]["comment_id"], 6)
+        self.assertEqual(claimants[1]["comment_id"], 7)
         self.assertEqual(claimants[1]["wallet"], "")
+
+    def test_extract_claimants_ignores_discussion_before_claim(self):
+        mod = load_verify_bounties()
+        comments = [
+            {
+                "id": 30,
+                "user": {"login": "alice"},
+                "body": "I can help verify this manually.",
+            },
+            {
+                "id": 31,
+                "user": {"login": "alice"},
+                "body": "Claiming this bounty. Wallet: alice-wallet",
+            },
+        ]
+
+        claimants = mod.extract_claimants(comments, issue_number=1589)
+
+        self.assertEqual(len(claimants), 1)
+        self.assertEqual(claimants[0]["comment_id"], 31)
+        self.assertEqual(claimants[0]["wallet"], "alice-wallet")
 
     def test_find_existing_bot_comment_returns_first_signature_match(self):
         mod = load_verify_bounties()

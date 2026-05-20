@@ -246,6 +246,23 @@ GENERIC_WALLET_RE = re.compile(
     r"(?:wallet\s+address|wallet|address)\s*[:=]?\s*([a-z0-9_-]{3,80})",
     re.IGNORECASE,
 )
+CLAIM_HINT_RE = re.compile(
+    r"\b("
+    r"claim|claiming|claimed|bounty|wallet|address|starred|stars?|"
+    r"follow(?:ed)?|badge|react(?:ed|ion)?|proof|submit(?:ted)?|"
+    r"done|completed"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
+def looks_like_claim_comment(body: str) -> bool:
+    """Return True when a comment appears to be a bounty claim."""
+    return bool(
+        RTC_WALLET_RE.search(body)
+        or GENERIC_WALLET_RE.search(body)
+        or CLAIM_HINT_RE.search(body)
+    )
 
 
 def extract_claimants(comments: list[dict], issue_number: int) -> list[dict]:
@@ -272,6 +289,9 @@ def extract_claimants(comments: list[dict], issue_number: int) -> list[dict]:
             continue
         # Skip empty
         if not user or not body.strip():
+            continue
+        # Skip discussion or helper comments that are not claim attempts
+        if not looks_like_claim_comment(body):
             continue
         # Deduplicate by username
         if user.lower() in seen:
