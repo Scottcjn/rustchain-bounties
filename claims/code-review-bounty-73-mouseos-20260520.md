@@ -233,6 +233,15 @@ Summary:
 - Confirmed the high-entropy badge path remains covered by the focused tests.
 - Ran `python -m pytest tests\test_validator_core_with_badge.py -q --noconftest -o addopts=''` on Windows: 6 passed.
 
+### 27. Scottcjn/Rustchain#5923 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5923#pullrequestreview-4331845994
+
+Summary:
+- Verified Python SDK object-response helpers are applied to dict-returning methods.
+- Confirmed list-returning methods remain flexible for bare lists and list-valued envelopes, while malformed scalar responses safely return empty lists.
+- Ran `PYTHONPATH=sdk/python python -m pytest sdk\python\rustchain_sdk\tests\test_client.py -q` on Windows: 23 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -241,4 +250,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 26 accepted reviews equal 130 RTC, or $13.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 27 accepted reviews equal 135 RTC, or $13.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
