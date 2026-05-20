@@ -27,7 +27,7 @@
 节点健康检查
 
 ```bash
-curl -sk https://rustchain.org/health
+curl -k https://rustchain.org/health
 ```
 
 **响应示例:**
@@ -47,7 +47,7 @@ curl -sk https://rustchain.org/health
 获取当前 Epoch 信息
 
 ```bash
-curl -sk https://rustchain.org/epoch
+curl -k https://rustchain.org/epoch
 ```
 
 **响应示例:**
@@ -67,7 +67,7 @@ curl -sk https://rustchain.org/epoch
 注册到当前 Epoch。矿工必须先在 Epoch 中注册才能挖矿。
 
 ```bash
-curl -sk -X POST https://rustchain.org/epoch/enroll \
+curl -k -X POST https://rustchain.org/epoch/enroll \
   -H "Content-Type: application/json" \
   -d '{"miner_id": "my-miner-01"}'
 ```
@@ -86,7 +86,7 @@ curl -sk -X POST https://rustchain.org/epoch/enroll \
 导出创世配置（用于验证区块链初始状态）
 
 ```bash
-curl -sk https://rustchain.org/genesis/export > genesis.json
+curl -k https://rustchain.org/genesis/export > genesis.json
 ```
 
 ---
@@ -95,7 +95,7 @@ curl -sk https://rustchain.org/genesis/export > genesis.json
 获取 OpenAPI 规范文档（Swagger 格式）
 
 ```bash
-curl -sk https://rustchain.org/openapi.json | jq '.paths' | head -50
+curl -k https://rustchain.org/openapi.json | jq '.paths' | head -50
 ```
 
 ---
@@ -104,7 +104,7 @@ curl -sk https://rustchain.org/openapi.json | jq '.paths' | head -50
 获取网络节点列表
 
 ```bash
-curl -sk https://rustchain.org/api/nodes
+curl -k https://rustchain.org/api/nodes
 ```
 
 **响应示例:**
@@ -121,7 +121,7 @@ curl -sk https://rustchain.org/api/nodes
 获取区块列表
 
 ```bash
-curl -sk 'https://rustchain.org/api/blocks?limit=10&offset=0'
+curl -k 'https://rustchain.org/api/blocks?limit=10&offset=0'
 ```
 
 **请求参数:**
@@ -145,7 +145,7 @@ curl -sk 'https://rustchain.org/api/blocks?limit=10&offset=0'
 获取交易列表
 
 ```bash
-curl -sk 'https://rustchain.org/api/transactions?limit=10'
+curl -k 'https://rustchain.org/api/transactions?limit=10'
 ```
 
 ---
@@ -154,7 +154,7 @@ curl -sk 'https://rustchain.org/api/transactions?limit=10'
 网络统计信息
 
 ```bash
-curl -sk https://rustchain.org/api/stats
+curl -k https://rustchain.org/api/stats
 ```
 
 | 字段 | 类型 | 说明 |
@@ -170,7 +170,7 @@ curl -sk https://rustchain.org/api/stats
 手续费池信息
 
 ```bash
-curl -sk https://rustchain.org/api/fee_pool
+curl -k https://rustchain.org/api/fee_pool
 ```
 
 ---
@@ -179,7 +179,7 @@ curl -sk https://rustchain.org/api/fee_pool
 赏金倍率（影响挖矿奖励的系数）
 
 ```bash
-curl -sk https://rustchain.org/api/bounty-multiplier
+curl -k https://rustchain.org/api/bounty-multiplier
 ```
 
 ---
@@ -188,7 +188,7 @@ curl -sk https://rustchain.org/api/bounty-multiplier
 全网余额汇总
 
 ```bash
-curl -sk https://rustchain.org/api/balances
+curl -k https://rustchain.org/api/balances
 ```
 
 ---
@@ -197,32 +197,26 @@ curl -sk https://rustchain.org/api/balances
 Prometheus 兼容的监控指标
 
 ```bash
-curl -sk https://rustchain.org/api/metrics
+curl -k https://rustchain.org/api/metrics
 ```
 
 ---
 
 ## 2. 矿工接口
 
-### `POST /api/mine`
-提交挖矿证明（mined block proof）。矿工核心操作。
+### `POST /api/mine` ⚠️ DEPRECATED
+> ⚠️ **此接口已废弃**（返回 410 "API v1 removed"）。请使用 `/epoch/enroll` + v2 票证/VRF 流程。
+
+原始请求格式（已废弃）：
 
 ```bash
-curl -sk -X POST https://rustchain.org/api/mine \
-  -H "Content-Type: application/json" \
-  -d '{
-    "miner_id": "my-miner-01",
-    "nonce": 12345678,
-    "signature": "0xabcd...",
-    "epoch": 95,
-    "slot": 12345
-  }'
+# 此接口将返回 410
+curl -k -X POST https://rustchain.org/api/mine   -H "Content-Type: application/json"   -d '{"miner_id":"my-miner","nonce":123,"signature":"...","epoch":95,"slot":12345}'
 ```
 
-**请求参数:**
+**替代方案**: 使用 `/epoch/enroll` 注册到当前 Epoch，然后使用 v2 票证/VRF 流程提交证明。
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
+---------|------|------|------|
 | `miner_id` | string | 是 | 矿工ID |
 | `nonce` | int | 是 | 挖出的 Nonce 值 |
 | `signature` | string | 是 | 签名（用矿工私钥签名） |
@@ -235,7 +229,7 @@ curl -sk -X POST https://rustchain.org/api/mine \
 兼容 v1 API 的挖矿接口（旧客户端）
 
 ```bash
-curl -sk -X POST https://rustchain.org/compat/v1/api/mine \
+curl -k -X POST https://rustchain.org/compat/v1/api/mine \
   -H "Content-Type: application/json" \
   -d '{"miner_id": "...", "nonce": 12345678}'
 ```
@@ -246,7 +240,7 @@ curl -sk -X POST https://rustchain.org/compat/v1/api/mine \
 矿工连续出块记录
 
 ```bash
-curl -sk https://rustchain.org/api/miner/my-miner-01/streak
+curl -k https://rustchain.org/api/miner/my-miner-01/streak
 ```
 
 **响应:** `{"streak": 5, "best_streak": 12, "current_streak": 5}`
@@ -257,7 +251,7 @@ curl -sk https://rustchain.org/api/miner/my-miner-01/streak
 矿工徽章/成就
 
 ```bash
-curl -sk https://rustchain.org/api/badge/my-miner-01
+curl -k https://rustchain.org/api/badge/my-miner-01
 ```
 
 ---
@@ -266,7 +260,7 @@ curl -sk https://rustchain.org/api/badge/my-miner-01
 矿工认证历史
 
 ```bash
-curl -sk https://rustchain.org/api/miner/my-miner-01/attestations
+curl -k https://rustchain.org/api/miner/my-miner-01/attestations
 ```
 
 ---
@@ -275,7 +269,7 @@ curl -sk https://rustchain.org/api/miner/my-miner-01/attestations
 矿工仪表盘页面（HTML）
 
 ```bash
-curl -sk https://rustchain.org/dashboard?miner_id=my-miner-01
+curl -k https://rustchain.org/dashboard?miner_id=my-miner-01
 ```
 
 ---
@@ -284,7 +278,7 @@ curl -sk https://rustchain.org/dashboard?miner_id=my-miner-01
 矿工仪表盘数据 API
 
 ```bash
-curl -sk https://rustchain.org/api/miner_dashboard/my-miner-01
+curl -k https://rustchain.org/api/miner_dashboard/my-miner-01
 ```
 
 ---
@@ -293,7 +287,7 @@ curl -sk https://rustchain.org/api/miner_dashboard/my-miner-01
 矿工列表
 
 ```bash
-curl -sk https://rustchain.org/api/miners
+curl -k https://rustchain.org/api/miners
 ```
 
 ---
@@ -302,18 +296,18 @@ curl -sk https://rustchain.org/api/miners
 矿工名人堂页面（HTML）
 
 ```bash
-curl -sk https://rustchain.org/hall-of-fame
+curl -k https://rustchain.org/hall-of-fame
 ```
 
 ---
 
 ## 3. 钱包与余额接口
 
-### `GET /balance/<miner_pk>`
+### `GET /wallet/balance?miner_id=<miner_id>`
 查询矿工余额（RTC）
 
 ```bash
-curl -sk https://rustchain.org/balance/0xPUBLIC_KEY_HERE
+curl -k https://rustchain.org/balance/0xPUBLIC_KEY_HERE
 ```
 
 **响应示例:** `{"balance_rtc": 150.5, "locked_rtc": 10.0}`
@@ -334,7 +328,7 @@ curl -sk https://rustchain.org/balance/0xPUBLIC_KEY_HERE
 全网余额分布
 
 ```bash
-curl -sk https://rustchain.org/api/balances
+curl -k https://rustchain.org/api/balances
 ```
 
 ---
@@ -342,21 +336,44 @@ curl -sk https://rustchain.org/api/balances
 ## 4. 提现接口
 
 ### `POST /withdraw/register`
-注册提现地址。提现前必须先注册目标钱包地址。
+注册提现地址。需要管理员/API-key 认证。
 
 ```bash
-curl -sk -X POST https://rustchain.org/withdraw/register \
-  -H "Content-Type: application/json" \
-  -d '{"miner_id": "my-miner-01", "withdraw_address": "0xTARGET_WALLET"}'
+curl -k -X POST https://rustchain.org/withdraw/register   -H "Authorization: Bearer $API_KEY"   -H "Content-Type: application/json"   -d '{"miner_id":"my-miner","withdraw_address":"0x...","miner_pk":"...","pubkey_sr25519":"..."}'
 ```
 
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `miner_id` | string | 是 | 矿工唯一标识 |
+| `withdraw_address` | string | 是 | 提现目标地址 |
+| `miner_pk` | string | 是 | 矿工公钥 |
+| `pubkey_sr25519` | string | 是 | Sr25519 公钥 |
+
+**注意**: 此接口需要管理员或 API-key 认证。
+
 ---
+
+### `POST /withdraw/request`
+发起提现请求。需要管理员/API-key 认证。
+
+```bash
+curl -k -X POST https://rustchain.org/withdraw/request   -H "Authorization: Bearer $API_KEY"   -H "Content-Type: application/json"   -d '{"miner_id":"my-miner","amount_rtc":100,"miner_pk":"...","pubkey_sr25519":"..."}'
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `miner_id` | string | 是 | 矿工唯一标识 |
+| `amount_rtc` | number | 是 | 提现金额（RTC） |
+| `miner_pk` | string | 是 | 矿工公钥 |
+| `pubkey_sr25519` | string | 是 | Sr25519 公钥 |
+
+**注意**: 此接口需要管理员或 API-key 认证。---
 
 ### `POST /withdraw/request`
 发起提现申请
 
 ```bash
-curl -sk -X POST https://rustchain.org/withdraw/request \
+curl -k -X POST https://rustchain.org/withdraw/request \
   -H "Content-Type: application/json" \
   -d '{"miner_id": "my-miner-01", "amount_rtc": 50}'
 ```
@@ -367,7 +384,7 @@ curl -sk -X POST https://rustchain.org/withdraw/request \
 查询提现状态
 
 ```bash
-curl -sk https://rustchain.org/withdraw/status/wd_1234
+curl -k https://rustchain.org/withdraw/status/wd_1234
 ```
 
 ---
@@ -376,7 +393,7 @@ curl -sk https://rustchain.org/withdraw/status/wd_1234
 查询提现历史
 
 ```bash
-curl -sk https://rustchain.org/withdraw/history/0xPUBLIC_KEY
+curl -k https://rustchain.org/withdraw/history/0xPUBLIC_KEY
 ```
 
 ---
@@ -387,7 +404,7 @@ curl -sk https://rustchain.org/withdraw/history/0xPUBLIC_KEY
 获取所有治理提案列表
 
 ```bash
-curl -sk https://rustchain.org/governance/proposals
+curl -k https://rustchain.org/governance/proposals
 ```
 
 ---
@@ -396,7 +413,7 @@ curl -sk https://rustchain.org/governance/proposals
 获取单个提案详情
 
 ```bash
-curl -sk https://rustchain.org/governance/proposal/1
+curl -k https://rustchain.org/governance/proposal/1
 ```
 
 ---
@@ -405,7 +422,7 @@ curl -sk https://rustchain.org/governance/proposal/1
 创建新提案
 
 ```bash
-curl -sk -X POST https://rustchain.org/governance/propose \
+curl -k -X POST https://rustchain.org/governance/propose \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Increase Block Reward",
@@ -420,7 +437,7 @@ curl -sk -X POST https://rustchain.org/governance/propose \
 投票
 
 ```bash
-curl -sk -X POST https://rustchain.org/governance/vote \
+curl -k -X POST https://rustchain.org/governance/vote \
   -H "Content-Type: application/json" \
   -d '{"proposal_id": 1, "voter": "my-miner-01", "vote": "yes"}'
 ```
@@ -431,7 +448,7 @@ curl -sk -X POST https://rustchain.org/governance/vote \
 治理界面（HTML）
 
 ```bash
-curl -sk https://rustchain.org/governance/ui
+curl -k https://rustchain.org/governance/ui
 ```
 
 ---
@@ -442,7 +459,7 @@ curl -sk https://rustchain.org/governance/ui
 请求挑战（验证矿工的身份和算力）
 
 ```bash
-curl -sk -X POST https://rustchain.org/attest/challenge \
+curl -k -X POST https://rustchain.org/attest/challenge \
   -H "Content-Type: application/json" \
   -d '{"miner_id": "my-miner-01", "fingerprint": "0xDEVICE_FINGERPRINT"}'
 ```
@@ -453,7 +470,7 @@ curl -sk -X POST https://rustchain.org/attest/challenge \
 提交挑战应答
 
 ```bash
-curl -sk -X POST https://rustchain.org/attest/submit \
+curl -k -X POST https://rustchain.org/attest/submit \
   -H "Content-Type: application/json" \
   -d '{"miner_id": "my-miner-01", "challenge": "0xCHALLENGE_DATA", "signature": "0xSIGNED_RESPONSE"}'
 ```
@@ -466,7 +483,7 @@ curl -sk -X POST https://rustchain.org/attest/submit \
 手动添加对等节点
 
 ```bash
-curl -sk -X POST https://rustchain.org/p2p/add_peer \
+curl -k -X POST https://rustchain.org/p2p/add_peer \
   -H "Content-Type: application/json" \
   -d '{"address": "10.0.0.1:8333"}'
 ```
@@ -477,7 +494,7 @@ curl -sk -X POST https://rustchain.org/p2p/add_peer \
 从对等节点同步区块
 
 ```bash
-curl -sk https://rustchain.org/p2p/blocks?from=1000
+curl -k https://rustchain.org/p2p/blocks?from=1000
 ```
 
 ---
@@ -488,7 +505,7 @@ curl -sk https://rustchain.org/p2p/blocks?from=1000
 获取 Beacon 摘要信息
 
 ```bash
-curl -sk https://rustchain.org/beacon/digest
+curl -k https://rustchain.org/beacon/digest
 ```
 
 ---
@@ -497,7 +514,7 @@ curl -sk https://rustchain.org/beacon/digest
 获取所有 Beacon 信封
 
 ```bash
-curl -sk https://rustchain.org/beacon/envelopes
+curl -k https://rustchain.org/beacon/envelopes
 ```
 
 ---
@@ -506,7 +523,7 @@ curl -sk https://rustchain.org/beacon/envelopes
 提交 Beacon 数据
 
 ```bash
-curl -sk -X POST https://rustchain.org/beacon/submit \
+curl -k -X POST https://rustchain.org/beacon/submit \
   -H "Content-Type: application/json" \
   -d '{"data": "0xBEACON_DATA", "signature": "0xSIG"}'
 ```
@@ -519,7 +536,7 @@ curl -sk -X POST https://rustchain.org/beacon/submit \
 释放锁定资产
 
 ```bash
-curl -sk -X POST https://rustchain.org/api/lock/release \
+curl -k -X POST https://rustchain.org/api/lock/release \
   -H "Content-Type: application/json" \
   -d '{"lock_id": "lock_123", "signature": "0xSIG"}'
 ```
@@ -530,7 +547,7 @@ curl -sk -X POST https://rustchain.org/api/lock/release \
 没收/放弃锁定（罚没场景）
 
 ```bash
-curl -sk -X POST https://rustchain.org/api/lock/forfeit \
+curl -k -X POST https://rustchain.org/api/lock/forfeit \
   -H "Content-Type: application/json" \
   -d '{"lock_id": "lock_123"}'
 ```
@@ -541,7 +558,7 @@ curl -sk -X POST https://rustchain.org/api/lock/forfeit \
 桥接作废（取消跨链交易）
 
 ```bash
-curl -sk -X POST https://rustchain.org/api/bridge/void \
+curl -k -X POST https://rustchain.org/api/bridge/void \
   -H "Content-Type: application/json" \
   -d '{"bridge_id": "br_456"}'
 ```
@@ -554,7 +571,7 @@ curl -sk -X POST https://rustchain.org/api/bridge/void \
 获取指定 Epoch 的奖励发放记录
 
 ```bash
-curl -sk https://rustchain.org/rewards/epoch/95
+curl -k https://rustchain.org/rewards/epoch/95
 ```
 
 ---
@@ -563,7 +580,7 @@ curl -sk https://rustchain.org/rewards/epoch/95
 结算奖励（手动触发）
 
 ```bash
-curl -sk -X POST https://rustchain.org/rewards/settle \
+curl -k -X POST https://rustchain.org/rewards/settle \
   -H "Content-Type: application/json" \
   -d '{"epoch": 95}'
 ```
@@ -599,6 +616,7 @@ Supports: system info, mining, wallets, withdrawals, governance, attestation, P2
 import json, hashlib, time
 import requests
 import urllib3
+# For development only - remove in production
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 BASE_URL = "https://rustchain.org"
@@ -609,12 +627,12 @@ class RustChainClient:
         self.base_url = base_url
 
     def _get(self, path, params=None):
-        r = requests.get(f"{self.base_url}{path}", params=params, verify=False, timeout=10)
+        r = requests.get(f"{self.base_url}{path}", params=params, verify=os.environ.get('RUSTCHAIN_CA_CERT', True)  # Set RUSTCHAIN_CA_CERT for private nodes, timeout=10)
         r.raise_for_status()
         return r.json()
 
     def _post(self, path, data=None):
-        r = requests.post(f"{self.base_url}{path}", json=data, verify=False, timeout=10)
+        r = requests.post(f"{self.base_url}{path}", json=data, verify=os.environ.get('RUSTCHAIN_CA_CERT', True)  # Set RUSTCHAIN_CA_CERT for private nodes, timeout=10)
         r.raise_for_status()
         return r.json()
 
@@ -811,5 +829,5 @@ print(client.balance("0xYOUR_PUBLIC_KEY"))
 - ✅ 响应示例及字段说明
 - ✅ Python SDK 完整客户端类（可立即运行）
 
-**文件位置:** `/tmp/hermes-tools/rustchain-api-reference/README.md`
-**Python SDK:** `/tmp/hermes-tools/rustchain_sdk.py`
+**文件位置:** `docs/api-reference/README.md`
+**Python SDK:** `docs/api-reference/rustchain_sdk.py`
