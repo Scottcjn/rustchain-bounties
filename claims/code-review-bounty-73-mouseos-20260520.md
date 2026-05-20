@@ -224,6 +224,15 @@ Summary:
 - Confirmed the artifact SHA256 is `163fafcf751d8fbd41bf936facaeb366c042f467fa34b79f2c4c0a45472ef70f`.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 5 passed.
 
+### 26. Scottcjn/Rustchain#5966 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5966#pullrequestreview-4331831635
+
+Summary:
+- Verified low-entropy validator runs remove stale `relic_rewards.json` output from earlier qualifying runs.
+- Confirmed the high-entropy badge path remains covered by the focused tests.
+- Ran `python -m pytest tests\test_validator_core_with_badge.py -q --noconftest -o addopts=''` on Windows: 6 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -232,4 +241,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 25 accepted reviews equal 125 RTC, or $12.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 26 accepted reviews equal 130 RTC, or $13.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
