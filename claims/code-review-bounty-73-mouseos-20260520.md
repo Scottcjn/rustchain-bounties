@@ -179,6 +179,15 @@ Summary:
 - Reproduced that a cloned `PING` with `signature = "bad-signature"` returns `invalid_signature`, then the original valid message returns `duplicate`.
 - Ran `python -m pytest node\tests\test_p2p_hardening_phase2.py node\tests\test_p2p_handshake_negotiation.py -q --noconftest -o addopts=''` on Windows: 14 passed.
 
+### 21. Scottcjn/Rustchain#5981 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5981#pullrequestreview-4331619804
+
+Summary:
+- Verified webhook `Content-Length` parsing returns the existing 400 path for missing, malformed, zero, and negative values.
+- Verified the macOS v2.5 miner checksum refresh matches the current file hash.
+- Ran `python -m pytest tests\test_webhook_client_helpers.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 12 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -187,4 +196,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 20 accepted reviews equal 100 RTC, or $10.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 21 accepted reviews equal 105 RTC, or $10.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
