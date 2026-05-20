@@ -251,6 +251,16 @@ Summary:
 - Confirmed list-returning paths such as `miners()` and transfer history remain on the permissive `_request()` path.
 - Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_client_unit.py -q` on Windows: 25 passed.
 
+### 29. Scottcjn/Rustchain#5917 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5917#pullrequestreview-4332554877
+
+Summary:
+- Verified agent reputation API payload hardening ignores scalar JSON before structured callers inspect the response.
+- Confirmed malformed miner API rows are skipped before `.get()` access while normal dict/list payloads remain supported.
+- Ran `python -m pytest tests\test_agent_reputation.py -q` on Windows: 16 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -259,4 +269,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 28 accepted reviews equal 140 RTC, or $14.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 29 accepted reviews equal 145 RTC, or $14.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
