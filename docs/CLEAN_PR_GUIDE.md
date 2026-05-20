@@ -30,7 +30,7 @@ echo "*.vsix" >> .gitignore
 If you've already committed `node_modules/` or `dist/`, remove them from tracking (this does **not** delete the files from disk):
 
 ```bash
-git rm -r --cached node_modules/
+git rm -r --cached --ignore-unmatch node_modules/ dist/ out/
 git rm -r --cached dist/
 git rm -r --cached out/
 ```
@@ -55,7 +55,7 @@ git status
 
 ```bash
 # 1. Check what files you're about to commit
-git diff --stat HEAD
+git diff --stat origin/main...HEAD
 # ⚠️ If you see node_modules/, dist/, or out/ in the list → STOP and fix .gitignore
 
 # 2. Check your .gitignore exists and is correct
@@ -105,10 +105,10 @@ my-extension/
 
 | Endpoint | URL |
 |----------|-----|
-| Health | `GET https://50.28.86.131/health` |
-| Balance | `GET https://50.28.86.131/wallet/balance?miner_id={name}` |
-| Epoch | `GET https://50.28.86.131/epoch` |
-| Miners | `GET https://50.28.86.131/api/miners` |
+| Health | `GET https://rustchain.org/health` |
+| Balance | `GET https://rustchain.org/wallet/balance?miner_id={name}` |
+| Epoch | `GET https://rustchain.org/epoch` |
+| Miners | `GET https://rustchain.org/api/miners` |
 
 > ⚠️ Use `miner_id` (not `wallet_id`) as the query parameter.
 
@@ -132,9 +132,9 @@ vsc-extension-quickstart.md
 
 | Mistake | Fix |
 |---------|-----|
-| Committed `node_modules/` | `git rm -r --cached node_modules/` then add to `.gitignore` |
+| Committed `node_modules/` | `git rm -r --cached --ignore-unmatch node_modules/ dist/ out/` then add to `.gitignore` |
 | No `.gitignore` file | Create one at the repo root with the entries above |
-| `.gitignore` exists but `node_modules` still tracked | Run `git rm -r --cached node_modules/` — `.gitignore` only prevents **new** tracking |
+| `.gitignore` exists but `node_modules` still tracked | Run `git rm -r --cached --ignore-unmatch node_modules/ dist/ out/` — `.gitignore` only prevents **new** tracking |
 | Used `wallet_id` instead of `miner_id` | Change to `miner_id` in your API calls |
 | Submitted MCP server code as VS Code extension | Add `engines.vscode` to `package.json` and restructure |
 | PR diff has 800K+ lines | Almost certainly `node_modules/` — run the cleanup above |
@@ -150,7 +150,7 @@ echo "dist/" >> .gitignore
 echo "out/" >> .gitignore
 echo ".env" >> .gitignore
 echo "*.log" >> .gitignore
-git rm -r --cached node_modules/ 2>/dev/null
+git rm -r --cached --ignore-unmatch node_modules/ dist/ out/ 2>/dev/null
 git rm -r --cached dist/ 2>/dev/null
 git rm -r --cached out/ 2>/dev/null
 git add .gitignore
