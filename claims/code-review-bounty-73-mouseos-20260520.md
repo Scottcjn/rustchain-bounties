@@ -197,6 +197,15 @@ Summary:
 - Confirmed the regression test checks both miner count and returned rows.
 - Ran `python -m pytest tests\test_rustchain_health.py tests\test_rustchain_health_cli.py -q --noconftest -o addopts=''` on Windows: 13 passed.
 
+### 23. Scottcjn/Rustchain#5980 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5980#pullrequestreview-4331710058
+
+Summary:
+- Found that the two new pending-confirm regression tests leave SQLite temp DB files locked on Windows.
+- Reproduced `PermissionError: [WinError 32]` at `db_path.unlink()` in both new tests after endpoint assertions pass.
+- Ran `python -m pytest tests\test_signed_transfer_replay.py -q` on Windows after installing declared test dependencies: 5 passed, 2 failed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -205,4 +214,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 22 accepted reviews equal 110 RTC, or $11.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 23 accepted reviews equal 115 RTC, or $11.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
