@@ -215,6 +215,15 @@ Summary:
 - Confirmed list/generic methods remain on `_request()` and transfer preserves the public `TransferError` wrapping contract.
 - Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_async_client.py -q` on Windows: 27 passed.
 
+### 25. Scottcjn/Rustchain#5982 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5982#pullrequestreview-4331781127
+
+Summary:
+- Verified the Darwin `setup_miner.py` pin and `miners/checksums.sha256` now match the checked-in macOS v2.5 miner artifact.
+- Confirmed the artifact SHA256 is `163fafcf751d8fbd41bf936facaeb366c042f467fa34b79f2c4c0a45472ef70f`.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 5 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -223,4 +232,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 24 accepted reviews equal 120 RTC, or $12.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 25 accepted reviews equal 125 RTC, or $12.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
