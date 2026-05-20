@@ -271,6 +271,17 @@ Summary:
 - Ran `python -m pytest tests\test_bcos_badge_generator.py -q` on Windows: 53 passed, 9 subtests passed.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
+### 31. Scottcjn/Rustchain#5978 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5978#pullrequestreview-4332600052
+
+Summary:
+- Verified the OTC confirm route rejects non-object JSON before reading settlement fields.
+- Confirmed the regression covers the array payload shape that would otherwise reach `.get(...)`.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest otc-bridge\test_otc_bridge.py -q -k confirm_rejects_non_object_json` on Windows: 1 passed, 26 deselected.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -279,4 +290,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 30 accepted reviews equal 150 RTC, or $15.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 31 accepted reviews equal 155 RTC, or $15.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
