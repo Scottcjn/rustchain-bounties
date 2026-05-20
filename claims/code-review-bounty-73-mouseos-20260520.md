@@ -242,6 +242,15 @@ Summary:
 - Confirmed list-returning methods remain flexible for bare lists and list-valued envelopes, while malformed scalar responses safely return empty lists.
 - Ran `PYTHONPATH=sdk/python python -m pytest sdk\python\rustchain_sdk\tests\test_client.py -q` on Windows: 23 passed.
 
+### 28. Scottcjn/Rustchain#5921 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5921#pullrequestreview-4331900118
+
+Summary:
+- Verified synchronous SDK object-response validation protects dict-shaped endpoints before callers use `.get()`.
+- Confirmed list-returning paths such as `miners()` and transfer history remain on the permissive `_request()` path.
+- Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_client_unit.py -q` on Windows: 25 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -250,4 +259,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 27 accepted reviews equal 135 RTC, or $13.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 28 accepted reviews equal 140 RTC, or $14.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
