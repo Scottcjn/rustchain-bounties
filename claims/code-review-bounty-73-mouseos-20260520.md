@@ -161,6 +161,15 @@ Summary:
 - Verified enveloped mining video miner payload parsing.
 - Ran `python -m pytest tests\test_mining_video_pipeline.py -q --noconftest -o addopts=''` on Windows: 2 passed.
 
+### 19. Scottcjn/Rustchain#5979 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5979#pullrequestreview-4331466123
+
+Summary:
+- Verified miner checklist process-exit exceptions are no longer swallowed as node reachability failures.
+- Verified macOS v2.5 miner checksum refresh matches the current file hash.
+- Ran `python -m pytest tests\test_miner_checklist.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 11 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -169,4 +178,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 18 accepted reviews equal 90 RTC, or $9.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 19 accepted reviews equal 95 RTC, or $9.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
