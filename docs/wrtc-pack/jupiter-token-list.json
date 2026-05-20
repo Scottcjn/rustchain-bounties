@@ -6,7 +6,7 @@
     "symbol": "wRTC",
     "decimals": 6,
     "mintAddress": "12TAdKXxcGf6oCv4rqDz2NkgxjyHq6HQKoxKZYGf5i4X",
-    "logoURI": "https://github.com/Scottcjn/rustchain-bounties/raw/main/assets/wrtc-logo.png",
+    "logoURI": "https://bottube.ai/static/img/wrtc-logo.png",
     "tags": ["utility", "bridge", "rustchain", "ai-mining"]
   },
   "extensions": {
