@@ -206,6 +206,15 @@ Summary:
 - Reproduced `PermissionError: [WinError 32]` at `db_path.unlink()` in both new tests after endpoint assertions pass.
 - Ran `python -m pytest tests\test_signed_transfer_replay.py -q` on Windows after installing declared test dependencies: 5 passed, 2 failed.
 
+### 24. Scottcjn/Rustchain#5925 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5925#pullrequestreview-4331729657
+
+Summary:
+- Verified the updated async SDK head still applies object-response validation only to dict-typed public methods.
+- Confirmed list/generic methods remain on `_request()` and transfer preserves the public `TransferError` wrapping contract.
+- Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_async_client.py -q` on Windows: 27 passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -214,4 +223,4 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 23 accepted reviews equal 115 RTC, or $11.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 24 accepted reviews equal 120 RTC, or $12.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
