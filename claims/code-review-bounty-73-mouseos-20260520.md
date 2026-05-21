@@ -406,6 +406,20 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tests/test_health_monitor.py tools/node_health_monitor.py`: passed.
 
+### 42. Scottcjn/Rustchain#6002 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6002#pullrequestreview-4333857123
+
+Summary:
+- Verified `/api/passport` now rejects structured, empty, and path-separator `machine_id` values before ledger lookup or save.
+- Confirmed the new regression covers list, dict, empty string, slash, and backslash payloads returning JSON 400 responses.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `PYTHONPATH=passport python -m pytest passport\test_passport.py -q` on Windows: 35 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python -m py_compile passport\passport_server.py passport\test_passport.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- passport/passport_server.py passport/test_passport.py setup_miner.py miners/checksums.sha256`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -414,6 +428,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 41 accepted reviews equal 205 RTC, or $20.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 42 accepted reviews equal 210 RTC, or $21.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
