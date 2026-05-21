@@ -45,6 +45,17 @@ Summary:
 - Included a minimal reproducer showing `["alice", "bob", "alice", "bob"]` with `complete=True` for a repeated no-offset page.
 - Requested requiring echoed offsets for paginated follow-up pages or adding another progress signal before treating the miner set as complete.
 
+### 4. Scottcjn/Rustchain#6042 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6042#pullrequestreview-4337658555
+
+Summary:
+
+- Reviewed the monitoring alerts wallet-balance redirect diagnostic.
+- Confirmed `httpx` does not follow redirects by default in this client, so checking `resp.is_redirect` before `raise_for_status()` and `resp.json()` catches a 307 redirect before attempting to parse a non-wallet payload.
+- Confirmed the new regression covers the netprotect-style redirect case and does not change normal successful wallet-balance parsing.
+- Verified that the current GitHub CI failure is the existing macOS miner checksum mismatch, not part of this PR's two-file monitoring alerts diff.
+
 ## Local Verification Evidence
 
 Commands run on PR head `55967f2becb59a33bac00010696f9a856fac19b8`:
@@ -89,11 +100,29 @@ Results:
 - `py_compile`: passed.
 - `git diff --check`: passed.
 
+Commands run on PR head `614ac2023c2601ed645c7d306dfbe6969bac3a28`:
+
+```bash
+/usr/bin/env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy /private/tmp/rustchain-review-venv/bin/python -m pytest monitoring/alerts/tests/test_api.py -q
+/usr/bin/env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy /private/tmp/rustchain-review-venv/bin/python -m pytest monitoring/alerts/tests/test_api.py::test_wallet_balance_reports_redirect_before_json_parsing -q
+/private/tmp/rustchain-review-venv/bin/python -m py_compile monitoring/alerts/rustchain_alerts/api.py monitoring/alerts/tests/test_api.py
+git diff --check origin/main...HEAD -- monitoring/alerts/rustchain_alerts/api.py monitoring/alerts/tests/test_api.py
+/private/tmp/rustchain-review-venv/bin/python tools/bcos_spdx_check.py --base-ref origin/main
+```
+
+Results:
+
+- `monitoring/alerts/tests/test_api.py`: 7 passed.
+- Redirect regression: 1 passed.
+- `py_compile`: passed.
+- `git diff --check`: passed.
+- `tools/bcos_spdx_check.py`: OK.
+
 ## Reward Request
 
 Please assess under the #73 reward structure:
 
 - 1 changes-requested review with a reproduced pagination completeness blocker.
-- 2 standard functional reviews with local verification and scoped security/privacy or response-shape checks.
+- 3 standard functional reviews with local verification and scoped security/privacy or response-shape checks.
 
 Payout boundary: this is a public bounty claim for maintainer assessment only. No payout, RTC award, wallet transfer, wallet balance, or USD receipt is asserted until maintainer approval/payment proof exists.
