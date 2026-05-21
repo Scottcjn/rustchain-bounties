@@ -449,6 +449,20 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- wallet/rustchain_wallet_gui.py wallet/rustchain_wallet_secure.py tests/test_wallet_network_utils.py setup_miner.py miners/checksums.sha256`: passed.
 
+### 45. Scottcjn/Rustchain#5969 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5969#pullrequestreview-4333953968
+
+Summary:
+- Verified `detect_gpu_and_display()` now removes an existing `unlocked_badges.json` when no relic GPU/display terms are detected.
+- Confirmed existing no-match and missing-`lspci` paths still report `No relic badges detected.` and do not create a new output file.
+- Confirmed matching badge output still uses the same JSON shape through the new `BADGE_OUTPUT` path constant.
+- Confirmed the new regression covers a stale `unlocked_badges.json` being removed after a no-match probe.
+- Ran `python -m pytest tests\test_gpu_display_detector.py -q` on Windows: 7 passed.
+- Ran `python -m py_compile tools\gpu_display_detector.py tests\test_gpu_display_detector.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tools/gpu_display_detector.py tests/test_gpu_display_detector.py`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -457,6 +471,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 44 accepted reviews equal 220 RTC, or $22.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 45 accepted reviews equal 225 RTC, or $22.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
