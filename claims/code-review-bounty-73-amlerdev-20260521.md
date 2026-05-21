@@ -20,6 +20,10 @@ Claiming code review bounty #73 for five PR reviews submitted on 2026-05-21.
 
 Standard review tier for each PR. The first four reviews also identify PRs that would close bounty issues without delivering the requested work.
 
+## AI / Automation Disclosure
+
+OpenAI Codex assisted with finding candidate PRs, inspecting GitHub issue/PR context, drafting the review text, and creating this claim PR. The final review decisions were based on the linked diffs and bounty acceptance criteria. No undisclosed additional bounty-hunting automation was used beyond GitHub CLI/search and Codex-assisted analysis.
+
 ## Payout
 
 Payout handle: amlerdev
