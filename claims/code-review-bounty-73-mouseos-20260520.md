@@ -339,6 +339,19 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py`: passed.
 
+### 37. Scottcjn/Rustchain#6000 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6000#pullrequestreview-4333665452
+
+Summary:
+- Verified Hall of Rust endpoints now return a stable `internal_error` response instead of exposing raw exception strings.
+- Confirmed the new regressions cover SQLite missing-schema details not leaking from `/hall/stats` and `/hall/machine_of_the_day`.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest tests\test_explorer_hall_of_rust_current_year.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 10 passed.
+- Ran `python -m py_compile explorer\hall_of_rust.py tests\test_explorer_hall_of_rust_current_year.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- explorer/hall_of_rust.py tests/test_explorer_hall_of_rust_current_year.py setup_miner.py miners/checksums.sha256`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -347,6 +360,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 36 accepted reviews equal 180 RTC, or $18.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 37 accepted reviews equal 185 RTC, or $18.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
