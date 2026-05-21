@@ -4,9 +4,9 @@ Claimant: `mouseos`
 
 Bounty: Scottcjn/rustchain-bounties#73
 
-Wallet/miner ID: `mouseos-codex-earner`
+Wallet/miner ID: `未定`
 
-Canonical payout declaration: https://github.com/Scottcjn/rustchain-bounties/issues/6885#issuecomment-4499541075
+Canonical payout declaration: 未定
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
@@ -302,3 +302,5 @@ All reviews include direct review links with detailed validation notes. Commands
 Please assess under bounty #73's code review reward structure.
 
 At the posted minimum of 5 RTC per accepted review, 32 accepted reviews equal 160 RTC, or $16.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+
+Payment destination is currently undecided (`未定`). The previously listed named miner ID is retracted and must not be used for payout.
