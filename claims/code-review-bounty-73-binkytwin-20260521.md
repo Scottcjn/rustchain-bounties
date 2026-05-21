@@ -28,12 +28,17 @@ Summary:
 ### 2. Scottcjn/Rustchain#6030 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/6030#pullrequestreview-4336113761
+Follow-up review on updated head:
+https://github.com/Scottcjn/Rustchain/pull/6030#pullrequestreview-4337353795
 
 Summary:
 
 - Reviewed payout preflight miner-id type validation.
 - Confirmed structured `from_miner` and `to_miner` values are rejected before
   list/dict stringification can turn malformed values into plausible miner IDs.
+- Re-reviewed commit `f96e585d56d8fa3d5212d80a1deee86df60fa478` after the
+  helper refactor and confirmed non-string empty values now report
+  `invalid_from_or_to_type` consistently.
 - Verified the focused tests and static checks documented below.
 
 ### 3. Scottcjn/Rustchain#6031 - Changes Requested
