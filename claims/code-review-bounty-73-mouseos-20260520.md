@@ -327,6 +327,18 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/fuzz/attestation_validators.py tests/test_attestation_fuzz.py`: passed.
 
+### 36. Scottcjn/Rustchain#5999 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5999#pullrequestreview-4333642770
+
+Summary:
+- Verified the Sophia governor review service now rejects non-object JSON request bodies on the review, maintenance, and Scott notification queue routes.
+- Confirmed malformed non-empty `application/json` bodies now return `400 JSON object required` instead of falling through to the empty-body default.
+- Ran `python -m pytest -q node\tests\test_sophia_governor_review_service.py` on Windows: 52 passed.
+- Ran `python -m py_compile node\sophia_governor_review_service.py node\tests\test_sophia_governor_review_service.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -335,6 +347,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 35 accepted reviews equal 175 RTC, or $17.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 36 accepted reviews equal 180 RTC, or $18.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
