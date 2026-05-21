@@ -116,11 +116,30 @@ Summary:
   `setup_miner.py` and `miners/checksums.sha256`, causing the focused checksum
   tests to fail.
 
+### 8. Scottcjn/Rustchain#6041 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6041#pullrequestreview-4337571454
+
+Summary:
+
+- Reviewed bridge admin callback and external callback validation.
+- Confirmed the added string-field validation and focused route tests pass
+  locally.
+- Found a remaining confirmation-count validation blocker: JSON booleans are
+  parsed as integer counts because Python `bool` is an `int` subclass.
+- Direct Flask probing with an existing pending withdraw transfer showed
+  `confirmations: true` and `required_confirmations: true` completing the
+  transfer with `external_confirmations=1`, `required_confirmations=1`, and
+  `status=completed`.
+- Requested rejecting `bool` before integer coercion and adding route
+  regressions for both boolean confirmation fields.
+
 ## Local Verification Evidence
 
 Commands and probes used across the reviewed PRs included:
 
 ```bash
+uv run --no-project --with pytest --with flask python -m pytest node/tests/test_bridge_api_limit_validation.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
 PYTHONPATH=passport uv run --no-project --with pytest --with flask python -m pytest passport/test_passport.py -q --tb=short
 PYTHONPATH=passport uv run --no-project --with pytest --with flask python -m pytest passport/test_passport.py -q --tb=short --noconftest -o addopts=''
 uv run --no-project --with pytest --with flask python -m pytest tests/test_setup_miner_help.py -q --tb=short
@@ -128,14 +147,17 @@ uv run --no-project --with pytest --with flask python -m pytest tests/test_setup
 uv run --no-project --with pytest --with flask python -m pytest node/test_utxo_endpoints.py tests/test_utxo_transfer_json_validation.py -q --tb=short
 uv run --no-project --with pytest --with flask python -m pytest tests/test_utxo_transfer_json_validation.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
 uv run --no-project --with pytest --with flask python -m pytest node/tests/test_sophia_governor_review_service.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
+uv run --no-project --with ruff python -m ruff check node/bridge_api.py node/tests/test_bridge_api_limit_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check scripts/sophia_auto_approve.py
+python3 -m py_compile node/bridge_api.py node/tests/test_bridge_api_limit_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile setup_miner.py tests/test_setup_miner_help.py tests/test_setup_miner_downloads.py tests/test_install_miner_checksums.py
 python3 -m py_compile node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile scripts/sophia_auto_approve.py scripts/auto-pay.py
 python3 tools/bcos_spdx_check.py --base-ref origin/main
+git diff --check origin/main...HEAD -- node/bridge_api.py node/tests/test_bridge_api_limit_validation.py setup_miner.py miners/checksums.sha256
 git diff --check origin/main...HEAD -- setup_miner.py tests/test_setup_miner_help.py
 git diff --check origin/main...HEAD -- node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py miners/checksums.sha256
 git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py miners/checksums.sha256
@@ -154,6 +176,8 @@ Additional direct probes:
 - `/review` rejects structured Sophia prompt and entry identity fields before
   model invocation, while valid requests still call the model once and store a
   review.
+- `/api/bridge/update-external` on PR #6041 accepted JSON boolean confirmation
+  counts and completed a pending withdraw transfer as `1/1`.
 - `setup_miner.py --help` prints the argparse help and exits before the setup
   banner, directory creation, or miner download path.
 - `scripts/sophia_auto_approve.py` uses HTTPS transfer, disables TLS
@@ -164,8 +188,8 @@ Additional direct probes:
 
 Please assess under the #73 reward structure:
 
-- 2 security-focused changes-requested reviews with reproduced blockers
-  (#6031, #11536).
+- 3 validation/security changes-requested reviews with reproduced blockers
+  (#6031, #11536, #6041).
 - 1 compliance/CI changes-requested review with local reproduction (#6040).
 - 4 functional reviews with local validation (#6028, #6030, #6032, #6039).
 
