@@ -508,6 +508,25 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- issue2288/glitch_system/src/api.py tests/test_glitch_api_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
 
+### 49. Scottcjn/Rustchain#6004 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6004#pullrequestreview-4334163055
+
+Summary:
+- Verified the documented/script-style runtime path where `issue2307_boot_chime/boot_chime_api.py` adds `issue2307_boot_chime/src` to `sys.path` and imports `proof_of_iron` as a top-level module.
+- Confirmed the import fallback keeps top-level `proof_of_iron` working while preserving package-relative imports for normal package use.
+- Confirmed both the focused top-level import regression and the existing boot chime test suite pass on Windows.
+- Confirmed the macOS v2.5 miner checksum refresh matches both `setup_miner.py` and `miners/checksums.sha256`.
+- Confirmed the PR's GitHub checks were passing.
+- Ran `python -m pytest tests\test_boot_chime_top_level_import.py -q` on Windows: 1 passed.
+- Ran `python -m pytest issue2307_boot_chime\tests\test_boot_chime.py -q` on Windows: 32 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran API import smoke importing `issue2307_boot_chime/boot_chime_api.py` on Windows: loaded `ProofOfIron`, `AcousticFingerprint`, `BootChimeCapture`, and the Flask app.
+- Ran direct top-level import smoke with `issue2307_boot_chime/src` on `sys.path` on Windows: loaded `proof_of_iron`, `ProofOfIron`, `AcousticFingerprint`, and `BootChimeCapture`.
+- Ran `python -m py_compile issue2307_boot_chime\src\proof_of_iron.py issue2307_boot_chime\src\acoustic_fingerprint.py issue2307_boot_chime\src\boot_chime_capture.py tests\test_boot_chime_top_level_import.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- issue2307_boot_chime/src/proof_of_iron.py tests/test_boot_chime_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -516,6 +535,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 48 accepted reviews equal 240 RTC, or $24.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 49 accepted reviews equal 245 RTC, or $24.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
