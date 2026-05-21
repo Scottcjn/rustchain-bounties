@@ -435,6 +435,20 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- .github/actions/rtc-auto-bounty/award_rtc.py .github/actions/rtc-auto-bounty/test_award_rtc.py setup_miner.py miners/checksums.sha256`: passed.
 
+### 44. Scottcjn/Rustchain#5991 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5991#pullrequestreview-4333905910
+
+Summary:
+- Verified both wallet HTTP helpers now call requests with `allow_redirects=False`, so public API redirects are handled before JSON parsing.
+- Confirmed 3xx responses return the existing `(None, error)` helper contract with HTTP status and Location header detail.
+- Confirmed the regression covers a 307 balance API redirect and verifies redirects are disabled on the request.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `python -m pytest tests\test_wallet_network_utils.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 18 passed.
+- Ran `python -m py_compile wallet\rustchain_wallet_gui.py wallet\rustchain_wallet_secure.py tests\test_wallet_network_utils.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- wallet/rustchain_wallet_gui.py wallet/rustchain_wallet_secure.py tests/test_wallet_network_utils.py setup_miner.py miners/checksums.sha256`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -443,6 +457,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 43 accepted reviews equal 215 RTC, or $21.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 44 accepted reviews equal 220 RTC, or $22.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
