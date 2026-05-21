@@ -22,6 +22,29 @@ Summary:
 - Confirmed the new regression test covers a concrete secret/path leak string from the upstream body.
 - Noted a residual pre-existing hardening follow-up: `requests.post` exceptions and timeouts still bubble instead of becoming normalized `transfer_failed` responses, but that is outside this PR's scoped body-redaction fix.
 
+### 2. Scottcjn/Rustchain#5944 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5944#pullrequestreview-4335241936
+
+Summary:
+
+- Reviewed the bounty verifier wallet balance response-shape fix.
+- Confirmed the verifier now accepts the live `amount_rtc` field when `balance` is absent.
+- Confirmed non-object wallet balance responses are rejected instead of being treated as valid wallets.
+- Noted a follow-up outside this PR: balance values could be type-checked as numeric before inclusion in reports.
+
+### 3. Scottcjn/Rustchain#5945 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5945#pullrequestreview-4335234922
+
+Summary:
+
+- Reviewed the node sync validator pagination-progress guard.
+- Verified the targeted test suite, syntax check, and diff whitespace check.
+- Found a remaining progress-proof blocker: if a follow-up miner page omits offset metadata and the server ignores the requested offset by returning the first page again, `fetch_miners()` advances by `row_count` and returns duplicate miners with `complete=True`.
+- Included a minimal reproducer showing `["alice", "bob", "alice", "bob"]` with `complete=True` for a repeated no-offset page.
+- Requested requiring echoed offsets for paginated follow-up pages or adding another progress signal before treating the miner set as complete.
+
 ## Local Verification Evidence
 
 Commands run on PR head `55967f2becb59a33bac00010696f9a856fac19b8`:
@@ -38,8 +61,39 @@ Results:
 - `py_compile`: passed.
 - `git diff --check`: passed.
 
+Commands run on PR head `a6152b4bab76d961f0875b1626907acb6ff02638`:
+
+```bash
+/private/tmp/rustchain-review-venv/bin/python -m pytest tools/bounty-bot-pro/tests/test_verifier.py tests/test_bounty_verifier_py_compile.py -q
+/private/tmp/rustchain-review-venv/bin/python -m py_compile tools/bounty-bot-pro/verifier.py tools/bounty-bot-pro/tests/test_verifier.py tests/test_bounty_verifier_py_compile.py
+git diff --check origin/main...HEAD -- tools/bounty-bot-pro/verifier.py tools/bounty-bot-pro/tests/test_verifier.py tests/test_bounty_verifier_py_compile.py
+```
+
+Results:
+
+- `tools/bounty-bot-pro/tests/test_verifier.py tests/test_bounty_verifier_py_compile.py`: 5 passed.
+- `py_compile`: passed.
+- `git diff --check`: passed.
+
+Commands run on PR head `81a194032fb221bd47236ce8f071f30979305c11`:
+
+```bash
+/private/tmp/rustchain-review-venv/bin/python -m pytest tests/test_node_sync_validator.py tools/tests/test_node_sync_validator_helpers.py -q
+/private/tmp/rustchain-review-venv/bin/python -m py_compile tools/node_sync_validator.py tests/test_node_sync_validator.py tools/tests/test_node_sync_validator_helpers.py
+git diff --check origin/main...HEAD -- tools/node_sync_validator.py tests/test_node_sync_validator.py tools/tests/test_node_sync_validator_helpers.py
+```
+
+Results:
+
+- `tests/test_node_sync_validator.py tools/tests/test_node_sync_validator_helpers.py`: 17 passed.
+- `py_compile`: passed.
+- `git diff --check`: passed.
+
 ## Reward Request
 
-Please assess under the #73 reward structure as a standard functional review with local verification and a scoped security/privacy check of the public faucet error path.
+Please assess under the #73 reward structure:
+
+- 1 changes-requested review with a reproduced pagination completeness blocker.
+- 2 standard functional reviews with local verification and scoped security/privacy or response-shape checks.
 
 Payout boundary: this is a public bounty claim for maintainer assessment only. No payout, RTC award, wallet transfer, wallet balance, or USD receipt is asserted until maintainer approval/payment proof exists.
