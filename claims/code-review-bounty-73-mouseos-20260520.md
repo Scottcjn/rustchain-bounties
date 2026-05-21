@@ -293,6 +293,40 @@ Summary:
 - Ran `python -m pytest tests\test_payout_ledger_migration.py tests\test_payout_ledger_admin_auth.py -q` on Windows: 13 passed.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
+### 33. Scottcjn/Rustchain#5995 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5995#pullrequestreview-4333155581
+
+Summary:
+- Verified the fork-choice visualization serves and renders the expected graph/dashboard routes.
+- Confirmed miner checksum installation tests still pass after the macOS v2.5 checksum refresh.
+- Ran `python -m pytest visualizations\test_fork_choice_graph.py -q` on Windows: 4 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran route smoke checks for `/`, `/fork_choice_graph.html`, `/api/health`, and `/api/dashboard`: passed.
+
+### 34. Scottcjn/Rustchain#5922 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5922#pullrequestreview-4333225467
+
+Summary:
+- Verified miner header-key schema hardening covers the object/list response shape used by the node endpoint.
+- Ran `python -m pytest tests\test_miner_headerkey_schema.py -q` on Windows: 1 passed.
+- Ran `python -m py_compile node\rustchain_v2_integrated_v2.2.1_rip200.py tests\test_miner_headerkey_schema.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/test_miner_headerkey_schema.py`: passed.
+
+### 35. Scottcjn/Rustchain#5994 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5994#pullrequestreview-4333236227
+
+Summary:
+- Verified attestation fuzz coverage for malformed and edge-case validator inputs.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -B -m pytest -q tests\test_attestation_fuzz.py --tb=short` on Windows: 37 passed.
+- Ran `python -m py_compile node\rustchain_v2_integrated_v2.2.1_rip200.py tests\fuzz\attestation_validators.py tests\test_attestation_fuzz.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/fuzz/attestation_validators.py tests/test_attestation_fuzz.py`: passed.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -301,6 +335,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 32 accepted reviews equal 160 RTC, or $16.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 35 accepted reviews equal 175 RTC, or $17.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
