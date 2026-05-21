@@ -84,6 +84,22 @@ Summary:
 - Requested preserving TLS verification and avoiding reusable admin-key exposure
   in the automated payout path.
 
+### 6. Scottcjn/Rustchain#6039 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6039#pullrequestreview-4337385308
+
+Summary:
+
+- Reviewed Sophia governor review-service request validation.
+- Confirmed structured prompt/metadata fields are rejected with explicit `400`
+  errors before `_build_prompt()` or `_call_ollama()` can stringify them into
+  model input.
+- Direct Flask probing covered top-level prompt fields, top-level `source`, and
+  nested entry identity fields while confirming invalid payloads skipped the
+  mocked model call.
+- Verified the focused Sophia tests, static checks, BCOS SPDX check, and macOS
+  miner checksum refresh.
+
 ## Local Verification Evidence
 
 Commands and probes used across the reviewed PRs included:
@@ -93,12 +109,16 @@ PYTHONPATH=passport uv run --no-project --with pytest --with flask python -m pyt
 PYTHONPATH=passport uv run --no-project --with pytest --with flask python -m pytest passport/test_passport.py -q --tb=short --noconftest -o addopts=''
 uv run --no-project --with pytest --with flask python -m pytest node/test_utxo_endpoints.py tests/test_utxo_transfer_json_validation.py -q --tb=short
 uv run --no-project --with pytest --with flask python -m pytest tests/test_utxo_transfer_json_validation.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
+uv run --no-project --with pytest --with flask python -m pytest node/tests/test_sophia_governor_review_service.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
 uv run --no-project --with ruff python -m ruff check node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
+uv run --no-project --with ruff python -m ruff check node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check scripts/sophia_auto_approve.py
 python3 -m py_compile node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
+python3 -m py_compile node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile scripts/sophia_auto_approve.py scripts/auto-pay.py
 python3 tools/bcos_spdx_check.py --base-ref origin/main
 git diff --check origin/main...HEAD -- node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py miners/checksums.sha256
+git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py miners/checksums.sha256
 git diff --check origin/main...HEAD -- .github/workflows/sophia-auto-approve.yml scripts/sophia_auto_approve.py
 shasum -a 256 miners/macos/rustchain_mac_miner_v2.5.py
 ```
@@ -111,6 +131,9 @@ Additional direct probes:
   created control-character filenames.
 - `/utxo/transfer` rejects list/dict/int/bool values for signed string fields
   before signature and address logic.
+- `/review` rejects structured Sophia prompt and entry identity fields before
+  model invocation, while valid requests still call the model once and store a
+  review.
 - `scripts/sophia_auto_approve.py` uses HTTPS transfer, disables TLS
   verification, sends an admin-key header, and derives the recipient from the PR
   author path.
@@ -121,7 +144,7 @@ Please assess under the #73 reward structure:
 
 - 2 security-focused changes-requested reviews with reproduced blockers
   (#6031, #11536).
-- 3 functional reviews with local validation (#6028, #6030, #6032).
+- 4 functional reviews with local validation (#6028, #6030, #6032, #6039).
 
 Payment is not assumed until maintainer assessment and separate payout proof
 exist.
