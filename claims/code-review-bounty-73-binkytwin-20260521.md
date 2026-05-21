@@ -155,6 +155,23 @@ Summary:
 - Requested removing the placeholder and submitting a scoped RustChain change
   with valid syntax, SPDX metadata, and passing checks.
 
+### 10. Scottcjn/Rustchain#6045 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6045#pullrequestreview-4337888109
+
+Summary:
+
+- Reviewed the signed-transfer regression for the legacy fresh-init balance
+  schema `balances(miner_pk, balance_rtc)`.
+- Confirmed the test switches the route to a legacy-schema database, funds the
+  sender through `balance_rtc`, posts `/wallet/transfer/signed`, and verifies a
+  `pending_ledger` amount of `1_500_000` micro-RTC.
+- Verified the focused signed-transfer test, test-file lint, py_compile, BCOS
+  SPDX check, and whitespace check.
+- Noted the required repository CI is still red on the existing macOS miner
+  checksum mismatch (`dbc02277...` pinned while the artifact hashes to
+  `163fafcf...`), which needs a rebase or checksum refresh before CI can pass.
+
 ## Local Verification Evidence
 
 Commands and probes used across the reviewed PRs included:
@@ -169,15 +186,18 @@ uv run --no-project --with pytest --with flask python -m pytest tests/test_setup
 uv run --no-project --with pytest --with flask python -m pytest node/test_utxo_endpoints.py tests/test_utxo_transfer_json_validation.py -q --tb=short
 uv run --no-project --with pytest --with flask python -m pytest tests/test_utxo_transfer_json_validation.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
 uv run --no-project --with pytest --with flask python -m pytest node/tests/test_sophia_governor_review_service.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py -q --tb=short
+uv run --no-project --with pytest --with flask --with pynacl python -m pytest tests/test_signed_transfer_replay.py -q --tb=short
 uv run --no-project --with ruff python -m ruff check node/bridge_api.py node/tests/test_bridge_api_limit_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 uv run --no-project --with ruff python -m ruff check node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
+uv run --no-project --with ruff python -m ruff check tests/test_signed_transfer_replay.py
 uv run --no-project --with ruff python -m ruff check scripts/sophia_auto_approve.py
 python3 -m py_compile node/bridge_api.py node/tests/test_bridge_api_limit_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile setup_miner.py tests/test_setup_miner_help.py tests/test_setup_miner_downloads.py tests/test_install_miner_checksums.py
 python3 -m py_compile setup_miner.py tests/test_setup_miner_help.py tests/test_keeper_explorer_py_compile.py keeper_explorer.py tests/test_setup_miner_downloads.py tests/test_install_miner_checksums.py
 python3 -m py_compile node/utxo_endpoints.py tests/test_utxo_transfer_json_validation.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
 python3 -m py_compile node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py setup_miner.py tests/test_install_miner_checksums.py tests/test_setup_miner_downloads.py
+python3 -m py_compile node/rustchain_v2_integrated_v2.2.1_rip200.py tests/test_signed_transfer_replay.py
 python3 -m py_compile scripts/sophia_auto_approve.py scripts/auto-pay.py
 node --check solution.js
 python3 tools/bcos_spdx_check.py --base-ref origin/main
@@ -203,6 +223,9 @@ Additional direct probes:
   review.
 - `/api/bridge/update-external` on PR #6041 accepted JSON boolean confirmation
   counts and completed a pending withdraw transfer as `1/1`.
+- `/wallet/transfer/signed` on PR #6045 accepts a funded legacy
+  `balances(miner_pk, balance_rtc)` row and writes the expected micro-RTC amount
+  to `pending_ledger`.
 - `setup_miner.py --help` prints the argparse help and exits before the setup
   banner, directory creation, or miner download path.
 - Updated PR #6040 passes the focused setup/checksum/keeper tests but still
@@ -222,7 +245,8 @@ Please assess under the #73 reward structure:
   (#6031, #11536, #6041).
 - 2 compliance/CI changes-requested reviews with local reproduction
   (#6040, #6043).
-- 4 functional reviews with local validation (#6028, #6030, #6032, #6039).
+- 5 functional reviews with local validation (#6028, #6030, #6032, #6039,
+  #6045).
 
 Payment is not assumed until maintainer assessment and separate payout proof
 exist.
