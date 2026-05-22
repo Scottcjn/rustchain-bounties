@@ -249,4 +249,4 @@ Please assess under the #73 reward structure:
   #6045).
 
 Payment is not assumed until maintainer assessment and separate payout proof
-exist.
+exists.
