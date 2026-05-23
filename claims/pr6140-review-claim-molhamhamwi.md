@@ -1,6 +1,7 @@
-# Code Review Bounty Claim: RustChain PR 6140
+# Code Review Bounty Claim: Rustchain PR 6140
 
 - Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6140
+- Reviewed commit: 3a0ec0d45064b7de3e7c57fab5d0d8b7ede2e032
 - Review submitted: https://github.com/Scottcjn/Rustchain/pull/6140#pullrequestreview-4351249542
 - Reviewer: MolhamHamwi
 
