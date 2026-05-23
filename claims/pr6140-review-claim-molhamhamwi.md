@@ -1,7 +1,7 @@
 # Code Review Bounty Claim: RustChain PR 6140
 
 - Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6140
-- Review submitted: https://github.com/Scottcjn/Rustchain/pull/6140#pullrequestreview-4351357473
+- Review submitted: https://github.com/Scottcjn/Rustchain/pull/6140#pullrequestreview-4351249542
 - Reviewer: MolhamHamwi
 
 ## Validation performed
