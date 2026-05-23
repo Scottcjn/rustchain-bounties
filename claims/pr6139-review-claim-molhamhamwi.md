@@ -3,6 +3,7 @@
 Claimant: @MolhamHamwi
 
 Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6139
+Reviewed commit: 898480927fa67e1998303336fba6d0f869f702c1
 Submitted review: https://github.com/Scottcjn/Rustchain/pull/6139#pullrequestreview-4351198005
 
 ## Validation performed
@@ -11,7 +12,7 @@ Submitted review: https://github.com/Scottcjn/Rustchain/pull/6139#pullrequestrev
 
 ## Review summary
 
-I reviewed current head for the legacy faucet wallet validation hardening. The PR replaces the permissive legacy `0x` prefix/length check with an anchored Ethereum-style regex requiring exactly 40 hexadecimal characters after `0x`, while keeping the existing native RTC wallet regex path intact.
+I reviewed current HEAD for the legacy faucet wallet validation hardening. The PR replaces the permissive legacy `0x` prefix/length check with an anchored Ethereum-style regex requiring exactly 40 hexadecimal characters after `0x`, while keeping the existing native RTC wallet regex path intact.
 
 The added route-level regression tests cover short `0x` inputs, non-hex `0x` inputs, and a canonical valid Ethereum-style wallet to confirm the faucet now fails closed for malformed legacy wallets without breaking valid claims.
 
