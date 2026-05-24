@@ -1,7 +1,7 @@
 # Code Review Bounty Claim: Scottcjn/Rustchain#6169
 
 - Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6169
-- Submitted review: https://github.com/Scottcjn/Rustchain/pull/6169#pullrequestreview-4352015170
+- Submitted review: https://github.com/Scottcjn/Rustchain/pull/6169#pullrequestreview-4351932363
 - Reviewer: @MolhamHamwi
 - Review outcome: Approved
 
