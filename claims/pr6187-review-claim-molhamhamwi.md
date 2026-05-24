@@ -12,7 +12,7 @@ Status: submitted for maintainer assessment. Wallet/miner ID uses the contributo
 
 ### Scottcjn/Rustchain#6187 — Changes Requested
 
-Review: https://github.com/Scottcjn/Rustchain/pull/6187#pullrequestreview-4352056140
+Review: https://github.com/Scottcjn/Rustchain/pull/6187#pullrequestreview-4352042138
 
 Summary:
 
