@@ -1,4 +1,4 @@
-# Code Review Bounty Claim — RustChain PR #6214
+# Code Review Bounty Claim — Rustchain PR #6214
 
 - Bounty issue: https://github.com/Scottcjn/rustchain-bounties/issues/2782
 - Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6214
