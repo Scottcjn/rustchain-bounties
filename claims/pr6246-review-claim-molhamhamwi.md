@@ -1,9 +1,9 @@
 # Code Review Bounty Claim — Rustchain PR #6246
 
-- Bounty issue: https://github.com/Scottcjn/rustchain-bounties/issues/2782
-- Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6246
-- Review: https://github.com/Scottcjn/Rustchain/pull/6246#pullrequestreview-4354175600
-- Issue claim: https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4531448202
+- Bounty issue: [rustchain-bounties issue #2782](https://github.com/Scottcjn/rustchain-bounties/issues/2782)
+- Reviewed PR: [Rustchain PR #6246](https://github.com/Scottcjn/Rustchain/pull/6246)
+- Review: [PR #6246 review](https://github.com/Scottcjn/Rustchain/pull/6246#pullrequestreview-4354175600)
+- Issue claim: [issue #2782 claim comment](https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4531448202)
 
 ## What I reviewed
 
