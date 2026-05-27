@@ -9,8 +9,8 @@ class TestAIWorkflow(unittest.TestCase):
         # Mocking the repository and issue list
         mock_repo = MagicMock()
         mock_get_repo.return_value = mock_repo
-        mock_issues = [MagicMock(title="Bounty 1", body="This is a non-hardware bounty BOUNTY"),
-                       MagicMock(title="Bounty 2", body="This requires hardware BOUNTY"),
+        mock_issues = [MagicMock(title="Bounty 1", body="This is a standard software bounty"),
+                       MagicMock(title="Bounty 2", body="This requires hardware components"),
                        MagicMock(title="Random Issue", body="This is a random issue")]
         mock_repo.get_issues.return_value = mock_issues
         

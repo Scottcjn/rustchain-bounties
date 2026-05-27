@@ -18,7 +18,8 @@ def get_open_bounties():
     open_bounties = []
     issues = repo.get_issues(state='open')
     for issue in issues:
-        if 'hardware' not in issue.body.lower() and 'BOUNTY' in issue.title:  # Filter out hardware-related issues and non-bounty issues
+        text = (issue.title + " " + issue.body).lower()
+        if "hardware" not in text and "bounty" in text:  # case-insensitive, searches title+body
             open_bounties.append(issue)
     return open_bounties
 
