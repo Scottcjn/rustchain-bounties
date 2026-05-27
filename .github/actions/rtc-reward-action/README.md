@@ -1,15 +1,45 @@
-# rtc-reward-action
+# RTC Reward Action
 
-Automatically awards **RTC tokens** when a pull request is merged. Any open source project can add this to reward contributors with cryptocurrency — zero backend required.
+GitHub Action that auto-awards RTC tokens when a PR is merged.
 
----
+## How It Works
 
-## Usage
+1. Triggers on `pull_request` closed event
+2. Checks if PR was actually merged
+3. Extracts contributor wallet from PR body or `.rtc-wallet` file
+4. Calls RustChain API to transfer RTC tokens
+5. Posts a comment confirming the payment
 
-### Add to any repo with one YAML file
+## Inputs
 
-Create `.github/workflows/rtc-reward.yml`:
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `node-url` | Yes | - | RustChain node URL |
+| `amount` | Yes | - | Amount of RTC tokens to reward |
+| `wallet-from` | Yes | - | Source wallet address |
+| `admin-key` | Yes | - | Admin key for signing transfers |
+| `wallet-field` | No | `wallet` | Field name in PR body |
+| `dry-run` | No | `false` | Simulate without sending tokens |
 
+## Outputs
+
+| Output | Description |
+|--------|-------------|
+| `recipient` | Wallet address that received the reward |
+| `tx-status` | Transaction status (sent, dry-run, skipped) |
+| `amount` | Amount awarded |
+
+## Setup
+
+### 1. Add Secrets
+
+Go to repo Settings > Secrets:
+- `RTC_ADMIN_KEY` - Admin key for RustChain
+- `RTC_WALLET_FROM` - Your funding wallet address
+
+### 2. Create Workflow
+
+`.github/workflows/reward.yml`:
 ```yaml
 name: RTC Reward
 
@@ -19,76 +49,53 @@ on:
 
 jobs:
   reward:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     steps:
-      - uses: Scottcjn/rtc-reward-action@v1
+      - uses: actions/checkout@v4
+
+      - name: Award RTC
+        uses: your-org/rtc-reward-action@v1
         with:
-          node-url: https://rustchain.org
-          amount: 5
-          wallet-from: your-project-fund
+          node-url: 'https://rustchain.org'
+          amount: '100'
+          wallet-from: ${{ secrets.RTC_WALLET_FROM }}
           admin-key: ${{ secrets.RTC_ADMIN_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### Settings
+### 3. PR Body Format
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `node-url` | No | `https://rustchain.org` | RustChain node URL |
-| `amount` | No | `5` | RTC per merged PR |
-| `wallet-from` | **Yes** | — | Source wallet name |
-| `admin-key` | **Yes** | — | Admin key (store in GitHub Secret) |
-| `dry-run` | No | `false` | Test without sending RTC |
-| `min-pr-body-length` | No | `10` | Minimum PR body chars to extract wallet |
+Contributors add wallet address to PR body:
+```markdown
+## Description
+Fixed the bug in auth module
 
----
-
-## How It Works
-
-1. Triggers when any PR is **merged**
-2. Parses the PR body for a **wallet name** (supports EVM addresses, wallet names, `wallet_name:` patterns)
-3. Calls RustChain `/wallet/send` API to transfer RTC
-4. Posts a **confirmation comment** on the PR
-
----
-
-## Wallet Extraction
-
-The action looks for the contributor's wallet in the PR body in this order:
-
-1. **EVM address** — `0x...` (40 hex chars)
-2. **Backtick-wrapped** — `` `wallet_name` ``
-3. **Keyed pattern** — `wallet: name` or `rtc_wallet: name`
-4. **Plain wallet name** — lowercase with underscores
-
-Example valid PR body:
-```
-## My Contribution
-
-Implemented the new feature.
-
-**Wallet:** founder_community
+wallet: 0x1234567890abcdef1234567890abcdef12345678
 ```
 
----
+Or create `.rtc-wallet` file in repo root:
+```
+0x1234567890abcdef1234567890abcdef12345678
+```
 
-## Publish to GitHub Marketplace
+## Dry Run Mode
 
-1. Create a **public repo** named `rtc-reward-action`
-2. Add this action to `.github/actions/rtc-reward-action/`
-3. Tag a release: `git tag v1 && git push --tags`
-4. Go to **GitHub Marketplace** → **Publish** → select your repo
-5. Users can now reference it as `owner/rtc-reward-action@v1`
+Test without sending tokens:
+```yaml
+- uses: your-org/rtc-reward-action@v1
+  with:
+    dry-run: 'true'
+    # ... other inputs
+```
 
----
+## Development
 
-## Security
-
-- **Never** commit `admin-key` — use `${{ secrets.RTC_ADMIN_KEY }}`
-- Use `dry-run: true` to test before enabling real payments
-- The action only triggers on **merged** PRs, not opened/closed (unmerged)
-
----
+```bash
+npm install
+npm test
+```
 
 ## License
 
