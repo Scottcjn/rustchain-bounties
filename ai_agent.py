@@ -18,7 +18,8 @@ def get_open_bounties():
     open_bounties = []
     issues = repo.get_issues(state='open')
     for issue in issues:
-        if 'hardware' not in issue.body.lower():  # Filter out hardware-related issues
+        text = (issue.title + " " + issue.body).lower()
+        if "hardware" not in text and "bounty" in text:  # case-insensitive, searches title+body
             open_bounties.append(issue)
     return open_bounties
 
@@ -28,60 +29,35 @@ def claim_bounty(issue):
     issue.create_comment(comment)
     print(f"Claimed bounty: {issue.title}")
 
-# Function to fork the repository and create a branch
+# Function to fork the repository and create a new branch
 def fork_repo_and_create_branch():
-    forked_repo = repo.create_fork()
-    branch_name = f"ai-agent-{RTC_WALLET}"
-    main_branch = forked_repo.get_branch("main")
-    forked_repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=main_branch.commit.sha)
-    print(f"Created branch: {branch_name}")
-    return forked_repo, branch_name
+    fork = g.create_fork(REPO_NAME)
+    branch_name = f"ai-agent-{RTC_WALLET}-{fork.default_branch[:6].upper()}"
+    fork.create_branch(branch_name, fork.default_branch)
+    return fork, branch_name
 
-# Function to implement solution (simple placeholder code for now)
-def implement_solution(forked_repo, branch_name):
-    # This is where AI agent would write code, docs, or tests
-    file_content = """
-    # AI Agent Solution
-    This is a simple placeholder solution by AI agent.
-    """
-    forked_repo.create_file("solution.py", "Implementing solution", file_content, branch=branch_name)
-    print("Implemented solution in solution.py")
+# Function to implement a solution for a bounty
+def implement_solution(fork, branch_name, issue):
+    solution_file = "solution.py"
+    solution_content = "This is a simple placeholder solution by AI agent."
+    fork.create_file(solution_file, "Implementing solution", solution_content, branch=branch_name)
+    print(f"Implemented solution for bounty: {issue.title}")
 
-# Function to submit a pull request
-def submit_pr(forked_repo, branch_name):
-    pr_title = f"AI Agent Solution for Bounty"
-    pr_body = "This PR includes the solution for the bounty claimed by the AI agent."
-    pr = forked_repo.create_pull(title=pr_title, body=pr_body, head=branch_name, base="main")
-    print(f"Submitted PR: {pr.title}")
-    return pr
+# Function to create a pull request for a bounty
+def create_pull_request(fork, branch_name, issue):
+    pr_title = f"AI Agent Solution for {issue.title}"
+    pr_body = f"This is a solution for {issue.title} implemented by AI agent."
+    fork.create_pull_request(pr_title, branch_name, fork.default_branch, pr_body)
+    print(f"Created pull request for bounty: {issue.title}")
 
-# Function to simulate receiving RTC payment (Placeholder)
-def receive_rtc_payment():
-    print(f"RTC Payment received to wallet: {RTC_WALLET}")
-
-# Main function to run the agent workflow
-def run_agent():
-    # Step 1: Scan for open bounties
+# Main function
+def main():
     open_bounties = get_open_bounties()
-    if not open_bounties:
-        print("No open bounties available.")
-        return
-
-    # Step 2: Claim the first bounty
-    bounty = open_bounties[0]
-    claim_bounty(bounty)
-
-    # Step 3: Fork repo and create a branch
-    forked_repo, branch_name = fork_repo_and_create_branch()
-
-    # Step 4: Implement the solution
-    implement_solution(forked_repo, branch_name)
-
-    # Step 5: Submit PR
-    pr = submit_pr(forked_repo, branch_name)
-
-    # Step 6: Simulate receiving RTC payment on PR merge
-    receive_rtc_payment()
+    for issue in open_bounties:
+        claim_bounty(issue)
+        fork, branch_name = fork_repo_and_create_branch()
+        implement_solution(fork, branch_name, issue)
+        create_pull_request(fork, branch_name, issue)
 
 if __name__ == '__main__':
-    run_agent()
+    main()
