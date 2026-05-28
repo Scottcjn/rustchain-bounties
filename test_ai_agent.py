@@ -1,18 +1,19 @@
 import unittest
 from unittest.mock import patch, MagicMock
+from ai_agent import get_open_hardware_bounties, fork_repo_and_create_branch, implement_solution
 
 class TestAIWorkflow(unittest.TestCase):
 
     @patch('github.Github.get_repo')
-    def test_get_open_bounties(self, mock_get_repo):
+    def test_get_open_hardware_bounties(self, mock_get_repo):
         # Mocking the repository and issue list
         mock_repo = MagicMock()
         mock_get_repo.return_value = mock_repo
-        mock_issues = [MagicMock(title="Bounty 1", body="This is a non-hardware bounty"),
-                       MagicMock(title="Bounty 2", body="This requires hardware")]
+        mock_issues = [MagicMock(title="Bounty 1", body="This requires hardware"),
+                       MagicMock(title="Bounty 2", body="This is a non-hardware bounty")]
         mock_repo.get_issues.return_value = mock_issues
         
-        bounties = get_open_bounties()
+        bounties = get_open_hardware_bounties()
         self.assertEqual(len(bounties), 1)
         self.assertEqual(bounties[0].title, "Bounty 1")
     
@@ -28,7 +29,7 @@ class TestAIWorkflow(unittest.TestCase):
         
         forked_repo, branch_name = fork_repo_and_create_branch()
         
-        self.assertEqual(branch_name, "ai-agent-RTC-agent-DUMMYHASH")
+        self.assertEqual(branch_name, f"ai-agent-AGENT-1234-DUMM")
     
     @patch('github.Github.get_repo')
     @patch('github.Github.Github.create_fork')
