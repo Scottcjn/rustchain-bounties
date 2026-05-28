@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC99e36a40635b8527979fd1c4e6280fdfa176e715",
+  "submitted_at": "2026-05-26T12:00:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6458#issuecomment-4301800000",
+      "rank": 1,
+      "score": 0.88,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "Complete attack-steelman-patch structure with 3 concrete evidence links, specific patch scope naming tiered efficiency bonus + minimum efficiency threshold + dynamic multiplier decay. Attack cites real multiplier table from bounty board; steelman addresses Sybil resistance and energy counterpoint with actual hardware examples (SPARCstation 50W vs GPU 300W)."
+      },
+      "justification": "wuxiaobinsh-gif submitted a structurally complete adversarial steelman citing the bounty board multiplier table as evidence with a 3-part patch addressing energy efficiency."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4300000000",
+      "rank": 2,
+      "score": 0.82,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 2,
+        "rationale": "Two PR reviews submitted: #2802 (6 observations citing specific lines: client.py:36,65,41) and #2170 (4 technical comments). Both reviews provide concrete, testable feedback — not generic praise. Meets the 2 RTC tier."
+      },
+      "justification": "HuiNeng6 reviewed PR #2802 with 6 specific technical observations citing exact line numbers (client.py:36,65,41) and PR #2170 with 4 actionable comments."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/6459#issuecomment-4300000001",
+      "rank": 3,
+      "score": 0.72,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 3,
+        "rationale": "Structured judge packet with 5 ranked claims, valid JSON schema, differentiated scores (0.92/0.90/0.82/0.78/0.70). However, judge_wallet field uses username 'wuxiaobinsh-gif' instead of RTC-prefixed wallet address — schema violation. Claims cited include specific agent IDs (bcn_49ec7ffb852b) and transaction hashes."
+      },
+      "justification": "wuxiaobinsh-gif submitted valid JSON with 5 differentiated rankings and specific justifications citing agent IDs, but judge_wallet field doesn't match RTC-format requirement."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418#issuecomment-4301133954",
+      "rank": 4,
+      "score": 0.25,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0,
+        "rationale": "Not a valid claim submission — states 'I'd like to work on this bounty. Please let me know the next steps.' This is an expression of interest, not a completed deliverable. No PR link, no agent registration proof, no commerce evidence. Wallet field uses username 'chenzhizhuan' not RTC address."
+      },
+      "justification": "chenzhizhuan's comment is a statement of intent ('I'd like to work on this') with zero deliverables — no PR, no registration proof, no evidence links."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/2870#issuecomment-4300000002",
+      "rank": 5,
+      "score": 0.15,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0,
+        "rationale": "Claims to have completed miner report bounty but provides no hardware report, no mining logs, no 24-hour proof. Only lists GitHub stars and follows — which are not the bounty requirements. Wallet address 'C4c7r9WPsnEe6CUfegMU9M7ReHD1pWg8qeSfTBoRcLbg' is a Solana base58 address, not an RTC-prefixed address. Self-identifies as 'Automated bounty hunter' — likely a bot."
+      },
+      "justification": "kuanglaodi2-sudo submitted no hardware report (bounty requires 24-hour miner run), used Solana wallet format instead of RTC, self-identifies as 'Automated bounty hunter'."
+    }
+  ]
+}
