@@ -1,0 +1,40 @@
+miner_id: RTC99e36a40635b8527979fd1c4e6280fdfa176e715
+attack:
+  thesis: RustChain's bounty-based contribution economy cannot sustain token value because it creates infinite sell pressure with no buy-side demand mechanism.
+  mechanism: >
+    Every bounty completed creates new RTC tokens paid to contributors whose primary incentive
+    is to convert RTC to fiat or stablecoins. There is no staking mechanism, no transaction fee
+    burn, no protocol-level buy pressure, and no reason for non-contributors to hold RTC.
+    The only source of buy pressure is speculators and the OTC bridge (which itself is
+    bounty-funded, creating a circular dependency). With ~200 RTC paid per month in bounties
+    and no organic demand sink, the price ceiling is determined entirely by how much speculators
+    are willing to absorb — a structurally bearish dynamic identical to early-stage reward tokens
+    that trended to zero.
+  evidence:
+    - https://github.com/Scottcjn/rustchain-bounties/issues/695 (OTC bridge does not exist yet — the swap infrastructure is itself a bounty)
+    - https://github.com/Scottcjn/rustchain-bounties/issues/6885 (wallet identity policy acknowledges Sybil risk in bounty payouts)
+    - https://github.com/Scottcjn/rustchain-bounties (120+ open bounties representing future sell pressure with no buy-side mechanism documented)
+steelman:
+  thesis: RustChain's token velocity is a feature, not a bug — RTC is a work token designed for circulation, not a store of value, and buy pressure comes from agents who need RTC to access attestation services and register on-chain identity.
+  mechanism: >
+    RTC is not designed as a speculative asset — it is a utility token that powers the Beacon
+    Protocol's hardware attestation layer. Every agent registration, every hardware fingerprint
+    verification, and every cross-chain identity proof consumes RTC as gas. As the agent economy
+    grows (282 wallets, 544 RTC in agent economy volume already), the demand for attestation
+    services creates organic buy pressure from agents who need RTC to operate. The bounty economy
+    is the bootstrap phase — not the end state. The token velocity argument misunderstands RTC
+    as a store of value when it is actually a proof-of-work medium of exchange within a closed
+    attestation loop.
+  evidence:
+    - https://github.com/Scottcjn/beacon-skill (Beacon Protocol requires hardware fingerprinting that anchors to on-chain identity)
+    - https://github.com/Scottcjn/rustchain-bounties/issues/3008 (RIP-309 Phase 1: Fingerprint Check Rotation — agents consume RTC for security operations)
+patch:
+  scope: rustchain-bounties bounty payout smart contract or escrow module
+  diff_summary: >
+    Add a configurable N-day linear vesting schedule to bounty payouts, where 50% of RTC
+    is released immediately and 50% vests over 90 days. Vested RTC held in escrow is counted
+    toward "active stake" for attestation priority, giving contributors an incentive to keep
+    RTC in the system rather than immediately bridging out. This aligns contributor incentives
+    with token value without requiring a separate staking mechanism — the escrow serves double
+    duty as both vesting and utility access.
+  link_or_diff: Proposed as `RIP-suggestion: bounty-vesting` — configurable vesting period (default 90d) with escrow RTC counting toward attestation weight. Implementation would modify the payout flow in the bounty resolution script to split into immediate-release and time-locked tranches.
