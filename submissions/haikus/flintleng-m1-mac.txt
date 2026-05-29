@@ -1,8 +1,0 @@
-Apple Silicon
-Quiet fan, blazing fast
-M1 dreams of code
-
-archetype: vintage_powerpc
-hardware: Apple M1 MacBook Air
-wallet: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
-bounty: #2844
