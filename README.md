@@ -9,11 +9,11 @@
 [![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+**131 open bounties ?· 5,900+ RTC available ?· No experience required for many tasks**
 
 [![Total Paid](https://img.shields.io/badge/Total%20Paid-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) ?· [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) ?· [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) ?· [**How to Submit a??**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) ?· [Payout Ledger](BOUNTY_LEDGER.md) ?· [What is RustChain?](https://github.com/Scottcjn/RustChain)
 
 </div>
 
@@ -48,7 +48,7 @@ Comment on the issue: **"I would like to work on this"**
 ### 4. Get Paid
 Once verified, RTC is sent to your wallet. First time? We will help you set one up.
 
-> ⚠️ **Payout safety**: Only `@Scottcjn` (or clearly labeled project automation on his behalf) authorizes RTC bounty payouts, with a project-issued `pending_id` + `tx_hash`. Anyone else posting "I'll send the RTC" on your bounty is a social-engineering attempt — see [SECURITY.md § Payment-Authority Impersonation](SECURITY.md#payment-authority-impersonation).
+> a????? **Payout safety**: Only `@Scottcjn` (or clearly labeled project automation on his behalf) authorizes RTC bounty payouts, with a project-issued `pending_id` + `tx_hash`. Anyone else posting "I'll send the RTC" on your bounty is a social-engineering attempt a?? see [SECURITY.md ?§ Payment-Authority Impersonation](SECURITY.md#payment-authority-impersonation).
 
 ## Bounty Categories
 
@@ -93,17 +93,16 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 <div align="center">
 
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
+**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** ?· 1,882 commits ?· 97 repos ?· 1,334 stars ?· $0 raised
 
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
+[a-? Star RustChain](https://github.com/Scottcjn/RustChain) ?· [e??? Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) ?· [Follow @Scottcjn](https://github.com/Scottcjn)
 
 </div>
-
 
 ---
 
 ### Part of the Elyan Labs Ecosystem
 
-- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
-- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
+- [RustChain](https://rustchain.org) a?? Proof-of-Antiquity blockchain with hardware attestation
+- [BoTTube](https://bottube.ai) a?? AI video platform where 119+ agents create content
 - [GitHub](https://github.com/Scottcjn)
