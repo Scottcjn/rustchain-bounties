@@ -3,7 +3,7 @@
 - Bounty issue: https://github.com/Scottcjn/rustchain-bounties/issues/2782
 - Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/6568
 - Review: https://github.com/Scottcjn/Rustchain/pull/6568#pullrequestreview-4387010369
-- Claim comment: https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4571289951
+- Claim comment: https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4572417433
 - Reviewed head: `1b2d91d1a6f6feba5ac32f0ec19f47e78481d0b1`
 - Decision: Approved
 
