@@ -1,0 +1,3794 @@
+{
+  "updated_at": "2026-05-30T03:26:56.592563+00:00",
+  "repo": "Scottcjn/rustchain-bounties",
+  "total_bounties": 200,
+  "total_reward_rtc": 5589.5,
+  "total_reward_usd": 0,
+  "total_reward_mrg": 0,
+  "bounties": [
+    {
+      "id": 400,
+      "title": "[SEASON 1] Harden the Forge — Security Season (750 RTC Pool, 6 Weeks)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/400",
+      "reward_min": 750.0,
+      "reward_max": 750.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:26:17Z",
+      "updated_at": "2026-03-20T04:34:51Z"
+    },
+    {
+      "id": 71,
+      "title": "[BOUNTY] Ongoing Bug Bounty Program — Find Bugs, Earn RTC (200 RTC Pool)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/71",
+      "reward_min": 200.0,
+      "reward_max": 200.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bug",
+        "bounty",
+        "open"
+      ],
+      "created_at": "2026-02-06T01:13:53Z",
+      "updated_at": "2026-05-30T01:05:02Z"
+    },
+    {
+      "id": 252,
+      "title": "[BOUNTY] GitHub Engagement Sprint — Stars, Follows, Forks (Pool: 200 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/252",
+      "reward_min": 200.0,
+      "reward_max": 200.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "micro",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-17T00:22:13Z",
+      "updated_at": "2026-05-29T03:31:30Z"
+    },
+    {
+      "id": 402,
+      "title": "[GRANTS] RustChain Micro-Grants — Build Your Own Thing (100-200 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/402",
+      "reward_min": 200.0,
+      "reward_max": 200.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:26:50Z",
+      "updated_at": "2026-05-29T08:16:46Z"
+    },
+    {
+      "id": 681,
+      "title": "🏆 March Madness: Multi-Platform Engagement Challenge (Up to 200 RTC!)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/681",
+      "reward_min": 200.0,
+      "reward_max": 200.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "campaign",
+        "engagement"
+      ],
+      "created_at": "2026-03-06T00:04:30Z",
+      "updated_at": "2026-03-18T06:40:51Z"
+    },
+    {
+      "id": 2819,
+      "title": "[BOUNTY] Red Team UTXO Implementation — Find Bugs, Earn RTC (50-200 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819",
+      "reward_min": 200.0,
+      "reward_max": 200.0,
+      "currency": "RTC",
+      "category": "security",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty",
+        "security"
+      ],
+      "created_at": "2026-04-04T03:03:17Z",
+      "updated_at": "2026-05-29T23:49:01Z"
+    },
+    {
+      "id": 72,
+      "title": "[BOUNTY] Documentation Sprint — Complete Docs for All RustChain Components (150 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/72",
+      "reward_min": 150.0,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "documentation",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "documentation",
+        "bounty",
+        "open"
+      ],
+      "created_at": "2026-02-06T01:14:03Z",
+      "updated_at": "2026-05-29T04:01:45Z"
+    },
+    {
+      "id": 434,
+      "title": "[BOUNTY] Port RustChain Miner to Sega Dreamcast (SH4 Linux) — 150 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/434",
+      "reward_min": 150.0,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty",
+        "open",
+        "major",
+        "community"
+      ],
+      "created_at": "2026-02-26T20:47:40Z",
+      "updated_at": "2026-04-06T09:19:51Z"
+    },
+    {
+      "id": 685,
+      "title": "RIP-302 Agent Economy: Live Demo + Build Bounties (25-150 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/685",
+      "reward_min": 150.0,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-06T00:53:13Z",
+      "updated_at": "2026-05-25T16:40:49Z"
+    },
+    {
+      "id": 691,
+      "title": "[BOUNTY: 1.5-150 RTC] Tip-to-Earn — Tip Up to 10 Creators, Get 1.5x Back",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/691",
+      "reward_min": 1.5,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-03-06T14:01:18Z",
+      "updated_at": "2026-04-05T02:21:51Z"
+    },
+    {
+      "id": 3418,
+      "title": "[BOUNTY] Register on Beacon Atlas + Prove Commerce (Pool: 150 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418",
+      "reward_min": 150.0,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-04-22T16:23:31Z",
+      "updated_at": "2026-05-29T03:36:34Z"
+    },
+    {
+      "id": 12028,
+      "title": "[GRANT: 150 RTC/mo] Maintainer-Nominated Welcome Grant",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12028",
+      "reward_min": 150.0,
+      "reward_max": 150.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-05-22T15:44:46Z",
+      "updated_at": "2026-05-29T16:32:09Z"
+    },
+    {
+      "id": 307,
+      "title": "[BOUNTY] BoTTube Provider Router Hardening Follow-up (Grok + Runway) (120 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/307",
+      "reward_min": 120.0,
+      "reward_max": 120.0,
+      "currency": "RTC",
+      "category": "security",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "major",
+        "hardening",
+        "integration"
+      ],
+      "created_at": "2026-02-18T20:20:02Z",
+      "updated_at": "2026-04-13T10:20:12Z"
+    },
+    {
+      "id": 73,
+      "title": "[BOUNTY] Code Review Bounty Program — Review PRs, Earn RTC (100 RTC Pool)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/73",
+      "reward_min": 100.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "created_at": "2026-02-06T01:14:28Z",
+      "updated_at": "2026-05-29T02:20:11Z"
+    },
+    {
+      "id": 398,
+      "title": "[QUEST] Harden the Chain — Security Quest, 100 RTC Total",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/398",
+      "reward_min": 100.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:25:06Z",
+      "updated_at": "2026-05-30T00:05:37Z"
+    },
+    {
+      "id": 399,
+      "title": "[BOUNTY] Content Creator Program — Write About RustChain, Earn 25-100 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/399",
+      "reward_min": 100.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:25:29Z",
+      "updated_at": "2026-05-29T03:56:13Z"
+    },
+    {
+      "id": 683,
+      "title": "🤖 RIP-302: Agent Economy is LIVE — Build on it! (25-100 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/683",
+      "reward_min": 100.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "code",
+        "rip-302"
+      ],
+      "created_at": "2026-03-06T00:27:52Z",
+      "updated_at": "2026-05-27T16:37:39Z"
+    },
+    {
+      "id": 730,
+      "title": "[BOUNTY: 40-100 RTC] RustChain Wallet Browser Extension + MetaMask Snap",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/730",
+      "reward_min": 40.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "major",
+        "community",
+        "development"
+      ],
+      "created_at": "2026-03-07T00:24:50Z",
+      "updated_at": "2026-05-27T16:39:01Z"
+    },
+    {
+      "id": 2890,
+      "title": "[BOUNTY: 100 RTC] AgentFolio ↔ Beacon Integration Spec + Reference Implementation",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
+      "reward_min": 100.0,
+      "reward_max": 100.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty",
+        "major",
+        "ecosystem",
+        "integration"
+      ],
+      "created_at": "2026-04-09T14:57:05Z",
+      "updated_at": "2026-05-29T16:51:10Z"
+    },
+    {
+      "id": 89,
+      "title": "[BOUNTY] wRTC Visibility Pack — Token Lists + Trackers + Logo (75 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/89",
+      "reward_min": 75.0,
+      "reward_max": 75.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "propagation",
+        "ecosystem",
+        "wrtc"
+      ],
+      "created_at": "2026-02-09T23:58:20Z",
+      "updated_at": "2026-05-11T15:09:58Z"
+    },
+    {
+      "id": 247,
+      "title": "Red Team: BoTTube Vote Manipulation & CSRF (75 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/247",
+      "reward_min": 75.0,
+      "reward_max": 75.0,
+      "currency": "RTC",
+      "category": "security",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "hardening"
+      ],
+      "created_at": "2026-02-17T00:20:06Z",
+      "updated_at": "2026-05-12T02:26:44Z"
+    },
+    {
+      "id": 440,
+      "title": "[BOUNTY] Port RustChain Miner to Mac OS 9 via POSIX Shim — 75 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/440",
+      "reward_min": 75.0,
+      "reward_max": 75.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty",
+        "open",
+        "community"
+      ],
+      "created_at": "2026-02-26T21:44:41Z",
+      "updated_at": "2026-04-06T10:27:26Z"
+    },
+    {
+      "id": 453,
+      "title": "[75 RTC] Dual-Mining Integration: Earn RTC While Mining PoW Coins",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/453",
+      "reward_min": 75.0,
+      "reward_max": 75.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T17:08:00Z",
+      "updated_at": "2026-05-27T16:40:29Z"
+    },
+    {
+      "id": 747,
+      "title": "[BOUNTY: 50-75 RTC] Bounty Verification Bot — Auto-Verify Star/Follow Claims",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/747",
+      "reward_min": 50.0,
+      "reward_max": 75.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "major",
+        "community",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:23Z",
+      "updated_at": "2026-05-25T16:40:43Z"
+    },
+    {
+      "id": 160,
+      "title": "Write a tutorial or blog about Beacon (50 RTC Bounty)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/160",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "documentation",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "documentation",
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-02-13T21:05:10Z",
+      "updated_at": "2026-05-29T06:07:27Z"
+    },
+    {
+      "id": 249,
+      "title": "[BOUNTY] RustChain Telegram Community Bot (50 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/249",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "ecosystem",
+        "community"
+      ],
+      "created_at": "2026-02-17T00:20:10Z",
+      "updated_at": "2026-05-27T16:38:58Z"
+    },
+    {
+      "id": 397,
+      "title": "[QUEST] Become a RustChain Miner — 5 Steps, 50 RTC Total",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/397",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:24:52Z",
+      "updated_at": "2026-05-29T03:46:41Z"
+    },
+    {
+      "id": 427,
+      "title": "[BOUNTY] Create a RustChain Explainer Video — 50 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/427",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "major",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "major",
+        "community"
+      ],
+      "created_at": "2026-02-26T03:27:14Z",
+      "updated_at": "2026-05-27T16:37:36Z"
+    },
+    {
+      "id": 449,
+      "title": "[BOUNTY] Build a BoTTube Bot That Uploads Daily — 50 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/449",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-02-26T22:21:53Z",
+      "updated_at": "2026-05-16T12:10:24Z"
+    },
+    {
+      "id": 684,
+      "title": "🧪 Agent-to-Agent Transaction Test Challenge — Use Beacon + Grazer + RIP-302 (10-50 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/684",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "testing",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "grazer",
+        "beacon",
+        "rip-302",
+        "testing"
+      ],
+      "created_at": "2026-03-06T00:28:27Z",
+      "updated_at": "2026-03-11T11:14:24Z"
+    },
+    {
+      "id": 692,
+      "title": "[BOUNTY: up to 50 RTC] Micro Liquidity — Provide Liquidity, Get 1.5x Back",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/692",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "defi",
+        "liquidity"
+      ],
+      "created_at": "2026-03-06T14:01:47Z",
+      "updated_at": "2026-05-27T16:38:59Z"
+    },
+    {
+      "id": 1156,
+      "title": "[BOUNTY: 10-50 RTC] Vintage Hardware Speed Run — Mine RTC on the Weirdest Machine You Own",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1156",
+      "reward_min": 10.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-08T02:36:42Z",
+      "updated_at": "2026-05-27T16:40:23Z"
+    },
+    {
+      "id": 1158,
+      "title": "[BOUNTY: 10-50 RTC] YouTube Tutorial Videos — BoTTube, RustChain, Beacon Atlas, Grazer",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1158",
+      "reward_min": 10.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-08T02:46:01Z",
+      "updated_at": "2026-05-18T05:40:49Z"
+    },
+    {
+      "id": 2274,
+      "title": "Bounty: CVPR 2026 Paper Human Evaluation — 2AFC Video Quality Assessment (50 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2274",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty"
+      ],
+      "created_at": "2026-03-21T00:27:35Z",
+      "updated_at": "2026-05-25T16:39:00Z"
+    },
+    {
+      "id": 2304,
+      "title": "RustChain Animated Explainer Video — How Proof of Antiquity Works (50 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2304",
+      "reward_min": 50.0,
+      "reward_max": 50.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "content",
+        "video",
+        "50-rtc"
+      ],
+      "created_at": "2026-03-21T17:18:18Z",
+      "updated_at": "2026-05-27T16:12:58Z"
+    },
+    {
+      "id": 315,
+      "title": "[BOUNTY] Human Funnel Stage 1 Asset Pack (Hooks + Shorts + Memes) — 45 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/315",
+      "reward_min": 45.0,
+      "reward_max": 45.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-19T01:12:27Z",
+      "updated_at": "2026-05-16T09:20:02Z"
+    },
+    {
+      "id": 504,
+      "title": "[BOUNTY] Prometheus Metrics Exporter + Grafana Dashboard (40 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/504",
+      "reward_min": 40.0,
+      "reward_max": 40.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "ecosystem"
+      ],
+      "created_at": "2026-02-28T22:57:02Z",
+      "updated_at": "2026-04-28T21:36:49Z"
+    },
+    {
+      "id": 300,
+      "title": "[BOUNTY] Dofollow Backlinks (SEO) — RustChain + BoTTube (Max 30 RTC/person)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/300",
+      "reward_min": 30.0,
+      "reward_max": 30.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-18T17:23:37Z",
+      "updated_at": "2026-05-22T22:34:50Z"
+    },
+    {
+      "id": 303,
+      "title": "[BOUNTY] Integrations: Add BoTTube API example to your agent framework (30 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/303",
+      "reward_min": 30.0,
+      "reward_max": 30.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-18T17:36:03Z",
+      "updated_at": "2026-05-29T06:21:17Z"
+    },
+    {
+      "id": 463,
+      "title": "[30 RTC] Dual-Mining: NiceHash / MoneroOcean / Profit-Switching Miner Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/463",
+      "reward_min": 30.0,
+      "reward_max": 30.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:55Z",
+      "updated_at": "2026-03-05T04:00:35Z"
+    },
+    {
+      "id": 1160,
+      "title": "[BOUNTY: 5-30 RTC] Short-Form Video Blitz — TikTok, Instagram Reels, YouTube Shorts",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1160",
+      "reward_min": 5.0,
+      "reward_max": 30.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-08T02:46:35Z",
+      "updated_at": "2026-05-18T05:40:48Z"
+    },
+    {
+      "id": 157,
+      "title": "Star & Share beacon-skill on GitHub (25 RTC Bounty)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/157",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-02-13T21:04:00Z",
+      "updated_at": "2026-05-29T08:19:56Z"
+    },
+    {
+      "id": 446,
+      "title": "[BOUNTY] Upload 5 Original Videos to BoTTube — 25 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/446",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-02-26T22:21:21Z",
+      "updated_at": "2026-05-16T11:50:30Z"
+    },
+    {
+      "id": 455,
+      "title": "[25 RTC] Dual-Mining: Ergo (Autolykos2) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/455",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:38Z",
+      "updated_at": "2026-03-05T03:53:14Z"
+    },
+    {
+      "id": 456,
+      "title": "[25 RTC] Dual-Mining: Warthog (Janushash) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/456",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:40Z",
+      "updated_at": "2026-03-21T00:02:08Z"
+    },
+    {
+      "id": 458,
+      "title": "[25 RTC] Dual-Mining: Monero (RandomX) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/458",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:43Z",
+      "updated_at": "2026-03-05T03:52:53Z"
+    },
+    {
+      "id": 724,
+      "title": "[BOUNTY: 10-25 RTC] Show HN — Get RustChain on Hacker News Front Page",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/724",
+      "reward_min": 10.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-07T00:15:22Z",
+      "updated_at": "2026-04-05T02:21:51Z"
+    },
+    {
+      "id": 746,
+      "title": "[BOUNTY: 15-25 RTC] BoTTube Embed Player — Embeddable Video Widget",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/746",
+      "reward_min": 15.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:22Z",
+      "updated_at": "2026-05-27T16:38:56Z"
+    },
+    {
+      "id": 2127,
+      "title": "[BOUNTY: 25 RTC] Fix Beacon Atlas auto-registration + rustchain.org routing",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2127",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "beacon",
+        "infrastructure"
+      ],
+      "created_at": "2026-03-16T01:24:09Z",
+      "updated_at": "2026-05-23T21:18:26Z"
+    },
+    {
+      "id": 2161,
+      "title": "[BOUNTY: 25 RTC] BoTTube — Creator Collaboration Features",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2161",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-16T18:15:15Z",
+      "updated_at": "2026-05-27T16:40:25Z"
+    },
+    {
+      "id": 2308,
+      "title": "Silicon Obituary — Hardware Eulogy Generator for Retired Miners (25 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2308",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "creative",
+        "25-rtc"
+      ],
+      "created_at": "2026-03-21T18:44:13Z",
+      "updated_at": "2026-05-28T04:38:01Z"
+    },
+    {
+      "id": 6194,
+      "title": "[BOUNTY: 15-25 RTC by variant, 200 RTC pool] Mining Hardware Video — Production Brief: shot list, duration variants, captions, voiceover, asset constraints",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/6194",
+      "reward_min": 25.0,
+      "reward_max": 25.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-04-25T16:11:29Z",
+      "updated_at": "2026-05-20T17:38:23Z"
+    },
+    {
+      "id": 284,
+      "title": "[BOUNTY] Add RustChain to a Wikipedia or Wiki Article — 20 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/284",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-17T20:14:51Z",
+      "updated_at": "2026-05-02T06:53:48Z"
+    },
+    {
+      "id": 429,
+      "title": "[BOUNTY] Run a RustChain Miner for 30 Days Straight — 20 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/429",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-26T03:27:20Z",
+      "updated_at": "2026-03-28T16:00:39Z"
+    },
+    {
+      "id": 448,
+      "title": "[BOUNTY] Cross-Post 10 BoTTube Videos to Social Media — 20 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/448",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-02-26T22:21:40Z",
+      "updated_at": "2026-05-14T15:52:46Z"
+    },
+    {
+      "id": 459,
+      "title": "[20 RTC] Dual-Mining: Verus (VerusHash 2.2) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/459",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:45Z",
+      "updated_at": "2026-03-05T03:54:11Z"
+    },
+    {
+      "id": 460,
+      "title": "[20 RTC] Dual-Mining: Alephium (Blake3) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/460",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:47Z",
+      "updated_at": "2026-03-05T03:53:55Z"
+    },
+    {
+      "id": 468,
+      "title": "[20 RTC] Dual-Mining: DERO (AstroBWT) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/468",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:42Z",
+      "updated_at": "2026-03-05T03:54:45Z"
+    },
+    {
+      "id": 726,
+      "title": "[BOUNTY: 10-20 RTC] Build Rust Crates for RustChain — Publish on crates.io",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/726",
+      "reward_min": 10.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "development"
+      ],
+      "created_at": "2026-03-07T00:15:24Z",
+      "updated_at": "2026-03-27T13:59:01Z"
+    },
+    {
+      "id": 1616,
+      "title": "[BOUNTY: 20 RTC] Build a mobile wallet app (React Native/Flutter)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1616",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "feature",
+        "mobile"
+      ],
+      "created_at": "2026-03-10T23:50:18Z",
+      "updated_at": "2026-05-18T05:37:35Z"
+    },
+    {
+      "id": 2864,
+      "title": "[BOUNTY: 20 RTC] Create a GitHub Action That Awards RTC for Merged Pull Requests",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864",
+      "reward_min": 20.0,
+      "reward_max": 20.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "bounty",
+        "standard",
+        "integration"
+      ],
+      "created_at": "2026-04-09T03:25:19Z",
+      "updated_at": "2026-05-29T03:28:45Z"
+    },
+    {
+      "id": 259,
+      "title": "[BOUNTY] Write a Technical Article on Dev.to or Hashnode — 15 RTC Each",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/259",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-17T01:58:47Z",
+      "updated_at": "2026-05-29T03:40:04Z"
+    },
+    {
+      "id": 282,
+      "title": "[BOUNTY] Write a Blog Post About Proof-of-Antiquity — 15 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/282",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-17T20:14:47Z",
+      "updated_at": "2026-05-29T06:02:15Z"
+    },
+    {
+      "id": 450,
+      "title": "[BOUNTY] Write a BoTTube Integration Guide — 15 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/450",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-02-26T22:22:03Z",
+      "updated_at": "2026-05-29T06:11:26Z"
+    },
+    {
+      "id": 461,
+      "title": "[15 RTC] Dual-Mining: Zephyr (RandomX) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/461",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:49Z",
+      "updated_at": "2026-03-20T09:04:52Z"
+    },
+    {
+      "id": 462,
+      "title": "[15 RTC] Dual-Mining: Neoxa (KawPow) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/462",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T18:34:53Z",
+      "updated_at": "2026-03-20T08:56:18Z"
+    },
+    {
+      "id": 469,
+      "title": "[15 RTC] Dual-Mining: Raptoreum (GhostRider) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/469",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:44Z",
+      "updated_at": "2026-03-05T03:55:49Z"
+    },
+    {
+      "id": 693,
+      "title": "[BOUNTY: 5-15 RTC] A2A Transaction Badge — Complete Agent-to-Agent Jobs, Earn Badges",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/693",
+      "reward_min": 5.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "rip-302",
+        "badges"
+      ],
+      "created_at": "2026-03-06T14:03:26Z",
+      "updated_at": "2026-05-29T04:01:09Z"
+    },
+    {
+      "id": 749,
+      "title": "[BOUNTY: 10-15 RTC] Epoch Reporter Bot — Auto-Post Epoch Summaries",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/749",
+      "reward_min": 10.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:24Z",
+      "updated_at": "2026-04-24T02:20:30Z"
+    },
+    {
+      "id": 751,
+      "title": "[BOUNTY: 10-15 RTC] RustChain Testnet Faucet — Free Test RTC for Developers",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/751",
+      "reward_min": 10.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:25Z",
+      "updated_at": "2026-05-27T16:40:24Z"
+    },
+    {
+      "id": 2156,
+      "title": "[BOUNTY: 15 RTC] BoTTube — Video Page Customization",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2156",
+      "reward_min": 15.0,
+      "reward_max": 15.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-16T18:15:08Z",
+      "updated_at": "2026-05-27T16:40:27Z"
+    },
+    {
+      "id": 175,
+      "title": "[BOUNTY] Record Your First Mining Setup Video (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/175",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-02-15T00:55:51Z",
+      "updated_at": "2026-05-27T16:38:31Z"
+    },
+    {
+      "id": 195,
+      "title": "[BOUNTY] Post About RustChain on YouTube (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/195",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-15T22:25:44Z",
+      "updated_at": "2026-05-12T02:26:39Z"
+    },
+    {
+      "id": 196,
+      "title": "[BOUNTY] Post About RustChain on Instagram (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/196",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-15T22:25:44Z",
+      "updated_at": "2026-05-12T02:26:29Z"
+    },
+    {
+      "id": 197,
+      "title": "[BOUNTY] Post About RustChain on Facebook (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/197",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-15T22:25:44Z",
+      "updated_at": "2026-05-27T16:36:36Z"
+    },
+    {
+      "id": 269,
+      "title": "[BOUNTY] Silicon Archaeology: Hardware Scanner Module (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/269",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-02-17T15:03:21Z",
+      "updated_at": "2026-05-29T04:00:21Z"
+    },
+    {
+      "id": 292,
+      "title": "Create Player Skins for Xonotic RustChain Arena (10 RTC each)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/292",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-18T00:49:57Z",
+      "updated_at": "2026-03-19T19:50:59Z"
+    },
+    {
+      "id": 293,
+      "title": "Create Sound Effects & Music for Xonotic RustChain Arena (10 RTC per set)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/293",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-18T00:50:13Z",
+      "updated_at": "2026-03-19T19:51:03Z"
+    },
+    {
+      "id": 470,
+      "title": "[10 RTC] Dual-Mining: Wownero (RandomX) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/470",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:46Z",
+      "updated_at": "2026-03-22T21:04:44Z"
+    },
+    {
+      "id": 471,
+      "title": "[10 RTC] Dual-Mining: Salvium (RandomX) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/471",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:49Z",
+      "updated_at": "2026-03-22T15:21:25Z"
+    },
+    {
+      "id": 472,
+      "title": "[10 RTC] Dual-Mining: Conceal (CryptoNight-GPU) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/472",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:51Z",
+      "updated_at": "2026-03-05T03:56:55Z"
+    },
+    {
+      "id": 473,
+      "title": "[10 RTC] Dual-Mining: Scala (RandomX variant) Integration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/473",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-27T19:11:53Z",
+      "updated_at": "2026-03-22T21:04:40Z"
+    },
+    {
+      "id": 721,
+      "title": "Bounty: Repost @RustchainPOA on X — Earn 10 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/721",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "social"
+      ],
+      "created_at": "2026-03-06T19:15:26Z",
+      "updated_at": "2026-03-06T21:07:17Z"
+    },
+    {
+      "id": 753,
+      "title": "[BOUNTY: 5-10 RTC] BoTTube OEmbed Protocol — Rich Link Previews Everywhere",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/753",
+      "reward_min": 5.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "bottube",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:27Z",
+      "updated_at": "2026-05-23T20:27:43Z"
+    },
+    {
+      "id": 755,
+      "title": "[BOUNTY: 10 RTC] Automated Backup Verification — Validate RustChain DB Backups",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/755",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "development"
+      ],
+      "created_at": "2026-03-07T03:24:28Z",
+      "updated_at": "2026-05-20T10:10:22Z"
+    },
+    {
+      "id": 1112,
+      "title": "[BOUNTY: 10 RTC] Fuzz the /attest/submit Endpoint",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1112",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "security",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "security",
+        "testing"
+      ],
+      "created_at": "2026-03-07T18:00:33Z",
+      "updated_at": "2026-05-26T17:08:07Z"
+    },
+    {
+      "id": 1114,
+      "title": "[BOUNTY: 10 RTC] 60-Second RustChain Explainer Video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1114",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "video"
+      ],
+      "created_at": "2026-03-07T18:00:36Z",
+      "updated_at": "2026-05-29T03:55:03Z"
+    },
+    {
+      "id": 1584,
+      "title": "[FUNNEL BOUNTY: up to 10 RTC per pair] Founding Human Referral Loop — Bring a New Human into RustChain + BoTTube",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1584",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-10T16:31:07Z",
+      "updated_at": "2026-05-27T16:40:27Z"
+    },
+    {
+      "id": 1585,
+      "title": "[FUNNEL BOUNTY: up to 10 RTC per pair] Founding Agent Onboarding Loop — Bring a New Agent into RustChain + BoTTube",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1585",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-10T16:31:07Z",
+      "updated_at": "2026-05-25T16:40:19Z"
+    },
+    {
+      "id": 2316,
+      "title": "Play-Test sophia-edge-node on Raspberry Pi 4 — First Achievements (10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2316",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "gaming",
+        "play-test",
+        "10-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:23Z",
+      "updated_at": "2026-05-18T05:29:25Z"
+    },
+    {
+      "id": 12026,
+      "title": "[BOUNTY: 10 RTC] Hardware Pioneer — Mine on New Vintage Hardware",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12026",
+      "reward_min": 10.0,
+      "reward_max": 10.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-05-22T15:44:43Z",
+      "updated_at": "2026-05-29T08:26:34Z"
+    },
+    {
+      "id": 1113,
+      "title": "[BOUNTY: 8 RTC] RTC Token Distribution Analysis",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1113",
+      "reward_min": 8.0,
+      "reward_max": 8.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "research"
+      ],
+      "created_at": "2026-03-07T18:00:34Z",
+      "updated_at": "2026-05-29T03:51:35Z"
+    },
+    {
+      "id": 2319,
+      "title": "System Crown Challenge — Master 5 Games on One Platform (8 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2319",
+      "reward_min": 8.0,
+      "reward_max": 8.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "gaming",
+        "system-crown",
+        "8-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:25Z",
+      "updated_at": "2026-05-18T05:29:22Z"
+    },
+    {
+      "id": 732,
+      "title": "[BOUNTY: 5-7 RTC] Write Video Generation Guides for BoTTube Agents",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/732",
+      "reward_min": 5.0,
+      "reward_max": 7.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T00:53:33Z",
+      "updated_at": "2026-05-29T03:55:11Z"
+    },
+    {
+      "id": 374,
+      "title": "[BOUNTY] First Attest Bonus (Latest Miner Required) - 5 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/374",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "micro",
+        "multi-claim",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-20T12:51:41Z",
+      "updated_at": "2026-05-29T03:45:10Z"
+    },
+    {
+      "id": 422,
+      "title": "[BOUNTY] Register Your Agent on Beacon Atlas - 5 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/422",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-02-25T02:44:28Z",
+      "updated_at": "2026-05-29T03:41:44Z"
+    },
+    {
+      "id": 442,
+      "title": "Test the Miner on Your Machine — 5 RTC (Good First Issue)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/442",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "easy"
+      ],
+      "created_at": "2026-02-26T21:54:02Z",
+      "updated_at": "2026-05-30T01:05:57Z"
+    },
+    {
+      "id": 443,
+      "title": "Write a Review of RustChain — 5 RTC (Good First Issue)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/443",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "easy"
+      ],
+      "created_at": "2026-02-26T21:54:17Z",
+      "updated_at": "2026-05-29T08:07:40Z"
+    },
+    {
+      "id": 719,
+      "title": "Bounty: Heart & Like @RustchainPOA Posts on X — Earn 5 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/719",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "social"
+      ],
+      "created_at": "2026-03-06T19:14:56Z",
+      "updated_at": "2026-03-06T21:07:15Z"
+    },
+    {
+      "id": 720,
+      "title": "Bounty: Bookmark @RustchainPOA Posts & Earn 5 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/720",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "social"
+      ],
+      "created_at": "2026-03-06T19:15:08Z",
+      "updated_at": "2026-03-06T21:07:16Z"
+    },
+    {
+      "id": 727,
+      "title": "[BOUNTY: 5 RTC] Write a Comparison Article — RustChain vs Other Chains",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/727",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-07T00:15:26Z",
+      "updated_at": "2026-05-29T03:41:05Z"
+    },
+    {
+      "id": 1100,
+      "title": "[EASY BOUNTY: 5 RTC] Upload Your First BoTTube Video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1100",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:17:09Z",
+      "updated_at": "2026-05-23T03:31:13Z"
+    },
+    {
+      "id": 1102,
+      "title": "[EASY BOUNTY: 3-5 RTC] Find and Report a BoTTube Bug",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1102",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:17:32Z",
+      "updated_at": "2026-05-29T08:07:38Z"
+    },
+    {
+      "id": 1115,
+      "title": "[BOUNTY: 5 RTC] Starstruck 128 Stars Celebration Graphic",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1115",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "design"
+      ],
+      "created_at": "2026-03-07T18:00:37Z",
+      "updated_at": "2026-05-22T22:28:44Z"
+    },
+    {
+      "id": 1151,
+      "title": "[BOUNTY: 5 RTC] 3,000 Stars Celebration — Design a Milestone Graphic",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1151",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-08T02:35:07Z",
+      "updated_at": "2026-05-21T12:35:57Z"
+    },
+    {
+      "id": 1575,
+      "title": "Register in Ecosystem Contributors — 5 RTC per registration",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1575",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-03-10T15:42:29Z",
+      "updated_at": "2026-05-29T06:13:46Z"
+    },
+    {
+      "id": 1578,
+      "title": "[EASY BOUNTY: 5 RTC] Add a Flagship Project to an Awesome List or Public Tool Directory",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1578",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-10T16:05:07Z",
+      "updated_at": "2026-05-26T07:08:29Z"
+    },
+    {
+      "id": 1600,
+      "title": "[BOUNTY: 5 RTC] Build a web dashboard showing RustChain stats",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1600",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "feature",
+        "frontend"
+      ],
+      "created_at": "2026-03-10T23:48:43Z",
+      "updated_at": "2026-05-27T16:38:54Z"
+    },
+    {
+      "id": 2071,
+      "title": "[CREATIVE BOUNTY: 5 RTC] Explain RustChain to Your Grandma (Video Under 60 Seconds)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2071",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "creative"
+      ],
+      "created_at": "2026-03-14T23:42:56Z",
+      "updated_at": "2026-05-23T18:31:17Z"
+    },
+    {
+      "id": 2073,
+      "title": "[CREATIVE BOUNTY: 5 RTC] Build a RustChain Mining Rig in Minecraft",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2073",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "creative"
+      ],
+      "created_at": "2026-03-14T23:42:58Z",
+      "updated_at": "2026-05-18T05:36:30Z"
+    },
+    {
+      "id": 2140,
+      "title": "[BOUNTY: 5 RTC] Add video player keyboard shortcuts to BoTTube watch page",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2140",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "feature",
+        "bottube"
+      ],
+      "created_at": "2026-03-16T17:06:10Z",
+      "updated_at": "2026-05-18T05:35:51Z"
+    },
+    {
+      "id": 2142,
+      "title": "[BOUNTY: 5 RTC] Write a BoTTube review or tutorial on dev.to / Medium / your blog",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2142",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-03-16T17:06:14Z",
+      "updated_at": "2026-05-27T16:38:27Z"
+    },
+    {
+      "id": 2143,
+      "title": "[BOUNTY: 5 RTC] Build something with the BoTTube JavaScript SDK",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2143",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "feature",
+        "bottube"
+      ],
+      "created_at": "2026-03-16T17:06:16Z",
+      "updated_at": "2026-05-27T16:38:23Z"
+    },
+    {
+      "id": 2179,
+      "title": "[EASY BOUNTY: 5 RTC] Write a blog post or Dev.to article about any Elyan Labs project",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2179",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-17T02:05:48Z",
+      "updated_at": "2026-05-29T06:03:58Z"
+    },
+    {
+      "id": 2180,
+      "title": "[BOUNTY: 5 RTC] Create a YouTube or BoTTube video tutorial about any Elyan Labs project",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-17T02:05:49Z",
+      "updated_at": "2026-05-30T00:54:03Z"
+    },
+    {
+      "id": 2317,
+      "title": "Saturday Morning Speedrun — Master Any Game on sophia-edge-node in One Session (5 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2317",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "gaming",
+        "one-credit-club",
+        "5-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:24Z",
+      "updated_at": "2026-05-18T05:29:24Z"
+    },
+    {
+      "id": 2793,
+      "title": "[BOTTUBE: 5 RTC] Create a 3-Video Series on Any Tech Topic",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2793",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-04-02T15:44:27Z",
+      "updated_at": "2026-05-23T19:42:26Z"
+    },
+    {
+      "id": 2797,
+      "title": "[BOTTUBE: 5 RTC] Make a Video Response to an Existing Video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2797",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "content",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "bottube",
+        "content"
+      ],
+      "created_at": "2026-04-02T15:45:01Z",
+      "updated_at": "2026-05-23T13:04:20Z"
+    },
+    {
+      "id": 2866,
+      "title": "[BOUNTY: 5 RTC] Post RustChain to Hacker News, Reddit, or Lobsters (With Proof)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2866",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "multi-claim",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-04-09T03:25:42Z",
+      "updated_at": "2026-05-27T18:23:19Z"
+    },
+    {
+      "id": 12027,
+      "title": "[BOUNTY: 5 RTC] Localization — Translate RustChain Docs",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12027",
+      "reward_min": 5.0,
+      "reward_max": 5.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-05-22T15:44:44Z",
+      "updated_at": "2026-05-29T08:26:35Z"
+    },
+    {
+      "id": 103,
+      "title": "[MICRO-BOUNTY] Follow @RustchainPOA on X + Upvote/Like + Join BoTTube (4 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/103",
+      "reward_min": 4.0,
+      "reward_max": 4.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-12T03:06:31Z",
+      "updated_at": "2026-05-12T02:25:41Z"
+    },
+    {
+      "id": 177,
+      "title": "[BOUNTY] Best RustChain/BoTTube Meme Wins 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/177",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "micro",
+        "multi-claim",
+        "community"
+      ],
+      "created_at": "2026-02-15T00:56:05Z",
+      "updated_at": "2026-05-12T02:26:24Z"
+    },
+    {
+      "id": 421,
+      "title": "[BOUNTY] Upload Your First BoTTube Video - 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/421",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-02-25T02:44:27Z",
+      "updated_at": "2026-05-27T16:36:34Z"
+    },
+    {
+      "id": 423,
+      "title": "[BOUNTY] Refer a Friend Who Completes a Bounty - 3 RTC per referral (Pool: 150 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/423",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-02-25T02:44:33Z",
+      "updated_at": "2026-04-23T01:03:13Z"
+    },
+    {
+      "id": 518,
+      "title": "[Achievement] First Blood - First Merged PR - 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/518",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:47Z",
+      "updated_at": "2026-05-27T16:42:27Z"
+    },
+    {
+      "id": 519,
+      "title": "[Achievement] Explorer - PRs to 3+ Repos - 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/519",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:49Z",
+      "updated_at": "2026-05-27T16:03:59Z"
+    },
+    {
+      "id": 520,
+      "title": "[Achievement] Bug Hunter - Find a Real Bug - 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/520",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:51Z",
+      "updated_at": "2026-05-29T13:18:15Z"
+    },
+    {
+      "id": 521,
+      "title": "[Achievement] Documenter - Improve Docs in 3+ Repos - 3 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/521",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:54Z",
+      "updated_at": "2026-05-27T16:04:04Z"
+    },
+    {
+      "id": 725,
+      "title": "[BOUNTY: 3 RTC] Translate RustChain README Into Your Language",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/725",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-07T00:15:23Z",
+      "updated_at": "2026-05-29T05:56:48Z"
+    },
+    {
+      "id": 1107,
+      "title": "[EASY BOUNTY: 3 RTC] Write a BoTTube vs YouTube Shorts Comparison",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1107",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:18:18Z",
+      "updated_at": "2026-05-29T07:42:40Z"
+    },
+    {
+      "id": 1154,
+      "title": "[EASY BOUNTY: 3 RTC] Agent Resume Reel — Showcase Your Bot on BoTTube",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1154",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-08T02:35:58Z",
+      "updated_at": "2026-05-23T18:58:19Z"
+    },
+    {
+      "id": 1555,
+      "title": "[EASY BOUNTY: 3 RTC] Upvote Elyan Labs flagship packages on ClawHub",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1555",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-09T22:03:48Z",
+      "updated_at": "2026-05-18T05:40:43Z"
+    },
+    {
+      "id": 1579,
+      "title": "[EASY BOUNTY: 3 RTC] Mention an Elyan Labs Project in an Existing Repo README or Docs Site",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1579",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-10T16:05:08Z",
+      "updated_at": "2026-05-29T03:40:55Z"
+    },
+    {
+      "id": 1592,
+      "title": "[BOUNTY: 3 RTC] Add RustChain to any awesome-list or curated list",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1592",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "propagation"
+      ],
+      "created_at": "2026-03-10T23:48:34Z",
+      "updated_at": "2026-05-24T13:15:03Z"
+    },
+    {
+      "id": 1603,
+      "title": "[BOUNTY: 3 RTC] Create a Python/JS SDK wrapper for BoTTube API",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1603",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "feature"
+      ],
+      "created_at": "2026-03-10T23:48:47Z",
+      "updated_at": "2026-05-29T21:47:25Z"
+    },
+    {
+      "id": 2070,
+      "title": "[MEME BOUNTY: 1-3 RTC each] Retro Computing Meme Contest — Best Memes Win RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2070",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "creative"
+      ],
+      "created_at": "2026-03-14T23:42:56Z",
+      "updated_at": "2026-05-27T16:59:06Z"
+    },
+    {
+      "id": 2139,
+      "title": "[BOUNTY: 3 RTC each] Fix BoTTube accessibility issues (4 open bugs)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2139",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube",
+        "accessibility"
+      ],
+      "created_at": "2026-03-16T17:06:07Z",
+      "updated_at": "2026-05-27T16:38:55Z"
+    },
+    {
+      "id": 2271,
+      "title": "[BOUNTY: 3 RTC] Download and test the RustChain miner (dry run)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2271",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-20T15:32:02Z",
+      "updated_at": "2026-05-29T17:04:41Z"
+    },
+    {
+      "id": 2318,
+      "title": "First Cartridge Relic — Earn the First-Ever Soulbound Mastery Badge (3 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2318",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "gaming",
+        "first-press",
+        "3-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:25Z",
+      "updated_at": "2026-05-27T16:38:30Z"
+    },
+    {
+      "id": 2784,
+      "title": "[ONBOARD: 3 RTC] Star + Test the Miner and Post Your Hardware Report",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2784",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "onboarding",
+        "miner"
+      ],
+      "created_at": "2026-04-02T15:41:51Z",
+      "updated_at": "2026-05-29T06:11:39Z"
+    },
+    {
+      "id": 2786,
+      "title": "[ONBOARD: 3 RTC] Star + Compare RustChain to Another Blockchain Project",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "onboarding"
+      ],
+      "created_at": "2026-04-02T15:42:09Z",
+      "updated_at": "2026-05-29T11:07:19Z"
+    },
+    {
+      "id": 2788,
+      "title": "[ONBOARD: 3 RTC] Star + Upload Your First Video to BoTTube",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2788",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "bottube",
+        "onboarding"
+      ],
+      "created_at": "2026-04-02T15:42:28Z",
+      "updated_at": "2026-05-23T18:36:07Z"
+    },
+    {
+      "id": 2798,
+      "title": "[BOTTUBE: 3 RTC] Share a BoTTube Video on Social Media with Context",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2798",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "bottube",
+        "outreach"
+      ],
+      "created_at": "2026-04-02T15:45:11Z",
+      "updated_at": "2026-05-27T16:11:40Z"
+    },
+    {
+      "id": 2960,
+      "title": "[BOUNTY: 3 RTC] Share elyanlabs.ai Launch on Social Media (With Proof)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2960",
+      "reward_min": 3.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "multi-claim",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-04-10T17:30:21Z",
+      "updated_at": "2026-05-27T23:25:52Z"
+    },
+    {
+      "id": 12025,
+      "title": "[BOUNTY: 2-3 RTC] First Light — Your First RustChain Contribution",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12025",
+      "reward_min": 2.0,
+      "reward_max": 3.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-05-22T15:44:41Z",
+      "updated_at": "2026-05-29T08:20:38Z"
+    },
+    {
+      "id": 256,
+      "title": "[BOUNTY] Fork a Scottcjn Repo + Add to Your Profile — 2 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/256",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-02-17T01:08:47Z",
+      "updated_at": "2026-05-29T03:24:57Z"
+    },
+    {
+      "id": 415,
+      "title": "[BOUNTY] Review BoTTube on ToolPilot — 2 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/415",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-02-24T01:18:27Z",
+      "updated_at": "2026-05-27T16:36:00Z"
+    },
+    {
+      "id": 420,
+      "title": "[MICRO-BOUNTY] Share RustChain on Social Media - 2 RTC per post (Pool: 200 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/420",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "help wanted",
+        "good first issue",
+        "bounty"
+      ],
+      "created_at": "2026-02-25T02:43:57Z",
+      "updated_at": "2026-05-23T03:51:52Z"
+    },
+    {
+      "id": 438,
+      "title": "Join RustChain Discord — 2 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/438",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-02-26T21:21:10Z",
+      "updated_at": "2026-05-27T16:36:37Z"
+    },
+    {
+      "id": 515,
+      "title": "[Bounty] Add RustChain to Your GitHub Profile README - 2 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/515",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "micro",
+        "propagation",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:08Z",
+      "updated_at": "2026-05-29T06:15:42Z"
+    },
+    {
+      "id": 517,
+      "title": "[Bounty] Block Explorer Bug Hunt - 2 RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/517",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-03-01T04:13:33Z",
+      "updated_at": "2026-05-29T03:54:16Z"
+    },
+    {
+      "id": 694,
+      "title": "[BOUNTY: 2 RTC] First Transaction — Send Your First RTC Transfer",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/694",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "community",
+        "onboarding"
+      ],
+      "created_at": "2026-03-06T14:18:53Z",
+      "updated_at": "2026-05-27T16:36:38Z"
+    },
+    {
+      "id": 696,
+      "title": "Meme Bounty: Post RustChain Memes on Social Media (2 RTC each)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/696",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-06T14:59:22Z",
+      "updated_at": "2026-05-19T19:42:17Z"
+    },
+    {
+      "id": 1095,
+      "title": "[EASY BOUNTY: 2 RTC] Comment on 5 BoTTube Videos",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1095",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:16:40Z",
+      "updated_at": "2026-05-29T03:49:56Z"
+    },
+    {
+      "id": 1098,
+      "title": "[EASY BOUNTY: 2 RTC] Share a BoTTube Video on Social Media",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1098",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:17:07Z",
+      "updated_at": "2026-05-27T16:36:03Z"
+    },
+    {
+      "id": 1577,
+      "title": "[EASY BOUNTY: 2 RTC] Add an Elyan Labs Link to Your Personal Site or Link-in-Bio",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1577",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-10T16:05:07Z",
+      "updated_at": "2026-05-29T03:40:56Z"
+    },
+    {
+      "id": 2074,
+      "title": "[FUN BOUNTY: 2 RTC] Worst Mining Rig Photo Contest — Show Us Your Jankiest Setup",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2074",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "creative"
+      ],
+      "created_at": "2026-03-14T23:42:59Z",
+      "updated_at": "2026-05-18T05:36:03Z"
+    },
+    {
+      "id": 2141,
+      "title": "[BOUNTY: 2 RTC] Upload 3 original videos to BoTTube",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2141",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "easy",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-03-16T17:06:12Z",
+      "updated_at": "2026-05-27T16:36:35Z"
+    },
+    {
+      "id": 2176,
+      "title": "[EASY BOUNTY: 2 RTC] Write a tweet or X post about any Elyan Labs project",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2176",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-03-17T02:05:44Z",
+      "updated_at": "2026-05-18T05:34:50Z"
+    },
+    {
+      "id": 2269,
+      "title": "[BOUNTY: 2 RTC per follow] Help us reach 150 followers on GitHub",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2269",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "propagation",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-20T15:31:57Z",
+      "updated_at": "2026-05-27T16:11:18Z"
+    },
+    {
+      "id": 2321,
+      "title": "Install and Review sophia-edge-node — Report Bugs or Confirm It Works (2 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2321",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "testing",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "testing",
+        "gaming",
+        "2-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:27Z",
+      "updated_at": "2026-05-27T16:36:39Z"
+    },
+    {
+      "id": 2782,
+      "title": "[ONBOARD: 2 RTC] Star + Review an Open PR",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "onboarding"
+      ],
+      "created_at": "2026-04-02T15:41:31Z",
+      "updated_at": "2026-05-30T00:07:21Z"
+    },
+    {
+      "id": 2796,
+      "title": "[BOTTUBE: 2 RTC] Start a Discussion Thread Under a Video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2796",
+      "reward_min": 2.0,
+      "reward_max": 2.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-04-02T15:44:53Z",
+      "updated_at": "2026-05-29T03:49:59Z"
+    },
+    {
+      "id": 124,
+      "title": "[MICRO-BOUNTY] Add a BoTTube Profile Avatar + Bio (1 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/124",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-02-12T15:33:20Z",
+      "updated_at": "2026-05-23T03:14:02Z"
+    },
+    {
+      "id": 171,
+      "title": "[BOUNTY] Star an Elyan Labs Repo — 55 Repos, Pick Your Favorite (1 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/171",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-02-14T21:05:30Z",
+      "updated_at": "2026-05-28T09:12:03Z"
+    },
+    {
+      "id": 254,
+      "title": "[BOUNTY] Open an Issue or Comment on Any Scottcjn Repo — 1 RTC Each",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/254",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "micro",
+        "community"
+      ],
+      "created_at": "2026-02-17T01:08:44Z",
+      "updated_at": "2026-05-29T03:30:37Z"
+    },
+    {
+      "id": 439,
+      "title": "Refer a Friend to Discord — 1 RTC per referral (max 5)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/439",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-02-26T21:21:18Z",
+      "updated_at": "2026-04-23T01:00:26Z"
+    },
+    {
+      "id": 728,
+      "title": "[BOUNTY: 1 RTC] Answer Questions in GitHub Discussions (Up to 10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/728",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-03-07T00:15:27Z",
+      "updated_at": "2026-05-23T21:54:56Z"
+    },
+    {
+      "id": 1096,
+      "title": "[EASY BOUNTY: 1 RTC] Upvote 10 BoTTube Videos",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1096",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:16:41Z",
+      "updated_at": "2026-05-29T03:49:57Z"
+    },
+    {
+      "id": 1097,
+      "title": "[EASY BOUNTY: 1 RTC] Follow 5 BoTTube Creators",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1097",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:16:42Z",
+      "updated_at": "2026-05-23T03:45:16Z"
+    },
+    {
+      "id": 1101,
+      "title": "[EASY BOUNTY: 1 RTC] Reply to 3 BoTTube Comments — Start Conversations",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1101",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:17:31Z",
+      "updated_at": "2026-05-29T03:52:26Z"
+    },
+    {
+      "id": 1104,
+      "title": "[EASY BOUNTY: 1 RTC] Set Up Your BoTTube Profile",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1104",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:17:53Z",
+      "updated_at": "2026-05-29T03:49:55Z"
+    },
+    {
+      "id": 1109,
+      "title": "[EASY BOUNTY: 1 RTC] BoTTube First Impression — Tell Us What You Think",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1109",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "bottube"
+      ],
+      "created_at": "2026-03-07T16:18:19Z",
+      "updated_at": "2026-05-29T11:07:19Z"
+    },
+    {
+      "id": 1504,
+      "title": "[BOUNTY: 1 RTC] BoTTube profile setup: avatar + bio + first published video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1504",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "open",
+        "type: feature",
+        "severity: low",
+        "area: growth"
+      ],
+      "created_at": "2026-03-08T20:22:30Z",
+      "updated_at": "2026-05-18T05:40:46Z"
+    },
+    {
+      "id": 1618,
+      "title": "[EASY BOUNTY: 1 RTC] Report any accessibility issue in BoTTube UI",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1618",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "easy",
+        "accessibility"
+      ],
+      "created_at": "2026-03-10T23:50:21Z",
+      "updated_at": "2026-05-26T07:02:01Z"
+    },
+    {
+      "id": 2320,
+      "title": "Cabinet Hunt: Beat 10 Bosses on Any System This Weekend (1 RTC each, max 10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2320",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "gaming",
+        "cabinet-hunt",
+        "1-10-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:26Z",
+      "updated_at": "2026-05-27T16:39:42Z"
+    },
+    {
+      "id": 2322,
+      "title": "Retro Screenshot Gallery — Share Your RPi Gaming Setup (1 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2322",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "gaming",
+        "1-4-rtc"
+      ],
+      "created_at": "2026-03-22T03:03:27Z",
+      "updated_at": "2026-05-25T16:37:23Z"
+    },
+    {
+      "id": 2781,
+      "title": "[ONBOARD: 1 RTC] Star + File Your First Bug Report",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2781",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "onboarding"
+      ],
+      "created_at": "2026-04-02T15:41:22Z",
+      "updated_at": "2026-05-29T11:00:59Z"
+    },
+    {
+      "id": 2791,
+      "title": "[BOTTUBE: 1 RTC] Leave Thoughtful Comments on 5 Videos",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2791",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-04-02T15:44:11Z",
+      "updated_at": "2026-05-29T03:49:07Z"
+    },
+    {
+      "id": 2792,
+      "title": "[BOTTUBE: 1 RTC] Upvote 10 Videos + Pick Your Favorite",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2792",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community",
+        "bottube"
+      ],
+      "created_at": "2026-04-02T15:44:17Z",
+      "updated_at": "2026-05-29T03:49:06Z"
+    },
+    {
+      "id": 2795,
+      "title": "[BOTTUBE: 1 RTC] Complete Your Profile + Follow 3 Creators",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2795",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "bottube",
+        "onboarding"
+      ],
+      "created_at": "2026-04-02T15:44:45Z",
+      "updated_at": "2026-05-29T03:49:08Z"
+    },
+    {
+      "id": 2870,
+      "title": "[BOUNTY: 1 RTC] Run the RustChain Miner for 24 Hours and Share Your Hardware Report",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2870",
+      "reward_min": 1.0,
+      "reward_max": 1.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "multi-claim",
+        "easy",
+        "community",
+        "onboarding"
+      ],
+      "created_at": "2026-04-09T03:26:26Z",
+      "updated_at": "2026-05-27T16:35:59Z"
+    },
+    {
+      "id": 731,
+      "title": "[BOUNTY: 0.5 RTC/repo] Watch Our Repos — Stay Notified, Earn RTC (Up to 10 RTC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/731",
+      "reward_min": 0.5,
+      "reward_max": 0.5,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "easy",
+        "community"
+      ],
+      "created_at": "2026-03-07T00:40:02Z",
+      "updated_at": "2026-05-29T06:19:32Z"
+    },
+    {
+      "id": 99,
+      "title": "[BOUNTY] Challenge Mode — Bring New Users + Confirm New Miners + Social Articles",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/99",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "created_at": "2026-02-12T03:04:08Z",
+      "updated_at": "2026-05-27T16:39:45Z"
+    },
+    {
+      "id": 100,
+      "title": "[BOUNTY] Discovery Mode — Find Elyan Labs Software, Open PRs, Earn RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/100",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "created_at": "2026-02-12T03:04:09Z",
+      "updated_at": "2026-05-29T04:00:05Z"
+    },
+    {
+      "id": 102,
+      "title": "[BOUNTY] New Capability Pitch — Build on RustChain/BoTTube or Drive Real Usage",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/102",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "created_at": "2026-02-12T03:05:56Z",
+      "updated_at": "2026-05-29T04:00:07Z"
+    },
+    {
+      "id": 121,
+      "title": "[BOUNTY] BoTTube SEO Audit Fix Pack (FixMyLanding / Lighthouse)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/121",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "enhancement",
+        "bounty",
+        "open",
+        "ecosystem"
+      ],
+      "created_at": "2026-02-12T15:33:18Z",
+      "updated_at": "2026-03-31T14:15:51Z"
+    },
+    {
+      "id": 122,
+      "title": "[BOUNTY] Grokipedia + Press Links Pack (BoTTube + RAM Coffers)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/122",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "ecosystem",
+        "community"
+      ],
+      "created_at": "2026-02-12T15:33:19Z",
+      "updated_at": "2026-05-29T08:20:37Z"
+    },
+    {
+      "id": 351,
+      "title": "x402 Integration Testing: Coinbase Wallets + Premium API",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/351",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "open",
+        "standard",
+        "ecosystem"
+      ],
+      "created_at": "2026-02-19T17:42:34Z",
+      "updated_at": "2026-05-06T12:32:40Z"
+    },
+    {
+      "id": 356,
+      "title": "[BOUNTY] Break the RustChain Mechanism Spec + Falsification Matrix",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/356",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "code",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bug",
+        "bounty",
+        "open"
+      ],
+      "created_at": "2026-02-19T20:19:08Z",
+      "updated_at": "2026-05-27T19:48:49Z"
+    },
+    {
+      "id": 401,
+      "title": "[PROGRAM] Retroactive Impact Rewards — Surprise Bonuses for Real Impact",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/401",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty"
+      ],
+      "created_at": "2026-02-22T15:26:29Z",
+      "updated_at": "2026-03-13T15:09:21Z"
+    },
+    {
+      "id": 555,
+      "title": "BoTTube: Social Graph API with Flask Integration Tests",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/555",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bottube",
+        "5 RTC"
+      ],
+      "created_at": "2026-03-03T13:47:54Z",
+      "updated_at": "2026-03-20T11:51:37Z"
+    },
+    {
+      "id": 697,
+      "title": "Chicken in Every Pot: Fork the Big 5 and Earn RTC",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/697",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "good first issue",
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-03-06T15:44:49Z",
+      "updated_at": "2026-05-23T02:39:43Z"
+    },
+    {
+      "id": 1482,
+      "title": "[PROGRAM] RustChain Digital Ambassador — Paid in RTC (Humans Only, Verified via Google Meet)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1482",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community"
+      ],
+      "created_at": "2026-03-08T16:29:36Z",
+      "updated_at": "2026-05-27T16:40:28Z"
+    },
+    {
+      "id": 2103,
+      "title": "[BOUNTY] Star & Follow — Earn RTC (Ongoing, Agents Welcome)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2103",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "easy",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "easy",
+        "community",
+        "ongoing"
+      ],
+      "created_at": "2026-03-15T01:59:45Z",
+      "updated_at": "2026-05-29T07:06:34Z"
+    },
+    {
+      "id": 2291,
+      "title": "BCOS v2: Reusable GitHub Action for any repo",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2291",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bcos",
+        "github-action"
+      ],
+      "created_at": "2026-03-21T16:38:14Z",
+      "updated_at": "2026-05-27T23:34:11Z"
+    },
+    {
+      "id": 2293,
+      "title": "BCOS v2: Homebrew formula for bcos-engine standalone",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2293",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bcos",
+        "homebrew"
+      ],
+      "created_at": "2026-03-21T16:38:15Z",
+      "updated_at": "2026-05-18T05:31:14Z"
+    },
+    {
+      "id": 2292,
+      "title": "BCOS v2: Badge generator web tool",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2292",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bcos",
+        "web"
+      ],
+      "created_at": "2026-03-21T16:38:15Z",
+      "updated_at": "2026-05-25T16:38:31Z"
+    },
+    {
+      "id": 2305,
+      "title": "Deploy BCOS v2 to Node 4 (createkr, Hong Kong)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2305",
+      "reward_min": 0,
+      "reward_max": 0,
+      "currency": "RTC",
+      "category": "general",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "bcos",
+        "node-4"
+      ],
+      "created_at": "2026-03-21T18:10:23Z",
+      "updated_at": "2026-05-06T03:47:33Z"
+    },
+    {
+      "id": 2451,
+      "title": "Founding 100 Antiquity Miners — 5,000 RTC Program",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2451",
+      "reward_min": 0.0,
+      "reward_max": 0.0,
+      "currency": "RTC",
+      "category": "community",
+      "difficulty": "standard",
+      "state": "open",
+      "assignees": [],
+      "labels": [
+        "bounty",
+        "community",
+        "mining"
+      ],
+      "created_at": "2026-03-25T16:04:23Z",
+      "updated_at": "2026-05-21T11:39:59Z"
+    }
+  ]
+}
