@@ -1,0 +1,63 @@
+miner_id: RTC019e78d600fb3131c29d7ba80aba8fe644be426e
+attack:
+  thesis: The payout worker's deduct-before-broadcast design violates atomic fund safety because a process crash between balance deduction and transaction broadcast can permanently strand user funds.
+  mechanism: |
+    process_withdrawal in node/payout_worker.py deducts the sender's balance and commits the database transaction before execute_withdrawal broadcasts the blockchain transaction. If the process is killed by SIGKILL, OOM, power loss, or another crash after the commit but before broadcast completion, the withdrawal remains in "processing" with funds already deducted. Without a reconciliation loop, timeout, or startup recovery pass, those funds are neither returned to the sender nor sent to the destination.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/payout_worker.py
+    - https://github.com/Scottcjn/Rustchain/issues/2755
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/payout_worker.py#L55
+steelman:
+  thesis: Deduct-before-broadcast is the right double-spend prevention pattern; the defect is missing reconciliation around the intermediate processing state, not the hold-and-forward model itself.
+  mechanism: |
+    Holding funds before broadcast prevents concurrent withdrawals from spending the same balance. If the worker only checked balance and deferred deduction until after broadcast, another withdrawal could consume the same funds while the first transaction was still in flight. The "processing" status, tx_hash column, and processed_at timestamp are exactly the state needed for a payment-processor style hold-and-forward design. The existing failure path already refunds failed broadcasts, so the intended model is present; it just needs a recovery loop for crashes and long-running stuck withdrawals.
+  evidence:
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/payout_worker.py#L94
+    - https://github.com/Scottcjn/Rustchain/blob/main/node/payout_worker.py#L140
+patch:
+  scope: node/payout_worker.py
+  diff_summary: |
+    Add reconcile_stuck_withdrawals with a 30-minute processing timeout. On startup and after each worker batch, scan withdrawals stuck in "processing"; retry broadcast when safe, and refund plus mark failed if retry fails or the timeout policy is exceeded.
+  link_or_diff: |
+    PROCESSING_TIMEOUT = 1800  # 30 minutes
+
+    def reconcile_stuck_withdrawals(self):
+        """Recover withdrawals stuck in 'processing' status."""
+        cutoff = int(time.time()) - PROCESSING_TIMEOUT
+        with sqlite3.connect(self.db_path) as conn:
+            stuck = conn.execute("""
+                SELECT withdrawal_id, miner_pk, amount, fee, destination
+                FROM withdrawals
+                WHERE status = 'processing' AND processed_at < ?
+            """, (cutoff,)).fetchall()
+
+        for withdrawal_id, miner_pk, amount, fee, destination in stuck:
+            withdrawal = {
+                "withdrawal_id": withdrawal_id,
+                "miner_pk": miner_pk,
+                "amount": amount,
+                "fee": fee,
+                "destination": destination,
+            }
+            try:
+                tx_hash = self.execute_withdrawal(withdrawal)
+                if not tx_hash:
+                    raise RuntimeError("broadcast returned no tx hash")
+                with sqlite3.connect(self.db_path) as conn:
+                    conn.execute(
+                        "UPDATE withdrawals SET status='completed', tx_hash=?, processed_at=? WHERE withdrawal_id=?",
+                        (tx_hash, int(time.time()), withdrawal_id),
+                    )
+            except Exception:
+                total = amount + (fee or 0)
+                with sqlite3.connect(self.db_path) as conn:
+                    conn.execute(
+                        "UPDATE accounts SET balance = balance + ? WHERE public_key = ?",
+                        (total, miner_pk),
+                    )
+                    conn.execute(
+                        "UPDATE withdrawals SET status='failed', error_msg='reconciliation_timeout' WHERE withdrawal_id=?",
+                        (withdrawal_id,),
+                    )
+
+    # Call self.reconcile_stuck_withdrawals() at worker startup and after each batch.
