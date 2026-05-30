@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC019e78d600fb3131c29d7ba80aba8fe644be426e",
+  "submitted_at": "2026-05-30T00:00:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7338",
+      "rank": 1,
+      "score": 0.94,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 175,
+        "rationale": "AgentFolio claim cites substantial real PR work and the largest requested payout among the open claims reviewed. Evidence appears materially stronger than the other four claims, so full payout is recommended subject to maintainer verification of the referenced PRs."
+      },
+      "justification": "Ranked first because #7338 presents substantial real PRs for AgentFolio and has low observed fraud risk relative to the packet set."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7342",
+      "rank": 2,
+      "score": 0.74,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 20,
+        "rationale": "GitHub Action claim appears to target a concrete deliverable and a modest 20 RTC amount, but the submitted wallet is non-RTC format ('zhaog100'), which requires manual payout identity review before approval."
+      },
+      "justification": "Ranked second because #7342 has a specific GitHub Action deliverable, but the non-RTC wallet raises medium fraud and payment-routing risk."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7356",
+      "rank": 3,
+      "score": 0.66,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 15,
+        "rationale": "Three-haiku claim has some hardware proof, but the proof is partial and the artifact value is lower than code-oriented claims. Recommend the stated 15 RTC only if the partial hardware evidence is accepted by maintainers."
+      },
+      "justification": "Ranked third because #7356 includes partial hardware proof but still needs evidence review before it can be treated as a low-risk completed claim."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7357",
+      "rank": 4,
+      "score": 0.52,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "PR review claim requests only 1 RTC and has low payout exposure, but the review link is the placeholder value 'xxx'. Recommend payout only after the claimant replaces the placeholder with a real review URL."
+      },
+      "justification": "Ranked fourth because #7357 has low fraud exposure but an incomplete evidence link, so it should not outrank claims with concrete deliverables."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7348",
+      "rank": 5,
+      "score": 0.31,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0,
+        "rationale": "SECURITY.md review claim combines a non-RTC wallet with minimal review substance. Recommend no payout until the claimant provides an RTC-format wallet and a substantive review artifact."
+      },
+      "justification": "Ranked fifth because #7348 has both payment identity risk and weak review evidence, making it the highest-risk claim in this packet."
+    }
+  ]
+}
