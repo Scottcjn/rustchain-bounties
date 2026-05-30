@@ -1,2 +1,0 @@
-# Requirements for the Prometheus metrics exporter (scripts/prometheus_exporter.py)
-prometheus-client>=0.17.0,<1.0.0
