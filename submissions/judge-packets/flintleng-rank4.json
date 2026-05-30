@@ -1,0 +1,61 @@
+{
+  "judge_wallet": "RTC019e78d600fb3131c29d7ba80aba8fe644be426e",
+  "submitted_at": "2026-04-30T06:20:00Z",
+  "rankings": [
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7338",
+      "rank": 1,
+      "score": 0.82,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 100,
+        "rationale": "PRs beacon-skill#820 and agentfolio-mcp-server#5 submitted with 3/4 deliverables claimed at 175/200 RTC. Substantial integration work with real PRs and evidence of effort."
+      },
+      "justification": "Claim #7338 references two actual PRs with numbers (#820, #5) and specific deliverables; the partial completion claim (175/200 RTC for 3/4 tasks) is plausible and consistent with tiered payment bounty structure."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7342",
+      "rank": 2,
+      "score": 0.65,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 15,
+        "rationale": "GitHub Action with real PR #7341 submitted, but wallet listed as 'zhaog100' is not an RTC-format address. Either a display name or invalid address. Verify before paying."
+      },
+      "justification": "Claim #7342 for GitHub Action RTC Award lists wallet as 'zhaog100' which does not match the RTC-prefix wallet address format. This may be a username instead of a payment address, requiring clarification from maintainers before payout."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7356",
+      "rank": 3,
+      "score": 0.55,
+      "fraud_risk": "medium",
+      "payout_recommendation": {
+        "amount_rtc": 5,
+        "rationale": "3 haiku submitted with hardware claims but haiku #2 (riscv) lacks hardware photo proof per bounty #2844 requirements ('5 RTC each, 10 RTC w/ proof'). Only haiku #1 and #3 have hardware specifications."
+      },
+      "justification": "Claim #7356 for 3 Hybrid Haikus claims vintage_powerpc (1.4 GHz Power Mac G4), riscv (Sipeed MaixIII @ 1GHz), and apple_silicon, but bounty #2844 specifies '10 RTC w/ proof' for photo verification and only two haiku name hardware specifics, not actual photo proof."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7357",
+      "rank": 4,
+      "score": 0.48,
+      "fraud_risk": "low",
+      "payout_recommendation": {
+        "amount_rtc": 1,
+        "rationale": "PR review of test_contributor_registry.py is technically substantive (SQL injection patterns, SECRET_KEY config, input validation gaps) but the review link is placeholder ('pullrequestreview-xxx'); no actual GitHub review link provided."
+      },
+      "justification": "Claim #7357 references PR #2695 with real technical observations (SQL injection in test code, missing Flask SECRET_KEY) but the review link uses a placeholder fragment rather than a real review ID."
+    },
+    {
+      "claim_url": "https://github.com/Scottcjn/rustchain-bounties/issues/7348",
+      "rank": 5,
+      "score": 0.38,
+      "fraud_risk": "high",
+      "payout_recommendation": {
+        "amount_rtc": 0,
+        "rationale": "PR review of SECURITY.md is minimal ('Approved the PR') without specific observations, and wallet 'AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG' is non-RTC format; possibly a test or alternate wallet, but cannot verify against bounty #6885 policy requiring one canonical RTC wallet."
+      },
+      "justification": "Claim #7348 from @jaxint lists wallet 'AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG' which appears to be an Ed25519 address (starts with 'A' not 'RTC'), violating bounty #6885's 'One canonical RTC wallet per contributor' policy. The review body is also minimal with no specific observations."
+    }
+  ]
+}
