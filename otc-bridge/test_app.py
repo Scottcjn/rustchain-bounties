@@ -129,48 +129,68 @@ class TestOTCBridge(unittest.TestCase):
         escrow = db.get_escrow(escrow_id)
         self.assertTrue(escrow.crypto_deposited)
         self.assertFalse(escrow.rtc_locked)
-        self.assertIsNone(escrow.rtc_signed_tx)
+        self.assertIsNone(escrow.rtc_escrow_job_id)
 
-    def test_deposit_escrow_rtc_by_seller_with_signed_tx(self):
+    def test_deposit_escrow_rtc_by_seller_rustchain_lock_success(self):
         order_id = self._create_test_order()
         escrow_id = self._create_test_escrow(order_id, buyer_wallet="buyer_wallet_2", seller_wallet="seller_wallet_2")
 
-        data = {
-            "escrow_id": escrow_id,
-            "depositor_wallet": "seller_wallet_2",
-            "deposit_type": "rtc",
-            "signed_tx": "mock_signed_rtc_tx_123"
-        }
-        response = self.client.post(
-            '/api/escrow/deposit',
-            data=json.dumps(data),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 200)
-        escrow = db.get_escrow(escrow_id)
-        self.assertTrue(escrow.rtc_locked)
-        self.assertEqual(escrow.rtc_signed_tx, "mock_signed_rtc_tx_123")
-        self.assertFalse(escrow.crypto_deposited)
+        # Mock RustChainClient.create_escrow_job to succeed
+        with unittest.mock.patch.object(RustChainClient, 'create_escrow_job') as mock_create_escrow_job:
+            mock_create_escrow_job.return_value = {"ok": True, "job_id": f"rtc_escrow_{escrow_id}"}
 
-    def test_deposit_escrow_missing_signed_tx_for_rtc(self):
+            data = {
+                "escrow_id": escrow_id,
+                "depositor_wallet": "seller_wallet_2",
+                "deposit_type": "rtc"
+            }
+            response = self.client.post(
+                '/api/escrow/deposit',
+                data=json.dumps(data),
+                content_type='application/json'
+            )
+            self.assertEqual(response.status_code, 200)
+            escrow = db.get_escrow(escrow_id)
+            self.assertTrue(escrow.rtc_locked)
+            self.assertEqual(escrow.rtc_escrow_job_id, f"rtc_escrow_{escrow_id}")
+            self.assertFalse(escrow.crypto_deposited)
+            mock_create_escrow_job.assert_called_once()
+
+    def test_deposit_escrow_rtc_rustchain_lock_fails(self):
         order_id = self._create_test_order()
-        escrow_id = self._create_test_escrow(order_id, buyer_wallet="buyer_wallet_3", seller_wallet="seller_wallet_3")
+        escrow_id = self._create_test_escrow(order_id, buyer_wallet="buyer_wallet_fail", seller_wallet="seller_wallet_fail")
 
-        data = {
-            "escrow_id": escrow_id,
-            "depositor_wallet": "seller_wallet_3",
-            "deposit_type": "rtc"
-        }
-        response = self.client.post(
-            '/api/escrow/deposit',
-            data=json.dumps(data),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 400)
-        result = json.loads(response.data)
-        self.assertIn("Missing signed_tx for RTC deposit", result['error'])
+        # Mock RustChainClient.create_escrow_job to return an error
+        with unittest.mock.patch.object(RustChainClient, 'create_escrow_job') as mock_create_escrow_job:
+            mock_create_escrow_job.return_value = {"error": "RustChain API error: insufficient funds", "status_code": 400}
 
-    def test_execute_trade_success_with_signed_tx(self):
+            data = {
+                "escrow_id": escrow_id,
+                "depositor_wallet": "seller_wallet_fail",
+                "deposit_type": "rtc"
+            }
+            response = self.client.post(
+                '/api/escrow/deposit',
+                data=json.dumps(data),
+                content_type='application/json'
+            )
+            
+            # Assert that the request failed due to the mocked RustChain error
+            self.assertEqual(response.status_code, 500) # Bridge returns 500 for external API failure
+            result = json.loads(response.data)
+            self.assertIn("Failed to lock RTC on RustChain", result['error'])
+
+            # Assert that the escrow state did not advance
+            escrow = db.get_escrow(escrow_id)
+            self.assertFalse(escrow.rtc_locked)
+            self.assertIsNone(escrow.rtc_escrow_job_id)
+            self.assertEqual(escrow.status, "pending") # Initial status before any deposit
+            
+            # Also check the trade status
+            trade = db.get_trade(escrow.trade_id)
+            self.assertEqual(trade.status, "pending")
+
+    def test_execute_trade_success_with_rustchain_escrow(self):
         order_id = self._create_test_order()
         escrow_id = self._create_test_escrow(order_id, buyer_wallet="buyer_wallet_4", seller_wallet="seller_wallet_4")
 
@@ -181,16 +201,19 @@ class TestOTCBridge(unittest.TestCase):
             content_type='application/json'
         )
 
-        # Simulate RTC deposit by seller with signed_tx
-        self.client.post(
-            '/api/escrow/deposit',
-            data=json.dumps({"escrow_id": escrow_id, "depositor_wallet": "seller_wallet_4", "deposit_type": "rtc", "signed_tx": "mock_signed_rtc_tx_456"}),
-            content_type='application/json'
-        )
-
-        # Mock the RustChainClient.transfer method
-        with unittest.mock.patch.object(RustChainClient, 'transfer') as mock_transfer:
-            mock_transfer.return_value = {"ok": True, "tx_hash": "mock_tx_hash_789"}
+        # Mock RustChainClient.create_escrow_job for the RTC deposit
+        with unittest.mock.patch.object(RustChainClient, 'create_escrow_job') as mock_create_escrow_job:
+            mock_create_escrow_job.return_value = {"ok": True, "job_id": f"rtc_escrow_{escrow_id}"}
+            # Simulate RTC deposit by seller
+            self.client.post(
+                '/api/escrow/deposit',
+                data=json.dumps({"escrow_id": escrow_id, "depositor_wallet": "seller_wallet_4", "deposit_type": "rtc"}),
+                content_type='application/json'
+            )
+        
+        # Mock the RustChainClient.release_escrow_job method
+        with unittest.mock.patch.object(RustChainClient, 'release_escrow_job') as mock_release_escrow_job:
+            mock_release_escrow_job.return_value = {"ok": True, "tx_hash": "mock_tx_hash_789"}
 
             response = self.client.post(
                 '/api/trade/execute',
@@ -198,11 +221,9 @@ class TestOTCBridge(unittest.TestCase):
                 content_type='application/json'
             )
             self.assertEqual(response.status_code, 200)
-            mock_transfer.assert_called_once_with(
-                from_wallet="seller_wallet_4",
-                to_wallet="buyer_wallet_4",
-                amount=100.0,
-                signed_tx="mock_signed_rtc_tx_456"
+            mock_release_escrow_job.assert_called_once_with(
+                job_id=f"rtc_escrow_{escrow_id}", # The job_id stored in escrow
+                release_to="buyer_wallet_4"
             )
             trade = db.get_trade(db.get_escrow(escrow_id).trade_id)
             self.assertEqual(trade.status, "completed")

@@ -99,7 +99,7 @@ class Escrow:
     rtc_amount: float
     rtc_locked: bool = False
     crypto_deposited: bool = False
-    rtc_signed_tx: Optional[str] = None # Added for security
+    rtc_escrow_job_id: Optional[str] = None # Changed from rtc_signed_tx for security
     status: str = "pending"
     created_at: str = None
     updated_at: str = None
@@ -585,7 +585,6 @@ def deposit_escrow():
     
     depositor = data.get('depositor_wallet', '')
     deposit_type = data.get('deposit_type', '') # 'crypto' or 'rtc'
-    signed_tx = data.get('signed_tx') # Only for RTC deposit
     
     now = datetime.utcnow().isoformat()
     
@@ -598,10 +597,36 @@ def deposit_escrow():
     elif depositor == escrow.seller_wallet and deposit_type == 'rtc':
         if escrow.rtc_locked:
             return jsonify({"error": "RTC already locked"}), 400
-        if not signed_tx:
-            return jsonify({"error": "Missing signed_tx for RTC deposit"}), 400
+        
+        # New: Lock RTC on RustChain via escrow job
+        release_conditions = {
+            "type": "external_confirmation",
+            "external_ref": escrow.id, # Reference back to this bridge escrow
+            "release_to": escrow.buyer_wallet,
+            "required_confirmations": 1 # Bridge confirms crypto deposit
+        }
+
+        rtc_escrow_result = rustchain.create_escrow_job(
+            wallet=escrow.seller_wallet,
+            amount=escrow.rtc_amount,
+            job_id=escrow.id, # Use bridge escrow ID as RustChain job ID for easy lookup
+            release_conditions=release_conditions
+        )
+
+        if "error" in rtc_escrow_result:
+            logger.error(f"RustChain RTC escrow creation failed: {rtc_escrow_result}")
+            return jsonify({
+                "error": "Failed to lock RTC on RustChain",
+                "details": rtc_escrow_result
+            }), 500
+
+        escrow_job_id = rtc_escrow_result.get("job_id")
+        if not escrow_job_id:
+            logger.error(f"RustChain RTC escrow creation succeeded but no job_id returned: {rtc_escrow_result}")
+            return jsonify({"error": "RustChain escrow job ID missing from response"}), 500
+
+        escrow.rtc_escrow_job_id = escrow_job_id
         escrow.rtc_locked = True
-        escrow.rtc_signed_tx = signed_tx # Store the signed transaction
     else:
         return jsonify({"error": "Invalid depositor_wallet or deposit_type combination"}), 400
     
@@ -669,24 +694,25 @@ def execute_trade():
     now = datetime.utcnow().isoformat()
     
     # Execute RTC transfer via RustChain
-    # Seller sends RTC to buyer (or locked in escrow, now released to buyer)
-    rtc_result = rustchain.transfer(
-        from_wallet=escrow.seller_wallet,
-        to_wallet=escrow.buyer_wallet,
-        amount=escrow.rtc_amount,
-        signed_tx=escrow.rtc_signed_tx # Use the stored signed transaction
+    # Instead of `rustchain.transfer`, release the escrow job
+    if not escrow.rtc_escrow_job_id:
+        return jsonify({"error": "RTC escrow job ID missing, cannot release funds"}), 500
+
+    rtc_release_result = rustchain.release_escrow_job(
+        job_id=escrow.rtc_escrow_job_id,
+        release_to=escrow.buyer_wallet
     )
     
-    if "error" in rtc_result:
-        logger.error(f"RTC transfer failed: {rtc_result}")
+    if "error" in rtc_release_result:
+        logger.error(f"RustChain RTC escrow release failed: {rtc_release_result}")
         return jsonify({
-            "error": "RTC transfer failed",
-            "details": rtc_result
+            "error": "RTC escrow release failed",
+            "details": rtc_release_result
         }), 500
     
     # Update trade
     trade.status = "completed"
-    trade.rtc_tx_hash = rtc_result.get("tx_hash", "unknown")
+    trade.rtc_tx_hash = rtc_release_result.get("tx_hash", "unknown") # Assuming tx_hash is returned
     trade.completed_at = now
     db.update_trade(trade)
     
