@@ -1,8 +1,3 @@
-"""
-RustChain OTC Bridge - Tier 2 Implementation
-Automated escrow for RTC <-> ETH/ERG/USDC trades
-"""
-
 import os
 import json
 import time
@@ -104,6 +99,7 @@ class Escrow:
     rtc_amount: float
     rtc_locked: bool = False
     crypto_deposited: bool = False
+    rtc_signed_tx: Optional[str] = None # Added for security
     status: str = "pending"
     created_at: str = None
     updated_at: str = None
@@ -587,22 +583,27 @@ def deposit_escrow():
     if not trade:
         return jsonify({"error": "Trade not found"}), 404
     
-    # Determine which side deposited
     depositor = data.get('depositor_wallet', '')
+    deposit_type = data.get('deposit_type', '') # 'crypto' or 'rtc'
+    signed_tx = data.get('signed_tx') # Only for RTC deposit
     
     now = datetime.utcnow().isoformat()
     
-    if depositor == escrow.buyer_wallet:
-        # Check if this is crypto deposit
-        if data.get('deposit_type') == 'crypto':
-            escrow.crypto_deposited = True
-        else:
-            escrow.rtc_locked = True
-    elif depositor == escrow.seller_wallet:
-        if data.get('deposit_type') == 'crypto':
-            escrow.crypto_deposited = True
-        else:
-            escrow.rtc_locked = True
+    # Buyer deposits crypto
+    if depositor == escrow.buyer_wallet and deposit_type == 'crypto':
+        if escrow.crypto_deposited:
+            return jsonify({"error": "Crypto already deposited"}), 400
+        escrow.crypto_deposited = True
+    # Seller deposits RTC
+    elif depositor == escrow.seller_wallet and deposit_type == 'rtc':
+        if escrow.rtc_locked:
+            return jsonify({"error": "RTC already locked"}), 400
+        if not signed_tx:
+            return jsonify({"error": "Missing signed_tx for RTC deposit"}), 400
+        escrow.rtc_locked = True
+        escrow.rtc_signed_tx = signed_tx # Store the signed transaction
+    else:
+        return jsonify({"error": "Invalid depositor_wallet or deposit_type combination"}), 400
     
     escrow.updated_at = now
     escrow.status = "escrow_deposited"
@@ -617,7 +618,7 @@ def deposit_escrow():
         id=str(uuid.uuid4()),
         trade_id=trade.id,
         action="escrow_deposited",
-        details=f"Deposit confirmed for escrow {escrow.id} by {depositor}",
+        details=f"Deposit confirmed for escrow {escrow.id} by {depositor} ({deposit_type})",
         timestamp=now
     ))
     
@@ -672,7 +673,8 @@ def execute_trade():
     rtc_result = rustchain.transfer(
         from_wallet=escrow.seller_wallet,
         to_wallet=escrow.buyer_wallet,
-        amount=escrow.rtc_amount
+        amount=escrow.rtc_amount,
+        signed_tx=escrow.rtc_signed_tx # Use the stored signed transaction
     )
     
     if "error" in rtc_result:
