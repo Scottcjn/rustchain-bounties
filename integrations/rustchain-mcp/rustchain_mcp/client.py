@@ -99,10 +99,15 @@ class BoTTubeClient:
     async def get_agent_profile(self, agent_name: str) -> Optional[Dict[str, Any]]:
         """
         Queries https://bottube.ai/api/agents for agent-specific profile/trust score.
+        Filters the results to ensure an exact match for the requested agent_name.
         """
-        api_response = await self._get_api_json("/agents", params={"agent_name": agent_name, "limit": 1})
+        # Fetch multiple agents to ensure we can filter by exact name, as /api/agents?agent_name=...&limit=1
+        # might return a a popular agent if no exact match is found or if the search is not precise.
+        # A higher limit is used to increase the chance of finding the specific agent.
+        api_response = await self._get_api_json("/agents", params={"agent_name": agent_name, "limit": 10})
         if api_response and isinstance(api_response, dict) and "agents" in api_response:
             agents = api_response["agents"]
-            if agents:
-                return agents[0] # Return the first matching agent
+            for agent in agents:
+                if agent.get("agent_name") == agent_name:
+                    return agent  # Return the exact matching agent
         return None

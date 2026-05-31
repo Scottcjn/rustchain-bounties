@@ -78,6 +78,7 @@ async def agentfolio_beacon_lookup(beacon_id: str) -> str:
         "errors": []
     }
 
+    found_beacon = None
     # 1. Query Beacon directory for provenance
     try:
         beacon_directory = await bottube_client.get_beacon_directory()
@@ -93,27 +94,33 @@ async def agentfolio_beacon_lookup(beacon_id: str) -> str:
         unified_response["errors"].append(f"Beacon provenance lookup failed: {e}")
 
     # 2. Query AgentFolio SATP registry for trust score (using /api/agents)
-    try:
-        agent_profile = await bottube_client.get_agent_profile(beacon_id)
-        if agent_profile:
-            # Extract relevant trust score info. Assuming 'reputation' or similar field exists.
-            # The structure of the /api/agents response is not fully specified, so we take a reasonable guess.
-            trust_score_data = {
-                "agent_name": agent_profile.get("agent_name"),
-                "reputation_score": agent_profile.get("reputation_score"), # Example field
-                "follower_count": agent_profile.get("follower_count"),
-                "karma_history": agent_profile.get("karma_history"),
-                "is_trusted": agent_profile.get("is_trusted"),
-                "last_activity": agent_profile.get("last_activity")
-            }
-            # Filter out None values for cleaner output
-            unified_response["trust_score"] = {k: v for k, v in trust_score_data.items() if v is not None}
-            if not unified_response["trust_score"]: # If all extracted fields were None
-                unified_response["errors"].append(f"Agent profile for '{beacon_id}' found, but no specific trust score data extracted.")
-        else:
-            unified_response["errors"].append(f"AgentFolio profile for '{beacon_id}' not found or could not be retrieved.")
-    except RuntimeError as e:
-        unified_response["errors"].append(f"AgentFolio trust score lookup failed: {e}")
+    # Use agent_name from found_beacon for lookup, as beacon_id is not directly an agent_name.
+    if found_beacon and "agent_name" in found_beacon:
+        agent_name_for_lookup = found_beacon["agent_name"]
+        try:
+            agent_profile = await bottube_client.get_agent_profile(agent_name_for_lookup)
+            if agent_profile:
+                # Extract relevant trust score info. Assuming 'reputation' or similar field exists.
+                # The structure of the /api/agents response is not fully specified, so we take a reasonable guess.
+                trust_score_data = {
+                    "agent_name": agent_profile.get("agent_name"),
+                    "reputation_score": agent_profile.get("reputation_score"), # Example field
+                    "follower_count": agent_profile.get("follower_count"),
+                    "karma_history": agent_profile.get("karma_history"),
+                    "is_trusted": agent_profile.get("is_trusted"),
+                    "last_activity": agent_profile.get("last_activity")
+                }
+                # Filter out None values for cleaner output
+                unified_response["trust_score"] = {k: v for k, v in trust_score_data.items() if v is not None}
+                if not unified_response["trust_score"]: # If all extracted fields were None
+                    unified_response["errors"].append(f"Agent profile for '{agent_name_for_lookup}' found, but no specific trust score data extracted.")
+            else:
+                unified_response["errors"].append(f"AgentFolio profile for agent_name '{agent_name_for_lookup}' not found or could not be retrieved.")
+        except RuntimeError as e:
+            unified_response["errors"].append(f"AgentFolio trust score lookup failed for agent_name '{agent_name_for_lookup}': {e}")
+    else:
+        unified_response["errors"].append(f"Cannot lookup AgentFolio profile: No agent_name found for beacon_id '{beacon_id}' in directory.")
+
 
     if unified_response["provenance"] and unified_response["trust_score"]:
         unified_response["status"] = "complete"
@@ -122,7 +129,3 @@ async def agentfolio_beacon_lookup(beacon_id: str) -> str:
         unified_response["errors"].append("No provenance or trust score data found for the given beacon ID.")
 
     return _to_pretty(unified_response)
-
-
-if __name__ == "__main__":
-    mcp.run()
