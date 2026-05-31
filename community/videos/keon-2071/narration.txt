@@ -1,0 +1,5 @@
+Grandma, RustChain is a reward network for useful old computers.
+Mining here means your computer checks in, proves it is a real machine, and helps keep the network alive.
+New computers can join, but older computers get a bigger thank you because they are harder to fake and often get thrown away.
+So instead of sending every old laptop to a drawer or a landfill, RustChain gives it a job and pays small rewards.
+If you have an old computer that still runs, you can install the miner, point rewards to your wallet, and let it help the network.
