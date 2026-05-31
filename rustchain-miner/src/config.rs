@@ -1,4 +1,4 @@
-/// Default node URL (self-signed TLS).
+/// Default node URL.
 #[allow(dead_code)]
 pub const DEFAULT_NODE_URL: &str = "https://50.28.86.131";
 

@@ -11,9 +11,8 @@ pub struct RustChainClient {
 
 impl RustChainClient {
     /// Create a new client for the given node URL.
-    /// Accepts self-signed certificates by default.
-    pub fn new(base_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let client = tls::build_client()?;
+    pub fn new(base_url: &str, insecure: bool) -> Result<Self, Box<dyn std::error::Error>> {
+        let client = tls::build_client(insecure)?;
         Ok(Self {
             client,
             base_url: base_url.trim_end_matches('/').to_string(),
