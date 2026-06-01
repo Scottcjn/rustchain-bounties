@@ -32,7 +32,7 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 
 
 DEFAULT_TARGETS = [
-    {
+    { 
         "owner": "Scottcjn",
         "repo": "rustchain-bounties",
         "issue": 87,
@@ -111,6 +111,17 @@ DEFAULT_TARGETS = [
         "require_bottube_username": False,
         "require_proof_link": True,
         "name": "BoTTube Star + Share Why",
+    },
+    {
+        "owner": "Scottcjn",
+        "repo": "rustchain-bounties",
+        "issue": 2259,
+        "min_account_age_days": 30,
+        "required_stars": [],
+        "require_wallet": True,
+        "require_bottube_username": False,
+        "require_proof_link": True,
+        "name": "CVPR 2026 Acceptance Post",
     },
 ]
 
