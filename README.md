@@ -99,7 +99,6 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 </div>
 
-
 ---
 
 ### Part of the Elyan Labs Ecosystem
@@ -107,3 +106,19 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 - [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
 - [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
 - [GitHub](https://github.com/Scottcjn)
+
+---
+
+### 📖 Available Languages
+
+- [English](README.md)
+- [中文 (Chinese)](README_zh.md)
+- [Deutsch (German)](README.de.md)
+- [Español (Spanish)](README.es.md)
+- [Français (French)](README.fr.md)
+- [Português (Portuguese)](README.pt.md)
+- [日本語 (Japanese)](README.ja.md)
+
+---
+
+*Want to add another language? Open a bounty issue!*
