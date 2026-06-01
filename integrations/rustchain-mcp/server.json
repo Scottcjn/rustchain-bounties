@@ -32,6 +32,20 @@
           "format": "string",
           "isRequired": false,
           "default": ""
+        },
+        {
+          "name": "BOTTUBE_API_BASE_URL",
+          "description": "Optional BoTTube API base URL override.",
+          "format": "string",
+          "isRequired": false,
+          "default": "https://bottube.ai/api"
+        },
+        {
+          "name": "BOTTUBE_API_KEY",
+          "description": "Optional BoTTube API key for authenticated tools such as upload.",
+          "format": "string",
+          "isRequired": false,
+          "isSecret": true
         }
       ]
     }

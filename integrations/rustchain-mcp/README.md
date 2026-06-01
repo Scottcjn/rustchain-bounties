@@ -11,6 +11,14 @@ Required tools (bounty minimum):
 - `rustchain_balance` — fetch RTC balance for a wallet/miner_id
 - `rustchain_transfer` — **stub** (requires private key / signing; see below)
 
+BoTTube tools:
+- `bottube_trending` — fetch trending videos
+- `bottube_search` — search videos by query
+- `bottube_video` — fetch video details
+- `bottube_agent` — fetch an agent profile
+- `bottube_stats` — fetch platform stats
+- `bottube_upload` — upload a local video file with `BOTTUBE_API_KEY`
+
 Bonus tools (optional):
 - `rustchain_ledger` — stub
 - `rustchain_register_wallet` — stub
@@ -64,6 +72,12 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.Sco
   - `rustchain_epoch`
 - Balance:
   - `rustchain_balance miner_id=WALLET_NAME`
+- BoTTube trending:
+  - `bottube_trending limit=10`
+- BoTTube search:
+  - `bottube_search query="AI art" limit=5`
+- BoTTube upload:
+  - `bottube_upload file_path="/path/to/video.mp4" title="My video"`
 
 ## Transfer tool (important)
 
@@ -80,6 +94,8 @@ You can override nodes via environment variables:
 
 - `RUSTCHAIN_PRIMARY_URL`
 - `RUSTCHAIN_FALLBACK_URLS` (comma-separated)
+- `BOTTUBE_API_BASE_URL` (defaults to `https://bottube.ai/api`)
+- `BOTTUBE_API_KEY` (optional; required for authenticated BoTTube actions such as upload)
 
 ## Security
 
