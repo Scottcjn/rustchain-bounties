@@ -1,107 +1,91 @@
-name: Bounty Proof / Claim
-description: Submit proof for a completed bounty, campaign, install report, or payout request
-title: "[CLAIM] "
-labels: [maintenance]
+name: Bounty Proof Submission
+about: Submit proof for completed bounty task
+title: "[BOUNTY PROOF] <brief description>"
+labels: bounty-proof
+assignees: ''
+
 body:
   - type: markdown
     attributes:
       value: |
-        ## Submit Proof for Completed Work
-        Use this form for:
-        - merged PR payout requests
-        - star / follow / referral claims
-        - campaign or content proof
-        - install or compatibility reports
-        - node / miner uptime proof
-        - other completed bounty work
-
-        Do **not** open claim, wallet, or payout issues in product repos like `Rustchain`, `bottube`, or `beacon-skill`.
-
+        ## Bounty Proof Submission
+        
+        Thank you for contributing! Please provide the details of your completed bounty task.
+        
   - type: input
-    id: bounty_issue
+    id: bounty-issue-url
     attributes:
-      label: Bounty issue link
-      description: Link to the bounty definition issue.
-      placeholder: https://github.com/Scottcjn/rustchain-bounties/issues/123
+      label: Bounty Issue URL
+      description: Link to the original bounty issue
+      placeholder: https://github.com/Scottcjn/rustchain-bounties/issues/XXXX
     validations:
       required: true
-
-  - type: dropdown
-    id: claim_type
+      
+  - type: input
+    id: pr-url
     attributes:
-      label: Claim type
-      options:
-        - Merged pull request
-        - Social / campaign proof
-        - Install / health-check report
-        - Content / tutorial / video proof
-        - Node / miner uptime proof
-        - Bug report with no PR
-        - Other
+      label: Pull Request URL
+      description: Link to the PR that fulfills the bounty
+      placeholder: https://github.com/Scottcjn/Rustchain/pull/XXXX
     validations:
       required: true
-
+      
   - type: input
-    id: implementation_link
+    id: review-url
     attributes:
-      label: Related PR / issue / content link
-      description: Link to the merged PR, implementation issue, published content, or main proof item.
-      placeholder: https://github.com/Scottcjn/Rustchain/pull/688
-
+      label: Review URL (if applicable)
+      description: Link to the code review
+      placeholder: https://github.com/Scottcjn/Rustchain/pull/XXXX#pullrequestreview-XXXX
+    validations:
+      required: false
+      
   - type: input
-    id: github_user
+    id: correction-note-url
     attributes:
-      label: GitHub username
-      placeholder: your-github-handle
+      label: Correction Note URL (if applicable)
+      description: Link to any correction note
+      placeholder: https://github.com/Scottcjn/Rustchain/pull/XXXX#issuecomment-XXXX
+    validations:
+      required: false
+      
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      description: GitHub username of the reviewer
+      placeholder: reviewer-username
     validations:
       required: true
-
+      
   - type: input
-    id: rtc_wallet
+    id: miner-id
     attributes:
-      label: RTC wallet name
-      description: Use a RustChain wallet name, not a SOL, ETH, Base, or Ergo address.
-      placeholder: my-wallet-name
+      label: Miner ID
+      description: Your miner identifier
+      placeholder: username-codex
     validations:
       required: true
-
-  - type: input
-    id: platform_identity
-    attributes:
-      label: Related platform identity (optional)
-      description: BoTTube username, agent slug, SaaSCity username, or similar if relevant.
-      placeholder: my-bottube-handle
-
+      
   - type: textarea
     id: summary
     attributes:
-      label: What did you complete?
-      description: Short summary of the completed work.
-      placeholder: Implemented ..., published ..., verified ..., or maintained ...
+      label: Summary
+      description: Brief summary of what was reviewed/completed
+      placeholder: Describe the changes and verification performed...
     validations:
       required: true
-
-  - type: textarea
-    id: proof
-    attributes:
-      label: Proof links and evidence
-      description: Include direct links, screenshots, analytics, logs, or reproducible evidence.
-      placeholder: |
-        - Link 1:
-        - Link 2:
-        - Screenshot / analytics:
-        - Notes:
-    validations:
-      required: true
-
+      
   - type: checkboxes
-    id: checklist
+    id: verification
     attributes:
-      label: Verification checklist
+      label: Verification Checklist
+      description: Confirm the following
       options:
-        - label: I am not using a product repo issue for this claim.
+        - label: I have verified the changes are limited to the intended scope
           required: true
-        - label: I provided an RTC wallet name, not an external chain address.
-          required: true
-        - label: I understand payout is reviewed manually and may be partial or rejected if the proof is weak, duplicated, or out of scope.
-          required: true
+        - label: I have checked that no runtime code or API behavior is changed (if applicable)
+          required: false
+        - label: I have verified command examples preserve executable paths and placeholders
+          required: false
+        - label: I have checked protocol terms and reciprocal links
+          required: false
