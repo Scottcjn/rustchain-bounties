@@ -1,148 +1,189 @@
-# RustChain API Quick Reference
+# RustChain API Reference
 
-> **Base URL:** `https://50.28.86.131`
-> **Version:** 2.2.1-rip200
-> **Protocol:** HTTPS (self-signed cert, use `-k` with curl)
+> Last updated: 2025-04-03
 
-This is a quick-reference supplement to the full [API_REFERENCE.md](./API_REFERENCE.md).
+This document describes the public endpoints available for interacting with RustChain nodes and services.
+
+## Base URL
+
+All API endpoints are served over HTTPS. The primary RustChain block explorer API is:
+
+```
+https://explorer.rustchain.org/api
+```
+
+Attestation nodes also expose a read-only API:
+
+```
+http://<node-ip>:31415/api
+```
+
+## Authentication
+
+Some endpoints require an API key. To obtain one, join the [Discord](https://discord.gg/VqVVS2CW9Q) and request a key in the #dev channel.
 
 ---
 
-## Core Endpoints
+## 1. Block Endpoints
 
-### GET /health
+### `GET /api/block/latest`
 
-Node health check.
+Returns the current tip block.
 
-**Live response fields:**
+**Example:**
+
+```bash
+curl https://explorer.rustchain.org/api/block/latest
+```
+
+**Response:**
 
 ```json
 {
-  "ok": true,
-  "uptime_s": 459718,
-  "backup_age_hours": 5.62,
-  "db_rw": true,
-  "tip_age_slots": 0,
-  "version": "2.2.1-rip200"
+  "height": 123456,
+  "hash": "0xabc...",
+  "timestamp": 1712000000,
+  "miner": "0xdead...",
+  "tx_count": 5
 }
 ```
 
-```bash
-curl -k https://50.28.86.131/health | jq .
-```
+### `GET /api/block/{height}`
 
-### GET /api/stats
+Returns block details by height.
 
-System-wide statistics.
-
-**Live response fields:**
-
-```json
-{
-  "epoch": 162,
-  "total_miners": 661,
-  "block_time": 600,
-  "chain_id": "rustchain-mainnet-v2",
-  "total_balance": 437075.354584,
-  "pending_withdrawals": 0,
-  "version": "2.2.1-security-hardened",
-  "features": ["RIP-0005", "RIP-0008", "RIP-0009", "RIP-0142", "RIP-0143", "RIP-0144"],
-  "security": ["no_mock_sigs", "mandatory_admin_key", "replay_protection", "validated_json"]
-}
-```
+**Example:**
 
 ```bash
-curl -k https://50.28.86.131/api/stats | jq .
-```
-
-### GET /epoch
-
-Current epoch information.
-
-**Live response fields:**
-
-```json
-{
-  "epoch": 162,
-  "slot": 23403,
-  "blocks_per_epoch": 144,
-  "epoch_pot": 1.5,
-  "enrolled_miners": 13,
-  "total_supply_rtc": 8388608
-}
-```
-
-```bash
-curl -k https://50.28.86.131/epoch | jq .
-```
-
-### GET /balance/{miner_pk}
-
-Check miner balance. Replace `{miner_pk}` with your miner ID / wallet name.
-
-```bash
-curl -k https://50.28.86.131/balance/YOUR_MINER_ID
+curl https://explorer.rustchain.org/api/block/100000
 ```
 
 ---
 
-## Quick Examples
+## 2. Transaction Endpoints
 
-### Python
+### `GET /api/tx/{hash}`
 
-```python
-import requests
-import urllib3
-urllib3.disable_warnings()
+Returns transaction details.
 
-BASE = "https://50.28.86.131"
+**Example:**
 
-# Health check
-health = requests.get(f"{BASE}/health", verify=False).json()
-print(f"Node OK: {health['ok']}, uptime: {health['uptime_s']}s")
-
-# Stats
-stats = requests.get(f"{BASE}/api/stats", verify=False).json()
-print(f"Epoch: {stats['epoch']}, Miners: {stats['total_miners']}")
-
-# Current epoch
-epoch = requests.get(f"{BASE}/epoch", verify=False).json()
-print(f"Epoch {epoch['epoch']}, Pot: {epoch['epoch_pot']} RTC")
-
-# Balance
-balance = requests.get(f"{BASE}/balance/YOUR_MINER_ID", verify=False).json()
-print(f"Balance: {balance}")
+```bash
+curl https://explorer.rustchain.org/api/tx/0x123...
 ```
 
-### JavaScript (Node.js)
+**Response:**
 
-```javascript
-const https = require('https');
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-function get(path) {
-  return new Promise((resolve, reject) => {
-    https.get('https://50.28.86.131' + path, res => {
-      let d = '';
-      res.on('data', c => d += c);
-      res.on('end', () => resolve(JSON.parse(d)));
-    }).on('error', reject);
-  });
+```json
+{
+  "hash": "0x123...",
+  "from": "0xabc...",
+  "to": "0xdef...",
+  "value": "10.5",
+  "fee": "0.001",
+  "confirmations": 42
 }
+```
 
-async function main() {
-  const health = await get('/health');
-  console.log('OK:', health.ok, 'Uptime:', health.uptime_s);
+### `POST /api/tx/send`
 
-  const stats = await get('/api/stats');
-  console.log('Epoch:', stats.epoch, 'Miners:', stats.total_miners);
+Broadcasts a signed transaction.
 
-  const epoch = await get('/epoch');
-  console.log('Epoch pot:', epoch.epoch_pot, 'RTC');
+**Request Body:**
+
+```json
+{
+  "raw_tx": "0x...signed_hex..."
 }
-main();
 ```
 
 ---
 
-For the complete API including attestation, enrollment, and withdrawal endpoints, see [API_REFERENCE.md](./API_REFERENCE.md).
+## 3. Node Status Endpoints
+
+### `GET /api/node/health`
+
+Returns health information for all official attestation nodes.
+
+**Example:**
+
+```bash
+curl https://explorer.rustchain.org/api/node/health
+```
+
+**Response:**
+
+```json
+[
+  {
+    "ip": "50.28.86.131",
+    "status": "online",
+    "version": "1.0.0",
+    "uptime": "12h34m",
+    "db_rw": true,
+    "tip_age_sec": 2
+  },
+  {
+    "ip": "50.28.86.153",
+    "status": "online",
+    "version": "1.0.0",
+    "uptime": "12h32m",
+    "db_rw": true,
+    "tip_age_sec": 1
+  },
+  {
+    "ip": "76.8.228.245",
+    "status": "online",
+    "version": "1.0.0",
+    "uptime": "12h30m",
+    "db_rw": true,
+    "tip_age_sec": 3
+  }
+]
+```
+
+### `GET /api/node/{ip}/peers`
+
+Returns peers of a specific node.
+
+---
+
+## 4. Account Endpoints
+
+### `GET /api/account/{address}`
+
+Returns balance and transaction history.
+
+**Example:**
+
+```bash
+curl https://explorer.rustchain.org/api/account/0xdeadbeef...
+```
+
+---
+
+## 5. Explorer Endpoints (Web UI)
+
+| Endpoint | Description |
+|----------|-------------|
+| `/` | Homepage with latest blocks |
+| `/block/{height}` | Block detail page |
+| `/tx/{hash}` | Transaction detail page |
+| `/address/{addr}` | Address detail page |
+| `/mempool` | Pending transactions |
+| `/search?q=...` | Search by block/tx/address |
+
+---
+
+## Error Codes
+
+| HTTP Code | Meaning |
+|-----------|---------|
+| 200 | Success |
+| 400 | Bad request (invalid params) |
+| 404 | Resource not found |
+| 500 | Internal server error |
+
+---
+
+*This document is part of the [RustChain Documentation Sprint](https://github.com/Scottcjn/rustchain-bounties/issues/72).*
