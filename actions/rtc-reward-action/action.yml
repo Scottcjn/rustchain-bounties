@@ -1,0 +1,56 @@
+name: "RTC Reward Action"
+description: "Award RustChain RTC to a contributor when their pull request merges."
+branding:
+  icon: "award"
+  color: "purple"
+inputs:
+  node-url:
+    description: "RustChain node base URL"
+    required: false
+    default: "https://rustchain.org"
+  amount:
+    description: "RTC to award per merged PR"
+    required: false
+    default: "1"
+  wallet-from:
+    description: "Funding (sender) wallet/account on the node"
+    required: false
+    default: ""
+  admin-key:
+    description: "Payout authorization key (store as a repo secret)"
+    required: false
+    default: ""
+  dry-run:
+    description: "If true, only logs/comments the intended payout (no transfer)"
+    required: false
+    default: "true"
+  github-token:
+    description: "Token used to post the confirmation comment"
+    required: false
+    default: ${{ github.token }}
+outputs:
+  awarded:
+    description: "true if a real transfer was made"
+    value: ${{ steps.award.outputs.awarded }}
+  wallet:
+    description: "Resolved recipient RTC wallet (empty if none found)"
+    value: ${{ steps.award.outputs.wallet }}
+  tx:
+    description: "Transfer id/hash when a real transfer was made"
+    value: ${{ steps.award.outputs.tx }}
+runs:
+  using: "composite"
+  steps:
+    - id: award
+      shell: bash
+      run: python3 "${{ github.action_path }}/award_rtc.py"
+      env:
+        INPUT_NODE_URL: ${{ inputs.node-url }}
+        INPUT_AMOUNT: ${{ inputs.amount }}
+        INPUT_WALLET_FROM: ${{ inputs.wallet-from }}
+        INPUT_ADMIN_KEY: ${{ inputs.admin-key }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_REPO: ${{ github.repository }}
+        INPUT_PR_NUMBER: ${{ github.event.pull_request.number }}
+        INPUT_PR_BODY: ${{ github.event.pull_request.body }}
