@@ -1,0 +1,9 @@
+Run command:
+python integrations/exal-gh-33/rustchain_verify.py --wallet RTC14f06ee294f327f5685d3de5e1ed501cffab33e7
+
+Live transcript:
+RustChain live node ok: version=2.2.1-rip200 tip_age_slots=0
+Epoch verified: epoch=182 slot=26343 pot=1.5 RTC
+Miners verified: active=20 enrolled=25 wallet_in_active_set=yes
+Balance verified: wallet=RTC14f06ee294f327f5685d3de5e1ed501cffab33e7 amount_rtc=9.59907
+T2 verification passed
