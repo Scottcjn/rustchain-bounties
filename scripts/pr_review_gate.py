@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """
 PR-Review Bounty Gate — on-arrival adjudication of Bounty #73 code-review claims.
 

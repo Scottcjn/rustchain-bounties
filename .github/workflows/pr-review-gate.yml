@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 name: PR-Review Bounty Gate (#73)
 
 # On-arrival adjudication of code-review bounty claims: verifies the claimant
