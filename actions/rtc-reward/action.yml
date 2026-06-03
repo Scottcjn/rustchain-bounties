@@ -1,0 +1,43 @@
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when a PR is merged'
+author: 'yujinju666'
+branding:
+  icon: 'award'
+  color: 'green'
+
+inputs:
+  node-url:
+    description: 'RustChain node API URL'
+    required: true
+    default: 'https://50.28.86.131'
+  amount:
+    description: 'Amount of RTC to award per merged PR'
+    required: true
+    default: '5'
+  wallet-from:
+    description: 'Source wallet name or address for the reward'
+    required: true
+  admin-key:
+    description: 'Admin private key or API key for signing transactions'
+    required: true
+  dry-run:
+    description: 'Run without actually sending RTC (logs what would happen)'
+    required: false
+    default: 'false'
+  wallet-pattern:
+    description: 'Regex pattern to extract RTC wallet from PR body'
+    required: false
+    default: 'RTC[0-9a-fA-F]{36,44}'
+  comment-template:
+    description: 'Template for the reward comment. Use {{amount}} and {{wallet}}'
+    required: false
+    default: |
+      ## RTC Reward
+
+      This merged PR earned **{{amount}} RTC** — sent to `{{wallet}}`.
+
+      [RustChain Bounty Program](https://github.com/Scottcjn/rustchain-bounties)
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
