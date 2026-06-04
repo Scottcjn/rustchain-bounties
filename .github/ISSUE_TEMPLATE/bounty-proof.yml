@@ -1,107 +1,77 @@
-name: Bounty Proof / Claim
-description: Submit proof for a completed bounty, campaign, install report, or payout request
-title: "[CLAIM] "
-labels: [maintenance]
+name: Bounty Proof Submission
+
+description: Submit proof of completed bounty work for review and reward
+
+labels: ["bounty-claim"]
+
 body:
   - type: markdown
     attributes:
       value: |
-        ## Submit Proof for Completed Work
-        Use this form for:
-        - merged PR payout requests
-        - star / follow / referral claims
-        - campaign or content proof
-        - install or compatibility reports
-        - node / miner uptime proof
-        - other completed bounty work
-
-        Do **not** open claim, wallet, or payout issues in product repos like `Rustchain`, `bottube`, or `beacon-skill`.
-
+        ## Bounty Claim Submission
+        
+        Please provide detailed evidence of your completed bounty work.
+        
   - type: input
-    id: bounty_issue
+    id: bounty-number
     attributes:
-      label: Bounty issue link
-      description: Link to the bounty definition issue.
-      placeholder: https://github.com/Scottcjn/rustchain-bounties/issues/123
-    validations:
-      required: true
-
-  - type: dropdown
-    id: claim_type
-    attributes:
-      label: Claim type
-      options:
-        - Merged pull request
-        - Social / campaign proof
-        - Install / health-check report
-        - Content / tutorial / video proof
-        - Node / miner uptime proof
-        - Bug report with no PR
-        - Other
+      label: Bounty Number
+      description: The number of the bounty you are claiming (e.g., #73)
+      placeholder: "#73"
     validations:
       required: true
 
   - type: input
-    id: implementation_link
+    id: pr-url
     attributes:
-      label: Related PR / issue / content link
-      description: Link to the merged PR, implementation issue, published content, or main proof item.
-      placeholder: https://github.com/Scottcjn/Rustchain/pull/688
-
-  - type: input
-    id: github_user
-    attributes:
-      label: GitHub username
-      placeholder: your-github-handle
+      label: Pull Request URL
+      description: Link to the PR that implements the bounty
+      placeholder: "https://github.com/Scottcjn/Rustchain/pull/6838"
     validations:
       required: true
 
   - type: input
-    id: rtc_wallet
+    id: review-url
     attributes:
-      label: RTC wallet name
-      description: Use a RustChain wallet name, not a SOL, ETH, Base, or Ergo address.
-      placeholder: my-wallet-name
-    validations:
-      required: true
-
-  - type: input
-    id: platform_identity
-    attributes:
-      label: Related platform identity (optional)
-      description: BoTTube username, agent slug, SaaSCity username, or similar if relevant.
-      placeholder: my-bottube-handle
-
-  - type: textarea
-    id: summary
-    attributes:
-      label: What did you complete?
-      description: Short summary of the completed work.
-      placeholder: Implemented ..., published ..., verified ..., or maintained ...
+      label: Review URL
+      description: Link to your code review on the PR
+      placeholder: "https://github.com/Scottcjn/Rustchain/pull/6838#pullrequestreview-4424161691"
     validations:
       required: true
 
   - type: textarea
-    id: proof
+    id: review-substance
     attributes:
-      label: Proof links and evidence
-      description: Include direct links, screenshots, analytics, logs, or reproducible evidence.
+      label: Review Substance
+      description: Describe the substantive feedback you provided in your review (not just rubber-stamping)
       placeholder: |
-        - Link 1:
-        - Link 2:
-        - Screenshot / analytics:
-        - Notes:
+        - Identified unbounded memory growth in SlidingWindowRateLimiter._requests
+        - Flagged burst implementation issues
+        - Suggested concrete fixes (OrderedDict-LRU + sweep)
     validations:
       required: true
 
-  - type: checkboxes
-    id: checklist
+  - type: input
+    id: wallet-address
     attributes:
-      label: Verification checklist
-      options:
-        - label: I am not using a product repo issue for this claim.
-          required: true
-        - label: I provided an RTC wallet name, not an external chain address.
-          required: true
-        - label: I understand payout is reviewed manually and may be partial or rejected if the proof is weak, duplicated, or out of scope.
-          required: true
+      label: Wallet Address (Miner ID)
+      description: Your Rustchain wallet address for receiving the reward
+      placeholder: "RTC51a782cf006436e5134e08049b289639bd8e2116"
+    validations:
+      required: true
+
+  - type: input
+    id: first-reviewer
+    attributes:
+      label: First Substantive Reviewer
+      description: Are you the first person to submit a substantive review on this PR?
+      placeholder: "yes"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information relevant to your claim
+      placeholder: "..."
