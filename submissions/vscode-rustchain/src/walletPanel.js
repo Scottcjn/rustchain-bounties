@@ -96,7 +96,75 @@ class WalletPanel {
       border-radius: 12px;
       padding: 20px;
     }
-    .card h2 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .card h2 { font-size: 14px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+    .card .value { font-size: 28px; font-weight: 600; margin: 8px 0; }
+    .card .label { font-size: 12px; color: var(--muted); }
+    .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+    .status.active { background: var(--success); color: #000; }
+    .status.inactive { background: var(--border); }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+    td { padding: 8px; border-bottom: 1px solid var(--border); }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>RustChain Dashboard</h1>
+  <p class="subtitle">Wallet & Mining Status</p>
+  <div class="loading" id="loading">Loading...</div>
+  <div id="content" style="display:none;">
+    <div class="grid">
+      <div class="card">
+        <h2>Wallet Balance</h2>
+        <div class="value" id="balance">0.00</div>
+        <div class="label">RTC</div>
+      </div>
+      <div class="card">
+        <h2>Miner Status</h2>
+        <div class="value"><span class="status" id="minerStatus">inactive</span></div>
+        <div class="label" id="hashrate">0 H/s</div>
+      </div>
+      <div class="card">
+        <h2>Network</h2>
+        <div class="value" id="blockHeight">0</div>
+        <div class="label">Current Block</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Recent Transactions</h2>
+      <table id="txTable">
+        <thead><tr><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    const vscode = acquireVsCodeApi();
+    window.addEventListener('message', event => {
+      const msg = event.data;
+      if (msg.type === 'update') {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+        document.getElementById('balance').textContent = msg.data.balance.toFixed(2);
+        document.getElementById('minerStatus').textContent = msg.data.miner.active ? 'active' : 'inactive';
+        document.getElementById('minerStatus').className = 'status ' + (msg.data.miner.active ? 'active' : 'inactive');
+        document.getElementById('hashrate').textContent = msg.data.miner.hashrate + ' H/s';
+        document.getElementById('blockHeight').textContent = msg.data.network.blockHeight;
+        const tbody = document.getElementById('txBody');
+        tbody.innerHTML = msg.data.transactions.map(tx => 
+          '<tr><td>' + tx.type + '</td><td>' + tx.amount + '</td><td>' + tx.status + '</td></tr>'
+        ).join('');
+      }
+    });
+  </script>
+</body>
+</html>`;
+  }
+
+  _disposables = [];
+}
+
+module.exports = WalletPanel;xt-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
     .card .value { font-size: 32px; font-weight: 700; color: var(--accent); }
     .card .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
     .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
