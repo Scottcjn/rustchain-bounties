@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Award RTC to a merged PR's contributor.
 
 Resolves the recipient wallet from the PR body (an `RTC<40-hex>` address or a

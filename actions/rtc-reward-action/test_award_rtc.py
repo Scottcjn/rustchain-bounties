@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Unit tests for wallet extraction + dry-run behavior (no network)."""
 import os, tempfile, subprocess, sys
 from award_rtc import extract_wallet, _bool
