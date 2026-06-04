@@ -1,107 +1,64 @@
-name: Bounty Proof / Claim
-description: Submit proof for a completed bounty, campaign, install report, or payout request
-title: "[CLAIM] "
-labels: [maintenance]
+name: Bounty Proof
+
+description: Submit proof of completed bounty work to claim RTC rewards
+
 body:
   - type: markdown
     attributes:
       value: |
-        ## Submit Proof for Completed Work
-        Use this form for:
-        - merged PR payout requests
-        - star / follow / referral claims
-        - campaign or content proof
-        - install or compatibility reports
-        - node / miner uptime proof
-        - other completed bounty work
-
-        Do **not** open claim, wallet, or payout issues in product repos like `Rustchain`, `bottube`, or `beacon-skill`.
+        ## Bounty Claim Form
+        Please provide all required information to process your RTC bounty claim.
 
   - type: input
-    id: bounty_issue
+    id: wallet_address
     attributes:
-      label: Bounty issue link
-      description: Link to the bounty definition issue.
-      placeholder: https://github.com/Scottcjn/rustchain-bounties/issues/123
-    validations:
-      required: true
-
-  - type: dropdown
-    id: claim_type
-    attributes:
-      label: Claim type
-      options:
-        - Merged pull request
-        - Social / campaign proof
-        - Install / health-check report
-        - Content / tutorial / video proof
-        - Node / miner uptime proof
-        - Bug report with no PR
-        - Other
-    validations:
-      required: true
-
-  - type: input
-    id: implementation_link
-    attributes:
-      label: Related PR / issue / content link
-      description: Link to the merged PR, implementation issue, published content, or main proof item.
-      placeholder: https://github.com/Scottcjn/Rustchain/pull/688
-
-  - type: input
-    id: github_user
-    attributes:
-      label: GitHub username
-      placeholder: your-github-handle
-    validations:
-      required: true
-
-  - type: input
-    id: rtc_wallet
-    attributes:
-      label: RTC wallet name
-      description: Use a RustChain wallet name, not a SOL, ETH, Base, or Ergo address.
-      placeholder: my-wallet-name
-    validations:
-      required: true
-
-  - type: input
-    id: platform_identity
-    attributes:
-      label: Related platform identity (optional)
-      description: BoTTube username, agent slug, SaaSCity username, or similar if relevant.
-      placeholder: my-bottube-handle
-
-  - type: textarea
-    id: summary
-    attributes:
-      label: What did you complete?
-      description: Short summary of the completed work.
-      placeholder: Implemented ..., published ..., verified ..., or maintained ...
+      label: Wallet Address
+      description: Your Solana wallet address for receiving RTC rewards
+      placeholder: "AhqbFaPBPLMMiaLDzA9WhQcyvv4hMxiteLhPk3NhG1iG"
     validations:
       required: true
 
   - type: textarea
-    id: proof
+    id: pr_reviews
     attributes:
-      label: Proof links and evidence
-      description: Include direct links, screenshots, analytics, logs, or reproducible evidence.
+      label: PR Reviews
+      description: List all PRs reviewed (format: #PR_NUMBER per line, with repository name)
       placeholder: |
-        - Link 1:
-        - Link 2:
-        - Screenshot / analytics:
-        - Notes:
+        Scottcjn/rustchain-bounties:
+        #12168, #12167, #11036, #12227, #11619, #11631, #11703, #11781, #11534, #11536, #12066, #12115, #12124, #12277, #12276, #12275, #12271, #12269, #12268, #12263, #12259, #12258, #12252, #12251, #12248, #12244, #12243, #12234, #12233, #12231, #12224
+        
+        Scottcjn/RustChain:
+        #6132, #6154, #6155, #6159, #6160, #6162, #6170, #6192, #6199, #6201, #6205, #6208, #6659
+    validations:
+      required: false
+
+  - type: textarea
+    id: emoji_reactions
+    attributes:
+      label: Emoji Reactions
+      description: List repositories and number of reactions contributed
+      placeholder: |
+        Scottcjn/BoTTube: 8 reactions
+        Scottcjn/grazer-skill: 8 reactions
+        Scottcjn/beacon-skill: 6 reactions
+        Scottcjn/clawrtc-rs: 7 reactions
+    validations:
+      required: false
+
+  - type: input
+    id: total_rtc
+    attributes:
+      label: Total RTC Claimed
+      description: Total amount of RTC being claimed
+      placeholder: "31.57"
     validations:
       required: true
 
-  - type: checkboxes
-    id: checklist
+  - type: textarea
+    id: additional_info
     attributes:
-      label: Verification checklist
-      options:
-        - label: I am not using a product repo issue for this claim.
-          required: true
-        - label: I provided an RTC wallet name, not an external chain address.
-          required: true
-        - label: I understand payout is reviewed manually and may be partial or rejected if the proof is weak, duplicated, or out of scope.
-          required: true
+      label: Additional Information
+      description: Any other relevant information or links
+      placeholder: "Optional: provide links to specific comments or evidence"
+    validations:
+      required: false
