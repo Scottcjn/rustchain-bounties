@@ -1,19 +1,17 @@
-# RustChain MCP Server Integration
+tier: T1
+target: rustchain
+language: python
+endpoints_used: [/health, /epoch, /api/miners]
+wallet: RTC1410e82d545ce0b3ffd21ca83e2465a8f2c3a64e
+starred: yes
 
-## Overview
-This integration provides a Model Context Protocol (MCP) server for interacting with RustChain. It allows AI agents to query blockchain data such as wallet balances and block heights directly.
+# RustChain MCP Read Integration
 
-## Capabilities
-- **get_latest_block**: Read the latest block height from the network.
-- **get_balance**: Check the balance of a given RustChain address.
+This submission exposes a small MCP server with read-only RustChain tools backed by a live node.
 
-## How to Run
-```bash
-pip install -r requirements.txt
-python mcp_server.py
-```
+Included tools:
+- `get_health`: fetches `GET /health`
+- `get_epoch`: fetches `GET /epoch`
+- `get_miners`: fetches `GET /api/miners`
 
-## Bounty Info
-- **Bounty:** #13040
-- **Tier:** Tier 3 (MCP Tool)
-- **Payment Wallet:** `RTC1410e82d545ce0b3ffd21ca83e2465a8f2c3a64e`
+Default base URL: `http://rustchain.org:8088`
