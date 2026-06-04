@@ -14,7 +14,7 @@ SAFETY:
   - MAX_PER_RUN aggregate cap (default 40) — hard stop per run, surfaced in log
 Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
 """
-import os, re, json, time, subprocess, urllib.request, urllib.error
+import os, re, json, time, subprocess, ssl, urllib.request, urllib.error
 TOKEN=os.environ["GITHUB_TOKEN"]; ADMIN=os.environ["RTC_ADMIN_KEY"]
 HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
 RATE=float(os.environ.get("RATE_RTC","3")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
@@ -22,13 +22,19 @@ FROM="founder_community"; PORT="8099"; WALLET_RE=re.compile(r'\bRTC[0-9a-fA-F]{4
 def gh(args):
     return subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
         env={**os.environ,"GH_TOKEN":TOKEN}).stdout
+def _post(url, body):
+    ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+    req=urllib.request.Request(url,data=body,method="POST",
+        headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
+    with urllib.request.urlopen(req,timeout=30,context=ctx) as r: return json.loads(r.read())
 def transfer(to,memo,idem):
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":RATE,"memo":memo,"idempotency_key":idem}).encode()
-    req=urllib.request.Request(f"http://{HOST}:{PORT}/wallet/transfer",data=body,method="POST",
-        headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
-    try:
-        with urllib.request.urlopen(req,timeout=30) as r: return True,json.loads(r.read())
-    except Exception as e: return False,str(e)[:160]
+    # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
+    # nginx HTTPS endpoint (the working path); fall back to the internal port.
+    for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
+        try: return True,_post(url,body)
+        except Exception as e: last=str(e)[:160]
+    return False,last
 issues=json.loads(gh(["issue","list","-R",REPO,"--state","open","--limit","400","--json","number,title,labels"]))
 paid=0; total=0.0
 for i in issues:
