@@ -28,7 +28,20 @@ class StatusBar {
         this.apiClient.getBalance(),
         this.apiClient.getNetworkStatus(),
       ]);
-      this._statusBarItem.text = `$(diamond) ${balance.amount} RTC | Epoch ${network.epoch}`;
+      this._statusBarItem.text = `$(icon) ${balance.amount} RTC | Epoch ${network.epoch}`;
+      this._statusBarItem.show();
+    } catch (err) {
+      this._statusBarItem.text = '$(alert) RustChain: Offline';
+      this._statusBarItem.show();
+    }
+  }
+
+  dispose() {
+    this._statusBarItem.dispose();
+  }
+}
+
+module.exports = { StatusBar };tem.text = `$(diamond) ${balance.amount} RTC | Epoch ${network.epoch}`;
       this._statusBarItem.show();
     } catch (err) {
       this._statusBarItem.text = '$(warning) RTC: offline';
