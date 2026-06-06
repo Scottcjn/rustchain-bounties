@@ -7,7 +7,10 @@ const path = require('path');
 // ---- helpers ----
 
 function getInput(name, opts = {}) {
-  const key = `INPUT_${name.replace(/-/g, '_').toUpperCase()}`;
+  // Match @actions/core.getInput's environment variable contract:
+  // spaces become underscores, but hyphens remain hyphens. GitHub sets
+  // `node-url` as `INPUT_NODE-URL`, not `INPUT_NODE_URL`.
+  const key = `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
   const val = process.env[key];
   if (opts.required && (val === undefined || val === '')) {
     throw new Error(`Input required and not supplied: ${name}`);
@@ -202,4 +205,8 @@ async function sendRTC(nodeUrl, from, to, amount, adminKey, memo) {
   return resp.json();
 }
 
-run();
+if (require.main === module) {
+  run();
+}
+
+module.exports = { getInput, extractWallet };
