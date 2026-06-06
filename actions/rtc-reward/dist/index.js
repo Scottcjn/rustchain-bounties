@@ -7,7 +7,7 @@ const path = require('path');
 // ---- helpers ----
 
 function getInput(name, opts = {}) {
-  const key = `INPUT_${name.replace(/-/g, '_').toUpperCase()}`;
+  const key = `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
   const val = process.env[key];
   if (opts.required && (val === undefined || val === '')) {
     throw new Error(`Input required and not supplied: ${name}`);
