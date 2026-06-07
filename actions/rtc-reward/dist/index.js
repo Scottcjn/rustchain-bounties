@@ -124,13 +124,27 @@ async function run() {
   if (!wallet) {
     wallet = await findWalletInRepo(token, apiBase, owner, repo, pr.head.sha, walletPattern);
   }
+  let walletSource = 'pr-body-or-repo';
   if (!wallet) {
-    info(`No RTC wallet found in PR #${prNumber}. Skipping reward.`);
+    // Handle fallback: RustChain treats a contributor's GitHub handle as a valid
+    // wallet identifier (see rustchain-bounties/GIG_APPLICANTS.md), so a PR with
+    // no explicit RTC address still earns — the author can later bind that handle
+    // to an RTC address. Bots are excluded so automation cannot farm rewards.
+    const login = (pr.user && pr.user.login) || '';
+    const isBot = (pr.user && pr.user.type === 'Bot') || /\[bot\]$/i.test(login);
+    if (login && !isBot) {
+      wallet = login;
+      walletSource = 'github-handle-fallback';
+      info(`No RTC wallet in PR #${prNumber}; falling back to GitHub handle wallet: ${wallet}`);
+    }
+  }
+  if (!wallet) {
+    info(`No wallet and no eligible handle for PR #${prNumber} (bot author?). Skipping reward.`);
     setOutput('wallet-found', 'false');
     return;
   }
 
-  info(`Found wallet: ${wallet}`);
+  info(`Found wallet: ${wallet} (source: ${walletSource})`);
   info(`Awarding ${amount} RTC to @${pr.user.login} for PR #${prNumber}`);
 
   if (dryRun) {
