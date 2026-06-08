@@ -49,6 +49,166 @@ def native_wallet(body):
     if re.search(r'\b[1-9A-HJ-NP-Za-km-z]{32,44}\b', b) and "rtc" not in b.lower(): return False
     return None  # unknown -> don't reject on this alone
 
+# Rubber-stamp detector (Bounty #73: "LGTM", generic praise, or emoji
+# reaction does not establish first-reviewer position). Bounty #73
+# explicitly states terse praise with no line-level findings does not
+# establish the first-reviewer slot. The helper logic lives in
+# is_substantive_review() below; this block only defines the phrase list
+# and the regex.
+#
+# Heuristic (intentionally narrow — only flags the obvious cases the
+# 2026-06-06 clarification on issue #73 calls out):
+#   1. Any review with >=1 inline comment is substantive (handled in
+#      is_substantive_review).
+#   2. Any review whose body is long enough to plausibly carry a finding
+#      (>=80 chars after stripping whitespace) is substantive (handled
+#      in is_substantive_review).
+#   3. Any review whose body contains a file path, a line reference
+#      like `L:NN`, a marker like "Ref:", "Finding", "Bug", "Issue:",
+#      "Security", "Risk", "Guard", or a Markdown code fence, is
+#      substantive (caught by _SUBSTANTIVE_MARKER_RE).
+#   4. Emoji-only bodies are rubber-stamps (caught by _EMOJI_ONLY_RE).
+#   5. Bodies that match the canonical "LGTM / great work / thanks"
+#      pattern with no other content are rubber-stamps (caught by
+#      _RUBBER_STAMP_RE). The pattern is anchored at the start (`^\s*`)
+#      but the trailing class only allows whitespace, non-word chars,
+#      and emoji, so a praise phrase that is immediately followed by
+#      substantive text (e.g. "Great work, but the file path is
+#      missing") will NOT match — _SUBSTANTIVE_MARKER_RE.search() will
+#      catch the file path above.
+
+# Substantive-marker regex. Used to detect file paths, line refs, and
+# finding keywords. Defined BEFORE the rubber-stamp regex so the
+# is_substantive_review helper can short-circuit: a body that contains
+# a marker is never rubber-stamp, even if it also starts with a praise
+# phrase.
+_SUBSTANTIVE_MARKER_RE = re.compile(
+    r"(?:"
+    r"\b(?:ref|refs|reference|finding|findings|bug|issue|risk|guard|"
+    r"security|vuln|vulnerability|regression|edge case|missing|broken|"
+    r"leak|panic|null|deref|injection|xss|csrf|race|deadlock|overflow)\b"
+    r"|"
+    r"`[^`]*\.[a-zA-Z0-9]{1,5}`"          # `path.ext`
+    r"|"
+    r"\b[a-zA-Z0-9_./-]+\.(?:py|js|ts|go|rs|java|kt|swift|c|cpp|h|hpp|"
+    r"md|yaml|yml|json|toml|sh|bash)\b"  # bare file path
+    r"|"
+    r"\bL:?\s*\d{1,4}\b"                  # L:123 or L 123 line ref
+    r"|"
+    r"\bline\s*\d{1,4}\b"                 # line 123
+    r"|"
+    r"```"                                # markdown code fence
+    r")",
+    re.IGNORECASE,
+)
+
+# A review body is rubber-stamp iff:
+#   (a) it is short (under 80 chars stripped), AND
+#   (b) it does NOT contain a substantive marker, AND
+#   (c) it starts with (or fully is) one of the canonical praise phrases.
+# This is the helper logic; see is_substantive_review() below. The
+# phrase list is small on purpose: a real review that starts with "Risk:"
+# or "Bug:" is filtered upstream by the substantive-marker check, not by
+# this list. The phrases here are the canonical "LGTM / great work /
+# thanks / appreciate" patterns plus the universal praise emoji.
+_RUBBER_STAMP_PHRASES = (
+    "lgtm", "lgtm!", "great work", "great contribution", "great work on this",
+    "nice work", "nice!", "nice job", "awesome", "awesome!",
+    "looks good", "looks great", "ship it", "shipit", "approved!",
+    "excellent", "excellent contribution", "appreciate", "appreciated",
+    "appreciate the work", "thanks", "thanks!", "thanks for", "thank you",
+    "thx", "thnx", "great pr", "great review", "great catch", "great find",
+    "good work", "good job", "well done", "wonderful", "fantastic", "amazing",
+)
+# Regex for "body is essentially just praise." The pattern matches if the
+# body STARTS with a praise phrase and is short enough that the rest of
+# the body cannot contain a substantive marker. Concretely: the body
+# must be <= 100 chars AND consist of (whitespace + praise phrase +
+# trailing punctuation/emoji/whitespace).
+_RUBBER_STAMP_RE = re.compile(
+    r"^\s*(?:" + "|".join(re.escape(p) for p in _RUBBER_STAMP_PHRASES) + r")"
+    r"[\s\W"
+    r"\U0001F300-\U0001FAFF"
+    r"\U0001F600-\U0001F64F"
+    r"\U0001F680-\U0001F6FF"
+    r"\U0001F1E0-\U0001F1FF"
+    r"\u2600-\u27BF"
+    r"]*$",
+    re.IGNORECASE | re.UNICODE,
+)
+# Emoji-only detector: any body that is purely emoji + whitespace +
+# non-word punctuation is a rubber-stamp, regardless of length. The
+# Bounty #73 source explicitly calls out "an emoji reaction" as not
+# establishing first-reviewer position.
+_EMOJI_ONLY_RE = re.compile(
+    r"^[\s\W"
+    r"\U0001F300-\U0001FAFF"                  # symbols + pictographs
+    r"\U0001F600-\U0001F64F"                  # emoticons
+    r"\U0001F680-\U0001F6FF"                  # transport
+    r"\U0001F1E0-\U0001F1FF"                  # flags
+    r"\u2600-\u27BF"                          # misc symbols + dingbats
+    r"]+$",
+    re.UNICODE,
+)
+
+
+def is_substantive_review(review, inline_count=0):
+    """Return True iff the review carries actionable, line-level findings.
+
+    Order of checks matters. Bounty #73's 2026-06-06 clarification says
+    "LGTM", generic praise, and emoji reactions do not establish
+    first-reviewer position. A real review names a file/line and a
+    concrete issue or risk. The helper returns False (rubber-stamp) for
+    any review that fails every positive signal:
+
+      1. >= 1 inline (line-level) review comment          -> substantive
+      2. non-empty body whose first non-blank word is a
+         substantive marker (file path, line ref, "Ref:", "Bug:",
+         "Risk:", "Security", etc.)                      -> substantive
+      3. body length (stripped) >= 80 chars AND the body
+         is not pure emoji                                -> substantive
+      4. short body that is just praise + emoji           -> rubber-stamp
+      5. short body with no marker                        -> rubber-stamp
+         (Bounty #73 explicitly says terse praise without findings
+         is not substantive; default-deny matches the spec.)
+      6. empty body                                        -> rubber-stamp
+    """
+    if inline_count and inline_count > 0:
+        return True
+    body = (review.get("body") or "").strip()
+    if not body:
+        return False
+    # Substantive marker short-circuit: a body that names a file, line, or
+    # finding keyword is never a rubber-stamp, even if it ALSO starts with
+    # a praise phrase (e.g. "Great catch on the file path bug in
+    # `app/foo.py`" — kept).
+    if _SUBSTANTIVE_MARKER_RE.search(body):
+        return True
+    # Emoji-only body is always a rubber-stamp, regardless of length.
+    if _EMOJI_ONLY_RE.match(body):
+        return False
+    # Body starts with a praise phrase and is short: rubber-stamp.
+    # The regex's trailing class allows only whitespace, non-word chars,
+    # and emoji, so a praise phrase that is immediately followed by
+    # substantive text (e.g. "Great work, but the file path is missing")
+    # will NOT match this regex — `_SUBSTANTIVE_MARKER_RE.search` already
+    # caught the "file path" marker above.
+    if _RUBBER_STAMP_RE.match(body):
+        return False
+    # Long body without an explicit marker: presumed substantive (a
+    # real review with line-level findings usually exceeds 80 chars and
+    # the marker regex is intentionally narrow).
+    if len(body) >= 80:
+        return True
+    # Short body, no marker, not a praise phrase, not emoji-only. Default
+    # to rubber-stamp because Bounty #73 explicitly excludes terse
+    # praise. A borderline case like "Move this constant to a
+    # module-level enum" (30 chars, no marker) is also a rubber-stamp by
+    # this rule; reviewers with terse-but-real feedback should add a
+    # `Ref:` prefix or a file path to be sure.
+    return False
+
+
 def comment(n, body): api(f"/repos/{REPO}/issues/{n}/comments","POST",{"body":body})
 def add_label(n, lab): api(f"/repos/{REPO}/issues/{n}/labels","POST",{"labels":[lab]})
 def close(n, reason_comment):
@@ -72,12 +232,25 @@ def main():
         add_label(NUM,"needs-human"); comment(NUM,f"🤖 Gate: couldn't read reviews for {TARGET}#{pr} (private/deleted?). Flagged for human review."); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
-    first = rv[0]["user"]["login"] if rv else None
-    body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
     inl = api(f"/repos/{TARGET}/pulls/{pr}/comments?per_page=100") or []
-    inline = sum(1 for c in inl if c.get("user",{}).get("login")==author)
+    # Per-author inline counts (so the rubber-stamp filter is per-review).
+    author_inline = {}
+    for c in inl:
+        login = (c.get("user") or {}).get("login")
+        if login:
+            author_inline[login] = author_inline.get(login, 0) + 1
+    # Filter out rubber-stamp reviews before picking the first substantive
+    # reviewer. If a review has no inline comments, run it through
+    # is_substantive_review(); if it has any inline comments, it is
+    # substantive by definition.
+    substantive = [r for r in rv if is_substantive_review(
+        r, inline_count=author_inline.get(r["user"]["login"], 0)
+    )]
+    first = substantive[0]["user"]["login"] if substantive else None
+    body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
+    inline = author_inline.get(author, 0)
     if first != author:
-        close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {TARGET}#{pr} was first reviewed by **{first or 'someone else'}**, not @{author}. Path back: review PRs where you're the first reviewer."); return
+        close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {TARGET}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
     if inline==0 and body_len<120:
         close(NUM,f"🤖 Gate: your review of {TARGET}#{pr} has no inline comments and no substantive summary — Bounty #73 requires a **substantive line-level review**, not a bare approval."); return
     # cap check: count author's existing bounty-eligible issues
