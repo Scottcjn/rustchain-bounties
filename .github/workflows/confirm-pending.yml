@@ -1,0 +1,58 @@
+name: Confirm Pending RTC Transfers
+
+# Hourly delivery-stage job: initiated RTC transfers sit in a 24h pending/void
+# window, then must be confirmed via POST /pending/confirm. The node bounds each
+# call to a batch (Rustchain#6900: default 100, max 500), so a single call no
+# longer drains the whole queue. This job therefore LOOPS, passing limit=500 and
+# repeating until stale_pending_count == 0 (or no further progress), so the full
+# past-void-window backlog is delivered every run regardless of size.
+#
+# The 24h void window remains the safety review: void a suspect transfer within
+# 24h and this never confirms it.
+on:
+  schedule:
+    - cron: '23 * * * *'   # hourly
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rtc-confirm-pending
+  cancel-in-progress: false
+
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Drain all past-void-window pending transfers
+        env:
+          RTC_VPS_HOST: ${{ secrets.RTC_VPS_HOST }}
+          RTC_ADMIN_KEY: ${{ secrets.RTC_ADMIN_KEY }}
+        run: |
+          if [ -z "$RTC_VPS_HOST" ] || [ -z "$RTC_ADMIN_KEY" ]; then
+            echo "::error::RTC_VPS_HOST / RTC_ADMIN_KEY not configured"; exit 1
+          fi
+          total=0
+          # Safety cap: 60 iterations * 500 = up to 30,000 transfers/run.
+          for i in $(seq 1 60); do
+            code=$(curl -sk -o resp.json -w '%{http_code}' --max-time 60 \
+              -X POST "https://${RTC_VPS_HOST}/pending/confirm" \
+              -H "X-Admin-Key: ${RTC_ADMIN_KEY}" \
+              -H "Content-Type: application/json" -d '{"limit": 500}')
+            if [ "$code" != "200" ]; then echo "::error::confirm HTTP $code"; cat resp.json; exit 1; fi
+            read confirmed stale < <(python3 - <<'PY'
+          import json
+          d = json.load(open('resp.json'))
+          print(d.get('confirmed_count', 0), d.get('stale_pending_count', 0))
+          PY
+          )
+            total=$((total + confirmed))
+            echo "iter $i: confirmed=$confirmed total=$total stale_remaining=$stale"
+            # Stop when the queue is drained, or a run makes no progress (e.g. all
+            # remaining rows error individually) to avoid spinning.
+            [ "${stale:-0}" -eq 0 ] && { echo "queue drained"; break; }
+            [ "${confirmed:-0}" -eq 0 ] && { echo "no progress this iter; stopping"; break; }
+          done
+          echo "confirmed $total transfer(s) this run"
