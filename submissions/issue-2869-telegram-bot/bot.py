@@ -73,7 +73,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @rate_limit
 async def miners(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        data = await fetch_json("/api/miners")
+        data = await fetch_json("/miners")
         if data:
             miners_list = data.get("miners", [])
             total = data.get("pagination", {}).get("total", len(miners_list))
