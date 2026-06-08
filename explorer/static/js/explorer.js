@@ -1,0 +1,13 @@
+// ...
+
+// Fix the trailing whitespace issue
+function normalizeMinersResponse(response) {
+    // ...
+}
+
+function renderMinersTable(miners) {
+    // ...
+}
+
+// Remove trailing whitespace
+// ...
