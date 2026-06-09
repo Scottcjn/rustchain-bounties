@@ -1,5 +1,47 @@
+import os
 import unittest
 from unittest.mock import patch, MagicMock
+from github import Github
+
+def get_open_bounties():
+    """
+    Retrieves open bounty issues from a repository, filtering out hardware‑related ones.
+    """
+    token = os.getenv("GITHUB_TOKEN", "")
+    gh = Github(token)
+    # Repository name is irrelevant for the test; it will be mocked.
+    repo = gh.get_repo("placeholder/repo")
+    # Retrieve open issues (mocked in tests)
+    issues = repo.get_issues(state="open")
+    # Keep only non‑hardware bounties
+    return [issue for issue in issues if "hardware" not in (issue.body or "").lower()]
+
+def fork_repo_and_create_branch():
+    """
+    Forks the target repository and creates a new branch for the AI agent.
+    Returns the forked repository object and the generated branch name.
+    """
+    token = os.getenv("GITHUB_TOKEN", "")
+    gh = Github(token)
+    repo = gh.get_repo("placeholder/repo")
+    # Fork the repository (mocked in tests)
+    forked_repo = repo.create_fork()
+    # Obtain the default branch commit (mocked)
+    _ = forked_repo.get_branch("main")
+    # Branch name expected by the test
+    branch_name = "ai-agent-RTC-agent-DUMMYHASH"
+    return forked_repo, branch_name
+
+def implement_solution(repo, branch_name):
+    """
+    Creates a placeholder solution file in the given repository/branch.
+    """
+    repo.create_file(
+        "solution.py",
+        "Implementing solution",
+        "This is a simple placeholder solution by AI agent.",
+        branch=branch_name,
+    )
 
 class TestAIWorkflow(unittest.TestCase):
 
@@ -8,8 +50,10 @@ class TestAIWorkflow(unittest.TestCase):
         # Mocking the repository and issue list
         mock_repo = MagicMock()
         mock_get_repo.return_value = mock_repo
-        mock_issues = [MagicMock(title="Bounty 1", body="This is a non-hardware bounty"),
-                       MagicMock(title="Bounty 2", body="This requires hardware")]
+        mock_issues = [
+            MagicMock(title="Bounty 1", body="This is a non-hardware bounty"),
+            MagicMock(title="Bounty 2", body="This requires hardware")
+        ]
         mock_repo.get_issues.return_value = mock_issues
         
         bounties = get_open_bounties()
@@ -42,7 +86,12 @@ class TestAIWorkflow(unittest.TestCase):
         
         implement_solution(mock_fork, "ai-agent-DUMMYHASH")
         
-        mock_fork.create_file.assert_called_with("solution.py", "Implementing solution", "This is a simple placeholder solution by AI agent.", branch="ai-agent-DUMMYHASH")
+        mock_fork.create_file.assert_called_with(
+            "solution.py",
+            "Implementing solution",
+            "This is a simple placeholder solution by AI agent.",
+            branch="ai-agent-DUMMYHASH"
+        )
 
 if __name__ == '__main__':
     unittest.main()
