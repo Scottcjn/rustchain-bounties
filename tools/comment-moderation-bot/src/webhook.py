@@ -71,6 +71,37 @@ logger: logging.Logger = logging.getLogger(__name__)
 # --------------------------------------------------------------------------- #
 
 
+class WebhookResponse:
+    """Simple HTTP response container for webhook handlers."""
+    
+    def __init__(self, status_code: int, body: str) -> None:
+        self.status_code = status_code
+        self.body = body
+
+
+def handle_webhook(payload: object) -> WebhookResponse:
+    """Handle incoming webhook payload with validation and error handling.
+    
+    Args:
+        payload: The incoming webhook payload (should be a dict).
+        
+    Returns:
+        WebhookResponse with appropriate status code and body.
+    """
+    try:
+        validate_payload(payload)
+        # If validation passes, process the webhook (placeholder)
+        return WebhookResponse(200, "OK")
+    except ValidationError as e:
+        # Return 400 with the validation error message
+        logger.warning(f"Validation error: {e.message}", extra={"details": e.details})
+        return WebhookResponse(400, e.message)
+    except Exception as e:
+        # Log unexpected errors and return 500
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+        return WebhookResponse(500, "Internal server error")
+
+
 def validate_payload(payload: object) -> None:
     """Validate the structure and required fields of a webhook payload.
 
@@ -81,6 +112,15 @@ def validate_payload(payload: object) -> None:
         ValidationError: If the payload is not a ``dict``, is missing required
             keys, or contains invalid field types/contents.
     """
+    if payload is None:
+        raise ValidationError("Payload must be a non-object.", details={"payload": "non-object"})
+    
+    if isinstance(payload, list):
+        raise ValidationError("Payload must be an object, not a list.", details={"payload": "expected an object"})
+    
+    if isinstance(payload, str):
+        raise ValidationError("Malformed payload: expected JSON object.", details={"payload": "malformed"})
+    
     if not isinstance(payload, dict):
         raise ValidationError("Payload must be a JSON object.", details={"payload": "expected object"})
 

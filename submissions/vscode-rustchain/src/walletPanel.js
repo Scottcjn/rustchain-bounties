@@ -97,6 +97,63 @@ class WalletPanel {
       padding: 20px;
     }
     .card h2 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .card .value { font-size: 28px; font-weight: 600; margin: 8px 0; }
+    .card .label { font-size: 12px; color: var(--muted); }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .status.active { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+    .status.inactive { background: rgba(148, 163, 184, 0.1); color: var(--muted); }
+    .tx-list { list-style: none; }
+    .tx-item { padding: 12px; border-bottom: 1px solid var(--border); }
+    .tx-item:last-child { border-bottom: none; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>🦀 RustChain Dashboard</h1>
+  <p class="subtitle">Monitor your wallet, miner status, and network activity</p>
+  <div id="content" class="loading">Loading dashboard...</div>
+  <script>
+    (function() {
+      const vscode = acquireVsCodeApi();
+      window.addEventListener('message', event => {
+        const message = event.data;
+        if (message.type === 'update') {
+          renderDashboard(message.data);
+        }
+      });
+      function renderDashboard(data) {
+        const content = document.getElementById('content');
+        content.className = '';
+        content.innerHTML = \`
+          <div class="grid">
+            <div class="card">
+              <h2>Wallet Balance</h2>
+              <div class="value">\${data.balance || '0.00'} RTC</div>
+            </div>
+            <div class="card">
+              <h2>Miner Status</h2>
+              <div class="value"><span class="status \${data.miner?.active ? 'active' : 'inactive'}">\${data.miner?.active ? 'Active' : 'Inactive'}</span></div>
+              <div class="label">\${data.miner?.hashrate || '0'} H/s</div>
+            </div>
+            <div class="card">
+              <h2>Network</h2>
+              <div class="value">\${data.network?.blockHeight || '0'}</div>
+              <div class="label">Block Height</div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Recent Transactions</h2>
+            <ul class="tx-list">
+              \${(data.transactions || []).map(tx => \`<li class="tx-item">\${tx.hash} - \${tx.amount} RTC</li>\`).join('')}
+            </ul>
+          </div>
+        \`;
+      }
+    })();
+  </script>
+</body>
+</html>\`;
+  }xt-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
     .card .value { font-size: 32px; font-weight: 700; color: var(--accent); }
     .card .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
     .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
