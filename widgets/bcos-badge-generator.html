@@ -104,7 +104,8 @@ function extractCertId(input) {
   // GitHub URL → extract owner/repo
   const ghMatch = input.match(/github\.com\/([^\/]+\/[^\/]+)/);
   if (ghMatch) return 'pending-' + ghMatch[1].replace(/\//g, '-');
-  return input;
+  // Security fix: sanitize fallback to prevent XSS by stripping unsafe characters
+  return input.replace(/[^a-zA-Z0-9_\-]/g, '');
 }
 
 function showTab(tab) {
