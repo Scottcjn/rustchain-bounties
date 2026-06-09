@@ -75,6 +75,38 @@ def _find_handle_in_text(text):
         if m:
             return m.group(1)
     return None
+def _load_canonical_wallets():
+    """Parse docs/CLAIMANTS.md into {handle_lower: native_RTC_wallet}.
+
+    Canonical registry: a handle listed here is ALWAYS paid to its registered
+    native wallet, regardless of what an individual claim body says. Only native
+    `RTC[0-9a-fA-F]{40}` rows are honored. Missing/garbled file -> empty map
+    (resolution falls back to per-claim parsing).
+    """
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "CLAIMANTS.md")
+    out = {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                if "|" not in line:
+                    continue
+                cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                if len(cells) < 2:
+                    continue
+                handle, wallet = cells[0], cells[1]
+                m = WALLET_RE.search(wallet)
+                if handle and m and not handle.lower().startswith(("github handle", "---")):
+                    out[handle.lower()] = m.group(0)
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"::warning::could not parse CLAIMANTS.md: {e}")
+    return out
+
+
+CANONICAL_WALLETS = _load_canonical_wallets()
+
+
 def gh(args):
     return subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
         env={**os.environ,"GH_TOKEN":TOKEN}).stdout
@@ -153,8 +185,10 @@ def _looks_like_handle(token):
            "the", "my", "your", "this", "pending", "see", "comment", "issue"}
     return token.lower() not in bad
 def resolve_wallet(issue_body, comments, claimant_login=None):
-    """Return (wallet, source) where source is 'native' | 'handle' | None.
+    """Return (wallet, source) where source is 'canonical' | 'native' | 'handle' | None.
     Resolution order:
+      0. Canonical registry (docs/CLAIMANTS.md) for claimant_login — ALWAYS wins
+         so a registered contributor's payouts can't fragment across handle/wallet.
       1. Native `RTC[0-9a-fA-F]{40}` in the issue body (preferred).
       2. `Wallet: <handle>` line in the issue body, when it parses as a
          plausible GitHub login.
@@ -162,6 +196,9 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
       4. `claimant_login` (the PR author) if it is a plausible login and not
          a bot. Caller is responsible for bot-excluding.
     """
+    # 0. Canonical registry — registered handle always maps to its native wallet.
+    if claimant_login and claimant_login.lower() in CANONICAL_WALLETS:
+        return CANONICAL_WALLETS[claimant_login.lower()], "canonical"
     body = issue_body or ""
     wm = WALLET_RE.search(body)
     if wm:
