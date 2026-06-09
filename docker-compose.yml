@@ -1,0 +1,6 @@
+# Update the nginx service to reload the configuration
+version: '3'
+services:
+  nginx:
+    # ...
+    restart: always
