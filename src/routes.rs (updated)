@@ -1,0 +1,13 @@
+// Update the Hall of Fame API handler to use the new logic
+use actix_web::{web, HttpResponse};
+use crate::hall_of_fame::get_hall_of_fame;
+
+pub fn routes(cfg: &mut web::ServiceConfig) {
+    // ... existing routes ...
+
+    // Update the Hall of Fame API route to use the new logic
+    cfg.route("/api/hall_of_fame", web::get().to(async move || {
+        let hall_of_fame = get_hall_of_fame().await;
+        HttpResponse::Ok().json(hall_of_fame)
+    }));
+}
