@@ -6,7 +6,7 @@ Reviewed PR: https://github.com/Scottcjn/Rustchain/pull/7227
 
 Review: https://github.com/Scottcjn/Rustchain/pull/7227#pullrequestreview-4460220067
 
-Claim comment: https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4661457658
+Claim comment: https://github.com/Scottcjn/rustchain-bounties/issues/2782#issuecomment-4661461598
 
 Reviewer: @MolhamHamwi
 
