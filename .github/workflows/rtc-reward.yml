@@ -1,0 +1,55 @@
+name: RTC Reward for Merged PR
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  payout:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+          # Install the local SDK
+          pip install -e ./sdk/python
+
+      - name: Extract RTC Wallet Address
+        id: wallet
+        run: |
+          # Search for RTC address in PR body and comments
+          # Pattern: RTC + 40 hex characters
+          BODY="${{ github.event.pull_request.body }}"
+          ADDRESS=$(echo "$BODY" | grep -oE "RTC[a-f0-9]{40}" | head -n 1)
+          
+          if [ -z "$ADDRESS" ]; then
+            echo "Wallet address not found in PR body. Checking comments..."
+            # This is a simplified version; in production, we'd use gh api to get comments
+            ADDRESS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[] | .body' | grep -oE "RTC[a-f0-9]{40}" | head -n 1)
+          fi
+          
+          if [ -z "$ADDRESS" ]; then
+            echo "❌ No RTC wallet address found. Payout skipped."
+            echo "result=skipped" >> $GITHUB_OUTPUT
+          else
+            echo "Found wallet: $ADDRESS"
+            echo "address=$ADDRESS" >> $GITHUB_OUTPUT
+            echo "result=found" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute Payout
+        if: steps.wallet.outputs.result == 'found'
+        env:
+          REWARD_WALLET_SEED: ${{ secrets.REWARD_WALLET_SEED }}
+        run: |
+          # Reward amount is 1 RTC by default, could be parameterized
+          python tools/rtc_payout.py ${{ steps.wallet.outputs.address }} 1
