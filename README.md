@@ -11,7 +11,7 @@
 
 **131 open bounties · 5,900+ RTC available · No experience required for many tasks**
 
-[![Total Paid](https://img.shields.io/badge/Total%20Paid-22%2C756%20RTC-gold)](BOUNTY_LEDGER.md)
+[![Total Paid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Frustchain.org%2Fpayouts.json&query=%24.total_paid_rtc&label=Total%20Paid&suffix=%20RTC&color=gold)](BOUNTY_LEDGER.md)
 
 [Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
 
@@ -19,9 +19,11 @@
 
 ---
 
+> 📄 **This bounty program is the subject of a published empirical self-audit** — *Incentive Moves Engagement, Not Authorship* (v1.0, 2026): the bounty attractor moved engagement ~3.7× and pulled one of the largest reported agent-contributor populations in open source (169+ automation-consistent accounts, ~8,400 PRs analyzed), while authorship stayed majority-human. [DOI: 10.5281/zenodo.20559770](https://doi.org/10.5281/zenodo.20559770)
+
 ## What is RTC?
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.10 USD**.
+**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.15 USD**.
 
 Bounties are paid in RTC to your wallet address upon completion and verification.
 
@@ -70,6 +72,7 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 | [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
 | [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
 | [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
+| [A2A Transaction Badge](https://github.com/Scottcjn/rustchain-bounties/issues/693) | 5 RTC/tx (max 3) | Easy |
 
 ## Quick Links
 
@@ -99,7 +102,6 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 </div>
 
-
 ---
 
 ### Part of the Elyan Labs Ecosystem
@@ -107,3 +109,19 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 - [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
 - [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
 - [GitHub](https://github.com/Scottcjn)
+
+---
+
+### 📖 Available Languages
+
+- [English](README.md)
+- [中文 (Chinese)](README_zh.md)
+- [Deutsch (German)](README.de.md)
+- [Español (Spanish)](README.es.md)
+- [Français (French)](README.fr.md)
+- [Português (Portuguese)](README.pt.md)
+- [日本語 (Japanese)](README.ja.md)
+
+---
+
+*Want to add another language? Open a bounty issue!*

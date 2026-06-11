@@ -1,0 +1,5 @@
+Grandma, RustChain is a reward jar for old computers.
+Instead of throwing an old laptop in a drawer, you let it help keep a public notebook honest.
+Mining here means the computer checks in and helps with the notebook.
+Older machines get a bonus because they are rarer, like a well-used cast-iron pan.
+RustChain turns useful old hardware into a small thank-you.
