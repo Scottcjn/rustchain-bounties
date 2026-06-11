@@ -1,0 +1,27 @@
+name: RTC Reward
+
+on:
+  pull_request:
+    types: [merged]
+
+jobs:
+  payout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install rustchain-sdk
+      - name: Payout RTC
+        env:
+          RTC_WALLET: ${{ secrets.RTC_WALLET }}
+          RTC_PASSWORD: ${{ secrets.RTC_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python tools/rtc_payout.py --wallet $RTC_WALLET --password $RTC_PASSWORD --github-token $GITHUB_TOKEN --pr ${GITHUB_EVENT_NUMBER} --approved-bounty true --dedupe true
