@@ -276,8 +276,10 @@ def main():
         close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {target}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
     if inline==0 and body_len<120:
         close(NUM,f"🤖 Gate: your review of {target}#{pr} has no inline comments and no substantive summary — Bounty #73 requires a **substantive line-level review**, not a bare approval."); return
-    # cap check: count author's existing bounty-eligible issues
-    elig=api(f"/search/issues?q=repo:{REPO}+label:bounty-eligible+author:{author}+type:issue") or {}
+    # cap check: count author's existing bounty-eligible issues ORG-WIDE
+    # (user:Scottcjn spans every repo, so the per-contributor cap stays global
+    # even though the gate now runs in both rustchain-bounties and Rustchain).
+    elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue") or {}
     if elig.get("total_count",0)>=CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
     add_label(NUM,"bounty-eligible")
