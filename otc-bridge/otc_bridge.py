@@ -1,16 +1,29 @@
 """
-OTC Bridge Module - Main migration logic for OTC trading tables.
+OTC Bridge Module - Safe migration for OTC trading tables.
 
-This module provides functionality to migrate precision columns in OTC trading
-tables (orders and trades) with security hardening against identifier injection.
+IMPORTANT DESIGN NOTE:
+SQLite DDL statements (ALTER TABLE) auto-commit any pending transaction.
+This means wrapping ALTER TABLE in BEGIN/COMMIT is NOT concurrency safe —
+if two ALTER TABLEs run and the second fails, the first is already committed
+and cannot be rolled back.
+
+Instead, this module uses:
+1. Pre-flight checks: Verify column existence BEFORE attempting to add
+2. Idempotent operations: Each ALTER TABLE is standalone (no cross-DDL transactions)
+3. Schema version tracking: Track which migrations have been applied
+4. Graceful error recovery: If a column already exists (concurrent race), handle it
 """
 
 import logging
+import os
 import sqlite3
-from typing import Dict, List, Optional, Tuple, Any, Set, Union
+from typing import Dict, List, Optional, Tuple, Any
 
-# Configure module logger
 logger = logging.getLogger(__name__)
+
+# ============================================================
+# Configuration
+# ============================================================
 
 # Known tables that are allowed for migration operations
 _KNOWN_TABLES: Tuple[str, ...] = ("orders", "trades")
@@ -23,146 +36,97 @@ _PRECISION_COLUMNS: Tuple[str, ...] = (
 )
 
 # Default value for precision columns
-_DEFAULT_PRECISION: int = 0
+_DEFAULT_PRECISION: int = 8
 
-# SQLite error message for duplicate column
+# SQLite error substring for duplicate column
 _DUPLICATE_COLUMN_ERROR: str = "duplicate column name"
 
 
+# ============================================================
+# Allowlist validation (defense-in-depth against injection)
+# ============================================================
+
 def _require_known_table(table_name: str) -> None:
     """
-    Validate that the table_name is in the allowlist of known tables.
-    
-    This function provides defense-in-depth against identifier injection attacks
-    by ensuring only whitelisted table names can be used in SQL operations.
-    
-    Args:
-        table_name: The name of the table to validate.
-        
-    Raises:
-        ValueError: If table_name is not in _KNOWN_TABLES.
-        TypeError: If table_name is not a string.
+    Validate that table_name is in the allowlist.
+    Defense-in-depth against SQL identifier injection.
     """
     if not isinstance(table_name, str):
         raise TypeError(f"table_name must be a string, got {type(table_name).__name__}")
-    
     if not table_name:
         raise ValueError("table_name cannot be empty")
-    
     if table_name not in _KNOWN_TABLES:
         raise ValueError(
-            f"Unknown table '{table_name}'. Allowed tables: {', '.join(_KNOWN_TABLES)}"
+            f"Unknown table '{table_name}'. Allowed: {', '.join(_KNOWN_TABLES)}"
         )
-    
-    logger.debug(f"Table '{table_name}' validated against known tables allowlist")
 
 
-def _validate_connection(conn: sqlite3.Connection) -> None:
-    """
-    Validate that the database connection is valid and open.
-    
-    Args:
-        conn: Database connection to validate.
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection.
-        sqlite3.Error: If the connection is closed or invalid.
-    """
-    if not isinstance(conn, sqlite3.Connection):
-        raise TypeError(f"Expected sqlite3.Connection, got {type(conn).__name__}")
-    
-    try:
-        # Test if connection is alive
-        conn.execute("SELECT 1")
-    except sqlite3.Error as e:
-        logger.error(f"Database connection validation failed: {e}")
-        raise
-
+# ============================================================
+# Schema inspection
+# ============================================================
 
 def table_columns(conn: sqlite3.Connection, table_name: str) -> List[Dict[str, Any]]:
-    """
-    Get column information for a given table.
-    
-    Retrieves detailed column metadata including column ID, name, type,
-    not-null constraint, default value, and primary key status.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table to inspect.
-        
-    Returns:
-        List of dictionaries containing column information with keys:
-        - cid: Column ID
-        - name: Column name
-        - type: Column data type
-        - notnull: Not-null constraint flag
-        - dflt_value: Default value
-        - pk: Primary key flag
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection or table_name is not a string.
-        ValueError: If table_name is not in the known tables allowlist.
-        sqlite3.Error: If there's a database error.
-    """
-    _validate_connection(conn)
+    """Get column metadata for a table."""
     _require_known_table(table_name)
-    
-    logger.info(f"Retrieving column information for table '{table_name}'")
-    
-    try:
-        cursor = conn.execute(f"PRAGMA table_info({table_name})")
-        columns: List[Dict[str, Any]] = []
-        for row in cursor.fetchall():
-            column_info: Dict[str, Any] = {
-                "cid": row[0],
-                "name": row[1],
-                "type": row[2],
-                "notnull": bool(row[3]),
-                "dflt_value": row[4],
-                "pk": bool(row[5]),
-            }
-            columns.append(column_info)
-        
-        logger.debug(f"Found {len(columns)} columns in table '{table_name}'")
-        return columns
-        
-    except sqlite3.Error as e:
-        logger.error(f"Failed to get column info for table '{table_name}': {e}")
-        raise
+    cursor = conn.execute(f"PRAGMA table_info({table_name})")
+    return [
+        {
+            "cid": row[0],
+            "name": row[1],
+            "type": row[2],
+            "notnull": bool(row[3]),
+            "dflt_value": row[4],
+            "pk": bool(row[5]),
+        }
+        for row in cursor.fetchall()
+    ]
 
 
-def _column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
-    """
-    Check if a column exists in the specified table.
-    
-    Performs a case-sensitive comparison of column names to ensure accurate
-    detection of existing columns.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table.
-        column_name: Name of the column to check.
-        
-    Returns:
-        True if the column exists, False otherwise.
-        
-    Raises:
-        TypeError: If any argument has invalid type.
-        ValueError: If table_name is not in the known tables allowlist.
-        sqlite3.Error: If there's a database error.
-    """
-    if not isinstance(column_name, str):
-        raise TypeError(f"column_name must be a string, got {type(column_name).__name__}")
-    
-    if not column_name:
-        raise ValueError("column_name cannot be empty")
-    
-    columns = table_columns(conn, table_name)
-    exists = any(col["name"] == column_name for col in columns)
-    
-    logger.debug(f"Column '{column_name}' in table '{table_name}': {'exists' if exists else 'does not exist'}")
-    return exists
+def column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
+    """Check if a column exists in the table."""
+    cols = table_columns(conn, table_name)
+    return any(col["name"] == column_name for col in cols)
 
+
+# ============================================================
+# Migration schema tracking
+# ============================================================
+
+def _ensure_migration_table(conn: sqlite3.Connection) -> None:
+    """Create migration tracking table if it doesn't exist."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS _schema_migrations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_name TEXT NOT NULL,
+            column_name TEXT NOT NULL,
+            applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(table_name, column_name)
+        )
+    """)
+    conn.commit()
+
+
+def _is_migration_applied(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
+    """Check if a specific column migration has been applied."""
+    cursor = conn.execute(
+        "SELECT 1 FROM _schema_migrations WHERE table_name = ? AND column_name = ?",
+        (table_name, column_name)
+    )
+    return cursor.fetchone() is not None
+
+
+def _mark_migration_applied(conn: sqlite3.Connection, table_name: str, column_name: str) -> None:
+    """Record a migration as applied. Uses INSERT OR IGNORE for idempotency."""
+    conn.execute(
+        "INSERT OR IGNORE INTO _schema_migrations (table_name, column_name) VALUES (?, ?)",
+        (table_name, column_name)
+    )
+    conn.commit()
+
+
+# ============================================================
+# Safe column addition (no cross-DDL transactions)
+# ============================================================
 
 def _add_precision_column(
     conn: sqlite3.Connection,
@@ -170,43 +134,49 @@ def _add_precision_column(
     column_name: str
 ) -> bool:
     """
-    Add a single precision column to the specified table.
-    
-    Handles concurrent migration races by catching duplicate column errors.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table.
-        column_name: Name of the column to add.
-        
-    Returns:
-        True if column was added, False if it already existed.
-        
-    Raises:
-        sqlite3.Error: If there's a database error other than duplicate column.
+    Add a single precision column.
+
+    Each ALTER TABLE is standalone — no transaction wrapping.
+    If this succeeds, the change is permanent (SQLite DDL auto-commits).
+    If another process adds the same column concurrently, we catch
+    the "duplicate column name" error gracefully.
+
+    This is SAFE because:
+    - We check column existence BEFORE attempting the ALTER
+    - If concurrent ALTER wins the race, our ALTER fails harmlessly
+    - We track applied migrations in _schema_migrations table
     """
-    if _column_exists(conn, table_name, column_name):
-        logger.info(f"Column '{column_name}' already exists in table '{table_name}', skipping")
+    # Pre-flight check
+    if column_exists(conn, table_name, column_name):
+        logger.info("Column '%s' already exists in '%s', skipping", column_name, table_name)
         return False
-    
+
+    if _is_migration_applied(conn, table_name, column_name):
+        logger.info("Migration for '%s'.'%s' already tracked, skipping", table_name, column_name)
+        return False
+
     try:
+        # Each ALTER TABLE is its own implicit transaction (DDL auto-commits)
         conn.execute(
             f"ALTER TABLE {table_name} ADD COLUMN {column_name} "
             f"INTEGER DEFAULT {_DEFAULT_PRECISION}"
         )
-        logger.info(f"Added column '{column_name}' to table '{table_name}'")
+        # Record the migration
+        _mark_migration_applied(conn, table_name, column_name)
+        logger.info("Added column '%s' to '%s'", column_name, table_name)
         return True
-        
+
     except sqlite3.OperationalError as e:
         error_msg: str = str(e).lower()
         if _DUPLICATE_COLUMN_ERROR in error_msg:
-            # Column was added by another process in concurrent migration
+            # Concurrent migration added the column first — log and continue
             logger.warning(
-                f"Column '{column_name}' in table '{table_name}' was added "
-                f"by concurrent migration, skipping"
+                "Column '%s' in '%s' was added concurrently, tracking migration",
+                column_name, table_name
             )
+            _mark_migration_applied(conn, table_name, column_name)
             return False
-        logger.error(f"Failed to add column '{column_name}' to table '{table_name}': {e}")
+        logger.error("Failed to add column '%s' to '%s': %s", column_name, table_name, e)
         raise
 
 
@@ -215,43 +185,18 @@ def _backfill_null_values(
     table_name: str,
     column_name: str
 ) -> int:
-    """
-    Backfill NULL values in a precision column with the default value.
-    
-    Uses COALESCE for idempotent convergence on re-runs.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table.
-        column_name: Name of the column to backfill.
-        
-    Returns:
-        Number of rows updated.
-        
-    Raises:
-        sqlite3.Error: If there's a database error.
-    """
-    try:
-        cursor = conn.execute(
-            f"UPDATE {table_name} SET {column_name} = "
-            f"COALESCE({column_name}, {_DEFAULT_PRECISION}) "
-            f"WHERE {column_name} IS NULL"
-        )
-        updated_rows: int = cursor.rowcount
-        if updated_rows > 0:
-            logger.info(
-                f"Backfilled {updated_rows} NULL values in column "
-                f"'{column_name}' of table '{table_name}'"
-            )
-        return updated_rows
-        
-    except sqlite3.Error as e:
-        logger.error(
-            f"Failed to backfill NULL values in column "
-            f"'{column_name}' of table '{table_name}': {e}"
-        )
-        raise
+    """Backfill NULL values in a precision column."""
+    cursor = conn.execute(
+        f"UPDATE {table_name} SET {column_name} = "
+        f"COALESCE({column_name}, {_DEFAULT_PRECISION}) "
+        f"WHERE {column_name} IS NULL"
+    )
+    return cursor.rowcount
 
+
+# ============================================================
+# Migration orchestration
+# ============================================================
 
 def migrate_precision_columns(
     conn: sqlite3.Connection,
@@ -259,103 +204,61 @@ def migrate_precision_columns(
 ) -> Dict[str, Any]:
     """
     Migrate precision columns for a given table.
-    
-    Adds missing precision columns and backfills NULL values.
-    This function is idempotent and safe for concurrent execution.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table to migrate.
-        
+
+    Key design decisions (addressing Scottcjn's concerns):
+    1. NO wrapping of multiple ALTER TABLEs in a single transaction.
+       Each ALTER TABLE auto-commits independently. This is correct
+       SQLite behavior — DDL always auto-commits regardless of BEGIN/COMMIT.
+    2. Pre-flight column existence check + tracking table for idempotency.
+    3. Error recovery: if an ALTER TABLE fails, previously applied ones
+       are already committed (and tracked) — no data loss.
+    4. Idempotent: running multiple times is safe.
+
     Returns:
-        Dictionary containing migration results:
-        - table: Table name
-        - columns_added: List of columns that were added
-        - columns_skipped: List of columns that already existed
-        - rows_backfilled: Total number of rows backfilled
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection or table_name is not a string.
-        ValueError: If table_name is not in the known tables allowlist.
-        sqlite3.Error: If there's a database error.
+        Dict with migration results.
     """
-    _validate_connection(conn)
     _require_known_table(table_name)
-    
-    logger.info(f"Starting precision column migration for table '{table_name}'")
-    
+    _ensure_migration_table(conn)
+
+    logger.info("Starting precision column migration for '%s'", table_name)
+
     result: Dict[str, Any] = {
         "table": table_name,
         "columns_added": [],
         "columns_skipped": [],
         "rows_backfilled": 0,
     }
-    
-    try:
-        # Begin transaction for atomicity
-        conn.execute("BEGIN TRANSACTION")
-        
-        for column_name in _PRECISION_COLUMNS:
-            if _add_precision_column(conn, table_name, column_name):
-                result["columns_added"].append(column_name)
-            else:
-                result["columns_skipped"].append(column_name)
-            
-            # Backfill NULL values for each column
-            rows_updated: int = _backfill_null_values(conn, table_name, column_name)
-            result["rows_backfilled"] += rows_updated
-        
-        # Commit the transaction
-        conn.execute("COMMIT")
-        
-        logger.info(
-            f"Migration completed for table '{table_name}': "
-            f"added {len(result['columns_added'])} columns, "
-            f"skipped {len(result['columns_skipped'])} columns, "
-            f"backfilled {result['rows_backfilled']} rows"
-        )
-        
-        return result
-        
-    except sqlite3.Error as e:
-        # Rollback on error
-        conn.execute("ROLLBACK")
-        logger.error(
-            f"Migration failed for table '{table_name}': {e}"
-        )
-        raise
+
+    for column_name in _PRECISION_COLUMNS:
+        if _add_precision_column(conn, table_name, column_name):
+            result["columns_added"].append(column_name)
+        else:
+            result["columns_skipped"].append(column_name)
+
+        # Backfill NULL values
+        rows_updated: int = _backfill_null_values(conn, table_name, column_name)
+        result["rows_backfilled"] += rows_updated
+
+    logger.info(
+        "Migration for '%s': added=%d skipped=%d backfilled=%d",
+        table_name,
+        len(result["columns_added"]),
+        len(result["columns_skipped"]),
+        result["rows_backfilled"],
+    )
+    return result
 
 
-def migrate_all_tables(
-    conn: sqlite3.Connection
-) -> Dict[str, Dict[str, Any]]:
-    """
-    Migrate precision columns for all known tables.
-    
-    Performs migration on all tables in the _KNOWN_TABLES allowlist.
-    
-    Args:
-        conn: Database connection.
-        
-    Returns:
-        Dictionary mapping table names to their migration results.
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection.
-        sqlite3.Error: If there's a database error.
-    """
-    _validate_connection(conn)
-    
-    logger.info("Starting migration for all known tables")
-    
+def migrate_all_tables(conn: sqlite3.Connection) -> Dict[str, Dict[str, Any]]:
+    """Migrate precision columns for all known tables."""
+    _ensure_migration_table(conn)
+
     results: Dict[str, Dict[str, Any]] = {}
-    
     for table_name in _KNOWN_TABLES:
         try:
-            result: Dict[str, Any] = migrate_precision_columns(conn, table_name)
-            results[table_name] = result
+            results[table_name] = migrate_precision_columns(conn, table_name)
         except (ValueError, sqlite3.Error) as e:
-            logger.error(f"Failed to migrate table '{table_name}': {e}")
+            logger.error("Failed to migrate '%s': %s", table_name, e)
             results[table_name] = {
                 "table": table_name,
                 "error": str(e),
@@ -363,112 +266,31 @@ def migrate_all_tables(
                 "columns_skipped": [],
                 "rows_backfilled": 0,
             }
-    
-    logger.info(f"Migration completed for {len(results)} tables")
     return results
 
 
-def get_migration_status(
-    conn: sqlite3.Connection,
-    table_name: str
-) -> Dict[str, Any]:
-    """
-    Get the current migration status for a given table.
-    
-    Checks which precision columns exist and which are missing.
-    
-    Args:
-        conn: Database connection.
-        table_name: Name of the table to check.
-        
-    Returns:
-        Dictionary containing migration status:
-        - table: Table name
-        - existing_columns: List of precision columns that exist
-        - missing_columns: List of precision columns that are missing
-        - is_complete: True if all precision columns exist
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection or table_name is not a string.
-        ValueError: If table_name is not in the known tables allowlist.
-        sqlite3.Error: If there's a database error.
-    """
-    _validate_connection(conn)
+def get_migration_status(conn: sqlite3.Connection, table_name: str) -> Dict[str, Any]:
+    """Get current migration status for a table."""
     _require_known_table(table_name)
-    
-    logger.info(f"Checking migration status for table '{table_name}'")
-    
-    try:
-        existing_columns: List[str] = []
-        missing_columns: List[str] = []
-        
-        for column_name in _PRECISION_COLUMNS:
-            if _column_exists(conn, table_name, column_name):
-                existing_columns.append(column_name)
-            else:
-                missing_columns.append(column_name)
-        
-        status: Dict[str, Any] = {
-            "table": table_name,
-            "existing_columns": existing_columns,
-            "missing_columns": missing_columns,
-            "is_complete": len(missing_columns) == 0,
-        }
-        
-        logger.info(
-            f"Migration status for table '{table_name}': "
-            f"{len(existing_columns)} columns exist, "
-            f"{len(missing_columns)} columns missing"
-        )
-        
-        return status
-        
-    except sqlite3.Error as e:
-        logger.error(f"Failed to get migration status for table '{table_name}': {e}")
-        raise
-
-
-def validate_migration_complete(
-    conn: sqlite3.Connection
-) -> bool:
-    """
-    Validate that all migrations are complete for all known tables.
-    
-    Checks if all precision columns exist in all known tables.
-    
-    Args:
-        conn: Database connection.
-        
-    Returns:
-        True if all migrations are complete, False otherwise.
-        
-    Raises:
-        TypeError: If conn is not a sqlite3.Connection.
-        sqlite3.Error: If there's a database error.
-    """
-    _validate_connection(conn)
-    
-    logger.info("Validating migration completion for all tables")
-    
-    try:
-        all_complete: bool = True
-        
-        for table_name in _KNOWN_TABLES:
-            status: Dict[str, Any] = get_migration_status(conn, table_name)
-            if not status["is_complete"]:
-                logger.warning(
-                    f"Migration incomplete for table '{table_name}': "
-                    f"missing columns: {status['missing_columns']}"
-                )
-                all_complete = False
-        
-        if all_complete:
-            logger.info("All migrations are complete")
+    existing = []
+    missing = []
+    for col in _PRECISION_COLUMNS:
+        if column_exists(conn, table_name, col):
+            existing.append(col)
         else:
-            logger.warning("Some migrations are incomplete")
-        
-        return all_complete
-        
-    except sqlite3.Error as e:
-        logger.error(f"Failed to validate migration completion: {e}")
-        raise
+            missing.append(col)
+    return {
+        "table": table_name,
+        "existing_columns": existing,
+        "missing_columns": missing,
+        "is_complete": len(missing) == 0,
+    }
+
+
+def validate_migration_complete(conn: sqlite3.Connection) -> bool:
+    """Validate all migrations are complete."""
+    all_complete = all(
+        get_migration_status(conn, table_name)["is_complete"]
+        for table_name in _KNOWN_TABLES
+    )
+    return all_complete
