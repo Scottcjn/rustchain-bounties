@@ -33,33 +33,77 @@ We take security seriously at Rustchain. If you discover a security vulnerabilit
 
 ### Bounty Rewards
 
-Security-related contributions are eligible for RTC token rewards:
+Security-related contributions are eligible for RTC token rewards.
 
-| Severity | Reward |
-| -------- | ------ |
-| Critical (consensus, funds at risk) | 100-150 RTC |
-| High (data leak, auth bypass) | 75-100 RTC |
-| Medium (DoS, logic error) | 20-50 RTC |
-| Low (info disclosure, best practice) | 1-10 RTC |
+**Rates were reduced 2026-06-11 as RTC's reference value rose** (1,300+ holding
+wallets; reference rate stepped up, so nominal RTC per finding steps down to keep
+USD-equivalent value per finding stable). The anchor is **USD value per finding**,
+not a fixed RTC number.
 
-### Scope
+| Severity | Reward | USD-equiv anchor | Example |
+| -------- | ------ | ---------------- | ------- |
+| **Critical** | **50 RTC** | ~$10 | Remote fund theft, RCE, consensus break, or auth bypass **on a live node/wallet endpoint** |
+| **High** | **25 RTC** | ~$5 | Privilege escalation or sensitive-data exposure on a **deployed** surface |
+| **Medium** | **13 RTC** | ~$2.50 | Limited-impact logic flaw or DoS on a **deployed** surface, with PoC |
+| **Low** | **5 RTC** | ~$1 | Minor info disclosure on a **deployed** surface, with PoC |
+| Out of scope | **0 RTC** | — | Acknowledged with thanks, not paid (see below) |
 
-The following are in scope for security reports:
+Severity is assigned by the maintainer based on **demonstrated impact on a
+deployed surface**, not on the reporter's self-rated CVSS. A "CRITICAL" label on a
+theoretical or undeployed-code finding does not make it payable.
 
-- Consensus mechanism vulnerabilities
-- Proof-of-Antiquity validation bypasses
-- Hardware fingerprinting spoofing
-- Solana bridge (wRTC) contract issues
-- API authentication/authorization flaws
-- Denial of service vectors
-- Cryptographic weaknesses
+### Deployment Scope (READ THIS BEFORE FILING)
 
-### Out of Scope
+A security finding is **only payable if it includes a working proof-of-concept
+against a named, deployed, reachable surface** from the in-scope list below.
+"It would be exploitable if this code were deployed" is **not** a payable finding —
+it is a code-quality note. This section exists to prevent generalized-security
+scope creep; please respect it.
 
-- Social engineering attacks
-- Issues in dependencies (report upstream)
-- Issues requiring physical access to hardware
-- Theoretical attacks without proof of concept
+**In scope — deployed, reachable surfaces (payable with PoC):**
+
+- **Live attestation nodes** — `rustchain.org`, `50.28.86.131`, `50.28.86.153`
+  (consensus, `/wallet/transfer*`, `/attest/*`, epoch settlement, admin endpoints)
+- **Live BoTTube** — `bottube.ai` (the deployed Flask app and its public APIs)
+- **Distributed client artifacts** — the `clawrtc` package and the miner clients
+  shipped to users (anything that handles real keys, funds, or attestation)
+- **Solana / Base bridge (wRTC)** — only the **deployed** contract/bridge, with a
+  concrete on-chain or live-endpoint PoC
+- **Proof-of-Antiquity validation & hardware-fingerprint spoofing** — against the
+  **live** attestation flow, with evidence the spoof is accepted on a real node
+
+**Out of scope — not payable (acknowledged, not rewarded):**
+
+- **Undeployed / reference / scaffold / example code.** Code checked into a repo
+  for reference or as a tier/demo implementation (e.g. `otc-bridge/`,
+  `command-center/`, dashboard demos, anything not running on a surface in the
+  in-scope list) is **out of scope** until proven deployed and reachable. If you
+  believe it *is* deployed, your report must include the live URL and a PoC hit.
+- **Generalized / best-practice / "defense-in-depth" notes** with no concrete
+  exploit against a live surface: missing security headers, wildcard CORS on a
+  non-deployed runtime, "OpenAPI security scheme defined but not applied,"
+  verbose error messages, missing rate limits, etc.
+- **Theoretical attacks without a working PoC.**
+- **Dependency CVEs** without a demonstrated exploit path in our actual usage
+  (report upstream; we track our own deps separately).
+- **Self-DoS or findings that require already-held admin credentials.**
+- **Findings against forks, third-party code, or another user's account.**
+- **Social engineering attacks** (but see the impersonation appendix below —
+  reporting an impersonation *pattern* protects contributors; it is not itself a
+  paid vuln).
+- **Issues requiring physical access to hardware.**
+
+### Filing Rules (anti-scope-creep)
+
+1. **One finding per issue.** Do not bundle, and do not split one finding across
+   several issues to multiply claims.
+2. **Name the deployed surface and include a reproducible PoC** (the exact request
+   + observed response). No surface named → out of scope by default.
+3. **Do not re-file or escalate while a report is under triage.** A growing
+   backlog does not get reviewed faster.
+4. Maintainer assigns final severity and scope. Good-faith out-of-scope reports
+   are acknowledged with thanks but are not paid — please don't treat
+   acknowledgment as a payment promise.
 
 ## Security Best Practices for Contributors
 
