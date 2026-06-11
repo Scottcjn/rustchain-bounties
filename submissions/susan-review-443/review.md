@@ -1,17 +1,19 @@
-# RustChain Review — Bounty #443
+# RustChain Review - Bounty #443
 
-RustChain is an interesting experiment because it treats mining hardware as part of the chain's story, not just invisible infrastructure. The Proof-of-Antiquity idea gives older machines a narrative role: vintage hardware can matter instead of being dismissed as obsolete.
+**GitHub:** `Thanhdn1984`
 
-What I like:
+**Resources I checked:**
+- RustChain website
+- GitHub repo / START_HERE and README documentation
+- PyPI package page for `clawrtc`
+- Live health endpoint: `curl -k https://50.28.86.131/health` returned `ok: true`, version `2.2.1-rip200`
 
-- The bounty board is unusually clear. Rewards, difficulty labels, and submission rules are visible from the start.
-- The project documents anti-hallucination rules for AI contributors. That is practical and healthy: contributors are told to verify real endpoints and file paths before submitting work.
-- The ecosystem framing is consistent: node health checks, miner docs, dashboards, and content bounties all point toward making the network easier to inspect and explain.
+**My review:**
+RustChain feels refreshingly concrete: there is a live chain, a simple Python-facing miner/wallet package, and an active GitHub workflow rather than just a whitepaper. The rough edge is onboarding clarity - the project spans website, node/explorer, wallet, PyPI, and bounties, but a newcomer has to piece together the safest "start here" path manually. I would recommend it to technical friends who enjoy small experimental chains, with the caveat that they should expect early-project friction.
 
-What I would improve:
+**One thing I'd improve:**
+Add a single beginner quickstart that covers wallet creation, explorer check, mining basics, and where bounty payout IDs/wallet addresses fit.
 
-- Add a short "first 10 minutes" path for brand-new contributors: install, call the health endpoint, inspect one explorer page, then choose one tiny bounty.
-- Keep a small list of currently recommended beginner bounties near the top of the README so newcomers do not have to search through many historical issues.
-- Add one visual diagram showing how a miner, node, explorer, and RTC payout flow relate.
+**RTC wallet:** `RTC802c0ff127cdc1b0b82d40ccb1bab5519198bd17`
 
-Overall: RustChain feels most compelling when it combines technical verifiability with community tasks. The best direction is to keep making every bounty easy to validate: real endpoint, real file path, clear proof, small scope.
+**Issue comment:** https://github.com/Scottcjn/rustchain-bounties/issues/443#issuecomment-4562624670
