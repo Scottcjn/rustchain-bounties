@@ -1,0 +1,20 @@
+name: RTC Reward on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  reward:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: foreverzyf/rtc-reward-action@v1
+        with:
+          node-url: https://50.28.86.131
+          amount: 5
+          wallet-from: project-fund
+          admin-key: ${{ secrets.RTC_ADMIN_KEY }}

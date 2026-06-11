@@ -1,12 +1,22 @@
-# RTC Reward Action
+# RTC Reward GitHub Action
 
-GitHub Action that automatically awards RTC tokens when a pull request is merged. Turns any GitHub repo into a bounty platform with one YAML file.
+Automatically award RTC tokens to contributors when their pull requests are merged.
+
+## Features
+
+- ✅ Configurable RTC amount per merge
+- ✅ Reads contributor wallet from PR body or `.rtc-wallet` file
+- ✅ Posts confirmation comment on PR
+- ✅ Dry-run mode for testing
+- ✅ Ready for GitHub Marketplace
 
 ## Usage
 
+Create `.github/workflows/rtc-reward.yml` in your repository:
+
 ```yaml
-# .github/workflows/rtc-reward.yml
-name: RTC Reward
+name: RTC Reward on PR Merge
+
 on:
   pull_request:
     types: [closed]
@@ -16,7 +26,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: Scottcjn/rtc-reward-action@v1
+      - uses: foreverzyf/rtc-reward-action@v1
         with:
           node-url: https://50.28.86.131
           amount: 5
@@ -24,33 +34,33 @@ jobs:
           admin-key: ${{ secrets.RTC_ADMIN_KEY }}
 ```
 
-## How Contributors Set Their Wallet
-
-Contributors add their RTC wallet address in the PR body:
-
-```
-Wallet: RTC99e36a40635b8527979fd1c4e6280fdfa176e715
-```
-
-Or the repo maintainer places a `.rtc-wallet` file in the repo root.
-
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `node-url` | Yes | — | RustChain node API URL |
-| `amount` | Yes | — | RTC to award per merged PR |
-| `wallet-from` | Yes | — | Source wallet for rewards |
-| `admin-key` | Yes | — | Admin key for signing |
-| `dry-run` | No | `false` | Log actions without sending transactions |
-| `wallet-pattern` | No | `RTC[0-9a-fA-F]{36,44}` | Regex to find wallet in PR body |
-| `comment-template` | No | Built-in | Template for reward comment |
+| `node-url` | Yes | `https://50.28.86.131` | RustChain node URL |
+| `amount` | Yes | `5` | RTC amount to award |
+| `wallet-from` | Yes | - | Source wallet for sending |
+| `admin-key` | Yes | - | Admin private key (use GitHub Secret) |
+| `dry-run` | No | `false` | Test mode (no transactions) |
 
-## Outputs
+## How Contributors Add Their Wallet
 
-| Output | Description |
-|--------|-------------|
-| `wallet-found` | `true` or `false` |
-| `wallet` | The detected wallet address |
-| `amount` | RTC amount awarded |
-| `pr-number` | PR that triggered the reward |
+Contributors can add their RTC wallet in two ways:
+
+1. **In PR description**: Include `RTC...` address anywhere in the PR body
+2. **`.rtc-wallet` file**: Add a `.rtc-wallet` file to the repo root with their address
+
+## Example PR Description
+
+```markdown
+## Changes
+Fixed bug in validator...
+
+## Wallet
+My RTC wallet: RTCa1b2c3d4e5f6...
+```
+
+## License
+
+MIT
