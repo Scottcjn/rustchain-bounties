@@ -10,20 +10,11 @@ Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
-Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format.
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total.
 
 ## Reviews Submitted
 
-### 1. Scottcjn/Rustchain#5826 - Changes Requested
-
-Review: https://github.com/Scottcjn/Rustchain/pull/5826#pullrequestreview-4325964711
-
-Summary:
-- Found that blank optional certificate IDs sent as `cert_id: null` are rejected before generated-ID fallback.
-- Found that some new validation branches return HTTP 200 with `success: false`, with tests accepting both 400 and 200.
-- Ran Windows syntax and diff checks for the touched badge generator files.
-
-### 2. Scottcjn/Rustchain#5827 - Changes Requested
+### 1. Scottcjn/Rustchain#5827 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5827#pullrequestreview-4325994162
 
@@ -31,7 +22,7 @@ Summary:
 - Found the same browser-compatible `cert_id: null` regression in malformed badge payload handling.
 - Ran Windows `py_compile` and diff checks for the touched badge generator files.
 
-### 3. Scottcjn/Rustchain#5828 - Approved
+### 2. Scottcjn/Rustchain#5828 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5828#pullrequestreview-4326013045
 
@@ -39,7 +30,7 @@ Summary:
 - Verified bridge status data is written beside the dashboard.
 - Ran `python -m pytest tests\test_static_bridge_update_stats.py -q --noconftest -o addopts=''` on Windows: 3 passed.
 
-### 4. Scottcjn/Rustchain#5946 - Approved
+### 3. Scottcjn/Rustchain#5946 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5946#pullrequestreview-4329613039
 
@@ -47,7 +38,7 @@ Summary:
 - Verified consensus probe miner envelope counting.
 - Ran focused Windows pytest for consensus probe tests: 14 passed.
 
-### 5. Scottcjn/Rustchain#5947 - Approved
+### 4. Scottcjn/Rustchain#5947 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5947#pullrequestreview-4329923948
 
@@ -55,7 +46,7 @@ Summary:
 - Verified GitHub Contents API SHA lookup hardening in the tip bot.
 - Ran `python -m pytest integrations\rustchain-bounties\test_tip_bot.py -q --noconftest -o addopts=''` on Windows: 66 passed.
 
-### 6. Scottcjn/Rustchain#5948 - Approved
+### 5. Scottcjn/Rustchain#5948 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5948#pullrequestreview-4329906432
 
@@ -63,7 +54,7 @@ Summary:
 - Verified DexScreener wRTC price payload hardening.
 - Ran `python -m pytest tests\test_wrtc_price_bot.py -q --noconftest -o addopts=''` on Windows: 3 passed.
 
-### 7. Scottcjn/Rustchain#5949 - Approved
+### 6. Scottcjn/Rustchain#5949 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5949#pullrequestreview-4329914319
 
@@ -71,7 +62,7 @@ Summary:
 - Verified Locust load-test malformed JSON failure handling.
 - Ran `python -m pytest tests\test_locust_load_suite.py -q --noconftest -o addopts=''` on Windows: 5 passed.
 
-### 8. Scottcjn/Rustchain#5951 - Changes Requested
+### 7. Scottcjn/Rustchain#5951 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5951#pullrequestreview-4329573977
 
@@ -80,7 +71,7 @@ Summary:
 - Reproduced `TypeError: '<' not supported between instances of 'str' and 'int'` with malformed `views` and `videos_posted`.
 - Ran focused Windows digest tests: 13 passed.
 
-### 9. Scottcjn/Rustchain#5953 - Approved
+### 8. Scottcjn/Rustchain#5953 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5953#pullrequestreview-4329598768
 
@@ -88,7 +79,7 @@ Summary:
 - Verified vintage validator warning preservation.
 - Ran `python -m pytest tests\test_validate_vintage_submission.py -q --noconftest -o addopts=''` on Windows: 7 passed.
 
-### 10. Scottcjn/Rustchain#5954 - Approved
+### 9. Scottcjn/Rustchain#5954 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5954#pullrequestreview-4329625477
 
@@ -96,7 +87,7 @@ Summary:
 - Verified empty interaction metadata preservation.
 - Ran `python -m pytest tests\test_interactions.py -q --noconftest -o addopts=''` on Windows: 27 passed.
 
-### 11. Scottcjn/Rustchain#5955 - Changes Requested
+### 10. Scottcjn/Rustchain#5955 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5955#pullrequestreview-4329857690
 
@@ -104,7 +95,7 @@ Summary:
 - Found that the focused parasocial test suite leaves SQLite temp DB files locked on Windows.
 - Reproduced 19 failures from `PermissionError: [WinError 32]` during cleanup.
 
-### 12. Scottcjn/Rustchain#5956 - Approved
+### 11. Scottcjn/Rustchain#5956 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5956#pullrequestreview-4329848843
 
@@ -112,7 +103,7 @@ Summary:
 - Verified low-verbosity personality text truncation chooses the earliest sentence terminator.
 - Ran `python -m pytest tests\test_personality.py -q --noconftest -o addopts=''` on Windows: 29 passed.
 
-### 13. Scottcjn/Rustchain#5957 - Changes Requested
+### 12. Scottcjn/Rustchain#5957 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5957#pullrequestreview-4329809272
 
@@ -121,7 +112,7 @@ Summary:
 - Reproduced Windows teardown errors from locked SQLite temp DB files.
 - Ran focused collab tests: 24 passed, 24 teardown errors.
 
-### 14. Scottcjn/Rustchain#5958 - Approved
+### 13. Scottcjn/Rustchain#5958 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5958#pullrequestreview-4329795174
 
@@ -129,7 +120,7 @@ Summary:
 - Verified discovery tag matching treats `%` and `_` literally.
 - Ran `python -m pytest tests\test_discovery.py -q --noconftest -o addopts=''` on Windows: 28 passed.
 
-### 15. Scottcjn/Rustchain#5959 - Approved
+### 14. Scottcjn/Rustchain#5959 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5959#pullrequestreview-4329820434
 
@@ -137,7 +128,7 @@ Summary:
 - Verified invalid onboarding metadata JSON returns a controlled error.
 - Ran `python -m pytest tests\test_bottube_onboarding_example.py -q --noconftest -o addopts=''` on Windows: 5 passed.
 
-### 16. Scottcjn/Rustchain#5960 - Approved
+### 15. Scottcjn/Rustchain#5960 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5960#pullrequestreview-4329868297
 
@@ -145,7 +136,7 @@ Summary:
 - Verified duplicate GreenTracker registration preserves existing mining session history.
 - Ran `python -m pytest tests\test_green_tracker.py -q --noconftest -o addopts=''` on Windows: 20 passed.
 
-### 17. Scottcjn/Rustchain#5961 - Approved
+### 16. Scottcjn/Rustchain#5961 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5961#pullrequestreview-4329941538
 
@@ -153,7 +144,7 @@ Summary:
 - Verified phone-only miner alert subscription upsert behavior.
 - Ran `python -m pytest tests\test_miner_alerts_db.py tests\test_miner_alerts.py -q --noconftest -o addopts=''` on Windows: 11 passed.
 
-### 18. Scottcjn/Rustchain#5962 - Approved
+### 17. Scottcjn/Rustchain#5962 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5962#pullrequestreview-4329951048
 
@@ -161,7 +152,7 @@ Summary:
 - Verified enveloped mining video miner payload parsing.
 - Ran `python -m pytest tests\test_mining_video_pipeline.py -q --noconftest -o addopts=''` on Windows: 2 passed.
 
-### 19. Scottcjn/Rustchain#5979 - Approved
+### 18. Scottcjn/Rustchain#5979 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5979#pullrequestreview-4331466123
 
@@ -170,7 +161,7 @@ Summary:
 - Verified macOS v2.5 miner checksum refresh matches the current file hash.
 - Ran `python -m pytest tests\test_miner_checklist.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 11 passed.
 
-### 20. Scottcjn/Rustchain#5983 - Changes Requested
+### 19. Scottcjn/Rustchain#5983 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5983#pullrequestreview-4331577173
 
@@ -179,7 +170,7 @@ Summary:
 - Reproduced that a cloned `PING` with `signature = "bad-signature"` returns `invalid_signature`, then the original valid message returns `duplicate`.
 - Ran `python -m pytest node\tests\test_p2p_hardening_phase2.py node\tests\test_p2p_handshake_negotiation.py -q --noconftest -o addopts=''` on Windows: 14 passed.
 
-### 21. Scottcjn/Rustchain#5981 - Approved
+### 20. Scottcjn/Rustchain#5981 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5981#pullrequestreview-4331619804
 
@@ -188,7 +179,7 @@ Summary:
 - Verified the macOS v2.5 miner checksum refresh matches the current file hash.
 - Ran `python -m pytest tests\test_webhook_client_helpers.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 12 passed.
 
-### 22. Scottcjn/Rustchain#5984 - Approved
+### 21. Scottcjn/Rustchain#5984 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5984#pullrequestreview-4331655530
 
@@ -197,7 +188,7 @@ Summary:
 - Confirmed the regression test checks both miner count and returned rows.
 - Ran `python -m pytest tests\test_rustchain_health.py tests\test_rustchain_health_cli.py -q --noconftest -o addopts=''` on Windows: 13 passed.
 
-### 23. Scottcjn/Rustchain#5980 - Changes Requested
+### 22. Scottcjn/Rustchain#5980 - Changes Requested
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5980#pullrequestreview-4331710058
 
@@ -206,7 +197,7 @@ Summary:
 - Reproduced `PermissionError: [WinError 32]` at `db_path.unlink()` in both new tests after endpoint assertions pass.
 - Ran `python -m pytest tests\test_signed_transfer_replay.py -q` on Windows after installing declared test dependencies: 5 passed, 2 failed.
 
-### 24. Scottcjn/Rustchain#5925 - Approved
+### 23. Scottcjn/Rustchain#5925 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5925#pullrequestreview-4331729657
 
@@ -215,7 +206,7 @@ Summary:
 - Confirmed list/generic methods remain on `_request()` and transfer preserves the public `TransferError` wrapping contract.
 - Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_async_client.py -q` on Windows: 27 passed.
 
-### 25. Scottcjn/Rustchain#5982 - Approved
+### 24. Scottcjn/Rustchain#5982 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5982#pullrequestreview-4331781127
 
@@ -224,7 +215,7 @@ Summary:
 - Confirmed the artifact SHA256 is `163fafcf751d8fbd41bf936facaeb366c042f467fa34b79f2c4c0a45472ef70f`.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 5 passed.
 
-### 26. Scottcjn/Rustchain#5966 - Approved
+### 25. Scottcjn/Rustchain#5966 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5966#pullrequestreview-4331831635
 
@@ -233,7 +224,7 @@ Summary:
 - Confirmed the high-entropy badge path remains covered by the focused tests.
 - Ran `python -m pytest tests\test_validator_core_with_badge.py -q --noconftest -o addopts=''` on Windows: 6 passed.
 
-### 27. Scottcjn/Rustchain#5923 - Approved
+### 26. Scottcjn/Rustchain#5923 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5923#pullrequestreview-4331845994
 
@@ -242,7 +233,7 @@ Summary:
 - Confirmed list-returning methods remain flexible for bare lists and list-valued envelopes, while malformed scalar responses safely return empty lists.
 - Ran `PYTHONPATH=sdk/python python -m pytest sdk\python\rustchain_sdk\tests\test_client.py -q` on Windows: 23 passed.
 
-### 28. Scottcjn/Rustchain#5921 - Approved
+### 27. Scottcjn/Rustchain#5921 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5921#pullrequestreview-4331900118
 
@@ -251,7 +242,7 @@ Summary:
 - Confirmed list-returning paths such as `miners()` and transfer history remain on the permissive `_request()` path.
 - Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_client_unit.py -q` on Windows: 25 passed.
 
-### 29. Scottcjn/Rustchain#5917 - Approved
+### 28. Scottcjn/Rustchain#5917 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5917#pullrequestreview-4332554877
 
@@ -261,7 +252,7 @@ Summary:
 - Ran `python -m pytest tests\test_agent_reputation.py -q` on Windows: 16 passed.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
-### 30. Scottcjn/Rustchain#5907 - Approved
+### 29. Scottcjn/Rustchain#5907 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5907#pullrequestreview-4332568271
 
@@ -271,7 +262,7 @@ Summary:
 - Ran `python -m pytest tests\test_bcos_badge_generator.py -q` on Windows: 53 passed, 9 subtests passed.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
-### 31. Scottcjn/Rustchain#5978 - Approved
+### 30. Scottcjn/Rustchain#5978 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5978#pullrequestreview-4332600052
 
@@ -282,7 +273,7 @@ Summary:
 - Ran `python -m pytest otc-bridge\test_otc_bridge.py -q -k confirm_rejects_non_object_json` on Windows: 1 passed, 26 deselected.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
-### 32. Scottcjn/Rustchain#5993 - Approved
+### 31. Scottcjn/Rustchain#5993 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5993#pullrequestreview-4333138301
 
@@ -293,7 +284,7 @@ Summary:
 - Ran `python -m pytest tests\test_payout_ledger_migration.py tests\test_payout_ledger_admin_auth.py -q` on Windows: 13 passed.
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 
-### 33. Scottcjn/Rustchain#5995 - Approved
+### 32. Scottcjn/Rustchain#5995 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5995#pullrequestreview-4333155581
 
@@ -304,7 +295,7 @@ Summary:
 - Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
 - Ran route smoke checks for `/`, `/fork_choice_graph.html`, `/api/health`, and `/api/dashboard`: passed.
 
-### 34. Scottcjn/Rustchain#5922 - Approved
+### 33. Scottcjn/Rustchain#5922 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5922#pullrequestreview-4333225467
 
@@ -315,7 +306,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/test_miner_headerkey_schema.py`: passed.
 
-### 35. Scottcjn/Rustchain#5994 - Approved
+### 34. Scottcjn/Rustchain#5994 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5994#pullrequestreview-4333236227
 
@@ -327,7 +318,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/fuzz/attestation_validators.py tests/test_attestation_fuzz.py`: passed.
 
-### 36. Scottcjn/Rustchain#5999 - Approved
+### 35. Scottcjn/Rustchain#5999 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5999#pullrequestreview-4333642770
 
@@ -339,7 +330,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py`: passed.
 
-### 37. Scottcjn/Rustchain#6000 - Approved
+### 36. Scottcjn/Rustchain#6000 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/6000#pullrequestreview-4333665452
 
@@ -352,7 +343,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- explorer/hall_of_rust.py tests/test_explorer_hall_of_rust_current_year.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 38. Scottcjn/Rustchain#5998 - Approved
+### 37. Scottcjn/Rustchain#5998 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5998#pullrequestreview-4333682417
 
@@ -365,7 +356,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- rustchain-poa/api/poa_api.py tests/test_poa_api_upload_hardening.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 39. Scottcjn/Rustchain#5997 - Approved
+### 38. Scottcjn/Rustchain#5997 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5997#pullrequestreview-4333786737
 
@@ -379,7 +370,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- sdk/rustchain/agent_economy/payments.py sdk/tests/test_agent_economy.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 40. Scottcjn/Rustchain#5996 - Approved
+### 39. Scottcjn/Rustchain#5996 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5996#pullrequestreview-4333802195
 
@@ -393,7 +384,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tools/os_detector.py tools/test_os_detector.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 41. Scottcjn/Rustchain#5963 - Approved
+### 40. Scottcjn/Rustchain#5963 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5963#pullrequestreview-4333818962
 
@@ -406,7 +397,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tests/test_health_monitor.py tools/node_health_monitor.py`: passed.
 
-### 42. Scottcjn/Rustchain#6002 - Approved
+### 41. Scottcjn/Rustchain#6002 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/6002#pullrequestreview-4333857123
 
@@ -420,7 +411,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- passport/passport_server.py passport/test_passport.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 43. Scottcjn/Rustchain#5989 - Approved
+### 42. Scottcjn/Rustchain#5989 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5989#pullrequestreview-4333867247
 
@@ -435,7 +426,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- .github/actions/rtc-auto-bounty/award_rtc.py .github/actions/rtc-auto-bounty/test_award_rtc.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 44. Scottcjn/Rustchain#5991 - Approved
+### 43. Scottcjn/Rustchain#5991 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5991#pullrequestreview-4333905910
 
@@ -449,7 +440,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- wallet/rustchain_wallet_gui.py wallet/rustchain_wallet_secure.py tests/test_wallet_network_utils.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 45. Scottcjn/Rustchain#5969 - Approved
+### 44. Scottcjn/Rustchain#5969 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5969#pullrequestreview-4333953968
 
@@ -463,7 +454,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tools/gpu_display_detector.py tests/test_gpu_display_detector.py`: passed.
 
-### 46. Scottcjn/Rustchain#5964 - Approved
+### 45. Scottcjn/Rustchain#5964 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5964#pullrequestreview-4334018709
 
@@ -477,7 +468,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tools/quantum_flux_validator.py tests/test_quantum_flux_validator.py`: passed.
 
-### 47. Scottcjn/Rustchain#5965 - Approved
+### 46. Scottcjn/Rustchain#5965 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/5965#pullrequestreview-4334031608
 
@@ -491,7 +482,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- tools/bios_pawpaw_detector.py tests/test_bios_pawpaw_detector.py`: passed.
 
-### 48. Scottcjn/Rustchain#6003 - Approved
+### 47. Scottcjn/Rustchain#6003 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/6003#pullrequestreview-4334090650
 
@@ -508,7 +499,7 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- issue2288/glitch_system/src/api.py tests/test_glitch_api_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
 
-### 49. Scottcjn/Rustchain#6004 - Approved
+### 48. Scottcjn/Rustchain#6004 - Approved
 
 Review: https://github.com/Scottcjn/Rustchain/pull/6004#pullrequestreview-4334163055
 
@@ -535,6 +526,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 49 accepted reviews equal 245 RTC, or $24.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 48 accepted reviews equal 240 RTC, or $24.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
