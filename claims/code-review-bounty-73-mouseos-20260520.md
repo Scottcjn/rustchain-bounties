@@ -1,0 +1,531 @@
+# Code Review Bounty Claim - #73
+
+Claimant: `mouseos`
+
+Bounty: Scottcjn/rustchain-bounties#73
+
+Wallet/miner ID: `RTC849344ea4cc70514183eb03df0e8d107a398ac12`
+
+Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
+
+Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
+
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total.
+
+## Reviews Submitted
+
+### 1. Scottcjn/Rustchain#5827 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5827#pullrequestreview-4325994162
+
+Summary:
+- Found the same browser-compatible `cert_id: null` regression in malformed badge payload handling.
+- Ran Windows `py_compile` and diff checks for the touched badge generator files.
+
+### 2. Scottcjn/Rustchain#5828 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5828#pullrequestreview-4326013045
+
+Summary:
+- Verified bridge status data is written beside the dashboard.
+- Ran `python -m pytest tests\test_static_bridge_update_stats.py -q --noconftest -o addopts=''` on Windows: 3 passed.
+
+### 3. Scottcjn/Rustchain#5946 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5946#pullrequestreview-4329613039
+
+Summary:
+- Verified consensus probe miner envelope counting.
+- Ran focused Windows pytest for consensus probe tests: 14 passed.
+
+### 4. Scottcjn/Rustchain#5947 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5947#pullrequestreview-4329923948
+
+Summary:
+- Verified GitHub Contents API SHA lookup hardening in the tip bot.
+- Ran `python -m pytest integrations\rustchain-bounties\test_tip_bot.py -q --noconftest -o addopts=''` on Windows: 66 passed.
+
+### 5. Scottcjn/Rustchain#5948 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5948#pullrequestreview-4329906432
+
+Summary:
+- Verified DexScreener wRTC price payload hardening.
+- Ran `python -m pytest tests\test_wrtc_price_bot.py -q --noconftest -o addopts=''` on Windows: 3 passed.
+
+### 6. Scottcjn/Rustchain#5949 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5949#pullrequestreview-4329914319
+
+Summary:
+- Verified Locust load-test malformed JSON failure handling.
+- Ran `python -m pytest tests\test_locust_load_suite.py -q --noconftest -o addopts=''` on Windows: 5 passed.
+
+### 7. Scottcjn/Rustchain#5951 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5951#pullrequestreview-4329573977
+
+Summary:
+- Found a remaining malformed-field crash in BoTTube digest sorting for mixed numeric and malformed string values.
+- Reproduced `TypeError: '<' not supported between instances of 'str' and 'int'` with malformed `views` and `videos_posted`.
+- Ran focused Windows digest tests: 13 passed.
+
+### 8. Scottcjn/Rustchain#5953 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5953#pullrequestreview-4329598768
+
+Summary:
+- Verified vintage validator warning preservation.
+- Ran `python -m pytest tests\test_validate_vintage_submission.py -q --noconftest -o addopts=''` on Windows: 7 passed.
+
+### 9. Scottcjn/Rustchain#5954 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5954#pullrequestreview-4329625477
+
+Summary:
+- Verified empty interaction metadata preservation.
+- Ran `python -m pytest tests\test_interactions.py -q --noconftest -o addopts=''` on Windows: 27 passed.
+
+### 10. Scottcjn/Rustchain#5955 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5955#pullrequestreview-4329857690
+
+Summary:
+- Found that the focused parasocial test suite leaves SQLite temp DB files locked on Windows.
+- Reproduced 19 failures from `PermissionError: [WinError 32]` during cleanup.
+
+### 11. Scottcjn/Rustchain#5956 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5956#pullrequestreview-4329848843
+
+Summary:
+- Verified low-verbosity personality text truncation chooses the earliest sentence terminator.
+- Ran `python -m pytest tests\test_personality.py -q --noconftest -o addopts=''` on Windows: 29 passed.
+
+### 12. Scottcjn/Rustchain#5957 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5957#pullrequestreview-4329809272
+
+Summary:
+- Found a remaining `max_agents` bypass where a third agent can still add a collaboration fragment after the voter cap is reached.
+- Reproduced Windows teardown errors from locked SQLite temp DB files.
+- Ran focused collab tests: 24 passed, 24 teardown errors.
+
+### 13. Scottcjn/Rustchain#5958 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5958#pullrequestreview-4329795174
+
+Summary:
+- Verified discovery tag matching treats `%` and `_` literally.
+- Ran `python -m pytest tests\test_discovery.py -q --noconftest -o addopts=''` on Windows: 28 passed.
+
+### 14. Scottcjn/Rustchain#5959 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5959#pullrequestreview-4329820434
+
+Summary:
+- Verified invalid onboarding metadata JSON returns a controlled error.
+- Ran `python -m pytest tests\test_bottube_onboarding_example.py -q --noconftest -o addopts=''` on Windows: 5 passed.
+
+### 15. Scottcjn/Rustchain#5960 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5960#pullrequestreview-4329868297
+
+Summary:
+- Verified duplicate GreenTracker registration preserves existing mining session history.
+- Ran `python -m pytest tests\test_green_tracker.py -q --noconftest -o addopts=''` on Windows: 20 passed.
+
+### 16. Scottcjn/Rustchain#5961 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5961#pullrequestreview-4329941538
+
+Summary:
+- Verified phone-only miner alert subscription upsert behavior.
+- Ran `python -m pytest tests\test_miner_alerts_db.py tests\test_miner_alerts.py -q --noconftest -o addopts=''` on Windows: 11 passed.
+
+### 17. Scottcjn/Rustchain#5962 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5962#pullrequestreview-4329951048
+
+Summary:
+- Verified enveloped mining video miner payload parsing.
+- Ran `python -m pytest tests\test_mining_video_pipeline.py -q --noconftest -o addopts=''` on Windows: 2 passed.
+
+### 18. Scottcjn/Rustchain#5979 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5979#pullrequestreview-4331466123
+
+Summary:
+- Verified miner checklist process-exit exceptions are no longer swallowed as node reachability failures.
+- Verified macOS v2.5 miner checksum refresh matches the current file hash.
+- Ran `python -m pytest tests\test_miner_checklist.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 11 passed.
+
+### 19. Scottcjn/Rustchain#5983 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5983#pullrequestreview-4331577173
+
+Summary:
+- Found that inserting `msg_id` into `p2p_seen_messages` before signature verification lets an invalid-signature packet poison the dedup table.
+- Reproduced that a cloned `PING` with `signature = "bad-signature"` returns `invalid_signature`, then the original valid message returns `duplicate`.
+- Ran `python -m pytest node\tests\test_p2p_hardening_phase2.py node\tests\test_p2p_handshake_negotiation.py -q --noconftest -o addopts=''` on Windows: 14 passed.
+
+### 20. Scottcjn/Rustchain#5981 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5981#pullrequestreview-4331619804
+
+Summary:
+- Verified webhook `Content-Length` parsing returns the existing 400 path for missing, malformed, zero, and negative values.
+- Verified the macOS v2.5 miner checksum refresh matches the current file hash.
+- Ran `python -m pytest tests\test_webhook_client_helpers.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 12 passed.
+
+### 21. Scottcjn/Rustchain#5984 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5984#pullrequestreview-4331655530
+
+Summary:
+- Verified the RustChain health CLI counts `/api/miners` responses wrapped in an `items` envelope.
+- Confirmed the regression test checks both miner count and returned rows.
+- Ran `python -m pytest tests\test_rustchain_health.py tests\test_rustchain_health_cli.py -q --noconftest -o addopts=''` on Windows: 13 passed.
+
+### 22. Scottcjn/Rustchain#5980 - Changes Requested
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5980#pullrequestreview-4331710058
+
+Summary:
+- Found that the two new pending-confirm regression tests leave SQLite temp DB files locked on Windows.
+- Reproduced `PermissionError: [WinError 32]` at `db_path.unlink()` in both new tests after endpoint assertions pass.
+- Ran `python -m pytest tests\test_signed_transfer_replay.py -q` on Windows after installing declared test dependencies: 5 passed, 2 failed.
+
+### 23. Scottcjn/Rustchain#5925 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5925#pullrequestreview-4331729657
+
+Summary:
+- Verified the updated async SDK head still applies object-response validation only to dict-typed public methods.
+- Confirmed list/generic methods remain on `_request()` and transfer preserves the public `TransferError` wrapping contract.
+- Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_async_client.py -q` on Windows: 27 passed.
+
+### 24. Scottcjn/Rustchain#5982 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5982#pullrequestreview-4331781127
+
+Summary:
+- Verified the Darwin `setup_miner.py` pin and `miners/checksums.sha256` now match the checked-in macOS v2.5 miner artifact.
+- Confirmed the artifact SHA256 is `163fafcf751d8fbd41bf936facaeb366c042f467fa34b79f2c4c0a45472ef70f`.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q --noconftest -o addopts=''` on Windows: 5 passed.
+
+### 25. Scottcjn/Rustchain#5966 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5966#pullrequestreview-4331831635
+
+Summary:
+- Verified low-entropy validator runs remove stale `relic_rewards.json` output from earlier qualifying runs.
+- Confirmed the high-entropy badge path remains covered by the focused tests.
+- Ran `python -m pytest tests\test_validator_core_with_badge.py -q --noconftest -o addopts=''` on Windows: 6 passed.
+
+### 26. Scottcjn/Rustchain#5923 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5923#pullrequestreview-4331845994
+
+Summary:
+- Verified Python SDK object-response helpers are applied to dict-returning methods.
+- Confirmed list-returning methods remain flexible for bare lists and list-valued envelopes, while malformed scalar responses safely return empty lists.
+- Ran `PYTHONPATH=sdk/python python -m pytest sdk\python\rustchain_sdk\tests\test_client.py -q` on Windows: 23 passed.
+
+### 27. Scottcjn/Rustchain#5921 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5921#pullrequestreview-4331900118
+
+Summary:
+- Verified synchronous SDK object-response validation protects dict-shaped endpoints before callers use `.get()`.
+- Confirmed list-returning paths such as `miners()` and transfer history remain on the permissive `_request()` path.
+- Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_client_unit.py -q` on Windows: 25 passed.
+
+### 28. Scottcjn/Rustchain#5917 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5917#pullrequestreview-4332554877
+
+Summary:
+- Verified agent reputation API payload hardening ignores scalar JSON before structured callers inspect the response.
+- Confirmed malformed miner API rows are skipped before `.get()` access while normal dict/list payloads remain supported.
+- Ran `python -m pytest tests\test_agent_reputation.py -q` on Windows: 16 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
+### 29. Scottcjn/Rustchain#5907 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5907#pullrequestreview-4332568271
+
+Summary:
+- Verified badge generator regression coverage now includes raw non-JSON bodies, JSON arrays, and non-string request fields.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest tests\test_bcos_badge_generator.py -q` on Windows: 53 passed, 9 subtests passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
+### 30. Scottcjn/Rustchain#5978 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5978#pullrequestreview-4332600052
+
+Summary:
+- Verified the OTC confirm route rejects non-object JSON before reading settlement fields.
+- Confirmed the regression covers the array payload shape that would otherwise reach `.get(...)`.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest otc-bridge\test_otc_bridge.py -q -k confirm_rejects_non_object_json` on Windows: 1 passed, 26 deselected.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
+### 31. Scottcjn/Rustchain#5993 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5993#pullrequestreview-4333138301
+
+Summary:
+- Verified the zero-amount guard is centralized in `_rtc_to_micro()`.
+- Confirmed both direct `ledger_create()` calls and the admin `/api/ledger` route reject `amount_rtc = 0` before inserting a queued payout row.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest tests\test_payout_ledger_migration.py tests\test_payout_ledger_admin_auth.py -q` on Windows: 13 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+
+### 32. Scottcjn/Rustchain#5995 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5995#pullrequestreview-4333155581
+
+Summary:
+- Verified the fork-choice visualization serves and renders the expected graph/dashboard routes.
+- Confirmed miner checksum installation tests still pass after the macOS v2.5 checksum refresh.
+- Ran `python -m pytest visualizations\test_fork_choice_graph.py -q` on Windows: 4 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran route smoke checks for `/`, `/fork_choice_graph.html`, `/api/health`, and `/api/dashboard`: passed.
+
+### 33. Scottcjn/Rustchain#5922 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5922#pullrequestreview-4333225467
+
+Summary:
+- Verified miner header-key schema hardening covers the object/list response shape used by the node endpoint.
+- Ran `python -m pytest tests\test_miner_headerkey_schema.py -q` on Windows: 1 passed.
+- Ran `python -m py_compile node\rustchain_v2_integrated_v2.2.1_rip200.py tests\test_miner_headerkey_schema.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/test_miner_headerkey_schema.py`: passed.
+
+### 34. Scottcjn/Rustchain#5994 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5994#pullrequestreview-4333236227
+
+Summary:
+- Verified attestation fuzz coverage for malformed and edge-case validator inputs.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -B -m pytest -q tests\test_attestation_fuzz.py --tb=short` on Windows: 37 passed.
+- Ran `python -m py_compile node\rustchain_v2_integrated_v2.2.1_rip200.py tests\fuzz\attestation_validators.py tests\test_attestation_fuzz.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py tests/fuzz/attestation_validators.py tests/test_attestation_fuzz.py`: passed.
+
+### 35. Scottcjn/Rustchain#5999 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5999#pullrequestreview-4333642770
+
+Summary:
+- Verified the Sophia governor review service now rejects non-object JSON request bodies on the review, maintenance, and Scott notification queue routes.
+- Confirmed malformed non-empty `application/json` bodies now return `400 JSON object required` instead of falling through to the empty-body default.
+- Ran `python -m pytest -q node\tests\test_sophia_governor_review_service.py` on Windows: 52 passed.
+- Ran `python -m py_compile node\sophia_governor_review_service.py node\tests\test_sophia_governor_review_service.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- node/sophia_governor_review_service.py node/tests/test_sophia_governor_review_service.py`: passed.
+
+### 36. Scottcjn/Rustchain#6000 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6000#pullrequestreview-4333665452
+
+Summary:
+- Verified Hall of Rust endpoints now return a stable `internal_error` response instead of exposing raw exception strings.
+- Confirmed the new regressions cover SQLite missing-schema details not leaking from `/hall/stats` and `/hall/machine_of_the_day`.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest tests\test_explorer_hall_of_rust_current_year.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 10 passed.
+- Ran `python -m py_compile explorer\hall_of_rust.py tests\test_explorer_hall_of_rust_current_year.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- explorer/hall_of_rust.py tests/test_explorer_hall_of_rust_current_year.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 37. Scottcjn/Rustchain#5998 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5998#pullrequestreview-4333682417
+
+Summary:
+- Verified the POA upload endpoint now avoids rejecting valid small JSON uploads because of multipart envelope overhead.
+- Confirmed the bounded stream copy still enforces `MAX_UPLOAD_BYTES` against actual uploaded file bytes before validation runs.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in artifact hash.
+- Ran `python -m pytest tests\test_poa_api_upload_hardening.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 10 passed.
+- Ran `python -m py_compile rustchain-poa\api\poa_api.py tests\test_poa_api_upload_hardening.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- rustchain-poa/api/poa_api.py tests/test_poa_api_upload_hardening.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 38. Scottcjn/Rustchain#5997 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5997#pullrequestreview-4333786737
+
+Summary:
+- Verified newly requested Agent Economy payment intents now expire in the future instead of immediately expiring at the current minute boundary.
+- Confirmed the regression covers the newly-created intent being usable and roughly 15 minutes from expiry.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `PYTHONPATH=sdk python -m pytest sdk\tests\test_agent_economy.py -q` on Windows: 34 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python -m py_compile sdk\rustchain\agent_economy\payments.py sdk\tests\test_agent_economy.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- sdk/rustchain/agent_economy/payments.py sdk/tests/test_agent_economy.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 39. Scottcjn/Rustchain#5996 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5996#pullrequestreview-4333802195
+
+Summary:
+- Verified `tools/test_os_detector.py` now imports `tools.os_detector` through the package path instead of file-loading the module with `importlib.util`.
+- Confirmed the timestamp change uses timezone-aware UTC while preserving the existing trailing `Z` output format.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `python -m pytest tools\test_os_detector.py -q` on Windows: 3 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python -m py_compile tools\os_detector.py tools\test_os_detector.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tools/os_detector.py tools/test_os_detector.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 40. Scottcjn/Rustchain#5963 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5963#pullrequestreview-4333818962
+
+Summary:
+- Verified reachable `/status` responses with valid non-object JSON now normalize to missing-field data instead of raising on `.get()` and falling into the offline path.
+- Confirmed the behavior matches the existing invalid JSON and empty-object handling: node stays reachable/online, with epoch and miner fields absent.
+- Confirmed the new regression covers a raw `[]` response and verifies no error is reported.
+- Ran `python -m pytest tests\test_health_monitor.py -q` on Windows: 21 passed.
+- Ran `python -m py_compile tools\node_health_monitor.py tests\test_health_monitor.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tests/test_health_monitor.py tools/node_health_monitor.py`: passed.
+
+### 41. Scottcjn/Rustchain#6002 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6002#pullrequestreview-4333857123
+
+Summary:
+- Verified `/api/passport` now rejects structured, empty, and path-separator `machine_id` values before ledger lookup or save.
+- Confirmed the new regression covers list, dict, empty string, slash, and backslash payloads returning JSON 400 responses.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `PYTHONPATH=passport python -m pytest passport\test_passport.py -q` on Windows: 35 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python -m py_compile passport\passport_server.py passport\test_passport.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- passport/passport_server.py passport/test_passport.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 42. Scottcjn/Rustchain#5989 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5989#pullrequestreview-4333867247
+
+Summary:
+- Verified malformed non-empty auto-bounty amount inputs now fail closed as `nan` instead of silently falling back to default payout amounts.
+- Confirmed unset or blank amount inputs still preserve the configured default behavior.
+- Confirmed the dry-run malformed amount path exits before comment fetch/post side effects or transfer attempts.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `python -m py_compile .github\actions\rtc-auto-bounty\award_rtc.py .github\actions\rtc-auto-bounty\test_award_rtc.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python -m pytest .github\actions\rtc-auto-bounty\test_award_rtc.py -q` on Windows: 58 passed, 9 subtests passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- .github/actions/rtc-auto-bounty/award_rtc.py .github/actions/rtc-auto-bounty/test_award_rtc.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 43. Scottcjn/Rustchain#5991 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5991#pullrequestreview-4333905910
+
+Summary:
+- Verified both wallet HTTP helpers now call requests with `allow_redirects=False`, so public API redirects are handled before JSON parsing.
+- Confirmed 3xx responses return the existing `(None, error)` helper contract with HTTP status and Location header detail.
+- Confirmed the regression covers a 307 balance API redirect and verifies redirects are disabled on the request.
+- Confirmed the macOS v2.5 miner checksum refresh matches the checked-in setup/checksum expectations.
+- Ran `python -m pytest tests\test_wallet_network_utils.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 18 passed.
+- Ran `python -m py_compile wallet\rustchain_wallet_gui.py wallet\rustchain_wallet_secure.py tests\test_wallet_network_utils.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- wallet/rustchain_wallet_gui.py wallet/rustchain_wallet_secure.py tests/test_wallet_network_utils.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 44. Scottcjn/Rustchain#5969 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5969#pullrequestreview-4333953968
+
+Summary:
+- Verified `detect_gpu_and_display()` now removes an existing `unlocked_badges.json` when no relic GPU/display terms are detected.
+- Confirmed existing no-match and missing-`lspci` paths still report `No relic badges detected.` and do not create a new output file.
+- Confirmed matching badge output still uses the same JSON shape through the new `BADGE_OUTPUT` path constant.
+- Confirmed the new regression covers a stale `unlocked_badges.json` being removed after a no-match probe.
+- Ran `python -m pytest tests\test_gpu_display_detector.py -q` on Windows: 7 passed.
+- Ran `python -m py_compile tools\gpu_display_detector.py tests\test_gpu_display_detector.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tools/gpu_display_detector.py tests/test_gpu_display_detector.py`: passed.
+
+### 45. Scottcjn/Rustchain#5964 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5964#pullrequestreview-4334018709
+
+Summary:
+- Verified `award_quantum_flux_badge()` now creates `relics/` only on the flux-detected write path, so clean first-run badge writes no longer fail with a missing output directory.
+- Confirmed the new regression starts from a temporary working directory without a pre-existing `relics` folder, forces flux detection, and verifies the expected badge JSON is written.
+- Confirmed existing no-flux behavior remains unchanged and still avoids writing the badge file when no anomaly is detected.
+- Confirmed the SPDX/shebang and no-op f-string cleanup are behavior-neutral.
+- Ran `python -m pytest tests\test_quantum_flux_validator.py -q` on Windows: 6 passed, 2 existing `datetime.utcnow()` deprecation warnings.
+- Ran `python -m py_compile tools\quantum_flux_validator.py tests\test_quantum_flux_validator.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tools/quantum_flux_validator.py tests/test_quantum_flux_validator.py`: passed.
+
+### 46. Scottcjn/Rustchain#5965 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/5965#pullrequestreview-4334031608
+
+Summary:
+- Verified `get_bios_date()` now catches ordinary `Exception` only, so expected probe failures still return `None` while process-control exits such as `SystemExit` are no longer swallowed.
+- Confirmed the existing command-failure fallback remains covered by the `FileNotFoundError` regression.
+- Confirmed the new regression patches the BIOS command path to raise `SystemExit` and verifies it propagates with the original message.
+- Confirmed the SPDX/shebang addition is metadata-only for the touched script.
+- Ran `python -m pytest tests\test_bios_pawpaw_detector.py -q` on Windows: 4 passed.
+- Ran `python -m py_compile tools\bios_pawpaw_detector.py tests\test_bios_pawpaw_detector.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- tools/bios_pawpaw_detector.py tests/test_bios_pawpaw_detector.py`: passed.
+
+### 47. Scottcjn/Rustchain#6003 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6003#pullrequestreview-4334090650
+
+Summary:
+- Verified the route-local relative import in `register_agent()` is removed and `PersonalityProfile` now uses the same package/top-level fallback import path as the other Glitch API dependencies.
+- Confirmed the new regression imports `api.py` from its file path with `issue2288/glitch_system/src` on `sys.path`, registers the Flask blueprint, and verifies `POST /api/glitch/agents/<id>/register` succeeds.
+- Confirmed existing Glitch API input-validation coverage still passes, so the import move does not disturb JSON-body handling or admin checks.
+- Confirmed the macOS v2.5 miner checksum refresh matches both `setup_miner.py` and `miners/checksums.sha256`.
+- Confirmed the PR's GitHub checks were passing.
+- Ran `python -m pytest tests\test_glitch_api_top_level_import.py tests\test_glitch_api_input_validation.py -q` on Windows: 10 passed.
+- Ran `python -m pytest issue2288\glitch_system\tests\test_glitch_system.py -q` on Windows: 44 passed, 6 subtests passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran `python -m py_compile issue2288\glitch_system\src\api.py issue2288\glitch_system\src\glitch_engine.py issue2288\glitch_system\src\personality.py tests\test_glitch_api_top_level_import.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- issue2288/glitch_system/src/api.py tests/test_glitch_api_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
+
+### 48. Scottcjn/Rustchain#6004 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/6004#pullrequestreview-4334163055
+
+Summary:
+- Verified the documented/script-style runtime path where `issue2307_boot_chime/boot_chime_api.py` adds `issue2307_boot_chime/src` to `sys.path` and imports `proof_of_iron` as a top-level module.
+- Confirmed the import fallback keeps top-level `proof_of_iron` working while preserving package-relative imports for normal package use.
+- Confirmed both the focused top-level import regression and the existing boot chime test suite pass on Windows.
+- Confirmed the macOS v2.5 miner checksum refresh matches both `setup_miner.py` and `miners/checksums.sha256`.
+- Confirmed the PR's GitHub checks were passing.
+- Ran `python -m pytest tests\test_boot_chime_top_level_import.py -q` on Windows: 1 passed.
+- Ran `python -m pytest issue2307_boot_chime\tests\test_boot_chime.py -q` on Windows: 32 passed.
+- Ran `python -m pytest tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py -q` on Windows: 5 passed.
+- Ran API import smoke importing `issue2307_boot_chime/boot_chime_api.py` on Windows: loaded `ProofOfIron`, `AcousticFingerprint`, `BootChimeCapture`, and the Flask app.
+- Ran direct top-level import smoke with `issue2307_boot_chime/src` on `sys.path` on Windows: loaded `proof_of_iron`, `ProofOfIron`, `AcousticFingerprint`, and `BootChimeCapture`.
+- Ran `python -m py_compile issue2307_boot_chime\src\proof_of_iron.py issue2307_boot_chime\src\acoustic_fingerprint.py issue2307_boot_chime\src\boot_chime_capture.py tests\test_boot_chime_top_level_import.py setup_miner.py tests\test_install_miner_checksums.py tests\test_setup_miner_downloads.py` on Windows: passed.
+- Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
+- Ran `git diff --check origin/main...HEAD -- issue2307_boot_chime/src/proof_of_iron.py tests/test_boot_chime_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
+
+## Local Verification Evidence
+
+All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
+
+## Reward Request
+
+Please assess under bounty #73's code review reward structure.
+
+At the posted minimum of 5 RTC per accepted review, 48 accepted reviews equal 240 RTC, or $24.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+
+Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
