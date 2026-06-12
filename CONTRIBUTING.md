@@ -37,9 +37,9 @@ Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to
 2. **Claim format**: Comment on the issue with:
    ```
    **Claiming this bounty.**
-   
+
    [Brief description of your approach]
-   
+
    Timeline: [Estimated completion time]
    -BetsyMalthus (or your GitHub username)
    ```
@@ -189,3 +189,47 @@ By contributing, you agree that your contributions will be licensed under the sa
 ---
 
 **Happy contributing! Every PR brings RustChain closer to its vision.** 🦀⛓️
+
+## 🧹 Submitting a Clean PR
+
+> **This is the #1 reason PRs get rejected.** Read this section carefully.
+
+Your PR must **not** include build artifacts or dependency directories. Before submitting:
+
+### Required `.gitignore` entries
+
+```
+node_modules/
+dist/
+out/
+.env
+*.log
+.vscode-test/
+*.vsix
+```
+
+### If you already committed `node_modules/`
+
+```bash
+# Remove from git tracking (keeps files on disk)
+git rm -r --cached --ignore-unmatch node_modules/ dist/ out/
+
+# Add .gitignore
+echo "node_modules/" >> .gitignore
+echo "dist/" >> .gitignore
+
+# Commit the fix
+git add .gitignore
+git commit -m "chore: add .gitignore, remove build artifacts from tracking"
+```
+
+### Pre-submission check
+
+```bash
+# Verify no build artifacts in your diff
+git diff --stat origin/main...HEAD
+# ✅ Only YOUR code changes should appear
+# ❌ If node_modules/ or dist/ appear, STOP and fix .gitignore first
+```
+
+For the full guide, see **[docs/CLEAN_PR_GUIDE.md](docs/CLEAN_PR_GUIDE.md)**.
