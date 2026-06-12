@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustChain Network Status</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .status-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .status-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    flex: 1;
+    min-width: 150px;
+  }
+  .status-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-card .value { font-size: 28px; font-weight: 600; margin-top: 4px; }
+  .status-card .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .dot-online { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 6px; }
+  .dot-offline { background: var(--red); }
+  .dot-warning { background: var(--yellow); }
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .section h2 { font-size: 16px; margin-bottom: 16px; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 500; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge-green { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-red { background: rgba(248,81,73,0.15); color: var(--red); }
+  .badge-blue { background: rgba(88,166,255,0.15); color: var(--blue); }
+  .error-msg { color: var(--red); font-size: 13px; padding: 20px; text-align: center; }
+  .loading { color: var(--muted); font-size: 13px; padding: 20px; text-align: center; }
+  .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 32px; }
+  .footer a { color: var(--blue); }
+  .updated { color: var(--muted); font-size: 12px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<h1>鉀擄笍 RustChain Network Status</h1>
+<p class="subtitle">Live monitoring for Proof-of-Antiquity blockchain 路 <a href="https://50.28.86.131/explorer" style="color:var(--blue)">Explorer</a></p>
+
+<div class="status-bar" id="statusBar">
+  <div class="status-card"><div class="label">Node Status</div><div class="value" id="nodeStatus">鈥?/div></div>
+  <div class="status-card"><div class="label">Active Miners</div><div class="value" id="minerCount">鈥?/div><div class="sub" id="minerDetail"></div></div>
+  <div class="status-card"><div class="label">Current Epoch</div><div class="value" id="epochInfo">鈥?/div><div class="sub" id="epochDetail"></div></div>
+  <div class="status-card"><div class="label">Uptime</div><div class="value" id="uptime">鈥?/div><div class="sub" id="versionInfo"></div></div>
+</div>
+
+<div class="section">
+  <h2>馃枼锔?Active Miners</h2>
+  <div id="minersTable"><div class="loading">Loading miner data...</div></div>
+</div>
+
+<div class="section">
+  <h2>馃挵 RTC Balances</h2>
+  <div id="balancesTable"><div class="loading">Loading balance data...</div></div>
+</div>
+
+<p class="updated" id="lastUpdated">Last updated: 鈥?/p>
+<div class="footer">
+  RustChain PoA 路 <a href="https://github.com/Scottcjn/Rustchain">GitHub</a> 路 Data refreshes every 30s
+</div>
+
+<script>
+const API = 'https://50.28.86.131';
+
+async function fetchJSON(url) {
+  const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
+}
+
+function fmtTime(ts) {
+  if (!ts) return '鈥?;
+  const d = new Date(ts * 1000);
+  return d.toLocaleString();
+}
+
+function fmtDuration(seconds) {
+  if (!seconds) return '鈥?;
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  return `${d}d ${h}h`;
+}
+
+function statusBadge(online) {
+  return online
+    ? '<span class="badge badge-green">鈼?Online</span>'
+    : '<span class="badge badge-red">鈼?Offline</span>';
+}
+
+async function refresh() {
+  // 1. Health
+  try {
+    const health = await fetchJSON(`${API}/health`);
+    document.getElementById('nodeStatus').innerHTML = `<span class="dot-online"></span> Online`;
+    document.getElementById('uptime').textContent = fmtDuration(health.uptime_s);
+    document.getElementById('versionInfo').textContent = `v${health.version || '?'}`;
+  } catch {
+    document.getElementById('nodeStatus').innerHTML = `<span class="dot-online dot-offline"></span> Offline`;
+    document.getElementById('uptime').textContent = '鈥?;
+  }
+
+  // 2. Miners
+  try {
+    const miners = await fetchJSON(`${API}/api/miners`);
+    const list = Array.isArray(miners) ? miners : (miners.miners || []);
+    document.getElementById('minerCount').textContent = list.length;
+    document.getElementById('minerDetail').textContent = `${list.filter(m => m.status === 'active' || !m.status).length} active`;
+
+    let html = '';
+    if (list.length === 0) {
+      html = '<div class="loading">No miners found</div>';
+    } else {
+      html = `<table><tr><th>Miner ID</th><th>Architecture</th><th>Multiplier</th><th>Status</th><th>Last Attestation</th></tr>`;
+      for (const m of list) {
+        const arch = m.arch || m.architecture || '鈥?;
+        const mult = m.multiplier || m.antiquity_multiplier || '1.0x';
+        const lastSeen = m.last_attestation || m.last_seen || '';
+        html += `<tr>
+          <td style="font-family:monospace;font-size:12px">${m.miner_id || m.id || '?'}</td>
+          <td>${arch}</td>
+          <td>${typeof mult === 'number' ? mult.toFixed(1) + 'x' : mult}</td>
+          <td>${statusBadge(m.status !== 'offline')}</td>
+          <td>${lastSeen ? fmtTime(typeof lastSeen === 'number' ? lastSeen : new Date(lastSeen)/1000) : '鈥?}</td>
+        </tr>`;
+      }
+      html += '</table>';
+    }
+    document.getElementById('minersTable').innerHTML = html;
+  } catch (e) {
+    document.getElementById('minersTable').innerHTML = `<div class="error-msg">Failed to load miners: ${e.message}</div>`;
+  }
+
+  // 3. Balances (try fetching for known miners)
+  try {
+    const miners = await fetchJSON(`${API}/api/miners`);
+    const list = Array.isArray(miners) ? miners : (miners.miners || []);
+    let html = '<table><tr><th>Miner ID</th><th>Balance (RTC)</th><th>Architecture</th></tr>';
+    let rows = 0;
+
+    for (const m of list.slice(0, 20)) {
+      const id = m.miner_id || m.id;
+      if (!id) continue;
+      try {
+        const bal = await fetchJSON(`${API}/wallet/balance?miner_id=${id}`);
+        const balance = bal.balance || '鈥?;
+        const arch = m.arch || m.architecture || '鈥?;
+        html += `<tr><td style="font-family:monospace;font-size:12px">${id}</td><td style="font-family:monospace">${balance}</td><td>${arch}</td></tr>`;
+        rows++;
+      } catch {
+        // Skip miners that error
+      }
+    }
+
+    if (rows === 0) {
+      html += '<tr><td colspan="3" style="text-align:center;color:var(--muted)">No balance data available</td></tr>';
+    }
+    html += '</table>';
+    document.getElementById('balancesTable').innerHTML = html;
+  } catch (e) {
+    document.getElementById('balancesTable').innerHTML = `<div class="error-msg">Failed to load balances: ${e.message}</div>`;
+  }
+
+  document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+}
+
+refresh();
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>
