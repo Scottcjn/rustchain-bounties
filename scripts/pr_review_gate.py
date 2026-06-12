@@ -38,10 +38,25 @@ def is_review_claim(title):
     t=title.lower()
     return ("review" in t) and ("pr " in t or "code review" in t or "#73" in t or "pr#" in t or "pr #" in t)
 def pr_ref(title, body):
+    """Resolve the claimed PR as (repo_fullname_or_None, number_str_or_None).
+
+    Order matters: claim titles look like "Bounty #1009 claim: review of
+    PR #1396", so a bare '#N' scan grabs the BOUNTY number, not the PR
+    (2026-06-11 bug — 9 valid claims auto-rejected). Full PR URLs win,
+    then explicit 'PR #N'/'pull/N', and bare '#N' only as a last resort
+    with 'Bounty #N' references stripped first.
+    """
     for s in (title, body or ""):
-        m=re.search(r'(?:PR\s*#?|pull/|#)(\d{3,6})', s)
-        if m: return m.group(1)
-    return None
+        m = re.search(r'github\.com/([\w.-]+/[\w.-]+)/pull/(\d{1,6})', s)
+        if m: return m.group(1), m.group(2)
+    for s in (title, body or ""):
+        m = re.search(r'(?:\bPR\s*#?\s*|pull/)(\d{1,6})', s, re.IGNORECASE)
+        if m: return None, m.group(1)
+    for s in (title, body or ""):
+        stripped = re.sub(r'(?i)bounty\s*#\s*\d{1,6}', '', s)
+        m = re.search(r'#(\d{3,6})', stripped)
+        if m: return None, m.group(1)
+    return None, None
 def native_wallet(body):
     b=body or ""
     if re.search(r'\bRTC[0-9a-fA-F]{40}\b', b) or re.search(r'(?i)miner[_\-]?id', b): return True
@@ -222,17 +237,25 @@ def main():
     title=iss.get("title",""); body=iss.get("body") or ""; author=iss["user"]["login"]
     if not is_review_claim(title): return  # not our claim type; leave for other workflows
     add_label(NUM,"gate-processed")
-    pr=pr_ref(title,body)
+    claim_repo, pr = pr_ref(title, body)
     if not pr:
-        add_label(NUM,"needs-human"); comment(NUM,"🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>`. Flagged for human review."); return
+        add_label(NUM,"needs-human"); comment(NUM,"🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>` (a full PR URL is best). Flagged for human review."); return
+    # Cross-repo claims: trust an explicit PR URL if it points at one of
+    # the maintainer's repos; anything else goes to a human.
+    target = TARGET
+    if claim_repo:
+        if claim_repo.lower().startswith(TARGET.split("/")[0].lower() + "/"):
+            target = claim_repo
+        else:
+            add_label(NUM,"needs-human"); comment(NUM,f"🤖 Gate: claim references a PR outside the maintainer's repos ({claim_repo}#{pr}). Flagged for human review."); return
     if native_wallet(body) is False:
         close(NUM,"🤖 Gate: payout must be a **native RTC wallet** (`RTC…`) — RTC has no off-ramp, no Solana/ETH bridge. Reopen with a native wallet."); return
-    reviews=api(f"/repos/{TARGET}/pulls/{pr}/reviews")
+    reviews=api(f"/repos/{target}/pulls/{pr}/reviews")
     if reviews is None:
-        add_label(NUM,"needs-human"); comment(NUM,f"🤖 Gate: couldn't read reviews for {TARGET}#{pr} (private/deleted?). Flagged for human review."); return
+        add_label(NUM,"needs-human"); comment(NUM,f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review."); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
-    inl = api(f"/repos/{TARGET}/pulls/{pr}/comments?per_page=100") or []
+    inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100") or []
     # Per-author inline counts (so the rubber-stamp filter is per-review).
     author_inline = {}
     for c in inl:
@@ -250,15 +273,17 @@ def main():
     body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
     inline = author_inline.get(author, 0)
     if first != author:
-        close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {TARGET}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
+        close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {target}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
     if inline==0 and body_len<120:
-        close(NUM,f"🤖 Gate: your review of {TARGET}#{pr} has no inline comments and no substantive summary — Bounty #73 requires a **substantive line-level review**, not a bare approval."); return
-    # cap check: count author's existing bounty-eligible issues
-    elig=api(f"/search/issues?q=repo:{REPO}+label:bounty-eligible+author:{author}+type:issue") or {}
+        close(NUM,f"🤖 Gate: your review of {target}#{pr} has no inline comments and no substantive summary — Bounty #73 requires a **substantive line-level review**, not a bare approval."); return
+    # cap check: count author's existing bounty-eligible issues ORG-WIDE
+    # (user:Scottcjn spans every repo, so the per-contributor cap stays global
+    # even though the gate now runs in both rustchain-bounties and Rustchain).
+    elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue") or {}
     if elig.get("total_count",0)>=CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
     add_label(NUM,"bounty-eligible")
-    comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {TARGET}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
+    comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
     try: main()
