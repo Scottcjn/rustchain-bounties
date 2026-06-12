@@ -1,0 +1,45 @@
+{
+  "name": "rustchain-sdk",
+  "version": "0.1.0",
+  "description": "Official JavaScript / Node.js SDK for the RustChain blockchain network",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.cjs"
+    }
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/",
+    "example:health": "node examples/health-check.js",
+    "example:balance": "node examples/balance.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "rustchain",
+    "blockchain",
+    "rtc",
+    "sdk",
+    "client",
+    "proof-of-antiquity"
+  ],
+  "author": "zxy0314-work",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Scottcjn/rustchain-bounties.git",
+    "directory": "sdk/javascript"
+  },
+  "bugs": {
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues"
+  },
+  "homepage": "https://github.com/Scottcjn/rustchain-bounties/tree/main/sdk/javascript#readme"
+}
