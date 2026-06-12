@@ -1,0 +1,23 @@
+# ... existing code ...
+
+# Add test cases for idempotency, no locks, non-existent tx_hash, concurrent lock insertion
+def test_void_only_releases_bridge_locks():
+    # ... existing code ...
+
+def test_void_idempotency():
+    # Test that voiding a bridge transfer multiple times has the same effect as voiding it once
+    # ... test code ...
+
+def test_void_no_locks():
+    # Test that voiding a bridge transfer with no locks does not raise an error
+    # ... test code ...
+
+def test_void_non_existent_tx_hash():
+    # Test that voiding a bridge transfer with a non-existent tx_hash raises an error
+    # ... test code ...
+
+def test_void_concurrent_lock_insertion():
+    # Test that voiding a bridge transfer with concurrent lock insertion does not raise an error
+    # ... test code ...
+
+# ... existing code ...
