@@ -182,10 +182,22 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 - **GitHub Issues**: For bugs and feature requests
 - **Discussions**: For questions and ideas
 
+## 🔒 Security Reporting
+
+If you discover a security vulnerability in RustChain, please report it responsibly:
+
+1. **Do not open a public issue** for security vulnerabilities
+2. **Email**: Report to the maintainers via [GitHub Security Advisories](https://github.com/Scottcjn/rustchain-bounties/security/advisories/new)
+3. **Include**: Steps to reproduce, potential impact, and suggested fix (if any)
+4. **Response**: Maintainers will acknowledge within 48 hours and work with you on a fix
+5. **Disclosure**: Coordinated disclosure will be arranged after a fix is developed
+
+Security bounties may qualify for the **Critical** tier (100-150 RTC) depending on severity.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the same license as the project (Apache 2.0).
 
 ---
 
-**Happy contributing! Every PR brings RustChain closer to its vision.** 🦀⛓️
+**Happy contributing! Every PR brings RustChain closer to its vision.**
