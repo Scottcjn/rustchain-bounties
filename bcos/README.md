@@ -31,7 +31,7 @@ Two static HTML pages implementing BCOS v2 tooling for rustchain.org.
 **Deploy:** `rustchain.org/bcos/badge-generator.html`
 
 **Badge endpoint:** `GET https://50.28.86.131/bcos/badge/{cert_id}-{style}.svg`  
-**Verify page:** `https://rustchain.org/bcos/verify/{cert_id}`
+**Verify page:** `https://rustchain.org/bcos/`
 
 ## Bounty Payment
 
