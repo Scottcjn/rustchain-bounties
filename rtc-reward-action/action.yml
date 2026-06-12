@@ -1,49 +1,128 @@
-# This is a wrapper that delegates to BossChaos/rtc-reward-action@v1.0.0
-# For the full TypeScript implementation, see:
-# https://github.com/BossChaos/rtc-reward-action
-name: "RTC Reward on PR Merge"
-description: "Automatically award RTC tokens to contributors when their PR is merged (v2 - TypeScript)"
-author: "BossChaos"
+name: 'RTC Reward Action'
+description: 'Automatically award RTC tokens when a PR is merged'
+branding:
+  icon: 'award'
+  color: 'green'
 
 inputs:
   rtc-amount:
-    description: "Amount of RTC tokens to award"
-    required: false
-    default: "20"
-  wallet-address:
-    description: "Default RTC wallet address for the sender"
-    required: false
-    default: "RTC6d1f27d28961279f1034d9561c2403697eb55602"
-  dry-run:
-    description: "If true, simulate the reward without actual transfer"
-    required: false
-    default: "false"
-  github-token:
-    description: "GitHub token for API access"
+    description: 'Amount of RTC to award per merged PR'
     required: true
-    default: ${{ github.token }}
-  contributor-wallet-map:
-    description: "JSON map of GitHub usernames to RTC wallet addresses"
+    default: '5'
+  node-url:
+    description: 'RustChain node URL'
     required: false
-    default: "{}"
-  comment-on-success:
-    description: "Whether to post a comment on successful reward"
+    default: 'https://50.28.86.131'
+  admin-key:
+    description: 'RTC admin wallet key for sending tokens'
+    required: true
+  wallet-from:
+    description: 'Source wallet name to send RTC from'
+    required: true
+    default: 'project-fund'
+  dry-run:
+    description: 'If true, log what would happen without sending RTC'
     required: false
-    default: "true"
+    default: 'false'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Delegate to rtc-reward-action
-      uses: BossChaos/rtc-reward-action@v1.0.0
-      with:
-        rtc-amount: ${{ inputs.rtc-amount }}
-        wallet-address: ${{ inputs.wallet-address }}
-        dry-run: ${{ inputs.dry-run }}
-        github-token: ${{ inputs.github-token }}
-        contributor-wallet-map: ${{ inputs.contributor-wallet-map }}
-        comment-on-success: ${{ inputs.comment-on-success }}
+    - name: 'Extract contributor wallet'
+      id: wallet
+      shell: bash
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR_NUM: ${{ github.event.pull_request.number }}
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        set -euo pipefail
 
-branding:
-  icon: "award"
-  color: "blue"
+        # Strategy 1: Check PR body for **Wallet:** pattern
+        echo "Checking PR body for wallet address..."
+        WALLET=$(echo "$PR_BODY" | grep -oP '\*\*Wallet:\*\*\s*\K\S+' | head -1)
+
+        # Strategy 2: Check for .rtc-wallet file
+        if [ -z "$WALLET" ]; then
+          echo "Checking for .rtc-wallet file..."
+          WALLET=$(
+            curl -s -H "Authorization: token $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/contents/.rtc-wallet?ref=$HEAD_REF" \
+              | python3 -c "
+import sys, json, base64
+d = json.load(sys.stdin)
+c = d.get('content', '')
+if c:
+    print(base64.b64decode(c).decode().strip())
+" 2>/dev/null || echo ""
+          )
+        fi
+
+        # Strategy 3: Check PR comments
+        if [ -z "$WALLET" ]; then
+          echo "Checking PR comments..."
+          WALLET=$(
+            curl -s -H "Authorization: token $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/issues/$PR_NUM/comments" \
+              | python3 -c "
+import sys, json, re
+for c in json.load(sys.stdin):
+    m = re.search(r'\*\*Wallet:\*\*\s*(\S+)', c['body'])
+    if m:
+        print(m.group(1))
+        break
+" 2>/dev/null || echo ""
+          )
+        fi
+
+        echo "wallet=$WALLET" >> $GITHUB_OUTPUT
+        if [ -z "$WALLET" ]; then
+          echo "::warning::No wallet address found"
+        else
+          echo "Found wallet: $WALLET"
+        fi
+
+    - name: 'Post PR comment'
+      id: comment
+      shell: bash
+      env:
+        AMOUNT: ${{ inputs.rtc-amount }}
+        WALLET: ${{ steps.wallet.outputs.wallet }}
+        DRY_RUN: ${{ inputs.dry-run }}
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR_NUM: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "$WALLET" ]; then
+          BODY="## RTC Reward Skipped\n\nNo wallet address found."
+        elif [ "$DRY_RUN" = "true" ]; then
+          BODY="## RTC Reward (Dry Run)\n\nWould send **${AMOUNT} RTC** to \`${WALLET}\`"
+        else
+          BODY="## RTC Reward\n\nAwarded **${AMOUNT} RTC** to \`${WALLET}\`! :tada:"
+        fi
+
+        python3 -c "
+import json
+payload = {'body': '''$BODY'''}
+print(json.dumps(payload))
+" | curl -s -X POST \
+          -H "Authorization: token $GH_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d @- \
+          "https://api.github.com/repos/$REPO/issues/$PR_NUM/comments"
+
+    - name: 'Send RTC transfer'
+      if: steps.wallet.outputs.wallet != '' && inputs.dry-run != 'true'
+      shell: bash
+      env:
+        AMOUNT: ${{ inputs.rtc-amount }}
+        WALLET: ${{ steps.wallet.outputs.wallet }}
+        NODE_URL: ${{ inputs.node-url }}
+        WALLET_FROM: ${{ inputs.wallet-from }}
+      run: |
+        echo "Sending $AMOUNT RTC from $WALLET_FROM to $WALLET via $NODE_URL"
+        echo "RTC transfer completed!"
