@@ -1,0 +1,73 @@
+name: Generate Bounties Index
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate bounties.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          echo "Fetching open bounties from $REPO..."
+
+          # Fix #2: --paginate to handle repos with >100 issues
+          # Fix #3: select(has("pull_request") | not) to exclude PRs
+          bounties=$(gh api --paginate "repos/$REPO/issues" \
+            -f state=open \
+            -f per_page=100 \
+            -f sort=created \
+            -f direction=desc \
+            --jq '
+              map(select(has("pull_request") | not)) |
+              map(select(
+                (.title | test("(?i)bounty|BOUNTY")) or
+                (.labels[]?.name | test("(?i)bounty"))
+              )) |
+              map({
+                id: .number,
+                title: .title,
+                url: .html_url,
+                state: .state,
+                created_at: .created_at,
+                updated_at: .updated_at,
+                comments: .comments,
+                author: .user.login,
+                labels: [.labels[]?.name | select(test("(?i)bounty|open|major|standard|help wanted|integration|community|easy|documentation|red-team"))],
+                agents_welcome: (.body | test("(?i)agents.?welcome|Agents.?welcome"))
+              })
+            ')
+
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          jq -n \
+            --arg updated "$timestamp" \
+            --argjson bounties "$bounties" \
+            '{
+              updated_at: $updated,
+              repo: "'"$REPO"'",
+              total: ($bounties | length),
+              bounties: $bounties
+            }' > bounties.json
+
+          count=$(jq '.total' bounties.json)
+          echo "Generated bounties.json with $count bounties"
+
+      - name: Commit bounties.json
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update bounties.json [skip ci]'
+          file_pattern: 'bounties.json'
+          skip_checkout: true

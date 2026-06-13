@@ -1,0 +1,27 @@
+{
+  "updated_at": "2026-05-30T12:35:00Z",
+  "repo": "Scottcjn/rustchain-bounties",
+  "total": 20,
+  "bounties": [
+    {"id": 12620, "title": "RFC: RustChain Foundation Council", "reward": "100 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12620", "state": "open", "comments": 4, "category": "governance", "agents_welcome": true},
+    {"id": 12494, "title": "Machine-readable bounty index", "reward": "5-10 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12494", "state": "open", "comments": 1, "category": "tooling", "agents_welcome": false},
+    {"id": 12445, "title": "CN-Language Market Framing", "reward": "5-8 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12445", "state": "open", "comments": 11, "category": "content", "agents_welcome": true},
+    {"id": 12444, "title": "Proof of Antiquity vs Proof of Storage", "reward": "5 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12444", "state": "open", "comments": 18, "category": "comparison", "agents_welcome": true},
+    {"id": 12443, "title": "wRTC Bridge vs Cross-Chain DEX", "reward": "5 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12443", "state": "open", "comments": 18, "category": "comparison", "agents_welcome": true},
+    {"id": 12442, "title": "RustChain vs Helium / DePIN Networks", "reward": "5 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12442", "state": "open", "comments": 17, "category": "comparison", "agents_welcome": true},
+    {"id": 2890, "title": "AgentFolio + Beacon Integration", "reward": "200 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890", "state": "open", "comments": 41, "category": "integration", "agents_welcome": false},
+    {"id": 2864, "title": "GitHub Action: Auto-Award RTC", "reward": "20 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864", "state": "open", "comments": 90, "category": "integration", "agents_welcome": false},
+    {"id": 3074, "title": "LangChain Native Tool", "reward": "25 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3074", "state": "open", "comments": 11, "category": "integration", "agents_welcome": true},
+    {"id": 3075, "title": "Submit rustchain-mcp to 3 MCP Directories", "reward": "30 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3075", "state": "open", "comments": 25, "category": "integration", "agents_welcome": true},
+    {"id": 2819, "title": "Red Team UTXO Implementation", "reward": "50-200 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2819", "state": "open", "comments": 153, "category": "security", "agents_welcome": false},
+    {"id": 3418, "title": "Beacon Atlas Registration", "reward": "5 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418", "state": "open", "comments": 61, "category": "community", "agents_welcome": false},
+    {"id": 160, "title": "Beacon Tutorial / Blog", "reward": "50 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/160", "state": "open", "comments": 129, "category": "documentation", "agents_welcome": false},
+    {"id": 12028, "title": "Maintainer-Nominated Welcome Grant", "reward": "150 RTC/mo", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12028", "state": "open", "comments": 3, "category": "grant", "agents_welcome": false},
+    {"id": 12027, "title": "Localization — Translate Docs", "reward": "5 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12027", "state": "open", "comments": 14, "category": "documentation", "agents_welcome": false},
+    {"id": 12026, "title": "Hardware Pioneer — Mine on New Hardware", "reward": "10 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12026", "state": "open", "comments": 3, "category": "mining", "agents_welcome": false},
+    {"id": 12025, "title": "First Light — First Contribution", "reward": "2-3 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12025", "state": "open", "comments": 7, "category": "onboarding", "agents_welcome": false},
+    {"id": 402, "title": "RustChain Micro-Grants", "reward": "100-200 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/402", "state": "open", "comments": 43, "category": "grant", "agents_welcome": false},
+    {"id": 9017, "title": "May Flowers — Star 3 Repos", "reward": "2 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9017", "state": "open", "comments": 2, "category": "community", "agents_welcome": false},
+    {"id": 12584, "title": "UTXO-BUG: Block candidates internal conflicts", "reward": "50 RTC", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12584", "state": "open", "comments": 2, "category": "security", "agents_welcome": false}
+  ]
+}
