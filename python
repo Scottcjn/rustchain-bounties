@@ -1,0 +1,308 @@
+#!/usr/bin/env python3
+"""
+Bounty Verification Bot
+
+Monitors GitHub issue comments for bounty claims and auto-verifies
+star/follow claims using the GitHub API.
+
+Usage:
+    Set environment variables:
+        GITHUB_TOKEN: GitHub personal access token
+        GITHUB_REPOSITORY: Repository name (owner/repo)
+        ISSUE_NUMBER: Issue number
+        COMMENT_ID: Comment ID to reply to
+        COMMENT_BODY: Body of the comment
+        COMMENT_AUTHOR: Author of the comment
+"""
+
+import os
+import re
+import sys
+import json
+import logging
+from typing import Optional, Dict, Any, Tuple
+
+import requests
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+class BountyVerifier:
+    """Handles verification of bounty claims."""
+
+    def __init__(self):
+        """Initialize verifier with environment variables."""
+        self.token = os.environ.get('GITHUB_TOKEN')
+        if not self.token:
+            raise ValueError("GITHUB_TOKEN environment variable is required")
+
+        self.repository = os.environ.get('GITHUB_REPOSITORY')
+        if not self.repository:
+            raise ValueError("GITHUB_REPOSITORY environment variable is required")
+
+        self.issue_number = os.environ.get('ISSUE_NUMBER')
+        if not self.issue_number:
+            raise ValueError("ISSUE_NUMBER environment variable is required")
+
+        self.comment_id = os.environ.get('COMMENT_ID')
+        if not self.comment_id:
+            raise ValueError("COMMENT_ID environment variable is required")
+
+        self.comment_body = os.environ.get('COMMENT_BODY', '')
+        self.comment_author = os.environ.get('COMMENT_AUTHOR', '')
+
+        self.api_base = "https://api.github.com"
+        self.headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+
+    def parse_claim(self, body: str) -> Optional[Dict[str, str]]:
+        """
+        Parse a claim from the comment body.
+
+        Expected formats:
+            Claim: star <owner/repo>
+            Claim: follow <username>
+            Claim: star <owner/repo> follow <username>
+
+        Returns:
+            Dict with 'type' and 'target' keys, or None if no valid claim found.
+        """
+        body_lower = body.lower().strip()
+        claims = []
+
+        # Pattern for star claims: "Claim: star owner/repo"
+        star_pattern = r'claim:\s*star\s+([a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+)'
+        star_match = re.search(star_pattern, body_lower)
+        if star_match:
+            claims.append({
+                'type': 'star',
+                'target': star_match.group(1)
+            })
+
+        # Pattern for follow claims: "Claim: follow username"
+        follow_pattern = r'claim:\s*follow\s+([a-zA-Z0-9_.-]+)'
+        follow_match = re.search(follow_pattern, body_lower)
+        if follow_match:
+            claims.append({
+                'type': 'follow',
+                'target': follow_match.group(1)
+            })
+
+        return claims if claims else None
+
+    def verify_star(self, repo_full_name: str) -> Tuple[bool, str]:
+        """
+        Verify that the comment author has starred the given repository.
+
+        Args:
+            repo_full_name: Repository in format "owner/repo"
+
+        Returns:
+            Tuple of (is_verified, message)
+        """
+        try:
+            # Check if the comment author has starred the repo
+            url = f"{self.api_base}/repos/{repo_full_name}/stargazers"
+            params = {'per_page': 100}
+            page = 1
+
+            while True:
+                params['page'] = page
+                response = requests.get(url, headers=self.headers, params=params)
+
+                if response.status_code == 404:
+                    return False, f"Repository '{repo_full_name}' not found"
+
+                if response.status_code != 200:
+                    return False, f"GitHub API error: {response.status_code}"
+
+                stargazers = response.json()
+                if not stargazers:
+                    break
+
+                for stargazer in stargazers:
+                    if stargazer.get('login', '').lower() == self.comment_author.lower():
+                        # Get star count for proof
+                        repo_url = f"{self.api_base}/repos/{repo_full_name}"
+                        repo_response = requests.get(repo_url, headers=self.headers)
+                        star_count = "unknown"
+                        if repo_response.status_code == 200:
+                            star_count = repo_response.json().get('stargazers_count', 'unknown')
+
+                        return True, (
+                            f"✅ **Star Verified!**\n"
+                            f"- User: @{self.comment_author}\n"
+                            f"- Repository: {repo_full_name}\n"
+                            f"- Total stars: {star_count}\n"
+                            f"- Status: Starred ✓"
+                        )
+
+                # Check if there are more pages
+                if 'next' not in response.links:
+                    break
+                page += 1
+
+            return False, (
+                f"❌ **Star Not Verified**\n"
+                f"- User: @{self.comment_author}\n"
+                f"- Repository: {repo_full_name}\n"
+                f"- Status: Not starred ✗\n"
+                f"- Please star the repository and try again."
+            )
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error verifying star: {e}")
+            return False, f"⚠️ **Verification Error**: {str(e)}"
+
+    def verify_follow(self, target_username: str) -> Tuple[bool, str]:
+        """
+        Verify that the comment author follows the target user.
+
+        Args:
+            target_username: GitHub username to check follow status for
+
+        Returns:
+            Tuple of (is_verified, message)
+        """
+        try:
+            # Check if the comment author follows the target user
+            url = f"{self.api_base}/users/{self.comment_author}/following/{target_username}"
+            response = requests.get(url, headers=self.headers)
+
+            if response.status_code == 204:
+                return True, (
+                    f"✅ **Follow Verified!**\n"
+                    f"- User: @{self.comment_author}\n"
+                    f"- Following: @{target_username}\n"
+                    f"- Status: Following ✓"
+                )
+            elif response.status_code == 404:
+                # Check if target user exists
+                user_url = f"{self.api_base}/users/{target_username}"
+                user_response = requests.get(user_url, headers=self.headers)
+
+                if user_response.status_code == 404:
+                    return False, f"❌ **Follow Not Verified**\nUser '@{target_username}' not found on GitHub."
+
+                return False, (
+                    f"❌ **Follow Not Verified**\n"
+                    f"- User: @{self.comment_author}\n"
+                    f"- Target: @{target_username}\n"
+                    f"- Status: Not following ✗\n"
+                    f"- Please follow @{target_username} and try again."
+                )
+            else:
+                return False, f"⚠️ **Verification Error**: GitHub API returned status {response.status_code}"
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error verifying follow: {e}")
+            return False, f"⚠️ **Verification Error**: {str(e)}"
+
+    def post_comment(self, issue_number: str, body: str) -> bool:
+        """
+        Post a comment on the issue.
+
+        Args:
+            issue_number: Issue number to post on
+            body: Comment body
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            url = f"{self.api_base}/repos/{self.repository}/issues/{issue_number}/comments"
+            data = {"body": body}
+            response = requests.post(url, headers=self.headers, json=data)
+
+            if response.status_code == 201:
+                logger.info(f"Successfully posted verification result on issue #{issue_number}")
+                return True
+            else:
+                logger.error(f"Failed to post comment: {response.status_code} - {response.text}")
+                return False
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error posting comment: {e}")
+            return False
+
+    def run(self):
+        """Main execution flow."""
+        logger.info(f"Processing comment #{self.comment_id} by @{self.comment_author}")
+
+        # Parse the claim
+        claims = self.parse_claim(self.comment_body)
+        if not claims:
+            logger.info("No valid claim found in comment")
+            return
+
+        logger.info(f"Found {len(claims)} claim(s): {claims}")
+
+        # Verify each claim
+        results = []
+        all_verified = True
+
+        for claim in claims:
+            if claim['type'] == 'star':
+                verified, message = self.verify_star(claim['target'])
+            elif claim['type'] == 'follow':
+                verified, message = self.verify_follow(claim['target'])
+            else:
+                verified, message = False, f"Unknown claim type: {claim['type']}"
+
+            results.append(message)
+            if not verified:
+                all_verified = False
+
+        # Build response
+        response_parts = [
+            f"## 🔍 Bounty Verification Results",
+            f"**Claimant:** @{self.comment_author}",
+            f"**Issue:** #{self.issue_number}",
+            "",
+            "---",
+            ""
+        ]
+
+        for i, result in enumerate(results, 1):
+            response_parts.append(f"### Claim {i}")
+            response_parts.append(result)
+            response_parts.append("")
+
+        if all_verified and len(results) > 0:
+            response_parts.append("### 🎉 All claims verified! Ready for bounty processing.")
+        elif len(results) > 0:
+            response_parts.append("### ⚠️ Some claims could not be verified. Please check the details above.")
+
+        response_body = "\n".join(response_parts)
+
+        # Post the verification result
+        success = self.post_comment(self.issue_number, response_body)
+        if success:
+            logger.info("Verification result posted successfully")
+        else:
+            logger.error("Failed to post verification result")
+            sys.exit(1)
+
+
+def main():
+    """Entry point for the verification bot."""
+    try:
+        verifier = BountyVerifier()
+        verifier.run()
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
