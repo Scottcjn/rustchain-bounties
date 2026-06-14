@@ -10,7 +10,7 @@ Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
-Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total.
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Updated again on 2026-06-14 to add the first substantive review for Scottcjn/Rustchain#7444.
 
 ## Reviews Submitted
 
@@ -518,6 +518,21 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- issue2307_boot_chime/src/proof_of_iron.py tests/test_boot_chime_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
 
+### 49. Scottcjn/Rustchain#7444 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/7444#pullrequestreview-4493284609
+
+Summary:
+- Verified the docs miner setup wizard no longer assigns remote `/health`, `/api/miners`, or exception text through the `testOut` / `minerOut` `innerHTML` sinks.
+- Confirmed those untrusted values now flow through `renderStatusResult()`, which builds DOM nodes with `document.createElement()`, writes values with `textContent`, and swaps content via `replaceChildren()`.
+- Confirmed the existing UI presentation is preserved with status pills, preformatted response/error bodies, and muted helper text.
+- Confirmed the regression test rejects the risky `innerHTML` assignments and asserts the safer helper is used for the health, miner-hit, and exception paths.
+- Ran `python -m pytest -q tests/test_miner_setup_docs_wizard_security.py` on Windows: 2 passed.
+- Ran `python -m py_compile tests/test_miner_setup_docs_wizard_security.py` on Windows: passed.
+- Ran extracted wizard `<script>` parse smoke with Node `new Function(...)` on Windows: parsed 1 script.
+- Ran `git diff --check origin/main...HEAD -- docs/miner-setup-wizard/index.html tests/test_miner_setup_docs_wizard_security.py` on Windows: passed.
+- Noted PR CI's failing full-suite `test` job is from unrelated `tests/test_fetchall_guard.py` hits in `node/rustchain_v2_integrated_v2.2.1_rip200.py`, outside the files touched by this review.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -526,6 +541,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 48 accepted reviews equal 240 RTC, or $24.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 49 accepted reviews equal 245 RTC, or $24.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
