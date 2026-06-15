@@ -10,7 +10,7 @@ Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
-Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope.
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope. Updated again on 2026-06-15 to add the first substantive review for Scottcjn/Rustchain#7446.
 
 ## Reviews Submitted
 
@@ -518,6 +518,20 @@ Summary:
 - Ran `python tools\bcos_spdx_check.py --base-ref origin/main` on Windows: BCOS SPDX check OK.
 - Ran `git diff --check origin/main...HEAD -- issue2307_boot_chime/src/proof_of_iron.py tests/test_boot_chime_top_level_import.py setup_miner.py miners/checksums.sha256`: passed.
 
+### 49. Scottcjn/Rustchain#7446 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/7446#pullrequestreview-4494061666
+
+Summary:
+- Verified `/api/miners` now rejects out-of-range pagination values instead of silently clamping them: `limit < 1`, `limit > 1000`, and `offset < 0` return explicit 400 responses.
+- Confirmed omitted or empty pagination parameters still use the existing defaults of `limit=100` and `offset=0`.
+- Confirmed the SQL query still uses bound `LIMIT ? OFFSET ?` parameters after validation, so the change tightens API input semantics without changing the database access shape.
+- Confirmed the new tests cover malformed limits, out-of-range limits, malformed offsets, negative offsets, default empty values, and the existing success/rate-limit path.
+- Ran `python -m pytest node/tests/test_api_miners_rate_limit.py -q` on Windows: 7 passed, 4 subtests passed.
+- Ran `python -m py_compile node/rustchain_v2_integrated_v2.2.1_rip200.py` on Windows: passed.
+- Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py node/tests/test_api_miners_rate_limit.py` on Windows: passed.
+- Confirmed GitHub checks were green at the reviewed head.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -526,6 +540,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 48 accepted reviews equal 240 RTC, or $24.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 49 accepted reviews equal 245 RTC, or $24.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
