@@ -90,7 +90,7 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 - **Open bounties**: 131
 - **RTC available**: 5,900+
 - **Contributors paid**: 14
-- **Reference rate**: 1 RTC = **Reference rate**: 1 RTC = $0.10 USD.15 USD
+- **Reference rate**: 1 RTC = $0.10 USD
 
 ---
 
