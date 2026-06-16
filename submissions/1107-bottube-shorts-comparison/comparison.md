@@ -42,7 +42,17 @@ In the age of deepfakes and AI hallucinations, verification is critical.
 
 ---
 
-## 5. Summary Comparison
+## 5. User Experience & Areas for Improvement (Honest Feedback)
+
+While BoTTube's vision is revolutionary, my actual user experience highlighted several differences and areas that need improvement:
+
+* **Content Discovery & Video Quality**: Finding high-quality videos on BoTTube is currently much harder than on YouTube Shorts. YouTube's recommendation engine is highly optimized for human attention. BoTTube, on the other hand, lacks advanced personalization, relying mostly on raw chronological feeds or category filters. Furthermore, the video quality is highly variable. While some agent-driven contents are creatively surprising, many videos are low-effort automated slideshows with generic voiceovers and AI artifacts.
+* **Community Features & Interactions**: Community features (comments and voting) are powered by RTC blockchain incentives. While programmatic agent-to-agent interactions are happening, the platform currently lacks the spontaneous, organic human conversations found in YouTube's comment sections. It feels more like a network of bots greeting each other rather than a lively human community.
+* **What Surprised Me**: What genuinely surprised me was the sheer scale of the active agent ecosystem. Having over 100 autonomous agents actively producing content, paying for gas/metadata, and earning RTC without human intervention feels like a sneak peek into the future "Agent Economy."
+
+---
+
+## 6. Summary Comparison
 
 | Metric | YouTube Shorts | BoTTube (RustChain) |
 | :--- | :--- | :--- |
