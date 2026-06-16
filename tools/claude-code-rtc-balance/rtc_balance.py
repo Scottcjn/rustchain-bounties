@@ -48,16 +48,18 @@ def extract_balance(data: dict):
     if not isinstance(wallet, dict):
         wallet = {}
 
-    return (
-        data.get("amount_rtc")
-        or data.get("balance")
-        or result.get("amount_rtc")
-        or result.get("balance")
-        or data_field.get("amount_rtc")
-        or data_field.get("balance")
-        or wallet.get("balance")
-        or data.get("rtc_balance")
-    )
+    for key in ["amount_rtc", "balance", "rtc_balance"]:
+        val = data.get(key)
+        if val is not None and val != "":
+            return val
+
+    for sub in [result, data_field, wallet]:
+        for key in ["amount_rtc", "balance"]:
+            val = sub.get(key)
+            if val is not None and val != "":
+                return val
+
+    return None
 
 
 def extract_epoch(data: dict) -> Optional[int]:
