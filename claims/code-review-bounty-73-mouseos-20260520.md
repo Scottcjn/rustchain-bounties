@@ -10,7 +10,7 @@ Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
-Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope. Updated again on 2026-06-15 to add the first substantive review for Scottcjn/Rustchain#7446.
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope. Updated again on 2026-06-15 to add the first substantive review for Scottcjn/Rustchain#7446. Updated on 2026-06-16 UTC to add the accepted review for merged Scottcjn/Rustchain#7479.
 
 ## Reviews Submitted
 
@@ -532,6 +532,21 @@ Summary:
 - Ran `git diff --check origin/main...HEAD -- node/rustchain_v2_integrated_v2.2.1_rip200.py node/tests/test_api_miners_rate_limit.py` on Windows: passed.
 - Confirmed GitHub checks were green at the reviewed head.
 
+### 50. Scottcjn/Rustchain#7479 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/7479#pullrequestreview-4497023072
+
+Summary:
+- Verified the new `_parse_ioreg_serial()` helper extracts `IOPlatformSerialNumber` from the `ioreg -rd1 -c IOPlatformExpertDevice` output shape and ignores empty or missing serial values.
+- Confirmed the Darwin path now routes through `get_hardware_serial()` to `get_macos_serial()`, while non-Darwin systems keep the existing Linux serial probe behavior.
+- Confirmed `LocalMiner.__init__()` and `_get_hw_info()` now use the shared serial helper, so dry-run payload/reporting and startup banner use the same platform-aware serial source.
+- Confirmed the new tests cover both direct `ioreg` parsing and the Darwin dispatch path without invoking Linux serial probes.
+- Ran `python -m py_compile miners/linux/rustchain_linux_miner.py tests/test_linux_miner_identity.py` on Windows: passed.
+- Ran `git diff --check origin/main...HEAD -- miners/linux/rustchain_linux_miner.py tests/test_linux_miner_identity.py` on Windows: passed.
+- Ran `python -m pytest tests/test_linux_miner_identity.py -q` on Windows: 7 passed.
+- Ran a direct parser sanity check on Windows: returned `C02TESTSERIAL` for a sample `IOPlatformSerialNumber` line and empty output for `None`/missing serial cases.
+- Confirmed the PR merged on 2026-06-16 UTC after the review.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -540,6 +555,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 49 accepted reviews equal 245 RTC, or $24.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 50 accepted reviews equal 250 RTC, or $25.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
