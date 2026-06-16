@@ -1,6 +1,6 @@
 # Follow @RustchainPOA Proof - Bounty #299
 
-**Wallet ID:** batianxia--  
+**Wallet ID:** RTC41e11e938fc3cb4f77060cca50b8928959946036  
 **Bounty:** #299 - Follow RustChain on X  
 **Reward:** 3 RTC
 
