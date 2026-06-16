@@ -10,7 +10,7 @@ Canonical payout declaration: RTC849344ea4cc70514183eb03df0e8d107a398ac12
 
 Issue claim thread: https://github.com/Scottcjn/rustchain-bounties/issues/11521
 
-Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope. Updated again on 2026-06-15 to add the first substantive review for Scottcjn/Rustchain#7446. Updated on 2026-06-16 UTC to add the accepted review for merged Scottcjn/Rustchain#7479.
+Status: submitted for maintainer assessment. Bounty #73 issue comments are disabled after 2500 comments, so this file mirrors the issue claim in PR-claim format. Updated after maintainer feedback on 2026-06-03 to exclude Scottcjn/Rustchain#5826 from the requested total. Scottcjn/Rustchain#7444 was reviewed on 2026-06-14 but not included in this claim after maintainer feedback closed that PR as out of payout scope. Updated again on 2026-06-15 to add the first substantive review for Scottcjn/Rustchain#7446. Updated on 2026-06-16 UTC to add the accepted review for merged Scottcjn/Rustchain#7479 and the accepted review for Scottcjn/Rustchain#7480, whose fix was landed on main by maintainer cherry-pick.
 
 ## Reviews Submitted
 
@@ -547,6 +547,22 @@ Summary:
 - Ran a direct parser sanity check on Windows: returned `C02TESTSERIAL` for a sample `IOPlatformSerialNumber` line and empty output for `None`/missing serial cases.
 - Confirmed the PR merged on 2026-06-16 UTC after the review.
 
+### 51. Scottcjn/Rustchain#7480 - Approved
+
+Review: https://github.com/Scottcjn/Rustchain/pull/7480#pullrequestreview-4497730358
+
+Summary:
+- Verified the README troubleshooting block no longer points regular users at `/pending/list`, which Issue #7460 reports as a 404 path.
+- Confirmed the replacement `wallet/history?miner_id=...&limit=20` endpoint is suitable for regular user troubleshooting and returned a normal empty history response for the placeholder miner in a live curl check.
+- Confirmed the admin-only pending ledger path is documented through `tools/pending_ops.py` with `RC_ADMIN_KEY`, which matches the tool's CLI surface.
+- Confirmed the malformed README code fences in the pending-transfer section are fixed to proper fenced `bash` blocks.
+- Ran `git diff --check origin/main...HEAD -- README.md` on Windows: passed.
+- Ran `python -m py_compile tools/pending_ops.py` on Windows: passed.
+- Ran `python tools/pending_ops.py --help` on Windows and confirmed the expected `list` and `confirm` subcommands plus `--node`, `--admin-key`, and `--insecure` options.
+- Ran `curl -fsS "https://rustchain.org/wallet/history?miner_id=YOUR_MINER_NAME&limit=20"` on Windows: returned `ok: true` with an empty transaction list.
+- Confirmed the PR's GitHub check suite was green at the reviewed head.
+- Confirmed the maintainer closed the PR after landing the valuable fix on `main` as `c80621fd` by cherry-pick and crediting the PR author.
+
 ## Local Verification Evidence
 
 All reviews include direct review links with detailed validation notes. Commands were run on Windows where applicable and included focused pytest, `py_compile`, and `git diff --check` runs for touched files.
@@ -555,6 +571,6 @@ All reviews include direct review links with detailed validation notes. Commands
 
 Please assess under bounty #73's code review reward structure.
 
-At the posted minimum of 5 RTC per accepted review, 50 accepted reviews equal 250 RTC, or $25.00 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
+At the posted minimum of 5 RTC per accepted review, 51 accepted reviews equal 255 RTC, or $25.50 equivalent at the posted reference rate of 1 RTC = $0.10 USD.
 
 Payment destination is the RTC mainnet wallet address `RTC849344ea4cc70514183eb03df0e8d107a398ac12`. The previously listed named miner ID is retracted and must not be used for payout.
