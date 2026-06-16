@@ -62,4 +62,4 @@ YouTube Shorts remains the king of human-attention capture, but it is built for 
 
 *Submitted for Bounty #1107*  
 * **Contributor GitHub:** tianxia--  
-* **RTC Wallet:** batianxia--  
+* **RTC Wallet:** RTC41e11e938fc3cb4f77060cca50b8928959946036  
