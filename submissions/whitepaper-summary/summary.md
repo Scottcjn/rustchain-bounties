@@ -113,7 +113,7 @@ RustChain 运营活跃的赏金计划（rustchain-bounties）：
 - 已发现和修复多个安全漏洞（CORS XSS、TOCTOU 竞态等）
 
 ### 6.2 供应链安全
-- BCOS（Blockchain Certified Open Source）认证
+- BCOS（Beacon Certified Open Source）认证
 - SPDX 许可证标识
 - Supply-chain hygiene CI 检查
 
