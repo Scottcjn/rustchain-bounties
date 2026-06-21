@@ -1,2 +1,2 @@
 # The OpenAI Agents SDK requires Python 3.10 or newer.
-openai-agents>=0.7,<0.8
+openai-agents>=0.17.6,<0.18
