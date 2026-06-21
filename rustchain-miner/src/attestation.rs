@@ -19,9 +19,11 @@ pub fn run(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
         return run_test_only();
     }
 
-    // ── Wallet is required for all other modes ──────────────────────────
+    // ── Wallet is required for live mining ───────────────────────────────
+    // The wallet is the Ed25519 public key address where RTC mining rewards are sent.
+    // Must be provided as --wallet flag with RTC address format.
     let wallet = cli.wallet.as_deref().ok_or(
-        "Error: --wallet is required for mining. Use --test-only to run fingerprint checks only.",
+        "Error: --wallet is required for mining. Provide RTC wallet address with --wallet. Use --test-only to run fingerprint checks only.",
     )?;
 
     // ── Initialize client ───────────────────────────────────────────────

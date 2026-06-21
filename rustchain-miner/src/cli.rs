@@ -8,7 +8,9 @@ use clap::Parser;
     about = "Native Rust miner for the RustChain Proof-of-Antiquity blockchain"
 )]
 pub struct Cli {
-    /// Wallet / miner ID to mine with.
+    /// RTC wallet address (Ed25519 public key) to receive mining rewards.
+    /// Format: RTCa759d9bc7cbd4c1690060afd403a37b1dcfde6b
+    /// Required for live mining; optional for --test-only mode.
     #[arg(long)]
     pub wallet: Option<String>,
 
