@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // ---- helpers ----
 
@@ -202,17 +203,23 @@ async function findWalletInRepo(token, apiBase, owner, repo, ref, pattern) {
   return null;
 }
 
+function buildIdempotencyKey(from, to, amount, memo) {
+  const raw = `${from}:${to}:${amount}:${memo}`;
+  return crypto.createHash('sha256').update(raw).digest('hex').slice(0, 24);
+}
+
 async function sendRTC(nodeUrl, from, to, amount, adminKey, memo) {
   // RustChain node contract: POST /wallet/transfer with {from_miner,to_miner,
   // amount_rtc}, admin auth via the X-Admin-Key header (NOT the body). The old
-  // /api/v1/transfer path 404s and body admin_key is ignored, so every reward
-  // silently failed. idempotency_key (the PR URL) prevents double-pay on re-run.
+  // /api/v1/transfer path 404s and body admin_key is ignored. Use a compact
+  // stable hex idempotency key because the node rejects URL-shaped keys.
+  const idempotencyKey = buildIdempotencyKey(from, to, amount, memo);
   const payload = {
     from_miner: from,
     to_miner: to,
     amount_rtc: amount,
     memo,
-    idempotency_key: memo,
+    idempotency_key: idempotencyKey,
   };
   const resp = await fetch(`${nodeUrl.replace(/\/$/, '')}/wallet/transfer`, {
     method: 'POST',
