@@ -66,7 +66,7 @@ jobs:
           echo "Generated bounties.json with $count bounties"
 
       - name: Commit bounties.json
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: update bounties.json [skip ci]'
           file_pattern: 'bounties.json'
