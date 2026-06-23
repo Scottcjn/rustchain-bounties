@@ -25,7 +25,13 @@ pub fn run(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // ── Initialize client ───────────────────────────────────────────────
-    let client = RustChainClient::new(&cli.node)?;
+    if cli.insecure {
+        eprintln!(
+            "WARNING: --insecure disables TLS certificate verification. Use only with trusted test nodes."
+        );
+    }
+
+    let client = RustChainClient::new(&cli.node, cli.insecure)?;
     println!("╔══════════════════════════════════════════════════╗");
     println!("║       RustChain Miner v{}           ║", env!("CARGO_PKG_VERSION"));
     println!("╠══════════════════════════════════════════════════╣");
