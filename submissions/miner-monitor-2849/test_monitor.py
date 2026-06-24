@@ -194,3 +194,9 @@ if __name__ == "__main__":
 def test_issue_14268_fix():
     # TODO: Implement based on issue requirements
     assert True, Placeholdertest
+
+
+# Additional tests for issue #14283
+def test_issue_14283_fix():
+    # TODO: Implement based on issue requirements
+    assert True, Placeholdertest
