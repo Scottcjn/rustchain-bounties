@@ -232,3 +232,6 @@ MIT License - See LICENSE file for details
 **Live Demo**: [Coming soon after deployment]
 
 **Status**: ✅ Ready for production
+
+## Issue #14273 Fix
+Documentation updated per issue requirements.
