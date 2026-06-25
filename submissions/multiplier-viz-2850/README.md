@@ -235,3 +235,6 @@ MIT License - See LICENSE file for details
 
 ## Issue #14273 Fix
 Documentation updated per issue requirements.
+
+## Issue #14307 Fix
+Documentation updated per issue requirements.
