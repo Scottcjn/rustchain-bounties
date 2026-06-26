@@ -50,6 +50,15 @@ export function generateJudgeKeyPair() {
   };
 }
 
+// Derive the spki public-key PEM from an Ed25519 private-key PEM so that a judge
+// configured with only JUDGE_PRIVATE_KEY_PEM advertises the public key that
+// actually verifies its signatures (no fresh/unrelated key).
+export function derivePublicKeyPem(privateKeyPem) {
+  return crypto
+    .createPublicKey(privateKeyPem)
+    .export({ type: "spki", format: "pem" });
+}
+
 export function signCanonical(privateKeyPem, payload) {
   return crypto
     .sign(null, Buffer.from(canonicalJson(payload)), privateKeyPem)
@@ -105,12 +114,14 @@ export function parseUnifiedDiff(diffText) {
         isDeleted: false,
         addedAssertions: 0,
         removedAssertions: 0,
+        hunks: 0,
       };
       continue;
     }
     if (!current) continue;
 
-    if (line.startsWith("new file mode")) current.isNew = true;
+    if (line.startsWith("@@")) current.hunks += 1;
+    else if (line.startsWith("new file mode")) current.isNew = true;
     else if (line.startsWith("deleted file mode")) current.isDeleted = true;
     else if (line.startsWith("rename to ")) current.path = line.slice("rename to ".length).trim();
     else if (line.startsWith("+++ ")) {
@@ -153,9 +164,21 @@ export const DEFAULT_LIMITS = {
 
 export class DiffBoundsJudge {
   constructor({ privateKeyPem, publicKeyPem, limits = {}, now = () => new Date() } = {}) {
-    const generated = privateKeyPem && publicKeyPem ? null : generateJudgeKeyPair();
-    this.privateKeyPem = privateKeyPem || generated.privateKeyPem;
-    this.publicKeyPem = publicKeyPem || generated.publicKeyPem;
+    if (privateKeyPem) {
+      this.privateKeyPem = privateKeyPem;
+      // Always derive the advertised key from the signing key so the documented
+      // JUDGE_PRIVATE_KEY_PEM-only flow emits self-consistent verdicts. An
+      // explicit publicKeyPem is honoured only when no private key is supplied
+      // (verify-only construction).
+      this.publicKeyPem = derivePublicKeyPem(privateKeyPem);
+    } else if (publicKeyPem) {
+      this.publicKeyPem = publicKeyPem;
+      this.privateKeyPem = null;
+    } else {
+      const generated = generateJudgeKeyPair();
+      this.privateKeyPem = generated.privateKeyPem;
+      this.publicKeyPem = generated.publicKeyPem;
+    }
     this.limits = {
       ...DEFAULT_LIMITS,
       ...limits,
@@ -223,14 +246,23 @@ export class DiffBoundsJudge {
   // --- individual checks ---------------------------------------------------
 
   checkParseable(diffText, files) {
-    const passed = typeof diffText === "string" && diffText.trim().length > 0 && files.length > 0;
-    return {
-      id: "parseable",
-      passed,
-      reason: passed
-        ? "request carries a well-formed unified diff"
-        : "request must include a non-empty unified `diff`/`patch` (no parseable file headers found)",
-    };
+    // A well-formed unified diff needs a file header AND at least one real hunk
+    // (`@@`). Header-only/malformed input (a bare `diff --git` line) must NOT
+    // pass the parseable guard, otherwise it would slip through every size /
+    // integrity bound with zero scrutinised content.
+    const hasHunk = files.some((f) => f.hunks > 0);
+    const passed =
+      typeof diffText === "string" &&
+      diffText.trim().length > 0 &&
+      files.length > 0 &&
+      hasHunk;
+    let reason;
+    if (passed) reason = "request carries a well-formed unified diff";
+    else if (files.length > 0 && !hasHunk)
+      reason = "diff has file headers but no `@@` hunk — header-only/malformed patch rejected";
+    else
+      reason = "request must include a non-empty unified `diff`/`patch` (no parseable file headers found)";
+    return { id: "parseable", passed, reason };
   }
 
   checkSize(files) {

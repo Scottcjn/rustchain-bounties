@@ -159,3 +159,29 @@ test("verdict signature is reproducible for identical input", () => {
     crypto.createHash("sha256").update(b.signature).digest("hex"),
   );
 });
+
+test("private-key-only construction derives a matching public key (documented flow)", () => {
+  // Reproduces the JUDGE_PRIVATE_KEY_PEM-only server command: supply ONLY the
+  // private key. The advertised public key must verify the signature.
+  const judge = createJudge({ privateKeyPem: KEYS.privateKeyPem, now: fixedNow });
+  const signed = judge.judge({ summary: "x", diff: SMALL_CLEAN_DIFF });
+
+  // Advertised key is derived from the supplied private key, not a fresh one.
+  const expectedPub = crypto
+    .createPublicKey(KEYS.privateKeyPem)
+    .export({ type: "spki", format: "pem" });
+  assert.equal(signed.public_key_pem, expectedPub);
+
+  // And the verdict actually verifies under the advertised key.
+  const { signature, ...payload } = signed;
+  assert.ok(verifyCanonical(signed.public_key_pem, payload, signature));
+});
+
+test("header-only diff (no @@ hunk) fails parseable", () => {
+  const headerOnly = "diff --git a/src/x.js b/src/x.js\n";
+  const v = makeJudge().judge({ summary: "noop", diff: headerOnly });
+  assert.equal(v.verdict.passed, false);
+  const parseable = v.verdict.checks.find((c) => c.id === "parseable");
+  assert.equal(parseable.passed, false);
+  assert.match(parseable.reason, /no `@@` hunk|header-only/);
+});
