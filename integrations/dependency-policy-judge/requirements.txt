@@ -1,2 +1,2 @@
-cryptography>=42.0.0
-pytest>=8.0.0
+cryptography==49.0.0
+pytest==9.1.1
