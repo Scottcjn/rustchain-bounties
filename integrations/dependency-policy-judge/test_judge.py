@@ -1,0 +1,136 @@
+# SPDX-License-Identifier: MIT
+
+from judge import DependencyPolicyJudge
+
+
+def test_accepts_pinned_package_json_dependency():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "package.json": '{"dependencies": {"left-pad": "1.3.0"}}',
+            }
+        }
+    )
+
+    assert passed is True
+    assert reasons == []
+
+
+def test_rejects_npm_install_lifecycle_script():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "package.json": '{"scripts": {"postinstall": "node ./install.js"}}',
+            }
+        }
+    )
+
+    assert passed is False
+    assert "postinstall" in reasons[0]
+
+
+def test_rejects_floating_npm_ranges_and_url_specs():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "package.json": (
+                    '{"dependencies": {"a": "^1.2.3", "b": "latest", '
+                    '"c": "git+https://example.invalid/repo.git"}}'
+                ),
+            }
+        }
+    )
+
+    assert passed is False
+    assert len(reasons) == 3
+    assert any("range dependency" in reason for reason in reasons)
+    assert any("floating dependency" in reason for reason in reasons)
+    assert any("URL/VCS/local dependency" in reason for reason in reasons)
+
+
+def test_rejects_unpinned_requirements():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "requirements.txt": "requests>=2.32\npytest==8.3.4\n",
+            }
+        }
+    )
+
+    assert passed is False
+    assert reasons == ["requirements.txt:1: requirement must be pinned with =="]
+
+
+def test_rejects_python_alt_package_source_and_vcs():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "requirements-dev.txt": (
+                    "--extra-index-url https://packages.example.invalid/simple\n"
+                    "git+https://example.invalid/project.git\n"
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert len(reasons) == 2
+    assert "alternate package sources" in reasons[0]
+    assert "URL or VCS" in reasons[1]
+
+
+def test_pyproject_dependencies_follow_same_pinning_policy():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "pyproject.toml": (
+                    "[project]\n"
+                    'dependencies = ["requests==2.32.3", "click>=8"]\n'
+                    "[project.optional-dependencies]\n"
+                    'dev = ["pytest==8.3.4", "ruff"]\n'
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert any("click>=8" in reason for reason in reasons)
+    assert any("'ruff'" in reason for reason in reasons)
+
+
+def test_rejects_request_without_supported_manifests():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge({"files": {"main.py": "print('ok')"}})
+
+    assert passed is False
+    assert reasons == ["no supported dependency manifests provided"]
+
+
+def test_signs_and_verifies_verdict_envelope():
+    judge = DependencyPolicyJudge()
+    request = {"files": {"package.json": '{"dependencies": {"left-pad": "1.3.0"}}'}}
+
+    envelope = judge.sign_verdict(request, issued_at=123)
+
+    assert envelope["payload"]["passed"] is True
+    assert envelope["payload"]["issued_at"] == 123
+    assert envelope["signature_algorithm"] == "Ed25519"
+    assert DependencyPolicyJudge.verify(envelope) is True
+
+
+def test_verify_rejects_tampered_payload():
+    judge = DependencyPolicyJudge()
+    envelope = judge.sign_verdict(
+        {"files": {"requirements.txt": "pytest==8.3.4\n"}},
+        issued_at=123,
+    )
+
+    envelope["payload"]["passed"] = not envelope["payload"]["passed"]
+
+    assert DependencyPolicyJudge.verify(envelope) is False
