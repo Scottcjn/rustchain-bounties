@@ -1,0 +1,14 @@
+﻿{
+  "name": "@elyan/staking",
+  "version": "1.0.0",
+  "description": "Elyan Staking SDK — TypeScript client for staking operations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublish": "npm run build"
+  },
+  "keywords": ["elyan", "staking", "rustchain", "blockchain"],
+  "license": "MIT"
+}
