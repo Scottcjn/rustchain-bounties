@@ -27,7 +27,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     const request = await readJson(req);
-    const signedVerdict = judge.judge(request);
+    const signedVerdict = judge.judgeSigned(request);
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify(signedVerdict, null, 2));
   } catch (error) {

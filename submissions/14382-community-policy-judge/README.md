@@ -8,7 +8,7 @@ This judge is deliberately small and auditable. It implements the open interface
 judge(request) -> (passed, reasons)
 ```
 
-The returned verdict is wrapped in an Ed25519-signed envelope so a staking SDK or gate server can verify that the verdict was produced by this judge key.
+`judge(request)` returns the flat verdict shape with top-level `passed` and `reasons` fields. Use `judgeSigned(request)` or the HTTP gate adapter when a signed Ed25519 envelope is needed for downstream verification.
 
 ## What It Judges
 
@@ -25,7 +25,7 @@ This is meant for community-run gates that want a conservative "is this work rev
 
 | File | Purpose |
 | --- | --- |
-| `policy-judge.mjs` | `CommunityPolicyJudge`, canonical JSON, Ed25519 sign/verify helpers |
+| `policy-judge.mjs` | `CommunityPolicyJudge`, flat judge verdicts, canonical JSON, Ed25519 sign/verify helpers |
 | `gate-server.mjs` | Minimal HTTP adapter exposing `POST /judge` for a reference gate |
 | `test.mjs` | Node built-in test suite for passing, failing, and tampered verdicts |
 | `package.json` | Local scripts, no external dependencies |
@@ -61,7 +61,15 @@ JUDGE_PUBLIC_KEY_PEM="$(cat judge_public.pem)" \
 node gate-server.mjs
 ```
 
-The response includes:
+`judge(request)` returns:
+
+- `passed`
+- `reasons`
+- `checks`
+- `request_hash`
+- `issued_at`
+
+`judgeSigned(request)` and `POST /judge` wrap that verdict in a signed envelope containing:
 
 - `verdict.passed`
 - `verdict.reasons`
@@ -70,7 +78,7 @@ The response includes:
 - `signature_algorithm: Ed25519`
 - `signature`
 
-SDK verification succeeds by verifying the canonical envelope, excluding the `signature` field, with `public_key_pem`.
+SDK verification succeeds by verifying the canonical envelope, excluding the `signature` field, with the pinned judge public key. The verifier must not trust a public key supplied only by an untrusted envelope.
 
 ## Limits
 

@@ -54,6 +54,9 @@ function asText(request) {
     request.patch,
     request.readme,
     request.evidence,
+    request.artifact_url,
+    request.repository,
+    JSON.stringify(request.tests || []),
     JSON.stringify(request.metadata || {}),
   ]
     .filter(Boolean)
@@ -66,6 +69,9 @@ function hasAny(text, patterns) {
 
 export class CommunityPolicyJudge {
   constructor({ privateKeyPem, publicKeyPem, now = () => new Date() } = {}) {
+    if ((privateKeyPem && !publicKeyPem) || (!privateKeyPem && publicKeyPem)) {
+      throw new Error("JUDGE_PRIVATE_KEY_PEM and JUDGE_PUBLIC_KEY_PEM must be provided together");
+    }
     const generated = privateKeyPem && publicKeyPem ? null : generateJudgeKeyPair();
     this.privateKeyPem = privateKeyPem || generated.privateKeyPem;
     this.publicKeyPem = publicKeyPem || generated.publicKeyPem;
@@ -91,7 +97,11 @@ export class CommunityPolicyJudge {
       request_hash: sha256Hex(canonicalJson(normalized)),
       issued_at: this.now().toISOString(),
     };
-    return this.signVerdict(verdict);
+    return verdict;
+  }
+
+  judgeSigned(request) {
+    return this.signVerdict(this.judge(request));
   }
 
   signVerdict(verdict) {
@@ -106,9 +116,13 @@ export class CommunityPolicyJudge {
     };
   }
 
-  verify(signedVerdict) {
+  verify(signedVerdict, expectedPublicKeyPem = this.publicKeyPem) {
+    if (!expectedPublicKeyPem) throw new Error("missing pinned judge public key");
+    if (signedVerdict.public_key_pem && signedVerdict.public_key_pem !== expectedPublicKeyPem) {
+      return false;
+    }
     const { signature, ...payload } = signedVerdict;
-    return verifyCanonical(signedVerdict.public_key_pem, payload, signature);
+    return verifyCanonical(expectedPublicKeyPem, payload, signature);
   }
 
   checkShape(request) {
