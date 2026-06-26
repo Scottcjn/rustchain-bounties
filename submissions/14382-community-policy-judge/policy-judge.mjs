@@ -67,6 +67,12 @@ function hasAny(text, patterns) {
   return patterns.some((pattern) => pattern.test(text));
 }
 
+function hasReviewableArtifact(request) {
+  return [request.diff, request.patch, request.artifact_url, request.repository].some(
+    (artifact) => typeof artifact === "string" && artifact.trim().length > 0,
+  );
+}
+
 export class CommunityPolicyJudge {
   constructor({ privateKeyPem, publicKeyPem, now = () => new Date() } = {}) {
     if ((privateKeyPem && !publicKeyPem) || (!privateKeyPem && publicKeyPem)) {
@@ -127,11 +133,7 @@ export class CommunityPolicyJudge {
 
   checkShape(request) {
     const hasSummary = typeof request.summary === "string" && request.summary.trim().length >= 12;
-    const hasArtifact =
-      typeof request.diff === "string" ||
-      typeof request.patch === "string" ||
-      typeof request.artifact_url === "string" ||
-      typeof request.repository === "string";
+    const hasArtifact = hasReviewableArtifact(request);
     return {
       id: "shape",
       passed: hasSummary && hasArtifact,

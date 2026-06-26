@@ -7,9 +7,18 @@ const judge = createJudge({
   publicKeyPem: process.env.JUDGE_PUBLIC_KEY_PEM,
 });
 
+const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 1_048_576);
+
 async function readJson(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let received = 0;
+  for await (const chunk of req) {
+    received += chunk.length;
+    if (received > MAX_BODY_BYTES) {
+      throw new Error(`request body exceeds ${MAX_BODY_BYTES} byte limit`);
+    }
+    chunks.push(chunk);
+  }
   const raw = Buffer.concat(chunks).toString("utf8");
   return raw ? JSON.parse(raw) : {};
 }

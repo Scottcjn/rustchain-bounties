@@ -52,6 +52,19 @@ test("judge rejects missing validation evidence", () => {
   assert.match(verdict.reasons.join("\n"), /validation artifact/);
 });
 
+test("judge rejects empty or whitespace-only review artifacts", () => {
+  const judge = createJudge({ now: fixedNow });
+  const verdict = judge.judge({
+    summary: "Submit a claim that has passing tests but no reviewable artifact.",
+    scope: "code",
+    diff: "   \n\t ",
+    tests: [{ name: "node --test", status: "passed" }],
+  });
+
+  assert.equal(verdict.passed, false);
+  assert.match(verdict.reasons.join("\n"), /diff\/patch\/repository artifact/);
+});
+
 test("judge rejects obvious secret-like payloads", () => {
   const judge = createJudge({ now: fixedNow });
   const verdict = judge.judge({
