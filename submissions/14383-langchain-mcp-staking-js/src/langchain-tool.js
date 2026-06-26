@@ -11,8 +11,7 @@ export const stakeAndAcquireSchema = {
     bond_rtc: {
       type: "number",
       description: "RTC bond to stake for the acquisition attempt.",
-      minimum: 0,
-      exclusiveMinimum: true,
+      exclusiveMinimum: 0,
     },
     agent: {
       type: "string",

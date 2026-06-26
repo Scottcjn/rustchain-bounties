@@ -50,7 +50,7 @@ export async function handleMcpMessage(message, { client = new StakeAndAcquireCl
           text: JSON.stringify(result, null, 2),
         },
       ],
-      isError: result.ok === false && result.refunded !== true,
+      isError: result.ok === false,
     });
   }
 

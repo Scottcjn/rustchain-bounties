@@ -102,6 +102,9 @@ export function verifiedResult(response, request, gatePublicKeyPem = "") {
 
   const requestHash = sha256Hex(canonicalJson(request));
   const verdictPayload = envelope.verdict || {};
+  if (verdictPayload.passed !== true) {
+    throw new StakeVerificationError("verdict did not pass");
+  }
   const verdictHash = sha256Hex(canonicalJson(verdictPayload));
   const attestation = response.attestation || envelope.attestation;
 

@@ -5,9 +5,11 @@ import crypto from "node:crypto";
 import {
   ElyanStakeAndAcquireTool,
   StakeAndAcquireClient,
+  StakeVerificationError,
   canonicalJson,
   createLangChainTool,
   sha256Hex,
+  verifiedResult,
 } from "../src/index.js";
 import { handleMcpMessage } from "../src/mcp-server.mjs";
 
@@ -109,6 +111,47 @@ test("gate denial is surfaced as refunded fail-safe", async () => {
   assert.equal(result.refund_reason, "gate_denied");
 });
 
+test("verified result rejects signed denied verdicts", () => {
+  const keys = keyPair();
+  const request = {
+    version: 1,
+    skill: "not-ready",
+    bond_rtc: 1,
+    agent: "lxx197818",
+    nonce: "n",
+    created_at: "2026-06-26T00:00:00.000Z",
+    metadata: {},
+  };
+  const verdict = {
+    passed: false,
+    reasons: ["skill_not_available"],
+    request_hash: sha256Hex(canonicalJson(request)),
+    issued_at: "2026-06-26T00:00:00.000Z",
+  };
+  const envelopePayload = {
+    verdict,
+    public_key_pem: keys.publicKeyPem,
+    signature_algorithm: "Ed25519",
+  };
+  const envelope = {
+    ...envelopePayload,
+    signature: sign(keys.privateKeyPem, envelopePayload),
+  };
+
+  assert.throws(
+    () => verifiedResult({
+      verdict: envelope,
+      attestation: {
+        status: "confirmed",
+        tx_id: "rtc-test-tx",
+        request_hash: verdict.request_hash,
+        verdict_hash: sha256Hex(canonicalJson(verdict)),
+      },
+    }, request, keys.publicKeyPem),
+    StakeVerificationError,
+  );
+});
+
 test("invalid signature fails closed with refunded verification_failed", async () => {
   const good = keyPair();
   const wrong = keyPair();
@@ -162,4 +205,28 @@ test("MCP server lists and calls stake_and_acquire", async () => {
   const result = JSON.parse(called.result.content[0].text);
   assert.equal(result.ok, true);
   assert.equal(result.refunded, false);
+});
+
+test("MCP server marks refunded fail-safe results as errors", async () => {
+  const keys = keyPair();
+  const client = new StakeAndAcquireClient({
+    gateUrl: "https://gate.example",
+    gatePublicKeyPem: keys.publicKeyPem,
+    fetch: gateFetch({ ...keys, passed: false }),
+  });
+
+  const called = await handleMcpMessage({
+    jsonrpc: "2.0",
+    id: 3,
+    method: "tools/call",
+    params: {
+      name: "stake_and_acquire",
+      arguments: { skill: "not-ready", bond_rtc: 1, nonce: "n" },
+    },
+  }, { client });
+
+  const result = JSON.parse(called.result.content[0].text);
+  assert.equal(result.ok, false);
+  assert.equal(result.refunded, true);
+  assert.equal(called.result.isError, true);
 });
