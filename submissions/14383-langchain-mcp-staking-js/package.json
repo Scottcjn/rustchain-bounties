@@ -1,0 +1,29 @@
+{
+  "name": "@elyan/staking-agent-tools",
+  "version": "0.1.0",
+  "description": "LangChain JS tool and MCP stdio server for the open Elyan staking gate.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "elyan-staking-mcp": "./src/mcp-server.mjs"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./langchain": "./src/langchain-tool.js",
+    "./mcp": "./src/mcp-server.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/stake-and-acquire.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
+  }
+}
