@@ -1,7 +1,7 @@
 # RustChain — Staked Self-Improvement: LangChain + MCP Tool
 
 **Bounty #14383** · 100 RTC · Elyan Labs  
-**Claim wallet:** `RTCd4e9f3a1b2c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9`
+**Claim wallet:** `RTCd3594ecccfcfd9ef1e4ae9aed1ea36a88ce525a8`
 
 ---
 
