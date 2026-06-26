@@ -1,0 +1,17 @@
+﻿{
+  "name": "elyan-staking-mcp",
+  "version": "1.0.0",
+  "description": "LangChain + MCP tool for Elyan staking",
+  "main": "dist/mcp-server.js",
+  "bin": {
+    "elyan-staking-mcp": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "start:mcp": "node dist/cli.js --mcp"
+  },
+  "dependencies": {},
+  "keywords": ["elyan", "staking", "langchain", "mcp", "rustchain"],
+  "license": "MIT"
+}
