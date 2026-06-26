@@ -104,6 +104,66 @@ def test_pyproject_dependencies_follow_same_pinning_policy():
     assert any("'ruff'" in reason for reason in reasons)
 
 
+def test_rejects_direct_reference_even_with_equals_marker():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "pyproject.toml": (
+                    "[project]\n"
+                    'dependencies = ["local-lib @ ./local ==1.0", "safe==1.0.0"]\n'
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert reasons == [
+        "pyproject.toml: project dependency uses URL/VCS dependency: 'local-lib @ ./local ==1.0'"
+    ]
+
+
+def test_pyproject_poetry_and_pdm_sections_are_checked():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "pyproject.toml": (
+                    "[tool.poetry.dependencies]\n"
+                    'requests = "^2.32.0"\n'
+                    'local-lib = { path = "../local-lib" }\n'
+                    "[tool.pdm.dev-dependencies]\n"
+                    'test = ["pytest>=8", "coverage==7.6.1"]\n'
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert any("tool.poetry.dependencies" in reason and "requests^2.32.0" in reason for reason in reasons)
+    assert any("tool.poetry.dependencies" in reason and "local-lib" in reason for reason in reasons)
+    assert any("tool.pdm.dev-dependencies" in reason and "pytest>=8" in reason for reason in reasons)
+
+
+def test_pyproject_uv_sections_are_checked():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "pyproject.toml": (
+                    "[tool.uv]\n"
+                    'dev-dependencies = ["ruff==0.8.0", "mypy>=1.10"]\n'
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert reasons == [
+        "pyproject.toml: tool.uv.dev-dependencies dependency uses unpinned dependency: 'mypy>=1.10'"
+    ]
+
+
 def test_rejects_request_without_supported_manifests():
     judge = DependencyPolicyJudge()
     passed, reasons = judge.judge({"files": {"main.py": "print('ok')"}})
