@@ -62,6 +62,7 @@ class TestWebhookMalformedPayload:
         assert response.status_code == 400, f"Expected 400, got {response.status_code}"
         assert "malformed" in response.body.lower(), (
             f"Response body should contain 'malformed': {response.body}"
+        )sponse.body}"
         )
 
     def test_rejects_non_object_nested_payload(

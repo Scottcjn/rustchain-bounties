@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a23;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a4e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bg)" />
+  
+  <!-- Stars background pattern (small dots) -->
+  <g fill="#ffffff" opacity="0.15">
+    <circle cx="100" cy="80" r="1.5"/>
+    <circle cx="300" cy="120" r="1"/>
+    <circle cx="500" cy="60" r="2"/>
+    <circle cx="700" cy="140" r="1.5"/>
+    <circle cx="900" cy="90" r="1"/>
+    <circle cx="1100" cy="110" r="2"/>
+    <circle cx="150" cy="200" r="1.5"/>
+    <circle cx="1050" cy="220" r="1"/>
+    <circle cx="200" cy="550" r="2"/>
+    <circle cx="1000" cy="580" r="1.5"/>
+    <circle cx="600" cy="50" r="1"/>
+  </g>
+
+  <!-- Big central star (the 128th star) -->
+  <polygon points="600,100 625,165 695,165 640,205 660,270 600,235 540,270 560,205 505,165 575,165" fill="url(#gold)" filter="url(#glow)"/>
+
+  <!-- 128 Count (huge) -->
+  <text x="600" y="320" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#ffffff" text-anchor="middle" filter="url(#glow)">128</text>
+  
+  <!-- Stars -->
+  <text x="600" y="380" font-family="Arial, sans-serif" font-size="40" fill="#ffd700" text-anchor="middle" letter-spacing="4">STARS</text>
+
+  <!-- Starstruck Badge text -->
+  <rect x="340" y="410" width="520" height="60" rx="30" ry="30" fill="#ffd700" opacity="0.2"/>
+  <text x="600" y="450" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffd700" text-anchor="middle">⭐ Starstruck Bronze Badge ⭐</text>
+
+  <!-- Elyan Labs branding -->
+  <text x="600" y="520" font-family="'Courier New', monospace" font-size="20" fill="#a0a0c0" text-anchor="middle">★ Elyan Labs ★</text>
+  
+  <!-- RustChain link -->
+  <text x="600" y="560" font-family="Arial, sans-serif" font-size="16" fill="#8080a0" text-anchor="middle">RustChain — Proof-of-Antiquity Blockchain</text>
+
+  <!-- Bottom decorative line -->
+  <line x1="200" y1="590" x2="1000" y2="590" stroke="#ffd700" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Hashtags -->
+  <text x="600" y="625" font-family="Arial, sans-serif" font-size="14" fill="#606080" text-anchor="middle">#RustChain #Starstruck #128Stars #ElyanLabs</text>
+</svg>

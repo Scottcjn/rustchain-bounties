@@ -85,6 +85,13 @@ pub fn get_cpu_serial() -> String {
     }
 
     // Ultimate fallback: hash the brand string
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    
+    let brand = get_cpu_model();
+    let mut hasher = DefaultHasher::new();
+    brand.hash(&mut hasher);
+    format!("cpu-{:x}", hasher.finish())rand string
     let model = get_cpu_model();
     use sha2::{Digest, Sha256};
     let hash = Sha256::digest(model.as_bytes());

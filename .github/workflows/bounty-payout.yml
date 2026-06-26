@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: MIT
+name: Bounty Payout (eligible #73 reviews)
+
+# Pays verified-eligible code-review claims as wallets confirm. Eligibility is
+# set by the PR-Review Gate (label) or a maintainer ("Verified eligible").
+on:
+  schedule:
+    - cron: "23 */6 * * *"   # every 6h
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: bounty-payout
+  cancel-in-progress: false
+
+jobs:
+  payout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Pay eligible claims
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RTC_ADMIN_KEY: ${{ secrets.RTC_ADMIN_KEY }}
+          RTC_VPS_HOST: ${{ secrets.RTC_VPS_HOST }}
+          GH_REPO: ${{ github.repository }}
+          RATE_RTC: "3"
+          MAX_PER_RUN: "40"
+        run: python3 scripts/bounty_payout.py
