@@ -34,7 +34,7 @@ export interface ElyanStakingClientOptions {
   gateUrl: string;
   gatePath?: string;
   apiKey?: string;
-  gatePublicKeyPem?: string;
+  gatePublicKeyPem: string;
   fetch?: typeof fetch;
 }
 

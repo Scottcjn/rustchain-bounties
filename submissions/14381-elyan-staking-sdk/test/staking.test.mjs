@@ -31,6 +31,14 @@ function jsonResponse(status, body) {
   };
 }
 
+function textResponse(status, body) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: async () => body,
+  };
+}
+
 function gateFetch({ privateKeyPem, publicKeyPem }) {
   const calls = [];
   const fetch = async (_url, init) => {
@@ -103,6 +111,31 @@ test("bad API key maps to AuthError", async () => {
   );
 });
 
+test("non-json auth errors still map to AuthError", async () => {
+  const client = new ElyanStakingClient({
+    gateUrl: "https://gate.example",
+    apiKey: "bad",
+    gatePublicKeyPem: keyPair().publicKeyPem,
+    fetch: async () => textResponse(401, "unauthorized"),
+  });
+  await assert.rejects(
+    () => client.stake({ skill: "x", bondRtc: 1, nonce: "n", createdAt: "2026-06-26T00:00:00.000Z" }),
+    AuthError,
+  );
+});
+
+test("non-json unavailable responses still map to GateUnavailableError", async () => {
+  const client = new ElyanStakingClient({
+    gateUrl: "https://gate.example",
+    gatePublicKeyPem: keyPair().publicKeyPem,
+    fetch: async () => textResponse(503, "service unavailable"),
+  });
+  await assert.rejects(
+    () => client.stake({ skill: "x", bondRtc: 1, nonce: "n", createdAt: "2026-06-26T00:00:00.000Z" }),
+    GateUnavailableError,
+  );
+});
+
 test("forged or mismatched gate pubkey fails closed", async () => {
   const good = keyPair();
   const wrong = keyPair();
@@ -110,6 +143,18 @@ test("forged or mismatched gate pubkey fails closed", async () => {
     gateUrl: "https://gate.example",
     gatePublicKeyPem: wrong.publicKeyPem,
     fetch: gateFetch(good),
+  });
+  await assert.rejects(
+    () => client.stake({ skill: "x", bondRtc: 1, nonce: "n", createdAt: "2026-06-26T00:00:00.000Z" }),
+    VerificationError,
+  );
+});
+
+test("missing pinned gate pubkey fails closed", async () => {
+  const keys = keyPair();
+  const client = new ElyanStakingClient({
+    gateUrl: "https://gate.example",
+    fetch: gateFetch(keys),
   });
   await assert.rejects(
     () => client.stake({ skill: "x", bondRtc: 1, nonce: "n", createdAt: "2026-06-26T00:00:00.000Z" }),
@@ -151,6 +196,43 @@ test("attestation hash mismatch is rejected", async () => {
         status: "confirmed",
         tx_id: "rtc-test-tx-2",
         request_hash: "not-the-request",
+        verdict_hash: sha256Hex(canonicalJson(verdict)),
+      },
+    });
+  };
+  const client = new ElyanStakingClient({
+    gateUrl: "https://gate.example",
+    gatePublicKeyPem: keys.publicKeyPem,
+    fetch,
+  });
+  await assert.rejects(
+    () => client.stake({ skill: "x", bondRtc: 1, nonce: "n", createdAt: "2026-06-26T00:00:00.000Z" }),
+    VerificationError,
+  );
+});
+
+test("verdict request hash replay is rejected", async () => {
+  const keys = keyPair();
+  const fetch = async (_url, init) => {
+    const request = JSON.parse(init.body);
+    const realRequestHash = sha256Hex(canonicalJson(request));
+    const verdict = {
+      passed: true,
+      reasons: [],
+      request_hash: "replayed-request",
+      issued_at: "2026-06-26T00:00:00.000Z",
+    };
+    const payload = {
+      verdict,
+      public_key_pem: keys.publicKeyPem,
+      signature_algorithm: "Ed25519",
+    };
+    return jsonResponse(200, {
+      verdict: { ...payload, signature: sign(keys.privateKeyPem, payload) },
+      attestation: {
+        status: "confirmed",
+        tx_id: "rtc-test-tx-3",
+        request_hash: realRequestHash,
         verdict_hash: sha256Hex(canonicalJson(verdict)),
       },
     });

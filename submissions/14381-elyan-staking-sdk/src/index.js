@@ -31,9 +31,8 @@ export function sha256Hex(value) {
 }
 
 export function verifyEd25519Envelope(envelope, expectedPubkeyPem) {
-  const publicKeyPem = expectedPubkeyPem || envelope.public_key_pem;
-  if (!publicKeyPem) throw new VerificationError("missing gate public key");
-  if (expectedPubkeyPem && envelope.public_key_pem && envelope.public_key_pem !== expectedPubkeyPem) {
+  if (!expectedPubkeyPem) throw new VerificationError("missing pinned gate public key");
+  if (envelope.public_key_pem && envelope.public_key_pem !== expectedPubkeyPem) {
     throw new VerificationError("verdict public key does not match configured gate key");
   }
   const { signature, ...payload } = envelope;
@@ -41,7 +40,7 @@ export function verifyEd25519Envelope(envelope, expectedPubkeyPem) {
   const ok = crypto.verify(
     null,
     Buffer.from(canonicalJson(payload)),
-    publicKeyPem,
+    expectedPubkeyPem,
     Buffer.from(signature, "base64"),
   );
   if (!ok) throw new VerificationError("invalid Ed25519 verdict signature");
@@ -130,12 +129,18 @@ export class ElyanStakingClient {
       throw new GateUnavailableError("gate unavailable", { cause: error.message });
     }
     const text = await res.text();
-    const body = text ? JSON.parse(text) : {};
     if (res.status === 401 || res.status === 403) {
-      throw new AuthError("gate rejected API key", { status: res.status, body });
+      throw new AuthError("gate rejected API key", { status: res.status, body: text });
     }
     if (!res.ok) {
-      throw new GateUnavailableError("gate returned unavailable status", { status: res.status, body });
+      throw new GateUnavailableError("gate returned unavailable status", { status: res.status, body: text });
+    }
+
+    let body;
+    try {
+      body = text ? JSON.parse(text) : {};
+    } catch (error) {
+      throw new GateUnavailableError("gate returned invalid JSON", { error: error.message, body: text });
     }
     return body;
   }
@@ -155,6 +160,9 @@ export class ElyanStakingClient {
     const envelope = response.verdict || response;
     verifyEd25519Envelope(envelope, this.gatePublicKeyPem);
     const requestHash = sha256Hex(canonicalJson(request));
+    if (envelope.verdict?.request_hash !== requestHash) {
+      throw new VerificationError("verdict request hash mismatch");
+    }
     const verdictHash = sha256Hex(canonicalJson(envelope.verdict));
     const attestation = response.attestation || envelope.attestation;
     verifyAttestation(attestation, { requestHash, verdictHash });

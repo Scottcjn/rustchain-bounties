@@ -10,6 +10,7 @@ The client mirrors the reference staking surface:
 - `verify(response, request)`
 
 It uses canonical JSON with sorted keys, sends the canonical request to a gate endpoint with a Bearer API key, verifies the Ed25519 signed verdict against the configured gate public key, and verifies the returned on-chain attestation hashes.
+The gate public key must be pinned with `gatePublicKeyPem`; the SDK never trusts a public key supplied only by the response envelope.
 
 ## Install Locally
 
@@ -81,7 +82,9 @@ The SDK fails closed if:
 - the gate rejects the Bearer API key
 - the gate is unavailable
 - the verdict signature is forged
+- no pinned gate public key is configured
 - the verdict public key does not match the configured gate public key
+- the verdict `request_hash` does not match the submitted canonical request
 - the attestation request or verdict hash does not match the verified payload
 
 ## Tests
@@ -94,8 +97,11 @@ Covered cases:
 
 - happy path
 - bad API key
+- non-JSON auth and unavailable responses
 - forged or mismatched gate public key
+- missing pinned gate public key
 - gate-down fail-safe
+- verdict request-hash replay
 - attestation hash mismatch
 - canonical JSON byte ordering
 
