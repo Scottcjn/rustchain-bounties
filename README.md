@@ -122,4 +122,4 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 ---
 
-*Want to add another language? Open a bounty issue!*
+*Want to add another language? Open a bounty issue!*Dashboard Proposal: Monitor open bounties and payouts.
