@@ -31,6 +31,8 @@ The default policy rejects:
 - Python requirements that are not pinned with `==`.
 - Python requirements that use editable installs, extra package indexes, URLs,
   or VCS dependencies.
+- Common `pyproject.toml` tool sections from Poetry, PDM, and uv that declare
+  broad, unpinned, URL, VCS, or local dependencies.
 
 These checks are deterministic and do not install, import, or execute any
 submitted package.
@@ -72,7 +74,8 @@ pytest integrations/dependency-policy-judge/test_judge.py -q
 ```
 
 The tests cover accepted manifests, rejected NPM and Python dependency patterns,
-the open Judge interface, signed verdict verification, and tamper detection.
+common pyproject tool sections, the open Judge interface, signed verdict
+verification, and tamper detection.
 
 ## RTC Wallet
 
