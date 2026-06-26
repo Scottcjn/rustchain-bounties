@@ -1,0 +1,21 @@
+{
+  "name": "@elyan/staking",
+  "version": "0.1.0",
+  "description": "Typed JavaScript client for the open Elyan staking gate contract.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/staking.test.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
