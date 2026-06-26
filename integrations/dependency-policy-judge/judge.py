@@ -46,10 +46,16 @@ NPM_DEPENDENCY_SECTIONS = (
     "optionalDependencies",
     "peerDependencies",
 )
-PYPROJECT_DEPENDENCY_SECTIONS = (
-    ("project", "dependencies"),
-    ("project", "optional-dependencies"),
+PYPROJECT_TOOL_DEPENDENCY_PATHS = (
+    ("tool", "poetry", "dependencies"),
+    ("tool", "poetry", "dev-dependencies"),
+    ("tool", "pdm", "dev-dependencies"),
+    ("tool", "pdm", "dependencies"),
+    ("tool", "uv", "dev-dependencies"),
+    ("tool", "uv", "override-dependencies"),
+    ("tool", "uv", "constraint-dependencies"),
 )
+PYPROJECT_DIRECT_REF_KEYS = frozenset({"path", "url", "git"})
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -91,6 +97,15 @@ def _iter_pyproject_strings(value: Any) -> Iterable[str]:
     elif isinstance(value, dict):
         for item in value.values():
             yield from _iter_pyproject_strings(item)
+
+
+def _nested_get(value: Mapping[str, Any], path: tuple[str, ...]) -> Any:
+    current: Any = value
+    for key in path:
+        if not isinstance(current, Mapping):
+            return None
+        current = current.get(key)
+    return current
 
 
 @dataclass
@@ -247,7 +262,39 @@ class DependencyPolicyJudge:
                             reasons.append(
                                 f"{path}: optional dependency group {group!r} uses {reason}: {dep!r}"
                             )
+        for tool_path in PYPROJECT_TOOL_DEPENDENCY_PATHS:
+            section = _nested_get(doc, tool_path)
+            if not isinstance(section, (dict, list)):
+                continue
+            for dep in self._iter_tool_dependency_specs(section):
+                reason = self._python_spec_reason(dep)
+                if reason:
+                    location = ".".join(tool_path)
+                    reasons.append(f"{path}: {location} dependency uses {reason}: {dep!r}")
         return reasons
+
+    def _iter_tool_dependency_specs(self, value: Any) -> Iterable[str]:
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, list):
+            for item in value:
+                yield from self._iter_tool_dependency_specs(item)
+        elif isinstance(value, dict):
+            if PYPROJECT_DIRECT_REF_KEYS & set(value):
+                yield json.dumps(value, sort_keys=True)
+                return
+            for name, spec in sorted(value.items()):
+                if isinstance(spec, str):
+                    yield f"{name}{spec}"
+                elif isinstance(spec, dict):
+                    if PYPROJECT_DIRECT_REF_KEYS & set(spec):
+                        yield f"{name} {json.dumps(spec, sort_keys=True)}"
+                    elif "version" in spec:
+                        yield f"{name}{spec['version']}"
+                    else:
+                        yield from self._iter_tool_dependency_specs(spec)
+                else:
+                    yield from self._iter_tool_dependency_specs(spec)
 
     @staticmethod
     def _npm_spec_reason(spec: str) -> str | None:
@@ -267,7 +314,22 @@ class DependencyPolicyJudge:
     def _python_spec_reason(spec: str) -> str | None:
         stripped = spec.strip()
         lower = stripped.lower()
-        if "://" in lower or lower.startswith("git+"):
+        direct_reference_markers = (
+            " @ ",
+            "://",
+            "git+",
+            "file:",
+            "path =",
+            '"path"',
+            "'path'",
+            '"url"',
+            "'url'",
+            '"git"',
+            "'git'",
+        )
+        if any(marker in lower for marker in direct_reference_markers) or lower.startswith(
+            ("./", "../", "/", "git+")
+        ):
             return "URL/VCS dependency"
         if "==" not in stripped:
             return "unpinned dependency"
