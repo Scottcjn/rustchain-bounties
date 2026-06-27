@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Regression tests for the auto-pay sensitive-path guard.
 
 Run: python3 scripts/test_auto_pay.py   (or `pytest scripts/test_auto_pay.py`)
