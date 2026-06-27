@@ -62,7 +62,31 @@ def test_rejects_unpinned_requirements():
     )
 
     assert passed is False
-    assert reasons == ["requirements.txt:1: requirement must be pinned with =="]
+    assert reasons == ["requirements.txt:1: requirement uses range dependency: 'requests>=2.32'"]
+
+
+def test_rejects_requirement_wildcards_mixed_constraints_and_direct_refs():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "requirements.txt": (
+                    "pkg==*\n"
+                    "pkg-two==1.*\n"
+                    "pkg-three==1.0,>=1\n"
+                    "local-lib @ ./local ==1.0\n"
+                    "safe==1.2.3\n"
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert len(reasons) == 4
+    assert any("pkg==*" in reason and "wildcard dependency" in reason for reason in reasons)
+    assert any("pkg-two==1.*" in reason and "wildcard dependency" in reason for reason in reasons)
+    assert any("pkg-three==1.0,>=1" in reason and "mixed or broad dependency" in reason for reason in reasons)
+    assert any("local-lib @ ./local ==1.0" in reason and "URL/VCS/local dependency" in reason for reason in reasons)
 
 
 def test_rejects_python_alt_package_source_and_vcs():
@@ -81,7 +105,7 @@ def test_rejects_python_alt_package_source_and_vcs():
     assert passed is False
     assert len(reasons) == 2
     assert "alternate package sources" in reasons[0]
-    assert "URL or VCS" in reasons[1]
+    assert "URL/VCS/local dependency" in reasons[1]
 
 
 def test_pyproject_dependencies_follow_same_pinning_policy():
@@ -119,8 +143,27 @@ def test_rejects_direct_reference_even_with_equals_marker():
 
     assert passed is False
     assert reasons == [
-        "pyproject.toml: project dependency uses URL/VCS dependency: 'local-lib @ ./local ==1.0'"
+        "pyproject.toml: project dependency uses URL/VCS/local dependency: 'local-lib @ ./local ==1.0'"
     ]
+
+
+def test_pyproject_rejects_wildcard_and_mixed_specifiers():
+    judge = DependencyPolicyJudge()
+    passed, reasons = judge.judge(
+        {
+            "files": {
+                "pyproject.toml": (
+                    "[project]\n"
+                    'dependencies = ["pkg==1.*", "pkg-two==1.0,>=1", "safe==1.0.0"]\n'
+                )
+            }
+        }
+    )
+
+    assert passed is False
+    assert len(reasons) == 2
+    assert any("pkg==1.*" in reason and "wildcard dependency" in reason for reason in reasons)
+    assert any("pkg-two==1.0,>=1" in reason and "mixed or broad dependency" in reason for reason in reasons)
 
 
 def test_pyproject_poetry_and_pdm_sections_are_checked():
@@ -160,7 +203,7 @@ def test_pyproject_uv_sections_are_checked():
 
     assert passed is False
     assert reasons == [
-        "pyproject.toml: tool.uv.dev-dependencies dependency uses unpinned dependency: 'mypy>=1.10'"
+        "pyproject.toml: tool.uv.dev-dependencies dependency uses range dependency: 'mypy>=1.10'"
     ]
 
 
