@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from pathlib import PurePosixPath
 from typing import Any, Iterable, Mapping
 
+from packaging.requirements import InvalidRequirement, Requirement
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python < 3.11 fallback
@@ -56,6 +58,19 @@ PYPROJECT_TOOL_DEPENDENCY_PATHS = (
     ("tool", "uv", "constraint-dependencies"),
 )
 PYPROJECT_DIRECT_REF_KEYS = frozenset({"path", "url", "git"})
+PYTHON_DIRECT_REFERENCE_MARKERS = (
+    " @ ",
+    "://",
+    "git+",
+    "file:",
+    "path =",
+    '"path"',
+    "'path'",
+    '"url"',
+    "'url'",
+    '"git"',
+    "'git'",
+)
 
 
 def _canonical_json(value: Any) -> bytes:
@@ -232,10 +247,12 @@ class DependencyPolicyJudge:
                 reasons.append(f"{path}:{line_no}: editable installs are not allowed")
             elif lower.startswith(("--extra-index-url", "--index-url", "--find-links")):
                 reasons.append(f"{path}:{line_no}: alternate package sources are not allowed")
-            elif "://" in lower or lower.startswith("git+"):
-                reasons.append(f"{path}:{line_no}: URL or VCS requirements are not allowed")
-            elif "==" not in base:
-                reasons.append(f"{path}:{line_no}: requirement must be pinned with ==")
+            elif lower.startswith(("-r ", "--requirement ", "-c ", "--constraint ")):
+                reasons.append(f"{path}:{line_no}: requirement file indirection is not allowed")
+            else:
+                reason = self._python_spec_reason(base)
+                if reason:
+                    reasons.append(f"{path}:{line_no}: requirement uses {reason}: {base!r}")
         return reasons
 
     def _check_pyproject(self, path: str, content: str) -> list[str]:
@@ -306,31 +323,36 @@ class DependencyPolicyJudge:
             return "URL/VCS/local dependency"
         if lower.startswith(("^", "~", ">", "<", ">=", "<=")) or "||" in lower:
             return "range dependency"
-        if re.search(r"(^|[.\-])x($|[.\-])", lower):
+        if "*" in lower or re.search(r"(^|[.\-])x($|[.\-])", lower):
             return "wildcard dependency"
         return None
 
     @staticmethod
     def _python_spec_reason(spec: str) -> str | None:
         stripped = spec.strip()
+        if not stripped:
+            return "unpinned dependency"
         lower = stripped.lower()
-        direct_reference_markers = (
-            " @ ",
-            "://",
-            "git+",
-            "file:",
-            "path =",
-            '"path"',
-            "'path'",
-            '"url"',
-            "'url'",
-            '"git"',
-            "'git'",
-        )
-        if any(marker in lower for marker in direct_reference_markers) or lower.startswith(
+        if any(marker in lower for marker in PYTHON_DIRECT_REFERENCE_MARKERS) or lower.startswith(
             ("./", "../", "/", "git+")
         ):
-            return "URL/VCS dependency"
-        if "==" not in stripped:
+            return "URL/VCS/local dependency"
+        if "==*" in lower:
+            return "wildcard dependency"
+        try:
+            requirement = Requirement(stripped)
+        except InvalidRequirement:
+            return "invalid dependency"
+        if requirement.url:
+            return "URL/VCS/local dependency"
+        specifiers = list(requirement.specifier)
+        if not specifiers:
             return "unpinned dependency"
+        if len(specifiers) != 1:
+            return "mixed or broad dependency"
+        specifier = specifiers[0]
+        if specifier.operator != "==":
+            return "range dependency"
+        if "*" in specifier.version:
+            return "wildcard dependency"
         return None
