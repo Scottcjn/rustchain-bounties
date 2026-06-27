@@ -413,8 +413,9 @@ class RustChainClient:
 
     async def governance_propose(
         self,
-        proposer: str,
+        proposer_wallet: Any,
         proposal_type: str,
+        title: str,
         description: str,
         payload: Dict,
     ) -> Dict[str, Any]:
@@ -422,19 +423,32 @@ class RustChainClient:
         Submit a governance proposal.
 
         Args:
-            proposer: Proposer's wallet address.
+            proposer_wallet: A RustChainWallet instance.
             proposal_type: Type of proposal (e.g. "param_change", "treasury").
+            title: Proposal title.
             description: Human-readable description.
             payload: Proposal-specific payload dict.
 
         Returns:
             Proposal result with proposal_id.
         """
+        # Create a unique nonce for the proposal
+        import time
+        nonce = int(time.time())
+        
+        # Sign the proposal data
+        message = f"{proposer_wallet.address}:{proposal_type}:{title}:{nonce}".encode()
+        signature = proposer_wallet.sign(message).hex()
+        
         return await self._post(
             "/governance/propose",
             json_data={
-                "proposer": proposer,
+                "wallet": proposer_wallet.address,
+                "public_key": proposer_wallet.public_key_hex,
+                "nonce": nonce,
+                "signature": signature,
                 "proposal_type": proposal_type,
+                "title": title,
                 "description": description,
                 "payload": payload,
             },
