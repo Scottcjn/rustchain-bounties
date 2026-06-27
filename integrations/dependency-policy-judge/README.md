@@ -26,9 +26,9 @@ The default policy rejects:
 - NPM lifecycle install scripts: `preinstall`, `install`, `postinstall`,
   `prepare`.
 - Floating or broad dependency versions such as `latest`, `*`, `^1.2.3`,
-  `~1.2.3`, `>=1.2.3`, and wildcard ranges.
+  `~1.2.3`, `>=1.2.3`, wildcard ranges, and mixed constraints.
 - URL, Git, GitHub, and local file dependency specs.
-- Python requirements that are not pinned with `==`.
+- Python requirements that are not pinned to one concrete `==` version.
 - Python requirements that use editable installs, extra package indexes, URLs,
   or VCS dependencies.
 - Common `pyproject.toml` tool sections from Poetry, PDM, and uv that declare
