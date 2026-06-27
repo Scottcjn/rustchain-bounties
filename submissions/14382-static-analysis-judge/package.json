@@ -1,0 +1,14 @@
+{
+  "name": "rustchain-static-analysis-judge",
+  "version": "0.1.0",
+  "description": "Open static-analysis Judge implementation for RustChain community gate bounty #14382.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test test.mjs",
+    "demo": "node gate-server.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
