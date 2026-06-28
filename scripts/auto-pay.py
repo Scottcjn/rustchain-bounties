@@ -75,6 +75,19 @@ SENSITIVE_PREFIXES = (
     "BOUNTY_LEDGER.md",
 )
 
+# Lower-cased copy used for matching. The guard MUST be case-insensitive:
+# git tracks `Scripts/`, `Node/`, `.GitHub/`, `BOUNTY_LEDGER.MD` etc. as
+# distinct from their lower-case forms, so a case-sensitive `startswith`
+# lets a PR touch consensus / money / CI code under a re-cased path and
+# still slip into the auto-tier (an auto-award the guard exists to deny).
+# Normalising both sides closes that bypass.
+SENSITIVE_PREFIXES_LC = tuple(p.lower() for p in SENSITIVE_PREFIXES)
+
+
+def is_sensitive_path(path: str) -> bool:
+    """True if `path` falls under a sensitive prefix, case-insensitively."""
+    return path.lower().startswith(SENSITIVE_PREFIXES_LC)
+
 # Marker recorded when the conservative auto-tier pays (distinct from the
 # human-directive marker so logs/audits can tell them apart). The dedup
 # check treats ANY occurrence of ALREADY_PAID_MARKER as "already paid".
@@ -245,7 +258,7 @@ def main() -> None:
         files = fetch_pr_files(repo, pr_number)
         total_changed = sum(f.get("additions", 0) + f.get("deletions", 0) for f in files)
         paths = [f.get("filename", "") for f in files]
-        sensitive = [p for p in paths if p.startswith(SENSITIVE_PREFIXES)]
+        sensitive = [p for p in paths if is_sensitive_path(p)]
 
         if sensitive:
             print(f"No directive; PR touches sensitive paths {sensitive[:3]} — "
