@@ -1,0 +1,21 @@
+name: BCOS Trust Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  bcos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: lee-muriithi-kingori/bcos-action@v1
+        id: bcos
+        with:
+          tier: L1
+          reviewer: ${{ github.event.pull_request.user.login || 'automation' }}
+      - name: Show outputs
+        run: |
+          echo "Trust Score: ${{ steps.bcos.outputs.trust_score }}"
+          echo "Cert ID:     ${{ steps.bcos.outputs.cert_id }}"
+          echo "Tier Met:    ${{ steps.bcos.outputs.tier_met }}"
