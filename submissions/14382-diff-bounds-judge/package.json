@@ -1,0 +1,12 @@
+{
+  "name": "@community/diff-bounds-judge",
+  "version": "1.0.0",
+  "description": "A diff-geometry gate for the open Judge interface: bounds change size and forbids deleting tests or editing protected paths.",
+  "type": "module",
+  "main": "diff-bounds-judge.mjs",
+  "scripts": {
+    "test": "node --test",
+    "serve": "node gate-server.mjs"
+  },
+  "license": "MIT"
+}

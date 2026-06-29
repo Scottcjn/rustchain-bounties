@@ -1,0 +1,12 @@
+{
+  "name": "@community/secret-leak-judge",
+  "version": "1.0.0",
+  "description": "A secret-scanning gate for the open Judge interface: fails any self-improvement diff whose added lines introduce hardcoded private keys, vendor tokens or credential literals.",
+  "type": "module",
+  "main": "secret-leak-judge.mjs",
+  "scripts": {
+    "test": "node --test",
+    "serve": "node gate-server.mjs"
+  },
+  "license": "MIT"
+}
