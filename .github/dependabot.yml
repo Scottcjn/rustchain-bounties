@@ -1,16 +1,16 @@
+# Dependabot configuration — keeps BCOS action SHA pinned but auto-bumped
+# Tracked ecosystem: GitHub Actions (workflow SHA pins)
+# Schedule: weekly (Mondays 09:00 UTC) to pick up new bcos-action releases
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-    open-pull-requests-limit: 10
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    commit-message:
+      prefix: "ci"
     labels:
       - "dependencies"
+      - "bcos-action"
