@@ -1,20 +1,41 @@
 name: BCOS Trust Scan
 
+# Triggers:
+#   - pull_request on any base branch: catches issues pre-merge
+#   - push to main: re-scan post-merge so RustChain anchor reflects the merged code
 on:
   pull_request:
+    branches: ['**']
   push:
     branches: [main]
+
+# Least-privilege permissions for the BCOS scan.
+#   - contents: read         - clone the repo to scan
+#   - pull-requests: write   - post the BCOS results comment
+permissions:
+  contents: read
+  pull-requests: write
+
+# Cancel any in-progress run for the same workflow + ref.
+# Avoids duplicate scans on rapid PR pushes.
+concurrency:
+  group: bcos-scan-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   bcos:
     runs-on: ubuntu-latest
     steps:
-      - uses: lee-muriithi-kingori/bcos-action@v1
+      # Pinned to commit SHA for immutability. Tracks the bcos-action v1.0.0
+      # release (2026-06-29). Bump the SHA via Dependabot (.github/dependabot.yml)
+      # or manually when bumping the major version.
+      - uses: lee-muriithi-kingori/bcos-action@d531d157b1f59b9e94de7df41b3b92ad19f80ad5  # v1.0.0
         id: bcos
         with:
           tier: L1
           reviewer: ${{ github.event.pull_request.user.login || 'automation' }}
       - name: Show outputs
+        if: always()
         run: |
           echo "Trust Score: ${{ steps.bcos.outputs.trust_score }}"
           echo "Cert ID:     ${{ steps.bcos.outputs.cert_id }}"
