@@ -1,0 +1,29 @@
+{
+  "name": "elyan-staking-mcp",
+  "version": "1.0.0",
+  "description": "LangChain tool + MCP server wrapping the Elyan Labs staking SDK for AI agent self-improvement",
+  "main": "dist/mcp-server.js",
+  "bin": {
+    "elyan-staking-mcp": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "start:mcp": "node dist/cli.js --mcp",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": ["elyan", "staking", "langchain", "mcp", "rustchain", "ai-agents"],
+  "license": "MIT",
+  "author": "Lee Muriithi Kingori <lee@lestramk.org>",
+  "files": ["dist", "src"]
+}
