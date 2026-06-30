@@ -1,10 +1,11 @@
 name: BCOS Trust Scan
 
 # Triggers:
-#   - pull_request on any base branch: catches issues pre-merge
+#   - pull_request_target: required to run with write permissions so the
+#     action can post PR comments back. (pull_request from a fork runs read-only.)
 #   - push to main: re-scan post-merge so RustChain anchor reflects the merged code
 on:
-  pull_request:
+  pull_request_target:
     branches: ['**']
   push:
     branches: [main]
