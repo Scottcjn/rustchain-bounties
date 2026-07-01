@@ -8,7 +8,7 @@ Native Rust miner for [RustChain](https://github.com/Scottcjn/Rustchain) — a P
 - **Full RIP-PoA fingerprinting** — all 6 hardware fingerprint checks in native Rust
 - **Inline assembly** — `rdtsc` (x86_64) / `mftb` (PowerPC) for precise timing
 - **Cross-platform** — x86_64, aarch64, PowerPC, RISC-V (riscv64gc) targets
-- **Self-signed TLS** — works with the RustChain node out of the box
+- **Verified TLS by default** — certificate validation is enabled unless explicitly disabled for testing
 
 ## Quick Start
 
@@ -30,6 +30,9 @@ cargo build --release
 
 # Use a custom node
 ./target/release/rustchain-miner --wallet YOUR_WALLET --node https://your-node:port
+
+# Use a self-signed test node
+./target/release/rustchain-miner --wallet YOUR_WALLET --node https://your-node:port --insecure
 ```
 
 ## RIP-PoA Fingerprint Checks
@@ -69,7 +72,7 @@ cargo build --release
 | `/epoch/enroll` | POST | Enroll in current epoch |
 | `/wallet/balance` | GET | Check RTC balance |
 
-Default node: `https://50.28.86.131` (self-signed cert)
+Default node: `https://50.28.86.131`
 
 ## Cross-Compilation
 
@@ -129,7 +132,13 @@ When running as a systemd service, logs go to journald (auto-rotated). For manua
 
 ## TLS Certificate
 
-The node at `50.28.86.131` uses a self-signed certificate. By default the miner accepts it (matching the Python miner's `verify=False`). For stricter security, you can pin the node's certificate:
+TLS certificate verification is enabled by default. For local or test nodes that use a self-signed certificate, pass `--insecure` to opt out explicitly:
+
+```bash
+./rustchain-miner --wallet my-wallet --node https://test-node.example --insecure
+```
+
+For production nodes, install a certificate trusted by the operating system or pin the node's certificate:
 
 ```bash
 # Download the node's cert
