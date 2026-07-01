@@ -1,0 +1,36 @@
+name: Bounty Claim Verifier
+
+on:
+  issue_comment:
+    types: [created, edited]
+  workflow_dispatch:
+    inputs:
+      event_path:
+        description: "Optional checked-in or uploaded event JSON path for dry runs"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request == null
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify bounty claim comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ inputs.event_path }}" ]; then
+            python scripts/bounty_claim_verifier.py --event-path "${{ inputs.event_path }}" --dry-run
+          else
+            python scripts/bounty_claim_verifier.py
+          fi
