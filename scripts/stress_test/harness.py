@@ -1,5 +1,6 @@
 import asyncio
 import time
+import uuid
 import httpx
 import statistics
 from typing import List, Dict, Any
@@ -105,6 +106,16 @@ class StressHarness:
         stats["error"] = "Max retries exceeded (429)"
         return None
 
+    @staticmethod
+    def _generate_duplicate_base_id() -> str:
+        """Builds the shared miner ID used to simulate duplicate/replay miners.
+
+        Kept as a small helper so the --dupes setup can be exercised in
+        isolation without launching any network sessions (see the regression
+        test for the missing-``uuid``-import crash).
+        """
+        return f"duplicate-miner-{uuid.uuid4().hex[:4]}"
+
     async def run_test(self, num_miners: int, duplicate_ratio: float = 0.0, test_malformed: bool = False, test_epoch_boundary: bool = False):
         """Launches a massive attack with the specified number of miners."""
         print(f"🚀 Starting stress test with {num_miners} simulated miners...")
@@ -119,7 +130,7 @@ class StressHarness:
 
         if duplicate_ratio > 0:
             num_dupes = int(num_miners * duplicate_ratio)
-            base_id = f"duplicate-miner-{uuid.uuid4().hex[:4]}"
+            base_id = self._generate_duplicate_base_id()
             for i in range(num_dupes):
                 force_ids[i] = base_id
 
