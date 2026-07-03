@@ -9,6 +9,10 @@ name: Confirm Pending RTC Transfers
 #
 # The 24h void window remains the safety review: void a suspect transfer within
 # 24h and this never confirms it.
+#
+# Runs on the self-hosted rustchain-vps runner: the F2 route hardening restricts
+# /pending/ to trusted IPs, so a GitHub-hosted runner gets an nginx 403. The
+# self-hosted runner sits on the VPS itself, whose IP is already allow-listed.
 on:
   schedule:
     - cron: '23 * * * *'   # hourly
@@ -23,7 +27,7 @@ concurrency:
 
 jobs:
   confirm:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, rustchain-vps]
     timeout-minutes: 10
     steps:
       - name: Drain all past-void-window pending transfers
