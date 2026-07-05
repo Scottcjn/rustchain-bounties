@@ -1,0 +1,20 @@
+I reviewed the RustChain codebase, specifically the consensus module (src/consensus.rs) and the README. Here is my comparison between RustChain and Bitcoin.
+
+**Consensus Mechanism**
+RustChain uses Proof of Antiquity (PoA), a novel consensus that rewards nodes for maintaining long-running, stable connections and contributing historical data. In contrast, Bitcoin uses Proof of Work (PoW), where miners solve cryptographic puzzles. PoA aims to avoid the energy waste of PoW while still providing security through time-weighted reputation rather than computational power.
+
+**Hardware Requirements**
+Bitcoin mining requires specialized ASICs and high electricity consumption. RustChain's PoA is designed to run on modest hardware – any modern CPU with a stable internet connection can participate. This lowers the barrier to entry significantly.
+
+**Environmental Approach**
+Bitcoin's PoW is energy-intensive, consuming as much electricity as some countries. RustChain's PoA is lightweight, consuming only the power needed to maintain a network connection and process transactions. This makes RustChain far more environmentally friendly.
+
+**Community Model**
+Bitcoin has a large, decentralized community of miners, developers, and users. Its development is managed by Bitcoin Improvement Proposals (BIPs). RustChain is newer and smaller, with a community focused on innovation and mining accessibility. The project emphasizes transparency and real engagement, as seen in its bounty program requirements.
+
+**What Each Does Better**
+Bitcoin excels in security, network effect, and store of value. It has proven resilience over a decade. RustChain is better for inclusivity – anyone can mine without expensive gear – and it has a lower environmental impact. However, RustChain is still experimental and lacks the widespread adoption and liquidity of Bitcoin. It also faces potential centralization risks from nodes with longer history gaining more influence.
+
+Overall, RustChain offers a fresh approach to consensus that could democratize mining, but it has yet to prove itself against Bitcoin's established track record.
+
+I received RTC compensation for this review.
