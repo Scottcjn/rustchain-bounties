@@ -1,0 +1,31 @@
+I have completed the bounty task. Here is my comparison comment:
+
+---
+
+**What I Reviewed:** I looked at the README.md file in the RustChain repository (https://github.com/Scottcjn/Rustchain/blob/main/README.md) and the source code for the Proof of Antiquity consensus (src/consensus.rs).
+
+**Why I Liked It:** RustChain's use of Proof of Antiquity is genuinely novel — it leverages disk space and time as a scarce resource, which is a creative solution to the energy waste problem in Proof of Work. I appreciate that the codebase is well-documented and easy to follow for a Rust beginner.
+
+**Disclosure:** I received RTC compensation for this review.
+
+---
+
+## RustChain vs Ethereum: A Comparison
+
+### Consensus Mechanism
+RustChain uses Proof of Antiquity (PoA), which relies on disk space and the age of data stored. Miners prove they have stored certain data for a period of time. Ethereum currently uses Proof of Stake (PoS) after The Merge, where validators stake ETH to propose and attest to blocks. RustChain's PoA is energy-efficient like PoS but introduces a unique time dimension, making it resistant to ASIC centralization. However, PoS on Ethereum has been battle-tested with billions in value secured, while PoA is still experimental.
+
+### Hardware Requirements
+RustChain is designed to run on commodity hardware — standard HDDs/SSDs and a modest CPU. There's no need for expensive GPUs or ASICs. Ethereum validators require a reliable internet connection and a machine that can run 24/7 (e.g., a Raspberry Pi or a cloud instance), but the barrier to entry is higher if you factor in the 32 ETH stake required. RustChain's low hardware requirements make it more accessible to hobbyists.
+
+### Environmental Approach
+RustChain's PoA is inherently green because it uses existing storage space and minimal electricity. It's carbon-neutral by design. Ethereum's PoS reduced energy consumption by ~99.95% compared to PoW, but still relies on idle hardware running continuously. RustChain arguably has a smaller environmental footprint, but Ethereum's shift to PoS was a massive leap forward.
+
+### Community Model
+Ethereum has one of the largest and most decentralized developer communities in crypto, with thousands of contributors and a robust ecosystem of dApps, DeFi, and NFTs. RustChain is a smaller, open-source project with a focused community interested in experimental consensus. Ethereum's community is more established but can be slow to change; RustChain can iterate faster due to its small size.
+
+### What Each Does Better
+- **Ethereum** excels at smart contracts, interoperability, and economic security. It has a proven track record and a huge user base.
+- **RustChain** does better at energy efficiency and accessibility for low-end hardware. Its Proof of Antiquity is a fresh idea that could inspire future blockchain designs.
+
+In summary, while Ethereum is the established heavyweight, RustChain offers an intriguing alternative that prioritizes environmental sustainability and low barriers to entry. Both have strengths, and I'm excited to see how RustChain evolves.
