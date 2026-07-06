@@ -1,0 +1,33 @@
+## RustChain vs Solana: A Comparison
+
+I starred the RustChain repo and reviewed the README and the consensus module (Proof of Antiquity) in detail. Here is an honest comparison with Solana, a blockchain I am familiar with.
+
+### Consensus Mechanism
+- **RustChain**: Uses Proof of Antiquity (PoA) — a novel consensus that combines time-based stamps with a lightweight verification. It does not require heavy computation or staking, aiming for fairness and low entry barriers.
+- **Solana**: Uses Proof of History (PoH) combined with Proof of Stake (PoS). PoH provides a verifiable time source, allowing parallel transaction processing. It is extremely fast but requires specialized hardware for validators.
+
+### Hardware Requirements
+- **RustChain**: Designed to run on low-power devices like Raspberry Pi. Minimal RAM and CPU needed. This makes it accessible to hobbyists and developing regions.
+- **Solana**: Validators need high-end GPUs (e.g., NVIDIA Ampere) and fast storage (NVMe SSDs) to keep up with the network. The hardware cost is a barrier to entry.
+
+### Environmental Approach
+- **RustChain**: Proof of Antiquity is inherently green — no mining arms race. Power consumption is comparable to a regular desktop computer running idle. This aligns with eco-friendly goals.
+- **Solana**: Though not proof-of-work, the high transaction throughput (50k TPS) still requires significant energy due to the many validator nodes running powerful hardware. It is more efficient than Bitcoin but less so than RustChain.
+
+### Community Model
+- **RustChain**: Small but passionate open-source community. Development is driven by contributors on GitHub. The bounty program (like this one) encourages genuine engagement.
+- **Solana**: Large community with strong VC backing (Multicoin, Bankman-Fried). Has a foundation that funds ecosystem projects. More corporate feel but vibrant.
+
+### What Each Does Better
+- **RustChain** does better in decentralization and accessibility. Anyone can participate without large investments. It also has a unique consensus that could be useful for IoT or timestamp-based applications.
+- **Solana** does better in raw performance and developer tooling. It hosts complex DeFi apps and supports high-frequency trading. Its ecosystem is mature and battle-tested.
+
+### Weaknesses of RustChain
+- Still very early; not battle-tested at scale.
+- Limited ecosystem — few dApps, wallets, or exchanges support it.
+- Documentation is sparse beyond the basic README.
+
+### Disclosure
+I received RTC compensation for this review.
+
+Overall, both projects have their place. RustChain is a promising experiment for green, decentralized mining, while Solana is a powerhouse for real-time applications.
