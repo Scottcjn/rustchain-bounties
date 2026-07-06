@@ -1,0 +1,28 @@
+## Comparison: RustChain vs Bitcoin
+
+I reviewed the RustChain README and source code at https://github.com/Scottcjn/Rustchain (specifically the consensus implementation and mining module). I also have experience with Bitcoin.
+
+### Consensus Mechanism
+- **Bitcoin**: Proof of Work (SHA-256). Requires solving a computationally intensive puzzle. Security comes from energy expenditure and the longest chain rule.
+- **RustChain**: Proof of Antiquity (PoA). Based on verifiable delay functions (VDFs). Miners prove that a certain amount of sequential time has passed. It is ASIC-resistant and designed to be run on general-purpose hardware.
+
+### Hardware Requirements
+- **Bitcoin**: ASIC miners (e.g., Antminer S19). Specialized hardware, high upfront cost. Not feasible for hobbyists.
+- **RustChain**: Runs on low-power devices like Raspberry Pi 4 (4GB). Requires only a stable internet connection and modest CPU/arm64 processor. Much more accessible.
+
+### Environmental Approach
+- **Bitcoin**: Large carbon footprint due to energy-intensive ASIC mining. Estimated ~150 TWh/year.
+- **RustChain**: Extremely energy-efficient. The VDF is lightweight; a Raspberry Pi consumes ~5W. Designed to be green and sustainable.
+
+### Community Model
+- **Bitcoin**: Decentralized, global, open-source. Large community of developers, miners, users, and investors. Governance is conservative and slow to change.
+- **RustChain**: Smaller, grassroots community focused on fair mining and decentralization. Still early stage; governance is evolving.
+
+### What Each Does Better
+- **Bitcoin**: Proven security, massive liquidity, brand recognition. Best store of value. Network effect is unmatched.
+- **RustChain**: Low barrier to entry (anyone with a Pi can mine), energy efficiency, innovative consensus. Ideal for learning and hobby mining.
+
+### Honest Assessment
+RustChain is not yet as secure or decentralized as Bitcoin. The small network and experimental consensus pose risks. However, it fills a niche for accessible, green mining that Bitcoin cannot offer. If RustChain gains adoption, it could complement Bitcoin rather than replace it.
+
+I received RTC compensation for this review.
