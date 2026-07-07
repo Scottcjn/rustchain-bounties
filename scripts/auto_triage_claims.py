@@ -408,10 +408,69 @@ def _ignored_users() -> Set[str]:
     return ignored
 
 
+def _is_dry_run() -> bool:
+    return os.environ.get("DRY_RUN", "").strip().lower() in {"1", "true", "yes"}
+
+
+def _fetch_star_cache(
+    repos: List[str],
+    token: str,
+    star_token: Optional[str] = None,
+) -> tuple[Dict[str, Set[str]], Dict[str, str]]:
+    """Fetch stargazer logins for each repo.
+
+    The GitHub REST "List stargazers" endpoint returns HTTP 403
+    ("Resource not accessible by integration") for the default Actions
+    GITHUB_TOKEN when the target repo is not the one the workflow is
+    running in -- this is true even for public repos, because the
+    Actions installation token is scoped only to its own repository.
+    Regular issue/comment reads across public repos are not affected,
+    only this social-graph-style endpoint.
+
+    Because of that, cross-repo star checks can legitimately be
+    unavailable at runtime. Rather than let that crash the whole triage
+    run (which previously took down every bounty target, not just the
+    ones that need a star check), record the failure per-repo and let
+    the caller degrade to a "can't verify" blocker instead of a hard
+    exit.
+
+    An optional `star_token` (e.g. a fine-grained PAT with public read
+    access, wired up via the STAR_CHECK_TOKEN secret) can be supplied to
+    restore real cross-repo star verification; it is tried first and
+    falls back to `token` only if unset.
+    """
+    cache: Dict[str, Set[str]] = {}
+    errors: Dict[str, str] = {}
+    effective_token = star_token or token
+    for repo in sorted(repos):
+        try:
+            users = _gh_paginated(f"/repos/Scottcjn/{repo}/stargazers", effective_token)
+            cache[repo] = {u.get("login") for u in users if u.get("login")}
+        except urllib.error.HTTPError as exc:
+            print(
+                f"WARN: could not fetch stargazers for Scottcjn/{repo}: "
+                f"HTTP {exc.code} {exc.reason}. Star checks for this repo "
+                "will be marked as unavailable instead of failing the run.",
+                file=sys.stderr,
+            )
+            cache[repo] = set()
+            errors[repo] = f"HTTP {exc.code}"
+        except urllib.error.URLError as exc:
+            print(
+                f"WARN: could not fetch stargazers for Scottcjn/{repo}: {exc}",
+                file=sys.stderr,
+            )
+            cache[repo] = set()
+            errors[repo] = str(exc.reason)
+    return cache, errors
+
+
 def main() -> int:
     token = _env("GITHUB_TOKEN")
+    star_token = os.environ.get("STAR_CHECK_TOKEN", "").strip() or None
     since_hours = int(_env("SINCE_HOURS", "72"))
     risk_policy = _env("TRIAGE_RISK_POLICY", "balanced")
+    dry_run = _is_dry_run()
     ignored_users = _ignored_users()
     targets_json = os.environ.get("TRIAGE_TARGETS_JSON", "").strip()
     if targets_json:
@@ -425,10 +484,9 @@ def main() -> int:
         for repo in t.get("required_stars", []):
             required_star_repos.add(repo)
 
-    star_cache: Dict[str, Set[str]] = {}
-    for repo in sorted(required_star_repos):
-        users = _gh_paginated(f"/repos/Scottcjn/{repo}/stargazers", token)
-        star_cache[repo] = {u.get("login") for u in users if u.get("login")}
+    star_cache, star_fetch_errors = _fetch_star_cache(
+        sorted(required_star_repos), token, star_token
+    )
 
     user_cache: Dict[str, Dict[str, Any]] = {}
     cutoff = _now_utc() - timedelta(hours=since_hours)
@@ -448,14 +506,25 @@ def main() -> int:
         issue_ref = f"{owner}/{repo}#{issue}"
         try:
             issue_obj = _gh_request("GET", f"/repos/{owner}/{repo}/issues/{issue}", token)
+            comments_url = issue_obj["comments_url"]
+            comments = _gh_paginated(comments_url, token)
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
                 print(f"WARN: {issue_ref} not found (HTTP 404), skipping target")
-                results_by_issue[issue_ref] = []
-                continue
-            raise
-        comments_url = issue_obj["comments_url"]
-        comments = _gh_paginated(comments_url, token)
+            else:
+                # Don't let one inaccessible/rate-limited target take down
+                # triage for every other bounty. Log it loudly and move on.
+                print(
+                    f"WARN: {issue_ref} fetch failed (HTTP {exc.code} {exc.reason}), "
+                    "skipping target",
+                    file=sys.stderr,
+                )
+            results_by_issue[issue_ref] = []
+            continue
+        except urllib.error.URLError as exc:
+            print(f"WARN: {issue_ref} fetch failed ({exc}), skipping target", file=sys.stderr)
+            results_by_issue[issue_ref] = []
+            continue
 
         # Merge multi-comment claims per user (users often add follow-ups).
         per_user: Dict[str, Dict[str, Any]] = {}
@@ -524,7 +593,12 @@ def main() -> int:
                 blockers.append("missing_proof_link")
 
             for star_repo in req_stars:
-                if user not in star_cache.get(star_repo, set()):
+                if star_repo in star_fetch_errors:
+                    # We couldn't verify stars for this repo at all (e.g. the
+                    # cross-repo stargazers API rejected our token). Stay
+                    # fail-safe: never treat "unknown" as "eligible".
+                    blockers.append(f"star_check_unavailable:{star_repo}")
+                elif user not in star_cache.get(star_repo, set()):
                     blockers.append(f"missing_star:{star_repo}")
 
             rows.append(
@@ -549,23 +623,38 @@ def main() -> int:
 
     generated_at = _now_utc().isoformat().replace("+00:00", "Z")
     report = _build_report_md(generated_at, results_by_issue, since_hours, risk_policy)
+    if star_fetch_errors:
+        note = "; ".join(f"{repo} ({err})" for repo, err in sorted(star_fetch_errors.items()))
+        report = (
+            f"> WARN: star verification unavailable for: {note}. "
+            f"Affected claims are flagged `star_check_unavailable:<repo>` and "
+            f"left in `needs-action`, not auto-approved.\n\n{report}"
+        )
     print(report)
 
     ledger_repo = os.environ.get("LEDGER_REPO", "").strip()
     ledger_issue = os.environ.get("LEDGER_ISSUE", "").strip()
+    if dry_run:
+        print("\nDRY_RUN set: skipping ledger issue update.")
+        return 0
     if ledger_repo and ledger_issue:
         issue_path = f"/repos/Scottcjn/{ledger_repo}/issues/{int(ledger_issue)}"
-        ledger = _gh_request("GET", issue_path, token)
-        body = ledger.get("body") or ""
-        new_block = f"{MARKER_START}\n{report}\n{MARKER_END}"
-        if MARKER_START in body and MARKER_END in body:
-            start = body.index(MARKER_START)
-            end = body.index(MARKER_END) + len(MARKER_END)
-            updated = f"{body[:start]}{new_block}{body[end:]}"
-        else:
-            updated = f"{body}\n\n{new_block}\n"
-        _gh_request("PATCH", issue_path, token, data={"body": updated})
-        print(f"\nUpdated ledger issue: Scottcjn/{ledger_repo}#{ledger_issue}")
+        try:
+            ledger = _gh_request("GET", issue_path, token)
+            body = ledger.get("body") or ""
+            new_block = f"{MARKER_START}\n{report}\n{MARKER_END}"
+            if MARKER_START in body and MARKER_END in body:
+                start = body.index(MARKER_START)
+                end = body.index(MARKER_END) + len(MARKER_END)
+                updated = f"{body[:start]}{new_block}{body[end:]}"
+            else:
+                updated = f"{body}\n\n{new_block}\n"
+            _gh_request("PATCH", issue_path, token, data={"body": updated})
+            print(f"\nUpdated ledger issue: Scottcjn/{ledger_repo}#{ledger_issue}")
+        except (urllib.error.HTTPError, urllib.error.URLError) as exc:
+            # The report already printed above (and is visible in the Action
+            # log) even if we can't write it back to the ledger issue.
+            print(f"WARN: failed to update ledger issue: {exc}", file=sys.stderr)
 
     return 0
 

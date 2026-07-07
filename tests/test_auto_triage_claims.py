@@ -1,4 +1,6 @@
 import unittest
+import urllib.error
+from unittest import mock
 
 from scripts.auto_triage_claims import (
     ClaimResult,
@@ -6,6 +8,7 @@ from scripts.auto_triage_claims import (
     _build_report_md,
     _extract_bottube_user,
     _extract_wallet,
+    _fetch_star_cache,
     _has_proof_link,
     _looks_like_claim,
 )
@@ -79,6 +82,51 @@ class AutoTriageClaimsTests(unittest.TestCase):
         self.assertIn("#### Suspicious Claims", report)
         self.assertIn("@fresh-bot", report)
         self.assertIn("ACCOUNT_AGE", report)
+
+    def test_fetch_star_cache_survives_cross_repo_403(self):
+        # This reproduces the real failure: GitHub's "List stargazers"
+        # endpoint returns 403 "Resource not accessible by integration"
+        # for the default Actions GITHUB_TOKEN when the repo isn't the one
+        # the workflow runs in, even for public repos. That used to raise
+        # out of _gh_paginated and crash the whole triage run for every
+        # bounty target, not just the ones needing that star.
+        forbidden = urllib.error.HTTPError(
+            url="https://api.github.com/repos/Scottcjn/Rustchain/stargazers",
+            code=403,
+            msg="Forbidden",
+            hdrs=None,
+            fp=None,
+        )
+
+        def fake_paginated(path, token):
+            if "good-repo" in path:
+                return [{"login": "alice"}, {"login": "bob"}]
+            raise forbidden
+
+        with mock.patch(
+            "scripts.auto_triage_claims._gh_paginated", side_effect=fake_paginated
+        ):
+            cache, errors = _fetch_star_cache(["good-repo", "blocked-repo"], "tok")
+
+        self.assertEqual(cache["good-repo"], {"alice", "bob"})
+        self.assertEqual(cache["blocked-repo"], set())
+        self.assertNotIn("good-repo", errors)
+        self.assertIn("blocked-repo", errors)
+        self.assertIn("403", errors["blocked-repo"])
+
+    def test_fetch_star_cache_prefers_star_token_when_set(self):
+        seen_tokens = []
+
+        def fake_paginated(path, token):
+            seen_tokens.append(token)
+            return [{"login": "alice"}]
+
+        with mock.patch(
+            "scripts.auto_triage_claims._gh_paginated", side_effect=fake_paginated
+        ):
+            _fetch_star_cache(["some-repo"], "default-tok", star_token="pat-tok")
+
+        self.assertEqual(seen_tokens, ["pat-tok"])
 
 
 if __name__ == "__main__":

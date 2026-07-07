@@ -27,6 +27,16 @@ jobs:
       - name: Run Auto Triage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: a fine-grained PAT (public repo read access is enough)
+          # used only for cross-repo star checks (Rustchain, bottube,
+          # beacon-skill). The default Actions GITHUB_TOKEN cannot list
+          # stargazers on any repo other than the one running the workflow
+          # (GitHub returns 403 "Resource not accessible by integration"
+          # even though the repos are public). Without this secret, the
+          # script still runs fine, it just marks star-gated claims as
+          # `star_check_unavailable` instead of verifying them. Set the
+          # STAR_CHECK_TOKEN repo secret to restore real verification.
+          STAR_CHECK_TOKEN: ${{ secrets.STAR_CHECK_TOKEN }}
           SINCE_HOURS: "168"
           LEDGER_REPO: "rustchain-bounties"
           LEDGER_ISSUE: "104"
