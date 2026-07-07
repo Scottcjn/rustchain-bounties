@@ -1,8 +1,11 @@
 # Harden the Chain — Security Quest (#398)
 
-Contributor: @2lll5  
-Target reviewed: `Scottcjn/Rustchain` plus the `rustchain-bounties` security policy context.  
-Scope completed: Step 1 security assessment and Step 2 known-fix reproduction write-up.  
+Contributor: @2lll5
+
+Target reviewed: `Scottcjn/Rustchain` plus the `rustchain-bounties` security policy context.
+
+Scope completed: Step 1 security assessment and Step 2 known-fix reproduction write-up.
+
 Evidence pinned to RustChain commit `e1a48a0f804d6160af62f24d0a92075ee47b9c26` (`main` as inspected on 2026-07-06). Stable source references use permalinks to that commit so the assessment remains reproducible if upstream changes.
 
 ## Step 1 — Security assessment
