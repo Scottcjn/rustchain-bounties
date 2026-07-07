@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-07-07T14:03:23Z",
+  "updated_at": "2026-07-07T16:07:37Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1867,
+  "total": 1862,
   "bounties": [
     {
       "id": 14983,
@@ -19598,18 +19598,6 @@
       "agents_welcome": false
     },
     {
-      "id": 8804,
-      "title": "Star & Follow Bounty — 6 Repos (Bounty #253) — OpenClaw 2026-05-07",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/8804",
-      "state": "open",
-      "created_at": "2026-05-07T04:13:31Z",
-      "updated_at": "2026-05-10T14:13:37Z",
-      "comments": 1,
-      "author": "fengqiankun6-sudo",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 8803,
       "title": "Emoji Reactions — 19 Issues (Bounty #1611) — OpenClaw 2026-05-07",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/8803",
@@ -20015,11 +20003,11 @@
     },
     {
       "id": 2788,
-      "title": "[ONBOARD: 2 RTC] Upload Your First Video to BoTTube",
+      "title": "[ONBOARD: 3 RTC] Upload Your First Video to BoTTube",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2788",
       "state": "open",
       "created_at": "2026-04-02T15:42:28Z",
-      "updated_at": "2026-07-06T17:42:20Z",
+      "updated_at": "2026-07-07T15:49:47Z",
       "comments": 29,
       "author": "Scottcjn",
       "labels": [
@@ -20029,12 +20017,12 @@
     },
     {
       "id": 2786,
-      "title": "[ONBOARD: 2 RTC] Compare RustChain to Another Blockchain Project",
+      "title": "[ONBOARD: 3 RTC] Compare RustChain to Another Blockchain Project",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786",
       "state": "open",
       "created_at": "2026-04-02T15:42:09Z",
-      "updated_at": "2026-07-07T13:36:16Z",
-      "comments": 770,
+      "updated_at": "2026-07-07T16:03:37Z",
+      "comments": 785,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20058,11 +20046,11 @@
     },
     {
       "id": 2782,
-      "title": "[ONBOARD: 1 RTC] Review an Open PR",
+      "title": "[ONBOARD: 2 RTC] Review an Open PR",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782",
       "state": "open",
       "created_at": "2026-04-02T15:41:31Z",
-      "updated_at": "2026-07-07T10:43:19Z",
+      "updated_at": "2026-07-07T15:49:44Z",
       "comments": 1362,
       "author": "Scottcjn",
       "labels": [
@@ -20300,22 +20288,6 @@
       "agents_welcome": false
     },
     {
-      "id": 2269,
-      "title": "[BOUNTY: 2 RTC per follow] Help us reach 150 followers on GitHub",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2269",
-      "state": "open",
-      "created_at": "2026-03-20T15:31:57Z",
-      "updated_at": "2026-07-06T17:21:28Z",
-      "comments": 111,
-      "author": "Scottcjn",
-      "labels": [
-        "bounty",
-        "easy",
-        "community"
-      ],
-      "agents_welcome": true
-    },
-    {
       "id": 2259,
       "title": "[BOUNTY: 10 RTC] Write about our CVPR 2026 acceptance on any platform",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2259",
@@ -20345,7 +20317,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-07T09:42:21Z",
+      "updated_at": "2026-07-07T14:36:52Z",
       "comments": 354,
       "author": "Scottcjn",
       "labels": [
@@ -20401,7 +20373,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-07T09:41:40Z",
+      "updated_at": "2026-07-07T14:35:22Z",
       "comments": 42,
       "author": "Scottcjn",
       "labels": [],
@@ -20479,22 +20451,6 @@
         "bounty"
       ],
       "agents_welcome": false
-    },
-    {
-      "id": 2103,
-      "title": "[BOUNTY] Star & Follow — Earn RTC (Ongoing, Agents Welcome)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2103",
-      "state": "open",
-      "created_at": "2026-03-15T01:59:45Z",
-      "updated_at": "2026-07-06T17:21:58Z",
-      "comments": 911,
-      "author": "Scottcjn",
-      "labels": [
-        "bounty",
-        "easy",
-        "community"
-      ],
-      "agents_welcome": true
     },
     {
       "id": 2074,
@@ -22375,22 +22331,6 @@
       "agents_welcome": false
     },
     {
-      "id": 252,
-      "title": "[BOUNTY] GitHub Engagement Sprint — Stars, Follows, Forks (Pool: 133 RTC)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/252",
-      "state": "open",
-      "created_at": "2026-02-17T00:22:13Z",
-      "updated_at": "2026-07-06T17:49:25Z",
-      "comments": 43,
-      "author": "Scottcjn",
-      "labels": [
-        "bounty",
-        "open",
-        "community"
-      ],
-      "agents_welcome": false
-    },
-    {
       "id": 249,
       "title": "[BOUNTY] RustChain Telegram Community Bot (33 RTC)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/249",
@@ -22519,21 +22459,6 @@
       "author": "Scottcjn",
       "labels": [
         "documentation",
-        "bounty",
-        "community"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 157,
-      "title": "Star & Share beacon-skill on GitHub (17 RTC Bounty)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/157",
-      "state": "open",
-      "created_at": "2026-02-13T21:04:00Z",
-      "updated_at": "2026-07-06T17:46:40Z",
-      "comments": 68,
-      "author": "Scottcjn",
-      "labels": [
         "bounty",
         "community"
       ],
