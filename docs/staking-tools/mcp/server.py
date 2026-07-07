@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """
 RustChain Staking MCP Server
 Bounty #14383: LangChain + MCP tool for staked self-improvement
