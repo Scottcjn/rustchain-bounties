@@ -1,8 +1,32 @@
 {
-  "updated_at": "2026-07-07T09:20:47Z",
+  "updated_at": "2026-07-07T14:03:23Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1865,
+  "total": 1867,
   "bounties": [
+    {
+      "id": 14983,
+      "title": "[CLAIM] Discussion Q&A Bounty - #742",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/14983",
+      "state": "open",
+      "created_at": "2026-07-07T12:15:37Z",
+      "updated_at": "2026-07-07T12:20:20Z",
+      "comments": 1,
+      "author": "jaxint",
+      "labels": [],
+      "agents_welcome": false
+    },
+    {
+      "id": 14982,
+      "title": "[CLAIM] Discussion Q&A Bounty - #739",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/14982",
+      "state": "open",
+      "created_at": "2026-07-07T12:15:36Z",
+      "updated_at": "2026-07-07T12:15:36Z",
+      "comments": 0,
+      "author": "jaxint",
+      "labels": [],
+      "agents_welcome": false
+    },
     {
       "id": 14760,
       "title": "[Bounty #2786 claim] ONBOARD: Star + Compare RustChain to Monero",
@@ -20009,8 +20033,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786",
       "state": "open",
       "created_at": "2026-04-02T15:42:09Z",
-      "updated_at": "2026-07-07T08:36:08Z",
-      "comments": 639,
+      "updated_at": "2026-07-07T13:36:16Z",
+      "comments": 770,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20038,8 +20062,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782",
       "state": "open",
       "created_at": "2026-04-02T15:41:31Z",
-      "updated_at": "2026-07-07T08:15:01Z",
-      "comments": 1360,
+      "updated_at": "2026-07-07T10:43:19Z",
+      "comments": 1362,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20321,7 +20345,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-07T03:28:21Z",
+      "updated_at": "2026-07-07T09:42:21Z",
       "comments": 354,
       "author": "Scottcjn",
       "labels": [
@@ -20377,7 +20401,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-07T03:27:38Z",
+      "updated_at": "2026-07-07T09:41:40Z",
       "comments": 42,
       "author": "Scottcjn",
       "labels": [],
