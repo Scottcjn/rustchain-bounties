@@ -1,6 +1,9 @@
-## Files to Create or Modify
+# Comparison between RustChain and Ethereum
 
-* `comparison_document.md`: A markdown file containing the comparison document (300-800 words).
-* `comparison_tables.md`: A markdown file containing any tables or charts created to illustrate the differences.
-* `review_comment.md`: A markdown file containing the review comment posted on the issue.
-* `review_comment_links.txt`: A text file containing the links to the RustChain repository and specific files, PRs, features, or doc sections reviewed.
+| **Category** | **RustChain** | **Ethereum** |
+| --- | --- | --- |
+| Consensus Mechanism | Proof of Antiquity | Proof of Stake |
+| Hardware Requirements | High-performance hardware | Moderate hardware |
+| Environmental Approach | Energy-efficient | Energy-intensive |
+| Community Model | Decentralized | Decentralized |
+| What it does better | Scalability and security | Smart contracts and decentralized applications |
