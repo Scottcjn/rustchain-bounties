@@ -1,0 +1,6 @@
+# complete code
+"""
+This file lists the dependencies required by the script.
+"""
+markdown
+jinja2
