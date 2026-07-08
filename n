@@ -1,0 +1,4 @@
+import bounty_claimer
+
+if __name__ == "__main__":
+    bounty_claimer.main()
