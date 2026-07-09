@@ -78,7 +78,7 @@ def run_agent():
     implement_solution(forked_repo, branch_name)
 
     # Step 5: Submit PR
-    pr = submit_pr(forked_repo, branch_name)
+    submit_pr(forked_repo, branch_name)
 
     # Step 6: Simulate receiving RTC payment on PR merge
     receive_rtc_payment()
