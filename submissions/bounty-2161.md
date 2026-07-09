@@ -10,7 +10,7 @@ Implemented Creator Collaboration Features (Issue #427) in the BoTTube repositor
 4. **Validation Suite:** Five regression test cases verifying normal tipping, 3-way split, rounding logic, and tipper self-filtering.
 
 **Source Code Specification:** [README.md](./bounty-2161/README.md)
-**Regression Tests:** [test_bounty_2161_collab_tip_split.py](./bounty-2161/test_bounty_2161_collab_tip_split.py)
+**Regression Tests:** [test_bounty_2161_collab_tip_split_py.md](./bounty-2161/test_bounty_2161_collab_tip_split_py.md)
 
 ### Verification
 - Run tests via pytest in BoTTube:

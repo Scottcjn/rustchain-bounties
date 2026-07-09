@@ -1,3 +1,4 @@
+```python
 # SPDX-License-Identifier: MIT
 """
 Tests for Bounty #2161: Creator Collaboration Features (Issue #427)
@@ -245,3 +246,4 @@ class TestCollabTipSplit:
         assert response.status_code == 400
         assert _query("SELECT COUNT(*) AS n FROM tips WHERE video_id = ?", ("vid_2161_ib",))[0][0] == 0
         assert _get_balance("test_2161_t_ib") == pytest.approx(100, abs=1e-6)
+```
