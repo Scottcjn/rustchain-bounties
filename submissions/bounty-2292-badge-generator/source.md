@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,3 +163,4 @@ document.getElementById('input').addEventListener('keydown', e => { if (e.key ==
 </script>
 </body>
 </html>
+```

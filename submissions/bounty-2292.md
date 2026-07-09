@@ -13,8 +13,7 @@ Built a web tool for generating BCOS v2 badges.
 - Fully responsive layout
 
 **Tech stack:** HTML, CSS, JavaScript
-**Source Code:** [index.html](./bounty-2292-badge-generator/index.html)
-**Working Demo:** [https://lequangsang01.github.io/rustchain-bounties/submissions/bounty-2292-badge-generator/index.html](https://lequangsang01.github.io/rustchain-bounties/submissions/bounty-2292-badge-generator/index.html)
+**Source Code:** [source.md](./bounty-2292-badge-generator/source.md)
 
 ### Verification
 - Enter `BCOS-001` or `https://github.com/lequangsang01/bottube` in the input field.
