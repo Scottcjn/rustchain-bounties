@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BCOS Badge Generator | RustChain</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#0f0;font-family:'Courier New',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+h1{color:#0f0;font-size:1.5em;margin:20px 0 5px;text-shadow:0 0 10px #0f04}
+.subtitle{color:#080;font-size:0.85em;margin-bottom:30px}
+.terminal{background:#111;border:1px solid #0f03;border-radius:4px;padding:20px;max-width:600px;width:100%}
+.input-group{margin:15px 0}
+.input-group label{display:block;color:#0a0;font-size:0.85em;margin-bottom:5px}
+.input-group input,.input-group select{background:#0a0a0a;border:1px solid #0f02;color:#0f0;padding:8px 12px;width:100%;font-family:inherit;font-size:0.95em;border-radius:2px}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:#0f0;box-shadow:0 0 5px #0f03}
+.preview{margin:20px 0;padding:20px;background:#000;border:1px dashed #0f02;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center}
+.preview img{max-width:100%}
+.style-options{display:flex;gap:10px;flex-wrap:wrap}
+.style-options label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:0.85em;color:#0a0}
+.style-options input[type=radio]{accent-color:#0f0}
+.btn{background:#0f0;color:#000;border:none;padding:10px 20px;cursor:pointer;font-family:inherit;font-weight:bold;border-radius:2px;margin:5px}
+.btn:hover{background:#0fa}
+.btn-secondary{background:transparent;color:#0f0;border:1px solid #0f02}
+.btn-secondary:hover{background:#0f02}
+.code-output{margin:15px 0;position:relative}
+.code-output pre{background:#000;border:1px solid #0f02;padding:10px;overflow-x:auto;font-size:0.8em;color:#0f0;white-space:pre-wrap;word-break:break-all}
+.code-output .copy-btn{position:absolute;top:5px;right:5px;background:#0f02;color:#0f0;border:1px solid #0f02;padding:2px 8px;cursor:pointer;font-size:0.75em;border-radius:2px}
+.code-output .copy-btn:hover{background:#0f0;color:#000}
+.tabs{display:flex;border-bottom:1px solid #0f02;margin-bottom:0}
+.tabs button{background:transparent;color:#080;border:none;padding:8px 16px;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent}
+.tabs button.active{color:#0f0;border-bottom-color:#0f0}
+.result{display:none;border:1px solid #0f02;border-top:none;padding:10px;background:#111}
+.result.active{display:block}
+.error{color:#f00;font-size:0.85em;margin:10px 0}
+.success{color:#0f0;font-size:0.85em;margin:10px 0}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.cursor{animation:blink 1s infinite}
+</style>
+</head>
+<body>
+<h1>BCOS Badge Generator<span class="cursor">_</span></h1>
+<p class="subtitle">rustchain.org/bcos/badge-generator</p>
+
+<div class="terminal">
+  <div class="input-group">
+    <label>Repository URL or BCOS Certificate ID</label>
+    <input type="text" id="input" placeholder="https://github.com/user/repo  or  BCOS-001" />
+  </div>
+
+  <div class="input-group">
+    <label>Badge Style</label>
+    <div class="style-options">
+      <label><input type="radio" name="style" value="flat" checked> flat</label>
+      <label><input type="radio" name="style" value="flat-square"> flat-square</label>
+      <label><input type="radio" name="style" value="for-the-badge"> for-the-badge</label>
+    </div>
+  </div>
+
+  <div class="preview" id="preview">
+    <span style="color:#080">Enter a repo URL or cert ID above</span>
+  </div>
+
+  <div id="status"></div>
+
+  <div class="tabs">
+    <button class="active" onclick="showTab('markdown')">Markdown</button>
+    <button onclick="showTab('html')">HTML</button>
+  </div>
+  <div class="result active" id="tab-markdown">
+    <div class="code-output">
+      <button class="copy-btn" onclick="copy('md')">Copy</button>
+      <pre id="md-code">Click "Generate" to get badge code</pre>
+    </div>
+  </div>
+  <div class="result" id="tab-html">
+    <div class="code-output">
+      <button class="copy-btn" onclick="copy('html')">Copy</button>
+      <pre id="html-code">Click "Generate" to get badge code</pre>
+    </div>
+  </div>
+
+  <div style="margin-top:15px">
+    <button class="btn" onclick="generate()">Generate Badge</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://50.28.86.131/bcos';
+const BADGE_BASE = 'https://rustchain.org/bcos';
+const VERIFY_BASE = 'https://rustchain.org/bcos/verify';
+
+function getStyle() {
+  return document.querySelector('input[name=style]:checked').value;
+}
+
+function getInput() {
+  return document.getElementById('input').value.trim();
+}
+
+function extractCertId(input) {
+  // Direct cert ID
+  if (input.match(/^BCOS-\w+$/i)) return input.toUpperCase();
+  // GitHub URL → extract owner/repo
+  const ghMatch = input.match(/github\.com\/([^\/]+\/[^\/]+)/);
+  if (ghMatch) return 'pending-' + ghMatch[1].replace(/\//g, '-');
+  return input;
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.result').forEach(r => r.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function copy(type) {
+  const text = document.getElementById(type + '-code').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    event.target.textContent = 'Copied!';
+    setTimeout(() => event.target.textContent = 'Copy', 1500);
+  });
+}
+
+async function generate() {
+  const input = getInput();
+  if (!input) {
+    document.getElementById('status').innerHTML = '<p class="error">> Please enter a repo URL or cert ID</p>';
+    return;
+  }
+
+  const certId = extractCertId(input);
+  const style = getStyle();
+  const badgeUrl = `${API_BASE}/badge/${certId}.svg?style=${style}`;
+  const verifyUrl = `${VERIFY_BASE}/${certId}`;
+
+  // Preview badge
+  document.getElementById('preview').innerHTML = `<img src="${badgeUrl}" alt="BCOS Badge" onerror="document.getElementById('preview').innerHTML='<span style=color:#f80>Badge generation pending...</span>'" />`;
+
+  // Generate codes
+  const md = `[![BCOS](${badgeUrl})](${verifyUrl})`;
+  const html = `<a href="${verifyUrl}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="BCOS Verified" /></a>`;
+
+  document.getElementById('md-code').textContent = md;
+  document.getElementById('html-code').textContent = html;
+
+  // Try to verify
+  try {
+    const res = await fetch(`${API_BASE}/verify/${certId}`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      document.getElementById('status').innerHTML = '<p class="success">> BCOS certificate verified ✓</p>';
+    } else {
+      document.getElementById('status').innerHTML = '<p style="color:#f80">> Certificate not found. Badge will work once BCOS verification passes.</p>';
+    }
+  } catch {
+    document.getElementById('status').innerHTML = '<p style="color:#080">> Badge code generated. Verification endpoint unreachable — badge will activate once deployed.</p>';
+  }
+}
+
+// Auto-generate on Enter
+document.getElementById('input').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+</script>
+</body>
+</html>
