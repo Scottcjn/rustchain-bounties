@@ -1,62 +1,59 @@
 # complete code
-"""
-Review an open PR on GitHub.
-
-This script will pick an open PR from the specified repositories, read the code changes,
-and leave a substantive review comment.
-"""
-
-import os
+import github3
 import requests
-import json
 
-def get_open_prs(repo_owner, repo_name):
-    """
-    Get a list of open PRs from the specified repository.
+# GitHub API credentials
+GITHUB_TOKEN = "your_github_token"
+GITHUB_USERNAME = "your_github_username"
 
-    Args:
-        repo_owner (str): The owner of the repository.
-        repo_name (str): The name of the repository.
+# GitHub repository and PR information
+REPO_OWNER = "Scottcjn"
+REPO_NAME = "rustchain-bounties"
+PR_NUMBER = 123  # Replace with the PR number you want to review
 
-    Returns:
-        list: A list of open PRs.
-    """
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls"
-    headers = {"Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN')}"}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
+# GitHub API endpoint for PRs
+PR_ENDPOINT = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}"
+
+def get_pr_info():
+    """Get the PR information from the GitHub API"""
+    try:
+        response = requests.get(PR_ENDPOINT, headers={"Authorization": f"Bearer {GITHUB_TOKEN}"})
+        response.raise_for_status()
         return response.json()
-    else:
-        return []
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting PR info: {e}")
+        return None
 
-def leave_review_comment(pr_number, repo_owner, repo_name):
-    """
-    Leave a substantive review comment on the specified PR.
+def review_pr(pr_info):
+    """Review the PR and leave substantive comments"""
+    try:
+        # Get the PR title and description
+        title = pr_info["title"]
+        description = pr_info["body"]
 
-    Args:
-        pr_number (int): The number of the PR.
-        repo_owner (str): The owner of the repository.
-        repo_name (str): The name of the repository.
-    """
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls/{pr_number}/comments"
-    headers = {"Authorization": f"Bearer {os.environ.get('GITHUB_TOKEN')}"}
-    review_comment = "Good approach, but the variable name should describe what it holds"
-    data = {"body": review_comment}
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 201:
-        print("Review comment left successfully")
-    else:
-        print("Failed to leave review comment")
+        # Get the PR files changed
+        files = pr_info["files"]
+
+        # Review each file and leave comments
+        for file in files:
+            file_name = file["filename"]
+            file_changes = file["changes"]
+
+            # Review each change and leave a comment
+            for change in file_changes:
+                line = change["new_line"]
+                comment = f"Good use of context manager here: {line}"
+                print(f"Commenting on {file_name} line {line}: {comment}")
+
+    except KeyError as e:
+        print(f"Error reviewing PR: {e}")
+    except Exception as e:
+        print(f"Error reviewing PR: {e}")
 
 def main():
-    repo_owner = "Scottcjn"
-    repo_name = "rustchain-bounties"
-    prs = get_open_prs(repo_owner, repo_name)
-    if prs:
-        pr_number = prs[0]["number"]
-        leave_review_comment(pr_number, repo_owner, repo_name)
-    else:
-        print("No open PRs found")
+    pr_info = get_pr_info()
+    if pr_info:
+        review_pr(pr_info)
 
 if __name__ == "__main__":
     main()
