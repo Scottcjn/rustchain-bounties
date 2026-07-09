@@ -1,3 +1,4 @@
+```python
 #!/usr/bin/env python3
 """
 BCOS v2 GitHub Action - Main Entry Point
@@ -403,3 +404,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+```

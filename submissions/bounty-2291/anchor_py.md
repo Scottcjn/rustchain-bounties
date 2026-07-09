@@ -1,3 +1,4 @@
+```python
 #!/usr/bin/env python3
 """
 BCOS v2 Action - Anchor to RustChain
@@ -72,3 +73,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+```

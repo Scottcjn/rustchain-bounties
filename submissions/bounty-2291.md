@@ -3,7 +3,7 @@
 Created a reusable GitHub Action to run BCOS v2 scans, evaluate requirements, post PR comments, and anchor attestations.
 
 **Platform:** GitHub Actions
-**Source Code:** [action.yml](./bounty-2291/action.yml), [main.py](./bounty-2291/main.py), [anchor.py](./bounty-2291/anchor.py)
+**Source Code:** [action_yml.md](./bounty-2291/action_yml.md), [main_py.md](./bounty-2291/main_py.md), [anchor_py.md](./bounty-2291/anchor_py.md)
 **License:** [MIT License](./bounty-2291/LICENSE)
 
 ### Action Inputs

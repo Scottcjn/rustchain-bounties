@@ -1,3 +1,4 @@
+```yaml
 name: 'BCOS v2 Scanner'
 description: 'Reusable GitHub Action to run BCOS v2 scans and produce trust score attestations'
 author: 'Scottcjn'
@@ -133,3 +134,4 @@ runs:
         echo "PR: #$PR_NUMBER"
         echo "Merged Commit: $MERGED_COMMIT"
         python ${{ github.action_path }}/anchor.py
+```

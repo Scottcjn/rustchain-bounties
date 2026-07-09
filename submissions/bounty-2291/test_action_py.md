@@ -1,3 +1,4 @@
+```python
 #!/usr/bin/env python3
 """
 BCOS v2 Action - Test Suite
@@ -351,3 +352,4 @@ class TestScoreCalculation(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+```
