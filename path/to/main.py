@@ -1,24 +1,17 @@
-# complete code
+# Complete code for main.py
 """
-This script runs the comparison and bounty generation tasks.
+This script runs the comparison script.
 
-It includes the following code:
-- Import the comparison and bounty modules
-- Run the comparison task
-- Run the bounty generation task
+Usage:
+    python main.py
 """
-
 import comparison
-import bounty
 
 def main():
-    print("Running comparison task...")
-    comparison.compare_projects()
-    print("Running bounty generation task...")
-    bounty.generate_bounty()
+    print("Welcome to the comparison script!")
+    project_name = input("Enter a project name: ")
+    comparison_result = comparison.compare_projects(project_name, "Ethereum")
+    print(comparison_result)
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    main()

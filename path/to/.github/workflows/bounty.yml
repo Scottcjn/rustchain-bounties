@@ -1,0 +1,23 @@
+# Complete code for .github/workflows/bounty.yml
+"""
+This workflow creates a bounty for the comparison task.
+
+Usage:
+    python bounty.py
+"""
+name: Bounty
+
+on:
+  issue:
+    types: [opened]
+    labels: [bounty]
+
+jobs:
+  create-bounty:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create bounty
+        run: |
+          python bounty.py
