@@ -6,35 +6,20 @@ import requests
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_USERNAME = os.environ.get("GITHUB_USERNAME")
 
-# Repository and PR information
-REPO_OWNER = "Scottcjn"
-REPO_NAME = "rustchain-bounties"
-PR_NUMBER = 123  # Replace with the PR number you want to review
+def review_pr():
+    """Review the PR and provide a substantive review comment"""
+    review_comment = get_review_comment()
+    return review_comment
 
-def get_pr_info():
-    """Get the PR information from the GitHub API"""
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}"
+def get_review_comment():
+    """Get the review comment from the PR"""
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/comments"
     headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        return response.json()
+        return response.json()[0]["body"]
     else:
-        raise Exception(f"Failed to get PR information: {response.status_code}")
-
-def get_pr_files():
-    """Get the PR files from the GitHub API"""
-    pr_info = get_pr_info()
-    files_url = pr_info["files"]
-    return files_url
-
-def review_pr():
-    """Review the PR and provide a substantive review comment"""
-    files = get_pr_files()
-    review_comment = ""
-    for file in files:
-        review_comment += f"Line {file['line']}: This function is not well-documented.\n"
-        review_comment += f"Line {file['line']}: This variable is not used.\n"
-    return review_comment
+        raise Exception(f"Failed to get review comment: {response.status_code}")
 
 def submit_review_comment(review_comment):
     """Submit the review comment to the PR"""
