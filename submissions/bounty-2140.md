@@ -20,7 +20,7 @@ Added YouTube-style keyboard shortcuts to the BoTTube video player.
 
 **Tech stack:** JavaScript Event Listeners, ARIA announcements
 **Implementation PR:** [https://github.com/Scottcjn/bottube/pull/1560](https://github.com/Scottcjn/bottube/pull/1560)
-**Source Code:** [watch.html](./bounty-2140/watch.html)
+**Source Code:** [watch_html.md](./bounty-2140/watch_html.md)
 
 ### Verification
 - Open the watch page on BoTTube.

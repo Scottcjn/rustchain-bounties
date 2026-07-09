@@ -1,3 +1,4 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}{{ video.title }}{% endblock %}
@@ -4606,3 +4607,4 @@ function seekTo(seconds) {
 </script>
 
 {% endblock %}
+```
