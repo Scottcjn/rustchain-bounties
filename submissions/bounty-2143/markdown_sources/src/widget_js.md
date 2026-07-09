@@ -1,3 +1,4 @@
+```javascript
 // SPDX-License-Identifier: MIT
 const DEFAULT_BASE_URL = 'https://bottube.ai';
 
@@ -146,3 +147,4 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replaceAll('`', '&#96;');
 }
+```

@@ -1,3 +1,4 @@
+```json
 {
   "name": "bottube-embed-widget-example",
   "version": "1.0.0",
@@ -17,3 +18,4 @@
     "node": ">=18.0.0"
   }
 }
+```

@@ -3,7 +3,7 @@
 Built a responsive, embeddable video player widget using the `@bottube/sdk` package.
 
 **Platform:** BoTTube / JavaScript
-**Source Code:** [index.js](./bounty-2143/index.js), [index.html](./bounty-2143/index.html), [package.json](./bounty-2143/package.json)
+**Source Code:** [index_js.md](./bounty-2143/markdown_sources/index_js.md), [package_json.md](./bounty-2143/markdown_sources/package_json.md)
 **Documentation:** [README.md](./bounty-2143/README.md)
 
 ### Features

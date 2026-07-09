@@ -1,3 +1,4 @@
+```javascript
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
 
@@ -121,3 +122,4 @@ Options:
   --base-url <url>     BoTTube instance URL (default: https://bottube.ai)
 `);
 }
+```

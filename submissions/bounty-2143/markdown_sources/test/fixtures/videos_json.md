@@ -1,3 +1,4 @@
+```json
 [
   {
     "video_id": "rustchain-demo",
@@ -19,3 +20,4 @@
     "tags": ["agents", "video"]
   }
 ]
+```

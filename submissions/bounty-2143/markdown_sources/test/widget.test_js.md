@@ -1,3 +1,4 @@
+```javascript
 // SPDX-License-Identifier: MIT
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -107,3 +108,4 @@ test('CLI rejects malformed limit values instead of parsing numeric prefixes', (
   assert.match(result.stderr, /--limit must be an integer from 1 to 24/);
   assert.doesNotMatch(result.stderr, /at clampInteger|Node\.js/);
 });
+```
