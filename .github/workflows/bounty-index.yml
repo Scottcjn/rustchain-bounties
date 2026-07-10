@@ -11,6 +11,19 @@ permissions:
   contents: write
   issues: read
 
+# Fix #8: this workflow fires on BOTH a 6-hourly schedule and every push to
+# main, so two runs can end up generating + pushing at the same time (a
+# schedule tick landing mid-merge-storm, or two pushes close together). Each
+# run checks out main once at the start and pushes ~20-60s later; if another
+# run (of this same workflow) pushes in that window, the second push is
+# rejected as non-fast-forward and the whole job fails. Serializing runs
+# removes that self-collision. The "Commit bounties.json" step below adds a
+# fetch+retry loop on top of this for the remaining case: a real, unrelated
+# PR merge landing on main in that same window.
+concurrency:
+  group: bounty-index-generate
+  cancel-in-progress: true
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -80,8 +93,39 @@ jobs:
           echo "Generated bounties.json with $count bounties"
 
       - name: Commit bounties.json
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'chore: update bounties.json [skip ci]'
-          file_pattern: 'bounties.json'
-          skip_checkout: true
+        run: |
+          # Fix #8 (crash: "non-fast-forward" push rejection): bounties.json
+          # is always fully regenerated from scratch (never hand-edited or
+          # diffed), so if main moved between our checkout and our push, the
+          # safe fix is to re-sync to the new tip and re-apply the freshly
+          # generated file, not to try to merge/rebase a partial diff. Retry
+          # a few times before giving up loudly.
+          cp bounties.json /tmp/bounties-generated.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/bounties-generated.json bounties.json
+
+            if git diff --quiet -- bounties.json; then
+              echo "No changes to bounties.json — nothing to commit."
+              exit 0
+            fi
+
+            git add bounties.json
+            git commit -m 'chore: update bounties.json [skip ci]'
+
+            if git push origin HEAD:main; then
+              echo "Pushed bounties.json on attempt $attempt"
+              exit 0
+            fi
+
+            echo "::warning::Push rejected (attempt $attempt/5) — main moved since checkout, retrying..."
+            sleep $((attempt * 3))
+          done
+
+          echo "::error::Failed to push bounties.json after 5 attempts (main kept moving)"
+          exit 1
