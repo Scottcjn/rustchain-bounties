@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: MIT
+name: Guard Bounty PR Protected Paths
+
+# Flags (does not permanently block) bounty/onboarding-style PRs from
+# first-time/non-collaborator contributors that touch CI automation or
+# payout-critical paths instead of just adding their own submission
+# content. See #14981 for the incident this guards against: a "solution"
+# PR to an onboarding bounty replaced working .github/scripts/*.py
+# automation with stubs.
+#
+# This intentionally does NOT gate every path outside submissions/ --
+# real bounty work in this repo legitimately touches docs/, museum/,
+# apple2_miner/, star_tracker.py, bounties/<issue>/, etc. depending on
+# what the bounty asks for. It also never gates trusted contributors
+# (OWNER/MEMBER/COLLABORATOR/CONTRIBUTOR) doing normal maintenance on
+# scripts/ or .github/ (see #14990, #14546). See scripts/guard_bounty_pr.py
+# for the exact logic.
+#
+# Uses pull_request_target (not pull_request) so the check can comment
+# and label on PRs from forks. This is safe here because the job never
+# checks out or executes the PR head's code -- it only reads the
+# workflow/script from the trusted base branch and calls the GitHub API
+# to list changed file paths.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: guard-bounty-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch (trusted script, not the PR head)
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Guard protected paths
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 scripts/guard_bounty_pr.py
