@@ -139,12 +139,21 @@ def post_comment(repo: str, pr_number: str, body: str) -> None:
 
 
 def transfer_rtc(vps_host: str, admin_key: str, to_wallet: str,
-                 amount: float, memo: str, idempotency_key: str) -> dict:
+                 amount: float, memo: str, idempotency_key: str,
+                 max_attempts: int = 3, retry_delay: float = 5.0) -> dict:
     """Call the RustChain VPS transfer endpoint.
 
     The idempotency_key is per-PR, so the node de-duplicates any retry or
     concurrent run to a single transfer — the single serialization point
     that makes a double-pay impossible even if the workflow runs twice.
+
+    Retries on transient connection failures / timeouts (e.g. the VPS
+    restarting for a few seconds) up to `max_attempts` times before giving
+    up. HTTP error responses (4xx/5xx from `raise_for_status()`) are NOT
+    retried — those are a real answer from the node, not a dropped
+    connection, and get surfaced to the caller immediately. Retrying is
+    still fail-safe even on a genuine transient failure: the idempotency
+    key means at most one of the attempts can ever actually move funds.
     """
     url = f"http://{vps_host}:{VPS_PORT}/wallet/transfer"
     payload = {
@@ -158,9 +167,24 @@ def transfer_rtc(vps_host: str, admin_key: str, to_wallet: str,
         "Content-Type": "application/json",
         "X-Admin-Key": admin_key,
     }
-    resp = requests.post(url, headers=headers, json=payload, timeout=30)
-    resp.raise_for_status()
-    return resp.json()
+
+    last_exc: Exception = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=30)
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            last_exc = e
+            if attempt < max_attempts:
+                print(f"::warning::Attempt {attempt}/{max_attempts} to reach VPS "
+                      f"failed ({e.__class__.__name__}) — retrying in {retry_delay:g}s...")
+                time.sleep(retry_delay)
+
+    # Exhausted retries on a transient error — re-raise so the caller's
+    # existing except clauses handle it the same way as before (fail-safe:
+    # no transfer recorded, no confirmation comment posted).
+    raise last_exc
 
 
 def fetch_pr_files(repo: str, pr_number: str) -> list:
