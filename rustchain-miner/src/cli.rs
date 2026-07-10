@@ -16,6 +16,10 @@ pub struct Cli {
     #[arg(long, default_value = "https://50.28.86.131")]
     pub node: String,
 
+    /// Disable TLS certificate verification for test nodes with self-signed certificates.
+    #[arg(long)]
+    pub insecure: bool,
+
     /// Build and display the attestation payload without submitting.
     #[arg(long)]
     pub dry_run: bool,
@@ -27,4 +31,24 @@ pub struct Cli {
     /// Run fingerprint checks only (no attestation).
     #[arg(long)]
     pub test_only: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Cli;
+    use clap::Parser;
+
+    #[test]
+    fn tls_verification_is_enabled_by_default() {
+        let cli = Cli::try_parse_from(["rustchain-miner"]).unwrap();
+
+        assert!(!cli.insecure);
+    }
+
+    #[test]
+    fn insecure_flag_is_explicit_opt_in() {
+        let cli = Cli::try_parse_from(["rustchain-miner", "--insecure"]).unwrap();
+
+        assert!(cli.insecure);
+    }
 }
