@@ -7,6 +7,7 @@ Listens for /tip, /balance, /leaderboard, /register commands in GitHub comments.
 import os
 import re
 import json
+import math
 import requests
 from github import Github
 
@@ -14,6 +15,7 @@ from github import Github
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 RUSTCHAIN_NODE = os.getenv("RUSTCHAIN_NODE", "https://50.28.86.131")
 RUSTCHAIN_ADMIN_KEY = os.getenv("RUSTCHAIN_ADMIN_KEY", "")
+VERIFY_TLS = os.getenv("RUSTCHAIN_VERIFY_TLS", "true").strip().lower() not in {"0", "false", "no", "off"}
 
 # In-memory storage for demo (use database in production)
 registered_wallets = {}  # github_username -> wallet_name
@@ -26,7 +28,7 @@ def check_balance(wallet_name: str) -> dict:
             f"{RUSTCHAIN_NODE}/wallet/balance",
             params={"miner_id": wallet_name},
             timeout=10,
-            verify=False
+            verify=VERIFY_TLS
         )
         return r.json()
     except Exception as e:
@@ -42,6 +44,20 @@ def process_tip(from_user: str, to_wallet: str, amount: float, memo: str = "") -
     Process a tip transfer.
     Note: Requires admin key for actual transfers.
     """
+    # Validate amount before queueing. process_tip() is callable directly by
+    # tests/integrations, so keep this guard here instead of relying only on the
+    # comment parser's regex.
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return {"status": "error", "message": "Tip amount must be a number."}
+
+    if not math.isfinite(amount):
+        return {"status": "error", "message": "Tip amount must be finite."}
+
+    if amount <= 0:
+        return {"status": "error", "message": "Tip amount must be greater than zero."}
+
     # Validate recipient has registered wallet
     recipient = None
     for user, wallet in registered_wallets.items():

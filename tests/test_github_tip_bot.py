@@ -48,6 +48,46 @@ class GitHubTipBotTests(unittest.TestCase):
         self.assertIn("not registered", result["message"])
         self.assertEqual(self.tip_bot.tip_ledger, [])
 
+    def test_process_tip_rejects_non_positive_amounts(self):
+        self.tip_bot.register_wallet("alice", "alice_wallet")
+
+        for bad_amount in (0, -1, "-2.5"):
+            with self.subTest(amount=bad_amount):
+                result = self.tip_bot.process_tip("carol", "alice_wallet", bad_amount, "oops")
+                self.assertEqual(result["status"], "error")
+                self.assertIn("greater than zero", result["message"])
+
+        self.assertEqual(self.tip_bot.tip_ledger, [])
+
+    def test_process_tip_rejects_non_finite_amounts(self):
+        self.tip_bot.register_wallet("alice", "alice_wallet")
+
+        for bad_amount in (float("nan"), float("inf"), "-inf"):
+            with self.subTest(amount=bad_amount):
+                result = self.tip_bot.process_tip("carol", "alice_wallet", bad_amount, "oops")
+                self.assertEqual(result["status"], "error")
+                self.assertIn("finite", result["message"])
+
+        self.assertEqual(self.tip_bot.tip_ledger, [])
+
+    def test_check_balance_verifies_tls_by_default(self):
+        calls = []
+
+        def fake_get(*args, **kwargs):
+            calls.append((args, kwargs))
+
+            class Response:
+                def json(self):
+                    return {"amount_rtc": 3}
+
+            return Response()
+
+        self.tip_bot.requests.get = fake_get
+
+        self.assertEqual(self.tip_bot.check_balance("alice_wallet"), {"amount_rtc": 3})
+        self.assertTrue(calls)
+        self.assertIs(calls[0][1]["verify"], True)
+
     def test_register_process_tip_and_leaderboard_ordering(self):
         self.assertTrue(self.tip_bot.register_wallet("alice", "alice_wallet"))
         self.assertTrue(self.tip_bot.register_wallet("bob", "bob_wallet"))
