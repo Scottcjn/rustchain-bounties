@@ -7,6 +7,7 @@ Listens for /tip, /balance, /leaderboard, /register commands in GitHub comments.
 import os
 import re
 import json
+import math
 import requests
 from github import Github
 
@@ -50,6 +51,9 @@ def process_tip(from_user: str, to_wallet: str, amount: float, memo: str = "") -
         amount = float(amount)
     except (TypeError, ValueError):
         return {"status": "error", "message": "Tip amount must be a number."}
+
+    if not math.isfinite(amount):
+        return {"status": "error", "message": "Tip amount must be finite."}
 
     if amount <= 0:
         return {"status": "error", "message": "Tip amount must be greater than zero."}

@@ -59,6 +59,17 @@ class GitHubTipBotTests(unittest.TestCase):
 
         self.assertEqual(self.tip_bot.tip_ledger, [])
 
+    def test_process_tip_rejects_non_finite_amounts(self):
+        self.tip_bot.register_wallet("alice", "alice_wallet")
+
+        for bad_amount in (float("nan"), float("inf"), "-inf"):
+            with self.subTest(amount=bad_amount):
+                result = self.tip_bot.process_tip("carol", "alice_wallet", bad_amount, "oops")
+                self.assertEqual(result["status"], "error")
+                self.assertIn("finite", result["message"])
+
+        self.assertEqual(self.tip_bot.tip_ledger, [])
+
     def test_check_balance_verifies_tls_by_default(self):
         calls = []
 
