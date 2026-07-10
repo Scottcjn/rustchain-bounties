@@ -279,6 +279,15 @@ def main() -> None:
             print(f"No directive; author {pr_author} is a bot — no auto-award.")
             return
 
+        # The repo owner is the payer, not a bounty recipient. Auto-awarding the
+        # owner for merging their own PRs drains the founder wallet on every
+        # self-merge (observed 2026-07-09: six 5 RTC self-pays in one evening
+        # of routine merges). A human `Payment:` directive is still the way to
+        # pay a genuine owner contribution deliberately.
+        if pr_author.lower() == repo_owner.lower():
+            print(f"No directive; author {pr_author} is the repo owner — no self-award.")
+            return
+
         files = fetch_pr_files(repo, pr_number)
         total_changed = sum(f.get("additions", 0) + f.get("deletions", 0) for f in files)
         paths = [f.get("filename", "") for f in files]
