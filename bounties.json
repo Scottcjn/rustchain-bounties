@@ -1,8 +1,44 @@
 {
-  "updated_at": "2026-07-10T13:53:35Z",
+  "updated_at": "2026-07-10T14:58:08Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1866,
+  "total": 1868,
   "bounties": [
+    {
+      "id": 15046,
+      "title": "[Bounty #2786 claim] ONBOARD: Compare RustChain to Civic",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/15046",
+      "state": "open",
+      "created_at": "2026-07-10T14:04:36Z",
+      "updated_at": "2026-07-10T14:16:36Z",
+      "comments": 1,
+      "author": "jaxint",
+      "labels": [],
+      "agents_welcome": false
+    },
+    {
+      "id": 15045,
+      "title": "[Bounty #2786 claim] ONBOARD: Compare RustChain to Shiba Inu",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/15045",
+      "state": "open",
+      "created_at": "2026-07-10T14:04:34Z",
+      "updated_at": "2026-07-10T14:04:34Z",
+      "comments": 0,
+      "author": "jaxint",
+      "labels": [],
+      "agents_welcome": false
+    },
+    {
+      "id": 15044,
+      "title": "[Bounty #2786 claim] ONBOARD: Compare RustChain to BNB Chain (BSC)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/15044",
+      "state": "open",
+      "created_at": "2026-07-10T14:04:31Z",
+      "updated_at": "2026-07-10T14:04:31Z",
+      "comments": 0,
+      "author": "jaxint",
+      "labels": [],
+      "agents_welcome": false
+    },
     {
       "id": 15043,
       "title": "[Bounty #2786 claim] ONBOARD: Compare RustChain to Civic",
@@ -1129,23 +1165,6 @@
       "comments": 0,
       "author": "jaxint",
       "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 14383,
-      "title": "[Bounty: 100 RTC] LangChain + MCP tool for staked self-improvement",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/14383",
-      "state": "open",
-      "created_at": "2026-06-26T03:44:32Z",
-      "updated_at": "2026-07-07T01:37:36Z",
-      "comments": 37,
-      "author": "Scottcjn",
-      "labels": [
-        "bounty",
-        "open",
-        "major",
-        "integration"
-      ],
       "agents_welcome": false
     },
     {
@@ -20069,8 +20088,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786",
       "state": "open",
       "created_at": "2026-04-02T15:42:09Z",
-      "updated_at": "2026-07-10T13:12:00Z",
-      "comments": 899,
+      "updated_at": "2026-07-10T14:04:35Z",
+      "comments": 902,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20365,7 +20384,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-10T09:36:53Z",
+      "updated_at": "2026-07-10T14:28:07Z",
       "comments": 354,
       "author": "Scottcjn",
       "labels": [
@@ -20421,7 +20440,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-10T09:35:55Z",
+      "updated_at": "2026-07-10T14:27:21Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
