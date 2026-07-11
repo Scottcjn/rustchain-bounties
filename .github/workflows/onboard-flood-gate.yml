@@ -1,0 +1,90 @@
+name: ONBOARD Flood Gate
+
+# Auto-closes the automated "[CLAIM] ONBOARD - RustChain vs <chain> Comparison"
+# issue floods against the single already-honored #2786 comparison bounty.
+#
+# Context: on 2026-07-09/11 one contributor's unattended bot opened 286 of these
+# template issues (~1 every 2 seconds), each claiming the same 3 RTC bounty that
+# pays once. Closing them by hand does not scale. This gate closes the narrow
+# spam pattern on open, and never touches anything else.
+#
+# Safety: it fires ONLY when the title matches the ONBOARD comparison-claim
+# shape AND the issue is not opened by the repo owner or a maintainer. A real
+# comparison belongs in a comment on #2786, not a new issue, so no genuine
+# contribution is lost.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    # Cheap pre-filter so the job only spins up for candidate titles.
+    if: contains(github.event.issue.title, 'ONBOARD')
+    steps:
+      - name: Close ONBOARD comparison-claim floods
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title || "";
+            const author = issue.user.login;
+
+            // Owner / maintainer issues are never auto-closed.
+            const OWNER = context.repo.owner; // Scottcjn
+            const MAINTAINERS = new Set([OWNER.toLowerCase(), "automatedjanitor"]);
+            if (MAINTAINERS.has(author.toLowerCase())) {
+              core.info(`Author ${author} is owner/maintainer — leaving open.`);
+              return;
+            }
+
+            // Narrow spam signature: an ONBOARD claim that is a per-chain
+            // comparison. Requires ONBOARD *and* a claim/comparison marker so a
+            // legitimately-named issue that merely mentions onboarding is safe.
+            const t = title.toLowerCase();
+            const isOnboard = t.includes("onboard");
+            const isClaim =
+              t.includes("[claim]") ||
+              t.includes("onboard claim") ||
+              /onboard\b.*\bcompar/i.test(title) ||
+              /\bvs\b.*compar/i.test(title) ||
+              t.includes("comparison");
+            if (!(isOnboard && isClaim)) {
+              core.info("Title does not match the ONBOARD comparison-claim pattern — leaving open.");
+              return;
+            }
+
+            const body = [
+              "Closing automatically. This is the `[CLAIM] ONBOARD` comparison pattern that was",
+              "used to flood the tracker with 286 near-identical issues against a single bounty.",
+              "",
+              "Bounty **#2786** is one 3 RTC comparison bounty and it **pays once** — it was already",
+              "honored. Opening a separate issue per blockchain does not create separate bounties.",
+              "",
+              "If you want to write one genuine comparison, post it as a **comment on #2786** and it",
+              "is eligible for the award like anyone else. Real contributions are always welcome; this",
+              "specific automated flood pattern is not.",
+              "",
+              "_Auto-closed by the ONBOARD flood gate. If this was a real issue caught by mistake,",
+              "reopen it and rename the title so it does not read as an ONBOARD comparison claim._",
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body,
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: "closed",
+              state_reason: "not_planned",
+            });
+            core.info(`Closed #${issue.number} (${title}) — ONBOARD flood pattern.`);
