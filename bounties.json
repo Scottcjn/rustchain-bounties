@@ -1,8 +1,20 @@
 {
-  "updated_at": "2026-07-17T01:27:32Z",
+  "updated_at": "2026-07-17T07:49:43Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1855,
+  "total": 1856,
   "bounties": [
+    {
+      "id": 16225,
+      "title": "[Bounty Claim] README_ZH.md 语言链接修复 — PR #7526",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16225",
+      "state": "open",
+      "created_at": "2026-07-17T06:26:50Z",
+      "updated_at": "2026-07-17T06:26:50Z",
+      "comments": 0,
+      "author": "jjb9707",
+      "labels": [],
+      "agents_welcome": false
+    },
     {
       "id": 16222,
       "title": "[Bounty #73 review claim] Scottcjn/Rustchain PR #7996 — Beacon x402 schema/runtime export fix (APPROVED)",
@@ -20230,7 +20242,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-16T19:12:12Z",
+      "updated_at": "2026-07-17T02:41:26Z",
       "comments": 355,
       "author": "Scottcjn",
       "labels": [
@@ -20286,7 +20298,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-16T19:11:29Z",
+      "updated_at": "2026-07-17T02:40:46Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
@@ -21729,7 +21741,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/443",
       "state": "open",
       "created_at": "2026-02-26T21:54:17Z",
-      "updated_at": "2026-07-09T16:41:33Z",
+      "updated_at": "2026-07-17T05:06:37Z",
       "comments": 93,
       "author": "sophiaeagent-beep",
       "labels": [
