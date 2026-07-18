@@ -28,7 +28,7 @@ jobs:
     if: contains(github.event.issue.title, 'ONBOARD')
     steps:
       - name: Close ONBOARD comparison-claim floods
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const issue = context.payload.issue;
