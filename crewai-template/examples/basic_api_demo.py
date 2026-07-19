@@ -47,11 +47,17 @@ def main():
     print(f"   Wallet: aric-saxp-alpha")
     print(f"   Balance: {balance}")
     
-    # 5. BoTTube Stats
-    print("\n5. Getting BoTTube stats...")
+    # 5. BoTTube Integration
+    print("\n5. BoTTube API integration...")
+    print("   Docs: https://bottube.ai/api/docs")
+    print("   Developers: https://bottube.ai/developers")
     try:
-        stats = bt.get_stats()
-        print(f"   Stats: {stats}")
+        health = bt.health()
+        print(f"   Health: {health}")
+        videos = bt.videos(limit=3)
+        print(f"   Videos (sample): {videos[:1] if isinstance(videos, list) else videos}")
+        feed = bt.feed(limit=3)
+        print(f"   Feed (sample): {feed[:1] if isinstance(feed, list) else feed}")
     except Exception as e:
         print(f"   (BoTTube API not available: {e})")
     
