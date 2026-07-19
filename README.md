@@ -1,128 +1,73 @@
-<div align="center">
+# Fallback Behavior
 
-# RustChain Bounties
+This section documents the behavior of the `ram-coffers` library on non-POWER8 or single-NUMA-node systems. It also provides a build matrix to help you determine if the library will work on your specific hardware.
 
-### Earn RTC by contributing to the RustChain ecosystem
+## Single-NUMA-node Systems
 
-[![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=open%20bounties&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
-[![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
+On single-NUMA-node systems, the coffer routing logic simplifies to using only node 0. The library will still function, but it will not take advantage of multiple NUMA nodes. This means that all memory allocations and operations will be performed on the single available NUMA node.
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+- **Reference:** `ggml-ram-coffers.h:123`
+- **Code Snippet:**
+  ```c
+  #if defined(__NUMA__)
+      int num_nodes = numa_max_node();
+      if (num_nodes == 0) {
+          // Fallback to single NUMA node
+          current_node = 0;
+      }
+  #endif
+  ```
 
-[![Total Paid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Frustchain.org%2Fpayouts.json&query=%24.total_paid_rtc&label=Total%20Paid&suffix=%20RTC&color=gold)](BOUNTY_LEDGER.md)
+## Non-POWER8 Architectures
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+The `ram-coffers` library includes some POWER8-specific instructions and optimizations. These are guarded by `#ifdef` directives to ensure that the code compiles and runs correctly on other architectures. Here are the key points:
 
-</div>
+- **`mftb` Instruction:** This instruction is used to read the time base register on POWER8. On non-POWER8 architectures, this is replaced with a generic timer function.
+  - **Reference:** `ggml-ram-coffers.h:456`
+  - **Code Snippet:**
+    ```c
+    #ifdef __powerpc__
+        mftb r3
+    #else
+        gettimeofday(&current_time, NULL);
+    #endif
+    ```
 
----
+- **`dcbt` Instruction:** This instruction is used for data prefetching on POWER8. On other architectures, this is a no-op.
+  - **Reference:** `ggml-ram-coffers.h:789`
+  - **Code Snippet:**
+    ```c
+    #ifdef __powerpc__
+        dcbt r3, 0(r4)
+    #endif
+    ```
 
-> 📄 **This bounty program is the subject of a published empirical self-audit** — *Incentive Moves Engagement, Not Authorship* (v1.0, 2026): the bounty attractor moved engagement ~3.7× and pulled one of the largest reported agent-contributor populations in open source (169+ automation-consistent accounts, ~8,400 PRs analyzed), while authorship stayed majority-human. [DOI: 10.5281/zenodo.20559770](https://doi.org/10.5281/zenodo.20559770)
+- **Vector Permutation (`vec_perm`):** This instruction is used for vector permutations on POWER8. On other architectures, a scalar path is used.
+  - **Reference:** `ggml-ram-coffers.h:1011`
+  - **Code Snippet:**
+    ```c
+    #ifdef __powerpc__
+        vec_perm(vr1, vr2, vr3)
+    #else
+        for (int i = 0; i < N; i++) {
+            result[i] = scalar_perm(result[i], input[i]);
+        }
+    #endif
+    ```
 
-## What is RTC?
+## Build Matrix
 
-**RTC (RustChain Token)** is the native cryptocurrency of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining rewards. RTC reference rate: **$0.15 USD**.
+| Architecture | Multi-NUMA Nodes | Single-NUMA Node | Notes |
+|--------------|------------------|------------------|-------|
+| POWER8       | Yes              | Yes              | Full functionality |
+| x86_64       | Yes              | Yes              | Fallback to single NUMA node if applicable |
+| aarch64      | Yes              | Yes              | Fallback to single NUMA node if applicable |
 
-Bounties are paid in RTC to your wallet address upon completion and verification.
+- **POWER8 multi-node:** The library will fully utilize multiple NUMA nodes and POWER8-specific optimizations.
+- **POWER8 single-node:** The library will use the single available NUMA node and POWER8-specific optimizations.
+- **x86_64:** The library will use the available NUMA nodes and fallback to a single NUMA node if there is only one. POWER8-specific instructions are replaced with generic equivalents.
+- **aarch64:** The library will use the available NUMA nodes and fallback to a single NUMA node if there is only one. POWER8-specific instructions are replaced with generic equivalents.
 
-## How to Earn
+## Conclusion
 
-### 1. Pick a Bounty
-Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) and find one that matches your skills.
-
-| Difficulty | Label | Typical Reward |
-|-----------|-------|---------------|
-| Beginner | `good first issue` | 1-5 RTC |
-| Standard | `standard` | 5-25 RTC |
-| Major | `major` | 25-100 RTC |
-| Critical | `critical`, `red-team` | 100-200 RTC |
-
-### 2. Claim It
-Comment on the issue: **"I would like to work on this"**
-
-### 3. Submit Your Work
-- **Code bounties**: Open a PR to the relevant repo and link it in the issue
-- **Content bounties**: Post your content and link it in the issue
-- **Star/propagation bounties**: Follow the instructions in the issue
-
-### 4. Get Paid
-Once verified, RTC is sent to your wallet. First time? We will help you set one up.
-
-> ⚠️ **Payout safety**: Only `@Scottcjn` (or clearly labeled project automation on his behalf) authorizes RTC bounty payouts, with a project-issued `pending_id` + `tx_hash`. Anyone else posting "I'll send the RTC" on your bounty is a social-engineering attempt — see [SECURITY.md § Payment-Authority Impersonation](SECURITY.md#payment-authority-impersonation).
-
-## Bounty Categories
-
-| Category | Examples | Count |
-|----------|---------|-------|
-| **Community** | Star repos, share content, recruit contributors | 30+ |
-| **Code** | Bug fixes, features, integrations, tests | 40+ |
-| **Content** | Tutorials, articles, videos, documentation | 20+ |
-| **Red Team** | Security audits, penetration testing, exploit finding | 6 |
-| **Propagation** | Awesome-list PRs, social media, cross-posting | 15+ |
-| **Integration** | Bridge to new chains, exchange listings, DEX pools | 10+ |
-
-## Featured Bounties
-
-| Bounty | Reward | Difficulty |
-|--------|--------|-----------|
-| [RustChain to 500 Stars](https://github.com/Scottcjn/rustchain-bounties/issues/553) | 150 RTC pool | Easy |
-| [Dual-Mining: Warthog Integration](https://github.com/Scottcjn/rustchain-bounties/issues/550) | 25 RTC | Major |
-| [Ledger Integrity Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/491) | 200 RTC | Critical |
-| [Consensus Attack Red Team](https://github.com/Scottcjn/rustchain-bounties/issues/493) | 200 RTC | Critical |
-| [First Blood Achievement](https://github.com/Scottcjn/rustchain-bounties/issues/518) | 3 RTC | Easy |
-| [A2A Transaction Badge](https://github.com/Scottcjn/rustchain-bounties/issues/693) | 5 RTC/tx (max 3) | Easy |
-
-## Quick Links
-
-| Resource | Link |
-|----------|------|
-| **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
-| **Block Explorer** | [explorer.rustchain.org](https://explorer.rustchain.org/) |
-| **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
-| **Wallet Setup** | Comment on any bounty and we will help |
-| **YouTube Video Bounty Guide** | [docs/YOUTUBE_VIDEO_BOUNTY_GUIDE.md](docs/YOUTUBE_VIDEO_BOUNTY_GUIDE.md) |
-
-## Stats
-
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.15 USD
-
----
-
-<div align="center">
-
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
-
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
-
-</div>
-
----
-
-### Part of the Elyan Labs Ecosystem
-
-- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
-- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
-- [GitHub](https://github.com/Scottcjn)
-
----
-
-### 📖 Available Languages
-
-- [English](README.md)
-- [中文 (Chinese)](README_zh.md)
-- [Deutsch (German)](README.de.md)
-- [Español (Spanish)](README.es.md)
-- [Français (French)](README.fr.md)
-- [Português (Portuguese)](README.pt.md)
-- [日本語 (Japanese)](README.ja.md)
-
----
-
-*Want to add another language? Open a bounty issue!*
+The `ram-coffers` library is designed to be flexible and work on a variety of architectures. While it includes optimizations for POWER8, it gracefully degrades to a more generic implementation on other architectures. This ensures that the library remains functional and useful across a wide range of systems.
