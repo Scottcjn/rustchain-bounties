@@ -89,7 +89,7 @@ For bounties requiring proof of completion:
 - Bug reports with reproduction steps
 - Feature requests with use cases
 - Code reviews on open PRs
-- Helping others in [Discord](https://discord.gg/VqVVS2CW9Q)
+- Helping others in [Discord](https://discord.gg/XnRp7M5gBW)
 
 ## Payout Authority
 
@@ -178,7 +178,7 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 
 ## 📬 Getting Help
 
-- **Discord**: [Join our server](https://discord.gg/VqVVS2CW9Q)
+- **Discord**: [Join our server](https://discord.gg/XnRp7M5gBW)
 - **GitHub Issues**: For bugs and feature requests
 - **Discussions**: For questions and ideas
 
