@@ -57,6 +57,7 @@
 | **RustChain** | [github.com/Scottcjn/Rustchain](https://github.com/Scottcjn/Rustchain) |
 | **区块浏览器** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Discord** | [discord.gg/XnRp7M5gBW](https://discord.gg/XnRp7M5gBW) |
+| **Telegram** | [t.me/+l8dHTjXCBNM1MTIx](https://t.me/+l8dHTjXCBNM1MTIx) |
 
 ---
 
