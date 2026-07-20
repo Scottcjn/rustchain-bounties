@@ -78,7 +78,7 @@ Issue にコメント: **"I would like to work on this"**
 | **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
 | **ブロックエクスプローラー** | [explorer.rustchain.org](https://explorer.rustchain.org/) |
 | **トラクションレポート** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
+| **Discord** | [discord.gg/XnRp7M5gBW](https://discord.gg/XnRp7M5gBW) |
 | **ウォレット設定** | 任意のバウンティにコメントしてください。お手伝いします |
 
 ## 統計
