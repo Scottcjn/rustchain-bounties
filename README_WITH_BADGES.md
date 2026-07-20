@@ -21,6 +21,7 @@ RustChain is a revolutionary Proof-of-Age blockchain that values hardware longev
 - Website: https://rustchain.org
 - GitHub: https://github.com/Scottcjn/Rustchain
 - Discord: [Community](https://discord.gg/XnRp7M5gBW)
+- Telegram: [Community](https://t.me/+l8dHTjXCBNM1MTIx)
 
 ---
 
