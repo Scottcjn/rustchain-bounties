@@ -78,7 +78,7 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 | Resource | Link |
 |----------|------|
-| **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
+| **RustChain** | [github.com/Scottcjn/RustChain/blob/main/README.md](https://github.com/Scottcjn/RustChain/blob/main/README.md) |
 | **Block Explorer** | [explorer.rustchain.org](https://explorer.rustchain.org/) |
 | **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
 | **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
