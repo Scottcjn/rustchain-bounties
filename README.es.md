@@ -115,7 +115,7 @@ En lugar de recompensar a quienes pueden quemar más electricidad, RustChain pre
 | **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
 | **Explorador de Bloques** | [rustchain.org/explorer/](https://rustchain.org/explorer/) |
 | **Informe de Trayectoria** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
+| **Discord** | [discord.gg/XnRp7M5gBW](https://discord.gg/XnRp7M5gBW) |
 | **Configuración de Billetera** | Comenta en cualquier beca y te ayudaremos |
 
 ---
