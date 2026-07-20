@@ -327,6 +327,7 @@ MIT License - See LICENSE file for details
 
 - **Issues**: https://github.com/Scottcjn/rustchain-bounties/issues
 - **Discord**: https://discord.gg/XnRp7M5gBW
+- **Telegram**: https://t.me/+l8dHTjXCBNM1MTIx
 - **Documentation**: https://github.com/Scottcjn/rustchain-bounties/tree/main/docs
 
 ## Bounty Information
