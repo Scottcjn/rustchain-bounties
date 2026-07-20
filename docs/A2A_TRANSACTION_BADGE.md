@@ -44,4 +44,4 @@ Once you have completed a full lifecycle (POST → CLAIM → DELIVER → ACCEPT)
 
 - Use the health‑check endpoint `GET /agent/health` to confirm the API is online.
 - Check existing jobs before posting to avoid duplication.
-- If you need assistance, ask in the [Discord](https://discord.gg/XnRp7M5gBW) or comment on the issue.
+- If you need assistance, ask in the [Discord](https://discord.gg/XnRp7M5gBW) or [Telegram](https://t.me/+l8dHTjXCBNM1MTIx), or comment on the issue.
