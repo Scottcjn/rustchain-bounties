@@ -1,8 +1,291 @@
 {
-  "updated_at": "2026-07-19T18:46:18Z",
+  "updated_at": "2026-07-20T01:51:09Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1857,
+  "total": 1875,
   "bounties": [
+    {
+      "id": 16271,
+      "title": "[BOUNTY: 35 RTC] Harden x86 vintage-arch reward validation (anti-spoof)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16271",
+      "state": "open",
+      "created_at": "2026-07-19T23:38:33Z",
+      "updated_at": "2026-07-19T23:43:19Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16258,
+      "title": "[BOUNTY: 18 RTC] vintage-x86 miner: non-RDTSC timing-variance fallback so real 486s can fingerprint (C89, single file)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16258",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:59Z",
+      "updated_at": "2026-07-19T23:15:07Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16257,
+      "title": "[BOUNTY: 25 RTC] Test corpus + fuzz harness for node x86/device arch classification (armor around derive_verified_device — NOT the core fix)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16257",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:58Z",
+      "updated_at": "2026-07-19T23:43:19Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16256,
+      "title": "[BOUNTY: 10 RTC] clawrtc-rs: integration test suite — wallet roundtrip, address vectors, attestation determinism, error paths",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16256",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:56Z",
+      "updated_at": "2026-07-20T00:22:31Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16255,
+      "title": "[BOUNTY: 8 RTC] rustchain-mcp: document + test streaming/long-running tool behavior (answers rustchain-mcp#231)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16255",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:49Z",
+      "updated_at": "2026-07-19T22:26:26Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "documentation",
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16254,
+      "title": "[BOUNTY: 12 RTC] BoTTube API: shared query-param validator — fix malformed-param coercion across 4 endpoints (#1456 #1436 #1435 #1468)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16254",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:48Z",
+      "updated_at": "2026-07-20T00:00:29Z",
+      "comments": 6,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16253,
+      "title": "[BOUNTY: 7 RTC] Consistent error handling + exit codes in wallet balance check script (Rustchain#7889)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16253",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:46Z",
+      "updated_at": "2026-07-19T22:25:45Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16252,
+      "title": "[BOUNTY: 12 RTC] Windows headless miner: stop infinite retry of rejected headers, surface server diagnostic (Rustchain#7368)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16252",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:45Z",
+      "updated_at": "2026-07-19T23:41:01Z",
+      "comments": 6,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16251,
+      "title": "[BOUNTY: 10 RTC] Fix rustchain.org install script — wrong paths + macOS crash (Rustchain#7975), shellcheck-clean",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16251",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:36Z",
+      "updated_at": "2026-07-19T22:26:07Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16250,
+      "title": "[BOUNTY: 5 RTC] Test the grazer-mcp error contract — 4 tools x 4 failure modes, offline pytest suite",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16250",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:35Z",
+      "updated_at": "2026-07-19T22:51:02Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16249,
+      "title": "[BOUNTY: 4 RTC] Document ram-coffers fallback behavior on non-POWER8 / single-NUMA systems (ram-coffers#664)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16249",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:34Z",
+      "updated_at": "2026-07-19T22:25:24Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "documentation",
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16248,
+      "title": "[BOUNTY: 5 RTC] Fix ALL broken README/doc links in Scottcjn/Rustchain + add link-check CI (closes 5 open issues)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16248",
+      "state": "open",
+      "created_at": "2026-07-19T21:43:33Z",
+      "updated_at": "2026-07-19T22:26:43Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "documentation",
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16243,
+      "title": "[BOUNTY: 3-5 RTC] Show your real mining rig — photo/video of hardware running RustChain",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16243",
+      "state": "open",
+      "created_at": "2026-07-19T21:34:02Z",
+      "updated_at": "2026-07-20T00:27:39Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16242,
+      "title": "[BOUNTY: 3-5 RTC] Write an honest RustChain explainer thread or dev.to post (no hype)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16242",
+      "state": "open",
+      "created_at": "2026-07-19T21:34:01Z",
+      "updated_at": "2026-07-20T00:47:47Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16241,
+      "title": "[BOUNTY: 10 RTC] Refer a new active miner (1+ real epoch on genuine hardware)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16241",
+      "state": "open",
+      "created_at": "2026-07-19T21:34:00Z",
+      "updated_at": "2026-07-19T21:36:50Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16240,
+      "title": "[BOUNTY: 15-35 RTC] Make a real YouTube video or written tutorial on RustChain / Proof of Antiquity",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16240",
+      "state": "open",
+      "created_at": "2026-07-19T21:33:52Z",
+      "updated_at": "2026-07-19T21:37:36Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "standard"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16239,
+      "title": "[BOUNTY: 2-3 RTC] Share RustChain on X, Reddit, or Hacker News (real post, 24h+ live)",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16239",
+      "state": "open",
+      "created_at": "2026-07-19T21:33:51Z",
+      "updated_at": "2026-07-20T00:30:52Z",
+      "comments": 5,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open"
+      ],
+      "agents_welcome": false
+    },
+    {
+      "id": 16238,
+      "title": "[BOUNTY: 1 RTC] Star RustChain + 2 ecosystem repos",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16238",
+      "state": "open",
+      "created_at": "2026-07-19T21:33:49Z",
+      "updated_at": "2026-07-20T00:28:48Z",
+      "comments": 4,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty",
+        "open",
+        "community"
+      ],
+      "agents_welcome": false
+    },
     {
       "id": 16227,
       "title": "[Bounty #73 review claim] Scottcjn/Rustchain PR #8010 — Base wallet canonicalization (APPROVED)",
@@ -35,8 +318,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16222",
       "state": "open",
       "created_at": "2026-07-16T04:30:45Z",
-      "updated_at": "2026-07-16T04:30:56Z",
-      "comments": 1,
+      "updated_at": "2026-07-19T21:43:12Z",
+      "comments": 2,
       "author": "jjb9707",
       "labels": [
         "bounty-eligible"
@@ -20256,7 +20539,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-19T13:19:31Z",
+      "updated_at": "2026-07-19T19:07:51Z",
       "comments": 355,
       "author": "Scottcjn",
       "labels": [
@@ -20312,7 +20595,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-19T13:18:25Z",
+      "updated_at": "2026-07-19T19:06:42Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
