@@ -90,6 +90,7 @@ For bounties requiring proof of completion:
 - Feature requests with use cases
 - Code reviews on open PRs
 - Helping others in [Discord](https://discord.gg/XnRp7M5gBW)
+- Helping others in [Telegram](https://t.me/+l8dHTjXCBNM1MTIx)
 
 ## Payout Authority
 
@@ -179,6 +180,7 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 ## 📬 Getting Help
 
 - **Discord**: [Join our server](https://discord.gg/XnRp7M5gBW)
+- **Telegram**: [Join our server](https://t.me/+l8dHTjXCBNM1MTIx)
 - **GitHub Issues**: For bugs and feature requests
 - **Discussions**: For questions and ideas
 
