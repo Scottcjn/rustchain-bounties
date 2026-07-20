@@ -84,6 +84,7 @@
 ## 获取帮助
 
 - [Discord](https://discord.gg/XnRp7M5gBW)
+- [Telegram](https://t.me/+l8dHTjXCBNM1MTIx)
 - [GitHub Issues](https://github.com/Scottcjn/rustchain-bounties/issues)
 
 感谢你的贡献！
