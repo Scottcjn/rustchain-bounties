@@ -15,7 +15,7 @@ We take security seriously at Rustchain. If you discover a security vulnerabilit
 
 1. **DO NOT** open a public GitHub issue for security vulnerabilities
 2. Email your findings to the repository maintainers via GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-3. Alternatively, reach out on [Discord](https://discord.gg/VqVVS2CW9Q) via DM to a maintainer
+3. Alternatively, reach out on [Discord](https://discord.gg/XnRp7M5gBW) via DM to a maintainer
 
 ### What to Include
 
