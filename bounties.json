@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-21T13:12:23Z",
+  "updated_at": "2026-07-21T19:01:16Z",
   "repo": "Scottcjn/rustchain-bounties",
   "total": 1872,
   "bounties": [
@@ -39,8 +39,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16256",
       "state": "open",
       "created_at": "2026-07-19T21:43:56Z",
-      "updated_at": "2026-07-21T08:34:31Z",
-      "comments": 20,
+      "updated_at": "2026-07-21T14:27:15Z",
+      "comments": 21,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -55,7 +55,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16255",
       "state": "open",
       "created_at": "2026-07-19T21:43:49Z",
-      "updated_at": "2026-07-20T14:05:38Z",
+      "updated_at": "2026-07-21T14:23:11Z",
       "comments": 6,
       "author": "Scottcjn",
       "labels": [
@@ -71,8 +71,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16254",
       "state": "open",
       "created_at": "2026-07-19T21:43:48Z",
-      "updated_at": "2026-07-21T08:29:15Z",
-      "comments": 11,
+      "updated_at": "2026-07-21T14:23:13Z",
+      "comments": 12,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -102,7 +102,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16252",
       "state": "open",
       "created_at": "2026-07-19T21:43:45Z",
-      "updated_at": "2026-07-20T04:17:05Z",
+      "updated_at": "2026-07-21T14:48:42Z",
       "comments": 7,
       "author": "Scottcjn",
       "labels": [
@@ -118,8 +118,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16251",
       "state": "open",
       "created_at": "2026-07-19T21:43:36Z",
-      "updated_at": "2026-07-20T22:51:54Z",
-      "comments": 7,
+      "updated_at": "2026-07-21T14:48:44Z",
+      "comments": 8,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -134,8 +134,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16250",
       "state": "open",
       "created_at": "2026-07-19T21:43:35Z",
-      "updated_at": "2026-07-21T12:19:05Z",
-      "comments": 6,
+      "updated_at": "2026-07-21T16:04:41Z",
+      "comments": 9,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -149,8 +149,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16249",
       "state": "open",
       "created_at": "2026-07-19T21:43:34Z",
-      "updated_at": "2026-07-21T12:18:53Z",
-      "comments": 5,
+      "updated_at": "2026-07-21T14:23:16Z",
+      "comments": 6,
       "author": "Scottcjn",
       "labels": [
         "documentation",
@@ -165,8 +165,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16248",
       "state": "open",
       "created_at": "2026-07-19T21:43:33Z",
-      "updated_at": "2026-07-21T12:18:42Z",
-      "comments": 5,
+      "updated_at": "2026-07-21T15:19:21Z",
+      "comments": 9,
       "author": "Scottcjn",
       "labels": [
         "documentation",
@@ -181,7 +181,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16243",
       "state": "open",
       "created_at": "2026-07-19T21:34:02Z",
-      "updated_at": "2026-07-20T00:27:39Z",
+      "updated_at": "2026-07-21T14:48:45Z",
       "comments": 4,
       "author": "Scottcjn",
       "labels": [
@@ -196,7 +196,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16242",
       "state": "open",
       "created_at": "2026-07-19T21:34:01Z",
-      "updated_at": "2026-07-20T12:45:06Z",
+      "updated_at": "2026-07-21T14:48:46Z",
       "comments": 9,
       "author": "Scottcjn",
       "labels": [
@@ -19964,8 +19964,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3418",
       "state": "open",
       "created_at": "2026-04-22T16:23:31Z",
-      "updated_at": "2026-07-21T03:08:02Z",
-      "comments": 119,
+      "updated_at": "2026-07-21T13:54:43Z",
+      "comments": 120,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20020,8 +20020,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2890",
       "state": "open",
       "created_at": "2026-04-09T14:57:05Z",
-      "updated_at": "2026-07-21T11:39:57Z",
-      "comments": 66,
+      "updated_at": "2026-07-21T14:27:12Z",
+      "comments": 67,
       "author": "Scottcjn",
       "labels": [
         "help wanted",
@@ -20053,8 +20053,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2866",
       "state": "open",
       "created_at": "2026-04-09T03:25:42Z",
-      "updated_at": "2026-07-20T05:04:50Z",
-      "comments": 58,
+      "updated_at": "2026-07-21T15:41:06Z",
+      "comments": 59,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20158,8 +20158,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2792",
       "state": "open",
       "created_at": "2026-04-02T15:44:17Z",
-      "updated_at": "2026-07-21T03:08:10Z",
-      "comments": 316,
+      "updated_at": "2026-07-21T15:30:51Z",
+      "comments": 317,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20173,8 +20173,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2791",
       "state": "open",
       "created_at": "2026-04-02T15:44:11Z",
-      "updated_at": "2026-07-21T03:08:12Z",
-      "comments": 305,
+      "updated_at": "2026-07-21T15:29:45Z",
+      "comments": 306,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20188,8 +20188,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2788",
       "state": "open",
       "created_at": "2026-04-02T15:42:28Z",
-      "updated_at": "2026-07-21T03:08:13Z",
-      "comments": 33,
+      "updated_at": "2026-07-21T14:29:08Z",
+      "comments": 35,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20202,8 +20202,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2786",
       "state": "open",
       "created_at": "2026-04-02T15:42:09Z",
-      "updated_at": "2026-07-21T03:01:19Z",
-      "comments": 2064,
+      "updated_at": "2026-07-21T15:35:39Z",
+      "comments": 2065,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20217,8 +20217,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2784",
       "state": "open",
       "created_at": "2026-04-02T15:41:51Z",
-      "updated_at": "2026-07-21T03:08:15Z",
-      "comments": 75,
+      "updated_at": "2026-07-21T15:13:55Z",
+      "comments": 77,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20231,8 +20231,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2782",
       "state": "open",
       "created_at": "2026-04-02T15:41:31Z",
-      "updated_at": "2026-07-21T03:00:59Z",
-      "comments": 1432,
+      "updated_at": "2026-07-21T15:38:32Z",
+      "comments": 1433,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20245,8 +20245,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2781",
       "state": "open",
       "created_at": "2026-04-02T15:41:22Z",
-      "updated_at": "2026-07-21T03:01:00Z",
-      "comments": 245,
+      "updated_at": "2026-07-21T15:37:09Z",
+      "comments": 246,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20498,7 +20498,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-21T08:30:47Z",
+      "updated_at": "2026-07-21T13:51:58Z",
       "comments": 355,
       "author": "Scottcjn",
       "labels": [
@@ -20512,8 +20512,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2176",
       "state": "open",
       "created_at": "2026-03-17T02:05:44Z",
-      "updated_at": "2026-07-20T04:06:24Z",
-      "comments": 40,
+      "updated_at": "2026-07-21T15:41:51Z",
+      "comments": 41,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20554,7 +20554,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-21T08:29:30Z",
+      "updated_at": "2026-07-21T13:50:50Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
@@ -20566,8 +20566,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2143",
       "state": "open",
       "created_at": "2026-03-16T17:06:16Z",
-      "updated_at": "2026-07-21T03:08:42Z",
-      "comments": 75,
+      "updated_at": "2026-07-21T15:28:16Z",
+      "comments": 76,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20738,8 +20738,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1592",
       "state": "open",
       "created_at": "2026-03-10T23:48:34Z",
-      "updated_at": "2026-07-21T03:08:52Z",
-      "comments": 41,
+      "updated_at": "2026-07-21T15:25:28Z",
+      "comments": 42,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20784,8 +20784,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1579",
       "state": "open",
       "created_at": "2026-03-10T16:05:08Z",
-      "updated_at": "2026-07-21T03:01:24Z",
-      "comments": 56,
+      "updated_at": "2026-07-21T15:33:34Z",
+      "comments": 57,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20800,8 +20800,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1578",
       "state": "open",
       "created_at": "2026-03-10T16:05:07Z",
-      "updated_at": "2026-07-21T03:08:57Z",
-      "comments": 32,
+      "updated_at": "2026-07-21T15:24:47Z",
+      "comments": 33,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -20832,8 +20832,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1575",
       "state": "open",
       "created_at": "2026-03-10T15:42:29Z",
-      "updated_at": "2026-07-21T03:08:59Z",
-      "comments": 83,
+      "updated_at": "2026-07-21T15:13:16Z",
+      "comments": 84,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -20991,8 +20991,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1115",
       "state": "open",
       "created_at": "2026-03-07T18:00:37Z",
-      "updated_at": "2026-07-21T03:01:22Z",
-      "comments": 27,
+      "updated_at": "2026-07-21T15:34:30Z",
+      "comments": 28,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -21019,8 +21019,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1113",
       "state": "open",
       "created_at": "2026-03-07T18:00:34Z",
-      "updated_at": "2026-07-21T03:01:25Z",
-      "comments": 53,
+      "updated_at": "2026-07-21T15:32:43Z",
+      "comments": 54,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -21092,8 +21092,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1102",
       "state": "open",
       "created_at": "2026-03-07T16:17:32Z",
-      "updated_at": "2026-07-21T03:09:11Z",
-      "comments": 293,
+      "updated_at": "2026-07-21T14:54:10Z",
+      "comments": 297,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -21267,8 +21267,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/747",
       "state": "open",
       "created_at": "2026-03-07T03:24:23Z",
-      "updated_at": "2026-07-20T03:59:40Z",
-      "comments": 205,
+      "updated_at": "2026-07-21T15:44:34Z",
+      "comments": 206,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -21312,8 +21312,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/731",
       "state": "open",
       "created_at": "2026-03-07T00:40:02Z",
-      "updated_at": "2026-07-20T12:41:23Z",
-      "comments": 125,
+      "updated_at": "2026-07-21T15:39:44Z",
+      "comments": 126,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -21389,8 +21389,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/724",
       "state": "open",
       "created_at": "2026-03-07T00:15:22Z",
-      "updated_at": "2026-07-20T03:59:36Z",
-      "comments": 10,
+      "updated_at": "2026-07-21T15:45:33Z",
+      "comments": 11,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -21549,8 +21549,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/684",
       "state": "open",
       "created_at": "2026-03-06T00:28:27Z",
-      "updated_at": "2026-07-20T03:59:33Z",
-      "comments": 22,
+      "updated_at": "2026-07-21T15:47:59Z",
+      "comments": 23,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -21656,8 +21656,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/518",
       "state": "open",
       "created_at": "2026-03-01T04:13:47Z",
-      "updated_at": "2026-07-20T03:59:28Z",
-      "comments": 56,
+      "updated_at": "2026-07-21T15:48:35Z",
+      "comments": 57,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -21717,8 +21717,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/504",
       "state": "open",
       "created_at": "2026-02-28T22:57:02Z",
-      "updated_at": "2026-07-21T11:40:00Z",
-      "comments": 29,
+      "updated_at": "2026-07-21T14:27:13Z",
+      "comments": 30,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -21997,8 +21997,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/443",
       "state": "open",
       "created_at": "2026-02-26T21:54:17Z",
-      "updated_at": "2026-07-21T03:01:18Z",
-      "comments": 98,
+      "updated_at": "2026-07-21T15:36:08Z",
+      "comments": 99,
       "author": "sophiaeagent-beep",
       "labels": [
         "bounty",
@@ -22060,8 +22060,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/438",
       "state": "open",
       "created_at": "2026-02-26T21:21:10Z",
-      "updated_at": "2026-07-20T03:59:07Z",
-      "comments": 15,
+      "updated_at": "2026-07-21T15:49:25Z",
+      "comments": 16,
       "author": "sophiaeagent-beep",
       "labels": [
         "bounty",
@@ -22185,8 +22185,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/415",
       "state": "open",
       "created_at": "2026-02-24T01:18:27Z",
-      "updated_at": "2026-07-20T03:59:06Z",
-      "comments": 22,
+      "updated_at": "2026-07-21T15:50:06Z",
+      "comments": 23,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -22444,8 +22444,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/282",
       "state": "open",
       "created_at": "2026-02-17T20:14:47Z",
-      "updated_at": "2026-07-21T11:40:13Z",
-      "comments": 34,
+      "updated_at": "2026-07-21T15:02:09Z",
+      "comments": 35,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -22620,8 +22620,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/171",
       "state": "open",
       "created_at": "2026-02-14T21:05:30Z",
-      "updated_at": "2026-07-20T03:59:02Z",
-      "comments": 105,
+      "updated_at": "2026-07-21T15:50:51Z",
+      "comments": 106,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -22683,8 +22683,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/121",
       "state": "open",
       "created_at": "2026-02-12T15:33:18Z",
-      "updated_at": "2026-07-20T04:05:55Z",
-      "comments": 17,
+      "updated_at": "2026-07-21T15:42:58Z",
+      "comments": 18,
       "author": "Scottcjn",
       "labels": [
         "bounty",
