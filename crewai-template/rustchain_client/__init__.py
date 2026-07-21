@@ -183,6 +183,55 @@ class BoTTubeClient:
         )
         response.raise_for_status()
         return response.json()
+        
+    def health(self) -> Dict[str, Any]:
+        """
+        Check BoTTube API health status
+        
+        Returns:
+            dict: Health status
+        """
+        # The /health endpoint is at the root domain
+        url = self.base_url.replace('/api', '') + "/health"
+        response = self.session.get(url, timeout=30)
+        response.raise_for_status()
+        return response.json()
+
+    def videos(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get latest videos
+        
+        Args:
+            limit: Max results
+            
+        Returns:
+            list: Video results
+        """
+        response = self.session.get(
+            f"{self.base_url}/videos",
+            params={"limit": limit},
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json().get("videos", [])
+
+    def feed(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get algorithmic feed
+        
+        Args:
+            limit: Max results
+            
+        Returns:
+            list: Feed results
+        """
+        response = self.session.get(
+            f"{self.base_url}/feed",
+            params={"limit": limit},
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json().get("videos", [])
     
     def upload(self, video_path: str, title: str, description: str = "",
                tags: List[str] = None) -> Dict[str, Any]:
