@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-07-20T19:22:11Z",
+  "updated_at": "2026-07-21T01:25:04Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1876,
+  "total": 1875,
   "bounties": [
     {
       "id": 16275,
@@ -24,7 +24,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16271",
       "state": "open",
       "created_at": "2026-07-19T23:38:33Z",
-      "updated_at": "2026-07-20T16:53:49Z",
+      "updated_at": "2026-07-20T22:56:18Z",
       "comments": 8,
       "author": "Scottcjn",
       "labels": [
@@ -39,24 +39,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16258",
       "state": "open",
       "created_at": "2026-07-19T21:43:59Z",
-      "updated_at": "2026-07-20T04:17:07Z",
+      "updated_at": "2026-07-21T01:04:52Z",
       "comments": 5,
-      "author": "Scottcjn",
-      "labels": [
-        "bounty",
-        "open",
-        "standard"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16257,
-      "title": "[BOUNTY: 25 RTC] Test corpus + fuzz harness for node x86/device arch classification (armor around derive_verified_device — NOT the core fix)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16257",
-      "state": "open",
-      "created_at": "2026-07-19T21:43:58Z",
-      "updated_at": "2026-07-20T15:56:10Z",
-      "comments": 10,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -71,8 +55,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16256",
       "state": "open",
       "created_at": "2026-07-19T21:43:56Z",
-      "updated_at": "2026-07-20T15:56:09Z",
-      "comments": 15,
+      "updated_at": "2026-07-20T23:12:33Z",
+      "comments": 16,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -103,7 +87,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16254",
       "state": "open",
       "created_at": "2026-07-19T21:43:48Z",
-      "updated_at": "2026-07-20T14:07:25Z",
+      "updated_at": "2026-07-20T23:06:50Z",
       "comments": 7,
       "author": "Scottcjn",
       "labels": [
@@ -119,7 +103,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16253",
       "state": "open",
       "created_at": "2026-07-19T21:43:46Z",
-      "updated_at": "2026-07-20T14:04:35Z",
+      "updated_at": "2026-07-20T19:43:22Z",
       "comments": 6,
       "author": "Scottcjn",
       "labels": [
@@ -150,7 +134,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16251",
       "state": "open",
       "created_at": "2026-07-19T21:43:36Z",
-      "updated_at": "2026-07-20T13:00:32Z",
+      "updated_at": "2026-07-20T22:51:54Z",
       "comments": 7,
       "author": "Scottcjn",
       "labels": [
@@ -20554,7 +20538,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-20T14:07:32Z",
+      "updated_at": "2026-07-20T19:44:45Z",
       "comments": 355,
       "author": "Scottcjn",
       "labels": [
@@ -20610,7 +20594,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-20T14:06:31Z",
+      "updated_at": "2026-07-20T19:43:50Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
