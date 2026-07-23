@@ -1,0 +1,1 @@
+该代码实现了针对80486/386等无RDTSC指令的老旧x86 CPU的时序方差测量回退方案。核心思路是：1) 利用CMOS RTC（端口0x70/0x71）获取秒级时间参考；2) 通过PIT（8253/8254计数器2）提供微秒级计时；3) 测量连续两次RTC秒变化之间的PIT计数值差异，得到CPU时钟漂移指纹。代码兼容C89标准，单文件无外部依赖，通过条件编译支持Linux、DOS和Windows（Windows使用QueryPerformanceCounter回退）。函数`get_timing_samples`自动检测RDTSC可用性并选择最优方法。
