@@ -80,6 +80,17 @@ class TestRustChainClientHealth:
             with pytest.raises(ConnectionError):
                 await client.health()
 
+    @pytest.mark.asyncio
+    @respx.mock
+    async def test_health_raises_connection_error_on_timeout(self):
+        """Network timeouts use the SDK's documented connection error type."""
+        respx.get("https://50.28.86.131/health").mock(
+            side_effect=httpx.ReadTimeout("Timed out while reading")
+        )
+        async with RustChainClient() as client:
+            with pytest.raises(ConnectionError):
+                await client.health()
+
 
 class TestRustChainClientEpoch:
     """Test epoch endpoint."""
@@ -192,6 +203,17 @@ class TestRustChainClientTransfer:
                     "RTCfrom", "RTCto", 100, 0, "bad", 0
                 )
             assert exc_info.value.status_code == 400
+
+    @pytest.mark.asyncio
+    @respx.mock
+    async def test_transfer_signed_raises_connection_error_on_timeout(self):
+        """POST timeouts use the same stable SDK error contract as GET timeouts."""
+        respx.post("https://50.28.86.131/transfer").mock(
+            side_effect=httpx.WriteTimeout("Timed out while writing")
+        )
+        async with RustChainClient() as client:
+            with pytest.raises(ConnectionError):
+                await client.transfer_signed("RTCfrom", "RTCto", 100, 0, "sig", 0)
 
 
 class TestRustChainClientExplorer:
