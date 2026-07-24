@@ -1,0 +1,19 @@
+name: Link Check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install lychee
+        run: |
+          pip install lychee
+      - name: Run link check
+        run: |
+          lychee .
