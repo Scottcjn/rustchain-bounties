@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-07-24T01:27:52Z",
+  "updated_at": "2026-07-24T08:04:38Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 1870,
+  "total": 1867,
   "bounties": [
     {
       "id": 16275,
@@ -2477,8 +2477,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/14014",
       "state": "open",
       "created_at": "2026-06-12T18:17:39Z",
-      "updated_at": "2026-06-23T08:41:04Z",
-      "comments": 5,
+      "updated_at": "2026-07-24T05:17:35Z",
+      "comments": 6,
       "author": "Scottcjn",
       "labels": [],
       "agents_welcome": false
@@ -4466,18 +4466,6 @@
       "agents_welcome": false
     },
     {
-      "id": 13513,
-      "title": "Bounty Claim: 120 Stars — hakkaboy (daviediao-code)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13513",
-      "state": "open",
-      "created_at": "2026-06-09T01:25:58Z",
-      "updated_at": "2026-07-09T06:01:39Z",
-      "comments": 1,
-      "author": "daviediao-code",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 13477,
       "title": "[BOUNTY] feverdream: terminal client to spend RTC and commission a video",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13477",
@@ -4579,30 +4567,6 @@
       "updated_at": "2026-06-25T17:06:20Z",
       "comments": 0,
       "author": "BossChaos",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 13444,
-      "title": "[CLAIM] Code review bounty - rustchain-bounties PR #13436",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13444",
-      "state": "open",
-      "created_at": "2026-06-08T13:12:33Z",
-      "updated_at": "2026-07-09T06:01:42Z",
-      "comments": 4,
-      "author": "AIjackgo",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 13443,
-      "title": "[CLAIM] Code review bounty - rustchain-bounties PR #13429",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13443",
-      "state": "open",
-      "created_at": "2026-06-08T13:08:38Z",
-      "updated_at": "2026-07-09T06:01:44Z",
-      "comments": 3,
-      "author": "AIjackgo",
       "labels": [],
       "agents_welcome": false
     },
@@ -20474,7 +20438,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-07-23T19:18:43Z",
+      "updated_at": "2026-07-24T02:43:03Z",
       "comments": 355,
       "author": "Scottcjn",
       "labels": [
@@ -20530,7 +20494,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-07-23T19:18:06Z",
+      "updated_at": "2026-07-24T02:42:20Z",
       "comments": 43,
       "author": "Scottcjn",
       "labels": [],
