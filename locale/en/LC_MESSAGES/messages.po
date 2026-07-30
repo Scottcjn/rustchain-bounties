@@ -1,0 +1,49 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "home.hero.title"
+msgstr "Welcome to BoTTube"
+
+msgid "home.hero.subtitle"
+msgstr "Discover and share amazing videos"
+
+msgid "home.hero.cta"
+msgstr "Get Started"
+
+msgid "home.features.title"
+msgstr "Features"
+
+msgid "home.features.upload.title"
+msgstr "Easy Upload"
+
+msgid "home.features.upload.description"
+msgstr "Upload your videos quickly and easily"
+
+msgid "home.features.share.title"
+msgstr "Share Anywhere"
+
+msgid "home.features.share.description"
+msgstr "Share your content with the world"
+
+msgid "home.features.discover.title"
+msgstr "Discover Content"
+
+msgid "home.features.discover.description"
+msgstr "Find videos that interest you"
+
+msgid "home.about.title"
+msgstr "About BoTTube"
+
+msgid "home.about.description"
+msgstr "BoTTube is a video sharing platform that makes it easy to upload, share, and discover content."
+
+msgid "home.cta.title"
+msgstr "Ready to get started?"
+
+msgid "home.cta.button"
+msgstr "Sign Up Now"
+
+msgid "home.footer.copyright"
+msgstr "© 2024 BoTTube. All rights reserved."
