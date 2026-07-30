@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BoTTube{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="{{ url_for('index') }}" class="logo">BoTTube</a>
+                <form action="{{ url_for('search') }}" method="get" class="search-form">
+                    <input type="text" name="q" placeholder="Search videos..." value="{{ request.args.get('q', '') }}" required>
+                    <button type="submit">Search</button>
+                </form>
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}">Home</a>
+                    <a href="{{ url_for('upload') }}">Upload</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 BoTTube. All rights reserved.</p>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

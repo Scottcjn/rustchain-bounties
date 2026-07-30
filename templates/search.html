@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - BoTTube{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <h1>Search Results</h1>
+    {% if query %}
+        <p class="search-query">Results for: <strong>{{ query }}</strong></p>
+    {% endif %}
+    
+    {% if videos %}
+        <div class="video-grid">
+            {% for video in videos %}
+            <div class="video-card">
+                <a href="{{ url_for('watch', video_id=video.id) }}">
+                    <div class="video-thumbnail">
+                        {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail }}" alt="{{ video.title }}">
+                        {% else %}
+                            <div class="no-thumbnail">No Thumbnail</div>
+                        {% endif %}
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title">{{ video.title }}</h3>
+                        {% if video.description %}
+                            <p class="video-description">{{ video.description[:150] }}{% if video.description|length > 150 %}...{% endif %}</p>
+                        {% endif %}
+                        <div class="video-meta">
+                            {% if video.uploader %}
+                                <span class="uploader">{{ video.uploader }}</span>
+                            {% endif %}
+                            {% if video.views is defined %}
+                                <span class="views">{{ video.views }} views</span>
+                            {% endif %}
+                            {% if video.created_at %}
+                                <span class="date">{{ video.created_at.strftime('%Y-%m-%d') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <p>No videos found matching your search.</p>
+            {% if query %}
+                <p>Try different keywords or <a href="{{ url_for('index') }}">browse all videos</a>.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
