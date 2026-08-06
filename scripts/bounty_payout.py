@@ -119,9 +119,15 @@ def transfer(to,memo,idem):
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":RATE,"memo":memo,"idempotency_key":idem}).encode()
     # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
     # nginx HTTPS endpoint (the working path); fall back to the internal port.
+    last="no endpoint attempted"
     for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
-        try: return True,_post(url,body)
-        except Exception as e: last=str(e)[:160]
+        try:
+            resp=_post(url,body)
+        except Exception as e:
+            last=str(e)[:160]; continue
+        if isinstance(resp,dict) and resp.get("ok") is True:
+            return True,resp
+        return False,resp          # node answered and declined — do not retry the fallback
     return False,last
 def _is_bot_login(login, user_obj):
     """Return True if the comment/author appears to be a bot.
