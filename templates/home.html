@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+  <h1>{{ _('home.hero.title') }}</h1>
+  <p>{{ _('home.hero.subtitle') }}</p>
+  <a href="/signup" class="btn btn-primary">{{ _('home.hero.cta') }}</a>
+</div>
+
+<div class="features-section">
+  <h2>{{ _('home.features.title') }}</h2>
+  <div class="features-grid">
+    <div class="feature">
+      <h3>{{ _('home.features.upload.title') }}</h3>
+      <p>{{ _('home.features.upload.description') }}</p>
+    </div>
+    <div class="feature">
+      <h3>{{ _('home.features.share.title') }}</h3>
+      <p>{{ _('home.features.share.description') }}</p>
+    </div>
+    <div class="feature">
+      <h3>{{ _('home.features.discover.title') }}</h3>
+      <p>{{ _('home.features.discover.description') }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="about-section">
+  <h2>{{ _('home.about.title') }}</h2>
+  <p>{{ _('home.about.description') }}</p>
+</div>
+
+<div class="cta-section">
+  <h2>{{ _('home.cta.title') }}</h2>
+  <a href="/signup" class="btn btn-primary">{{ _('home.cta.button') }}</a>
+</div>
+
+<footer>
+  <p>{{ _('home.footer.copyright') }}</p>
+</footer>
+{% endblock %}
