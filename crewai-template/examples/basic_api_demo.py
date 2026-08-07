@@ -47,11 +47,33 @@ def main():
     print(f"   Wallet: aric-saxp-alpha")
     print(f"   Balance: {balance}")
     
-    # 5. BoTTube Stats
-    print("\n5. Getting BoTTube stats...")
+    # 5. BoTTube API Usage
+    print("\n5. Testing BoTTube API...")
     try:
+        # Developer Links
+        print("   Developer Docs: https://bottube.ai/docs")
+        print("   Setup: Get API key at https://bottube.ai/settings/api")
+        
+        # Health Check
+        bt_health = bt.health()
+        print(f"   Health: {bt_health}")
+        
+        # Stats
         stats = bt.get_stats()
         print(f"   Stats: {stats}")
+        
+        # Videos
+        videos = bt.videos(limit=2)
+        print(f"   Videos (latest {len(videos)}):")
+        for v in videos:
+            print(f"     - {v.get('title', 'Untitled')} ({v.get('id')})")
+            
+        # Feed
+        feed = bt.feed(limit=2)
+        print(f"   Feed (latest {len(feed)}):")
+        for f in feed:
+            print(f"     - {f.get('title', 'Untitled')} ({f.get('id')})")
+            
     except Exception as e:
         print(f"   (BoTTube API not available: {e})")
     
