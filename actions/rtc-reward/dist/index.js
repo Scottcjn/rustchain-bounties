@@ -122,10 +122,15 @@ async function run() {
 
   // Extract wallet
   let wallet = extractWallet(pr.body || '', walletPattern);
-  if (!wallet) {
-    wallet = await findWalletInRepo(token, apiBase, owner, repo, pr.head.sha, walletPattern);
-  }
-  let walletSource = 'pr-body-or-repo';
+  let walletSource = 'pr-body';
+  // A committed .rtc-wallet file used to be consulted here, between the
+  // author's own claim and the handle fallback. That is unsafe: the file
+  // outlives the pull request that introduced it, so from then on it becomes
+  // the payout destination for every later contributor who did not put an
+  // explicit address in their own PR body. One person's wallet file silently
+  // collects other people's rewards. A contributor now states their address
+  // in their own PR, or is paid to their own GitHub handle. Neither can be
+  // redirected by a file sitting in the repository.
   if (!wallet) {
     // Handle fallback: RustChain treats a contributor's GitHub handle as a valid
     // wallet identifier (see rustchain-bounties/GIG_APPLICANTS.md), so a PR with
