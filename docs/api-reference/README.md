@@ -2,6 +2,8 @@
 
 **Bounty: 20 RTC** | 所有接口附带中文说明 + Python SDK 示例
 
+> **状态说明 (verified 2026-07-25):** 本文档由社区赏金提交，部分接口在当前生产节点 (`https://rustchain.org`) 上并未部署。实测可用的接口包括 `/health`、`/epoch`、`/api/miners`、`/api/fee_pool`、`/wallet/balance?miner_id=<id>`、`/api/badge/<miner_id>`、`/api/tokenomics` 以及 `/explorer`。治理、提现、P2P、锁定等章节描述的接口在当前节点返回 404，属于历史设计或未部署功能，使用前请先用 `curl` 验证。
+
 ---
 
 ## 目录 / Table of Contents
@@ -184,15 +186,6 @@ curl -k https://rustchain.org/api/bounty-multiplier
 
 ---
 
-### `GET /api/balances`
-全网余额汇总
-
-```bash
-curl -k https://rustchain.org/api/balances
-```
-
----
-
 ### `GET /api/metrics`
 Prometheus 兼容的监控指标
 
@@ -307,15 +300,16 @@ curl -k https://rustchain.org/hall-of-fame
 查询矿工余额（RTC）
 
 ```bash
-curl -k https://rustchain.org/balance/0xPUBLIC_KEY_HERE
+curl -k "https://rustchain.org/wallet/balance?miner_id=<miner_id>"
 ```
 
-**响应示例:** `{"balance_rtc": 150.5, "locked_rtc": 10.0}`
+**响应示例:** `{"amount_i64": 124951060000, "amount_rtc": 124951.06, "miner_id": "founder_dev_fund"}`
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `balance_rtc` | float | 可用余额（RTC） |
-| `locked_rtc` | float | 锁定余额（质押中） |
+| `amount_i64` | int | 余额（最小单位整数） |
+| `amount_rtc` | float | 余额（RTC） |
+| `miner_id` | string | 查询的钱包 / 矿工 ID |
 
 ---
 
@@ -324,11 +318,11 @@ curl -k https://rustchain.org/balance/0xPUBLIC_KEY_HERE
 
 ---
 
-### `GET /api/balances`
-全网余额分布
+### 全网余额分布
+当前节点没有一次性返回全网余额的公开接口。全网余额可通过区块浏览器查看：
 
-```bash
-curl -k https://rustchain.org/api/balances
+```
+https://rustchain.org/explorer
 ```
 
 ---
