@@ -2,60 +2,247 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    body {
-      width: 300px;
-      padding: 10px;
-      font-family: Arial, sans-serif;
-    }
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    button {
-      padding: 8px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    h1 {
-      font-size: 18px;
-      text-align: center;
-      color: #333;
-    }
-  </style>
+    <title>BoTTube wRTC Bridge</title>
+    <style>
+        body { font-family: sans-serif; padding: 10px; width: 300px; }
+        button { margin-top: 10px; padding: 8px 15px; cursor: pointer; }
+        #status { margin-top: 10px; font-weight: bold; }
+        #messageInput { width: 100%; margin-top: 10px; padding: 5px; }
+        #messages { margin-top: 10px; border: 1px solid #eee; padding: 5px; max-height: 200px; overflow-y: auto; }
+    </style>
 </head>
 <body>
-  <h1>BoTTube</h1>
-  <div class="button-group">
-    <button id="browse-btn">Browse</button>
-    <button id="vote-btn">Vote</button>
-    <button id="upload-btn">Upload</button>
-  </div>
-  <script>
-    document.getElementById('browse-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "browse"});
-      });
-    });
+    <h1>BoTTube Bridge</h1>
+    <p>Status: <span id="status">Initializing...</span></p>
+    <button id="connectButton">Connect Bridge</button>
+    <button id="sendButton" disabled>Send Message</button>
+    <input type="text" id="messageInput" placeholder="Type message here...">
+    <div id="messages"></div>
 
-    document.getElementById('vote-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "vote"});
-      });
-    });
+    <script type="module">
+        // Global/module-scoped variables for WebRTC components and state management
+        let peerConnection;
+        let dataChannel;
+        let isWebRTCReady = false; // Flag to indicate if data channel is open and ready to send
+        const messageQueue = [];    // Queue for messages to be sent
+        let isProcessingQueue = false; // Flag to prevent concurrent queue processing
 
-    document.getElementById('upload-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "upload"});
-      });
-    });
-  </script>
+        // UI element references
+        const statusSpan = document.getElementById('status');
+        const connectButton = document.getElementById('connectButton');
+        const sendButton = document.getElementById('sendButton');
+        const messageInput = document.getElementById('messageInput');
+        const messagesDiv = document.getElementById('messages');
+
+        /**
+         * Updates the UI status message.
+         * @param {string} message The status message.
+         * @param {string} color The text color for the status.
+         */
+        function updateStatus(message, color = 'black') {
+            statusSpan.textContent = message;
+            statusSpan.style.color = color;
+        }
+
+        /**
+         * Appends a message to the messages display area.
+         * @param {string} sender The sender of the message (e.g., 'Local', 'Remote').
+         * @param {string} message The message content.
+         */
+        function appendMessage(sender, message) {
+            const p = document.createElement('p');
+            p.textContent = `[${sender}]: ${message}`;
+            messagesDiv.appendChild(p);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to bottom
+        }
+
+        /**
+         * Initializes the WebRTC Peer Connection and Data Channel.
+         * Handles connection state changes and sets up event listeners.
+         */
+        async function initWebRTC() {
+            updateStatus('Connecting...', 'orange');
+            connectButton.disabled = true; // Disable connect button during connection attempt
+            sendButton.disabled = true; // Disable send button until channel is open
+
+            try {
+                // Create RTCPeerConnection with STUN servers for NAT traversal
+                peerConnection = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+
+                // Create a reliable data channel
+                dataChannel = peerConnection.createDataChannel('bottube-channel', {
+                    ordered: true, // Ensure messages are delivered in order
+                    maxRetransmits: 0 // No retransmits for faster failure detection if needed
+                });
+
+                // Data Channel Event Handlers
+                dataChannel.onopen = () => {
+                    updateStatus('Data Channel OPEN', 'green');
+                    isWebRTCReady = true;
+                    sendButton.disabled = false;
+                    processMessageQueue(); // Process any messages queued during connection
+                };
+
+                dataChannel.onclose = () => {
+                    updateStatus('Data Channel CLOSED', 'red');
+                    isWebRTCReady = false;
+                    sendButton.disabled = true;
+                };
+
+                dataChannel.onerror = (error) => {
+                    updateStatus(`Data Channel ERROR: ${error.message}`, 'red');
+                    console.error('Data Channel Error:', error);
+                    isWebRTCReady = false;
+                    sendButton.disabled = true;
+                };
+
+                dataChannel.onmessage = (event) => {
+                    appendMessage('Remote', event.data);
+                };
+
+                // ICE Connection State Change Handler
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
+                    switch (peerConnection.iceConnectionState) {
+                        case 'connected':
+                            updateStatus('ICE Connected', 'green');
+                            break;
+                        case 'disconnected':
+                        case 'failed':
+                        case 'closed':
+                            updateStatus(`ICE ${peerConnection.iceConnectionState}`, 'red');
+                            isWebRTCReady = false;
+                            sendButton.disabled = true;
+                            break;
+                        default:
+                            updateStatus(`ICE ${peerConnection.iceConnectionState}`, 'orange');
+                    }
+                };
+
+                // ICE Candidate Handler (for signaling)
+                peerConnection.onicecandidate = async (event) => {
+                    if (event.candidate) {
+                        // In a real application, 'event.candidate' would be sent to the remote peer
+                        console.log('Local ICE candidate:', event.candidate);
+                    }
+                };
+
+                // Create and set local SDP offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                // In a real "wRTC Bridge" scenario, the 'offer' would be sent to a signaling server
+                // or another peer, and an 'answer' would be received and set as remote description.
+                console.log('Local Offer (to be sent via signaling):', peerConnection.localDescription);
+
+                updateStatus('Waiting for remote connection...', 'blue');
+
+            } catch (error) {
+                updateStatus(`Connection Error: ${error.message}`, 'red');
+                console.error('WebRTC Initialization Error:', error);
+                isWebRTCReady = false;
+                sendButton.disabled = true;
+            } finally {
+                connectButton.disabled = false; // Re-enable connect button
+            }
+        }
+
+        /**
+         * Enqueues a message for sending. This function is called by the UI.
+         * The message will be processed by `processMessageQueue` when the WebRTC
+         * data channel is open and ready, preventing TOCTOU race conditions.
+         * @param {string} message The message to send.
+         * @returns {Promise<void>} A promise that resolves when the message is enqueued.
+         */
+        async function enqueueMessage(message) {
+            messageQueue.push(message);
+            console.log(`Message enqueued. Queue size: ${messageQueue.length}`);
+            // Attempt to process the queue immediately if not already processing
+            if (!isProcessingQueue) {
+                await processMessageQueue();
+            }
+        }
+
+        /**
+         * Processes the message queue. This function is designed to run asynchronously,
+         * sending messages one by one only when the WebRTC data channel is confirmed
+         * to be ready. This is the core TOCTOU race condition fix.
+         * @returns {Promise<void>} A promise that resolves when the queue is empty
+         *                          or processing is paused due to channel unavailability.
+         */
+        async function processMessageQueue() {
+            if (isProcessingQueue) {
+                return; // Already processing, avoid re-entry
+            }
+
+            isProcessingQueue = true;
+            try {
+                while (messageQueue.length > 0) {
+                    // CRITICAL: Wait until the data channel is explicitly ready
+                    while (!isWebRTCReady || !dataChannel || dataChannel.readyState !== 'open') {
+                        console.log('Waiting for WebRTC data channel to be ready...');
+                        updateStatus('Waiting for channel...', 'orange');
+                        // Introduce a small delay to prevent busy-waiting and yield to event loop
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        // Re-check `isWebRTCReady` and dataChannel state after delay
+                    }
+
+                    const message = messageQueue.shift(); // Get the next message from the queue
+
+                    // Double-check state before use (final check after waiting)
+                    if (message && dataChannel && dataChannel.readyState === 'open') {
+                        try {
+                            dataChannel.send(message);
+                            appendMessage('Local', message);
+                            console.log('Message sent from queue:', message);
+                            updateStatus('Message sent!', 'green');
+                        } catch (sendError) {
+                            console.error('Failed to send message from queue:', sendError);
+                            // If sending fails, re-queue the message and stop processing
+                            // as the channel might have become unstable.
+                            messageQueue.unshift(message);
+                            updateStatus(`Send error: ${sendError.message}. Re-queued.`, 'red');
+                            isWebRTCReady = false; // Mark as not ready to pause processing
+                            break; // Exit loop, will retry when channel is ready again
+                        }
+                    } else {
+                        // If channel closed or became invalid while waiting for `shift()`
+                        if (message) messageQueue.unshift(message); // Put message back
+                        updateStatus('Channel became unavailable during queue processing.', 'red');
+                        isWebRTCReady = false;
+                        break; // Exit loop
+                    }
+                }
+            } catch (queueError) {
+                console.error('Error during message queue processing:', queueError);
+                updateStatus(`Queue processing error: ${queueError.message}`, 'red');
+            } finally {
+                isProcessingQueue = false; // Allow new processing attempts
+                if (messageQueue.length > 0) {
+                    updateStatus('Messages remaining in queue (channel not ready).', 'orange');
+                } else if (isWebRTCReady) {
+                    updateStatus('Data Channel OPEN', 'green');
+                }
+            }
+        }
+
+        // Event Listeners for UI interaction
+        connectButton.addEventListener('click', initWebRTC);
+
+        sendButton.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                await enqueueMessage(message); // Use the queueing mechanism
+                messageInput.value = ''; // Clear input field
+            }
+        });
+
+        // Initialize status on load
+        updateStatus('Ready to connect.');
+
+    </script>
 </body>
 </html>
+    
