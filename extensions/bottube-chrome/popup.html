@@ -2,60 +2,50 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>BoTTube</title>
   <style>
-    body {
-      width: 300px;
-      padding: 10px;
-      font-family: Arial, sans-serif;
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      padding: 10px; 
+      width: 300px; 
+      background-color: #f0f2f5;
+      color: #333;
     }
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    h1 { 
+      color: #1a73e8; 
+      font-size: 20px; 
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      text-align: center;
     }
     button {
-      padding: 8px;
-      background-color: #4CAF50;
-      color: white;
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
       border: none;
       border-radius: 4px;
+      background-color: #1a73e8;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
     button:hover {
-      background-color: #45a049;
-    }
-    h1 {
-      font-size: 18px;
-      text-align: center;
-      color: #333;
+      background-color: #1558b0;
     }
   </style>
 </head>
 <body>
-  <h1>BoTTube</h1>
-  <div class="button-group">
-    <button id="browse-btn">Browse</button>
-    <button id="vote-btn">Vote</button>
-    <button id="upload-btn">Upload</button>
-  </div>
-  <script>
-    document.getElementById('browse-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "browse"});
-      });
-    });
-
-    document.getElementById('vote-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "vote"});
-      });
-    });
-
-    document.getElementById('upload-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "upload"});
-      });
-    });
-  </script>
+  <!-- CHANGE: Replaced hardcoded title with a __MSG_ placeholder for localization -->
+  <h1>__MSG_extensionName__</h1> 
+  <p>__MSG_homepageDescription__</p>
+  <button id="openSettings">__MSG_openSettingsButton__</button>
+  <script src="popup.js"></script> <!-- Assuming a popup.js exists for functionality -->
 </body>
 </html>
+    
