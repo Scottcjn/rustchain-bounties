@@ -2,60 +2,39 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>BoTTube</title>
   <style>
-    body {
-      width: 300px;
-      padding: 10px;
-      font-family: Arial, sans-serif;
-    }
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    button {
-      padding: 8px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    h1 {
-      font-size: 18px;
-      text-align: center;
-      color: #333;
-    }
+    body { font-family: sans-serif; padding: 10px; min-width: 200px; }
+    h1 { font-size: 1.2em; margin-bottom: 10px; }
+    a { display: block; text-align: center; padding: 8px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+    a:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
-  <h1>BoTTube</h1>
-  <div class="button-group">
-    <button id="browse-btn">Browse</button>
-    <button id="vote-btn">Vote</button>
-    <button id="upload-btn">Upload</button>
-  </div>
+  <h1>BoTTube Extension</h1>
+  <p>Quick access to BoTTube features.</p>
+  <a id="bottubeHomepageLink" href="https://www.bottube.com">Go to BoTTube Homepage</a>
+
   <script>
-    document.getElementById('browse-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "browse"});
-      });
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+      const homepageLink = document.getElementById('bottubeHomepageLink');
+      if (homepageLink) {
+        const userLanguage = navigator.language || navigator.userLanguage;
+        let locale = 'en'; // Default locale
 
-    document.getElementById('vote-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "vote"});
-      });
-    });
+        if (userLanguage) {
+          // Take the primary language tag (e.g., 'en' from 'en-US')
+          locale = userLanguage.split('-')[0].toLowerCase();
+        }
 
-    document.getElementById('upload-btn').addEventListener('click', function() {
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "upload"});
-      });
+        // Construct the locale-specific URL
+        // Assuming the homepage structure is https://www.bottube.com/{locale}
+        const baseUrl = 'https://www.bottube.com';
+        homepageLink.href = `${baseUrl}/${locale}`;
+        console.log(`BoTTube homepage link set to: ${homepageLink.href}`);
+      }
     });
   </script>
 </body>
 </html>
+    
