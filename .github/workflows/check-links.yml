@@ -1,0 +1,21 @@
+name: Check Markdown Links
+
+on:
+  push:
+    paths:
+      - '**/*.md'
+  pull_request:
+    paths:
+      - '**/*.md'
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Make link checker executable
+        run: chmod +x tools/check-links.sh
+      
+      - name: Check relative links in markdown files
+        run: bash tools/check-links.sh .
