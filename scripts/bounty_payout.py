@@ -125,8 +125,11 @@ CANONICAL_WALLETS = _load_canonical_wallets()
 
 
 def gh(args):
-    return subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
-        env={**os.environ,"GH_TOKEN":TOKEN}).stdout
+    p=subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
+        env={**os.environ,"GH_TOKEN":TOKEN})
+    if p.returncode!=0:
+        print(f"::warning::gh exit {p.returncode}: {p.stderr.strip()[:200]}")
+    return p.stdout
 def _post(url, body):
     ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
     req=urllib.request.Request(url,data=body,method="POST",
@@ -257,10 +260,15 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
         return claimant_login, "handle"
     return None, None
 def _list(extra):
+    raw=gh(["issue","list","-R",REPO,"--state","open",
+            "--json","number,title,labels"]+extra)
+    if not raw:
+        print(f"::warning::_list got empty response — check GITHUB_TOKEN and API connectivity")
+        return []
     try:
-        return json.loads(gh(["issue","list","-R",REPO,"--state","open",
-                              "--json","number,title,labels"]+extra) or "[]")
+        return json.loads(raw)
     except json.JSONDecodeError:
+        print(f"::error::could not parse gh issue list output")
         return []
 
 # Candidate set = every gate-labelled claim UNION a recent-window sweep.
@@ -275,6 +283,8 @@ def _list(extra):
 issues=_list(["--label","bounty-eligible","--limit","1000"])
 _seen={i["number"] for i in issues}
 issues += [i for i in _list(["--limit","400"]) if i["number"] not in _seen]
+if not issues:
+    print(f"::warning::bounty-payout: 0 candidate issues — check GITHUB_TOKEN and API connectivity")
 print(f"bounty-payout: {len(issues)} candidate issues "
       f"({len(_seen)} label-eligible, {len(issues)-len(_seen)} from recent window)")
 paid=0; total=0.0
