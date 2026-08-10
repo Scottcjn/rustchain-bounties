@@ -301,7 +301,28 @@ for i in issues:
     # only `body,comments`, so the fallback was unreachable in production.
     a=d.get("author") or {}
     claimant=a.get("login") if isinstance(a, dict) else None
-    eligible = ("bounty-eligible" in labels) or any("Verified eligible" in (c.get("body") or "") for c in coms)
+    # Only a maintainer may approve a claim by comment. Without this, anyone
+    # could comment "Verified eligible" on their own issue and be paid on the
+    # next cron: the repo is public with issues open, and this runs every six
+    # hours with the admin key.
+    #
+    # Note the comment branch never had a legitimate automated producer. The
+    # PR-review gate emits lowercase "verified eligible", which this
+    # case-sensitive check does not match, so the only thing the branch ever
+    # accepted was a human typing it, or anyone at all. `auto-pay.py` already
+    # does the equivalent author check.
+    _APPROVER_ROLES = {"OWNER", "MEMBER", "COLLABORATOR"}
+
+    def _maintainer_approved(comment):
+        if "Verified eligible" not in (comment.get("body") or ""):
+            return False
+        role = (comment.get("authorAssociation") or "").upper()
+        if role in _APPROVER_ROLES:
+            return True
+        login = ((comment.get("author") or {}).get("login") or "").lower()
+        return login == REPO.split("/")[0].lower()
+
+    eligible = ("bounty-eligible" in labels) or any(_maintainer_approved(c) for c in coms)
     if not eligible: continue
     if any("RTC-AutoPay-Confirmed" in (c.get("body") or "") for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
