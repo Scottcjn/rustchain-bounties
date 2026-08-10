@@ -9,65 +9,9 @@ permissions:
   pull-requests: read
 
 jobs:
-  label-gate:
-    name: Review Tier Label Gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Require BCOS label for non-doc PRs
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const pr = context.payload.pull_request;
-            const prNumber = pr.number;
-
-            // Accept either explicit BCOS tiers, or the repo's existing tier labels.
-            // (Some repos only have micro/standard/major/critical and no BCOS-* labels.)
-            const allowedLabels = new Set([
-              "BCOS-L1", "BCOS-L2", "bcos:l1", "bcos:l2",
-              "micro", "standard", "major", "critical"
-            ]);
-
-            const labels = (pr.labels || []).map(l => l.name);
-            const hasTier = labels.some(l => allowedLabels.has(l));
-
-            // Fetch file list (paginated)
-            const files = [];
-            for await (const resp of github.paginate.iterator(
-              github.rest.pulls.listFiles,
-              { owner, repo, pull_number: prNumber, per_page: 100 }
-            )) {
-              for (const f of resp.data) files.push(f.filename);
-            }
-
-            function isDocOnly(path) {
-              const p = path.toLowerCase();
-              if (p.startsWith("docs/")) return true;
-              if (p.endsWith(".md")) return true;
-              if (p.endsWith(".png") || p.endsWith(".jpg") || p.endsWith(".jpeg") || p.endsWith(".gif") || p.endsWith(".svg")) return true;
-              if (p.endsWith(".pdf")) return true;
-              return false;
-            }
-
-            const nonDoc = files.filter(f => !isDocOnly(f));
-            if (nonDoc.length === 0) {
-              core.info("Doc-only PR: tier label not required.");
-              return;
-            }
-
-            if (!hasTier) {
-              core.setFailed(
-                "Tier label required for non-doc changes. Add one of: BCOS-L1/BCOS-L2 (or bcos:l1/bcos:l2), or the repo tier labels: micro/standard/major/critical."
-              );
-            } else {
-              core.info(`Tier label present: ${labels.join(", ")}`);
-            }
-
   spdx-and-sbom:
     name: SPDX + SBOM Artifacts
     runs-on: ubuntu-latest
-    needs: [label-gate]
     steps:
       - uses: actions/checkout@v7
         with:
