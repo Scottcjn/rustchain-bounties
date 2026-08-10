@@ -74,8 +74,11 @@ DOCSTRING_OPEN = re.compile(r'^\s*[rRbBuU]{0,2}("""|\'\'\')')
 def gh(args, default=None):
     try:
         p = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120)
+        if p.returncode != 0:
+            print(f"::warning::gh exit {p.returncode}: {p.stderr.strip()[:200]}")
         return json.loads(p.stdout) if p.stdout.strip() else default
-    except Exception:
+    except Exception as e:
+        print(f"::warning::gh exception: {e}")
         return default
 
 
@@ -271,7 +274,9 @@ def main():
                 f"Paying the verified number. If you think the gate has miscounted, say so and a "
                 f"human will check — miscounts are usually arithmetic, not bad faith.")
 
-    add_labels("bounty-eligible", "docstring-verified")
+    if not add_labels("bounty-eligible", "docstring-verified"):
+        print("::error::failed to apply bounty-eligible/docstring-verified labels — claim will not be paid")
+        return 1
     gh(["issue", "comment", NUM, "-R", REPO, "--body",
         f"✅ 🤖 **Docstring gate: verified.**\n\n"
         f"- PR {pr_repo}#{pr_num} is **merged**\n"
