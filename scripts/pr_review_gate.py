@@ -340,7 +340,12 @@ def main():
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
-    inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100") or []
+    inl_raw = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100")
+    if inl_raw is None:
+        print(f"::warning::could not fetch inline comments for {target}#{pr} — API unavailable")
+        inl = []
+    else:
+        inl = inl_raw
     # Per-author inline counts (so the rubber-stamp filter is per-review).
     author_inline = {}
     for c in inl:
@@ -364,13 +369,20 @@ def main():
     # cap check: count author's existing bounty-eligible issues ORG-WIDE
     # (user:Scottcjn spans every repo, so the per-contributor cap stays global
     # even though the gate now runs in both rustchain-bounties and Rustchain).
-    elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue") or {}
-    if elig.get("total_count",0)>=CAP:
+    elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue")
+    if elig is None:
+        print(f"::warning::could not check cap for {author} — search API unavailable; proceeding")
+        elig = {"total_count": 0}
+    elif elig.get("total_count",0)>=CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
     add_label(NUM,"bounty-eligible")
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
-    try: main()
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
     except Exception as e:
-        print(f"gate error: {e}", file=sys.stderr)  # never fail the workflow
+        print(f"gate error: {e}", file=sys.stderr)
+        raise SystemExit(1)  # never fail the workflow
