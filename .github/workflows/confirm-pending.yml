@@ -35,10 +35,12 @@ jobs:
           RTC_VPS_HOST: ${{ secrets.RTC_VPS_HOST }}
           RTC_ADMIN_KEY: ${{ secrets.RTC_ADMIN_KEY }}
         run: |
+          set -euo pipefail
           if [ -z "$RTC_VPS_HOST" ] || [ -z "$RTC_ADMIN_KEY" ]; then
             echo "::error::RTC_VPS_HOST / RTC_ADMIN_KEY not configured"; exit 1
           fi
           total=0
+          stale=0
           # Safety cap: 60 iterations * 500 = up to 30,000 transfers/run.
           for i in $(seq 1 60); do
             code=$(curl -sk -o resp.json -w '%{http_code}' --max-time 60 \
@@ -49,7 +51,15 @@ jobs:
             read confirmed stale < <(python3 - <<'PY'
           import json
           d = json.load(open('resp.json'))
-          print(d.get('confirmed_count', 0), d.get('stale_pending_count', 0))
+          if d.get('ok') is not True:
+              raise SystemExit(f"confirm refused: {d.get('error', 'ok != true')}")
+          confirmed = d.get('confirmed_count')
+          stale = d.get('stale_pending_count')
+          if not isinstance(confirmed, int) or confirmed < 0:
+              raise SystemExit("invalid confirmed_count")
+          if not isinstance(stale, int) or stale < 0:
+              raise SystemExit("invalid stale_pending_count")
+          print(confirmed, stale)
           PY
           )
             total=$((total + confirmed))
@@ -59,4 +69,9 @@ jobs:
             [ "${stale:-0}" -eq 0 ] && { echo "queue drained"; break; }
             [ "${confirmed:-0}" -eq 0 ] && { echo "no progress this iter; stopping"; break; }
           done
+          if [ "${stale:-0}" -gt 0 ]; then
+            echo "::error::confirmation stopped with $stale stale transfer(s) undelivered"
+            cat resp.json
+            exit 1
+          fi
           echo "confirmed $total transfer(s) this run"

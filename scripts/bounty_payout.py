@@ -44,7 +44,9 @@ RATE=float(os.environ.get("RATE_RTC","3"))
 # Hard ceiling re-enforced at payout time, independent of any gate.
 MAX_CLAIM_RTC=float(os.environ.get("MAX_CLAIM_RTC","25")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
 FROM="founder_community"; PORT="8099"
+REPO_OWNER=REPO.split("/",1)[0]
 WALLET_RE=re.compile(r'\bRTC[0-9a-fA-F]{40}\b')
+PAID_COMMENT_RE=re.compile(r'\*\*RTC-AutoPay-Confirmed\*\*\s+—\s+payout\b')
 # Matches `Wallet: <handle-or-address>` (case-insensitive, Markdown-tolerant).
 # Tolerates:
 #   - leading Markdown headers (`## Wallet: handle`)
@@ -240,6 +242,16 @@ def _comment_author_login(c):
     if isinstance(u, dict):
         return u.get("login"), u
     return None, None
+
+
+def is_trusted_paid_comment(c):
+    """Accept the paid sentinel only from trusted automation/repo owner."""
+    login, _ = _comment_author_login(c)
+    trusted = {REPO_OWNER.lower(), "github-actions", "github-actions[bot]"}
+    return bool(login and login.lower() in trusted and
+                PAID_COMMENT_RE.search(c.get("body") or ""))
+
+
 def _looks_like_handle(token):
     if not token:
         return False
@@ -345,7 +357,7 @@ for i in issues:
         and _is_trusted(_comment_author_login(c)[0])
         for c in coms)
     if not eligible: continue
-    if any("RTC-AutoPay-Confirmed" in (c.get("body") or "") for c in coms): continue
+    if any(is_trusted_paid_comment(c) for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
     if not wallet: continue
     # Review claims are a flat RATE. Docstring claims are worth whatever the
