@@ -1,33 +1,63 @@
-name: 'RTC Reward Action'
-description: 'Automatically award RTC tokens when a PR is merged'
-author: 'xiaomili'
-inputs:
-  node-url:
-    description: 'RustChain node URL'
-    required: false
-    default: 'https://rustchain.org'
-  amount:
-    description: 'RTC amount to award per merged PR'
-    required: true
-  wallet-from:
-    description: 'Source wallet for rewards (project fund wallet)'
-    required: true
-  admin-key:
-    description: 'Admin key for transaction signing'
-    required: true
-  dry-run:
-    description: 'Dry run mode (no actual transactions)'
-    required: false
-    default: 'false'
-  wallet-file:
-    description: 'Wallet file path in repo (e.g., .rtc-wallet)'
-    required: false
-    default: '.rtc-wallet'
+steps:
+  - name: 'Extract contributor wallet from PR body'
+    id: extract-wallet
+    run: |
+      BODY="${{ github.event.pull_request.body }}"
+      # Try to extract wallet from common formats
+      # Format 1: EVM address
+      WALLET=$(echo "$BODY" | grep -oE '0x[a-fA-F0-9]{40}' | head -1)
+      # Format 2: wallet name in backticks
+      if [[ -z "$WALLET" ]]; then
+        WALLET=$(echo "$BODY" | grep -oE '`[a-z_]+`|' | tr -d '`' | head -1)
+      fi
+      # Format 3: Wallet: or wallet_name: pattern
+      if [[ -z "$WALLET" ]]; then
+        WALLET=$(echo "$BODY" | grep -oiE '(wallet|wallet_name|wallet-name|rtc_wallet)[:\s]+([a-z_]+)' | sed 's/.*://i' | tr -d ' ' | head -1)
+      fi
+      # Format 4: Look for .rtc-wallet file pattern
+      if [[ -z "$WALLET" ]]; then
+        WALLET=$(echo "$BODY" | grep -oE '^[a-z_][a-z0-9_]{2,}$' | head -1)
+      fi
+      echo "Contributors found wallet: $WALLET"
+      echo "contributor_wallet=$WALLET" >> $GITHUB_OUTPUT
 
-runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  - name: 'Show PR info'
+    run: |
+      echo "PR #${{ github.event.pull_request.number }} merged by ${{ github.event.pull_request.user.login }}"
+      echo "Contributor wallet: ${{ steps.extract-wallet.outputs.contributor_wallet }}"
+      echo "Amount: ${{ inputs.amount }} RTC"
 
-branding:
-  icon: 'gift'
-  color: 'green'
+  - name: 'Dry-run confirmation'
+    if: ${{ inputs.dry-run == 'true' }}
+    run: |
+      echo "=== DRY RUN MODE ==="
+      echo "Would award ${{ inputs.amount }} RTC from wallet '${{ inputs.wallet-from }}' to '${{ steps.extract-wallet.outputs.contributor_wallet }}'"
+      echo "Would post comment on PR #${{ github.event.pull_request.number }}"
+
+  - name: 'Award RTC'
+    if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+    run: |
+      curl -s -X POST "${{ inputs.node-url }}/wallet/send" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"from_wallet\": \"${{ inputs.wallet-from }}\",
+          \"admin_key\": \"${{ inputs.admin-key }}\",
+          \"to_wallet\": \"${{ steps.extract-wallet.outputs.contributor_wallet }}\",
+          \"amount\": ${{ inputs.amount }}
+        }" | tee /tmp/rtc-response.json
+      if grep -q '"ok":true' /tmp/rtc-response.json; then
+        echo "RTC sent successfully!"
+      else
+        echo "Failed to send RTC. Check response above."
+        exit 1
+      fi
+
+  - name: 'Post confirmation comment'
+    if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+    run: |
+      curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+        -H "Authorization: token ${{ github.token }}" \
+        -H "Content-Type: application/json" \
+        -d "{
+          \"body\": \"✅ **RTC Reward Sent!**\\n\\n awarded ${{ inputs.amount }} RTC to wallet \`${{ steps.extract-wallet.outputs.contributor_wallet }}\` for merged PR #${{ github.event.pull_request.number }}.\\n\\n_ Powered by [rtc-reward-action](https://github.com/Scottcjn/rtc-reward-action)_\"
+        }"
