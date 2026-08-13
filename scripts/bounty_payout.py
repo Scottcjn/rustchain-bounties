@@ -19,6 +19,9 @@ SAFETY:
   - idempotency_key=bounty73-claim-<n> + 'RTC-AutoPay-Confirmed' marker => never double-pays
   - MAX_PER_RUN aggregate cap (default 40) — hard stop per run, surfaced in log
 Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
+
+RTC_VPS_HOST must name the host covered by the node's TLS certificate. The
+payer intentionally has no plaintext or certificate-verification fallback.
 """
 import os, re, json, time, subprocess, ssl, urllib.request, urllib.error, importlib.util
 
@@ -43,7 +46,7 @@ HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO
 RATE=float(os.environ.get("RATE_RTC","3"))
 # Hard ceiling re-enforced at payout time, independent of any gate.
 MAX_CLAIM_RTC=float(os.environ.get("MAX_CLAIM_RTC","25")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
-FROM="founder_community"; PORT="8099"
+FROM="founder_community"
 REPO_OWNER=REPO.split("/",1)[0]
 WALLET_RE=re.compile(r'\bRTC[0-9a-fA-F]{40}\b')
 PAID_COMMENT_RE=re.compile(r'\*\*RTC-AutoPay-Confirmed\*\*\s+—\s+payout\b')
@@ -158,7 +161,9 @@ def gh(args, _check=True):
         raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: {(p.stderr or '').strip()[:200]}")
     return p.stdout
 def _post(url, body):
-    ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+    # The response is the payer's success oracle, so it must be authenticated.
+    # create_default_context() verifies both the certificate chain and hostname.
+    ctx=ssl.create_default_context()
     req=urllib.request.Request(url,data=body,method="POST",
         headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
     with urllib.request.urlopen(req,timeout=30,context=ctx) as r: return json.loads(r.read())
@@ -177,20 +182,16 @@ def transfer(to,memo,idem,amount=None):
     debit under a different URL.
     """
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":(RATE if amount is None else amount),"memo":memo,"idempotency_key":idem}).encode()
-    # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
-    # nginx HTTPS endpoint (the working path); fall back to the internal port.
-    last="no_endpoint_attempted"
-    for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
-        try:
-            resp=_post(url,body)
-        except Exception as e:
-            last=str(e)[:160]
-            continue
-        if not isinstance(resp,dict) or not resp.get("ok"):
-            # Server answered and refused. Do not try the other endpoint.
-            return False,f"server_declined:{str(resp)[:180]}"
-        return True,resp
-    return False,last
+    # Reach the node only through its authenticated nginx HTTPS endpoint.
+    # Falling back to http://HOST:8099 would expose X-Admin-Key and would turn a
+    # certificate failure into a silent security downgrade.
+    try:
+        resp=_post(f"https://{HOST}/wallet/transfer",body)
+    except Exception as e:
+        return False,str(e)[:160]
+    if not isinstance(resp,dict) or not resp.get("ok"):
+        return False,f"server_declined:{str(resp)[:180]}"
+    return True,resp
 def _is_bot_login(login, user_obj):
     """Return True if the comment/author appears to be a bot.
 

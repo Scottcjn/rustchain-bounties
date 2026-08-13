@@ -11,17 +11,20 @@ publicly confirmed with no RTC actually sent.
 Validates:
   - `{"ok": true}`   -> (True, response)
   - `{"ok": false}`  -> (False, "server_declined:...")
-  - a declining server is NOT retried against the fallback endpoint
-    (re-posting a request the server already processed risks a double debit)
-  - a raising endpoint DOES fall through to the fallback endpoint
-  - both endpoints raising -> (False, last error)
+  - certificate and hostname verification remain enabled
+  - the admin-authenticated request is HTTPS-only with no plaintext fallback
+  - a transport exception fails closed after one request
   - a non-dict body (e.g. an HTML error page) is not treated as success
 """
 import importlib.util
+import io
+import json
 import os
+import ssl
 import subprocess
 import unittest
 from pathlib import Path
+from unittest import mock
 
 os.environ.setdefault("GITHUB_TOKEN", "dummy")
 os.environ.setdefault("RTC_ADMIN_KEY", "dummy")
@@ -86,7 +89,7 @@ class TransferResultTests(unittest.TestCase):
         self.assertIn("server_declined", resp)
         self.assertIn("Insufficient balance", resp)
 
-    def test_declining_server_is_not_retried_on_fallback(self):
+    def test_declining_server_is_not_retried(self):
         """A server that processed and refused must not be re-posted to."""
         self._install([
             lambda u: {"ok": False, "error": "rejected"},
@@ -96,24 +99,17 @@ class TransferResultTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(len(self.calls), 1, "fallback endpoint must not be tried")
 
-    def test_raising_endpoint_falls_through_to_fallback(self):
+    def test_raising_endpoint_fails_closed_without_plaintext_fallback(self):
         def boom(_u):
             raise OSError("connection refused")
 
-        self._install([boom, lambda u: {"ok": True, "tx_hash": "z"}])
-        ok, resp = bp.transfer("alice", "memo", "idem-4")
-        self.assertTrue(ok)
-        self.assertEqual(resp["tx_hash"], "z")
-        self.assertEqual(len(self.calls), 2)
-
-    def test_all_endpoints_raise_is_failure(self):
-        def boom(_u):
-            raise OSError("403 Forbidden")
-
-        self._install([boom, boom])
+        self._install([boom])
         ok, resp = bp.transfer("alice", "memo", "idem-5")
         self.assertFalse(ok)
-        self.assertIn("403", resp)
+        self.assertIn("connection refused", resp)
+        self.assertEqual(len(self.calls), 1)
+        self.assertTrue(self.calls[0].startswith("https://"))
+        self.assertNotIn(":8099/", self.calls[0])
 
     def test_non_dict_body_is_not_success(self):
         """An HTML error page must not read as a completed payment."""
@@ -121,6 +117,32 @@ class TransferResultTests(unittest.TestCase):
         ok, resp = bp.transfer("alice", "memo", "idem-6")
         self.assertFalse(ok)
         self.assertIn("server_declined", resp)
+
+
+class VerifiedTransportTests(unittest.TestCase):
+    class _Response(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            self.close()
+
+    def test_post_keeps_default_certificate_and_hostname_verification(self):
+        captured = {}
+
+        def fake_urlopen(request, *, timeout, context):
+            captured.update(request=request, timeout=timeout, context=context)
+            return self._Response(json.dumps({"ok": True}).encode())
+
+        with mock.patch.object(bp.urllib.request, "urlopen", side_effect=fake_urlopen):
+            response = bp._post("https://node.example/wallet/transfer", b"{}")
+
+        self.assertEqual(response, {"ok": True})
+        self.assertTrue(captured["context"].check_hostname)
+        self.assertEqual(captured["context"].verify_mode, ssl.CERT_REQUIRED)
+        self.assertEqual(captured["request"].full_url,
+                         "https://node.example/wallet/transfer")
+        self.assertEqual(captured["request"].get_header("X-admin-key"), "dummy")
 
 
 if __name__ == "__main__":
