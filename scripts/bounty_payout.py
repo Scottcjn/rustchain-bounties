@@ -21,7 +21,8 @@ SAFETY:
 Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
 
 RTC_VPS_HOST must name the host covered by the node's TLS certificate. The
-payer intentionally has no plaintext or certificate-verification fallback.
+legacy production IP is translated to its certificate hostname so existing
+workflow secrets keep working without a plaintext or verification fallback.
 """
 import os, re, json, time, subprocess, ssl, urllib.request, urllib.error, importlib.util
 
@@ -42,7 +43,24 @@ def _load_second_act():
 
 _second_act = _load_second_act()
 TOKEN=os.environ["GITHUB_TOKEN"]; ADMIN=os.environ["RTC_ADMIN_KEY"]
-HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
+LEGACY_NODE_IP="50.28.86.131"
+NODE_TLS_HOST="bulbous-bouffant.metalseed.net"
+
+
+def _certificate_host(configured=None):
+    """Return a hostname that can pass TLS verification.
+
+    The workflow historically stored the production node's raw IP in
+    RTC_VPS_HOST. Its public certificate covers NODE_TLS_HOST, not that IP, so
+    enabling hostname verification without this exact compatibility mapping
+    would make the security fix stop every payout until a secret was edited.
+    Only the known production IP is translated; custom hosts are untouched.
+    """
+    host = configured if configured is not None else os.environ.get("RTC_VPS_HOST", NODE_TLS_HOST)
+    return NODE_TLS_HOST if host == LEGACY_NODE_IP else host
+
+
+HOST=_certificate_host(); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
 RATE=float(os.environ.get("RATE_RTC","3"))
 # Hard ceiling re-enforced at payout time, independent of any gate.
 MAX_CLAIM_RTC=float(os.environ.get("MAX_CLAIM_RTC","25")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))

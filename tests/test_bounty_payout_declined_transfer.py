@@ -145,5 +145,25 @@ class VerifiedTransportTests(unittest.TestCase):
         self.assertEqual(captured["request"].get_header("X-admin-key"), "dummy")
 
 
+class EndpointCompatibilityTests(unittest.TestCase):
+    def test_legacy_production_ip_uses_certificate_hostname(self):
+        self.assertEqual(
+            bp._certificate_host("50.28.86.131"),
+            "bulbous-bouffant.metalseed.net",
+        )
+
+    def test_custom_hostname_is_preserved(self):
+        self.assertEqual(
+            bp._certificate_host("node.internal.example"),
+            "node.internal.example",
+        )
+
+    def test_ip_prefix_is_not_broadly_rewritten(self):
+        self.assertEqual(
+            bp._certificate_host("50.28.86.131.attacker.example"),
+            "50.28.86.131.attacker.example",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
