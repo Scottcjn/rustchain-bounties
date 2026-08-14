@@ -112,7 +112,10 @@ class WeeklyCeilingTests(unittest.TestCase):
                 return {"items": items}
             if "/comments" in joined:
                 idx = int(joined.split("/issues/")[1].split("/")[0]) - 900
-                return [{"body": f"<!-- rtc-payout-amount: {amounts[idx]} -->"}]
+                return [{
+                    "user": {"login": "github-actions[bot]"},
+                    "body": f"<!-- rtc-payout-amount: {amounts[idx]} -->",
+                }]
             return default
         dg.gh = fake
 
@@ -124,6 +127,35 @@ class WeeklyCeilingTests(unittest.TestCase):
         self._with_prior([])
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
 
+    def test_untrusted_preplanted_marker_does_not_poison_cap(self):
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 900, "body": ""}]}
+            if "/issues/900/comments" in joined:
+                return [
+                    {"user": {"login": "mallory"},
+                     "body": "<!-- rtc-payout-amount: 40 -->"},
+                    {"user": {"login": "github-actions[bot]"},
+                     "body": "<!-- rtc-payout-amount: 0.5 -->"},
+                ]
+            return default
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.5)
+
+    def test_verified_claim_without_trusted_marker_fails_closed(self):
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 900, "body": ""}]}
+            if "/issues/900/comments" in joined:
+                return [{"user": {"login": "mallory"},
+                         "body": "<!-- rtc-payout-amount: 40 -->"}]
+            return default
+        dg.gh = fake
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
+
     def test_ceiling_is_higher_than_typical_top_earner(self):
         """Measured 2026-08-10: top contributors earn 20-50 RTC/week across ALL
         bounty types. A docstring-only ceiling below that would be punitive."""
@@ -134,3 +166,55 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+
+class VerifiedTransitionTests(unittest.TestCase):
+    def setUp(self):
+        self.saved = {
+            name: getattr(dg, name)
+            for name in ("NUM", "gh", "gh_raw", "docstring_rtc_this_week",
+                         "post_comment_checked", "add_labels")
+        }
+        dg.NUM = "99999"
+
+        def fake_gh(args, default=None, strict=False):
+            if args[:2] == ["issue", "view"]:
+                return {
+                    "title": "Docstring bounty claim",
+                    "body": "https://github.com/Scottcjn/Rustchain/pull/123",
+                    "labels": [], "author": {"login": "alice"}, "state": "OPEN",
+                }
+            if args[:2] == ["pr", "view"]:
+                return {
+                    "state": "MERGED", "additions": 1, "deletions": 0,
+                    "files": [], "author": {"login": "alice"},
+                    "mergedAt": "2026-08-14T00:00:00Z",
+                }
+            return default
+
+        dg.gh = fake_gh
+        dg.gh_raw = lambda args: '+++ b/x.py\n+    """Documented."""\n'
+        dg.docstring_rtc_this_week = lambda author: 0.0
+
+    def tearDown(self):
+        for name, value in self.saved.items():
+            setattr(dg, name, value)
+
+    def test_comment_failure_writes_no_terminal_labels(self):
+        labels = []
+        dg.post_comment_checked = lambda body: (_ for _ in ()).throw(
+            dg.GhError("simulated comment failure")
+        )
+        dg.add_labels = lambda *names: labels.extend(names) or True
+
+        self.assertEqual(dg.main(), 1)
+        self.assertEqual(labels, [])
+
+    def test_label_failure_is_not_reported_as_success(self):
+        comments = []
+        dg.post_comment_checked = lambda body: comments.append(body)
+        dg.add_labels = lambda *names: False
+
+        self.assertEqual(dg.main(), 1)
+        self.assertEqual(len(comments), 1)
+        self.assertIn("rtc-payout-amount: 0.5", comments[0])
