@@ -113,7 +113,6 @@ def gh_raw(args):
     return result.stdout
 
 
-
 def add_labels(*names):
     """Apply labels via REST.
 
@@ -312,8 +311,7 @@ def main():
                 f"Paying the verified number. If you think the gate has miscounted, say so and a "
                 f"human will check — miscounts are usually arithmetic, not bad faith.")
 
-    add_labels("bounty-eligible", "docstring-verified")
-    gh(["issue", "comment", NUM, "-R", REPO, "--body",
+    verified_comment = (
         f"✅ 🤖 **Docstring gate: verified.**\n\n"
         f"- PR {pr_repo}#{pr_num} is **merged**\n"
         f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
@@ -321,7 +319,12 @@ def main():
         f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
         f"<!-- rtc-payout-amount: {amount} -->\n"
         f"Queued for payout. The balance moves after the standard confirmation window, not on this "
-        f"comment."], None)
+        f"comment."
+    )
+    gh_raw(["issue", "comment", NUM, "-R", REPO, "--body", verified_comment])
+    if not add_labels("bounty-eligible", "docstring-verified"):
+        print("::error::verified amount marker posted, but labels were not applied")
+        return 1
     print(f"verified {doc_count} docstrings -> {amount} RTC on {REPO}#{NUM}")
     return 0
 
