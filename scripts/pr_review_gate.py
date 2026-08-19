@@ -371,6 +371,22 @@ def main():
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
-    try: main()
+    try:
+        main()
     except Exception as e:
-        print(f"gate error: {e}", file=sys.stderr)  # never fail the workflow
+        # Exit non-zero so the run is visibly red and can be retried.
+        #
+        # This used to swallow every exception ("never fail the workflow").
+        # add_label() re-raises on a failed POST, so when the label write at the
+        # eligible branch failed, it threw straight past the follow-up comment:
+        # the claim went unlabelled, the contributor was never told, and the run
+        # was green. That is the reported "gate green without applying payout
+        # labels" bug.
+        #
+        # A silent pass is the worst outcome for a payout gate — nothing
+        # downstream can tell a claim that was skipped from one that was
+        # adjudicated. Fail loudly instead.
+        import traceback
+        print(f"gate error: {type(e).__name__}: {e}", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)

@@ -45,12 +45,22 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RATE_PER_FUNC: "0.5"
           MAX_RTC: "25"
+        # `set -e` is deliberately NOT used: the sweep must keep going past one
+        # bad claim. Every exit status is therefore captured and acted on
+        # explicitly — which is what was missing before.
         run: |
           set -uo pipefail
           single="${{ github.event.inputs.issue || github.event.issue.number }}"
           if [ -n "$single" ]; then
-            ISSUE_NUMBER="$single" python3 scripts/docstring_gate.py
-            exit 0
+            # This used to be followed by an unconditional `exit 0`. Without
+            # `set -e`, a failing gate run reached it and the step went green
+            # having adjudicated nothing. The step's status is now the gate's
+            # status.
+            ISSUE_NUMBER="$single" python3 scripts/docstring_gate.py && rc=0 || rc=$?
+            if [ "$rc" -ne 0 ]; then
+              echo "::error title=Docstring gate failed::claim #${single} exited ${rc}; it was NOT adjudicated"
+            fi
+            exit "$rc"
           fi
 
           # Scheduled sweep: anything held awaiting-merge, plus recent claims
@@ -62,11 +72,30 @@ jobs:
                   -f q="repo:${GH_REPO} is:issue is:open -label:bounty-eligible -label:awaiting-merge -label:needs-human docstring" \
                   -f per_page=60 --jq '.items[].number' 2>/dev/null || true)
 
-          n=0
+          # Three separate counters. The old loop kept one, incremented it once
+          # per ITERATION after `|| true`, and printed it as "adjudicated N" —
+          # so 60 consecutive crashes reported "adjudicated 60 claim(s)" and the
+          # run was green. A count of attempts is not a count of adjudications.
+          attempted=0
+          adjudicated=0
+          failed=0
+          failed_list=""
           for i in $(printf '%s\n%s\n' "$held" "$fresh" | sort -un); do
             [ -z "$i" ] && continue
-            ISSUE_NUMBER="$i" python3 scripts/docstring_gate.py || true
-            n=$((n+1))
-            [ "$n" -ge 60 ] && echo "::notice::stopped at 60 claims this run; the rest process next sweep" && break
+            attempted=$((attempted+1))
+            ISSUE_NUMBER="$i" python3 scripts/docstring_gate.py && rc=0 || rc=$?
+            if [ "$rc" -eq 0 ]; then
+              adjudicated=$((adjudicated+1))
+            else
+              failed=$((failed+1))
+              failed_list="${failed_list} #${i}(exit ${rc})"
+              echo "::warning title=Docstring claim not adjudicated::#${i} exited ${rc}"
+            fi
+            [ "$attempted" -ge 60 ] && echo "::notice::stopped at 60 claims this run; the rest process next sweep" && break
           done
-          echo "adjudicated $n claim(s)"
+          echo "attempted ${attempted} claim(s): adjudicated ${adjudicated}, failed ${failed}"
+
+          if [ "$failed" -gt 0 ]; then
+            echo "::error title=Docstring gate failures::${failed} of ${attempted} claim(s) were NOT adjudicated:${failed_list}"
+            exit 1
+          fi
