@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: MIT
+name: Retention Snapshot
+
+# Appends a weekly contributor-retention snapshot to data/retention.jsonl.
+#
+# This is a measurement job, not a fix. The payout path was repaired on
+# 2026-08-07 (gate backfill + label-based payout selection); no post-fix
+# 30-day cohort existed at that point, so the open question is whether the
+# repair alone moves retention before any further mechanism is added.
+#
+# Snapshotting matters because `gh issue list` caps out (~4,000). As the
+# tracker grows, the earliest weeks stop being reachable through the API, and
+# a snapshot is the only surviving record of what those weeks looked like.
+on:
+  schedule:
+    - cron: "13 6 * * 1"   # Mondays, after the week rolls over
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: retention-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Snapshot retention
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: python3 scripts/retention_metrics.py --snapshot | tee "$GITHUB_STEP_SUMMARY"
+      - name: Commit snapshot
+        run: |
+          if git diff --quiet -- data/retention.jsonl; then
+            echo "no change to snapshot; nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/retention.jsonl
+          git commit -m "chore(metrics): weekly retention snapshot [skip ci]"
+          # The tracker is written to constantly by other jobs; rebase rather
+          # than fail the run on a race.
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
