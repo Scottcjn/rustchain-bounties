@@ -46,14 +46,30 @@ jobs:
               -H "X-Admin-Key: ${RTC_ADMIN_KEY}" \
               -H "Content-Type: application/json" -d '{"limit": 500}')
             if [ "$code" != "200" ]; then echo "::error::confirm HTTP $code"; cat resp.json; exit 1; fi
+            # `stale` is emitted as the literal string UNKNOWN when the node
+            # could not measure the queue (locked pending_ledger / schema drift).
+            # It used to come back as 0 in that case, which is this loop's stop
+            # condition — so a stuck queue printed "queue drained" and the job
+            # went green while RTC delivery was halted. Fail closed instead.
             read confirmed stale < <(python3 - <<'PY'
           import json
           d = json.load(open('resp.json'))
-          print(d.get('confirmed_count', 0), d.get('stale_pending_count', 0))
+          measured = d.get('overdue_stats_measured')
+          stale = d.get('stale_pending_count')
+          # measured is absent on older node builds; treat a present integer as
+          # measured so this workflow keeps working across the deploy window.
+          if measured is False or stale is None:
+              stale = 'UNKNOWN'
+          print(d.get('confirmed_count', 0), stale)
           PY
           )
             total=$((total + confirmed))
             echo "iter $i: confirmed=$confirmed total=$total stale_remaining=$stale"
+            if [ "$stale" = "UNKNOWN" ]; then
+              echo "::error title=Pending queue not measurable::The node could not count overdue pending transfers, so the queue state is UNKNOWN. This is NOT a drained queue — RTC delivery may be halted."
+              cat resp.json
+              exit 1
+            fi
             # Stop when the queue is drained, or a run makes no progress (e.g. all
             # remaining rows error individually) to avoid spinning.
             [ "${stale:-0}" -eq 0 ] && { echo "queue drained"; break; }

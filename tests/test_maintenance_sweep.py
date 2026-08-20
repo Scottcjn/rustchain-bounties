@@ -49,55 +49,79 @@ class MaintainerIdentityTests(unittest.TestCase):
         self.assertFalse(ms.is_maintainer("not-scottcjn"))
 
 
-class ClassifyTests(unittest.TestCase):
+
+
+class MultiStreamTests(unittest.TestCase):
+    """A PR has three comment streams; reading one loses maintainer questions.
+
+    Regression for the LLVM case: an inline review comment went unanswered for
+    four months because only the issue-comment stream was read.
+    """
+
     def setUp(self):
         self._orig = ms.gh_json
 
     def tearDown(self):
         ms.gh_json = self._orig
 
-    def _item(self, author, n_comments):
-        return {"user": {"login": author}, "comments": n_comments,
-                "comments_url": "u", "created_at": "2026-07-01T00:00:00Z"}
+    def _pr(self, author="alice", n=7):
+        return {"user": {"login": author}, "comments": n, "comments_url": "/issues/7/comments",
+                "created_at": "2026-04-01T00:00:00Z", "number": 7,
+                "pull_request": {}, "repository_url": "https://api.github.com/repos/llvm/llvm-project"}
 
-    def test_external_with_no_comments_is_never_answered(self):
-        b, who, _ = ms.classify(self._item("alice", 0), {})
-        self.assertEqual(b, "NEVER_ANSWERED")
-        self.assertEqual(who, "alice")
+    def _streams(self, issue=(), review=(), reviews=()):
+        def fake(args, default):
+            u = args[1] if len(args) > 1 else ""
+            if u.startswith("/issues"):
+                return [{"created_at": t, "user": {"login": w}} for t, w in issue]
+            if u.endswith("/comments?per_page=100"):
+                return [{"created_at": t, "user": {"login": w}} for t, w in review]
+            if "/reviews" in u:
+                return [{"submitted_at": t, "user": {"login": w}} for t, w in reviews]
+            return default
+        ms.gh_json = fake
 
-    def test_our_own_untouched_pr_is_not_owed_a_reply(self):
-        b, _, _ = ms.classify(self._item("Scottcjn", 0), {})
-        self.assertIsNone(b)
-
-    def test_beep_own_untouched_pr_is_not_owed_a_reply(self):
-        """The second identity must behave identically to the first."""
-        b, _, _ = ms.classify(self._item("sophiaeagent-beep", 0), {})
-        self.assertIsNone(b)
-
-    def test_contributor_spoke_last_is_ball_in_our_court(self):
-        ms.gh_json = lambda a, d: [{"user": {"login": "alice"},
-                                    "created_at": "2026-07-20T00:00:00Z"}]
-        b, who, when = ms.classify(self._item("alice", 1), {})
-        self.assertEqual(b, "BALL_IN_OUR_COURT")
-        self.assertEqual(who, "alice")
-        self.assertEqual(when, "2026-07-20")
-
-    def test_beep_reply_clears_the_thread(self):
-        """A reply from the SECOND identity must count as answered."""
-        ms.gh_json = lambda a, d: [{"user": {"login": "alice"},
-                                    "created_at": "2026-07-20T00:00:00Z"},
-                                   {"user": {"login": "sophiaeagent-beep"},
-                                    "created_at": "2026-07-21T00:00:00Z"}]
-        b, _, _ = ms.classify(self._item("alice", 2), {})
+    def test_inline_review_comment_is_seen(self):
+        """Maintainer spoke ONLY inline. Thread must not read as unanswered."""
+        self._streams(issue=[("2026-04-01T00:00:00Z", "alice")],
+                      review=[("2026-04-16T00:00:00Z", "Scottcjn")])
+        b, who, _ = ms.classify(self._pr(), {})
         self.assertEqual(b, "MOVED_RECENTLY")
+        self.assertEqual(who, "Scottcjn")
 
-    def test_contributor_after_maintainer_reopens_the_ball(self):
-        ms.gh_json = lambda a, d: [{"user": {"login": "Scottcjn"},
-                                    "created_at": "2026-07-20T00:00:00Z"},
-                                   {"user": {"login": "alice"},
-                                    "created_at": "2026-07-22T00:00:00Z"}]
-        b, _, _ = ms.classify(self._item("alice", 2), {})
+    def test_contributor_inline_reply_reopens_ball(self):
+        self._streams(issue=[("2026-04-01T00:00:00Z", "Scottcjn")],
+                      review=[("2026-04-20T00:00:00Z", "alice")])
+        b, who, _ = ms.classify(self._pr(), {})
         self.assertEqual(b, "BALL_IN_OUR_COURT")
+        self.assertEqual(who, "alice")
+
+    def test_review_state_counts_as_activity(self):
+        """An APPROVED review with no body is still a maintainer touching it."""
+        self._streams(issue=[("2026-04-01T00:00:00Z", "alice")],
+                      reviews=[("2026-04-05T00:00:00Z", "sophiaeagent-beep")])
+        b, who, _ = ms.classify(self._pr(), {})
+        self.assertEqual(b, "MOVED_RECENTLY")
+        self.assertEqual(who, "sophiaeagent-beep")
+
+    def test_latest_across_all_three_streams_wins(self):
+        self._streams(issue=[("2026-04-01T00:00:00Z", "Scottcjn")],
+                      review=[("2026-04-10T00:00:00Z", "Scottcjn")],
+                      reviews=[("2026-04-25T00:00:00Z", "alice")])
+        b, who, when = ms.classify(self._pr(), {})
+        self.assertEqual(b, "BALL_IN_OUR_COURT")
+        self.assertEqual(who, "alice")
+        self.assertEqual(when, "2026-04-25")
+
+    def test_no_activity_anywhere_is_never_answered(self):
+        self._streams()
+        b, _, _ = ms.classify(self._pr(n=0), {})
+        self.assertEqual(b, "NEVER_ANSWERED")
+
+    def test_our_own_silent_pr_is_not_owed_a_reply(self):
+        self._streams()
+        b, _, _ = ms.classify(self._pr(author="Scottcjn", n=0), {})
+        self.assertIsNone(b)
 
 
 if __name__ == "__main__":
