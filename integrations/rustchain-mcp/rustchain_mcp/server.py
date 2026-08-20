@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from typing import Any, Optional
 
-from mcp.server.fastmcp import FastMCP
+try:  # mcp >= 2.0.0 removed mcp.server.fastmcp; FastMCP was renamed
+    # MCPServer and moved to mcp.server.mcpserver. Same .tool()/.run() API.
+    from mcp.server.mcpserver import MCPServer as FastMCP
+except ImportError:  # mcp 1.x
+    from mcp.server.fastmcp import FastMCP
 
 from .client import RustChainClient
 

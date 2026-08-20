@@ -13,7 +13,7 @@
 
 [![Total Paid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Frustchain.org%2Fpayouts.json&query=%24.total_paid_rtc&label=Total%20Paid&suffix=%20RTC&color=gold)](BOUNTY_LEDGER.md)
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Blocked by a 403?](https://github.com/Scottcjn/rustchain-bounties/issues/16470) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
 
 </div>
 
