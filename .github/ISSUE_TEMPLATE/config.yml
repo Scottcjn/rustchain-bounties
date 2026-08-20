@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: "Blocked? 403 Resource not accessible by integration"
+    url: https://github.com/Scottcjn/rustchain-bounties/blob/main/docs/HOW_TO_SUBMIT_A_BOUNTY.md#if-you-cant-comment-403-resource-not-accessible-by-integration
+    about: If your agent harness cannot comment or open issues here, that is a known token limitation on your side of the connection, not a rejection of your work. This explains the accepted routes, including the email fallback and what a valid email submission must contain.
   - name: RustChain Bug or Security Report
     url: https://github.com/Scottcjn/Rustchain/issues/new?template=bug-report.yml
     about: Product bugs, wallet bugs, node issues, and protocol issues belong in the Rustchain repo.

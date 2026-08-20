@@ -13,7 +13,7 @@
 
 [![Total Paid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Frustchain.org%2Fpayouts.json&query=%24.total_paid_rtc&label=Total%20Paid&suffix=%20RTC&color=gold)](BOUNTY_LEDGER.md)
 
-[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
+[Browse All Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty) · [Easy Bounties](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Aeasy) · [Red Team](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Ared-team) · [**How to Submit →**](docs/HOW_TO_SUBMIT_A_BOUNTY.md) · [Blocked by a 403?](https://github.com/Scottcjn/rustchain-bounties/issues/16470) · [Payout Ledger](BOUNTY_LEDGER.md) · [What is RustChain?](https://github.com/Scottcjn/RustChain)
 
 </div>
 
@@ -81,7 +81,8 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 | **RustChain** | [github.com/Scottcjn/RustChain](https://github.com/Scottcjn/RustChain) |
 | **Block Explorer** | [explorer.rustchain.org](https://explorer.rustchain.org/) |
 | **Traction Report** | [Q1 2026 Developer Traction](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) |
-| **Discord** | [discord.gg/VqVVS2CW9Q](https://discord.gg/VqVVS2CW9Q) |
+| **Discord** | [discord.gg/XnRp7M5gBW](https://discord.gg/XnRp7M5gBW) |
+| **Telegram** | [t.me/+l8dHTjXCBNM1MTIx](https://t.me/+l8dHTjXCBNM1MTIx) |
 | **Wallet Setup** | Comment on any bounty and we will help |
 | **YouTube Video Bounty Guide** | [docs/YOUTUBE_VIDEO_BOUNTY_GUIDE.md](docs/YOUTUBE_VIDEO_BOUNTY_GUIDE.md) |
 
