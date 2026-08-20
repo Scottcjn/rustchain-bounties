@@ -156,8 +156,7 @@ class TransferRetry(unittest.TestCase):
     @patch("time.sleep", return_value=None)
     @patch("requests.post")
     def test_single_attempt_never_double_calls(self, mock_post, _sleep):
-        """Baseline: the common case (VPS reachable) makes exactly one
-        HTTP call — the retry loop must not add extra calls on success."""
+        """Baseline: the common case makes exactly one HTTP call."""
         ok_resp = MagicMock()
         ok_resp.raise_for_status.return_value = None
         ok_resp.json.return_value = {"ok": True}
@@ -167,6 +166,32 @@ class TransferRetry(unittest.TestCase):
 
         self.assertEqual(mock_post.call_count, 1)
 
+
+class PaidMarkerGuard(unittest.TestCase):
+    def _comment(self, login, body):
+        return {"user": {"login": login}, "body": body}
+
+    def test_untrusted_comment_cannot_suppress_payment(self):
+        c = self._comment(
+            "mallory",
+            "<!-- RTC-AutoPay-Confirmed kind=directive pending_id=p1 -->",
+        )
+        self.assertFalse(auto_pay.has_trusted_paid_marker(c, "Scottcjn"))
+
+    def test_failure_marker_is_not_a_paid_marker(self):
+        c = self._comment("github-actions[bot]", "<!-- RTC-AutoPay-Failed -->")
+        self.assertFalse(auto_pay.has_trusted_paid_marker(c, "Scottcjn"))
+
+    def test_trusted_exact_marker_suppresses_duplicate(self):
+        c = self._comment(
+            "github-actions[bot]",
+            "<!-- RTC-AutoPay-Confirmed kind=auto-tier pending_id=p1 -->",
+        )
+        self.assertTrue(auto_pay.has_trusted_paid_marker(c, "Scottcjn"))
+
+    def test_trusted_but_malformed_marker_does_not_suppress(self):
+        c = self._comment("github-actions[bot]", "RTC-AutoPay-Confirmed")
+        self.assertFalse(auto_pay.has_trusted_paid_marker(c, "Scottcjn"))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

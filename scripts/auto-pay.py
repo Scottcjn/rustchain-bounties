@@ -44,9 +44,16 @@ PAYMENT_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Duplicate-detection: if this string appears in any comment, payment was
-# already processed for this PR.
+# Duplicate-detection uses an exact structured marker written by trusted
+# automation (or the repository owner). Public PR comments are untrusted: a
+# contributor must not be able to suppress their own or somebody else's payout
+# by copying this string into a comment.
 ALREADY_PAID_MARKER = "RTC-AutoPay-Confirmed"
+FAILED_MARKER = "RTC-AutoPay-Failed"
+PAID_MARKER_RE = re.compile(
+    r"<!--\s*RTC-AutoPay-Confirmed\s+kind=(?:directive|auto-tier)\s+"
+    r"pending_id=[^\s>]+\s*-->"
+)
 
 # ---------------------------------------------------------------------------
 # Conservative auto-tier (folded in from the former sophia-auto-approve.yml,
@@ -136,6 +143,14 @@ def post_comment(repo: str, pr_number: str, body: str) -> None:
     resp = requests.post(url, headers=gh_headers(), json={"body": body})
     resp.raise_for_status()
     print(f"Posted confirmation comment on PR #{pr_number}")
+
+
+def has_trusted_paid_marker(comment: dict, repo_owner: str) -> bool:
+    """True only for an exact paid marker from trusted automation/owner."""
+    user = comment.get("user") or comment.get("author") or {}
+    login = (user.get("login") or "").lower() if isinstance(user, dict) else ""
+    trusted = {repo_owner.lower(), "github-actions", "github-actions[bot]"}
+    return login in trusted and bool(PAID_MARKER_RE.search(comment.get("body") or ""))
 
 
 def transfer_rtc(vps_host: str, admin_key: str, to_wallet: str,
@@ -231,7 +246,7 @@ def main() -> None:
 
     # --- Check for duplicate run ------------------------------------------
     for c in comments:
-        if ALREADY_PAID_MARKER in (c.get("body") or ""):
+        if has_trusted_paid_marker(c, repo_owner):
             print(f"Payment already processed (found {ALREADY_PAID_MARKER}). Skipping.")
             return
 
@@ -356,7 +371,7 @@ def main() -> None:
             f"but the transfer was rejected:\n\n"
             f"```\n{error}\n```\n\n"
             f"Please process this payment manually.\n\n"
-            f"<!-- {ALREADY_PAID_MARKER}:FAILED -->"
+            f"<!-- {FAILED_MARKER} -->"
         )
         post_comment(repo, pr_number, fail_body)
         sys.exit(1)

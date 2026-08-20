@@ -300,6 +300,23 @@ class GraphQLAuthorShapeTests(unittest.TestCase):
         self.assertEqual(bp._comment_author_login("string"), (None, None))
 
 
+class PaidMarkerTrustTests(unittest.TestCase):
+    MARKER = "💸 **RTC-AutoPay-Confirmed** — payout **settled** — 3 RTC"
+
+    def test_untrusted_paid_marker_is_ignored(self):
+        c = {"author": {"login": "mallory"}, "body": self.MARKER}
+        self.assertFalse(bp.is_trusted_paid_comment(c))
+
+    def test_actions_paid_marker_is_accepted(self):
+        c = {"author": {"login": "github-actions"}, "body": self.MARKER}
+        self.assertTrue(bp.is_trusted_paid_comment(c))
+
+    def test_plain_marker_text_is_not_accepted(self):
+        c = {"author": {"login": "github-actions"},
+             "body": "RTC-AutoPay-Confirmed"}
+        self.assertFalse(bp.is_trusted_paid_comment(c))
+
+
 class BotDetectionTests(unittest.TestCase):
     def test_bot_via_type(self):
         self.assertTrue(bp._is_bot_login("anything", {"type": "Bot"}))

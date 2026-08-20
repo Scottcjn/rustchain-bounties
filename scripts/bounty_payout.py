@@ -19,6 +19,10 @@ SAFETY:
   - idempotency_key=bounty73-claim-<n> + 'RTC-AutoPay-Confirmed' marker => never double-pays
   - MAX_PER_RUN aggregate cap (default 40) — hard stop per run, surfaced in log
 Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
+
+RTC_VPS_HOST must name the host covered by the node's TLS certificate. The
+legacy production IP is translated to its certificate hostname so existing
+workflow secrets keep working without a plaintext or verification fallback.
 """
 import os, re, json, time, subprocess, ssl, urllib.request, urllib.error, importlib.util
 
@@ -39,12 +43,31 @@ def _load_second_act():
 
 _second_act = _load_second_act()
 TOKEN=os.environ["GITHUB_TOKEN"]; ADMIN=os.environ["RTC_ADMIN_KEY"]
-HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
+LEGACY_NODE_IP="50.28.86.131"
+NODE_TLS_HOST="bulbous-bouffant.metalseed.net"
+
+
+def _certificate_host(configured=None):
+    """Return a hostname that can pass TLS verification.
+
+    The workflow historically stored the production node's raw IP in
+    RTC_VPS_HOST. Its public certificate covers NODE_TLS_HOST, not that IP, so
+    enabling hostname verification without this exact compatibility mapping
+    would make the security fix stop every payout until a secret was edited.
+    Only the known production IP is translated; custom hosts are untouched.
+    """
+    host = configured if configured is not None else os.environ.get("RTC_VPS_HOST", NODE_TLS_HOST)
+    return NODE_TLS_HOST if host == LEGACY_NODE_IP else host
+
+
+HOST=_certificate_host(); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
 RATE=float(os.environ.get("RATE_RTC","3"))
 # Hard ceiling re-enforced at payout time, independent of any gate.
 MAX_CLAIM_RTC=float(os.environ.get("MAX_CLAIM_RTC","25")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
-FROM="founder_community"; PORT="8099"
+FROM="founder_community"
+REPO_OWNER=REPO.split("/",1)[0]
 WALLET_RE=re.compile(r'\bRTC[0-9a-fA-F]{40}\b')
+PAID_COMMENT_RE=re.compile(r'\*\*RTC-AutoPay-Confirmed\*\*\s+—\s+payout\b')
 # Matches `Wallet: <handle-or-address>` (case-insensitive, Markdown-tolerant).
 # Tolerates:
 #   - leading Markdown headers (`## Wallet: handle`)
@@ -156,7 +179,9 @@ def gh(args, _check=True):
         raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: {(p.stderr or '').strip()[:200]}")
     return p.stdout
 def _post(url, body):
-    ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+    # The response is the payer's success oracle, so it must be authenticated.
+    # create_default_context() verifies both the certificate chain and hostname.
+    ctx=ssl.create_default_context()
     req=urllib.request.Request(url,data=body,method="POST",
         headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
     with urllib.request.urlopen(req,timeout=30,context=ctx) as r: return json.loads(r.read())
@@ -175,20 +200,16 @@ def transfer(to,memo,idem,amount=None):
     debit under a different URL.
     """
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":(RATE if amount is None else amount),"memo":memo,"idempotency_key":idem}).encode()
-    # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
-    # nginx HTTPS endpoint (the working path); fall back to the internal port.
-    last="no_endpoint_attempted"
-    for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
-        try:
-            resp=_post(url,body)
-        except Exception as e:
-            last=str(e)[:160]
-            continue
-        if not isinstance(resp,dict) or not resp.get("ok"):
-            # Server answered and refused. Do not try the other endpoint.
-            return False,f"server_declined:{str(resp)[:180]}"
-        return True,resp
-    return False,last
+    # Reach the node only through its authenticated nginx HTTPS endpoint.
+    # Falling back to http://HOST:8099 would expose X-Admin-Key and would turn a
+    # certificate failure into a silent security downgrade.
+    try:
+        resp=_post(f"https://{HOST}/wallet/transfer",body)
+    except Exception as e:
+        return False,str(e)[:160]
+    if not isinstance(resp,dict) or not resp.get("ok"):
+        return False,f"server_declined:{str(resp)[:180]}"
+    return True,resp
 def _is_bot_login(login, user_obj):
     """Return True if the comment/author appears to be a bot.
 
@@ -240,6 +261,16 @@ def _comment_author_login(c):
     if isinstance(u, dict):
         return u.get("login"), u
     return None, None
+
+
+def is_trusted_paid_comment(c):
+    """Accept the paid sentinel only from trusted automation/repo owner."""
+    login, _ = _comment_author_login(c)
+    trusted = {REPO_OWNER.lower(), "github-actions", "github-actions[bot]"}
+    return bool(login and login.lower() in trusted and
+                PAID_COMMENT_RE.search(c.get("body") or ""))
+
+
 def _looks_like_handle(token):
     if not token:
         return False
@@ -345,7 +376,7 @@ for i in issues:
         and _is_trusted(_comment_author_login(c)[0])
         for c in coms)
     if not eligible: continue
-    if any("RTC-AutoPay-Confirmed" in (c.get("body") or "") for c in coms): continue
+    if any(is_trusted_paid_comment(c) for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
     if not wallet: continue
     # Review claims are a flat RATE. Docstring claims are worth whatever the
