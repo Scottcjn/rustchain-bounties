@@ -10,6 +10,7 @@ import importlib.util
 import os
 import unittest
 from pathlib import Path
+from unittest import mock
 
 os.environ.setdefault("GITHUB_TOKEN", "dummy")
 SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "docstring_gate.py"
@@ -85,6 +86,69 @@ class ClaimParsingTests(unittest.TestCase):
             m = dg.COUNT_RE.search(text)
             self.assertIsNotNone(m, text)
             self.assertEqual(m.group(1), want)
+
+
+class DiffReadFailureTests(unittest.TestCase):
+    def setUp(self):
+        self._num = dg.NUM
+        self._gh = dg.gh
+        self._gh_raw = dg.gh_raw
+        self._add_labels = dg.add_labels
+        dg.NUM = "123"
+        self.comments = []
+        self.labels = []
+
+        def fake_gh(args, default=None, strict=False):
+            if args[:2] == ["issue", "view"]:
+                return {
+                    "title": "Claim: docs batch 1",
+                    "body": "PR: https://github.com/example/project/pull/7\nFunctions documented: 1",
+                    "labels": [],
+                    "author": {"login": "alice"},
+                    "state": "OPEN",
+                }
+            if args[:2] == ["pr", "view"]:
+                return {
+                    "state": "MERGED",
+                    "additions": 1,
+                    "deletions": 0,
+                    "files": [{"path": "x.py"}],
+                    "author": {"login": "alice"},
+                    "mergedAt": "2026-08-14T00:00:00Z",
+                }
+            if args[:2] == ["issue", "comment"]:
+                self.comments.append(args)
+            return default
+
+        dg.gh = fake_gh
+        dg.add_labels = lambda *names: self.labels.extend(names) or True
+
+    def tearDown(self):
+        dg.NUM = self._num
+        dg.gh = self._gh
+        dg.gh_raw = self._gh_raw
+        dg.add_labels = self._add_labels
+
+    def test_nonzero_diff_command_raises(self):
+        result = mock.Mock(returncode=1, stdout="", stderr="API rate limit exceeded")
+        with mock.patch.object(dg.subprocess, "run", return_value=result):
+            with self.assertRaisesRegex(dg.GhError, "API rate limit exceeded"):
+                dg.gh_raw(["pr", "diff", "7", "-R", "example/project"])
+
+    def test_failed_diff_read_does_not_adjudicate_claim(self):
+        dg.gh_raw = lambda _args: (_ for _ in ()).throw(dg.GhError("transient failure"))
+
+        self.assertEqual(dg.main(), 1)
+        self.assertEqual(self.comments, [])
+        self.assertEqual(self.labels, [])
+
+    def test_successful_empty_diff_keeps_zero_docstring_verdict(self):
+        dg.gh_raw = lambda _args: ""
+
+        self.assertEqual(dg.main(), 0)
+        self.assertEqual(self.labels, ["needs-human"])
+        self.assertEqual(len(self.comments), 1)
+        self.assertIn("no added lines", " ".join(self.comments[0]))
 
 
 if __name__ == "__main__":

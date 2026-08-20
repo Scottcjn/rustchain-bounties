@@ -46,27 +46,34 @@ jobs:
           RATE_PER_FUNC: "0.5"
           MAX_RTC: "25"
         run: |
-          set -uo pipefail
+          set -euo pipefail
           single="${{ github.event.inputs.issue || github.event.issue.number }}"
           if [ -n "$single" ]; then
             ISSUE_NUMBER="$single" python3 scripts/docstring_gate.py
-            exit 0
+            exit
           fi
 
           # Scheduled sweep: anything held awaiting-merge, plus recent claims
           # that have not been adjudicated yet.
           held=$(gh api -X GET search/issues \
                   -f q="repo:${GH_REPO} is:issue is:open label:awaiting-merge" \
-                  -f per_page=60 --jq '.items[].number' 2>/dev/null || true)
+                  -f per_page=60 --jq '.items[].number')
           fresh=$(gh api -X GET search/issues \
                   -f q="repo:${GH_REPO} is:issue is:open -label:bounty-eligible -label:awaiting-merge -label:needs-human docstring" \
-                  -f per_page=60 --jq '.items[].number' 2>/dev/null || true)
+                  -f per_page=60 --jq '.items[].number')
 
           n=0
+          failed=0
           for i in $(printf '%s\n%s\n' "$held" "$fresh" | sort -un); do
             [ -z "$i" ] && continue
-            ISSUE_NUMBER="$i" python3 scripts/docstring_gate.py || true
+            if ! ISSUE_NUMBER="$i" python3 scripts/docstring_gate.py; then
+              echo "::error::docstring gate failed for issue #$i"
+              failed=$((failed+1))
+            fi
             n=$((n+1))
             [ "$n" -ge 60 ] && echo "::notice::stopped at 60 claims this run; the rest process next sweep" && break
           done
-          echo "adjudicated $n claim(s)"
+          echo "adjudicated $n claim(s); $failed failed"
+          if [ "$failed" -gt 0 ]; then
+            exit 1
+          fi

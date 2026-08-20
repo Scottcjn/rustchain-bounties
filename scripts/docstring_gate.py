@@ -106,10 +106,15 @@ def gh(args, default=None, strict=False):
 
 
 def gh_raw(args):
+    """Run `gh` and return stdout, raising when the read is not authoritative."""
     try:
-        return subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120).stdout
-    except Exception:
-        return ""
+        p = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120)
+    except Exception as e:
+        raise GhError(f"gh {' '.join(args[:3])} failed: {e}") from e
+    if p.returncode != 0:
+        raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: "
+                      f"{(p.stderr or '').strip()[:200]}")
+    return p.stdout
 
 
 
@@ -246,7 +251,14 @@ def main():
         print(f"{pr_repo}#{pr_num} not merged ({pr.get('state')}); waiting")
         return 0
 
-    diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
+    try:
+        diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
+    except GhError as e:
+        # A failed diff read is not evidence that the merged PR contains zero
+        # docstrings. Leave the claim untouched so the workflow exposes the
+        # infrastructure failure and a later run can retry safely.
+        print(f"::error::could not read merged PR diff: {e}", file=sys.stderr)
+        return 1
     doc_count, total_added, files = count_added_docstrings(diff)
     claimed = None
     cm = COUNT_RE.search(body) or COUNT_RE.search(title)
