@@ -40,7 +40,9 @@ def _load_second_act():
 _second_act = _load_second_act()
 TOKEN=os.environ["GITHUB_TOKEN"]; ADMIN=os.environ["RTC_ADMIN_KEY"]
 HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
-RATE=float(os.environ.get("RATE_RTC","3")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
+RATE=float(os.environ.get("RATE_RTC","3"))
+# Hard ceiling re-enforced at payout time, independent of any gate.
+MAX_CLAIM_RTC=float(os.environ.get("MAX_CLAIM_RTC","25")); MAXRUN=int(os.environ.get("MAX_PER_RUN","40"))
 FROM="founder_community"; PORT="8099"
 WALLET_RE=re.compile(r'\bRTC[0-9a-fA-F]{40}\b')
 # Matches `Wallet: <handle-or-address>` (case-insensitive, Markdown-tolerant).
@@ -75,6 +77,17 @@ KNOWN_BOT_LOGINS=frozenset({
     "codecov", "codecov[bot]",
     "deepsource-io[bot]", "imgbot[bot]", "netlify[bot]",
 })
+
+
+
+# Identities whose word can authorize money movement. Everything reachable from
+# a public issue comment is UNTRUSTED: anyone with a GitHub account can write a
+# comment on a public repo, so a comment can never be an authorization by itself.
+TRUSTED_AUTHORS = frozenset({"scottcjn", "sophiaeagent-beep", "github-actions[bot]", "github-actions"})
+
+
+def _is_trusted(login):
+    return bool(login) and login.lower() in TRUSTED_AUTHORS
 
 
 def _find_handle_in_text(text):
@@ -124,15 +137,30 @@ def _load_canonical_wallets():
 CANONICAL_WALLETS = _load_canonical_wallets()
 
 
-def gh(args):
-    return subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
-        env={**os.environ,"GH_TOKEN":TOKEN}).stdout
+class GhError(RuntimeError):
+    """A `gh` invocation failed. Never swallow this into an empty result."""
+
+
+def gh(args, _check=True):
+    """Run `gh`, raising on failure rather than returning empty stdout.
+
+    The previous version returned `.stdout` and ignored the return code, so an
+    auth, rate-limit or transport failure produced an empty string, `_list()`
+    turned that into `[]`, and the payout run completed GREEN having enumerated
+    zero candidates and paid nobody. A workflow that goes green while paying
+    nothing is indistinguishable from a quiet day.
+    """
+    p = subprocess.run(["gh"]+args,capture_output=True,text=True,timeout=60,
+        env={**os.environ,"GH_TOKEN":TOKEN})
+    if _check and p.returncode != 0:
+        raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: {(p.stderr or '').strip()[:200]}")
+    return p.stdout
 def _post(url, body):
     ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
     req=urllib.request.Request(url,data=body,method="POST",
         headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
     with urllib.request.urlopen(req,timeout=30,context=ctx) as r: return json.loads(r.read())
-def transfer(to,memo,idem):
+def transfer(to,memo,idem,amount=None):
     """Return (ok, response_or_error).
 
     FIX (#16390): the previous version returned True whenever `_post` did not
@@ -146,7 +174,7 @@ def transfer(to,memo,idem):
     endpoint: it already processed the request, so re-posting risks a second
     debit under a different URL.
     """
-    body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":RATE,"memo":memo,"idempotency_key":idem}).encode()
+    body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":(RATE if amount is None else amount),"memo":memo,"idempotency_key":idem}).encode()
     # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
     # nginx HTTPS endpoint (the working path); fall back to the internal port.
     last="no_endpoint_attempted"
@@ -249,6 +277,13 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
             author, user_obj = _comment_author_login(c)
             if _is_bot_login(author, user_obj):
                 continue
+            # Only the CLAIMANT may name their own payout destination, or a
+            # trusted maintainer may set it for them. Previously any non-bot
+            # commenter could post "Wallet: attacker-handle" on someone else's
+            # claim and silently redirect the payout to themselves.
+            if not (claimant_login and author
+                    and author.lower() == claimant_login.lower()) and not _is_trusted(author):
+                continue
             cb = c.get("body") or ""
             m = _find_handle_in_text(cb)
             if m and _looks_like_handle(m):
@@ -281,7 +316,17 @@ paid=0; total=0.0
 for i in issues:
     if paid>=MAXRUN: print(f"::notice::MAX_PER_RUN={MAXRUN} reached — stopping; remaining eligible will pay next run."); break
     t=i["title"].lower()
-    if not (("review" in t) and ("pr" in t or "code" in t or "#73" in t)): continue
+    labels_pre={l["name"] for l in i.get("labels",[])}
+    # Review claims are title-matched; docstring claims are label-matched.
+    #
+    # This filter used to be review-only, so docstring claims adjudicated by
+    # the docstring gate were labelled `bounty-eligible` and then silently
+    # skipped here -- eligible, verified, and never paid. Any future gate that
+    # marks a claim payable must be represented here too, or it recreates the
+    # same dead end one layer down.
+    is_review = ("review" in t) and ("pr" in t or "code" in t or "#73" in t)
+    is_docstring = "docstring-verified" in labels_pre
+    if not (is_review or is_docstring): continue
     num=str(i["number"]); labels={l["name"] for l in i.get("labels",[])}
     d=json.loads(gh(["issue","view",num,"-R",REPO,"--json","body,comments,author"]))
     coms=d.get("comments",[])
@@ -291,14 +336,47 @@ for i in issues:
     # only `body,comments`, so the fallback was unreachable in production.
     a=d.get("author") or {}
     claimant=a.get("login") if isinstance(a, dict) else None
-    eligible = ("bounty-eligible" in labels) or any("Verified eligible" in (c.get("body") or "") for c in coms)
+    # A label can only be applied by someone with triage/write access, so it is
+    # an authorization. A COMMENT is not: anyone with a GitHub account can write
+    # "Verified eligible" on a public issue and, before this check, be paid for
+    # it. Comment-based eligibility now requires a trusted author.
+    eligible = ("bounty-eligible" in labels) or any(
+        "Verified eligible" in (c.get("body") or "")
+        and _is_trusted(_comment_author_login(c)[0])
+        for c in coms)
     if not eligible: continue
     if any("RTC-AutoPay-Confirmed" in (c.get("body") or "") for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
     if not wallet: continue
-    ok,resp=transfer(wallet,f"Bounty #73 code-review — claim #{num} (source: {source})",f"bounty73-claim-{num}")
+    # Review claims are a flat RATE. Docstring claims are worth whatever the
+    # gate verified (0.5 RTC per docstring), so paying the flat rate would pay
+    # 3 RTC for work verified at 4.5, 7.5 or 9. Read the gate's own figure.
+    amount, memo, idem = RATE, f"Bounty #73 code-review — claim #{num} (source: {source})", f"bounty73-claim-{num}"
+    if is_docstring:
+        # The amount marker decides how much money moves, so it may only come
+        # from the gate that verified the work. Previously every comment was
+        # scanned and the LAST match won with no author check, so anyone could
+        # append a larger marker and be paid it -- and because the gate's
+        # per-claim ceiling is enforced before that comment exists, the marker
+        # also bypassed the ceiling. Trusted authors only, and re-check the cap.
+        m=None
+        for c in coms:
+            if not _is_trusted(_comment_author_login(c)[0]):
+                continue
+            mm=re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
+            if mm: m=mm
+        if not m:
+            print(f"::warning::#{num} is docstring-verified but carries no trusted amount marker; skipping")
+            continue
+        amount=float(m.group(1))
+        if amount > MAX_CLAIM_RTC:
+            print(f"::warning::#{num} amount {amount} exceeds MAX_CLAIM_RTC={MAX_CLAIM_RTC}; skipping")
+            continue
+        memo=f"Docstring bounty — claim #{num}, gate-verified (source: {source})"
+        idem=f"docstring-claim-{num}"
+    ok,resp=transfer(wallet,memo,idem,amount)
     if ok:
-        paid+=1; total+=RATE
+        paid+=1; total+=amount
         # Transfers are two-phase: the node returns phase="pending" with a 24h
         # confirmation window, and the balance does not move until the pending
         # confirmer runs. Say "queued", not "sent" — reporting an unconfirmed
@@ -308,10 +386,10 @@ for i in issues:
         tx=f" tx `{txh}`." if txh else ""
         if phase=="pending":
             hrs=resp.get("confirms_in_hours",24)
-            state=(f"**queued** — {RATE:g} RTC to `{wallet}`.{tx} Pending the standard "
+            state=(f"**queued** — {amount:g} RTC to `{wallet}`.{tx} Pending the standard "
                    f"{hrs:g}h confirmation window; the balance moves when it clears.")
         else:
-            state=f"**settled** — {RATE:g} RTC to `{wallet}`.{tx}"
+            state=f"**settled** — {amount:g} RTC to `{wallet}`.{tx}"
         # Second-act hook: the payout notification is the one moment of
         # guaranteed attention. Ending on "thanks" wastes it; ending on a named
         # next task is the cheapest retention step available. Fail-open by

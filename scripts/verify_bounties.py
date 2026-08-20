@@ -114,8 +114,30 @@ def gh_get(url: str, params: dict | None = None) -> requests.Response:
     return r
 
 
+class IncompleteSweep(RuntimeError):
+    """A paginated sweep could not be completed.
+
+    Must never be mistaken for "the complete set, which happens to be small".
+    """
+
+
 def paginate_all(url: str, params: dict | None = None) -> list:
-    """Paginate through all results for a GitHub API endpoint."""
+    """Paginate through ALL results for a GitHub API endpoint, or raise.
+
+    Raises `IncompleteSweep` on any non-200 page instead of returning what it
+    managed to collect.
+
+    Why this is not defensive over-engineering: this used to `break` on a
+    non-200 and return the partial list with the same type and shape as a
+    complete one, so the caller could not tell the difference. `Rustchain`
+    alone is ~6,800 stars (~69 pages at per_page=100); one 403 secondary
+    rate-limit on page 3 returned ~300 logins as if that were everybody. The
+    star verifier then PUBLICLY posted, on the claimants' own issues, that
+    real contributors had not starred — an accusation manufactured entirely
+    by a swallowed HTTP error.
+
+    A sweep that cannot complete must render no verdict about anyone.
+    """
     results = []
     params = dict(params or {})
     params.setdefault("per_page", 100)
@@ -124,8 +146,9 @@ def paginate_all(url: str, params: dict | None = None) -> list:
         params["page"] = page
         r = gh_get(url, params)
         if r.status_code != 200:
-            log.warning("API %s returned %d: %s", url, r.status_code, r.text[:200])
-            break
+            raise IncompleteSweep(
+                f"{url} page {page} returned HTTP {r.status_code}: {r.text[:200]}"
+            )
         data = r.json()
         if not data:
             break
@@ -141,13 +164,26 @@ def paginate_all(url: str, params: dict | None = None) -> list:
 # ---------------------------------------------------------------------------
 
 def get_stargazers(repo: str) -> set[str]:
-    """Return set of usernames who starred OWNER/repo."""
-    users = paginate_all(f"https://api.github.com/repos/{OWNER}/{repo}/stargazers")
+    """Return set of usernames who starred OWNER/repo.
+
+    Raises `IncompleteSweep` if the stargazer list could not be read in full
+    (including a 404, which would otherwise silently turn a renamed or moved
+    repo into "nobody starred it").
+    """
+    try:
+        users = paginate_all(f"https://api.github.com/repos/{OWNER}/{repo}/stargazers")
+    except IncompleteSweep as e:
+        raise IncompleteSweep(f"stargazers for {OWNER}/{repo}: {e}") from e
     return {u["login"] for u in users if isinstance(u, dict) and "login" in u}
 
 
 def get_all_stargazers() -> dict[str, set[str]]:
-    """Return {repo: set(usernames)} for all tracked repos."""
+    """Return {repo: set(usernames)} for all tracked repos.
+
+    All-or-nothing on purpose. A partial map here becomes a public "you did
+    not star this" verdict on someone's claim, so if any repo cannot be read
+    in full the whole star phase is abandoned rather than reported.
+    """
     result = {}
     for repo in STAR_REPOS:
         log.info("Fetching stargazers for %s/%s ...", OWNER, repo)
@@ -156,20 +192,24 @@ def get_all_stargazers() -> dict[str, set[str]]:
     return result
 
 
-def check_profile_badge(username: str) -> tuple[bool, str]:
+def check_profile_badge(username: str) -> tuple[Optional[bool], str]:
     """Check if user's profile README mentions RustChain/Elyan.
-    Returns (found, detail_string).
+
+    Returns (found, detail_string), where `found` is None when the check
+    could NOT be performed. Distinguishing "no badge" from "could not look"
+    matters: both used to render as a public NOT FOUND verdict, so a 403
+    rate-limit read to the claimant as an accusation.
     """
     r = gh_get(f"https://api.github.com/repos/{username}/{username}/contents/README.md")
     if r.status_code == 404:
         return False, "No profile README found"
     if r.status_code != 200:
-        return False, f"Could not fetch profile README (HTTP {r.status_code})"
+        return None, f"Could not fetch profile README (HTTP {r.status_code}) — not checked"
 
     try:
         content = base64.b64decode(r.json()["content"]).decode("utf-8", errors="ignore")
     except Exception as e:
-        return False, f"Could not decode README: {e}"
+        return None, f"Could not decode README ({e}) — not checked"
 
     content_lower = content.lower()
     found_keywords = [kw for kw in BADGE_KEYWORDS if kw in content_lower]
@@ -178,10 +218,20 @@ def check_profile_badge(username: str) -> tuple[bool, str]:
     return False, "No RustChain/Elyan keywords found in profile README"
 
 
-def check_follows_owner(username: str) -> bool:
-    """Check if username follows OWNER."""
+def check_follows_owner(username: str) -> Optional[bool]:
+    """Check if username follows OWNER.
+
+    204 = follows, 404 = does not follow (an authoritative answer from
+    GitHub). Anything else means the check did not happen — return None
+    rather than reporting the claimant as NOT FOLLOWING off a rate-limit.
+    """
     r = gh_get(f"https://api.github.com/users/{username}/following/{OWNER}")
-    return r.status_code == 204
+    if r.status_code == 204:
+        return True
+    if r.status_code == 404:
+        return False
+    log.warning("Follow check for %s inconclusive: HTTP %d", username, r.status_code)
+    return None
 
 
 def get_issue_reactions(issue_number: int) -> dict[str, set[str]]:
@@ -389,8 +439,14 @@ def verify_badge_claims(issue_number: int) -> None:
     for cl in claimants:
         username = cl["username"]
         found, detail = check_profile_badge(username)
-        status = "VERIFIED" if found else "NOT FOUND"
-        lines.append(f"| @{username} | {'Yes' if found else 'No'} | {detail} | {status} |")
+        if found is None:
+            # Could not look. Say so; do not report it as a missing badge.
+            status, cell = "NOT CHECKED (retrying next run)", "?"
+        elif found:
+            status, cell = "VERIFIED", "Yes"
+        else:
+            status, cell = "NOT FOUND", "No"
+        lines.append(f"| @{username} | {cell} | {detail} | {status} |")
 
     lines.extend([
         "",
@@ -433,8 +489,13 @@ def verify_follow_claims(issue_number: int) -> None:
     for cl in claimants:
         username = cl["username"]
         follows = check_follows_owner(username)
-        status = "VERIFIED" if follows else "NOT FOLLOWING"
-        lines.append(f"| @{username} | {'Yes' if follows else 'No'} | {status} |")
+        if follows is None:
+            status, cell = "NOT CHECKED (retrying next run)", "?"
+        elif follows:
+            status, cell = "VERIFIED", "Yes"
+        else:
+            status, cell = "NOT FOLLOWING", "No"
+        lines.append(f"| @{username} | {cell} | {status} |")
 
     lines.extend([
         "",
@@ -549,54 +610,78 @@ def is_issue_open(issue_number: int) -> bool:
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
+def run_phase(name: str, issues: list[int], runner) -> list[str]:
+    """Run one verification phase, per issue, never on incomplete data.
+
+    Every verify_* function does all of its fetching BEFORE it posts, so an
+    `IncompleteSweep` raised mid-fetch means no comment was written for that
+    issue. Returns a list of failure descriptions (empty == clean).
+    """
+    failures: list[str] = []
+    log.info("--- %s ---", name)
+    for issue in issues:
+        if not is_issue_open(issue):
+            log.info("Issue #%d is closed, skipping", issue)
+            continue
+        try:
+            runner(issue)
+        except IncompleteSweep as e:
+            # No verdict is better than a verdict built on a truncated read.
+            log.error("SKIPPED #%d — could not read all data: %s", issue, e)
+            failures.append(f"{name} #{issue}: {e}")
+    return failures
+
+
+def main() -> int:
     log.info("=" * 60)
     log.info("RustChain Bounty Verification Bot starting")
     log.info("Owner: %s | Bounty repo: %s", OWNER, BOUNTY_REPO)
     log.info("=" * 60)
 
-    # Pre-fetch all stargazers once (most expensive operation)
+    failures: list[str] = []
+
+    # Pre-fetch all stargazers once (most expensive operation).
+    #
+    # If this cannot complete, the ENTIRE star phase is skipped. Running it
+    # on a partial map is how honest contributors got publicly told they had
+    # not starred; a missing report is recoverable, a false accusation is not.
     log.info("--- Phase 1: Fetching stargazers ---")
-    all_stars = get_all_stargazers()
-    total_unique = len(set().union(*all_stars.values()))
-    log.info("Total unique stargazers across %d repos: %d", len(STAR_REPOS), total_unique)
+    all_stars: dict[str, set[str]] | None = None
+    try:
+        all_stars = get_all_stargazers()
+    except IncompleteSweep as e:
+        log.error("Stargazer sweep INCOMPLETE — skipping all star bounties: %s", e)
+        failures.append(f"stargazer sweep: {e}")
+    else:
+        total_unique = len(set().union(*all_stars.values())) if all_stars else 0
+        log.info("Total unique stargazers across %d repos: %d", len(STAR_REPOS), total_unique)
 
-    # Star verification
-    log.info("--- Phase 2: Star bounties ---")
-    for issue in STAR_BOUNTY_ISSUES:
-        if is_issue_open(issue):
-            verify_star_claims(issue, all_stars)
-        else:
-            log.info("Issue #%d is closed, skipping", issue)
+    if all_stars is not None:
+        failures += run_phase(
+            "Phase 2: Star bounties", STAR_BOUNTY_ISSUES,
+            lambda issue: verify_star_claims(issue, all_stars),
+        )
+    else:
+        log.warning("Phase 2: Star bounties SKIPPED (no trustworthy stargazer data)")
 
-    # Badge verification
-    log.info("--- Phase 3: Badge bounties ---")
-    for issue in BADGE_BOUNTY_ISSUES:
-        if is_issue_open(issue):
-            verify_badge_claims(issue)
-        else:
-            log.info("Issue #%d is closed, skipping", issue)
-
-    # Follow verification
-    log.info("--- Phase 4: Follow bounties ---")
-    for issue in FOLLOW_BOUNTY_ISSUES:
-        if is_issue_open(issue):
-            verify_follow_claims(issue)
-        else:
-            log.info("Issue #%d is closed, skipping", issue)
-
-    # Emoji verification
-    log.info("--- Phase 5: Emoji bounties ---")
-    for issue in EMOJI_BOUNTY_ISSUES:
-        if is_issue_open(issue):
-            verify_emoji_claims(issue)
-        else:
-            log.info("Issue #%d is closed, skipping", issue)
+    failures += run_phase("Phase 3: Badge bounties", BADGE_BOUNTY_ISSUES, verify_badge_claims)
+    failures += run_phase("Phase 4: Follow bounties", FOLLOW_BOUNTY_ISSUES, verify_follow_claims)
+    failures += run_phase("Phase 5: Emoji bounties", EMOJI_BOUNTY_ISSUES, verify_emoji_claims)
 
     log.info("=" * 60)
+    if failures:
+        # Exit non-zero so the run shows RED. A sweep that skipped work is
+        # not a successful sweep, and a green check here previously meant
+        # nothing at all.
+        log.error("Bounty verification INCOMPLETE — %d check(s) skipped:", len(failures))
+        for f in failures:
+            log.error("  - %s", f)
+        log.info("=" * 60)
+        return 1
     log.info("Bounty verification complete")
     log.info("=" * 60)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

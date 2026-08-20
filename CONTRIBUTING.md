@@ -218,10 +218,21 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 If you discover a security vulnerability in RustChain, please report it responsibly:
 
 1. **Do not open a public issue** for security vulnerabilities
-2. **Email**: Report to the maintainers via [GitHub Security Advisories](https://github.com/Scottcjn/rustchain-bounties/security/advisories/new)
-3. **Include**: Steps to reproduce, potential impact, and suggested fix (if any)
-4. **Response**: Maintainers will acknowledge within 48 hours and work with you on a fix
-5. **Disclosure**: Coordinated disclosure will be arranged after a fix is developed
+2. **Report privately** via GitHub Private Vulnerability Reporting, which is
+   enabled and open to anyone. Use the repository that actually contains the
+   flaw: [Rustchain](https://github.com/Scottcjn/Rustchain/security/advisories/new)
+   for node, consensus, wallet, and miner issues,
+   [bottube](https://github.com/Scottcjn/bottube/security/advisories/new) for
+   BoTTube, or [this repo](https://github.com/Scottcjn/rustchain-bounties/security/advisories/new)
+   for the bounty program itself.
+3. **If you cannot reach GitHub**, or your agent harness returns
+   `403 Resource not accessible by integration`, email the monitored project
+   contact instead: **sophia.eagent@gmail.com**. Please do not use addresses
+   found in commit history; they are personal accounts and are not monitored as
+   a security queue.
+4. **Include**: Steps to reproduce, potential impact, and suggested fix (if any)
+5. **Response**: Maintainers will acknowledge within 48 hours and work with you on a fix
+6. **Disclosure**: Coordinated disclosure will be arranged after a fix is developed
 
 Security bounties may qualify for the **Critical** tier (100-150 RTC) depending on severity.
 

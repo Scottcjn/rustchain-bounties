@@ -82,24 +82,57 @@ def search(q, limit):
     return out[:limit]
 
 
+def _pr_path(item):
+    """Return 'owner/repo/pulls/N' for a PR search result, else None."""
+    if "pull_request" not in item:
+        return None
+    repo = item.get("repository_url", "").split("/repos/")[-1]
+    return f"{repo}/pulls/{item['number']}" if repo else None
+
+
+def _all_activity(item):
+    """Every human utterance on a thread, oldest first.
+
+    A PR carries THREE separate comment streams and the REST API keeps them
+    apart:
+      - issue comments      /issues/N/comments      (the main thread)
+      - review comments     /pulls/N/comments       (inline, on a diff line)
+      - reviews             /pulls/N/reviews        (approve / request-changes)
+
+    Reading only the first is how a maintainer question gets lost. That is not
+    hypothetical: an IBM LLVM reviewer asked a blocking question as an INLINE
+    comment, it was never answered, and four months later he had to write
+    "I think you might of missed my question/comment from above." A sweep that
+    reads only issue comments would have called that thread answered.
+    """
+    events = []
+    for c in gh_json(["api", item.get("comments_url", "") + "?per_page=100"], []) or []:
+        events.append(((c.get("created_at") or ""), (c.get("user") or {}).get("login", "")))
+
+    p = _pr_path(item)
+    if p:
+        for c in gh_json(["api", f"/repos/{p}/comments?per_page=100"], []) or []:
+            events.append(((c.get("created_at") or ""), (c.get("user") or {}).get("login", "")))
+        for r in gh_json(["api", f"/repos/{p}/reviews?per_page=100"], []) or []:
+            # A review with no body still signals attention (APPROVED etc).
+            events.append(((r.get("submitted_at") or ""), (r.get("user") or {}).get("login", "")))
+
+    return sorted([e for e in events if e[0] and e[1]])
+
+
 def classify(item, token_repo_cache):
     """Return (bucket, last_speaker, days_waiting)."""
-    url = item.get("comments_url")
-    n_comments = item.get("comments", 0)
     author = (item.get("user") or {}).get("login", "")
     created = item["created_at"][:10]
 
-    if n_comments == 0:
+    events = _all_activity(item)
+    if not events:
         if is_maintainer(author):
             return None, author, None          # our own untouched PR; not owed a reply
         return "NEVER_ANSWERED", author, created
 
-    comments = gh_json(["api", url + "?per_page=100"], [])
-    if not comments:
-        return "NEVER_ANSWERED", author, created
-    last = comments[-1]
-    speaker = (last.get("user") or {}).get("login", "")
-    when = (last.get("created_at") or "")[:10]
+    when, speaker = events[-1]
+    when = when[:10]
     if is_maintainer(speaker):
         return "MOVED_RECENTLY", speaker, when
     return "BALL_IN_OUR_COURT", speaker, when
