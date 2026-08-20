@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-name: BCOS Review Tier
+name: BCOS Checks
 
 # Assigns / checks the review tier label on non-doc pull requests.
 #
