@@ -51,6 +51,15 @@ try:
 finally:
     subprocess.run = _orig_run
 
+
+# NOTE (2026-08-13): several tests below previously asserted that a comment from
+# ANY non-bot user could name the payout destination. That was the behaviour, and
+# it was a defect (@AInoAKARI, bounty #16471): a third party could post
+# "Wallet: attacker" on someone else's claim and receive the transfer. Comment-
+# sourced destinations now come only from the claimant or a maintainer, so these
+# expectations were updated to the secure behaviour rather than deleted — the
+# cases are still worth pinning, just with the correct answer.
+
 NATIVE_WALLET = "RTC" + "0" * 40
 
 
@@ -81,7 +90,7 @@ class ResolveWalletTests(unittest.TestCase):
             {"user": {"login": "noise", "type": "User"}, "body": "Wallet: dave"},
         ]
         w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
-        self.assertEqual(w, "dave")
+        self.assertEqual(w, "bob")   # dave is not the claimant
         self.assertEqual(src, "handle")
 
     def test_bot_comment_handle_is_ignored(self):
@@ -91,7 +100,7 @@ class ResolveWalletTests(unittest.TestCase):
             {"user": {"login": "realuser", "type": "User"}, "body": "Wallet: realuser"},
         ]
         w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
-        self.assertEqual(w, "realuser")
+        self.assertEqual(w, "bob")  # realuser is not the claimant
         self.assertEqual(src, "handle")
 
     def test_bot_suffix_login_is_ignored(self):
@@ -226,7 +235,7 @@ class GraphQLAuthorShapeTests(unittest.TestCase):
             {"author": {"login": "realuser"}, "body": "Wallet: realuser"},
         ]
         w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
-        self.assertEqual(w, "realuser")
+        self.assertEqual(w, "bob")  # realuser is not the claimant
         self.assertEqual(src, "handle")
 
     def test_graphql_author_with_known_bot_login(self):
@@ -236,7 +245,9 @@ class GraphQLAuthorShapeTests(unittest.TestCase):
             {"author": {"login": "github-actions"}, "body": "Verified eligible"},
             {"author": {"login": "alice"}, "body": "Wallet: alice"},
         ]
-        w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
+        # Claimant is alice, so her own wallet comment is honoured; the point of
+        # this case is that the github-actions comment is skipped as a bot.
+        w, src = bp.resolve_wallet(body, comments, claimant_login="alice")
         self.assertEqual(w, "alice")
         self.assertEqual(src, "handle")
 
@@ -258,7 +269,7 @@ class GraphQLAuthorShapeTests(unittest.TestCase):
             {"author": {"login": "carol"}, "body": "Wallet: carol"},
         ]
         w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
-        self.assertEqual(w, "carol")
+        self.assertEqual(w, "bob")  # carol is not the claimant
         self.assertEqual(src, "handle")
 
     def test_rest_user_shape_still_works(self):
@@ -269,7 +280,7 @@ class GraphQLAuthorShapeTests(unittest.TestCase):
             {"user": {"login": "dave"}, "body": "Wallet: dave"},
         ]
         w, src = bp.resolve_wallet(body, comments, claimant_login="bob")
-        self.assertEqual(w, "dave")
+        self.assertEqual(w, "bob")   # dave is not the claimant
         self.assertEqual(src, "handle")
 
     def test_helper_returns_author_login(self):

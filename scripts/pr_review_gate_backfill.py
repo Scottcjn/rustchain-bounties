@@ -130,6 +130,19 @@ def main():
         # Never let a bound look like completion.
         print(f"::notice::{remaining} claims still pending "
               f"(MAX_PER_RUN={MAX_PER_RUN}); they process on the next run.")
+
+    # Fail the run when adjudications failed.
+    #
+    # This used to `return 0` unconditionally, so all 60 claims in a batch could
+    # fail and the workflow still went green. These are precisely the claims the
+    # safety net exists to rescue from being stranded, so a green run reporting
+    # "adjudicated 0/60" was the worst possible outcome: the backlog looked
+    # handled while nothing had been. Reported by @AInoAKARI under #16471.
+    failed = processed - done
+    if failed:
+        print(f"::error::{failed} of {processed} adjudications FAILED; "
+              f"the claims they cover are still unresolved")
+        return 1
     return 0
 
 

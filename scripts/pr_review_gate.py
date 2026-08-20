@@ -22,7 +22,29 @@ TARGET=os.environ.get("TARGET_REPO","Scottcjn/Rustchain")
 NUM=os.environ.get("ISSUE_NUMBER","")
 CAP=int(os.environ.get("CAP","15")); RATE=os.environ.get("RATE_RTC","3")
 API="https://api.github.com"
-def api(path, method="GET", data=None):
+
+
+class ApiError(RuntimeError):
+    """A GitHub API call failed. Must never be mistaken for an empty result."""
+
+
+def api(path, method="GET", data=None, strict=False):
+    """Call the GitHub API and parse JSON.
+
+    A failed GET normally returns None so callers can treat "not found" and
+    "could not read" the same way — fine for lookups where the fallback is
+    `needs-human`.
+
+    `strict=True` raises `ApiError` instead, and that matters wherever the
+    result feeds a MONEY decision. The per-contributor cap counted eligible
+    claims with `api("/search/issues?...") or {}`, so ANY failure — most
+    routinely a 403 secondary rate-limit, since /search/issues carries its
+    own 30 req/min budget separate from the REST quota — read back as
+    total_count 0, i.e. "this author has claimed nothing yet". The cap then
+    failed OPEN and approved past it at 3 RTC/claim, with no ceiling on how
+    many times that could repeat. A failed lookup is not an authoritative
+    zero. (Same defect and same remedy as `docstring_gate.gh(strict=True)`.)
+    """
     req=urllib.request.Request(f"{API}{path}", method=method,
         headers={"Authorization":f"Bearer {TOKEN}","Accept":"application/vnd.github+json",
                  "X-GitHub-Api-Version":"2022-11-28","User-Agent":"pr-review-gate"})
@@ -31,7 +53,14 @@ def api(path, method="GET", data=None):
     try:
         with urllib.request.urlopen(req,timeout=30) as r: return json.loads(r.read() or "null")
     except urllib.error.HTTPError as e:
+        if strict: raise ApiError(f"{method} {path} -> HTTP {e.code}") from e
         if method=="GET": return None
+        raise
+    except Exception as e:
+        # Transport/timeout/JSON failures. Non-strict callers keep the old
+        # behaviour (propagate to main's catch-all); strict callers get a
+        # typed error they can fail closed on.
+        if strict: raise ApiError(f"{method} {path} failed: {e.__class__.__name__}: {e}") from e
         raise
 
 def is_review_claim(title):
@@ -364,13 +393,53 @@ def main():
     # cap check: count author's existing bounty-eligible issues ORG-WIDE
     # (user:Scottcjn spans every repo, so the per-contributor cap stays global
     # even though the gate now runs in both rustchain-bounties and Rustchain).
-    elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue") or {}
+    #
+    # This lookup is STRICT: if it cannot be completed the cap cannot be
+    # honoured, so the claim is held for a human rather than approved. See
+    # api(strict=True) for why a swallowed failure here reads as "zero
+    # claims so far" and lets the cap fail open.
+    try:
+        elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue",
+                 strict=True) or {}
+    except ApiError as e:
+        print(f"gate: cap lookup failed, refusing to approve: {e}", file=sys.stderr)
+        _unresolved(
+            f"🤖 Gate: your review of {target}#{pr} checks out, but the lookup that counts your "
+            f"existing eligible claims failed, so the **{CAP} eligible reviews/contributor** cap "
+            f"(Bounty #73) cannot be checked right now.\n\nHolding for a human rather than "
+            f"approving — a failed lookup is not proof that you are under the cap. Nothing is "
+            f"needed from you.", quiet)
+        return
+    if not isinstance(elig, dict) or "total_count" not in elig:
+        # A 200 with an unexpected shape is also not an authoritative zero.
+        print("gate: cap lookup returned unexpected shape, refusing to approve", file=sys.stderr)
+        _unresolved(
+            f"🤖 Gate: your review of {target}#{pr} checks out, but the cap lookup returned an "
+            f"unreadable response, so the **{CAP} eligible reviews/contributor** cap (Bounty #73) "
+            f"cannot be checked right now. Holding for a human.", quiet)
+        return
     if elig.get("total_count",0)>=CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
     add_label(NUM,"bounty-eligible")
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
-    try: main()
+    try:
+        main()
     except Exception as e:
-        print(f"gate error: {e}", file=sys.stderr)  # never fail the workflow
+        # Exit non-zero so the run is visibly red and can be retried.
+        #
+        # This used to swallow every exception ("never fail the workflow").
+        # add_label() re-raises on a failed POST, so when the label write at the
+        # eligible branch failed, it threw straight past the follow-up comment:
+        # the claim went unlabelled, the contributor was never told, and the run
+        # was green. That is the reported "gate green without applying payout
+        # labels" bug.
+        #
+        # A silent pass is the worst outcome for a payout gate — nothing
+        # downstream can tell a claim that was skipped from one that was
+        # adjudicated. Fail loudly instead.
+        import traceback
+        print(f"gate error: {type(e).__name__}: {e}", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)

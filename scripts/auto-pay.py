@@ -48,6 +48,38 @@ PAYMENT_RE = re.compile(
 # already processed for this PR.
 ALREADY_PAID_MARKER = "RTC-AutoPay-Confirmed"
 
+# Marker for a payout that was ATTEMPTED AND REJECTED. It must not contain
+# ALREADY_PAID_MARKER as a substring.
+#
+# It used to: the failure notice embedded `<!-- RTC-AutoPay-Confirmed:FAILED -->`,
+# which the substring dedup below matched on every later run. One failed
+# payout therefore poisoned the PR permanently — every re-run printed
+# "Payment already processed. Skipping.", exited 0 green, and the only record
+# of the money was a comment saying the transfer had been REJECTED. The PR
+# could never be auto-paid again and the log asserted that it had been.
+#
+# (The AUTO_TIER_MARKER overlap further down is deliberate and stays: the
+# auto-tier is a real payment and SHOULD dedup as one.)
+FAILED_PAYMENT_MARKER = "RTC-AutoPay-Rejected"
+
+# Failure marker emitted before the fix above. Existing PRs still carry it,
+# so it is stripped before the dedup check — otherwise this fix would leave
+# every already-poisoned PR poisoned.
+LEGACY_FAILED_MARKER = f"{ALREADY_PAID_MARKER}:FAILED"
+
+
+def is_already_paid_comment(body: str) -> bool:
+    """True if `body` records a COMPLETED payment for this PR.
+
+    Substring matching is required (the live marker carries `kind=` and
+    `pending_id=` suffixes), so legacy failure notices are removed from the
+    text first rather than matched by accident.
+    """
+    b = body or ""
+    if ALREADY_PAID_MARKER not in b:
+        return False
+    return ALREADY_PAID_MARKER in b.replace(LEGACY_FAILED_MARKER, "")
+
 # ---------------------------------------------------------------------------
 # Conservative auto-tier (folded in from the former sophia-auto-approve.yml,
 # PR #11536). When a merged PR has NO human `Payment:` directive, this single
@@ -231,7 +263,7 @@ def main() -> None:
 
     # --- Check for duplicate run ------------------------------------------
     for c in comments:
-        if ALREADY_PAID_MARKER in (c.get("body") or ""):
+        if is_already_paid_comment(c.get("body") or ""):
             print(f"Payment already processed (found {ALREADY_PAID_MARKER}). Skipping.")
             return
 
@@ -356,7 +388,7 @@ def main() -> None:
             f"but the transfer was rejected:\n\n"
             f"```\n{error}\n```\n\n"
             f"Please process this payment manually.\n\n"
-            f"<!-- {ALREADY_PAID_MARKER}:FAILED -->"
+            f"<!-- {FAILED_PAYMENT_MARKER} -->"
         )
         post_comment(repo, pr_number, fail_body)
         sys.exit(1)
@@ -371,8 +403,19 @@ def main() -> None:
             f"not auto-awarded; they need a maintainer `Payment: N RTC` directive."
         )
     else:
-        title = "**RTC Payment Sent**"
-        tail = "Transfer confirmed on RustChain."
+        # The POST returns a pending_id, nothing more. RustChain transfers
+        # are two-phase with a ~24h void window; the balance moves only when
+        # the confirmer settles them. This path used to say "Transfer
+        # confirmed on RustChain" off that POST alone — a confirmation the
+        # script had no way to know about, on the very comment recipients
+        # read as proof of payment. The auto-tier path below already worded
+        # this correctly; the wording now matches.
+        title = "**RTC Payment Submitted** (pending confirmation)"
+        tail = (
+            f"The transfer is in the pending ledger with a ~24h void window — the balance "
+            f"moves only once the confirmer settles it. @{repo.split('/')[0]} — void "
+            f"`pending_id {pending_id}` before it confirms if this is wrong."
+        )
 
     confirm_body = (
         f"{title}\n\n"
@@ -388,8 +431,9 @@ def main() -> None:
     )
     post_comment(repo, pr_number, confirm_body)
 
-    print(f"Payment complete ({pay_kind}): {payment_amount} RTC to {to_wallet} "
-          f"(pending_id={pending_id})")
+    # "submitted", not "complete" — see the confirmation wording above.
+    print(f"Payment submitted to pending ledger ({pay_kind}): {payment_amount} RTC to "
+          f"{to_wallet} (pending_id={pending_id}, awaits confirmer)")
 
 
 if __name__ == "__main__":
