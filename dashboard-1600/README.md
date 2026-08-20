@@ -1,109 +1,72 @@
-# 🦞 RustChain Dashboard
+# 🦞 RustChain Live Dashboard
 
-A simple, elegant web dashboard for monitoring RustChain blockchain statistics.
+A modern, feature-rich web dashboard for monitoring RustChain blockchain statistics in real-time.
 
 ## Features
 
-- **Real-time Stats**: View current epoch, active miners, total supply, and transaction volume
-- **Miner Leaderboard**: Top 10 miners by blocks mined
-- **Recent Transactions**: Live feed of recent blockchain transactions
+- **Live Stats Cards**: Current epoch, slot, enrolled miners, total supply, epoch pot, blocks per epoch
+- **Node Health Panel**: Version, uptime, backup age, DB status, tip age
+- **Active Miners Table**: All miners ranked by antiquity multiplier, with hardware badges and attestation timestamps
+- **Miner Distribution Chart**: Doughnut chart showing hardware type breakdown
+- **Bridge & Swap Info**: RTC price, swap URL, network info
 - **Auto-refresh**: Data updates automatically every 30 seconds
-- **Responsive Design**: Works on desktop and mobile devices
-- **Dark Theme**: Easy on the eyes with a modern gradient background
+- **Mobile Responsive**: Fully responsive design for desktop, tablet, and mobile (375px breakpoint)
+- **Dark Theme**: Premium dark gradient theme with glassmorphism cards
+- **Zero Dependencies**: Single HTML file — open in browser, no build tools needed
+
+## API Endpoints Used
+
+| Endpoint | Data |
+|----------|------|
+| `GET /epoch` | Epoch, slot, enrolled miners, supply, epoch pot |
+| `GET /api/miners` | Active miner list with hardware, multiplier, entropy |
+| `GET /health` | Node health, version, uptime, DB status |
+| `GET /wallet/swap-info` | RTC price, swap URL, network |
 
 ## Quick Start
 
-### Option 1: Open Directly
-
-Simply open `index.html` in your browser:
-
 ```bash
-# macOS
+# Open directly in browser
 open index.html
 
-# Linux
-xdg-open index.html
-
-# Windows
-start index.html
-```
-
-### Option 2: Local Server
-
-For best experience, serve with a local web server:
-
-```bash
-# Using Python
+# Or serve locally
 python3 -m http.server 8080
-
-# Using Node.js
-npx serve .
-
-# Using PHP
-php -S localhost:8080
+# Then visit http://localhost:8080
 ```
-
-Then visit `http://localhost:8080`
-
-## API Configuration
-
-The dashboard is configured to work with:
-
-- **REST API**: `https://rustchain.org`
-- **RPC Node**: `https://50.28.86.131`
-
-If these endpoints are unavailable, the dashboard automatically falls back to demo mode with mock data.
-
-To use your own node, edit the `API_BASE` and `RPC_NODE` constants in `index.html`:
-
-```javascript
-const API_BASE = 'https://your-node.com';
-const RPC_NODE = 'https://your-rpc-node.com';
-```
-
-## Supported API Endpoints
-
-The dashboard queries the following RustChain RPC methods:
-
-| Method | Description |
-|--------|-------------|
-| `rustchain_getEpoch` | Get current epoch information |
-| `rustchain_getMiners` | Get list of active miners |
-| `rustchain_getLedger` | Get recent transactions |
 
 ## Screenshots
 
 The dashboard displays:
 
-1. **Status Bar**: Connection status and last update time
-2. **Stats Cards**: Epoch, miners, supply, transactions
-3. **Miners Table**: Top 10 miners with rankings
-4. **Transactions Table**: Recent blockchain activity
+1. **Header**: Connection status, auto-refresh timer, manual refresh button
+2. **Stats Grid**: 6 stat cards with live data
+3. **Node Health**: Detailed health metrics grid
+4. **Miner Chart**: Doughnut chart of hardware distribution
+5. **Miners Table**: Complete miner list with hardware badges and multipliers
+6. **Swap Info**: RTC price and bridge details
 
-## Technologies
+## Technology
 
 - HTML5
-- CSS3 (Flexbox, Grid, animations)
-- Vanilla JavaScript (no frameworks)
+- CSS3 (Flexbox, Grid, animations, glassmorphism)
+- Vanilla JavaScript (ES6+)
+- Chart.js (CDN) for data visualization
 - Fetch API for data retrieval
 
 ## File Structure
 
 ```
-rustchain-dashboard/
+dashboard-1600/
 ├── index.html      # Main dashboard (single file)
-└── README.md       # This file
+├── README.md       # This file
+└── wrtc-bridge-dashboard/  # wRTC bridge dashboard (sub-module)
 ```
 
 ## License
 
-MIT - Built for RustChain Bounty #1600
-
-## Author
-
-Lobster Bot / 花猫 (Flower Cat)
+MIT — Built for RustChain Bounty #1600
 
 ---
 
-**Bounty**: #1600 - 5 RTC  
-**Status**: ✅ Complete
+**Bounty**: [#1600 — Build a web dashboard showing RustChain stats](https://github.com/Scottcjn/rustchain-bounties/issues/1600)
+**Reward**: 5 RTC (+3 RTC for mobile responsive)
