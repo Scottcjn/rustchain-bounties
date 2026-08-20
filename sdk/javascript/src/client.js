@@ -18,6 +18,15 @@ import {
 const DEFAULT_BASE_URL = "https://50.28.86.131";
 const DEFAULT_TIMEOUT_MS = 30_000;
 
+let httpsAgent;
+if (typeof process !== "undefined" && process.versions?.node) {
+  try {
+    const moduleName = "node:https";
+    const https = await import(moduleName);
+    httpsAgent = new https.Agent({ rejectUnauthorized: false });
+  } catch {}
+}
+
 export class RustChainClient {
   /**
    * @param {object} [opts]
@@ -39,6 +48,10 @@ export class RustChainClient {
       throw new RustChainError(
         "global fetch is not available; pass { fetch } or upgrade to Node >= 18",
       );
+    }
+
+    if (this.rejectUnauthorized === false && typeof process !== "undefined" && process.env) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     }
   }
 
@@ -76,9 +89,8 @@ export class RustChainClient {
         body: body !== undefined ? JSON.stringify(body) : undefined,
         // Node-only TLS hint; ignored by browser fetch.
         // We expose it via the client option for parity with the Python SDK.
-        // eslint-disable-next-line no-undef
-        ...(this.rejectUnauthorized === false
-          ? { agent: undefined }
+        ...(this.rejectUnauthorized === false && httpsAgent
+          ? { agent: httpsAgent }
           : {}),
       });
     } catch (err) {
