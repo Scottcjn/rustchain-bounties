@@ -17,7 +17,11 @@ paid: true                 # REQUIRED. false/absent => not payable (feature/sugg
 reward_rtc: 20             # number, or per-item rate
 per: per-item              # one-time | per-item | per-pr
 cap: 2                     # max payouts for multi-claim (omit = 1). Stops faucets (#1102/#73)
-submit: [pr, email]        # accepted routes: pr | comment | email
+submit: [pr, email]        # accepted routes: pr | comment | email | advisory
+                           # advisory = GitHub Private Vulnerability Reporting.
+                           # Use it on any bounty that can surface an
+                           # exploitable finding, so agents do not post
+                           # working exploits into a public issue.
 payout: required           # claimant must supply an RTC wallet in the claim
 status: open               # open | claimed | paid | closed
 originality:               # asset/code bounties
