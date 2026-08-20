@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT
+name: PR-Review Gate Backfill (#73 safety net)
+
+# The gate itself (pr-review-gate.yml) only fires on issues:[opened, edited],
+# so it adjudicates a claim once, at filing, and never again. Anything that
+# missed that instant stayed silent forever -- that is what produced a backlog
+# of 104 unanswered claims averaging 82 days old. This sweep re-drives the same
+# gate over anything never adjudicated, so a missed webhook costs hours, not
+# forever. The gate is idempotent, so re-running is safe.
+on:
+  schedule:
+    - cron: "41 */4 * * *"   # every 4h, offset off the hour
+  workflow_dispatch:
+    inputs:
+      max_per_run:
+        description: "Max claims to adjudicate this run"
+        required: false
+        default: "60"
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: pr-review-gate-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sweep unadjudicated review claims
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TARGET_REPO: Scottcjn/Rustchain
+          CAP: "15"
+          RATE_RTC: "3"
+          MAX_PER_RUN: ${{ github.event.inputs.max_per_run || '60' }}
+        run: python3 scripts/pr_review_gate_backfill.py
