@@ -46,6 +46,35 @@ Browse [open bounties](https://github.com/Scottcjn/rustchain-bounties/issues) to
 3. **Wait for acknowledgment**: If no one else has claimed, you can proceed
 4. **Start working**: Fork the repository and begin implementation
 
+### Why claims get turned down
+
+Almost every declined claim we see falls into one of these. None of them are about the quality of your code, and none of them are personal. They are just the things that make a claim impossible to verify or pay.
+
+**The deliverable is the thing itself, not a file describing it.**
+If a bounty asks you to star a repo, record a video, publish a post, join the Discord, or review an open PR, then the star, the video, the post, the membership, or the review is the work. Adding a Python file named after the issue number does not complete it. Several of these arrive every week and none of them can be paid, because there is nothing to check.
+
+**A file nothing imports is not a fix.**
+Dropping `fix_1234.py` in the repository root, where no module imports it and no test covers it, does not change the behaviour the bounty is about. Change the code that actually runs, and add a test that fails before your change and passes after it.
+
+**Evidence has to be checkable by someone who is not you.**
+Links are opened. Stars are checked through the GitHub API. Videos are watched. If a link 404s, if a submission still contains placeholder text like `[your hardware here]`, or if a claimed star does not appear on your account, the claim cannot be verified and will be declined even if you did the work. Post the real artifact.
+
+**Use one wallet, consistently.**
+Pick one payout identity and keep it. When the same person claims under two different wallets, we cannot tell which one is theirs, and payment stops until it is resolved. If you need to change your payout address, say so plainly in one place rather than switching mid-stream.
+
+**Check the work is not already done.**
+Read the whole thread before claiming. A good number of claims arrive for bounties that were already paid, or for bugs someone else already fixed and merged. It costs you nothing to check and it saves you writing something that cannot be accepted.
+
+**Do not paste the same claim on several issues.**
+One claim per bounty, in your own words, describing what you will actually do. Identical text across multiple threads reads as volume rather than intent, and it makes the genuine claims underneath it harder to find.
+
+**Racing is normal and it is not personal.**
+Several people often work the same bounty. Where submissions are comparable, the first mergeable one usually wins, and the rest get closed with thanks. That is not a judgement about your work. If yours was close, say so and we will point you at something unclaimed.
+
+### If you are new and unsure
+
+Ask in the issue before you start. A short comment saying what you plan to do takes a minute and saves you from building the wrong thing. We would much rather answer a question up front than decline finished work.
+
 ### Wallet Format
 - **Use wallet names, not addresses**: `your-wallet-name` (e.g., `BetsyMalthus`)
 - **Do not include cryptocurrency addresses** in comments
@@ -89,7 +118,8 @@ For bounties requiring proof of completion:
 - Bug reports with reproduction steps
 - Feature requests with use cases
 - Code reviews on open PRs
-- Helping others in [Discord](https://discord.gg/VqVVS2CW9Q)
+- Helping others in [Discord](https://discord.gg/XnRp7M5gBW)
+- Helping others in [Telegram](https://t.me/+l8dHTjXCBNM1MTIx)
 
 ## Payout Authority
 
@@ -178,7 +208,8 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 
 ## 📬 Getting Help
 
-- **Discord**: [Join our server](https://discord.gg/VqVVS2CW9Q)
+- **Discord**: [Join our server](https://discord.gg/XnRp7M5gBW)
+- **Telegram**: [Join our server](https://t.me/+l8dHTjXCBNM1MTIx)
 - **GitHub Issues**: For bugs and feature requests
 - **Discussions**: For questions and ideas
 
@@ -187,10 +218,21 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 If you discover a security vulnerability in RustChain, please report it responsibly:
 
 1. **Do not open a public issue** for security vulnerabilities
-2. **Email**: Report to the maintainers via [GitHub Security Advisories](https://github.com/Scottcjn/rustchain-bounties/security/advisories/new)
-3. **Include**: Steps to reproduce, potential impact, and suggested fix (if any)
-4. **Response**: Maintainers will acknowledge within 48 hours and work with you on a fix
-5. **Disclosure**: Coordinated disclosure will be arranged after a fix is developed
+2. **Report privately** via GitHub Private Vulnerability Reporting, which is
+   enabled and open to anyone. Use the repository that actually contains the
+   flaw: [Rustchain](https://github.com/Scottcjn/Rustchain/security/advisories/new)
+   for node, consensus, wallet, and miner issues,
+   [bottube](https://github.com/Scottcjn/bottube/security/advisories/new) for
+   BoTTube, or [this repo](https://github.com/Scottcjn/rustchain-bounties/security/advisories/new)
+   for the bounty program itself.
+3. **If you cannot reach GitHub**, or your agent harness returns
+   `403 Resource not accessible by integration`, email the monitored project
+   contact instead: **sophia.eagent@gmail.com**. Please do not use addresses
+   found in commit history; they are personal accounts and are not monitored as
+   a security queue.
+4. **Include**: Steps to reproduce, potential impact, and suggested fix (if any)
+5. **Response**: Maintainers will acknowledge within 48 hours and work with you on a fix
+6. **Disclosure**: Coordinated disclosure will be arranged after a fix is developed
 
 Security bounties may qualify for the **Critical** tier (100-150 RTC) depending on severity.
 

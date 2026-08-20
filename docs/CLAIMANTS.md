@@ -15,3 +15,8 @@ resolution).
 | GitHub handle | Canonical RTC wallet |
 | --- | --- |
 | qingfeng312 | RTC69a97c336ad63f4904a311997a0429fb6104ed32 |
+| 0oAstro | RTC5268f16391bcdff87c43cd8694fca3be9d995359 |
+| 508704820 | RTC9d7caca3039130d3b26d41f7343d8f4ef4592360 |
+| Asti1982 | RTCda4841be5b2d109da5d995fb864c09676bb5b7c7 |
+| Vyacheslav-Tomashevskiy | RTCd1554f0f35576faf01d386a6be1c947f560dd0b7 |
+| kryosys-lea | RTC31ede8c0133d0af78ab557d1be7568523b619a84 |

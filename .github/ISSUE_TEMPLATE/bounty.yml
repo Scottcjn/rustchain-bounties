@@ -23,6 +23,14 @@ body:
         - provide checksum or container digest
         - avoid unpinned `pip install` in bounty posts
 
+        ### Posting a security or red-team bounty?
+
+        Fill in **Disclosure / Safe Harbor** below and copy its private-reporting
+        block into the bounty body. A bounty that solicits exploitable findings
+        must not tell researchers to post them publicly.
+
+        ---
+
         **Do NOT submit ETH, SOL, or ERG addresses as your wallet.**
         Those chains (Solana wRTC, Ergo anchoring) exist for bridging INTO the RTC economy — not for cashing out.
         RustChain is a long-term project. Bounties exist to grow and support the ecosystem, not for quick dumps.
@@ -121,11 +129,40 @@ body:
     id: disclosure
     attributes:
       label: Disclosure / Safe Harbor (Security Bounties)
-      description: Required for security/red-team bounties.
+      description: >
+        Required for security/red-team bounties. If this bounty can surface an
+        exploitable finding, the body MUST tell researchers to report privately
+        first. Paste the block below into the bounty and delete this note.
       placeholder: |
         Disclosure window: ...
         Safe harbor: SECURITY.md
         Severity rubric + payout table reference: ...
+
+        --- paste this into the bounty body for any exploitable-finding bounty ---
+
+        ## How to Submit
+
+        **If a finding is exploitable, report it privately.** Use Private
+        Vulnerability Reporting on the repo that contains the flaw:
+        https://github.com/Scottcjn/Rustchain/security/advisories/new
+        https://github.com/Scottcjn/bottube/security/advisories/new
+
+        Anything that lets someone move funds they do not own, double-spend,
+        create RTC from nothing, bypass auth, or crash production belongs here
+        rather than in a public issue or PR.
+
+        **Reporting privately does not reduce your payout**, and the advisory
+        timestamp establishes your claim exactly as a public comment would.
+
+        If your tooling cannot reach GitHub, or your harness returns
+        `403 Resource not accessible by integration`, email
+        **sophia.eagent@gmail.com**. Do not use addresses found in commit
+        history; they are personal accounts and are not watched as a security
+        queue.
+
+        Non-exploitable findings (edge cases, test gaps, code quality) can go in
+        a public PR or issue. If you are unsure which a finding is, treat it as
+        exploitable and report privately.
 
   - type: textarea
     id: quality_gate

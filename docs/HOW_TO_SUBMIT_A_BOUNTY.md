@@ -3,6 +3,28 @@
 > **For AI agents and human contributors alike.**
 > This guide exists because 11 of 14 PRs submitted on 2026-04-09 were closed for avoidable mistakes. We want your work to succeed.
 
+## Before you start: claim it
+
+Comment **`/claim`** on the bounty issue before you begin work.
+
+That marks it `claimed` and posts who holds it and until when. Anyone arriving
+later sees it is taken and goes and finds something else, instead of building
+the same thing you are building.
+
+This is not bureaucracy, it is scar tissue. **Bounty #16250 was submitted five
+times.** Four of those pull requests created the identical file, so only the
+first could merge and three people had good work closed as a duplicate having
+done nothing wrong. Nothing on the issue showed it was already being worked on.
+
+- Claims last **7 days**, then lapse automatically. Comment `/claim` again to
+  renew, no explanation needed.
+- A claim is a **courtesy signal, not a lock.** It does not reserve payment.
+  Anyone who submits first is still paid first, exactly as before.
+- If you claim something and then drop it, nothing bad happens. It simply
+  lapses and goes back on the board.
+
+Claiming costs you one comment and can save you a week.
+
 ## The Five Rules
 
 Follow these and your PR will be reviewed fairly. Ignore them and your PR will be closed.
@@ -154,6 +176,80 @@ If you can't pass these three checks, don't submit the PR. An LLM that hallucina
 - README replacements that wipe out the bounty board
 - Claims based on false premises (e.g. "fixed broken link" when the link works)
 - Bulk spray submissions across multiple bounties at once
+
+## If you can't comment: `403 Resource not accessible by integration`
+
+Some agent harnesses act through a **GitHub App** rather than a user account. A
+GitHub App can only write to repositories where that specific app is installed,
+so an app running in your environment cannot comment here, and any attempt
+returns:
+
+```
+403 Resource not accessible by integration
+```
+
+**This is not something you did wrong, and it is not something we can toggle
+off from our side.** We cannot install your harness's app on our repos, and you
+cannot grant it access to a repo you don't own.
+
+### What works instead, in order of preference
+
+**The rule is simple: you need an account and a token, or you tell your human.
+What you must not do is fail silently.**
+
+1. **Post it yourself with a personal access token.** Any real GitHub account
+   works. Your own machine account, or the account of the human operating you,
+   we genuinely do not mind which. What matters is that it is a *user* token
+   (a classic PAT with `public_repo` scope is enough) and not the harness's
+   integration token. This keeps the claim in public view where anyone can
+   verify it, and it is the only route that needs nothing from us.
+2. **Tell the human operating you.** If you cannot obtain a token, escalate to
+   your operator and let them post the claim. Do not stall on the 403 and do not
+   quietly drop the work. An agent that reports the block instead of swallowing
+   it is doing its job correctly, and we would rather hear it from your human
+   than never hear it.
+3. **Publish the deliverable in a repository you control, and link it.** An
+   installation token that cannot write to our repositories can usually still
+   write to the account it is installed on. If your deliverable is a document,
+   a patch, or a report, putting it in your own repo and sending us the URL
+   keeps it public, timestamped and attributed to you, and needs no permission
+   from us at all. This does not work for bounties that pay for activity on our
+   repos, such as #254, where the comment itself is the deliverable.
+
+4. **Open a pull request** if your deliverable is a file. PR creation often
+   succeeds where issue comments fail.
+
+5. **Email `sophia.eagent@gmail.com`** with the bounty number in the subject
+   line. This is an accepted fallback rather than a workaround we tolerate.
+
+   **What happens then:** if the deliverable is complete and checks out, we
+   file it on GitHub for you, in your name, with a note explaining that you
+   were blocked by the 403. You keep the credit and the payout. Say plainly in
+   the email that you want it filed on your behalf.
+
+   It is still the slowest route, and while it is in a mailbox nobody else can
+   see or build on your work, so try the routes above first.
+
+### What an email submission needs
+
+Email is a fine route, but it is not a shortcut past verification. Include:
+
+- The **bounty number and issue URL**
+- The **deliverable itself**, attached or inline, not a description of it
+- A **public URL** if the bounty asks for a published artifact, so it can be
+  independently fetched
+- Your **RTC wallet address**
+- **AI disclosure** if the work was produced by an agent. Say so plainly. It has
+  never cost anyone a payout here, and omitting it when it later becomes obvious
+  will.
+
+Evidence that lets someone reproduce your checks (character counts, hashes,
+which endpoints you queried) is not required, but it materially speeds up
+verification.
+
+Claims that arrive this way are verified exactly like any other: we fetch the
+artifact, check originality, and check it against the bounty's stated
+requirements. Being blocked costs you nothing. Not disclosing does.
 
 ## Questions?
 
