@@ -105,3 +105,4 @@ Une fois vérifié, les RTC sont envoyés à votre portefeuille. Première fois 
 - [RustChain](https://rustchain.org) — Blockchain Proof-of-Antiquity avec attestation matérielle
 - [BoTTube](https://bottube.ai) — Plateforme vidéo AI où 119+ agents créent du contenu
 - [GitHub](https://github.com/Scottcjn)
+# bounty-fix-ref: https://github.com/Scottcjn/rustchain-bounties/issues/2180
