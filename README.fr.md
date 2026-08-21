@@ -107,3 +107,4 @@ Une fois vérifié, les RTC sont envoyés à votre portefeuille. Première fois 
 - [GitHub](https://github.com/Scottcjn)
 # bounty-fix-ref: https://github.com/Scottcjn/rustchain-bounties/issues/2155
 # bounty-fix-ref: https://github.com/Scottcjn/rustchain-bounties/issues/2155
+# bounty-fix-ref: https://github.com/Scottcjn/rustchain-bounties/issues/2155
