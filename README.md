@@ -6,10 +6,10 @@
 
 [![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=open%20bounties&color=brightgreen)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
-[![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
+[![Open Bounties](https://img.shields.io/github/issues/Scottcjn/rustchain-bounties/bounty?label=Open%20Bounties&color=gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
 
-**131 open bounties · 5,900+ RTC available · No experience required for many tasks**
+**200+ open bounties · 72,499+ RTC already paid to 1,124 contributors · No experience required for many tasks**
 
 [![Total Paid](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Frustchain.org%2Fpayouts.json&query=%24.total_paid_rtc&label=Total%20Paid&suffix=%20RTC&color=gold)](BOUNTY_LEDGER.md)
 
@@ -88,11 +88,13 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 ## Stats
 
-- **Total bounties created**: 500+
-- **Open bounties**: 131
-- **RTC available**: 5,900+
-- **Contributors paid**: 14
-- **Reference rate**: 1 RTC = $0.15 USD
+Live payout figures are published at [rustchain.org/payouts.json](https://rustchain.org/payouts.json). Snapshot as of 2026-07-25:
+
+- **Open bounties**: 228 ([live count](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty))
+- **RTC paid out**: 72,499+
+- **Contributors paid**: 1,124 unique recipients
+- **Payout transactions**: 3,634
+- **Reference rate**: 1 RTC = $0.15 USD ([live rate](https://rustchain.org/api/tokenomics))
 
 ---
 

@@ -149,7 +149,7 @@ The hard cap at 8,388,608 is notably smaller than Bitcoin's 21 million, making R
 | Metric | ETH | RTC |
 |--------|-----|-----|
 | Max supply | Unlimited | 8,388,608 (hard cap) |
-| Current inflation | ~0.3%/year | Decreasing (halving schedule) |
+| Current inflation | ~0.3%/year | Fixed 1.5 RTC per epoch, no halving (tapers to zero at the hard cap) |
 | Staking model | Liquid staking common | Hardware-bonded |
 | Monetary policy | Social consensus | Code-enforced cap |
 | Scarcity narrative | "Ultrasound money" | "Digital antiquity" |
