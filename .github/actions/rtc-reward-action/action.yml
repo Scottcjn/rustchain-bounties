@@ -34,12 +34,16 @@ runs:
   steps:
     - name: 'Validate PR event'
       id: validate
+      shell: bash
+      env:
+        PR_MERGED: ${{ github.event.pull_request.merged }}
+        PR_BODY: ${{ github.event.pull_request.body }}
       run: |
-        if [[ "${{ github.event.pull_request.merged }}" != "true" ]]; then
+        if [[ "$PR_MERGED" != "true" ]]; then
           echo "PR was not merged, skipping."
           exit 0
         fi
-        BODY_LEN=$(echo "${{ github.event.pull_request.body }}" | wc -c)
+        BODY_LEN=$(printf '%s' "$PR_BODY" | wc -c)
         if [[ "$BODY_LEN" -lt ${{ inputs.min-pr-body-length }} ]]; then
           echo "PR body too short (< ${{ inputs.min-pr-body-length }} chars). Skipping."
           echo "contributor_wallet=" >> $GITHUB_OUTPUT
@@ -49,8 +53,11 @@ runs:
 
     - name: 'Extract contributor wallet from PR body'
       id: extract-wallet
+      shell: bash
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
       run: |
-        BODY="${{ github.event.pull_request.body }}"
+        BODY="$PR_BODY"
         # Try to extract wallet from common formats
         # Format 1: EVM address
         WALLET=$(echo "$BODY" | grep -oE '0x[a-fA-F0-9]{40}' | head -1)
@@ -70,13 +77,18 @@ runs:
         echo "contributor_wallet=$WALLET" >> $GITHUB_OUTPUT
 
     - name: 'Show PR info'
+      shell: bash
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
       run: |
-        echo "PR #${{ github.event.pull_request.number }} merged by ${{ github.event.pull_request.user.login }}"
+        echo "PR #${PR_NUMBER} merged by ${PR_AUTHOR}"
         echo "Contributor wallet: ${{ steps.extract-wallet.outputs.contributor_wallet }}"
         echo "Amount: ${{ inputs.amount }} RTC"
 
     - name: 'Dry-run confirmation'
       if: ${{ inputs.dry-run == 'true' }}
+      shell: bash
       run: |
         echo "=== DRY RUN MODE ==="
         echo "Would award ${{ inputs.amount }} RTC from wallet '${{ inputs.wallet-from }}' to '${{ steps.extract-wallet.outputs.contributor_wallet }}'"
@@ -84,15 +96,28 @@ runs:
 
     - name: 'Award RTC'
       if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+      shell: bash
+      env:
+        NODE_URL: ${{ inputs.node-url }}
+        WALLET_FROM: ${{ inputs.wallet-from }}
+        ADMIN_KEY: ${{ inputs.admin-key }}
+        WALLET_TO: ${{ steps.extract-wallet.outputs.contributor_wallet }}
+        AMOUNT: ${{ inputs.amount }}
       run: |
-        curl -s -X POST "${{ inputs.node-url }}/wallet/send" \
+        # The payload is built by jq from environment variables rather than
+        # interpolated into the command line, so the admin key never appears in
+        # the process table and no field can break out of the JSON it sits in.
+        jq -nc \
+          --arg from "$WALLET_FROM" \
+          --arg key  "$ADMIN_KEY" \
+          --arg to   "$WALLET_TO" \
+          --argjson amount "$AMOUNT" \
+          '{from_wallet:$from, admin_key:$key, to_wallet:$to, amount:$amount}' \
+          > /tmp/rtc-payload.json
+        curl -s -X POST "$NODE_URL/wallet/send" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"from_wallet\": \"${{ inputs.wallet-from }}\",
-            \"admin_key\": \"${{ inputs.admin-key }}\",
-            \"to_wallet\": \"${{ steps.extract-wallet.outputs.contributor_wallet }}\",
-            \"amount\": ${{ inputs.amount }}
-          }" | tee /tmp/rtc-response.json
+          --data-binary @/tmp/rtc-payload.json | tee /tmp/rtc-response.json
+        rm -f /tmp/rtc-payload.json
         if grep -q '"ok":true' /tmp/rtc-response.json; then
           echo "RTC sent successfully!"
         else
@@ -102,6 +127,7 @@ runs:
 
     - name: 'Post confirmation comment'
       if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+      shell: bash
       run: |
         curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
           -H "Authorization: token ${{ github.token }}" \
