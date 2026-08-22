@@ -69,6 +69,9 @@ COUNT_RE = re.compile(
     re.I)
 FILE_RE = re.compile(r'(?:^|\s)((?:[\w.-]+/)*[\w.-]+\.py)\b')
 DOCSTRING_OPEN = re.compile(r'^\s*[rRbBuU]{0,2}("""|\'\'\')')
+TRUSTED_GATE_AUTHORS = frozenset({
+    "scottcjn", "sophiaeagent-beep", "github-actions", "github-actions[bot]",
+})
 
 
 class GhError(RuntimeError):
@@ -112,6 +115,28 @@ def gh_raw(args):
         return ""
 
 
+def post_comment_checked(body):
+    """Post the verified amount marker, raising if GitHub did not persist it.
+
+    The payout runner cannot determine a docstring amount from labels alone. A
+    successful label transition without this comment therefore creates a claim
+    that looks adjudicated but can never be paid.
+    """
+    try:
+        p = subprocess.run(
+            ["gh", "issue", "comment", NUM, "-R", REPO, "--body", body],
+            capture_output=True, text=True, timeout=120,
+        )
+    except Exception as e:
+        raise GhError(f"could not post verified amount marker: {e}") from e
+    if p.returncode != 0:
+        raise GhError(
+            "could not post verified amount marker: "
+            f"{(p.stderr or '').strip()[:200]}"
+        )
+    return p.stdout
+
+
 
 def add_labels(*names):
     """Apply labels via REST.
@@ -122,15 +147,20 @@ def add_labels(*names):
     runner would never see it. Verified by observing an adjudicated claim come
     back with `labels: []`.
     """
-    ok = True
-    for n in names:
-        r = subprocess.run(["gh", "api", "-X", "POST",
-                            f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
-                           capture_output=True, text=True, timeout=60)
-        if r.returncode != 0:
-            print(f"::warning::could not apply label {n}: {r.stderr.strip()[:120]}")
-            ok = False
-    return ok
+    if not names:
+        return True
+    cmd = ["gh", "api", "-X", "POST", f"/repos/{REPO}/issues/{NUM}/labels"]
+    for name in names:
+        cmd.extend(["-f", f"labels[]={name}"])
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    except Exception as e:
+        print(f"::warning::could not apply labels {names}: {e}")
+        return False
+    if r.returncode != 0:
+        print(f"::warning::could not apply labels {names}: {r.stderr.strip()[:120]}")
+        return False
+    return True
 
 
 
@@ -153,11 +183,20 @@ def docstring_rtc_this_week(author):
         body = it.get("body") or ""
         # The marker lives in a gate comment, not the issue body, so fetch them.
         cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
+        verified_amount = None
         for c in cs:
+            actor = ((c.get("user") or {}).get("login")
+                     or (c.get("author") or {}).get("login") or "")
+            if actor.lower() not in TRUSTED_GATE_AUTHORS:
+                continue
             m = re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
             if m:
-                total += float(m.group(1))
-                break
+                verified_amount = float(m.group(1))
+        if verified_amount is None:
+            raise GhError(
+                f"docstring-verified claim #{it['number']} has no trusted amount marker"
+            )
+        total += verified_amount
     return round(total, 2)
 
 
@@ -311,8 +350,7 @@ def main():
                 f"Paying the verified number. If you think the gate has miscounted, say so and a "
                 f"human will check — miscounts are usually arithmetic, not bad faith.")
 
-    add_labels("bounty-eligible", "docstring-verified")
-    gh(["issue", "comment", NUM, "-R", REPO, "--body",
+    verified_comment = (
         f"✅ 🤖 **Docstring gate: verified.**\n\n"
         f"- PR {pr_repo}#{pr_num} is **merged**\n"
         f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
@@ -320,7 +358,19 @@ def main():
         f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
         f"<!-- rtc-payout-amount: {amount} -->\n"
         f"Queued for payout. The balance moves after the standard confirmation window, not on this "
-        f"comment."], None)
+        f"comment."
+    )
+    try:
+        # Persist the money-bearing record before marking the claim adjudicated.
+        # If this fails, no terminal labels are written and the scheduled sweep
+        # can retry the whole transition safely.
+        post_comment_checked(verified_comment)
+    except GhError as e:
+        print(f"::error::{e}")
+        return 1
+    if not add_labels("bounty-eligible", "docstring-verified"):
+        print("::error::verified amount marker posted, but terminal labels were not applied")
+        return 1
     print(f"verified {doc_count} docstrings -> {amount} RTC on {REPO}#{NUM}")
     return 0
 
