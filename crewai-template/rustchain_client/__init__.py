@@ -27,10 +27,10 @@ class RustChainClient:
         response.raise_for_status()
         return response.json()
     
-    def _post(self, endpoint: str, data: dict = None) -> dict:
+    def _post(self, endpoint: str, data: dict = None, headers: dict = None) -> dict:
         """Make POST request to RustChain node"""
         url = f"{self.node_url}{endpoint}"
-        response = self.session.post(url, json=data, timeout=30)
+        response = self.session.post(url, json=data, headers=headers or None, timeout=30)
         response.raise_for_status()
         return response.json()
     
@@ -73,8 +73,9 @@ class RustChainClient:
         """
         return self._get("/wallet/balance", params={"miner_id": wallet_name})
     
-    def transfer(self, from_wallet: str, to_wallet: str, amount: float, 
-                 admin_key: str = None) -> Dict[str, Any]:
+    def transfer(self, from_wallet: str, to_wallet: str, amount: float,
+                 admin_key: str = None, reason: str = None,
+                 idempotency_key: str = None) -> Dict[str, Any]:
         """
         Transfer RTC between wallets
         
@@ -89,14 +90,28 @@ class RustChainClient:
         """
         if not admin_key:
             raise ValueError("Admin key required for transfers")
-        
+        if not reason or not str(reason).strip():
+            raise ValueError("reason is required (audit attribution, e.g. 'bounty:123:slug:2026-08-22')")
+        if not idempotency_key:
+            # Stable per (from, to, amount, reason): a retried call replays to
+            # the same pending row on the node instead of paying twice.
+            import hashlib
+            idempotency_key = "crewai:" + hashlib.sha256(
+                f"{from_wallet}:{to_wallet}:{amount}:{reason}".encode()
+            ).hexdigest()[:40]
+
+        # Field names + auth header per the node's POST /wallet/transfer
+        # contract. (The previous from/to/amount/admin_key body never matched
+        # the endpoint.) Response is two-phase: ok + pending_id means QUEUED,
+        # confirming in ~24h — not yet paid.
         data = {
-            "from": from_wallet,
-            "to": to_wallet,
-            "amount": amount,
-            "admin_key": admin_key
+            "from_miner": from_wallet,
+            "to_miner": to_wallet,
+            "amount_rtc": amount,
+            "reason": reason,
+            "idempotency_key": idempotency_key,
         }
-        return self._post("/wallet/transfer", data)
+        return self._post("/wallet/transfer", data, headers={"X-Admin-Key": admin_key})
     
     def register_wallet(self, wallet_name: str) -> Dict[str, Any]:
         """
