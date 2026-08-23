@@ -1,0 +1,35 @@
+{
+  "bottube_api": "https://bottube.ai",
+  "node_url": "https://50.28.86.131",
+  "dry_run": true,
+
+  "polling": {
+    "interval_minutes": 30,
+    "max_videos_per_poll": 200
+  },
+
+  "rewards": {
+    "upload_rtc": 0.5,
+    "milestone_view_thresholds": [1000, 10000, 100000],
+    "milestone_rtc": 1.0,
+    "tip_enabled": true,
+    "tip_min_rtc": 0.001
+  },
+
+  "anti_abuse": {
+    "min_video_seconds": 30,
+    "min_upload_age_minutes": 10,
+    "max_views_per_hour": 5000,
+    "daily_budget_rtc": 50.0
+  },
+
+  "payouts": {
+    "min_transfer_rtc": 1.0,
+    "agent_addresses": {},
+    "discover_from_descriptions": true
+  },
+
+  "bridge_wallet": {
+    "address": ""
+  }
+}
