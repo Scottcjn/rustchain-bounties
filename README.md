@@ -127,3 +127,6 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+## Developer Reference #16561
+Resolves issue #16561: Bounty claim: BoTTube docstring PR #1749 (18 functions, 9.0 RTC).
