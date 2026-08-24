@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-24T12:22:26Z",
+  "updated_at": "2026-08-24T13:08:40Z",
   "repo": "Scottcjn/rustchain-bounties",
   "total": 801,
   "bounties": [
@@ -213,8 +213,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16497",
       "state": "open",
       "created_at": "2026-08-15T16:52:24Z",
-      "updated_at": "2026-08-24T11:43:01Z",
-      "comments": 16,
+      "updated_at": "2026-08-24T12:51:01Z",
+      "comments": 17,
       "author": "Scottcjn",
       "labels": [],
       "agents_welcome": false
@@ -4559,8 +4559,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12444",
       "state": "open",
       "created_at": "2026-05-27T21:56:08Z",
-      "updated_at": "2026-08-24T07:11:47Z",
-      "comments": 47,
+      "updated_at": "2026-08-24T13:08:39Z",
+      "comments": 48,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -7634,8 +7634,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2271",
       "state": "open",
       "created_at": "2026-03-20T15:32:02Z",
-      "updated_at": "2026-08-24T04:50:04Z",
-      "comments": 151,
+      "updated_at": "2026-08-24T13:08:41Z",
+      "comments": 152,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -7678,7 +7678,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-08-24T06:59:04Z",
+      "updated_at": "2026-08-24T12:51:05Z",
       "comments": 368,
       "author": "Scottcjn",
       "labels": [
@@ -7734,7 +7734,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-08-24T06:58:13Z",
+      "updated_at": "2026-08-24T12:50:19Z",
       "comments": 49,
       "author": "Scottcjn",
       "labels": [
@@ -9632,8 +9632,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/282",
       "state": "open",
       "created_at": "2026-02-17T20:14:47Z",
-      "updated_at": "2026-08-24T04:31:31Z",
-      "comments": 40,
+      "updated_at": "2026-08-24T12:56:34Z",
+      "comments": 42,
       "author": "Scottcjn",
       "labels": [
         "bounty"
