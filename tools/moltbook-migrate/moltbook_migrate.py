@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """beacon_migrate.py — one-command Moltbook -> Beacon/AgentFolio identity migration.
 
 Part of bounty rustchain-bounties#2890 (deliverable 1: migration importer).
