@@ -21,26 +21,45 @@ async function getWalletBalance(walletName) {
   }
 }
 
-async function transferRTC(fromWallet, toWallet, amount, adminKey) {
+// Stable per (from, to, amount, memo, tipCommentId): a re-delivered webhook or
+// a workflow re-run collapses onto the SAME pending row on the node instead of
+// tipping twice. Charset is what the node's /wallet/transfer accepts.
+function buildIdempotencyKey(fromWallet, toWallet, amount, memo, commentId) {
+  const raw = `${fromWallet}:${toWallet}:${amount}:${memo || ''}:${commentId || ''}`;
+  const digest = require('crypto').createHash('sha256').update(raw).digest('hex').slice(0, 32);
+  return `github_tip:${String(commentId || 'manual').replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 32)}:${digest}`;
+}
+
+async function transferRTC(fromWallet, toWallet, amount, adminKey, memo = '', commentId = '') {
   try {
+    // Field names + auth header per the node's POST /wallet/transfer contract:
+    // {from_miner, to_miner, amount_rtc, reason, idempotency_key} with
+    // X-Admin-Key. (The previous body — from/to/amount/admin_key — never
+    // matched the endpoint; every tip would have been rejected.)
+    const reason = `github_tip:${commentId || 'manual'}:${(memo || 'tip').slice(0, 200)}`;
     const response = await fetch(`${RUSTCHAIN_API}/wallet/transfer`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
       body: JSON.stringify({
-        from: fromWallet,
-        to: toWallet,
-        amount: parseFloat(amount),
-        admin_key: adminKey
+        from_miner: fromWallet,
+        to_miner: toWallet,
+        amount_rtc: parseFloat(amount),
+        reason,
+        idempotency_key: buildIdempotencyKey(fromWallet, toWallet, amount, memo, commentId)
       })
     });
-    
+
     if (!response.ok) {
       const error = await response.text();
       return { success: false, error: error };
     }
-    
+
     const data = await response.json();
-    return { success: true, txId: data.txId || data.ticket_id };
+    if (!data.ok) {
+      return { success: false, error: data.error || JSON.stringify(data) };
+    }
+    // Two-phase: `pending_id`/`tx_hash` mean QUEUED (confirms in ~24h), not paid.
+    return { success: true, txId: data.tx_hash, pendingId: data.pending_id, phase: data.phase };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -180,7 +199,7 @@ async function run() {
       }
       
       // Process tip
-      const result = await transferRTC(sender, toUser, amount, adminKey);
+      const result = await transferRTC(sender, toUser, amount, adminKey, memo, context.payload.comment.id);
       
       if (result.success) {
         response = formatResponse('tip_success', {
