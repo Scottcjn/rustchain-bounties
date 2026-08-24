@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """bottube_bridge — credit RTC to BoTTube creators for content and tips.
 
 Monitors the public BoTTube API, applies configurable reward rules with
