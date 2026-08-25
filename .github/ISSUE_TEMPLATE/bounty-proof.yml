@@ -59,11 +59,37 @@ body:
   - type: input
     id: rtc_wallet
     attributes:
-      label: RTC wallet name
-      description: Use a RustChain wallet name, not a SOL, ETH, Base, or Ergo address.
-      placeholder: my-wallet-name
+      label: RTC payout address
+      description: |
+        An RTC address: the letters `RTC` followed by 40 hex characters.
+        NOT your GitHub handle, and NOT a SOL / ETH / Base / Ergo address — a `0x...`
+        address cannot be paid here and the claim will stall at the last step.
+
+        Do not have one? It takes about two minutes:
+
+            git clone https://github.com/Scottcjn/Rustchain
+            cd Rustchain/rustchain-wallet && cargo install --path .
+            rtc-wallet create --name my-wallet
+
+        That prints your `RTC...` address. The address is public and safe to post here.
+        Your private key and seed phrase are not, and nobody from this project will
+        ever ask you for either.
+      placeholder: RTC0123456789abcdef0123456789abcdef01234567
     validations:
       required: true
+
+  - type: input
+    id: fallback_handle
+    attributes:
+      label: "Fallback: credit a bare name instead (not recommended)"
+      description: |
+        Leave this empty unless you genuinely cannot generate an address yet.
+
+        We can credit a bare name, but that balance has **no keypair behind it**, so
+        you cannot sign a transfer out of it. It will show as paid while being
+        unspendable until you supply a real address and we migrate it by hand.
+        Supplying an address above is strictly better for you.
+      placeholder: leave blank if you gave an RTC address above
 
   - type: input
     id: platform_identity
@@ -101,7 +127,15 @@ body:
       options:
         - label: I am not using a product repo issue for this claim.
           required: true
-        - label: I provided an RTC wallet name, not an external chain address.
+        - label: My payout field is an RTC address (`RTC` + 40 hex), or I deliberately used the fallback and accept that the balance cannot be spent until migrated.
           required: true
         - label: I understand payout is reviewed manually and may be partial or rejected if the proof is weak, duplicated, or out of scope.
           required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Blocked by `403 Resource not accessible by integration`?** That is a token-scope
+        limit on your integration, not on our side. Email the submission to
+        `sophia.eagent@gmail.com` and we will file it on GitHub in your name, with credit.
