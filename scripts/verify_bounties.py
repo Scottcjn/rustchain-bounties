@@ -36,6 +36,17 @@ GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 if not GITHUB_TOKEN:
     sys.exit("GITHUB_TOKEN environment variable is required")
 
+# Token used for the stargazer sweep. The Actions-issued GITHUB_TOKEN is a
+# GitHub App installation token, and GET /repos/{owner}/{repo}/stargazers
+# answers every such token with 403 "Resource not accessible by integration"
+# -- even for the workflow's own public repo. Every scheduled run since at
+# least 2026-08-19 logged that 403 for all 13 STAR_REPOS and (until the
+# fail-closed fix) reported "0 stargazers" as a green run. A user PAT
+# (classic `public_repo`, or fine-grained with Metadata: read) can list
+# stargazers, so the workflow passes one here; issue comments stay on
+# GITHUB_TOKEN so they are still authored by github-actions[bot].
+STAR_READ_TOKEN = os.environ.get("STAR_READ_TOKEN", "") or GITHUB_TOKEN
+
 OWNER = "Scottcjn"
 BOUNTY_REPO = "rustchain-bounties"
 
@@ -92,17 +103,24 @@ log = logging.getLogger("verify-bounties")
 # GitHub API helpers
 # ---------------------------------------------------------------------------
 
-SESSION = requests.Session()
-SESSION.headers.update({
-    "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-})
+def _make_session(token: str) -> requests.Session:
+    s = requests.Session()
+    s.headers.update({
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    })
+    return s
 
 
-def gh_get(url: str, params: dict | None = None) -> requests.Response:
+SESSION = _make_session(GITHUB_TOKEN)          # issue reads + comment writes
+STAR_SESSION = _make_session(STAR_READ_TOKEN)  # stargazer sweep only
+
+
+def gh_get(url: str, params: dict | None = None,
+           session: requests.Session = SESSION) -> requests.Response:
     """GET with rate-limit awareness."""
-    r = SESSION.get(url, params=params or {})
+    r = session.get(url, params=params or {})
     remaining = int(r.headers.get("X-RateLimit-Remaining", 999))
     if remaining < 50:
         reset_ts = int(r.headers.get("X-RateLimit-Reset", 0))
@@ -121,7 +139,8 @@ class IncompleteSweep(RuntimeError):
     """
 
 
-def paginate_all(url: str, params: dict | None = None) -> list:
+def paginate_all(url: str, params: dict | None = None,
+                 session: requests.Session = SESSION) -> list:
     """Paginate through ALL results for a GitHub API endpoint, or raise.
 
     Raises `IncompleteSweep` on any non-200 page instead of returning what it
@@ -144,7 +163,7 @@ def paginate_all(url: str, params: dict | None = None) -> list:
     page = 1
     while True:
         params["page"] = page
-        r = gh_get(url, params)
+        r = gh_get(url, params, session=session)
         if r.status_code != 200:
             raise IncompleteSweep(
                 f"{url} page {page} returned HTTP {r.status_code}: {r.text[:200]}"
@@ -171,7 +190,8 @@ def get_stargazers(repo: str) -> set[str]:
     repo into "nobody starred it").
     """
     try:
-        users = paginate_all(f"https://api.github.com/repos/{OWNER}/{repo}/stargazers")
+        users = paginate_all(f"https://api.github.com/repos/{OWNER}/{repo}/stargazers",
+                             session=STAR_SESSION)
     except IncompleteSweep as e:
         raise IncompleteSweep(f"stargazers for {OWNER}/{repo}: {e}") from e
     return {u["login"] for u in users if isinstance(u, dict) and "login" in u}

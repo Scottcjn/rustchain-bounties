@@ -24,3 +24,8 @@ jobs:
         run: python scripts/verify_bounties.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The Actions app token gets 403 "Resource not accessible by
+          # integration" from /stargazers on every repo; the star sweep needs
+          # a user PAT (Metadata: read is enough). Comments still go out on
+          # GITHUB_TOKEN as github-actions[bot].
+          STAR_READ_TOKEN: ${{ secrets.STAR_READ_TOKEN }}
