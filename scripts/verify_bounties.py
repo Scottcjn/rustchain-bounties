@@ -69,10 +69,13 @@ STAR_REPOS = [
 ]
 
 # Issue numbers by bounty type
-STAR_BOUNTY_ISSUES = [2175, 47, 773, 1595]
-BADGE_BOUNTY_ISSUES = [2177]
-FOLLOW_BOUNTY_ISSUES = [2173, 2155]
-EMOJI_BOUNTY_ISSUES = [1611, 2180]
+# Only OPEN bounty issues belong here: the phases skip closed issues, so a list of
+# closed numbers makes the sweep succeed while checking nobody (2026-08-28: all four
+# star entries had been closed for months while claims piled up on the live ones).
+STAR_BOUNTY_ISSUES = [16238, 9017, 165, 171, 378]   # star 3 repos / May Flowers / ClawHub / pick-one / BoTTube
+BADGE_BOUNTY_ISSUES = [13949]                        # RustChain badge in any README
+FOLLOW_BOUNTY_ISSUES = [2155]                        # (2173 closed)
+EMOJI_BOUNTY_ISSUES = [2180]                         # (1611 closed)
 
 # Bot signature so we can detect our own comments and avoid duplicates
 BOT_SIGNATURE = "<!-- bounty-verify-bot -->"
