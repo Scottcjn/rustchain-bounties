@@ -1,113 +1,110 @@
-'use strict';
-
-// rtc-reward: parses bounty claim issues and exports payout details.
-//
-// Fixes #16327 (Claim #696): claimants wrap their wallet in markdown code
-// quotes, e.g.
-//   **Wallet:** `7doPxSPt1pmbHcUcVzK22FVECDhv8kV6nnd2XMKaFiRd`
-// The previous parser expected a bare address and rejected these claims.
-
 const core = require('@actions/core');
 const github = require('@actions/github');
+const fetch = require('node-fetch');
+const { extractRtcWallet } = require('./wallet');
 
-// Wallet label followed by an optional code quote and a base58 address.
-// Tolerates bold markers: **Wallet:**, Wallet:, wallet :
-const WALLET_RE = /wallet\s*\*{0,2}\s*:\s*\*{0,2}\s*`?([1-9A-HJ-NP-Za-km-z]{32,44})`?/i;
-const WALLET_VALID_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-// "(2 RTC)" anywhere in the title or body.
-const AMOUNT_RE = /\(\s*(\d+(?:\.\d+)?)\s*RTC\s*\)/i;
-
-function extractWallet(body) {
-  if (!body) {
-    return null;
-  }
-  const match = body.match(WALLET_RE);
-  if (!match) {
-    return null;
-  }
-  const candidate = match[1].trim();
-  return WALLET_VALID_RE.test(candidate) ? candidate : null;
-}
-
-function extractAmount(title, body, fallbackAmount) {
-  const fromTitle = title && title.match(AMOUNT_RE);
-  if (fromTitle) {
-    return Number(fromTitle[1]);
-  }
-  const fromBody = body && body.match(AMOUNT_RE);
-  if (fromBody) {
-    return Number(fromBody[1]);
-  }
-  return fallbackAmount;
-}
-
-async function run() {
+async function getContributorWallet() {
+  const walletFile = core.getInput('wallet-file');
+  const prBody = github.context.payload.pull_request?.body || '';
+  
+  // Try to extract wallet from PR body
+  const prWallet = extractRtcWallet(prBody);
+  if (prWallet) return prWallet;
+  
+  // Try to get wallet from file in repo
   try {
-    const token = core.getInput('github-token') || process.env.GITHUB_TOKEN || '';
-    const fallbackAmount = Number(core.getInput('default-amount') || '0');
-    const dryRun = String(core.getInput('dry-run') || '').toLowerCase() === 'true';
-
-    const ctx = github.context;
-    const issue = ctx.payload.issue;
-    const issueNumber = (issue && issue.number) || Number(core.getInput('issue-number') || '0');
-
-    if (!issueNumber) {
-      core.setFailed('rtc-reward: no issue number available');
-      return;
+    const response = await fetch(
+      `https://api.github.com/repos/${github.context.repo.owner}/${github.context.repo.repo}/contents/${walletFile}`,
+      {
+        headers: {
+          'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      const wallet = extractRtcWallet(
+        Buffer.from(data.content, 'base64').toString().trim()
+      );
+      if (wallet) return wallet;
     }
+  } catch (error) {
+    core.info(`Could not read wallet file: ${error.message}`);
+  }
+  
+  // Fallback to PR author
+  return github.context.payload.pull_request?.user?.login || 'unknown';
+}
 
-    const title = (issue && issue.title) || '';
-    const body = (issue && issue.body) || '';
-
-    const wallet = extractWallet(body);
-    const amount = extractAmount(title, body, fallbackAmount);
-    const valid = Boolean(wallet) && amount > 0;
-
-    core.setOutput('issue-number', String(issueNumber));
-    core.setOutput('wallet', wallet || '');
-    core.setOutput('amount', String(amount));
-    core.setOutput('valid', String(valid));
-
-    if (!wallet) {
-      core.warning('rtc-reward: no valid base58 wallet found in claim #' + issueNumber);
-    }
-    if (!(amount > 0)) {
-      core.warning('rtc-reward: no positive RTC amount found in claim #' + issueNumber);
-    }
-
-    if (!token || dryRun || !issue) {
-      core.info('rtc-reward: dry run - outputs exported, no comment posted');
-      return;
-    }
-
-    const octokit = github.getOctokit(token);
-    const repo = ctx.repo;
-
-    let comment;
-    if (valid) {
-      comment =
-        '✅ Claim #' + issueNumber + ' validated by rtc-reward.\n\n' +
-        '- Wallet: `' + wallet + '`\n' +
-        '- Amount: ' + amount + ' RTC\n\n' +
-        'Payout queued by the rewards bot.';
-    } else {
-      comment =
-        '⚠️ Claim #' + issueNumber + ' could not be validated.\n\n' +
-        (wallet ? '' : '- Add a wallet line: Wallet: <your-base58-address>\n') +
-        (amount > 0 ? '' : '- Include the amount in the title, e.g. (2 RTC).\n');
-    }
-
-    await octokit.rest.issues.createComment({
-      owner: repo.owner,
-      repo: repo.repo,
-      issue_number: issueNumber,
-      body: comment,
+async function awardRTC(contributorWallet, amount, nodeUrl, adminKey, dryRun) {
+  if (dryRun === 'true') {
+    core.info(`DRY RUN: Would award ${amount} RTC to ${contributorWallet}`);
+    return { success: true, message: 'Dry run completed' };
+  }
+  
+  try {
+    const response = await fetch(`${nodeUrl}/admin/transfer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': adminKey
+      },
+      body: JSON.stringify({
+        from_wallet: core.getInput('wallet-from'),
+        to_wallet: contributorWallet,
+        amount_rtc: parseFloat(amount)
+      })
     });
-    core.info('rtc-reward: commented on #' + issueNumber + ' (valid=' + valid + ')');
-  } catch (err) {
-    core.setFailed('rtc-reward: ' + (err && err.message ? err.message : String(err)));
+    
+    const result = await response.json();
+    return { success: response.ok, message: result.message || 'Transfer completed' };
+  } catch (error) {
+    return { success: false, message: error.message };
   }
 }
 
-run();
+async function main() {
+  try {
+    // Verify this is a merged PR
+    if (!github.context.payload.pull_request?.merged) {
+      core.info('PR not merged, skipping reward');
+      return;
+    }
+    
+    const amount = core.getInput('amount');
+    const nodeUrl = core.getInput('node-url');
+    const adminKey = core.getInput('admin-key');
+    const dryRun = core.getInput('dry-run');
+    
+    const contributorWallet = await getContributorWallet();
+    core.info(`Awarding ${amount} RTC to contributor: ${contributorWallet}`);
+    
+    const result = await awardRTC(contributorWallet, amount, nodeUrl, adminKey, dryRun);
+    
+    if (result.success) {
+      core.info(`Successfully awarded ${amount} RTC to ${contributorWallet}`);
+      await core.setOutput('success', 'true');
+    } else {
+      core.setFailed(`Failed to award RTC: ${result.message}`);
+      await core.setOutput('success', 'false');
+    }
+    
+    // Post comment on PR
+    const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+    await octokit.rest.issues.createComment({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: github.context.issue.number,
+      body: result.success 
+        ? `✅ **RTC Reward Awarded**\n\n${amount} RTC has been transferred to wallet \`${contributorWallet}\`.\n\nThank you for your contribution! 🌾`
+        : `❌ **RTC Reward Failed**\n\nFailed to transfer ${amount} RTC: ${result.message}`
+    });
+    
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+}
+
+main();
