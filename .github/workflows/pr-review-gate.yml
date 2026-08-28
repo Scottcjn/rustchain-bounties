@@ -34,4 +34,6 @@ jobs:
           TARGET_REPO: Scottcjn/Rustchain
           CAP: "15"
           RATE_RTC: "3"
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          RETRY_NEEDS_HUMAN: ${{ github.event.action == 'edited' && '1' || '' }}
         run: python3 scripts/pr_review_gate.py
