@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rustchain-agent"
-version = "0.1.0"
-description = "Python SDK for RustChain Agent Economy (RIP-302)"
+version = "0.2.0"
+description = "Python SDK for RIP-302 wallet, payment, and reputation APIs"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -14,3 +14,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "responses>=0.23"]
+
+[tool.setuptools]
+packages = ["rustchain_agent"]
