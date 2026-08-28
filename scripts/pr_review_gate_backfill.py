@@ -45,6 +45,10 @@ PROCESSED_LABEL = os.environ.get("PROCESSED_LABEL", "gate-processed")
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
+class GhListError(RuntimeError):
+    """`gh issue list` failed or returned unparseable JSON. Not an empty queue."""
+
+
 def _load_gate():
     """Import pr_review_gate for its is_review_claim() classifier only."""
     spec = importlib.util.spec_from_file_location(
@@ -57,16 +61,22 @@ def _load_gate():
 
 def list_unprocessed(gate):
     """Open review claims that carry neither the processed label nor a verdict."""
-    out = subprocess.run(
+    r = subprocess.run(
         ["gh", "issue", "list", "-R", REPO, "--state", "open",
          "--limit", "1000", "--json", "number,title,labels"],
         capture_output=True, text=True, timeout=180,
-    ).stdout
+    )
+    if r.returncode != 0:
+        raise GhListError(
+            f"gh issue list exited {r.returncode}: {(r.stderr or r.stdout or '').strip()[:200]}"
+        )
     try:
-        issues = json.loads(out or "[]")
-    except json.JSONDecodeError:
-        print("::error::could not parse issue list", file=sys.stderr)
-        return []
+        issues = json.loads(r.stdout or "[]")
+    except json.JSONDecodeError as e:
+        raise GhListError(
+            f"gh issue list returned unparseable JSON: {e}; "
+            f"head={(r.stdout or '')[:120]!r}"
+        ) from e
 
     never, stranded = [], []
     for i in issues:
@@ -106,7 +116,11 @@ def adjudicate(number, retry=False):
 
 def main():
     gate = _load_gate()
-    never, stranded = list_unprocessed(gate)
+    try:
+        never, stranded = list_unprocessed(gate)
+    except GhListError as e:
+        print(f"::error::could not enumerate backfill queue: {e}", file=sys.stderr)
+        return 1
     total = len(never) + len(stranded)
     # Never-adjudicated claims get the budget first: those contributors have
     # heard nothing at all, whereas a stranded claim at least got a verdict.
