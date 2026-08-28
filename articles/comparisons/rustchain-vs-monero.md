@@ -1,6 +1,6 @@
 # RustChain vs Monero: A Deep Dive into CPU-Friendly Privacy Coins
 
-**Published**: March 2024
+**Published**: August 2026
 **Author**: Community Contributor
 **Bounty**: 5 RTC
 
@@ -179,9 +179,12 @@ For CPU miners looking to participate with vintage hardware and build privacy-fo
 
 ## References
 
+- [RustChain Explorer](https://rustchain.net/explorer)
+- [RustChain GitHub](https://github.com/Scottcjn/Rustchain)
+- [RustChain Bounties](https://github.com/Scottcjn/rustchain-bounties)
 - [RustChain Whitepaper](https://rustchain.net/whitepaper)
+- [Proof-of-Antiquity Paper](https://rustchain.net/poa-paper)
 - [Monero Research Lab](https://www.getmonero.org/resources/research-lab/)
 - [RandomX Specification](https://github.com/tevador/RandomX)
-- [Proof-of-Antiquity Paper](https://rustchain.net/poa-paper)
 
 ---
