@@ -292,11 +292,23 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
         return claimant_login, "handle"
     return None, None
 def _list(extra):
+    """Enumerate open issues, failing closed on malformed CLI output.
+
+    FIX (#16660): the previous version caught `json.JSONDecodeError` and
+    returned `[]`. A `gh` process that exits 0 but emits truncated or
+    otherwise malformed JSON therefore produced an authoritative empty
+    candidate set: the run printed "0 candidate issues ... 0 paid" and exited
+    green while every eligible payout was silently skipped. Enumerating
+    nothing is only trustworthy when the CLI answered parseably; anything
+    else must fail closed like a non-zero `gh` exit does.
+    """
+    raw = gh(["issue", "list", "-R", REPO, "--state", "open",
+              "--json", "number,title,labels"]+extra)
     try:
-        return json.loads(gh(["issue","list","-R",REPO,"--state","open",
-                              "--json","number,title,labels"]+extra) or "[]")
-    except json.JSONDecodeError:
-        return []
+        return json.loads(raw or "[]")
+    except json.JSONDecodeError as e:
+        raise GhError(f"gh issue list returned malformed JSON ({e}); "
+                      f"output head: {(raw or '')[:120]!r}") from e
 
 # Candidate set = every gate-labelled claim UNION a recent-window sweep.
 #
