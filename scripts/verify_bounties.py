@@ -58,13 +58,14 @@ STAR_REPOS = [
     "beacon-skill",
     "grazer-skill",
     "ram-coffers",
-    "llama-power8",
-    "elyan-site",
+    "llama-cpp-power8",   # was "llama-power8" (404: repo is named llama-cpp-power8)
     "rust-ppc-tiger",
     "rustchain-mcp",
     "shaprai",
-    "beacon-rs",
+    "beacon-skill-rs",    # was "beacon-rs" (404: repo is named beacon-skill-rs)
     "trashclaw",
+    # "elyan-site" removed: the site repos (elyan-labs-site, elyanlabs-ai-site) are private
+    # and cannot be starred, so a sweep over them can never succeed.
 ]
 
 # Issue numbers by bounty type
