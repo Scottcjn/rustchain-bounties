@@ -10,6 +10,8 @@ Checks:
   2. Badge claims   - Does the user's profile README mention RustChain/Elyan?
   3. Follow claims  - Does the user follow Scottcjn?
   4. Emoji claims   - Did the user react to the specified issue?
+  5. Distribution   - Does the `Live-URL:` a claimant posted actually exist
+                      off GitHub (BoTTube / X / YouTube / article host)?
 
 Posts a verification comment on the bounty issue with results.
 """
@@ -27,6 +29,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 import requests
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from live_url import LIVE_URL_LINE_RE, classify_live_url, extract_live_urls  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -73,6 +78,13 @@ STAR_BOUNTY_ISSUES = [2175, 47, 773, 1595]
 BADGE_BOUNTY_ISSUES = [2177]
 FOLLOW_BOUNTY_ISSUES = [2173, 2155]
 EMOJI_BOUNTY_ISSUES = [1611, 2180]
+# Distribution / human-funnel bounties: the deliverable lives OFF GitHub, and
+# the 2026-08-28 audit found ~45 claims on these that never left GitHub. A
+# claim counts here only if its `Live-URL:` resolves on the named platform.
+DISTRIBUTION_BOUNTY_ISSUES = [315, 16601, 16497, 282, 399, 2798, 14481]
+LIVE_URL_VERIFIED_LABEL = "live-url-verified"
+OFFPLATFORM_TIMEOUT = 20  # seconds per fetch
+OFFPLATFORM_UA = "rustchain-bounty-verify-bot/1.0 (+https://github.com/Scottcjn/rustchain-bounties)"
 
 # Bot signature so we can detect our own comments and avoid duplicates
 BOT_SIGNATURE = "<!-- bounty-verify-bot -->"
@@ -615,6 +627,196 @@ def verify_emoji_claims(issue_number: int) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Off-platform (Live-URL) verification
+# ---------------------------------------------------------------------------
+#
+# Fail closed, exactly like the star phase: a network error, a non-200, or a
+# body we cannot parse is UNVERIFIED — never VERIFIED, and never a public
+# "this link is fake". UNVERIFIED simply means the bot could not confirm it
+# this run; it retries every 6 hours.
+
+def _http_get(url: str, params: dict | None = None) -> requests.Response:
+    """Plain unauthenticated GET for third-party hosts (never sends the GitHub token)."""
+    return requests.get(url, params=params or {}, timeout=OFFPLATFORM_TIMEOUT,
+                        headers={"User-Agent": OFFPLATFORM_UA, "Accept": "*/*"},
+                        allow_redirects=True)
+
+
+def _result(status: str, metric: str) -> dict:
+    return {"status": status, "metric": metric}
+
+
+def verify_bottube_url(url: str) -> dict:
+    m = re.search(r"/watch/([A-Za-z0-9_-]+)", url)
+    if not m:
+        return _result("UNVERIFIED", "no video id in URL")
+    vid = m.group(1)
+    try:
+        r = _http_get(f"https://bottube.ai/api/videos/{vid}")
+        if r.status_code != 200:
+            return _result("UNVERIFIED", f"HTTP {r.status_code}")
+        data = r.json()
+    except Exception as e:  # network, JSON, timeout
+        return _result("UNVERIFIED", f"fetch failed: {type(e).__name__}")
+    if not isinstance(data, dict) or not data.get("agent_name"):
+        return _result("UNVERIFIED", "no agent_name in API response")
+    views = data.get("views", "?")
+    created = str(data.get("created_at", "?"))[:10]
+    return _result("VERIFIED", f"by {data['agent_name']} · {views} views · {created}")
+
+
+def verify_x_url(url: str) -> dict:
+    m = re.search(r"/([A-Za-z0-9_]{1,15})/status/(\d+)", url)
+    if not m:
+        return _result("UNVERIFIED", "no status id in URL")
+    handle, tid = m.group(1), m.group(2)
+    try:
+        r = _http_get("https://cdn.syndication.twimg.com/tweet-result",
+                      params={"id": tid, "token": "x"})
+        if r.status_code != 200:
+            return _result("UNVERIFIED", f"HTTP {r.status_code}")
+        data = r.json()
+    except Exception as e:
+        return _result("UNVERIFIED", f"fetch failed: {type(e).__name__}")
+    screen = ((data.get("user") or {}).get("screen_name") if isinstance(data, dict) else None)
+    if not screen:
+        return _result("UNVERIFIED", "no user.screen_name in syndication response")
+    if screen.lower() != handle.lower():
+        return _result("UNVERIFIED", f"post belongs to @{screen}, URL says @{handle}")
+    metric = f"@{screen}"
+    likes = data.get("favorite_count")
+    if likes is not None:
+        metric += f" · {likes} likes"
+    return _result("VERIFIED", metric)
+
+
+def verify_youtube_url(url: str) -> dict:
+    try:
+        r = _http_get("https://www.youtube.com/oembed", params={"url": url, "format": "json"})
+        if r.status_code != 200:
+            return _result("UNVERIFIED", f"oEmbed HTTP {r.status_code}")
+        data = r.json()
+    except Exception as e:
+        return _result("UNVERIFIED", f"fetch failed: {type(e).__name__}")
+    if not isinstance(data, dict) or not data.get("title"):
+        return _result("UNVERIFIED", "oEmbed returned no title")
+    return _result("VERIFIED", f"{data.get('author_name', '?')} · \"{data['title'][:60]}\"")
+
+
+def verify_article_url(url: str) -> dict:
+    """dev.to / hashnode / medium / hackaday: the page exists (HTTP 200)."""
+    try:
+        r = _http_get(url)
+    except Exception as e:
+        return _result("UNVERIFIED", f"fetch failed: {type(e).__name__}")
+    if r.status_code != 200:
+        return _result("UNVERIFIED", f"HTTP {r.status_code}")
+    return _result("VERIFIED", "HTTP 200")
+
+
+PLATFORM_VERIFIERS = {
+    "bottube": verify_bottube_url,
+    "x": verify_x_url,
+    "youtube": verify_youtube_url,
+    "hackaday": verify_article_url,
+    "devto": verify_article_url,
+    "hashnode": verify_article_url,
+    "medium": verify_article_url,
+}
+
+
+def verify_live_url(url: str) -> dict:
+    """Classify + verify one URL. Off-allowlist hosts are UNVERIFIED, never fetched."""
+    platform = classify_live_url(url)
+    if not platform:
+        return {"platform": "-", "status": "UNVERIFIED", "metric": "host not on allowlist"}
+    res = PLATFORM_VERIFIERS[platform](url)
+    res["platform"] = platform
+    return res
+
+
+def extract_live_url_claims(comments: list[dict]) -> list[dict]:
+    """Every (user, url) pair from `Live-URL:` lines, deduped, bot/owner excluded."""
+    seen = set()
+    out = []
+    for c in comments:
+        user = (c.get("user") or {}).get("login", "")
+        body = c.get("body") or ""
+        if not user or BOT_SIGNATURE in body or user.lower() == OWNER.lower():
+            continue
+        if not LIVE_URL_LINE_RE.search(body):
+            continue
+        for url in extract_live_urls(body):
+            key = (user.lower(), url)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({"username": user, "url": url, "comment_id": c.get("id")})
+    return out
+
+
+def add_issue_label(issue_number: int, label: str) -> bool:
+    r = SESSION.post(
+        f"https://api.github.com/repos/{OWNER}/{BOUNTY_REPO}/issues/{issue_number}/labels",
+        json={"labels": [label]},
+    )
+    if r.status_code in (200, 201):
+        log.info("Labelled #%d %s", issue_number, label)
+        return True
+    log.error("Failed to label #%d %s: %d %s", issue_number, label, r.status_code, r.text[:200])
+    return False
+
+
+def verify_distribution_claims(issue_number: int) -> None:
+    """Verify Live-URL claims on a distribution bounty issue."""
+    log.info("=== Verifying Live-URL claims on issue #%d ===", issue_number)
+
+    comments = get_issue_comments(issue_number)  # raises IncompleteSweep -> no verdict
+    claims = extract_live_url_claims(comments)
+    existing_comment = find_existing_bot_comment(comments)
+
+    if not claims:
+        log.info("No Live-URL claims on #%d, skipping", issue_number)
+        return
+
+    results = []
+    for cl in claims:
+        res = verify_live_url(cl["url"])
+        log.info("  @%s %s -> %s (%s)", cl["username"], cl["url"], res["status"], res["metric"])
+        results.append({**cl, **res})
+
+    n_ok = sum(1 for r in results if r["status"] == "VERIFIED")
+    lines = [
+        BOT_SIGNATURE,
+        "## Live-URL Verification Report",
+        f"*{BOT_TAG} - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}*",
+        "",
+        f"Checked **{len(results)}** `Live-URL:` claim(s); **{n_ok}** resolved on the named platform.",
+        "",
+        "| User | URL | Platform | Status | Metric |",
+        "|------|-----|----------|--------|--------|",
+    ]
+    for r in results:
+        lines.append(f"| @{r['username']} | {r['url']} | {r['platform']} | {r['status']} | {r['metric']} |")
+    lines.extend([
+        "",
+        "---",
+        "*UNVERIFIED means the bot could not confirm the link this run (not found, wrong host, "
+        "or a network error). It re-checks every 6 hours. A verified link is not a payout; a "
+        "maintainer still reviews the content.*",
+    ])
+    body = "\n".join(lines)
+
+    if existing_comment:
+        update_comment(existing_comment, body)
+    else:
+        post_comment(issue_number, body)
+
+    if n_ok:
+        add_issue_label(issue_number, LIVE_URL_VERIFIED_LABEL)
+
+
+# ---------------------------------------------------------------------------
 # Issue-state check: only process open issues
 # ---------------------------------------------------------------------------
 
@@ -688,6 +890,8 @@ def main() -> int:
     failures += run_phase("Phase 3: Badge bounties", BADGE_BOUNTY_ISSUES, verify_badge_claims)
     failures += run_phase("Phase 4: Follow bounties", FOLLOW_BOUNTY_ISSUES, verify_follow_claims)
     failures += run_phase("Phase 5: Emoji bounties", EMOJI_BOUNTY_ISSUES, verify_emoji_claims)
+    failures += run_phase("Phase 6: Distribution bounties (Live-URL)",
+                          DISTRIBUTION_BOUNTY_ISSUES, verify_distribution_claims)
 
     log.info("=" * 60)
     if failures:
