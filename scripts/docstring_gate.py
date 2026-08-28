@@ -30,7 +30,7 @@ teaches people to stop claiming.
 Sets `bounty-eligible` + `docstring-verified` and posts the arithmetic, so the
 existing payout runner pays it on its next pass. Never moves RTC itself.
 
-Env: GITHUB_TOKEN, GH_REPO, ISSUE_NUMBER, RATE_PER_FUNC (0.5), MAX_RTC (25).
+Env: GITHUB_TOKEN, GH_REPO, ISSUE_NUMBER, RATE_PER_FUNC (0.01), MAX_RTC (25).
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ import sys
 
 REPO = os.environ.get("GH_REPO", "Scottcjn/rustchain-bounties")
 NUM = os.environ.get("ISSUE_NUMBER", "")
-RATE = float(os.environ.get("RATE_PER_FUNC", "0.5"))
+RATE = float(os.environ.get("RATE_PER_FUNC", "0.01"))
 # A single claim asking for more than this is not auto-payable. Docstring work
 # is small by nature; a very large claim is either a mistake or something that
 # deserves a human read.
@@ -55,7 +55,8 @@ MAX_RTC = float(os.environ.get("MAX_RTC", "25"))
 # is always another file to document, which is the same faucet shape as the
 # ONBOARD comparison bounty that had to be closed at 98% farm share.
 #
-# 40 RTC/week is deliberately generous: it is 80 documented functions, and it
+# At 0.01 RTC/function the weekly cap is a soft backstop, not the constraint:
+# a docstring is a one-line comment (often on a test stub), so the per-unit price
 # sits at the top of what the strongest contributors earn across ALL bounty
 # types in a week (measured 2026-08-10: typical top earners 20-50 RTC/week).
 # It caps a faucet without punishing anyone doing real work.
