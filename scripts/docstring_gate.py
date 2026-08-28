@@ -106,31 +106,51 @@ def gh(args, default=None, strict=False):
 
 
 def gh_raw(args):
+    """Run `gh` and return stdout, raising when the read is not authoritative."""
     try:
-        return subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120).stdout
-    except Exception:
-        return ""
+        p = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120)
+    except Exception as e:
+        raise GhError(f"gh {' '.join(args[:3])} failed: {e}") from e
+    if p.returncode != 0:
+        raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: "
+                      f"{(p.stderr or '').strip()[:200]}")
+    return p.stdout
 
 
 
-def add_labels(*names):
-    """Apply labels via REST.
+def add_labels(*names, strict=False):
+    """Apply labels via REST in one POST.
 
     `gh issue edit --add-label` goes through GraphQL and currently fails with a
     Projects-classic deprecation error -- and it fails SILENTLY, so the gate
     would post "verified" while never marking the claim eligible, and the payout
     runner would never see it. Verified by observing an adjudicated claim come
     back with `labels: []`.
+
+    When `strict=True`, a failed write raises `GhError` so money-path callers
+    fail closed instead of posting a verified/queued comment without labels.
     """
-    ok = True
+    if not names:
+        return True
+    args = ["gh", "api", "-X", "POST", f"/repos/{REPO}/issues/{NUM}/labels"]
     for n in names:
-        r = subprocess.run(["gh", "api", "-X", "POST",
-                            f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
-                           capture_output=True, text=True, timeout=60)
-        if r.returncode != 0:
-            print(f"::warning::could not apply label {n}: {r.stderr.strip()[:120]}")
-            ok = False
-    return ok
+        args.extend(["-f", f"labels[]={n}"])
+    r = subprocess.run(args, capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        msg = (f"could not apply labels {list(names)}: "
+               f"{(r.stderr or r.stdout or '').strip()[:200]}")
+        if strict:
+            raise GhError(msg)
+        print(f"::warning::{msg}")
+        return False
+    return True
+
+
+def issue_has_labels(*names):
+    """Return True only when every named label is present on the issue."""
+    iss = gh(["issue", "view", NUM, "-R", REPO, "--json", "labels"], None, strict=True)
+    present = {l["name"] for l in (iss.get("labels") or [])}
+    return all(n in present for n in names)
 
 
 
@@ -246,7 +266,11 @@ def main():
         print(f"{pr_repo}#{pr_num} not merged ({pr.get('state')}); waiting")
         return 0
 
-    diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
+    try:
+        diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
+    except GhError as e:
+        print(f"::error::could not read merged PR diff: {e}", file=sys.stderr)
+        return 1
     doc_count, total_added, files = count_added_docstrings(diff)
     claimed = None
     cm = COUNT_RE.search(body) or COUNT_RE.search(title)
@@ -311,7 +335,20 @@ def main():
                 f"Paying the verified number. If you think the gate has miscounted, say so and a "
                 f"human will check — miscounts are usually arithmetic, not bad faith.")
 
-    add_labels("bounty-eligible", "docstring-verified")
+    try:
+        add_labels("bounty-eligible", "docstring-verified", strict=True)
+        if not issue_has_labels("bounty-eligible", "docstring-verified"):
+            raise GhError("payable labels missing after REST apply")
+    except GhError as e:
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"🤖 Docstring gate: verified **{doc_count} docstrings** in {pr_repo}#{pr_num} "
+            f"(**{amount} RTC**), but could not apply the payout labels right now.\n\n"
+            f"Holding rather than posting a verified/queued marker — a green run without "
+            f"`bounty-eligible` + `docstring-verified` would never pay. This retries "
+            f"automatically on the next sweep."], None)
+        print(f"::error::label apply failed, refusing to approve: {e}", file=sys.stderr)
+        return 1
+
     gh(["issue", "comment", NUM, "-R", REPO, "--body",
         f"✅ 🤖 **Docstring gate: verified.**\n\n"
         f"- PR {pr_repo}#{pr_num} is **merged**\n"
