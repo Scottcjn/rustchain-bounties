@@ -28,4 +28,4 @@ jobs:
           # integration" from /stargazers on every repo; the star sweep needs
           # a user PAT (Metadata: read is enough). Comments still go out on
           # GITHUB_TOKEN as github-actions[bot].
-          STAR_READ_TOKEN: ${{ secrets.BOUNTY_PUSH_TOKEN }}
+          STAR_READ_TOKEN: ${{ secrets.STAR_READ_TOKEN }}
