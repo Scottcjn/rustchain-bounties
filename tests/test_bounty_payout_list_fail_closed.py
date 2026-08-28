@@ -84,9 +84,18 @@ class ListFailClosedTests(unittest.TestCase):
         else:
             self.fail("GhError not raised")
 
-    def test_empty_stdout_is_empty_set(self):
-        # gh succeeded and printed nothing: a genuine empty set is valid.
-        out = self._with_gh("", lambda: bp._list(["--limit", "400"]))
+    def test_empty_stdout_raises(self):
+        # Blank/empty stdout cannot be distinguished from complete truncation: fail closed
+        with self.assertRaises(bp.GhError):
+            self._with_gh("", lambda: bp._list(["--limit", "400"]))
+
+    def test_whitespace_stdout_raises(self):
+        with self.assertRaises(bp.GhError):
+            self._with_gh("   \n\t  ", lambda: bp._list(["--limit", "400"]))
+
+    def test_empty_json_array_is_empty_set(self):
+        # A valid [] JSON document is the legitimate empty-set result
+        out = self._with_gh("[]", lambda: bp._list(["--limit", "400"]))
         self.assertEqual(out, [])
 
     def test_valid_json_returned_unchanged(self):
@@ -108,6 +117,17 @@ class ListFailClosedTests(unittest.TestCase):
 
         with self.assertRaises(bp.GhError):
             self._with_gh("{", run)
+
+    def test_candidate_enumeration_cannot_be_green_on_empty_output(self):
+        def run():
+            issues = bp._list(["--label", "bounty-eligible", "--limit", "1000"])
+            seen = {i["number"] for i in issues}
+            issues += [i for i in bp._list(["--limit", "400"])
+                       if i["number"] not in seen]
+            return issues
+
+        with self.assertRaises(bp.GhError):
+            self._with_gh("", run)
 
 
 if __name__ == "__main__":
