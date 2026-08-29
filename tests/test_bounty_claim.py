@@ -98,5 +98,65 @@ class ActiveClaimTests(unittest.TestCase):
         self.assertIsNone(bc.active_claim(1))
 
 
+class LiveUrlGateTests(unittest.TestCase):
+    """On `distribution` issues a claim without an allowlisted Live-URL must
+    NOT lock the bounty — it gets an explanation instead. Everywhere else the
+    gate is inert."""
+
+    def setUp(self):
+        self._gh, self._add = bc.gh, bc.add_label
+        self.comments, self.labels = [], []
+
+        def fake_gh(args, default=None):
+            if args[:2] == ["issue", "view"]:
+                return self.issue
+            if args[:2] == ["issue", "comment"]:
+                self.comments.append(args[args.index("--body") + 1])
+                return None
+            return []  # active_claim: no prior comments
+        bc.gh = fake_gh
+        bc.add_label = lambda n, name: self.labels.append(name) or True
+
+    def tearDown(self):
+        bc.gh, bc.add_label = self._gh, self._add
+
+    def _issue(self, *labels):
+        self.issue = {"title": "[BOUNTY] Share on X", "state": "OPEN",
+                      "labels": [{"name": name} for name in labels]}
+
+    def test_distribution_without_live_url_is_explained_not_locked(self):
+        self._issue("distribution")
+        bc.do_claim(2798, "alice", "/claim")
+        self.assertEqual(self.labels, [])
+        self.assertEqual(len(self.comments), 1)
+        self.assertIn("Live-URL", self.comments[0])
+        self.assertNotIn(bc.MARKER, self.comments[0])
+
+    def test_distribution_with_off_list_url_is_explained_not_locked(self):
+        self._issue("distribution")
+        bc.do_claim(2798, "alice", "/claim\nLive-URL: https://gist.github.com/alice/x")
+        self.assertEqual(self.labels, [])
+        self.assertIn("gist.github.com", self.comments[0])
+        self.assertNotIn(bc.MARKER, self.comments[0])
+
+    def test_distribution_with_live_url_locks(self):
+        self._issue("distribution", "standard")
+        bc.do_claim(2798, "alice", "/claim\nLive-URL: https://x.com/alice/status/123")
+        self.assertEqual(self.labels, [bc.LABEL])
+        self.assertIn(bc.MARKER, self.comments[0])
+
+    def test_non_distribution_issue_unchanged(self):
+        self._issue("standard")
+        bc.do_claim(16250, "alice", "/claim")
+        self.assertEqual(self.labels, [bc.LABEL])
+        self.assertIn(bc.MARKER, self.comments[0])
+
+    def test_gate_helper_direct(self):
+        self.assertTrue(bc.live_url_gate(1, "a", "/claim", {"standard"}))
+        self.assertFalse(bc.live_url_gate(1, "a", "/claim", {"distribution"}))
+        self.assertTrue(bc.live_url_gate(1, "a", "Live-URL: https://youtu.be/dQw4w9WgXcQ",
+                                         {"distribution"}))
+
+
 if __name__ == "__main__":
     unittest.main()
