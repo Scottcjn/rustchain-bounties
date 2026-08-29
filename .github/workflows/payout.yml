@@ -1,0 +1,70 @@
+# Maintainer-triggered RTC payout runner.
+#
+# Nothing here decides who gets paid. A maintainer stages a reviewed, idempotent
+# script under /root/payouts/ on the node, then presses "Run workflow" here with
+# its filename. The run log is the audit record. The SSH key used is bound on the
+# node to a forced command that can only execute /root/payouts/pay_*.sh — it
+# cannot open a shell, forward ports, or run anything else.
+name: Payout (maintainer-triggered)
+
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Payout script filename under /root/payouts/ (pay_*.sh)"
+        required: true
+        type: string
+      confirm:
+        description: "Type PAY to confirm you reviewed the script"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payout
+  cancel-in-progress: false
+
+jobs:
+  payout:
+    if: github.actor == 'Scottcjn'
+    runs-on: ubuntu-latest
+    environment: payout
+    steps:
+      - name: Validate inputs
+        env:
+          SCRIPT: ${{ inputs.script }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          [[ "$CONFIRM" == "PAY" ]] || { echo "::error::confirm must be exactly PAY"; exit 1; }
+          [[ "$SCRIPT" =~ ^pay_[A-Za-z0-9._-]+\.sh$ ]] || { echo "::error::script must match pay_*.sh"; exit 1; }
+
+      - name: Install SSH key (forced-command, payout-only)
+        env:
+          KEY: ${{ secrets.PAYOUT_SSH_KEY }}
+          HOSTKEY: ${{ secrets.PAYOUT_SSH_HOSTKEY }}
+        run: |
+          set -euo pipefail
+          [[ -n "$KEY" && -n "$HOSTKEY" ]] || { echo "::error::PAYOUT_SSH_KEY / PAYOUT_SSH_HOSTKEY secrets missing"; exit 1; }
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/payout && chmod 600 ~/.ssh/payout
+          printf '%s\n' "$HOSTKEY" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+
+      - name: Run payout script on node
+        env:
+          SCRIPT: ${{ inputs.script }}
+        run: |
+          set -euo pipefail
+          echo "Triggered by ${{ github.actor }} at $(date -u +%FT%TZ) — $SCRIPT"
+          ssh -i ~/.ssh/payout -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20 \
+              root@50.28.86.131 "run $SCRIPT" 2>&1 | tee payout-run.log
+
+      - name: Upload run log (audit record)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: payout-${{ inputs.script }}-${{ github.run_id }}
+          path: payout-run.log
+          retention-days: 400

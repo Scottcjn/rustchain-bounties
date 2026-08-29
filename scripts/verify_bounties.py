@@ -74,13 +74,15 @@ STAR_REPOS = [
 ]
 
 # Issue numbers by bounty type
-STAR_BOUNTY_ISSUES = [2175, 47, 773, 1595]
-BADGE_BOUNTY_ISSUES = [2177]
-FOLLOW_BOUNTY_ISSUES = [2173, 2155]
-EMOJI_BOUNTY_ISSUES = [1611, 2180]
-# Distribution / human-funnel bounties: the deliverable lives OFF GitHub, and
-# the 2026-08-28 audit found ~45 claims on these that never left GitHub. A
-# claim counts here only if its `Live-URL:` resolves on the named platform.
+# Only OPEN bounty issues belong here: the phases skip closed issues, so a list of
+# closed numbers makes the sweep succeed while checking nobody (2026-08-28).
+STAR_BOUNTY_ISSUES = [16238, 9017, 165, 171, 378]   # star 3 repos / May Flowers / ClawHub / pick-one / BoTTube
+BADGE_BOUNTY_ISSUES = [13949]                        # RustChain badge in any README
+FOLLOW_BOUNTY_ISSUES = [2155]                        # (2173 closed)
+EMOJI_BOUNTY_ISSUES = [2180]                         # (1611 closed)
+# Distribution / human-funnel bounties: the deliverable lives OFF GitHub, and the
+# 2026-08-28 audit found ~45 claims on these that never left GitHub. A claim counts
+# here only if its `Live-URL:` resolves on the named platform.
 DISTRIBUTION_BOUNTY_ISSUES = [315, 16601, 16497, 282, 399, 2798, 14481]
 LIVE_URL_VERIFIED_LABEL = "live-url-verified"
 OFFPLATFORM_TIMEOUT = 20  # seconds per fetch
