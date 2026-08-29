@@ -194,8 +194,10 @@ def sophia_get_last_inspected(sophia_url: str, miner_id: str) -> Optional[str]:
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
             return data.get("created_at")
-    except Exception:
-        return None
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Scheduler API returned HTTP {e.code}: {e.reason}") from e
+    except Exception as e:
+        raise RuntimeError(f"Scheduler API request failed: {e}") from e
 
 
 # ---------------------------------------------------------------------------

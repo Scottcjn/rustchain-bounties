@@ -75,11 +75,11 @@ def gh(args, default=None):
 
 
 def gh_ok(args):
-    try:
-        return subprocess.run(["gh"] + args, capture_output=True, text=True,
-                              timeout=90).returncode == 0
-    except Exception:
+    result = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=90)
+    if result.returncode != 0:
+        print(f"[WARN] gh {' '.join(args[:3])} failed (exit {result.returncode}): {result.stderr.strip()}", file=sys.stderr)
         return False
+    return True
 
 
 def add_label(num, name):
