@@ -107,10 +107,10 @@ def gh(args, default=None, strict=False):
 
 
 def gh_raw(args):
-    try:
-        return subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120).stdout
-    except Exception:
-        return ""
+    result = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=120)
+    if result.returncode != 0:
+        raise GhError(f"gh {' '.join(args[:3])} failed (exit {result.returncode}): {result.stderr.strip()}")
+    return result.stdout
 
 
 

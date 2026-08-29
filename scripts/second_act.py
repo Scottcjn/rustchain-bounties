@@ -122,11 +122,8 @@ def next_act(handle: str, repo: str, just_did: str) -> str:
 
 def build(handle: str, repo: str, just_did: str) -> str:
     """Return the trailing block for a payout comment. Never raises."""
-    try:
-        parts = [p for p in (standing(handle, repo), next_act(handle, repo, just_did)) if p]
-        return ("\n\n---\n" + "\n\n".join(parts)) if parts else ""
-    except Exception:
-        return ""
+    parts = [p for p in (standing(handle, repo), next_act(handle, repo, just_did)) if p]
+    return ("\n\n---\n" + "\n\n".join(parts)) if parts else ""
 
 
 if __name__ == "__main__":
