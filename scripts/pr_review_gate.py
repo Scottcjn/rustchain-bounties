@@ -236,7 +236,6 @@ def main():
     if {"bounty-eligible","needs-human","gate-processed"} & labels: return  # idempotent
     title=iss.get("title",""); body=iss.get("body") or ""; author=iss["user"]["login"]
     if not is_review_claim(title): return  # not our claim type; leave for other workflows
-    add_label(NUM,"gate-processed")
     claim_repo, pr = pr_ref(title, body)
     if not pr:
         add_label(NUM,"needs-human"); comment(NUM,"🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>` (a full PR URL is best). Flagged for human review."); return
@@ -283,6 +282,7 @@ def main():
     if elig.get("total_count",0)>=CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
     add_label(NUM,"bounty-eligible")
+    add_label(NUM,"gate-processed")
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
