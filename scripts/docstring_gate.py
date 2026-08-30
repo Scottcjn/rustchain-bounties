@@ -212,7 +212,7 @@ def main():
         print(f"could not read {REPO}#{NUM}", file=sys.stderr)
         return 1
     labels = {l["name"] for l in iss.get("labels", [])}
-    if {"bounty-eligible", "docstring-verified", "gate-processed"} & labels:
+    if {"bounty-eligible", "docstring-verified", "gate-processed", "weekly-cap-reached"} & labels:
         print("already adjudicated; skipping")
         return 0
     title, body = iss.get("title", ""), iss.get("body") or ""

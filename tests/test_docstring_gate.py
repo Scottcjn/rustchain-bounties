@@ -134,3 +134,21 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+    def test_weekly_cap_reached_label_skips_duplicate_adjudication(self):
+        """Claims already marked weekly-cap-reached should skip adjudication
+        to prevent duplicate spam comments on every cron sweep."""
+        old_num = dg.NUM
+        dg.NUM = "12345"
+        try:
+            dg.gh = lambda args, default=None, strict=False: {
+                "title": "BoTTube docstring PR #999",
+                "body": "https://github.com/Scottcjn/bottube/pull/999",
+                "labels": [{"name": "weekly-cap-reached"}],
+                "author": {"login": "contributor"},
+                "state": "OPEN"
+            }
+            res = dg.main()
+            self.assertEqual(res, 0)
+        finally:
+            dg.NUM = old_num
