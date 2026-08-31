@@ -8,8 +8,10 @@ anything at all. These pin that it counts docstrings and nothing else.
 """
 import importlib.util
 import os
+import subprocess
 import unittest
 from pathlib import Path
+from unittest import mock
 
 os.environ.setdefault("GITHUB_TOKEN", "dummy")
 SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "docstring_gate.py"
@@ -134,3 +136,92 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+
+class LabelWriteFailClosedTests(unittest.TestCase):
+    """Regression for #16662: ignored label REST failures must not exit green."""
+
+    def setUp(self):
+        self._run = subprocess.run
+        dg.NUM = "16662"
+        dg.REPO = "Scottcjn/rustchain-bounties"
+
+    def tearDown(self):
+        subprocess.run = self._run
+
+    def test_strict_add_labels_raises_on_rest_failure(self):
+        class R:
+            stdout = ""
+            stderr = "rate limit"
+            returncode = 1
+
+        subprocess.run = lambda *a, **k: R()
+        with self.assertRaises(dg.GhError):
+            dg.add_labels("bounty-eligible", "docstring-verified", strict=True)
+
+    def test_strict_add_labels_uses_single_post(self):
+        seen = []
+
+        class R:
+            stdout = "[]"
+            stderr = ""
+            returncode = 0
+
+        def capture(args, **kwargs):
+            seen.append(args)
+            return R()
+
+        subprocess.run = capture
+        dg.add_labels("bounty-eligible", "docstring-verified", strict=True)
+        self.assertEqual(len(seen), 1)
+        joined = " ".join(seen[0])
+        self.assertIn("labels[]=bounty-eligible", joined)
+        self.assertIn("labels[]=docstring-verified", joined)
+
+    def test_payable_path_fails_closed_when_labels_do_not_stick(self):
+        comments = []
+
+        def fake_gh(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "issue view" in joined or joined.startswith("gh issue view"):
+                return {
+                    "title": "Bounty claim: BoTTube docstring PR #9999",
+                    "body": "https://github.com/Scottcjn/bottube/pull/1696\nFunctions documented: 2",
+                    "labels": [],
+                    "author": {"login": "claimant"},
+                    "state": "OPEN",
+                }
+            if "pr view" in joined:
+                return {
+                    "state": "MERGED",
+                    "additions": 4,
+                    "deletions": 0,
+                    "files": [],
+                    "author": {"login": "claimant"},
+                    "mergedAt": "2026-01-01",
+                }
+            if len(args) >= 2 and args[0] == "issue" and args[1] == "comment":
+                comments.append(args)
+            if "search/issues" in joined:
+                return {"items": []}
+            return default
+
+        dg.gh = fake_gh
+        dg.gh_raw = lambda args: (
+            'diff --git a/x.py b/x.py\n'
+            '+++ b/x.py\n'
+            '+    """One."""\n'
+            '+    """Two."""\n'
+        )
+
+        with mock.patch.object(dg, "add_labels", side_effect=dg.GhError("label write failed")):
+            rc = dg.main()
+
+        self.assertEqual(rc, 1)
+        self.assertTrue(
+            any("could not apply the payout labels" in " ".join(c) for c in comments),
+            "expected hold comment, not verified marker",
+        )
+        self.assertFalse(
+            any("Docstring gate: verified." in " ".join(c) for c in comments),
+        )
