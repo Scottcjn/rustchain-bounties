@@ -593,3 +593,72 @@ tbody tr:hover {
     font-size: 2rem;
   }
 }
+
+/* RIP-302 Reputation & Marketplace Cards */
+.rep-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+}
+.rep-card.legendary {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #f5f3ff, #faf5ff);
+}
+.rep-card.trusted {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+}
+.rep-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.rep-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.rep-badge.legendary {
+  background: #8b5cf6;
+  color: #fff;
+}
+.rep-badge.trusted {
+  background: #10b981;
+  color: #fff;
+}
+.rep-badge.neutral {
+  background: #64748b;
+  color: #fff;
+}
+.rep-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+.stars {
+  color: #f59e0b;
+}
+.job-status-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.job-status-tag.posted { background: #e0f2fe; color: #0284c7; }
+.job-status-tag.claimed { background: #fef3c7; color: #d97706; }
+.job-status-tag.delivered { background: #fae8ff; color: #a855f7; }
+.job-status-tag.completed { background: #dcfce7; color: #16a34a; }
+.reward-badge {
+  background: #fef08a !important;
+  color: #854d0e !important;
+  font-weight: 800;
+}

@@ -41,6 +41,15 @@ __author__ = "kuanglaodi2-sudo"
 
 from .client import RustChainClient
 from .wallet import RustChainWallet
+from .agent_economy import (
+    AgentEconomyClient,
+    Job,
+    Reputation,
+    MarketplaceStats,
+    calculate_escrow,
+    AGENT_CATEGORIES,
+    PLATFORM_FEE_RATE,
+)
 from .exceptions import (
     RustChainError,
     AuthenticationError,
@@ -57,6 +66,14 @@ __all__ = [
     "__version__",
     # Core client
     "RustChainClient",
+    # Agent Economy
+    "AgentEconomyClient",
+    "Job",
+    "Reputation",
+    "MarketplaceStats",
+    "calculate_escrow",
+    "AGENT_CATEGORIES",
+    "PLATFORM_FEE_RATE",
     # Wallet
     "RustChainWallet",
     # Exceptions
@@ -69,3 +86,4 @@ __all__ = [
     "AttestationError",
     "GovernanceError",
 ]
+
