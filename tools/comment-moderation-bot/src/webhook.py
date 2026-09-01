@@ -182,8 +182,13 @@ def verify_signature(payload_body: bytes, signature_header: Optional[str]) -> No
         ValidationError: If the signature is missing, invalid, or does not match.
     """
     if not WEBHOOK_SECRET:
-        logger.warning("WEBHOOK_SECRET not set; skipping signature verification")
-        return
+        # SECURITY (C-1): fail closed. Skipping signature verification when the
+        # secret is unconfigured would allow any caller to forge webhooks.
+        logger.error("WEBHOOK_SECRET not configured; refusing webhook for safety")
+        raise ValidationError(
+            "Server is not configured to verify webhook signatures.",
+            details={"signature": "server-side secret not configured"},
+        )
 
     if not signature_header:
         raise ValidationError(
@@ -301,17 +306,36 @@ def webhook_handler() -> Tuple[Response, int]:
           a generic message (the original exception is logged internally).
         - Any other unexpected error results in a 500 response.
     """
-    # Security: reject oversized payloads before parsing
-    if request.content_length and request.content_length > MAX_PAYLOAD_SIZE_BYTES:
-        logger.warning("Payload exceeds maximum allowed size")
+    # Security (C-2): reject oversized payloads before parsing. A missing or
+    # lying Content-Length (chunked transfer, manually-crafted header) used to
+    # bypass the cap entirely; we now also cap the actual streamed body.
+    content_length = request.content_length
+    if content_length is not None and content_length > MAX_PAYLOAD_SIZE_BYTES:
+        logger.warning("Payload exceeds maximum allowed size (Content-Length=%s)", content_length)
         return jsonify({"detail": "Payload too large."}), 413
 
-    # Read raw body for signature verification
-    try:
-        raw_body: bytes = request.get_data()
-    except Exception as exc:
-        logger.exception("Failed to read request body")
-        return jsonify({"detail": "Internal server error."}), 500
+    # Cap the streamed body too, so chunked uploads cannot bypass the size limit.
+    raw_body_chunks = []
+    body_size = 0
+    for chunk in request.stream:
+        body_size += len(chunk)
+        if body_size > MAX_PAYLOAD_SIZE_BYTES:
+            logger.warning("Payload exceeds maximum allowed size while streaming")
+            return jsonify({"detail": "Payload too large."}), 413
+        raw_body_chunks.append(chunk)
+    raw_body = b"".join(raw_body_chunks)
+
+    # raw_body was populated by streaming above. If the stream was empty (e.g.
+    # an HTTP request with no body), fall back to get_data() so signature
+    # verification still has a (possibly empty) buffer to hash.
+    if not raw_body:
+        try:
+            raw_body = request.get_data()
+        except Exception as exc:
+            # Stream already consumed by an upstream Werkzeug middleware:
+            # treat as empty body and let signature verification reject it.
+            logger.warning("Could not re-read request body: %s", exc)
+            raw_body = b""
 
     # Verify HMAC signature
     try:
