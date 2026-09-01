@@ -704,6 +704,7 @@
         }
       }
 
+      function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
       function normalizeMiners(payload) {
         if (Array.isArray(payload)) return payload;
         if (Array.isArray(payload?.miners)) return payload.miners;
@@ -724,11 +725,11 @@
               <article class="node">
                 <span class="dot ${cls}" aria-hidden="true"></span>
                 <div>
-                  <strong>${node.name}</strong>
-                  <span>${node.baseUrl}/health</span>
-                  <span>${detail}</span>
+                  <strong>${esc(node.name)}</strong>
+                  <span>${esc(node.baseUrl)}/health</span>
+                  <span>${esc(detail)}</span>
                 </div>
-                <span class="pill ${cls}">${status}</span>
+                <span class="pill ${esc(cls)}">${esc(status)}</span>
               </article>
             `;
           })
@@ -783,8 +784,8 @@
           .map(
             ([label, value]) => `
               <div class="mini">
-                <div class="label">${label}</div>
-                <strong>${value}</strong>
+                <div class="label">${esc(label)}</div>
+                <strong>${esc(value)}</strong>
               </div>
             `,
           )
@@ -810,7 +811,7 @@
             const percent = miners.length ? (count / miners.length) * 100 : 0;
             return `
               <div class="arch-row">
-                <span class="arch-name">${family}</span>
+                <span class="arch-name">${esc(family)}</span>
                 <span class="track"><span class="fill" style="width:${(count / max) * 100}%"></span></span>
                 <span>${count} (${percent.toFixed(0)}%)</span>
               </div>
@@ -823,9 +824,9 @@
           .map(
             (miner) => `
               <tr>
-                <td data-label="Miner">${miner.miner || "unknown"}</td>
-                <td data-label="Family">${miner.device_family || miner.hardware_type || "unknown"}</td>
-                <td data-label="Arch">${miner.device_arch || "unknown"}</td>
+                <td data-label="Miner">${esc(miner.miner || "unknown")}</td>
+                <td data-label="Family">${esc(miner.device_family || miner.hardware_type || "unknown")}</td>
+                <td data-label="Arch">${esc(miner.device_arch || "unknown")}</td>
                 <td data-label="Multiplier">${Number(miner.antiquity_multiplier || 0).toFixed(4)}x</td>
                 <td data-label="Last">${relativeTime(Number(miner.last_attest || 0))}</td>
               </tr>
@@ -840,8 +841,8 @@
           .map(
             (incident) => `
               <div class="incident">
-                <strong>${incident.title}</strong>
-                <span>${incident.detail}</span>
+                <strong>${esc(incident.title)}</strong>
+                <span>${esc(incident.detail)}</span>
                 <span>${incident.time.toLocaleString()}</span>
               </div>
             `,
