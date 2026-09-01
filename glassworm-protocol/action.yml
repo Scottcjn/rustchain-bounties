@@ -1,5 +1,12 @@
 name: 'The Glassworm Sentinel'
 description: 'Intercepts PRs and enforces Proof of Antiquity (PoA) hardware signatures.'
+# Least-privilege permissions for the PoA verifier.
+# The action only reads pull-request metadata and writes issue comments
+# + labels; it never reads repo contents and never writes commit
+# statuses, so we declare exactly the scopes that are actually used.
+permissions:
+  issues: write
+  pull-requests: read
 inputs:
   github-token:
     description: 'GitHub token to label and comment on PRs'
