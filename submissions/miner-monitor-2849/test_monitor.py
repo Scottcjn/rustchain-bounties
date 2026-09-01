@@ -142,11 +142,13 @@ def run_integration_test():
     print("\n🔗 Integration Test: Checking RustChain API...")
     
     try:
+        import os
+        insecure = os.getenv("RUSTCHAIN_INSECURE", "").lower() in ("1", "true", "yes")
         import requests
         response = requests.get(
             "https://rustchain.org/api/miners",
             timeout=10,
-            verify=False
+            verify=not insecure
         )
         
         if response.status_code == 200:
