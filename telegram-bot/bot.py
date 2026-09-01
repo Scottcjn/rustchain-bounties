@@ -8,6 +8,7 @@ Check RustChain wallet balance and miner status directly from Telegram.
 
 import os
 import re
+import time
 import logging
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -27,7 +28,26 @@ logger = logging.getLogger(__name__)
 NODE_URL = os.getenv("RUSTCHAIN_NODE_URL", "https://50.28.86.131")
 
 # Path to a CA bundle for TLS verification; override via env var if needed.
-TLS_CA_BUNDLE = os.getenv("RUSTCHAIN_CA_BUNDLE", True)
+# Default None lets httpx use its own trust store. Setting RUSTCHAIN_CA_BUNDLE=""
+# previously crashed httpx because empty string is not a valid "verify" value.
+_ca_bundle_raw = os.getenv("RUSTCHAIN_CA_BUNDLE")
+TLS_CA_BUNDLE = _ca_bundle_raw if _ca_bundle_raw else None
+
+# Per-user rate limiter (1 request / 5 seconds). The original bounty #2869
+# spec called for this; without it, a single user can DoS the upstream node
+# and trigger Telegram rate-limits that block all other users.
+_RATE_LIMIT_SECONDS = 5.0
+_last_call_by_user = {}
+
+
+async def _enforce_rate_limit(user_id):
+    """Return True if the call is allowed, False if rate-limited."""
+    now = time.monotonic()
+    last = _last_call_by_user.get(user_id, 0.0)
+    if now - last < _RATE_LIMIT_SECONDS:
+        return False
+    _last_call_by_user[user_id] = now
+    return True
 
 
 def _escape_md(text: str) -> str:
@@ -49,7 +69,9 @@ async def get_balance(wallet_id: str) -> dict:
             )
             r.raise_for_status()
             return r.json()
-    except httpx.HTTPError as e:
+    except (httpx.HTTPError, ValueError) as e:
+        # ValueError covers json.JSONDecodeError when upstream returns 200 with
+        # an HTML or plain-text error page (CDN/reverse-proxy/runner restart).
         return {"error": str(e)}
 
 
@@ -60,7 +82,9 @@ async def get_miners() -> list:
             r = await client.get(f"{NODE_URL}/api/miners")
             r.raise_for_status()
             return r.json()
-    except httpx.HTTPError:
+    except (httpx.HTTPError, ValueError):
+        # ValueError covers json.JSONDecodeError; surface empty list on any
+        # failure so callers can distinguish from a hard crash.
         return []
 
 
@@ -117,13 +141,43 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+# Identifier shape used by the RustChain node: base58 / hex wallet id.
+# 64 chars upper-bounded by the longest wallet in production (RTC + 40 hex).
+_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,64}$")
+
+
+def _validate_id(value):
+    return bool(_ID_RE.match(value))
+
+
 async def cmd_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # In groups, the wallet id and balance are visible to every member.
+    # Restrict to private chats to avoid leaking sensitive holdings.
+    if update.effective_chat and update.effective_chat.type != "private":
+        await update.message.reply_text(
+            "Please use /balance in a private chat with me to keep your wallet info safe.",
+            parse_mode="Markdown",
+        )
+        return
     if not context.args:
         await update.message.reply_text(
             "Usage: `/balance <wallet_id>`", parse_mode="Markdown"
         )
         return
     wallet_id = context.args[0].strip()
+    if not _validate_id(wallet_id):
+        await update.message.reply_text(
+            "Invalid wallet id. Use letters, digits, '.', '_', ':', '-' (max 64 chars).",
+            parse_mode="Markdown",
+        )
+        return
+    user_id = update.effective_user.id if update.effective_user else 0
+    if not await _enforce_rate_limit(user_id):
+        await update.message.reply_text(
+            "Rate limit: wait 5 seconds between requests.",
+            parse_mode="Markdown",
+        )
+        return
     safe_wallet_id = _escape_md(wallet_id)
     msg = await update.message.reply_text(
         f"🔍 Querying `{safe_wallet_id}`\u2026", parse_mode="Markdown"
@@ -135,18 +189,37 @@ async def cmd_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     balance = data.get("balance", data.get("rtc_balance", "N/A"))
     pending = data.get("pending_balance", "")
     text = f"💰 *Wallet:* `{safe_wallet_id}`\n*Balance:* `{_escape_md(balance)} RTC`"
-    if pending:
-        text += f"\n*Pending:* `{_escape_md(pending)} RTC`"
+    if pending is not None and pending != "":
+        text += f"\n*Pending:* `{_escape_md(str(pending))} RTC`"
     await msg.edit_text(text, parse_mode="Markdown")
 
 
 async def cmd_miner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.effective_chat and update.effective_chat.type != "private":
+        await update.message.reply_text(
+            "Please use /miner in a private chat with me to keep your wallet info safe.",
+            parse_mode="Markdown",
+        )
+        return
     if not context.args:
         await update.message.reply_text(
             "Usage: `/miner <miner_id>`", parse_mode="Markdown"
         )
         return
     miner_id = context.args[0].strip()
+    if not _validate_id(miner_id):
+        await update.message.reply_text(
+            "Invalid miner id. Use letters, digits, '.', '_', ':', '-' (max 64 chars).",
+            parse_mode="Markdown",
+        )
+        return
+    user_id = update.effective_user.id if update.effective_user else 0
+    if not await _enforce_rate_limit(user_id):
+        await update.message.reply_text(
+            "Rate limit: wait 5 seconds between requests.",
+            parse_mode="Markdown",
+        )
+        return
     safe_miner_id = _escape_md(miner_id)
     msg = await update.message.reply_text(
         f"🔍 Checking `{safe_miner_id}`\u2026", parse_mode="Markdown"
