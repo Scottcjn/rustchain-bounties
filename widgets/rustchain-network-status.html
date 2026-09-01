@@ -582,10 +582,10 @@
                 <div class="response-time-section">
                     <h3>节点信息</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
-                        <div><strong>版本:</strong> ${status.data.version || '-'}</div>
-                        <div><strong>正常运行时间:</strong> ${formatUptime(status.data.uptime_s)}</div>
+                        <div><strong>版本:</strong> ${escapeHtml(status.data.version || '-')}</div>
+                        <div><strong>正常运行时间:</strong> ${escapeHtml(formatUptime(status.data.uptime_s))}</div>
                         <div><strong>数据库读写:</strong> ${status.data.db_rw ? '✅' : '❌'}</div>
-                        <div><strong>区块延迟:</strong> ${status.data.tip_age_slots !== undefined ? status.data.tip_age_slots + ' slots' : '-'}</div>
+                        <div><strong>区块延迟:</strong> ${escapeHtml(status.data.tip_age_slots !== undefined ? status.data.tip_age_slots + ' slots' : '-')}</div>
                     </div>
                 </div>
                 ` : ''}
@@ -678,6 +678,19 @@
         
         // 页面加载时启动
         window.onload = init;
-    </script>
+    
+        // SECURITY: HTML-escape any value that originated from the API before
+        // it is dropped into an innerHTML template. The /health response is
+        // expected to be JSON, but a future compromise of a node or a
+        // downstream proxy could return strings containing HTML.
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+</script>
 </body>
 </html>
