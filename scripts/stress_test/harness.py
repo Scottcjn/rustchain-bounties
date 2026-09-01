@@ -15,7 +15,12 @@ class StressHarness:
         self.semaphore = asyncio.Semaphore(concurrency)
         self.timeout = timeout
         self.results = []
-        self.client = httpx.AsyncClient(verify=False, timeout=timeout)
+        # SECURITY: TLS verification is enabled by default. Operators pointing
+        # the harness at a self-signed test node can opt in via the
+        # RUSTCHAIN_INSECURE_SKIP_TLS_VERIFY environment variable.
+        import os
+        verify_tls = os.environ.get("RUSTCHAIN_INSECURE_SKIP_TLS_VERIFY") != "1"
+        self.client = httpx.AsyncClient(verify=verify_tls, timeout=timeout)
 
     async def run_miner_session(self, simulator: MinerSimulator, force_duplicate_id: str = None, malformed: bool = False) -> Dict[str, Any]:
         """Runs a complete attestation lifecycle for a single simulator."""
