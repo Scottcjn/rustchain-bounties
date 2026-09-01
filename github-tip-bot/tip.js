@@ -4,7 +4,7 @@ const github = require('@actions/github');
 const RUSTCHAIN_API = process.env.RUSTCHAIN_API || 'https://50.28.86.131';
 
 // Command patterns
-const TIP_REGEX = /\/tip\s+@(\w+)\s+(\d+(?:\.\d+)?)\s+RTC\s*(.*)/i;
+const TIP_REGEX = /^\/tip\s+@(\w+)\s+(\d+(?:\.\d+)?)\s+RTC\s*(.*)$/i;
 const BALANCE_REGEX = /\/balance/i;
 const REGISTER_REGEX = /\/register\s+(\w+)/i;
 const LEADERBOARD_REGEX = /\/leaderboard/i;
@@ -107,17 +107,31 @@ async function hasRegisteredWallet(user) {
   }
 }
 
+// H-11 fix: escape user-controlled strings before interpolating them
+// into GitHub-flavored markdown. Backticks close code spans, pipes break
+// table rows, angle brackets may render as HTML, and a leading hyphen
+// can flip a list bullet. Keep the helper local; do not export.
+function escapeMarkdown(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/\|/g, '\\|')
+    .replace(/</g, '\\<')
+    .replace(/>/g, '\\>')
+    .replace(/^\s*-\s/gm, '\\- ');
+}
 function formatResponse(type, data) {
   switch (type) {
     case 'tip_success':
       return `✅ **Tip Queued!**\n\n` +
-        `• Amount: ${data.amount} RTC → @${data.to}\n` +
+        `• Amount: ${data.amount} RTC → @${escapeMarkdown(data.to)}\n` +
         `• From: ${data.from}${data.memo ? ` | Memo: ${data.memo}` : ''}\n` +
         `• Status: Pending (confirms in ~24h)\n` +
         `• TX: \`${data.txId}\``;
       
     case 'tip_no_wallet':
-      return `❌ @${data.to} has not registered a wallet yet.\n\n` +
+      return `❌ @${escapeMarkdown(data.to)} has not registered a wallet yet.\n\n` +
         `They can register with: \`/register WALLET_NAME\``;
       
     case 'tip_not_maintainer':
@@ -135,7 +149,7 @@ function formatResponse(type, data) {
       
     case 'leaderboard':
       return `🏆 **Top Tip Recipients This Month**\n\n` +
-        data.map((entry, i) => `${i + 1}. @${entry.user} - ${entry.amount} RTC`).join('\n');
+        data.map((entry, i) => `${i + 1}. @${escapeMarkdown(entry.user)} - ${entry.amount} RTC`).join('\n');
       
     case 'help':
       return `🤖 **RTC Tip Bot Commands**\n\n` +
