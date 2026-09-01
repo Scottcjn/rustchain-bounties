@@ -1,0 +1,141 @@
+{
+  "schema": "rustchain-platform-survey/v1",
+  "issue": 16512,
+  "surveyed_at": "2026-08-16T21:50:00Z",
+  "updated_at": "2026-08-28T22:10:00Z",
+  "usd_threshold": 1000,
+  "rtc_usd_reference": 0.15,
+  "platforms": [
+    {
+      "id": "rustchain-bounties",
+      "name": "RustChain Bounties",
+      "category": "agent-native",
+      "currency": "RTC",
+      "max_bounty_usd": 30.0,
+      "agent_accessibility": "high",
+      "agents_welcome": true,
+      "opportunities": [
+        {
+          "title": "Harden x86 vintage-arch reward validation",
+          "issue": 16271,
+          "reward_rtc": 35,
+          "reward_usd": 5.25,
+          "status": "open"
+        },
+        {
+          "title": "Audit payout pipeline",
+          "issue": 16471,
+          "reward_rtc": 35,
+          "reward_usd": 5.25,
+          "status": "claimed"
+        },
+        {
+          "title": "BoTTube CI fix",
+          "issue": 16472,
+          "reward_rtc": 20,
+          "reward_usd": 3.0,
+          "status": "claimed"
+        },
+        {
+          "title": "YouTube video bounty",
+          "issue": 14089,
+          "reward_rtc": 200,
+          "reward_usd": 30.0,
+          "status": "open"
+        }
+      ],
+      "notes": "Most accessible for AI agents; RTC conversion (~$0.15/RTC) keeps nominal USD low."
+    },
+    {
+      "id": "immunefi",
+      "name": "Immunefi",
+      "category": "defi-security",
+      "currency": "USD",
+      "max_bounty_usd": 3000000,
+      "agent_accessibility": "low",
+      "agents_welcome": false,
+      "opportunities": [
+        {"name": "SSV Network", "max_bounty_usd": 250000, "tvl_usd": 319300},
+        {"name": "ENS", "max_bounty_usd": 250000},
+        {"name": "The Graph", "max_bounty_usd": 50000, "paid_total_usd": 1500000},
+        {"name": "Ethena", "max_bounty_usd": 3000000},
+        {"name": "Lombard Finance", "max_bounty_usd": 250000},
+        {"name": "StackingDAO", "max_bounty_usd": 100000},
+        {"name": "Zest Protocol V2", "max_bounty_usd": 100000}
+      ],
+      "notes": "Requires Solidity/Rust smart-contract auditing expertise and responsible disclosure."
+    },
+    {
+      "id": "code4rena",
+      "name": "Code4rena",
+      "category": "audit-contest",
+      "currency": "USDC",
+      "max_bounty_usd": 135000,
+      "agent_accessibility": "low",
+      "agents_welcome": false,
+      "opportunities": [
+        {"name": "K2", "pool_usd": 135000, "status": "active"},
+        {"name": "Rujira", "pool_usd": 40000, "status": "judging"},
+        {"name": "Jupiter Lend", "pool_usd": 107000, "status": "completed"}
+      ],
+      "notes": "Time-boxed audit contests; domain expertise and competitive judging required."
+    },
+    {
+      "id": "huntr",
+      "name": "Huntr",
+      "category": "ai-ml-security",
+      "currency": "USD",
+      "max_bounty_usd": 50000,
+      "agent_accessibility": "medium",
+      "agents_welcome": false,
+      "opportunities": [
+        {"name": "Inside Job challenge", "pool_usd": 15000, "status": "active"},
+        {"name": "Hugging Face Transformers", "max_per_finding_usd": 50000},
+        {"name": "Anthropic Model Safety Bug Bounty", "max_per_finding_usd": 35000}
+      ],
+      "notes": "AI/ML vulnerability research; requires reproducible exploit or jailbreak evidence."
+    },
+    {
+      "id": "bountybook",
+      "name": "BountyBook",
+      "category": "agent-usdc",
+      "currency": "USDC",
+      "max_bounty_usd": 5,
+      "agent_accessibility": "high",
+      "agents_welcome": true,
+      "opportunities": [],
+      "notes": "Agent-oriented micro-tasks ($1–5 USDC); below $1,000 threshold."
+    },
+    {
+      "id": "hackerone",
+      "name": "HackerOne",
+      "category": "ai-safety",
+      "currency": "USD",
+      "max_bounty_usd": 35000,
+      "agent_accessibility": "medium",
+      "agents_welcome": false,
+      "opportunities": [
+        {
+          "program": "Anthropic",
+          "avg_payout_usd": 1100,
+          "max_payout_usd": 35000,
+          "focus": "universal jailbreaks"
+        }
+      ],
+      "notes": "Program enrollment and human identity verification typically required."
+    }
+  ],
+  "assessment": {
+    "best_for_agents": "rustchain-bounties",
+    "true_1000_usd_paths": ["immunefi", "code4rena", "huntr", "hackerone"],
+    "blockers": [
+      "RTC nominal USD values understate headline rewards",
+      "External platforms need security-audit or exploit-discovery skills",
+      "RustChain RTC wallet setup requires human operator"
+    ],
+    "recommended_next_targets": [
+      {"issue": 14089, "reward_rtc": 200, "reason": "Highest open RustChain content bounty"},
+      {"issue": 16271, "reward_rtc": 35, "reason": "Technical hardening with clear acceptance criteria"}
+    ]
+  }
+}

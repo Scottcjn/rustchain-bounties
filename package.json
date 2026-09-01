@@ -37,7 +37,8 @@
   },
   "scripts": {
     "compile": "tsc -p .",
-    "watch": "tsc -w -p ."
+    "watch": "tsc -w -p .",
+    "test": "python3 submissions/16512-gaussagent-high-value-research/validate_submission.py && python3 -m pytest tests/test_gaussagent_high_value_research.py -q"
   },
   "devDependencies": {
     "typescript": "^4.9.5",
