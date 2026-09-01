@@ -310,6 +310,7 @@ function saveToHistory(epochData) {
   renderHistory();
 }
 
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function renderHistory() {
   const history = loadHistory();
   const tbody = $('historyBody');
@@ -325,12 +326,12 @@ function renderHistory() {
     const blocks = h.blocks ?? h.block_count ?? '--';
     const tx = h.transactions ?? h.tx_count ?? h.totalTx ?? '--';
     return `<tr>
-      <td>${epoch}</td>
-      <td>${start ? fmtTime(start) : '--'}</td>
-      <td>${end ? fmtTime(end) : '--'}</td>
-      <td>${dur ? fmtDuration(dur) : '--'}</td>
-      <td>${blocks}</td>
-      <td>${tx}</td>
+      <td>${esc(epoch)}</td>
+      <td>${esc(start ? fmtTime(start) : '--')}</td>
+      <td>${esc(end ? fmtTime(end) : '--')}</td>
+      <td>${esc(dur ? fmtDuration(dur) : '--')}</td>
+      <td>${esc(blocks)}</td>
+      <td>${esc(tx)}</td>
     </tr>`;
   }).join('');
 }
