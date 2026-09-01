@@ -238,6 +238,26 @@ class TestMinerMonitor:
             data = json.load(f)
             assert "test-miner-1" in data['miners']
             assert data['miners']['test-miner-1']['alert_count'] == 2
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            [],
+            {"miners": []},
+            {"miners": "not-an-object"},
+        ],
+    )
+    def test_load_state_rejects_valid_json_with_wrong_shape(
+        self, mock_config, tmp_path, payload
+    ):
+        """A valid JSON document with the wrong schema must not abort startup."""
+        state_file = tmp_path / "state.json"
+        state_file.write_text(json.dumps(payload), encoding="utf-8")
+
+        with patch('miner_monitor.STATE_FILE', state_file):
+            monitor = MinerMonitor(mock_config)
+
+        assert monitor.miners == {}
     
     def test_run_once(self, monitor):
         """Test single monitoring cycle"""
