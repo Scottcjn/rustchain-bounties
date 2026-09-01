@@ -207,7 +207,8 @@ function err(m){var e=$('errBanner');if(e){e.textContent=m;e.style.display='bloc
 function shAddr(a,n){n=n||6;if(!a||a.length<n*2)return a||'\u2014';return a.slice(0,n)+'\u2026'+a.slice(-n)}
 function fmtNum(n,d){d=d!==undefined?d:2;if(n==null||isNaN(n))return'\u2014';if(n>=1e9)return(n/1e9).toFixed(d)+'B';if(n>=1e6)return(n/1e6).toFixed(d)+'M';if(n>=1e3)return(n/1e3).toFixed(d)+'K';return Number(n).toFixed(d)}
 function fmtTime(ts){if(!ts)return'\u2014';var d=(Date.now()/1000)-ts;if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';if(d<86400)return Math.floor(d/3600)+'h ago';return new Date(ts*1000).toLocaleDateString()}
-function statusTag(s){var m={'completed':'done',pending:'pend',failed:'fail',voided:'void',locked:'lock',confirming:'cnf'};var c=m[s]||'pend';return'<span class="tag '+c+'">'+s+'</span>'}
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function statusTag(s){var m={'completed':'done',pending:'pend',failed:'fail',voided:'void',locked:'lock',confirming:'cnf'};var c=m[s]||'pend';return'<span class="tag '+c+'">'+esc(s)+'</span>'}
 
 // ── Demo data – replace with real RustChain API calls ──
 async function fetchBridge(){
@@ -324,7 +325,7 @@ function renderActivity(acts){
   el.innerHTML=acts.map(function(a){
     var icon=a.type==='wrap'?'&#x2193;':a.type==='unwrap'?'&#x2191;':'&#x2696;';
     var cls=a.type==='wrap'?'w':a.type==='unwrap'?'u':'f';
-    return'<div class="item"><div class="ai '+cls+'">'+icon+'</div><div><div class="atext">'+a.msg+(a.addr?' <span class="grey">('+a.addr+')</span>':'')+'</div><div class="atime">'+fmtTime(a.time)+'</div></div></div>';
+    return'<div class="item"><div class="ai '+cls+'">'+icon+'</div><div><div class="atext">'+esc(a.msg)+(a.addr?' <span class="grey">('+esc(a.addr)+')</span>':'')+'</div><div class="atime">'+fmtTime(a.time)+'</div></div></div>';
   }).join('');
 }
 
@@ -336,8 +337,8 @@ function renderWraps(rows){
       '<td class="grey">'+fmtTime(r.time)+'</td>'+
       '<td class="bold">'+fmtNum(r.amount,4)+' RTC</td>'+
       '<td>'+statusTag(r.status)+'</td>'+
-      '<td class="grey mono" title="'+r.fromRtc+'">'+shAddr(r.fromRtc)+'</td>'+
-      '<td class="grey mono" title="'+r.toSol+'">'+shAddr(r.toSol)+'</td>'+
+      '<td class="grey mono" title="'+esc(r.fromRtc)+'">'+esc(shAddr(r.fromRtc))+'</td>'+
+      '<td class="grey mono" title="'+esc(r.toSol)+'">'+esc(shAddr(r.toSol))+'</td>'+
     '</tr>';
   }).join('');
 }
@@ -350,8 +351,8 @@ function renderUnwraps(rows){
       '<td class="grey">'+fmtTime(r.time)+'</td>'+
       '<td class="bold">'+fmtNum(r.amount,4)+' wRTC</td>'+
       '<td>'+statusTag(r.status)+'</td>'+
-      '<td class="grey mono" title="'+r.fromSol+'">'+shAddr(r.fromSol)+'</td>'+
-      '<td class="grey mono" title="'+r.toRtc+'">'+shAddr(r.toRtc)+'</td>'+
+      '<td class="grey mono" title="'+esc(r.fromSol)+'">'+esc(shAddr(r.fromSol))+'</td>'+
+      '<td class="grey mono" title="'+esc(r.toRtc)+'">'+esc(shAddr(r.toRtc))+'</td>'+
     '</tr>';
   }).join('');
 }
