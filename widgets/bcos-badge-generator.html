@@ -99,12 +99,20 @@ function getInput() {
 }
 
 function extractCertId(input) {
-  // Direct cert ID
-  if (input.match(/^BCOS-\w+$/i)) return input.toUpperCase();
-  // GitHub URL → extract owner/repo
-  const ghMatch = input.match(/github\.com\/([^\/]+\/[^\/]+)/);
-  if (ghMatch) return 'pending-' + ghMatch[1].replace(/\//g, '-');
-  return input;
+  // Direct cert ID — strict charset so the value cannot smuggle HTML/JS.
+  if (input.match(/^BCOS-[A-Za-z0-9_-]{1,64}$/)) return input.toUpperCase();
+  // GitHub URL → extract owner/repo; allow only safe path characters.
+  const ghMatch = input.match(/github\.com\/([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+)/);
+  if (ghMatch) {
+    const segs = ghMatch[1].split('/');
+    if (segs.every(s => /^[A-Za-z0-9._-]{1,128}$/.test(s))) {
+      return 'pending-' + segs.join('-');
+    }
+  }
+  // SECURITY: previously this function returned `input` unchanged as a
+  // fallback, which was then interpolated into an onerror attribute. That
+  // is a stored-XSS primitive. Reject instead.
+  return null;
 }
 
 function showTab(tab) {
@@ -125,17 +133,37 @@ function copy(type) {
 async function generate() {
   const input = getInput();
   if (!input) {
-    document.getElementById('status').innerHTML = '<p class="error">> Please enter a repo URL or cert ID</p>';
+    document.getElementById('status').innerHTML = '<p class="error">&gt; Please enter a repo URL or cert ID</p>';
     return;
   }
 
   const certId = extractCertId(input);
+  if (!certId) {
+    document.getElementById('status').innerHTML = '<p class="error">&gt; Unrecognized input. Enter a GitHub repo URL or a BCOS-... certificate ID.</p>';
+    return;
+  }
   const style = getStyle();
-  const badgeUrl = `${API_BASE}/badge/${certId}.svg?style=${style}`;
-  const verifyUrl = `${VERIFY_BASE}/${certId}`;
+  // SECURITY: percent-encode path segments so a future bug in `certId`  // validation cannot smuggle query parameters or fragments.
+  const safeCertId = encodeURIComponent(certId);
+  const badgeUrl = `${API_BASE}/badge/${safeCertId}.svg?style=${encodeURIComponent(style)}`;
+  const verifyUrl = `${VERIFY_BASE}/${safeCertId}`;
 
-  // Preview badge
-  document.getElementById('preview').innerHTML = `<img src="${badgeUrl}" alt="BCOS Badge" onerror="document.getElementById('preview').innerHTML='<span style=color:#f80>Badge generation pending...</span>'" />`;
+  // SECURITY: build the <img> via DOM APIs (no onerror attribute)
+  // so any future regression in `certId` escaping cannot escalate to script
+  // execution.
+  const previewEl = document.getElementById('preview');
+  previewEl.textContent = '';
+  const img = document.createElement('img');
+  img.src = badgeUrl;
+  img.alt = 'BCOS Badge';
+  img.addEventListener('error', () => {
+    const span = document.createElement('span');
+    span.style.color = '#f80';
+    span.textContent = 'Badge generation pending...';
+    previewEl.textContent = '';
+    previewEl.appendChild(span);
+  });
+  previewEl.appendChild(img);
 
   // Generate codes
   const md = `[![BCOS](${badgeUrl})](${verifyUrl})`;
@@ -146,7 +174,7 @@ async function generate() {
 
   // Try to verify
   try {
-    const res = await fetch(`${API_BASE}/verify/${certId}`, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(`${API_BASE}/verify/${encodeURIComponent(certId)}`, { signal: AbortSignal.timeout(5000) });
     if (res.ok) {
       document.getElementById('status').innerHTML = '<p class="success">> BCOS certificate verified ✓</p>';
     } else {
