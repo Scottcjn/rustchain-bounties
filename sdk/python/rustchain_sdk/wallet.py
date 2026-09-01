@@ -385,6 +385,7 @@ class RustChainWallet:
             "fee": fee,
             "timestamp": timestamp,
             "signature": signature.hex(),
+            "public_key": self.public_key_hex,
         }
 
     @property
@@ -439,5 +440,85 @@ class RustChainWallet:
 
         return cls.from_seed_phrase(data["seed_phrase"])
 
+    @classmethod
+    def verify_signature(
+        cls,
+        public_key_or_address: bytes | str,
+        message: bytes,
+        signature: bytes | str,
+    ) -> bool:
+        """
+        Verify an Ed25519 signature against a public key or raw public key bytes.
+
+        Args:
+            public_key_or_address: 32-byte raw public key or hex-encoded public key.
+            message: The original message bytes that were signed.
+            signature: 64-byte raw signature or hex-encoded signature string.
+
+        Returns:
+            True if the signature is valid, False otherwise.
+        """
+        try:
+            from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+            from cryptography.exceptions import InvalidSignature
+
+            pub_bytes = (
+                bytes.fromhex(public_key_or_address)
+                if isinstance(public_key_or_address, str)
+                else public_key_or_address
+            )
+            sig_bytes = (
+                bytes.fromhex(signature)
+                if isinstance(signature, str)
+                else signature
+            )
+
+            if len(pub_bytes) != 32 or len(sig_bytes) != 64:
+                return False
+
+            pub_key = Ed25519PublicKey.from_public_bytes(pub_bytes)
+            pub_key.verify(sig_bytes, message)
+            return True
+        except Exception:
+            return False
+
+    @classmethod
+    def verify_transfer(
+        cls,
+        transfer_payload: Dict[str, Any],
+        public_key: Optional[bytes | str] = None,
+    ) -> bool:
+        """
+        Verify a signed transfer payload.
+
+        Args:
+            transfer_payload: Dict containing from, to, amount, fee, timestamp, signature.
+            public_key: Optional 32-byte public key (or hex string) of the sender.
+
+        Returns:
+            True if the transfer signature matches the payload parameters.
+        """
+        from_addr = transfer_payload.get("from")
+        to_addr = transfer_payload.get("to")
+        amount = transfer_payload.get("amount")
+        fee = transfer_payload.get("fee", 0)
+        timestamp = transfer_payload.get("timestamp")
+        signature = transfer_payload.get("signature")
+
+        if not all([from_addr, to_addr, amount is not None, timestamp is not None, signature]):
+            return False
+
+        message = f"{from_addr}:{to_addr}:{amount}:{fee}:{timestamp}".encode()
+
+        if public_key is not None:
+            return cls.verify_signature(public_key, message, signature)
+
+        # If only signature is provided, verify using public key if present in payload
+        if "public_key" in transfer_payload:
+            return cls.verify_signature(transfer_payload["public_key"], message, signature)
+
+        return False
+
     def __repr__(self) -> str:
         return f"RustChainWallet(address={self._address!r})"
+

@@ -51,6 +51,28 @@ from .exceptions import (
     AttestationError,
     GovernanceError,
 )
+from .payments import (
+    DonationTier,
+    BridgeDirection,
+    BridgeStatus,
+    BountyStatus,
+    UpvoteRecord,
+    ContentStats,
+    BridgeTransaction,
+    X402Challenge,
+    X402PaymentProof,
+    BountyClaim,
+    DualCurrencyBounty,
+    CryptographicReceiptManager,
+    SlidingWindowRateLimiter,
+    AntiSpamGuard,
+    UpvoteDonateService,
+    CrossWalletBridge,
+    X402ServerManager,
+    require_rtc_payment,
+    AutoPayClient,
+    CrossBountyEscrowManager,
+)
 
 __all__ = [
     # Version
@@ -68,4 +90,26 @@ __all__ = [
     "WalletError",
     "AttestationError",
     "GovernanceError",
+    # Payments
+    "DonationTier",
+    "BridgeDirection",
+    "BridgeStatus",
+    "BountyStatus",
+    "UpvoteRecord",
+    "ContentStats",
+    "BridgeTransaction",
+    "X402Challenge",
+    "X402PaymentProof",
+    "BountyClaim",
+    "DualCurrencyBounty",
+    "CryptographicReceiptManager",
+    "SlidingWindowRateLimiter",
+    "AntiSpamGuard",
+    "UpvoteDonateService",
+    "CrossWalletBridge",
+    "X402ServerManager",
+    "require_rtc_payment",
+    "AutoPayClient",
+    "CrossBountyEscrowManager",
 ]
+
