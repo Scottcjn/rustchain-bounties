@@ -5,6 +5,7 @@ Implements Beacon 2.6 protocol: heartbeat, mayday, and contracts
 """
 
 import requests
+import os
 import json
 import time
 from datetime import datetime
@@ -14,7 +15,7 @@ class BeaconClient:
     """Beacon 2.6 client for AI agent coordination"""
 
     def __init__(self, agent_id: str, role: str = "worker",
-                 beacon_url: str = "http://50.28.86.131:8070/beacon",
+                 beacon_url: str = os.environ.get("BEACON_URL", "https://50.28.86.131:8070/beacon"),
                  wallet_address: Optional[str] = None):
         """
         Initialize Beacon client
@@ -300,7 +301,7 @@ def demo():
     beacon = BeaconClient(
         agent_id="green-dragon-agent",
         role="worker",
-        beacon_url="http://50.28.86.131:8070/beacon",
+        beacon_url=os.environ.get("BEACON_URL", "https://50.28.86.131:8070/beacon"),
         wallet_address="BR3TzHGHWTA53Db6oHoRqes3eBnEkbjmsprTMUbvoJYs"
     )
 
