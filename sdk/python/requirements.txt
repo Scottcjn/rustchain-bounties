@@ -1,5 +1,7 @@
-# RustChain SDK Dependencies
 requests>=2.28.0
+
+# Ed25519 signing and address derivation (required for RustChainWallet)
+cryptography>=41.0.0
 
 # Optional: for async support
 aiohttp>=3.8.0
