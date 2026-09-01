@@ -143,7 +143,9 @@
 
   <script>
     const fmt = new Intl.NumberFormat('en-US');
-    const shortDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    const shortDate
+    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+     = (iso) => new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
 
     fetch('./data.json')
       .then(r => r.json())
@@ -166,27 +168,27 @@
         ];
 
         document.getElementById('summary').innerHTML = summary.map(item => `
-          <div class="stat"><div class="k">${item.k}</div><div class="l">${item.l}</div></div>
+          <div class="stat"><div class="k">${esc(item.k)}</div><div class="l">${esc(item.l)}</div></div>
         `).join('');
 
         document.getElementById('merged-grid').innerHTML = mergedRepos.map(repo => `
           <article class="card">
             <div class="repo-head">
-              <img class="avatar" src="${repo.avatar}" alt="${repo.repo} owner avatar" loading="lazy" />
+              <img class="avatar" src="${esc(repo.avatar)}" alt="${esc(repo.repo)} owner avatar" loading="lazy" />
               <div>
-                <p class="repo-title"><a href="${repo.repo_url || `https://github.com/${repo.repo}`}" target="_blank" rel="noopener">${repo.repo}</a></p>
-                <div class="repo-meta">${repo.description || 'Open-source repository'} </div>
+                <p class="repo-title"><a href="${esc(repo.repo_url || `https://github.com/${repo.repo}`)}" target="_blank" rel="noopener">${esc(repo.repo)}</a></p>
+                <div class="repo-meta">${esc(repo.description || 'Open-source repository')} </div>
               </div>
             </div>
             <div class="chips">
-              <span class="chip ok">Merged ${repo.prs.length} PR${repo.prs.length > 1 ? 's' : ''}</span>
+              <span class="chip ok">Merged ${esc(repo.prs.length)} PR${repo.prs.length > 1 ? 's' : ''}</span>
               <span class="chip">⭐ ${fmt.format(repo.stars || 0)} stars</span>
             </div>
             <ul class="pr-list">
               ${repo.prs.sort((a,b) => (b.merged_at || '').localeCompare(a.merged_at || '')).map(pr => `
                 <li>
                   <div class="pr-top">
-                    <div class="pr-title"><a href="${pr.url}" target="_blank" rel="noopener">PR #${pr.number}</a> — ${pr.title}</div>
+                    <div class="pr-title"><a href="${esc(pr.url)}" target="_blank" rel="noopener">PR #${esc(pr.number)}</a> — ${esc(pr.title)}</div>
                     <div class="pr-date">${pr.merged_at ? shortDate(pr.merged_at) : 'Merged'}</div>
                   </div>
                 </li>
@@ -200,17 +202,17 @@
           .map(pr => `
             <article class="card">
               <div class="repo-head">
-                <img class="avatar" src="${pr.avatar}" alt="${pr.repo} owner avatar" loading="lazy" />
+                <img class="avatar" src="${esc(pr.avatar)}" alt="${esc(pr.repo)} owner avatar" loading="lazy" />
                 <div>
-                  <p class="repo-title"><a href="${pr.repo_url || `https://github.com/${pr.repo}`}" target="_blank" rel="noopener">${pr.repo}</a></p>
-                  <div class="repo-meta">${pr.description || 'Open-source repository'}</div>
+                  <p class="repo-title"><a href="${esc(pr.repo_url || `https://github.com/${pr.repo}`)}" target="_blank" rel="noopener">${esc(pr.repo)}</a></p>
+                  <div class="repo-meta">${esc(pr.description || 'Open-source repository')}</div>
                 </div>
               </div>
               <div class="chips">
-                <span class="chip warn">${pr.status}</span>
+                <span class="chip warn">${esc(pr.status)}</span>
                 <span class="chip">⭐ ${fmt.format(pr.stars || 0)} stars</span>
               </div>
-              <div class="pr-title"><a href="${pr.url}" target="_blank" rel="noopener">PR #${pr.number}</a> — ${pr.title}</div>
+              <div class="pr-title"><a href="${esc(pr.url)}" target="_blank" rel="noopener">PR #${esc(pr.number)}</a> — ${esc(pr.title)}</div>
             </article>
           `).join('');
       })
