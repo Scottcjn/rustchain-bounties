@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import os
 import requests
 from tabulate import tabulate
 import argparse
@@ -12,7 +13,14 @@ NODES = [
 
 def query_node(node_addr):
     try:
-        response = requests.get(f"http://{node_addr}/health", timeout=5)
+        # SECURITY: prefer HTTPS; warn loudly when falling back to plaintext HTTP.
+        # Operators with an internal HTTP-only node can force HTTP via
+        # RUSTCHAIN_HEALTH_INSECURE=1 (still surfaces a warning).
+        insecure = os.environ.get("RUSTCHAIN_HEALTH_INSECURE") == "1"
+        scheme = "http" if insecure else "https"
+        if insecure:
+            print(f"::warning::RUSTCHAIN_HEALTH_INSECURE=1 — polling {node_addr} over plaintext HTTP", flush=True)
+        response = requests.get(f"{scheme}://{node_addr}/health", timeout=5)
         response.raise_for_status()
         data = response.json()
         
