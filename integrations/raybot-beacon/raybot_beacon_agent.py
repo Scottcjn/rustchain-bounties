@@ -17,6 +17,7 @@ class BeaconIntegration:
         self.agent_id = agent_id
         self.wallet_id = wallet_id
         self.session = requests.Session()
+        self.insecure = os.getenv("RAYBOT_INSECURE", "").lower() in ("1", "true", "yes")
         print(f"🚀 Initializing RayBot Beacon Integration: {agent_id}")
 
     def submit_envelope(self, kind: str, text: str, metadata: Dict[str, Any] = None) -> Dict:
@@ -35,7 +36,7 @@ class BeaconIntegration:
         }
         
         try:
-            resp = self.session.post(f"{self.BASE_URL}/beacon/submit", json=payload, verify=False, timeout=10)
+            resp = self.session.post(f"{self.BASE_URL}/beacon/submit", json=payload, verify=self.insecure, timeout=10)
             if resp.status_code in (200, 201):
                 data = resp.json()
                 env_id = data.get('envelope_id') or data.get('id')
