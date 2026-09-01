@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-09-01T02:24:53Z",
+  "updated_at": "2026-09-01T10:40:16Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 887,
+  "total": 830,
   "bounties": [
     {
       "id": 16776,
@@ -9,234 +9,10 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16776",
       "state": "open",
       "created_at": "2026-08-30T16:23:32Z",
-      "updated_at": "2026-09-01T00:43:09Z",
-      "comments": 8,
+      "updated_at": "2026-09-01T08:50:03Z",
+      "comments": 9,
       "author": "ravendevhub",
       "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 16728,
-      "title": "[CLAIM] PR Review bottube #1824 (fix(i18n): localize /join page body across supported locales)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16728",
-      "state": "open",
-      "created_at": "2026-08-30T16:11:34Z",
-      "updated_at": "2026-08-30T16:11:44Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16727,
-      "title": "[CLAIM] PR Review bottube #1825 (docs: add docstrings to 94 undocumented functions in bottube)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16727",
-      "state": "open",
-      "created_at": "2026-08-30T16:11:28Z",
-      "updated_at": "2026-08-30T16:11:40Z",
-      "comments": 2,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16726,
-      "title": "[CLAIM] PR Review bottube #1828 (fix(docs): align homepage upload limit with backend)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16726",
-      "state": "open",
-      "created_at": "2026-08-30T16:11:21Z",
-      "updated_at": "2026-08-30T16:11:33Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16725,
-      "title": "[CLAIM] PR Review BoTTube #1817 (Test Suite Docstrings Batch 63 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16725",
-      "state": "open",
-      "created_at": "2026-08-30T16:10:27Z",
-      "updated_at": "2026-08-30T16:10:37Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16724,
-      "title": "[CLAIM] PR Review BoTTube #1818 (Test Suite Docstrings Batch 64 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16724",
-      "state": "open",
-      "created_at": "2026-08-30T16:09:47Z",
-      "updated_at": "2026-08-30T16:09:57Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16723,
-      "title": "[CLAIM] PR Review BoTTube #1819 (Test Suite Docstrings Batch 65 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16723",
-      "state": "open",
-      "created_at": "2026-08-30T16:08:24Z",
-      "updated_at": "2026-08-30T16:08:34Z",
-      "comments": 2,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16722,
-      "title": "[CLAIM] PR Review BoTTube #1820 (Test Suite Docstrings Batch 66 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16722",
-      "state": "open",
-      "created_at": "2026-08-30T16:07:34Z",
-      "updated_at": "2026-08-30T16:07:45Z",
-      "comments": 2,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16721,
-      "title": "[CLAIM] PR Review BoTTube #1821 (Test Suite Docstrings Batch 67 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16721",
-      "state": "open",
-      "created_at": "2026-08-30T16:06:40Z",
-      "updated_at": "2026-08-30T16:06:50Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16720,
-      "title": "[CLAIM] PR Review BoTTube #1822 (Validation Test Docstrings Batch 68 Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16720",
-      "state": "open",
-      "created_at": "2026-08-30T16:05:27Z",
-      "updated_at": "2026-08-30T16:05:38Z",
-      "comments": 2,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16719,
-      "title": "[CLAIM] PR Review #8290 (Broken Blog Link Repair & BCOS Specification Canonization)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16719",
-      "state": "open",
-      "created_at": "2026-08-30T16:03:05Z",
-      "updated_at": "2026-08-30T16:03:16Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16718,
-      "title": "[CLAIM] PR Review #8301 (README Attestation Live Metric Synchronization Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16718",
-      "state": "open",
-      "created_at": "2026-08-30T16:01:35Z",
-      "updated_at": "2026-08-30T16:01:49Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16717,
-      "title": "[CLAIM] PR Review BoTTube #1824 (/join Page Localization & Translation Coverage Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16717",
-      "state": "open",
-      "created_at": "2026-08-30T16:00:18Z",
-      "updated_at": "2026-08-30T16:00:29Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16716,
-      "title": "[CLAIM] PR Review BoTTube #1828 (Homepage Upload Limit & Transcoding Guidance Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16716",
-      "state": "open",
-      "created_at": "2026-08-30T15:58:39Z",
-      "updated_at": "2026-08-30T15:58:51Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16715,
-      "title": "[CLAIM] PR Review #8281 (Attestation Nodes vs Attesting Miners Disambiguation Review)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16715",
-      "state": "open",
-      "created_at": "2026-08-30T15:57:04Z",
-      "updated_at": "2026-08-30T15:57:17Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16714,
-      "title": "[CLAIM] PR Review #8284 (Signed Wallet Migration Guidance & Diff Scope Audit)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16714",
-      "state": "open",
-      "created_at": "2026-08-30T15:56:45Z",
-      "updated_at": "2026-08-30T15:56:58Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 16713,
-      "title": "[CLAIM] PR Review #8288 (SPARC Substring Fallback & Epoch State Rollback Analysis)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16713",
-      "state": "open",
-      "created_at": "2026-08-30T15:54:16Z",
-      "updated_at": "2026-08-30T15:54:30Z",
-      "comments": 1,
-      "author": "ravendevhub",
-      "labels": [
-        "bounty-eligible"
-      ],
       "agents_welcome": false
     },
     {
@@ -257,8 +33,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16694",
       "state": "open",
       "created_at": "2026-08-29T16:37:16Z",
-      "updated_at": "2026-09-01T00:43:05Z",
-      "comments": 15,
+      "updated_at": "2026-09-01T08:50:01Z",
+      "comments": 16,
       "author": "rafaio1",
       "labels": [],
       "agents_welcome": false
@@ -269,8 +45,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16683",
       "state": "open",
       "created_at": "2026-08-28T22:15:59Z",
-      "updated_at": "2026-09-01T00:43:03Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:59Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -281,8 +57,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16682",
       "state": "open",
       "created_at": "2026-08-28T22:12:51Z",
-      "updated_at": "2026-09-01T00:43:00Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:57Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -293,8 +69,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16681",
       "state": "open",
       "created_at": "2026-08-28T22:09:15Z",
-      "updated_at": "2026-09-01T00:42:58Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:54Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -305,8 +81,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16680",
       "state": "open",
       "created_at": "2026-08-28T22:08:05Z",
-      "updated_at": "2026-09-01T00:42:56Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:52Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -317,8 +93,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16679",
       "state": "open",
       "created_at": "2026-08-28T21:57:47Z",
-      "updated_at": "2026-09-01T00:42:54Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:50Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -329,8 +105,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16678",
       "state": "open",
       "created_at": "2026-08-28T21:55:32Z",
-      "updated_at": "2026-09-01T00:42:52Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:48Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -341,8 +117,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16677",
       "state": "open",
       "created_at": "2026-08-28T21:42:09Z",
-      "updated_at": "2026-09-01T00:42:50Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:46Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -353,8 +129,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16676",
       "state": "open",
       "created_at": "2026-08-28T21:38:56Z",
-      "updated_at": "2026-09-01T00:42:47Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:44Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -365,8 +141,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16672",
       "state": "open",
       "created_at": "2026-08-28T21:36:56Z",
-      "updated_at": "2026-09-01T00:42:45Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:41Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -377,8 +153,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16669",
       "state": "open",
       "created_at": "2026-08-28T20:52:13Z",
-      "updated_at": "2026-09-01T00:42:43Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:38Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -389,8 +165,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16668",
       "state": "open",
       "created_at": "2026-08-28T20:42:26Z",
-      "updated_at": "2026-09-01T00:42:41Z",
-      "comments": 17,
+      "updated_at": "2026-09-01T08:49:36Z",
+      "comments": 18,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -401,8 +177,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16659",
       "state": "open",
       "created_at": "2026-08-28T17:38:37Z",
-      "updated_at": "2026-09-01T00:42:39Z",
-      "comments": 16,
+      "updated_at": "2026-09-01T08:49:33Z",
+      "comments": 17,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -413,8 +189,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16658",
       "state": "open",
       "created_at": "2026-08-28T17:35:29Z",
-      "updated_at": "2026-09-01T00:42:37Z",
-      "comments": 18,
+      "updated_at": "2026-09-01T08:49:31Z",
+      "comments": 19,
       "author": "yaegerbomb42",
       "labels": [],
       "agents_welcome": false
@@ -425,8 +201,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16637",
       "state": "open",
       "created_at": "2026-08-27T13:21:12Z",
-      "updated_at": "2026-09-01T00:42:34Z",
-      "comments": 19,
+      "updated_at": "2026-09-01T08:49:29Z",
+      "comments": 20,
       "author": "tronnew",
       "labels": [],
       "agents_welcome": false
@@ -437,8 +213,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16636",
       "state": "open",
       "created_at": "2026-08-27T13:08:43Z",
-      "updated_at": "2026-09-01T00:42:32Z",
-      "comments": 19,
+      "updated_at": "2026-09-01T08:49:26Z",
+      "comments": 20,
       "author": "tronnew",
       "labels": [],
       "agents_welcome": false
@@ -449,8 +225,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16635",
       "state": "open",
       "created_at": "2026-08-27T13:02:34Z",
-      "updated_at": "2026-09-01T00:42:30Z",
-      "comments": 19,
+      "updated_at": "2026-09-01T08:49:23Z",
+      "comments": 20,
       "author": "tronnew",
       "labels": [],
       "agents_welcome": false
@@ -461,8 +237,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16634",
       "state": "open",
       "created_at": "2026-08-27T12:52:55Z",
-      "updated_at": "2026-09-01T00:42:28Z",
-      "comments": 19,
+      "updated_at": "2026-09-01T08:49:21Z",
+      "comments": 20,
       "author": "tronnew",
       "labels": [],
       "agents_welcome": false
@@ -473,8 +249,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16607",
       "state": "open",
       "created_at": "2026-08-26T00:15:50Z",
-      "updated_at": "2026-09-01T00:42:26Z",
-      "comments": 30,
+      "updated_at": "2026-09-01T08:49:17Z",
+      "comments": 31,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -497,8 +273,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16597",
       "state": "open",
       "created_at": "2026-08-25T22:17:08Z",
-      "updated_at": "2026-09-01T00:42:24Z",
-      "comments": 28,
+      "updated_at": "2026-09-01T08:49:15Z",
+      "comments": 29,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -509,8 +285,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16583",
       "state": "open",
       "created_at": "2026-08-25T20:15:59Z",
-      "updated_at": "2026-09-01T00:42:22Z",
-      "comments": 31,
+      "updated_at": "2026-09-01T08:49:12Z",
+      "comments": 32,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -533,8 +309,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16580",
       "state": "open",
       "created_at": "2026-08-25T16:18:53Z",
-      "updated_at": "2026-09-01T00:42:20Z",
-      "comments": 30,
+      "updated_at": "2026-09-01T08:49:10Z",
+      "comments": 31,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -545,8 +321,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16578",
       "state": "open",
       "created_at": "2026-08-25T12:16:43Z",
-      "updated_at": "2026-09-01T00:42:18Z",
-      "comments": 32,
+      "updated_at": "2026-09-01T08:49:07Z",
+      "comments": 33,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -569,8 +345,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16561",
       "state": "open",
       "created_at": "2026-08-24T17:39:44Z",
-      "updated_at": "2026-09-01T00:42:16Z",
-      "comments": 38,
+      "updated_at": "2026-09-01T08:49:04Z",
+      "comments": 39,
       "author": "dbquanghuy2004-Quant",
       "labels": [],
       "agents_welcome": false
@@ -737,7 +513,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16497",
       "state": "open",
       "created_at": "2026-08-15T16:52:24Z",
-      "updated_at": "2026-08-31T23:45:36Z",
+      "updated_at": "2026-09-01T03:56:53Z",
       "comments": 42,
       "author": "Scottcjn",
       "labels": [],
@@ -825,8 +601,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16402",
       "state": "open",
       "created_at": "2026-08-07T16:14:05Z",
-      "updated_at": "2026-09-01T00:42:13Z",
-      "comments": 148,
+      "updated_at": "2026-09-01T08:49:01Z",
+      "comments": 149,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -837,8 +613,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16401",
       "state": "open",
       "created_at": "2026-08-07T12:32:12Z",
-      "updated_at": "2026-09-01T00:42:11Z",
-      "comments": 148,
+      "updated_at": "2026-09-01T08:48:58Z",
+      "comments": 149,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -849,8 +625,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16400",
       "state": "open",
       "created_at": "2026-08-07T12:27:51Z",
-      "updated_at": "2026-09-01T00:42:10Z",
-      "comments": 148,
+      "updated_at": "2026-09-01T08:48:56Z",
+      "comments": 149,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -861,8 +637,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16399",
       "state": "open",
       "created_at": "2026-08-07T08:12:52Z",
-      "updated_at": "2026-09-01T00:42:08Z",
-      "comments": 146,
+      "updated_at": "2026-09-01T08:48:54Z",
+      "comments": 147,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -873,8 +649,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16398",
       "state": "open",
       "created_at": "2026-08-07T06:13:06Z",
-      "updated_at": "2026-09-01T00:42:05Z",
-      "comments": 146,
+      "updated_at": "2026-09-01T08:48:51Z",
+      "comments": 147,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -885,8 +661,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16397",
       "state": "open",
       "created_at": "2026-08-07T04:13:46Z",
-      "updated_at": "2026-09-01T00:42:03Z",
-      "comments": 146,
+      "updated_at": "2026-09-01T08:48:49Z",
+      "comments": 147,
       "author": "Vyacheslav-Tomashevskiy",
       "labels": [],
       "agents_welcome": false
@@ -921,8 +697,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16388",
       "state": "open",
       "created_at": "2026-08-03T11:56:21Z",
-      "updated_at": "2026-09-01T00:42:00Z",
-      "comments": 146,
+      "updated_at": "2026-09-01T08:48:47Z",
+      "comments": 147,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -933,8 +709,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16387",
       "state": "open",
       "created_at": "2026-08-03T11:54:26Z",
-      "updated_at": "2026-09-01T00:41:58Z",
-      "comments": 140,
+      "updated_at": "2026-09-01T08:48:44Z",
+      "comments": 141,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -945,8 +721,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16386",
       "state": "open",
       "created_at": "2026-08-03T11:52:10Z",
-      "updated_at": "2026-09-01T00:41:56Z",
-      "comments": 140,
+      "updated_at": "2026-09-01T08:48:42Z",
+      "comments": 141,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -957,8 +733,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16385",
       "state": "open",
       "created_at": "2026-08-03T11:50:56Z",
-      "updated_at": "2026-09-01T00:41:54Z",
-      "comments": 140,
+      "updated_at": "2026-09-01T08:48:39Z",
+      "comments": 141,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -981,8 +757,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16383",
       "state": "open",
       "created_at": "2026-08-03T11:47:44Z",
-      "updated_at": "2026-09-01T00:41:51Z",
-      "comments": 140,
+      "updated_at": "2026-09-01T08:48:37Z",
+      "comments": 141,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -993,8 +769,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16382",
       "state": "open",
       "created_at": "2026-08-03T11:47:00Z",
-      "updated_at": "2026-09-01T00:41:49Z",
-      "comments": 140,
+      "updated_at": "2026-09-01T08:48:34Z",
+      "comments": 141,
       "author": "leanworld7-netizen",
       "labels": [],
       "agents_welcome": false
@@ -1149,7 +925,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16312",
       "state": "open",
       "created_at": "2026-07-28T05:13:34Z",
-      "updated_at": "2026-08-02T06:41:01Z",
+      "updated_at": "2026-09-01T07:11:37Z",
       "comments": 2,
       "author": "waterWang",
       "labels": [],
@@ -1266,8 +1042,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16249",
       "state": "open",
       "created_at": "2026-07-19T21:43:34Z",
-      "updated_at": "2026-09-01T02:00:00Z",
-      "comments": 28,
+      "updated_at": "2026-09-01T06:28:42Z",
+      "comments": 30,
       "author": "Scottcjn",
       "labels": [
         "documentation",
@@ -1282,7 +1058,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16248",
       "state": "open",
       "created_at": "2026-07-19T21:43:33Z",
-      "updated_at": "2026-08-29T17:12:47Z",
+      "updated_at": "2026-09-01T06:15:56Z",
       "comments": 36,
       "author": "Scottcjn",
       "labels": [
@@ -1376,7 +1152,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16238",
       "state": "open",
       "created_at": "2026-07-19T21:33:49Z",
-      "updated_at": "2026-08-31T22:33:58Z",
+      "updated_at": "2026-09-01T03:55:18Z",
       "comments": 33,
       "author": "Scottcjn",
       "labels": [
@@ -3110,7 +2886,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13949",
       "state": "open",
       "created_at": "2026-06-11T23:02:38Z",
-      "updated_at": "2026-08-31T22:34:05Z",
+      "updated_at": "2026-09-01T03:55:31Z",
       "comments": 50,
       "author": "Scottcjn",
       "labels": [
@@ -5746,18 +5522,6 @@
       "agents_welcome": false
     },
     {
-      "id": 10726,
-      "title": "[Review Bounty Claim] RustChain PR #5590 wRTC bridge docs follow-up",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10726",
-      "state": "open",
-      "created_at": "2026-05-17T18:34:56Z",
-      "updated_at": "2026-05-17T18:34:56Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10725,
       "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10723 withdrawal docs mismatch (Bounty #73)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10725",
@@ -5794,18 +5558,6 @@
       "agents_welcome": false
     },
     {
-      "id": 10720,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10719 bounty 443 review submission",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10720",
-      "state": "open",
-      "created_at": "2026-05-17T18:20:25Z",
-      "updated_at": "2026-05-17T18:20:25Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10718,
       "title": "Claim: Blog Post — ZK Proofs and Privacy (Bounty #2179)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10718",
@@ -5825,54 +5577,6 @@
       "created_at": "2026-05-17T18:16:30Z",
       "updated_at": "2026-08-31T05:51:17Z",
       "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10716,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10707 wRTC token logo URI",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10716",
-      "state": "open",
-      "created_at": "2026-05-17T18:14:44Z",
-      "updated_at": "2026-05-17T18:14:44Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10715,
-      "title": "[Review Bounty Claim] RustChain PR #5593 Go SDK reference link",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10715",
-      "state": "open",
-      "created_at": "2026-05-17T18:10:44Z",
-      "updated_at": "2026-05-17T18:10:44Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10714,
-      "title": "[Review Bounty Claim] RustChain PR #5594 Prometheus exposition reference",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10714",
-      "state": "open",
-      "created_at": "2026-05-17T18:08:51Z",
-      "updated_at": "2026-05-17T18:08:51Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10711,
-      "title": "[Review Bounty Claim] RustChain PR #5592 funding donation link",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10711",
-      "state": "open",
-      "created_at": "2026-05-17T18:06:04Z",
-      "updated_at": "2026-05-17T18:06:04Z",
-      "comments": 0,
       "author": "ZacharyZhang-NY",
       "labels": [],
       "agents_welcome": false
@@ -5902,18 +5606,6 @@
       "agents_welcome": false
     },
     {
-      "id": 10708,
-      "title": "[Review Bounty Claim] RustChain PR #5591 BCOS action source link",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10708",
-      "state": "open",
-      "created_at": "2026-05-17T18:03:04Z",
-      "updated_at": "2026-05-17T18:03:04Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10706,
       "title": "[Bounty Claim] Broken BCOS action source link fix (PR #5591)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10706",
@@ -5922,18 +5614,6 @@
       "updated_at": "2026-06-25T16:45:49Z",
       "comments": 4,
       "author": "iamdinhthuan",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10703,
-      "title": "[Review Bounty Claim] RustChain PR #5587 missing CI test dependencies",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10703",
-      "state": "open",
-      "created_at": "2026-05-17T17:56:55Z",
-      "updated_at": "2026-05-17T17:56:55Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
       "labels": [],
       "agents_welcome": false
     },
@@ -5974,30 +5654,6 @@
       "agents_welcome": false
     },
     {
-      "id": 10699,
-      "title": "[Review Bounty Claim] RustChain PR #5589 Manticore docs link",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10699",
-      "state": "open",
-      "created_at": "2026-05-17T17:53:20Z",
-      "updated_at": "2026-05-17T17:53:20Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10697,
-      "title": "[Review Bounty Claim] RustChain PR #5578 missing UTXO fix and compile blocker",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10697",
-      "state": "open",
-      "created_at": "2026-05-17T17:50:09Z",
-      "updated_at": "2026-05-17T17:50:09Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10696,
       "title": "Claim: Blog Post — Future of Work AI Colleagues (Bounty #2179)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10696",
@@ -6006,18 +5662,6 @@
       "updated_at": "2026-05-17T17:48:42Z",
       "comments": 0,
       "author": "508704820",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10693,
-      "title": "[Review Bounty Claim] RustChain PR #5588 tip bot source links",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10693",
-      "state": "open",
-      "created_at": "2026-05-17T17:45:47Z",
-      "updated_at": "2026-05-17T17:45:47Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
       "labels": [],
       "agents_welcome": false
     },
@@ -6034,30 +5678,6 @@
       "agents_welcome": false
     },
     {
-      "id": 10682,
-      "title": "[Review Bounty Claim] RustChain PR #5584 Legend of Elya docs link",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10682",
-      "state": "open",
-      "created_at": "2026-05-17T17:31:48Z",
-      "updated_at": "2026-05-17T19:33:04Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10680,
-      "title": "[Review Bounty Claim] RustChain PR #5585 portable issue-2310 validation test",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10680",
-      "state": "open",
-      "created_at": "2026-05-17T17:29:08Z",
-      "updated_at": "2026-05-17T17:29:08Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10679,
       "title": "[Bounty Claim] issue-2310 validation path portability fix (PR #5585)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10679",
@@ -6066,90 +5686,6 @@
       "updated_at": "2026-06-25T16:46:04Z",
       "comments": 4,
       "author": "iamdinhthuan",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10677,
-      "title": "[Review Bounty Claim] RustChain PR #4952 self-authenticating proof entropy",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10677",
-      "state": "open",
-      "created_at": "2026-05-17T17:26:12Z",
-      "updated_at": "2026-05-17T19:33:07Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10675,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10473 langchain-core dependency bump",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10675",
-      "state": "open",
-      "created_at": "2026-05-17T17:19:39Z",
-      "updated_at": "2026-05-17T17:19:39Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10674,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10475 anthropic dependency bump",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10674",
-      "state": "open",
-      "created_at": "2026-05-17T17:18:32Z",
-      "updated_at": "2026-05-17T17:18:32Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10673,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10476 langgraph dependency bump",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10673",
-      "state": "open",
-      "created_at": "2026-05-17T17:17:19Z",
-      "updated_at": "2026-05-17T17:17:19Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10672,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10478 langchain dependency bump",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10672",
-      "state": "open",
-      "created_at": "2026-05-17T17:16:10Z",
-      "updated_at": "2026-05-17T17:16:10Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10670,
-      "title": "[Review Bounty Claim] rustchain-bounties PR #10477 requests dependency bump",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10670",
-      "state": "open",
-      "created_at": "2026-05-17T17:13:56Z",
-      "updated_at": "2026-05-17T17:13:56Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10669,
-      "title": "[Review Bounty Claim] PR #5582 OTC order JSON validation",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10669",
-      "state": "open",
-      "created_at": "2026-05-17T17:05:14Z",
-      "updated_at": "2026-05-17T17:05:14Z",
-      "comments": 0,
-      "author": "ZacharyZhang-NY",
       "labels": [],
       "agents_welcome": false
     },
@@ -6802,75 +6338,17 @@
       "agents_welcome": false
     },
     {
-      "id": 10382,
-      "title": "[Bounty Claim] PR Review - RustChain PR #5532 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10382",
-      "state": "open",
-      "created_at": "2026-05-17T02:56:24Z",
-      "updated_at": "2026-08-30T22:56:20Z",
-      "comments": 1,
-      "author": "kekehanshujun",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10379,
-      "title": "[Bounty Claim] PR Review - RustChain PR #5531 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10379",
-      "state": "open",
-      "created_at": "2026-05-17T02:53:12Z",
-      "updated_at": "2026-08-30T22:56:19Z",
-      "comments": 1,
-      "author": "kekehanshujun",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10364,
-      "title": "[Bounty Claim] PR Review - PR #5532 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10364",
-      "state": "open",
-      "created_at": "2026-05-17T02:43:59Z",
-      "updated_at": "2026-08-30T22:56:17Z",
-      "comments": 1,
-      "author": "kongzi123",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10363,
-      "title": "[Bounty Claim] PR Review - PR #5533 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10363",
-      "state": "open",
-      "created_at": "2026-05-17T02:43:30Z",
-      "updated_at": "2026-08-30T22:56:16Z",
-      "comments": 1,
-      "author": "kongzi123",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
       "id": 10359,
       "title": "[Bounty Claim] PR Review - RustChain PR #5531 (Bounty #73)",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10359",
       "state": "open",
       "created_at": "2026-05-17T02:40:13Z",
-      "updated_at": "2026-08-30T22:56:15Z",
-      "comments": 2,
+      "updated_at": "2026-09-01T05:41:58Z",
+      "comments": 3,
       "author": "2balmprune",
-      "labels": [],
-      "agents_welcome": false
-    },
-    {
-      "id": 10357,
-      "title": "[Bounty Claim] PR Review - RustChain PR #5533 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10357",
-      "state": "open",
-      "created_at": "2026-05-17T02:38:39Z",
-      "updated_at": "2026-08-30T22:56:14Z",
-      "comments": 1,
-      "author": "kekehanshujun",
-      "labels": [],
+      "labels": [
+        "bounty-eligible"
+      ],
       "agents_welcome": false
     },
     {
@@ -6934,236 +6412,12 @@
       "agents_welcome": false
     },
     {
-      "id": 10145,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #9957 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10145",
-      "state": "open",
-      "created_at": "2026-05-16T19:39:52Z",
-      "updated_at": "2026-08-31T06:12:48Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10144,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10141 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10144",
-      "state": "open",
-      "created_at": "2026-05-16T19:38:12Z",
-      "updated_at": "2026-08-31T06:12:44Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10136,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10054 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10136",
-      "state": "open",
-      "created_at": "2026-05-16T19:23:23Z",
-      "updated_at": "2026-08-31T06:12:36Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10135,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10075 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10135",
-      "state": "open",
-      "created_at": "2026-05-16T19:20:39Z",
-      "updated_at": "2026-08-31T06:12:31Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10134,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10081 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10134",
-      "state": "open",
-      "created_at": "2026-05-16T19:19:15Z",
-      "updated_at": "2026-08-31T06:12:26Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10131,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10039 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10131",
-      "state": "open",
-      "created_at": "2026-05-16T19:13:46Z",
-      "updated_at": "2026-08-31T06:12:18Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10130,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10047 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10130",
-      "state": "open",
-      "created_at": "2026-05-16T19:11:43Z",
-      "updated_at": "2026-08-31T06:12:13Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10129,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10046 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10129",
-      "state": "open",
-      "created_at": "2026-05-16T19:10:30Z",
-      "updated_at": "2026-08-31T06:12:09Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10127,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10049 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10127",
-      "state": "open",
-      "created_at": "2026-05-16T19:09:21Z",
-      "updated_at": "2026-08-31T06:12:05Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10126,
-      "title": "[Bounty Claim] PR Review - rustchain-bounties PR #10052 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10126",
-      "state": "open",
-      "created_at": "2026-05-16T19:07:59Z",
-      "updated_at": "2026-08-31T06:12:00Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10122,
-      "title": "[Bounty Claim] PR Review - BoTTube PR #1122 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10122",
-      "state": "open",
-      "created_at": "2026-05-16T19:03:02Z",
-      "updated_at": "2026-08-31T06:11:56Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10121,
-      "title": "[Bounty Claim] PR Review - BoTTube PR #1118 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10121",
-      "state": "open",
-      "created_at": "2026-05-16T19:00:06Z",
-      "updated_at": "2026-08-31T06:11:52Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10119,
-      "title": "[Bounty Claim] PR Review - ram-coffers PR #659 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10119",
-      "state": "open",
-      "created_at": "2026-05-16T18:57:11Z",
-      "updated_at": "2026-08-31T06:11:47Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10118,
-      "title": "[Bounty Claim] PR Review - RustChain PR #5474 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10118",
-      "state": "open",
-      "created_at": "2026-05-16T18:54:41Z",
-      "updated_at": "2026-08-31T06:11:43Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10117,
-      "title": "[Bounty Claim] PR Review - BoTTube PR #1111 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10117",
-      "state": "open",
-      "created_at": "2026-05-16T18:51:59Z",
-      "updated_at": "2026-08-31T06:11:39Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
-      "id": 10116,
-      "title": "[Bounty Claim] PR Review - BoTTube PR #1120 (Bounty #73)",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/10116",
-      "state": "open",
-      "created_at": "2026-05-16T18:49:44Z",
-      "updated_at": "2026-08-31T06:11:35Z",
-      "comments": 1,
-      "author": "ZacharyZhang-NY",
-      "labels": [
-        "bounty-eligible"
-      ],
-      "agents_welcome": false
-    },
-    {
       "id": 9999,
       "title": "[Bounty Claim] PR Reviews - 250+ PRs Total (Bounty #73) - HCIE2054",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9999",
       "state": "open",
       "created_at": "2026-05-16T13:40:15Z",
-      "updated_at": "2026-08-30T22:56:09Z",
+      "updated_at": "2026-09-01T05:41:47Z",
       "comments": 1,
       "author": "HCIE2054",
       "labels": [],
@@ -7175,7 +6429,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9997",
       "state": "open",
       "created_at": "2026-05-16T13:37:22Z",
-      "updated_at": "2026-08-30T22:56:08Z",
+      "updated_at": "2026-09-01T05:41:47Z",
       "comments": 1,
       "author": "HCIE2054",
       "labels": [],
@@ -7187,7 +6441,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9996",
       "state": "open",
       "created_at": "2026-05-16T13:35:25Z",
-      "updated_at": "2026-08-30T22:56:07Z",
+      "updated_at": "2026-09-01T05:41:46Z",
       "comments": 1,
       "author": "HCIE2054",
       "labels": [],
@@ -7211,7 +6465,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9963",
       "state": "open",
       "created_at": "2026-05-16T11:15:44Z",
-      "updated_at": "2026-08-30T22:56:06Z",
+      "updated_at": "2026-09-01T05:41:45Z",
       "comments": 2,
       "author": "HCIE2054",
       "labels": [],
@@ -7223,7 +6477,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9962",
       "state": "open",
       "created_at": "2026-05-16T11:13:53Z",
-      "updated_at": "2026-08-30T22:56:05Z",
+      "updated_at": "2026-09-01T05:41:45Z",
       "comments": 2,
       "author": "HCIE2054",
       "labels": [],
@@ -7295,7 +6549,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9951",
       "state": "open",
       "created_at": "2026-05-16T10:43:55Z",
-      "updated_at": "2026-08-30T22:56:04Z",
+      "updated_at": "2026-09-01T05:41:44Z",
       "comments": 2,
       "author": "HCIE2054",
       "labels": [],
@@ -7307,7 +6561,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9943",
       "state": "open",
       "created_at": "2026-05-16T10:07:38Z",
-      "updated_at": "2026-08-30T22:56:03Z",
+      "updated_at": "2026-09-01T05:41:43Z",
       "comments": 3,
       "author": "HCIE2054",
       "labels": [],
@@ -7319,7 +6573,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9940",
       "state": "open",
       "created_at": "2026-05-16T10:02:01Z",
-      "updated_at": "2026-08-30T22:56:02Z",
+      "updated_at": "2026-09-01T05:41:43Z",
       "comments": 2,
       "author": "HCIE2054",
       "labels": [],
@@ -7331,7 +6585,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9937",
       "state": "open",
       "created_at": "2026-05-16T09:59:08Z",
-      "updated_at": "2026-08-30T22:56:02Z",
+      "updated_at": "2026-09-01T05:41:42Z",
       "comments": 2,
       "author": "HCIE2054",
       "labels": [],
@@ -7391,7 +6645,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9867",
       "state": "open",
       "created_at": "2026-05-16T04:40:50Z",
-      "updated_at": "2026-08-30T22:56:00Z",
+      "updated_at": "2026-09-01T05:41:41Z",
       "comments": 2,
       "author": "GoodMorC",
       "labels": [],
@@ -7499,7 +6753,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9519",
       "state": "open",
       "created_at": "2026-05-14T18:50:03Z",
-      "updated_at": "2026-08-30T22:55:59Z",
+      "updated_at": "2026-09-01T05:41:40Z",
       "comments": 1,
       "author": "zp6",
       "labels": [],
@@ -7703,7 +6957,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9337",
       "state": "open",
       "created_at": "2026-05-13T21:11:28Z",
-      "updated_at": "2026-08-30T22:55:55Z",
+      "updated_at": "2026-09-01T05:41:36Z",
       "comments": 1,
       "author": "508704820",
       "labels": [],
@@ -7823,7 +7077,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9188",
       "state": "open",
       "created_at": "2026-05-12T22:47:53Z",
-      "updated_at": "2026-08-30T22:55:52Z",
+      "updated_at": "2026-09-01T05:41:35Z",
       "comments": 1,
       "author": "508704820",
       "labels": [],
@@ -7907,7 +7161,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/9017",
       "state": "open",
       "created_at": "2026-05-11T16:18:31Z",
-      "updated_at": "2026-08-31T22:33:59Z",
+      "updated_at": "2026-09-01T03:55:19Z",
       "comments": 7,
       "author": "Scottcjn",
       "labels": [
@@ -8127,7 +7381,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/8888",
       "state": "open",
       "created_at": "2026-05-08T22:14:15Z",
-      "updated_at": "2026-08-30T22:55:44Z",
+      "updated_at": "2026-09-01T05:41:28Z",
       "comments": 1,
       "author": "fengqiankun6-sudo",
       "labels": [],
@@ -8163,7 +7417,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/8839",
       "state": "open",
       "created_at": "2026-05-07T18:16:20Z",
-      "updated_at": "2026-08-30T22:55:43Z",
+      "updated_at": "2026-09-01T05:41:27Z",
       "comments": 1,
       "author": "fengqiankun6-sudo",
       "labels": [],
@@ -8223,7 +7477,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/8733",
       "state": "open",
       "created_at": "2026-05-06T14:11:17Z",
-      "updated_at": "2026-08-30T22:55:42Z",
+      "updated_at": "2026-09-01T05:41:26Z",
       "comments": 1,
       "author": "fengqiankun6-sudo",
       "labels": [],
@@ -8527,8 +7781,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2781",
       "state": "open",
       "created_at": "2026-04-02T15:41:22Z",
-      "updated_at": "2026-09-01T02:05:14Z",
-      "comments": 256,
+      "updated_at": "2026-09-01T06:34:33Z",
+      "comments": 258,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -8770,7 +8024,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2180",
       "state": "open",
       "created_at": "2026-03-17T02:05:49Z",
-      "updated_at": "2026-08-31T22:34:51Z",
+      "updated_at": "2026-09-01T03:56:48Z",
       "comments": 368,
       "author": "Scottcjn",
       "labels": [
@@ -8826,7 +8080,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2155",
       "state": "open",
       "created_at": "2026-03-16T18:12:44Z",
-      "updated_at": "2026-08-31T22:34:08Z",
+      "updated_at": "2026-09-01T03:55:35Z",
       "comments": 49,
       "author": "Scottcjn",
       "labels": [
@@ -8969,8 +8223,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/1618",
       "state": "open",
       "created_at": "2026-03-10T23:50:21Z",
-      "updated_at": "2026-09-01T01:41:08Z",
-      "comments": 100,
+      "updated_at": "2026-09-01T06:22:28Z",
+      "comments": 102,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -10275,8 +9529,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/443",
       "state": "open",
       "created_at": "2026-02-26T21:54:17Z",
-      "updated_at": "2026-09-01T02:05:33Z",
-      "comments": 104,
+      "updated_at": "2026-09-01T06:34:50Z",
+      "comments": 106,
       "author": "sophiaeagent-beep",
       "labels": [
         "bounty",
@@ -10562,7 +9816,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/378",
       "state": "open",
       "created_at": "2026-02-20T18:43:46Z",
-      "updated_at": "2026-08-31T22:34:02Z",
+      "updated_at": "2026-09-01T03:55:24Z",
       "comments": 28,
       "author": "Scottcjn",
       "labels": [
@@ -10900,7 +10154,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/171",
       "state": "open",
       "created_at": "2026-02-14T21:05:30Z",
-      "updated_at": "2026-08-31T22:34:01Z",
+      "updated_at": "2026-09-01T03:55:22Z",
       "comments": 113,
       "author": "Scottcjn",
       "labels": [
@@ -10915,7 +10169,7 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/165",
       "state": "open",
       "created_at": "2026-02-14T17:34:51Z",
-      "updated_at": "2026-08-31T22:34:00Z",
+      "updated_at": "2026-09-01T03:55:20Z",
       "comments": 37,
       "author": "sophiaeagent-beep",
       "labels": [
@@ -11056,8 +10310,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/71",
       "state": "open",
       "created_at": "2026-02-06T01:13:53Z",
-      "updated_at": "2026-08-29T16:04:27Z",
-      "comments": 505,
+      "updated_at": "2026-09-01T10:35:34Z",
+      "comments": 534,
       "author": "Scottcjn",
       "labels": [
         "bounty",
