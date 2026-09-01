@@ -70,6 +70,16 @@ fn check_mac_ouis() -> Vec<String> {
     let mut indicators = Vec::new();
 
     let macs = crate::hardware::system::get_mac_addresses();
+
+    // No NIC readable at all (sandbox, container, missing privileges).
+    // Treat as a suspicious indicator instead of silently passing: an
+    // attacker who can suppress MAC enumeration used to be rewarded with
+    // a placeholder "00:00:00:00:00:00" that wasn't on any VM OUI list.
+    if macs.is_empty() {
+        indicators.push("macs:no_addresses".to_string());
+        return indicators;
+    }
+
     for mac in &macs {
         let mac_lower = mac.to_lowercase();
         // Normalize separators: accept both ':' and '-'

@@ -84,16 +84,11 @@ pub fn get_cpu_serial() -> String {
         }
     }
 
-    // Ultimate fallback: hash the brand string
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    
-    let brand = get_cpu_model();
-    let mut hasher = DefaultHasher::new();
-    brand.hash(&mut hasher);
-    format!("cpu-{:x}", hasher.finish())rand string
+    // Ultimate fallback: hash the brand string so that we still return
+    // a stable, non-empty per-host identifier when no platform-specific
+    // serial is exposed.
     let model = get_cpu_model();
     use sha2::{Digest, Sha256};
     let hash = Sha256::digest(model.as_bytes());
-    hex::encode(&hash[..8])
+    format!("cpu-{}", hex::encode(&hash[..8]))
 }

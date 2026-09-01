@@ -53,13 +53,16 @@ pub fn get_mac_addresses() -> Vec<String> {
         _ => {}
     }
 
-    // Fallback: get the default/first MAC
-    if macs.is_empty() {
-        match mac_address::get_mac_address() {
-            Ok(Some(addr)) => macs.push(addr.to_string().to_lowercase()),
-            _ => macs.push("00:00:00:00:00:00".to_string()),
-        }
-    }
+    // If we could not enumerate any MAC from the well-known interfaces and
+    // the default fallback also failed, return an empty vector instead of
+    // synthesizing a placeholder value.
+    //
+    // Returning a hard-coded "00:00:00:00:00:00" would (a) collide the
+    // identities of every sandbox / container / restricted node that
+    // can't read its own NIC, and (b) silently bypass the VM-OUI check
+    // because that placeholder is not in any VM vendor prefix list.
+    // Callers (fingerprint/anti_emulation.rs and the attestation
+    // payload) treat an empty list as "no MAC available".
 
     // Deduplicate
     macs.sort();
