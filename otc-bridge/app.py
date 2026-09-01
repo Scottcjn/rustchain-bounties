@@ -234,7 +234,7 @@ class RustChainClient:
         self.node_url = node_url or Config.RUSTCHAIN_NODE_URL
         self.session = requests.Session()
         # Handle self-signed certificates
-        if "50.28.86.131" in self.node_url:
+        if os.getenv("OTC_BRIDGE_INSECURE", "").lower() in ("1", "true", "yes"):
             self.session.verify = False
     
     def _request(self, method: str, endpoint: str, data: dict = None) -> dict:
