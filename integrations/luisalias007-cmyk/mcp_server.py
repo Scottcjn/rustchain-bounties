@@ -10,13 +10,38 @@ from mcp.types import TextContent, Tool
 
 
 BASE_URL = os.environ.get("RUSTCHAIN_BASE_URL", "http://rustchain.org:8088").rstrip("/")
+# SECURITY: the default uses plaintext HTTP, which is MITM-vulnerable in any
+# network where an attacker can observe or modify packets. Operators running
+# against an HTTPS-capable endpoint should set RUSTCHAIN_BASE_URL=https://...
+# For self-signed certs, set RUSTCHAIN_INSECURE_SKIP_TLS=1 to skip verification.
+import warnings as _warnings
+if BASE_URL.lower().startswith("http://"):
+    _warnings.warn(
+        ("RUSTCHAIN_BASE_URL is plaintext HTTP (" + BASE_URL +
+         "). Responses can be tampered with in transit. Prefer HTTPS."),
+        RuntimeWarning,
+    )
+
+_INSECURE_TLS = os.environ.get("RUSTCHAIN_INSECURE_SKIP_TLS") == "1"
+if _INSECURE_TLS:
+    _warnings.warn(
+        "RUSTCHAIN_INSECURE_SKIP_TLS=1 — TLS certificate verification is disabled. Unsafe in production.",
+        RuntimeWarning,
+    )
 
 app = Server("rustchain-read-mcp")
 
 
 def fetch_json(path: str) -> dict:
     request = urllib.request.Request(f"{BASE_URL}{path}", headers={"Accept": "application/json"})
-    with urllib.request.urlopen(request, timeout=15) as response:
+    # SECURITY: pass an SSL context that respects RUSTCHAIN_INSECURE_SKIP_TLS
+    # so operators who switch to HTTPS can still use a self-signed cert.
+    import ssl as _ssl
+    ctx = _ssl.create_default_context()
+    if _INSECURE_TLS:
+        ctx.check_hostname = False
+        ctx.verify_mode = _ssl.CERT_NONE
+    with urllib.request.urlopen(request, timeout=15, context=ctx) as response:
         body = response.read().decode("utf-8")
     return json.loads(body)
 
