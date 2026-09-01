@@ -43,7 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RATE_PER_FUNC: "0.5"
+          RATE_PER_FUNC: "0.01"  # matches scripts/docstring_gate.py intended rate; the 0.5 override was a 50x overpay bug
           MAX_RTC: "25"
         # `set -e` is deliberately NOT used: the sweep must keep going past one
         # bad claim. Every exit status is therefore captured and acted on
