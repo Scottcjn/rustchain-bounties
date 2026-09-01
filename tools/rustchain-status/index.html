@@ -136,6 +136,8 @@ function statusBadge(online) {
     : '<span class="badge badge-red">鈼?Offline</span>';
 }
 
+function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
 async function refresh() {
   // 1. Health
   try {
@@ -165,18 +167,18 @@ async function refresh() {
         const mult = m.multiplier || m.antiquity_multiplier || '1.0x';
         const lastSeen = m.last_attestation || m.last_seen || '';
         html += `<tr>
-          <td style="font-family:monospace;font-size:12px">${m.miner_id || m.id || '?'}</td>
-          <td>${arch}</td>
-          <td>${typeof mult === 'number' ? mult.toFixed(1) + 'x' : mult}</td>
+          <td style="font-family:monospace;font-size:12px">${esc(m.miner_id || m.id || '?')}</td>
+          <td>${esc(arch)}</td>
+          <td>${esc(typeof mult === 'number' ? mult.toFixed(1) + 'x' : mult)}</td>
           <td>${statusBadge(m.status !== 'offline')}</td>
-          <td>${lastSeen ? fmtTime(typeof lastSeen === 'number' ? lastSeen : new Date(lastSeen)/1000) : '鈥?}</td>
+          <td>${esc(lastSeen ? fmtTime(typeof lastSeen === 'number' ? lastSeen : new Date(lastSeen)/1000) : '鈥?')</td>
         </tr>`;
       }
       html += '</table>';
     }
     document.getElementById('minersTable').innerHTML = html;
   } catch (e) {
-    document.getElementById('minersTable').innerHTML = `<div class="error-msg">Failed to load miners: ${e.message}</div>`;
+    document.getElementById('minersTable').innerHTML = `<div class="error-msg">Failed to load miners: ${esc(e.message)}</div>`;
   }
 
   // 3. Balances (try fetching for known miners)
@@ -193,7 +195,7 @@ async function refresh() {
         const bal = await fetchJSON(`${API}/wallet/balance?miner_id=${id}`);
         const balance = bal.balance || '鈥?;
         const arch = m.arch || m.architecture || '鈥?;
-        html += `<tr><td style="font-family:monospace;font-size:12px">${id}</td><td style="font-family:monospace">${balance}</td><td>${arch}</td></tr>`;
+        html += `<tr><td style="font-family:monospace;font-size:12px">${esc(id)}</td><td style="font-family:monospace">${esc(balance)}</td><td>${esc(arch)}</td></tr>`;
         rows++;
       } catch {
         // Skip miners that error
@@ -206,7 +208,7 @@ async function refresh() {
     html += '</table>';
     document.getElementById('balancesTable').innerHTML = html;
   } catch (e) {
-    document.getElementById('balancesTable').innerHTML = `<div class="error-msg">Failed to load balances: ${e.message}</div>`;
+    document.getElementById('balancesTable').innerHTML = `<div class="error-msg">Failed to load balances: ${esc(e.message)}</div>`;
   }
 
   document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
