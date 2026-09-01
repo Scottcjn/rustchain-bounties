@@ -61,11 +61,12 @@ def run_claim(bounty: Bounty):
         sys.exit(0)
 
     print("🍴 Forking repo and generating implementation...")
-    workdir, branch = fork_and_implement(bounty, WALLET)
+    workdir, branch, used_claude = fork_and_implement(bounty, WALLET)
     print(f"   Branch: {branch}")
+    print(f"   Generation: {"Claude" if used_claude else "template stub"}")
 
     print("📤 Submitting PR...")
-    pr_url = submit_pr(bounty, workdir, branch, WALLET)
+    pr_url = submit_pr(bounty, workdir, branch, WALLET, used_claude=used_claude)
     print(f"   ✅ PR submitted: {pr_url}")
 
     record_submission(
