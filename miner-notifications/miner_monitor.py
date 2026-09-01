@@ -8,6 +8,7 @@ Supports: Discord, Email, Telegram, Webhook
 Features: Status change detection, streak warnings, rate limiting
 """
 
+import os
 import json
 import time
 import hashlib
@@ -118,23 +119,37 @@ class MinerMonitor:
         self.load_state()
     
     def load_state(self):
-        """Load previous state from disk"""
-        if STATE_FILE.exists():
-            with open(STATE_FILE) as f:
+        # H-04 fix: a single corrupt entry used to crash the whole
+        # monitor on startup. We now skip bad rows with a warning and
+        # back the file up before rewriting it.
+        if not STATE_FILE.exists():
+            return
+        try:
+            with open(STATE_FILE, encoding="utf-8") as f:
                 data = json.load(f)
-                self.miners = {
-                    k: MinerState.from_dict(v) for k, v in data.get('miners', {}).items()
-                }
-                logger.info(f"Loaded state for {len(self.miners)} miners")
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("state file unreadable; starting fresh: %s", exc)
+            return
+        loaded = {}
+        for k, v in (data.get("miners") or {}).items():
+            try:
+                loaded[k] = MinerState.from_dict(v)
+            except (KeyError, TypeError, ValueError) as exc:
+                logger.warning("skipping corrupt state entry %r: %s", k, exc)
+        self.miners = loaded
+        logger.info("Loaded state for %d miners", len(self.miners))
     
     def save_state(self):
-        """Save current state to disk"""
+        # H-05 fix: write to a sibling .tmp file and os.replace so a
+        # crash mid-write cannot leave state.json half-written.
         data = {
             'miners': {k: v.to_dict() for k, v in self.miners.items()},
             'last_update': time.time()
         }
-        with open(STATE_FILE, 'w') as f:
+        tmp_path = STATE_FILE.with_suffix(STATE_FILE.suffix + ".tmp")
+        with open(tmp_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
+        os.replace(tmp_path, STATE_FILE)
     
     def fetch_miners(self) -> List[Dict]:
         """Fetch current miner data from API"""
@@ -317,12 +332,23 @@ Submit an attestation soon to preserve your {state.streak_days}-day streak!
         
         msg.attach(MIMEText(message, 'plain'))
         
-        server = smtplib.SMTP(self.config.email_smtp_server, self.config.email_smtp_port)
-        server.starttls()
-        server.login(self.config.email_username, self.config.email_password)
-        server.send_message(msg)
-        server.quit()
-        logger.info("Email notification sent")
+        # H-06 fix: try/finally so a failure in starttls/login/send
+        # never leaks the SMTP socket across cycles.
+        try:
+            server = smtplib.SMTP(self.config.email_smtp_server, self.config.email_smtp_port)
+            try:
+                server.starttls()
+                server.login(self.config.email_username, self.config.email_password)
+                server.send_message(msg)
+            finally:
+                try:
+                    server.quit()
+                except Exception:
+                    pass
+            logger.info("Email notification sent")
+        except Exception as exc:
+            logger.error("SMTP send failed: %s", exc)
+            raise
     
     def _send_webhook(self, title: str, message: str, priority: str):
         """Send generic webhook notification"""
