@@ -8,7 +8,22 @@ set -euo pipefail
 
 NODE_URL="${RTC_NODE_URL:-https://50.28.86.131}"
 WALLET="${1:-}"
+INSECURE="${RTC_INSECURE:-0}"
 RTC_USD=0.10
+
+# SECURITY: `curl -k` (or `-sk`) disables TLS certificate verification globally.
+# That's appropriate only when the operator deliberately points at a self-signed
+# test node. Default to verifying; allow opt-out via `RTC_INSECURE=1`.
+CURL_TLS_OPTS=()
+if [[ "$INSECURE" == "1" ]]; then
+    CURL_TLS_OPTS=(-k)
+fi
+
+# SECURITY: build the wallet URL with proper percent-encoding so an untrusted
+# wallet string cannot smuggle query parameters or fragments into the URL.
+urlencode() {
+    python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$1"
+}
 
 usage() {
     cat <<EOF
@@ -33,14 +48,14 @@ fi
 WALLET=$(echo "$WALLET" | xargs)
 
 # Health check
-if ! curl -skf --max-time 5 "$NODE_URL/health" > /dev/null 2>&1; then
+if ! curl "${CURL_TLS_OPTS[@]}" -sf --max-time 5 "$NODE_URL/health" > /dev/null 2>&1; then
     echo "Error: Node unreachable at $NODE_URL" >&2
     echo "Check your internet connection or try again in a moment." >&2
     exit 1
 fi
 
 # Query balance
-RAW=$(curl -skf --max-time 10 "$NODE_URL/wallet/balance?miner_id=$WALLET")
+RAW=$(curl "${CURL_TLS_OPTS[@]}" -sf --max-time 10 "$NODE_URL/wallet/balance?miner_id=$(urlencode "$WALLET")")
 CODE=$?
 
 if [[ $CODE -ne 0 ]]; then
@@ -79,7 +94,7 @@ except Exception:
 
 # Query epoch info (non-fatal if it fails)
 epoch_info=""
-if epoch_raw=$(curl -skf --max-time 10 "$NODE_URL/epoch" 2>/dev/null); then
+if epoch_raw=$(curl "${CURL_TLS_OPTS[@]}" -sf --max-time 10 "$NODE_URL/epoch" 2>/dev/null); then
     epoch_info=$(echo "$epoch_raw" | python3 -c '
 import sys, json
 try:
