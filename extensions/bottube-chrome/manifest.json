@@ -5,7 +5,7 @@
   "version": "1.0",
   "description": "A Chrome extension for BoTTube functionality",
   "permissions": [
-    "tabs",
+    "activeTab",
     "storage"
   ],
   "action": {
