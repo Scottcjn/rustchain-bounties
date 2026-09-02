@@ -105,13 +105,26 @@ def _find_handle_in_text(text):
         if m:
             return m.group(1)
     return None
+
+
+class GhError(RuntimeError):
+    """A `gh` invocation failed. Never swallow this into an empty result."""
+
+
+class CanonicalWalletError(GhError):
+    """CLAIMANTS.md exists but cannot be parsed into a trusted registry."""
+
+
 def _load_canonical_wallets():
     """Parse docs/CLAIMANTS.md into {handle_lower: native_RTC_wallet}.
 
     Canonical registry: a handle listed here is ALWAYS paid to its registered
     native wallet, regardless of what an individual claim body says. Only native
-    `RTC[0-9a-fA-F]{40}` rows are honored. Missing/garbled file -> empty map
-    (resolution falls back to per-claim parsing).
+    `RTC[0-9a-fA-F]{40}` rows are honored.
+
+    A missing file falls back to per-claim parsing (empty map). A present but
+    unreadable or corrupt file fails closed — an empty map would silently skip
+    canonical routing and risk paying the wrong destination.
     """
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "CLAIMANTS.md")
     out = {}
@@ -128,17 +141,15 @@ def _load_canonical_wallets():
                 if handle and m and not handle.lower().startswith(("github handle", "---")):
                     out[handle.lower()] = m.group(0)
     except FileNotFoundError:
-        pass
+        return out
     except Exception as e:
-        print(f"::warning::could not parse CLAIMANTS.md: {e}")
+        raise CanonicalWalletError(
+            f"could not parse CLAIMANTS.md at {path}: {e}"
+        ) from e
     return out
 
 
 CANONICAL_WALLETS = _load_canonical_wallets()
-
-
-class GhError(RuntimeError):
-    """A `gh` invocation failed. Never swallow this into an empty result."""
 
 
 def gh(args, _check=True):
