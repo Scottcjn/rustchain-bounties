@@ -63,6 +63,29 @@ def api(path, method="GET", data=None, strict=False):
         if strict: raise ApiError(f"{method} {path} failed: {e.__class__.__name__}: {e}") from e
         raise
 
+
+def api_collect(path, per_page=100):
+    """Fetch every page of a GitHub REST list endpoint.
+
+    Unpaginated collection reads default to 30 items/page. A valid first
+    substantive review on page 2 was invisible, so the gate closed claims as
+    "not first reviewer" while the workflow stayed green.
+    """
+    out = []
+    page = 1
+    while True:
+        sep = "&" if "?" in path else "?"
+        chunk = api(f"{path}{sep}per_page={per_page}&page={page}")
+        if chunk is None:
+            return None
+        if not isinstance(chunk, list):
+            return chunk
+        out.extend(chunk)
+        if len(chunk) < per_page:
+            return out
+        page += 1
+
+
 def is_review_claim(title):
     t=title.lower()
     return ("review" in t) and ("pr " in t or "code review" in t or "#73" in t or "pr#" in t or "pr #" in t)
@@ -325,7 +348,10 @@ def main():
     # avoid re-notifying people when nothing has changed, a retry that still
     # cannot resolve exits SILENTLY (see `quiet` below) -- it comments only
     # when the verdict actually improves.
-    retry = os.environ.get("RETRY_NEEDS_HUMAN", "") == "1"
+    retry = (
+        os.environ.get("RETRY_NEEDS_HUMAN", "") == "1"
+        or os.environ.get("GITHUB_EVENT_ACTION", "") == "edited"
+    )
     quiet = False
     if "bounty-eligible" in labels:
         return
@@ -351,7 +377,7 @@ def main():
             _unresolved(f"🤖 Gate: claim references a PR outside the maintainer's repos ({claim_repo}#{pr}). Flagged for human review.", quiet); return
     if native_wallet(body) is False:
         close(NUM,"🤖 Gate: payout must be a **native RTC wallet** (`RTC…`) — RTC has no off-ramp, no Solana/ETH bridge. Reopen with a native wallet."); return
-    reviews=api(f"/repos/{target}/pulls/{pr}/reviews")
+    reviews = api_collect(f"/repos/{target}/pulls/{pr}/reviews")
     if reviews is None and not claim_repo:
         # The default target was an assumption, not a statement by the
         # claimant. Before giving up, honour a repo named in prose
@@ -362,14 +388,14 @@ def main():
         if cand and cand.lower() != target.split("/")[1].lower():
             owner = TARGET.split("/")[0]
             alt = f"{owner}/{cand}"
-            alt_reviews = api(f"/repos/{alt}/pulls/{pr}/reviews")
+            alt_reviews = api_collect(f"/repos/{alt}/pulls/{pr}/reviews")
             if alt_reviews is not None:
                 target, reviews = alt, alt_reviews
     if reviews is None:
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
-    inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100") or []
+    inl = api_collect(f"/repos/{target}/pulls/{pr}/comments") or []
     # Per-author inline counts (so the rubber-stamp filter is per-review).
     author_inline = {}
     for c in inl:
