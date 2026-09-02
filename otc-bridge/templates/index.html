@@ -220,7 +220,7 @@
                     <div class="order-price">@ $${esc(order.price_per_rtc)}/RTC = $${esc((order.rtc_amount * order.price_per_rtc).toFixed(2))} ${esc(order.crypto_asset)}</div>
                     <div class="order-price">Expires: ${esc(new Date(order.expires_at).toLocaleString())}</div>
                     <div class="order-actions">
-                        <button onclick="openTradeModal('${esc(order.id)}')">💱 Trade</button>
+                        <button                         <button onclick="openTradeModal('${esc(order.id)}','${esc(order.order_type)}')">💱 Trade</button>
                     </div>
                 </div>
             `).join('');
@@ -272,13 +272,17 @@
             document.getElementById('statVolume').textContent = (result.total_volume_rtc || 0).toFixed(2);
         }
         
-        function openTradeModal(orderId) {
+        function openTradeModal(orderId, orderType) {
             selectedOrder = orderId;
             const modal = document.getElementById('tradeModal');
+            // orderType is supplied by the caller (now passed from the order-card button), so it can be
+            // attacker-controlled. Coerce + escape so it can't break out of the <li> or inject markup.
+            const safeType = esc(String(orderType == null ? '' : orderType));
+            const depositInstr = safeType === 'sell' ? 'ETH/ERG/USDC' : 'RTC';
             document.getElementById('tradeModalContent').innerHTML = `
                 <p>To trade, you'll need to:</p>
                 <ol style="margin: 16px 0; padding-left: 20px;">
-                    <li>Deposit ${order.order_type === 'sell' ? 'ETH/ERG/USDC' : 'RTC'} to escrow</li>
+                    <li>Deposit ${depositInstr} to escrow</li>
                     <li>Wait for counterparty to deposit</li>
                     <li>Execute atomic swap</li>
                 </ol>
@@ -315,9 +319,9 @@
             });
             
             if (result.error) {
-                alertDiv.innerHTML = `<div class="alert alert-error">${result.error}</div>`;
+                alertDiv.innerHTML = `<div class="alert alert-error">${esc(result.error)}</div>`;
             } else {
-                alertDiv.innerHTML = `<div class="alert alert-success">Order created! ID: ${result.order.id}</div>`;
+                alertDiv.innerHTML = `<div class="alert alert-success">Order created! ID: ${esc(result.order && result.order.id)}</div>`;
                 document.getElementById('createOrderForm').reset();
             }
         });
