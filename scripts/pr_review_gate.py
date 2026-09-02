@@ -285,6 +285,32 @@ def is_substantive_review(review, inline_count=0):
     return False
 
 
+def inline_count_by_review(inline_comments):
+    """Map pull_request_review_id -> inline comment count for that review."""
+    counts = {}
+    for c in inline_comments or []:
+        rid = c.get("pull_request_review_id")
+        if rid:
+            counts[rid] = counts.get(rid, 0) + 1
+    return counts
+
+
+def substantive_reviews(reviews, inline_comments):
+    """Return chronologically sorted substantive reviews with per-review inline counts."""
+    by_review = inline_count_by_review(inline_comments)
+    rv = [r for r in reviews if r.get("submitted_at")]
+    rv.sort(key=lambda r: r["submitted_at"])
+    return [
+        r for r in rv
+        if is_substantive_review(r, inline_count=by_review.get(r.get("id"), 0))
+    ]
+
+
+def claimant_substantive_review(author, substantive):
+    """The claimant's qualifying substantive review, if any."""
+    return next((r for r in substantive if r["user"]["login"] == author), None)
+
+
 def comment(n, body): api(f"/repos/{REPO}/issues/{n}/comments","POST",{"body":body})
 def add_label(n, lab): api(f"/repos/{REPO}/issues/{n}/labels","POST",{"labels":[lab]})
 def close(n, reason_comment):
@@ -367,25 +393,16 @@ def main():
                 target, reviews = alt, alt_reviews
     if reviews is None:
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
-    rv=[r for r in reviews if r.get("submitted_at")]
-    rv.sort(key=lambda r:r["submitted_at"])
     inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100") or []
-    # Per-author inline counts (so the rubber-stamp filter is per-review).
-    author_inline = {}
-    for c in inl:
-        login = (c.get("user") or {}).get("login")
-        if login:
-            author_inline[login] = author_inline.get(login, 0) + 1
-    # Filter out rubber-stamp reviews before picking the first substantive
-    # reviewer. If a review has no inline comments, run it through
-    # is_substantive_review(); if it has any inline comments, it is
-    # substantive by definition.
-    substantive = [r for r in rv if is_substantive_review(
-        r, inline_count=author_inline.get(r["user"]["login"], 0)
-    )]
+    # Inline comments belong to a specific review, not an author globally.
+    # Aggregating by login let a later inline comment retroactively qualify an
+    # earlier rubber-stamp review as substantive.
+    inline_by_review = inline_count_by_review(inl)
+    substantive = substantive_reviews(reviews, inl)
     first = substantive[0]["user"]["login"] if substantive else None
-    body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
-    inline = author_inline.get(author, 0)
+    author_review = claimant_substantive_review(author, substantive)
+    body_len = len((author_review or {}).get("body") or "")
+    inline = inline_by_review.get((author_review or {}).get("id"), 0)
     if first != author:
         close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {target}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
     if inline==0 and body_len<120:
