@@ -402,6 +402,35 @@ let autoRefreshTimer = null;
 
 const EMOJI = { APPROVED: '✨', CAUTIOUS: '⚠️', SUSPICIOUS: '🔍', REJECTED: '❌' };
 
+// XSS-safe HTML escape helper for API-controlled values rendered via innerHTML.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Indexed lookup for delegated row clicks (replaces unsafe inline `onclick` with JSON.stringify).
+let currentFilteredRecords = [];
+
+// Delegated click handler for the review table. Replaces the per-row `onclick='showDetail(JSON.stringify(r))'`,
+// which is unsafe because JSON.stringify interpolates into a single-quoted JS string and a value containing
+// `'` or `</script>` can break out. Using data-record-idx + esc() + a single delegated listener eliminates the attack surface.
+{
+  const reviewTable = document.getElementById('review-table');
+  if (reviewTable) {
+    reviewTable.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-record-idx]');
+      if (!tr) return;
+      const idx = parseInt(tr.getAttribute('data-record-idx'), 10);
+      const record = currentFilteredRecords[idx];
+      if (record) showDetail(record);
+    });
+  }
+}
+
 async function api(path, opts) {
   const r = await fetch(API_BASE + path, opts);
   return r.json();
@@ -436,24 +465,28 @@ async function loadData() {
     if (!filtered.length) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">No reviews pending</td></tr>';
     } else {
-      tbody.innerHTML = filtered.map(r => {
-        const conf = (r.confidence * 100).toFixed(0);
+      tbody.innerHTML = filtered.map((r, idx) => {
+        const conf = (Number(r.confidence) * 100).toFixed(0);
         const confColor = r.confidence > 0.7 ? 'var(--accent-green)' : r.confidence > 0.4 ? 'var(--accent-yellow)' : 'var(--accent-red)';
         const flags = (r.flags || []).join(', ') || '—';
         const override = r.override_verdict ?
-          `<span class="verdict-chip verdict-${r.override_verdict}">${EMOJI[r.override_verdict]} ${r.override_verdict}</span>` : '—';
-        return `<tr onclick='showDetail(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
-          <td>#${r.id}</td>
-          <td style="font-family:monospace;font-size:0.8rem;">${r.miner_id.substring(0,20)}${r.miner_id.length>20?'…':''}</td>
-          <td><span class="verdict-chip verdict-${r.verdict}">${EMOJI[r.verdict] || ''} ${r.verdict}</span></td>
-          <td>${conf}%<div class="confidence-bar"><div class="confidence-fill" style="width:${conf}%;background:${confColor}"></div></div></td>
-          <td style="font-size:0.8rem;color:var(--text-muted);">${flags}</td>
-          <td style="font-size:0.75rem;color:var(--text-muted);">${r.model_version||'—'}</td>
-          <td>${r.latency_ms||0}ms</td>
-          <td style="font-size:0.8rem;color:var(--text-muted);">${r.created_at||'—'}</td>
+          `<span class="verdict-chip verdict-${esc(r.override_verdict)}">${EMOJI[r.override_verdict] || ''} ${esc(r.override_verdict)}</span>` : '—';
+        const minerId = String(r.miner_id || '');
+        const truncated = minerId.substring(0, 20) + (minerId.length > 20 ? '…' : '');
+        return `<tr data-record-idx="${idx}">
+          <td>#${esc(r.id)}</td>
+          <td style="font-family:monospace;font-size:0.8rem;">${esc(truncated)}</td>
+          <td><span class="verdict-chip verdict-${esc(r.verdict)}">${EMOJI[r.verdict] || ''} ${esc(r.verdict)}</span></td>
+          <td>${esc(conf)}%<div class="confidence-bar"><div class="confidence-fill" style="width:${esc(conf)}%;background:${confColor}"></div></div></td>
+          <td style="font-size:0.8rem;color:var(--text-muted);">${esc(flags)}</td>
+          <td style="font-size:0.75rem;color:var(--text-muted);">${esc(r.model_version||'—')}</td>
+          <td>${esc(r.latency_ms||0)}ms</td>
+          <td style="font-size:0.8rem;color:var(--text-muted);">${esc(r.created_at||'—')}</td>
           <td>${override}</td>
         </tr>`;
       }).join('');
+      // Refresh the row-click index. The delegated listener (defined above) reads this.
+      currentFilteredRecords = filtered;
     }
 
     document.getElementById('last-refresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
@@ -464,9 +497,9 @@ async function loadData() {
 
 async function showDetail(record) {
   currentInspection = record;
-  document.getElementById('detail-title').textContent = `${EMOJI[record.verdict]} ${record.miner_id}`;
+  document.getElementById('detail-title').textContent = `${EMOJI[record.verdict] || ''} ${record.miner_id || ''}`;
   document.getElementById('detail-verdict').innerHTML =
-    `<span class="verdict-chip verdict-${record.verdict}">${EMOJI[record.verdict]} ${record.verdict}</span> — Confidence: ${(record.confidence*100).toFixed(1)}%`;
+    `<span class="verdict-chip verdict-${esc(record.verdict)}">${EMOJI[record.verdict] || ''} ${esc(record.verdict)}</span> — Confidence: ${(Number(record.confidence)*100).toFixed(1)}%`;
   document.getElementById('detail-reasoning').textContent = record.reasoning || 'No reasoning provided';
   document.getElementById('detail-flags').textContent = (record.flags||[]).join(', ') || 'None';
 
@@ -480,9 +513,9 @@ async function showDetail(record) {
     const hist = await api(`/sophia/history/${encodeURIComponent(record.miner_id)}?limit=10`);
     const rows = (hist.inspections || []).map(h =>
       `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;">
-        <span class="verdict-chip verdict-${h.verdict}" style="font-size:0.75rem;">${EMOJI[h.verdict]} ${h.verdict}</span>
-        ${(h.confidence*100).toFixed(0)}% — ${h.created_at}
-        ${h.override_verdict ? ` → <span class="verdict-chip verdict-${h.override_verdict}" style="font-size:0.7rem;">Override: ${h.override_verdict}</span>` : ''}
+        <span class="verdict-chip verdict-${esc(h.verdict)}" style="font-size:0.75rem;">${EMOJI[h.verdict] || ''} ${esc(h.verdict)}</span>
+        ${(Number(h.confidence)*100).toFixed(0)}% — ${esc(h.created_at)}
+        ${h.override_verdict ? ` → <span class="verdict-chip verdict-${esc(h.override_verdict)}" style="font-size:0.7rem;">Override: ${esc(h.override_verdict)}</span>` : ''}
       </div>`
     ).join('');
     document.getElementById('detail-history').innerHTML = rows || '<span style="color:var(--text-muted)">No history</span>';
