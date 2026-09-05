@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'">
   <style>
     body {
       width: 300px;
@@ -41,19 +42,25 @@
   <script>
     document.getElementById('browse-btn').addEventListener('click', function() {
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "browse"});
+        if (!tabs || !tabs[0] || !tabs[0].id) { return; }
+        if (!/^https?:\/\//.test(tabs[0].url || '')) { return; }
+        chrome.tabs.sendMessage(tabs[0].id, {action: "browse"}, function() { void chrome.runtime.lastError; });
       });
     });
 
     document.getElementById('vote-btn').addEventListener('click', function() {
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "vote"});
+        if (!tabs || !tabs[0] || !tabs[0].id) { return; }
+        if (!/^https?:\/\//.test(tabs[0].url || '')) { return; }
+        chrome.tabs.sendMessage(tabs[0].id, {action: "vote"}, function() { void chrome.runtime.lastError; });
       });
     });
 
     document.getElementById('upload-btn').addEventListener('click', function() {
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "upload"});
+        if (!tabs || !tabs[0] || !tabs[0].id) { return; }
+        if (!/^https?:\/\//.test(tabs[0].url || '')) { return; }
+        chrome.tabs.sendMessage(tabs[0].id, {action: "upload"}, function() { void chrome.runtime.lastError; });
       });
     });
   </script>
