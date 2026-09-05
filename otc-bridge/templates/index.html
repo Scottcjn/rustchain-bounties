@@ -199,6 +199,7 @@
             }
         }
         
+        function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
         async function loadOrders() {
             const asset = document.getElementById('filterAsset').value;
             let url = '/api/orders?status=open';
@@ -214,12 +215,12 @@
             
             container.innerHTML = result.orders.map(order => `
                 <div class="order-card">
-                    <span class="order-type ${order.order_type}">${order.order_type.toUpperCase()}</span>
-                    <div class="order-amount">${order.rtc_amount} RTC</div>
-                    <div class="order-price">@ $${order.price_per_rtc}/RTC = $${(order.rtc_amount * order.price_per_rtc).toFixed(2)} ${order.crypto_asset}</div>
-                    <div class="order-price">Expires: ${new Date(order.expires_at).toLocaleString()}</div>
+                    <span class="order-type ${esc(order.order_type)}">${esc((order.order_type || '').toUpperCase())}</span>
+                    <div class="order-amount">${esc(order.rtc_amount)} RTC</div>
+                    <div class="order-price">@ $${esc(order.price_per_rtc)}/RTC = $${esc((order.rtc_amount * order.price_per_rtc).toFixed(2))} ${esc(order.crypto_asset)}</div>
+                    <div class="order-price">Expires: ${esc(new Date(order.expires_at).toLocaleString())}</div>
                     <div class="order-actions">
-                        <button onclick="openTradeModal('${order.id}')">💱 Trade</button>
+                        <button onclick="openTradeModal('${esc(order.id)}')">💱 Trade</button>
                     </div>
                 </div>
             `).join('');
@@ -251,11 +252,11 @@
                     <tbody>
                         ${result.trades.map(t => `
                             <tr>
-                                <td>${t.trade.id.substring(0, 8)}...</td>
-                                <td>${t.trade.rtc_amount} RTC</td>
-                                <td>${t.trade.crypto_asset}</td>
-                                <td><span class="status-badge status-${t.trade.status}">${t.trade.status}</span></td>
-                                <td>${new Date(t.trade.created_at).toLocaleDateString()}</td>
+                                <td>${esc((t.trade.id || '').substring(0, 8))}...</td>
+                                <td>${esc(t.trade.rtc_amount)} RTC</td>
+                                <td>${esc(t.trade.crypto_asset)}</td>
+                                <td><span class="status-badge status-${esc(t.trade.status)}">${esc(t.trade.status)}</span></td>
+                                <td>${esc(new Date(t.trade.created_at).toLocaleDateString())}</td>
                             </tr>
                         `).join('')}
                     </tbody>
