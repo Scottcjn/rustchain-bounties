@@ -540,27 +540,30 @@
                 // 确定硬件图标emoji
                 const hardwareEmoji = getHardwareEmoji(miner.device_family, miner.device_arch);
                 
+                // SECURITY: escape all API-controlled values before they are
+                // dropped into innerHTML. hardwareType is also escaped because
+                // it is interpolated into a CSS class attribute.
                 row.innerHTML = `
                     <td class="rank rank-${index + 1}">${index + 1}</td>
-                    <td class="miner-id">${formatMinerId(miner.miner)}</td>
+                    <td class="miner-id">${escapeHtml(formatMinerId(miner.miner))}</td>
                     <td>
                         <div class="hardware-info">
-                            <div class="hardware-icon ${hardwareType}">
-                                ${hardwareEmoji}
+                            <div class="hardware-icon ${escapeHtml(hardwareType)}">
+                                ${escapeHtml(hardwareEmoji)}
                             </div>
                             <div class="hardware-details">
-                                <div class="hardware-type">${miner.device_family || '-'}</div>
-                                <div class="hardware-family">${miner.device_arch || '-'}</div>
+                                <div class="hardware-type">${escapeHtml(miner.device_family || '-')}</div>
+                                <div class="hardware-family">${escapeHtml(miner.device_arch || '-')}</div>
                             </div>
                         </div>
                     </td>
                     <td class="multiplier">
-                        <span class="multiplier-badge ${hardwareType}">${miner.antiquity_multiplier || 1}x</span>
+                        <span class="multiplier-badge ${escapeHtml(hardwareType)}">${escapeHtml(String(miner.antiquity_multiplier || 1))}x</span>
                     </td>
-                    <td>${(miner.last_attest || 0).toLocaleString()}</td>
+                    <td>${escapeHtml(String(miner.last_attest || 0).toLocaleString())}</td>
                     <td>
-                        <div class="value">${miner.estimatedEarnings?.total?.toFixed(1) || 0} RTC</div>
-                        <div class="usd">≈ $${miner.estimatedEarnings?.usd?.toFixed(2) || 0}</div>
+                        <div class="value">${escapeHtml((miner.estimatedEarnings?.total?.toFixed(1) || 0) + ' RTC')}</div>
+                        <div class="usd">≈ ${escapeHtml((miner.estimatedEarnings?.usd?.toFixed(2) || 0))}</div>
                     </td>
                 `;
                 
@@ -572,6 +575,19 @@
             if (!minerId) return '-';
             if (minerId.length <= 12) return minerId;
             return minerId.substring(0, 6) + '...' + minerId.substring(minerId.length - 4);
+        }
+
+        // SECURITY: HTML-escape any value that originated from the API before
+        // it is dropped into an innerHTML template. The /api/miners response is
+        // expected to be JSON, but a future compromise of the node or a
+        // downstream proxy could return strings containing HTML.
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
         }
         
         function getHardwareEmoji(family, arch) {
