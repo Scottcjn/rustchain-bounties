@@ -292,7 +292,7 @@ function renderAgentEconomy() {
   els.activeAgents.textContent = formatNumber(stats.active_agents);
   els.openJobs.textContent = formatNumber(stats.open_jobs);
   els.escrowBalance.textContent = formatRtc(stats.escrow_balance_rtc);
-  els.feeRate.textContent = stats.platform_fee_rate || "0%";
+  els.feeRate.textContent = stats.platform_fee_rate || "5%";
 
   const categories = {};
   (stats.categories || []).forEach((category) => {
@@ -332,13 +332,15 @@ function renderJobs() {
     const reward = job.reward_rtc || job.reward || job.amount || "RTC";
     const category = job.category || "uncategorized";
     const status = job.status || "posted";
+    const poster = job.poster_wallet ? `by ${shortMiner(job.poster_wallet)}` : "";
+    const escrow = job.escrow_locked_rtc ? `(Escrow: ${job.escrow_locked_rtc} RTC)` : "";
     return `
       <article class="job-row">
         <div>
           <strong>${escapeHtml(title)}</strong>
-          <small>${escapeHtml(category)} | ${escapeHtml(status)}</small>
+          <small>${escapeHtml(category)} | <span class="job-status-tag ${escapeHtml(status)}">${escapeHtml(status)}</span> ${escapeHtml(poster)} ${escapeHtml(escrow)}</small>
         </div>
-        <span class="badge">${escapeHtml(String(reward))}</span>
+        <span class="badge reward-badge">${escapeHtml(String(reward))} RTC</span>
         <code>${escapeHtml(job.id || job.job_id || "open")}</code>
       </article>
     `;
@@ -359,9 +361,29 @@ async function lookupReputation() {
   try {
     const data = await fetchJson(`/agent/reputation/${encodeURIComponent(wallet)}`);
     if (!data.reputation) {
-      els.reputationResult.textContent = `${data.wallet_id || wallet}: no reputation history returned.`;
+      els.reputationResult.innerHTML = `<div class="rep-card neutral"><span class="rep-tier">Unrated</span><p>${escapeHtml(data.wallet_id || wallet)}: No on-chain history</p></div>`;
     } else {
-      els.reputationResult.textContent = `${data.wallet_id || wallet}: ${JSON.stringify(data.reputation)}`;
+      const rep = data.reputation;
+      const score = rep.trust_score || 0;
+      const tier = (rep.trust_level || "neutral").toLowerCase();
+      const rating = rep.avg_rating || 0;
+      const stars = "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
+      const jobs = rep.completed_jobs || 0;
+      const earned = rep.total_rtc_earned || 0;
+
+      els.reputationResult.innerHTML = `
+        <div class="rep-card ${escapeHtml(tier)}">
+          <div class="rep-header">
+            <strong>${escapeHtml(shortMiner(data.wallet_id || wallet))}</strong>
+            <span class="rep-badge ${escapeHtml(tier)}">${escapeHtml(tier.toUpperCase())} (${score}/100)</span>
+          </div>
+          <div class="rep-stats">
+            <span>Rating: <span class="stars">${stars}</span> (${rating.toFixed(1)})</span>
+            <span>Jobs: <strong>${jobs}</strong></span>
+            <span>Earned: <strong>${earned} RTC</strong></span>
+          </div>
+        </div>
+      `;
     }
   } catch (error) {
     els.reputationResult.textContent = error.message;
