@@ -34,7 +34,8 @@ class RustChainClient:
         for base in self._urls():
             url = f"{base}{path}"
             try:
-                async with httpx.AsyncClient(verify=False, timeout=self.timeout_s) as client:
+                insecure = os.getenv("RUSTCHAIN_INSECURE", "").lower() in ("1", "true", "yes")
+                async with httpx.AsyncClient(verify=not insecure, timeout=self.timeout_s) as client:
                     r = await client.get(url, params=params)
                     r.raise_for_status()
                     return r.json()
