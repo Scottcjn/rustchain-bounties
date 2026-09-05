@@ -1,4 +1,4 @@
-PyGithub>=1.59.0
+PyGithub>=2.10.0
 anthropic>=1.0.0
 python-dotenv>=1.2.3
 asyncio
