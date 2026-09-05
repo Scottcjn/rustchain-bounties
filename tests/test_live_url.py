@@ -97,5 +97,50 @@ class FindTests(unittest.TestCase):
         self.assertEqual(lu.find_live_url(body)[1:], ("devto", "ok"))
 
 
+
+
+class DenylistAndCustomDomainTests(unittest.TestCase):
+    """2026-09-05: articles were being 'published' to repo files, gists and CDN
+    objects. Those must fail with a reason; a real blog on its own domain must
+    be held for a manual look rather than flatly rejected; Substack posts pass."""
+
+    def test_substack_post_is_allowlisted(self):
+        self.assertEqual(lu.classify_live_url("https://alice.substack.com/p/rustchain-on-a-g4"), "substack")
+        # profile / archive pages are not posts
+        self.assertIsNone(lu.classify_live_url("https://alice.substack.com/"))
+        self.assertIsNone(lu.classify_live_url("https://alice.substack.com/archive"))
+
+    def test_denied_hosts_carry_a_reason(self):
+        for url in (
+            "https://github.com/alice/pulse/blob/main/bounty-assets/ASSET_PACK.md",
+            "https://gist.github.com/alice/4deb02bcd9dca1db31cbf133064a153f",
+            "https://raw.githubusercontent.com/alice/pulse/main/README.md",
+            "https://cdn.shopify.com/s/files/1/1005/5290/0971/files/walkthrough.svg?v=1",
+            "https://d1abc.cloudfront.net/article.html",
+            "https://drive.google.com/file/d/abc/view",
+            "https://pastebin.com/raw/abc123",
+        ):
+            self.assertIsNone(lu.classify_live_url(url), url)
+            self.assertIsNotNone(lu.deny_reason(url), url)
+            self.assertIsNone(lu.classify_for_review(url), url)
+
+    def test_allowlisted_hosts_are_not_denied(self):
+        for url in ("https://dev.to/alice/rustchain-on-powerpc-1abc", "https://alice.hashnode.dev/x",
+                    "https://alice.substack.com/p/y", "https://hackaday.io/project/1234-z"):
+            self.assertIsNone(lu.deny_reason(url), url)
+
+    def test_custom_domain_blog_is_held_not_rejected(self):
+        self.assertEqual(lu.classify_for_review("https://blog.alice.example/posts/rustchain-g4"), lu.CUSTOM_DOMAIN)
+        # plain http is not good enough for a manual hold
+        self.assertIsNone(lu.classify_for_review("http://blog.alice.example/posts/rustchain-g4"))
+        # strict classifier still says no, so the auto path is unchanged
+        self.assertIsNone(lu.classify_live_url("https://blog.alice.example/posts/rustchain-g4"))
+
+    def test_find_live_url_contract_unchanged(self):
+        url, platform, reason = lu.find_live_url("Live-URL: https://gist.github.com/a/b")
+        self.assertEqual((url, platform, reason), ("https://gist.github.com/a/b", None, "rejected"))
+        self.assertIn("gist", lu.deny_reason(url))
+
+
 if __name__ == "__main__":
     unittest.main()
