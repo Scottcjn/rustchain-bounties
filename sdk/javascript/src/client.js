@@ -23,16 +23,16 @@ export class RustChainClient {
    * @param {object} [opts]
    * @param {string} [opts.baseUrl] - Node RPC base URL (defaults to https://50.28.86.131).
    * @param {number} [opts.timeoutMs] - Per-request timeout. Defaults to 30s.
-   * @param {boolean} [opts.rejectUnauthorized] - TLS strictness. The public
-   *   node uses a self-signed cert; the Python SDK pins it via
-   *   ~/.rustchain/node_cert.pem. For parity we default to `false` so the
-   *   SDK works out of the box; set `true` if you have a properly trusted cert.
+   * @param {boolean} [opts.rejectUnauthorized] - TLS strictness. Defaults to
+   *   `true`. Set to `false` (or set RUSTCHAIN_INSECURE=true) only if you trust
+   *   the network path to the node and accept self-signed / invalid certs.
    * @param {typeof fetch} [opts.fetch] - Inject a custom fetch (used by tests).
    */
   constructor(opts = {}) {
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    this.rejectUnauthorized = opts.rejectUnauthorized ?? false;
+    const _insecure = (typeof process !== "undefined" && process.env && process.env.RUSTCHAIN_INSECURE && process.env.RUSTCHAIN_INSECURE.toLowerCase() !== "false");
+    this.rejectUnauthorized = !(_insecure || opts.rejectUnauthorized === false);
     this._fetch = opts.fetch ?? globalThis.fetch;
 
     if (typeof this._fetch !== "function") {
