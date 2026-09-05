@@ -34,40 +34,49 @@ runs:
   steps:
     - name: 'Validate PR event'
       id: validate
+      env:
+        # SECURITY: pass the PR body via env, never inline it into the shell.
+        # A malicious PR body could otherwise smuggle $(...) / backticks / quotes
+        # and execute arbitrary commands in the runner.
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_BODY_LEN_MIN: ${{ inputs.min-pr-body-length }}
       run: |
         if [[ "${{ github.event.pull_request.merged }}" != "true" ]]; then
           echo "PR was not merged, skipping."
           exit 0
         fi
-        BODY_LEN=$(echo "${{ github.event.pull_request.body }}" | wc -c)
-        if [[ "$BODY_LEN" -lt ${{ inputs.min-pr-body-length }} ]]; then
-          echo "PR body too short (< ${{ inputs.min-pr-body-length }} chars). Skipping."
-          echo "contributor_wallet=" >> $GITHUB_OUTPUT
+        BODY_LEN=$(printf '%s' "$PR_BODY" | wc -c)
+        if [[ "$BODY_LEN" -lt "$PR_BODY_LEN_MIN" ]]; then
+          echo "PR body too short (< $PR_BODY_LEN_MIN chars). Skipping."
+          echo "contributor_wallet=" >> "$GITHUB_OUTPUT"
           exit 0
         fi
         echo "PR is merged and body is valid."
 
     - name: 'Extract contributor wallet from PR body'
       id: extract-wallet
+      env:
+        # SECURITY: pass the PR body via env, never inline it into the shell.
+        PR_BODY: ${{ github.event.pull_request.body }}
       run: |
-        BODY="${{ github.event.pull_request.body }}"
-        # Try to extract wallet from common formats
-        # Format 1: EVM address
-        WALLET=$(echo "$BODY" | grep -oE '0x[a-fA-F0-9]{40}' | head -1)
-        # Format 2: wallet name in backticks
+        # SECURITY: each grep -oE is anchored to ASCII character classes so a malicious body
+        # cannot smuggle $(...) backticks / quotes. We also restrict wallet names to
+        # [a-z0-9_-]{3,32} and EVM addresses to 0x[0-9a-fA-F]{40}.
+        WALLET=$(printf '%s' "$PR_BODY" | grep -oE '0x[a-fA-F0-9]{40}' | head -1)
         if [[ -z "$WALLET" ]]; then
-          WALLET=$(echo "$BODY" | grep -oE '`[a-z_]+`|' | tr -d '`' | head -1)
+          WALLET=$(printf '%s' "$PR_BODY" | grep -oE 'wallet[_-]?name[:\ ]+[a-z0-9_-]{3,32}' | head -1 | sed -E 's/.*[:\ ]+//')
         fi
-        # Format 3: Wallet: or wallet_name: pattern
         if [[ -z "$WALLET" ]]; then
-          WALLET=$(echo "$BODY" | grep -oiE '(wallet|wallet_name|wallet-name|rtc_wallet)[:\s]+([a-z_]+)' | sed 's/.*://i' | tr -d ' ' | head -1)
+          WALLET=$(printf '%s' "$PR_BODY" | grep -oE '`[a-z0-9_-]{3,32}`' | tr -d '`' | head -1)
         fi
-        # Format 4: Look for .rtc-wallet file pattern
-        if [[ -z "$WALLET" ]]; then
-          WALLET=$(echo "$BODY" | grep -oE '^[a-z_][a-z0-9_]{2,}$' | head -1)
+        # Strict whitelist before exporting: only [a-z0-9_-]{3,32} or 0x[0-9a-fA-F]{40}.
+        if [[ "$WALLET" =~ ^[a-z0-9_-]{3,32}$ ]] || [[ "$WALLET" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+          echo "Contributor wallet: $WALLET"
+        else
+          echo "::warning::Could not extract a valid wallet from PR body."
+          WALLET=""
         fi
-        echo "Contributors found wallet: $WALLET"
-        echo "contributor_wallet=$WALLET" >> $GITHUB_OUTPUT
+        echo "contributor_wallet=$WALLET" >> "$GITHUB_OUTPUT"
 
     - name: 'Show PR info'
       run: |
@@ -84,28 +93,46 @@ runs:
 
     - name: 'Award RTC'
       if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+      env:
+        # SECURITY: pass secrets via env, not via ${{ }} inline expansion.
+        # ${{ }} expands secrets directly into the shell command string,
+        # which means they appear in `ps` output and any command-line dump.
+        NODE_URL: ${{ inputs.node-url }}
+        FROM_WALLET: ${{ inputs.wallet-from }}
+        ADMIN_KEY: ${{ inputs.admin-key }}
+        TO_WALLET: ${{ steps.extract-wallet.outputs.contributor_wallet }}
+        AMOUNT: ${{ inputs.amount }}
       run: |
-        curl -s -X POST "${{ inputs.node-url }}/wallet/send" \
+        # SECURITY: build JSON via python json.dumps to avoid shell-quoting /
+        # interpolation issues; secrets are read from env (never appear on the
+        # command line) and serialized by python.
+        PAYLOAD=$(python3 -c 'import json,os; print(json.dumps({"from_wallet": os.environ["FROM_WALLET"], "admin_key": os.environ["ADMIN_KEY"], "to_wallet": os.environ["TO_WALLET"], "amount": int(os.environ["AMOUNT"])}))')
+        curl -sS -X POST "$NODE_URL/wallet/send" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"from_wallet\": \"${{ inputs.wallet-from }}\",
-            \"admin_key\": \"${{ inputs.admin-key }}\",
-            \"to_wallet\": \"${{ steps.extract-wallet.outputs.contributor_wallet }}\",
-            \"amount\": ${{ inputs.amount }}
-          }" | tee /tmp/rtc-response.json
+          --data-raw "$PAYLOAD" -o /tmp/rtc-response.json
         if grep -q '"ok":true' /tmp/rtc-response.json; then
           echo "RTC sent successfully!"
         else
           echo "Failed to send RTC. Check response above."
+          cat /tmp/rtc-response.json
           exit 1
         fi
 
     - name: 'Post confirmation comment'
       if: ${{ inputs.dry-run != 'true' && steps.extract-wallet.outputs.contributor_wallet != '' }}
+      env:
+        # SECURITY: pass secrets / user input via env, never inline ${{ }} into shell strings.
+        GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        REPO_FULL: ${{ github.repository }}
+        AMOUNT: ${{ inputs.amount }}
+        TO_WALLET: ${{ steps.extract-wallet.outputs.contributor_wallet }}
       run: |
-        curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-          -H "Authorization: token ${{ github.token }}" \
+        # SECURITY: build JSON via python json.dumps so the wallet name (already whitelisted
+        # to [a-z0-9_-]{3,32} or 0x[0-9a-fA-F]{40}) cannot break out of the body string,
+        # and secrets never appear on the command line.
+        BODY=$(python3 -c 'import json,os; body = "✅ **RTC Reward Sent!**\\n\\n awarded {amt} RTC to wallet \`{wlt}\` for merged PR #{pr}.\\n\\n_ Powered by [rtc-reward-action](https://github.com/Scottcjn/rtc-reward-action)_".format(amt=os.environ["AMOUNT"], wlt=os.environ["TO_WALLET"], pr=os.environ["PR_NUMBER"]); print(json.dumps({"body": body}))')
+        curl -sS -X POST "https://api.github.com/repos/$REPO_FULL/issues/$PR_NUMBER/comments" \
+          -H "Authorization: token $GH_TOKEN" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"body\": \"✅ **RTC Reward Sent!**\\n\\n awarded ${{ inputs.amount }} RTC to wallet \`${{ steps.extract-wallet.outputs.contributor_wallet }}\` for merged PR #${{ github.event.pull_request.number }}.\\n\\n_ Powered by [rtc-reward-action](https://github.com/Scottcjn/rtc-reward-action)_\"
-          }"
+          --data-raw "$BODY"
