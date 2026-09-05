@@ -555,6 +555,7 @@
       $("statusText").textContent = text;
     }
 
+    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
     function renderBars(miners) {
       const top = [...miners]
         .sort((a, b) => Number(b.antiquity_multiplier || 0) - Number(a.antiquity_multiplier || 0))
@@ -562,7 +563,7 @@
       const max = Math.max(1, ...top.map((m) => Number(m.antiquity_multiplier || 0)));
       $("minerChart").innerHTML = top.map((miner) => {
         const height = Math.max(8, Math.round((Number(miner.antiquity_multiplier || 0) / max) * 100));
-        return `<div class="bar" style="height:${height}%" title="${shortId(miner.miner)}: ${miner.antiquity_multiplier || 0}x"></div>`;
+        return `<div class="bar" style="height:${height}%" title="${esc(shortId(miner.miner))}: ${esc(miner.antiquity_multiplier || 0)}x"></div>`;
       }).join("");
     }
 
@@ -572,11 +573,11 @@
         .slice(0, 10)
         .map((miner) => `
           <tr>
-            <td class="mono" title="${String(miner.miner || "")}">${shortId(miner.miner)}</td>
-            <td><span class="chip">${miner.device_family || "Unknown"}</span></td>
-            <td>${miner.hardware_type || miner.device_arch || "Unknown"}</td>
-            <td class="mono">${miner.antiquity_multiplier || 0}x</td>
-            <td>${timeAgo(miner.last_attest)}</td>
+            <td class="mono" title="${esc(String(miner.miner || ""))}">${esc(shortId(miner.miner))}</td>
+            <td><span class="chip">${esc(miner.device_family || "Unknown")}</span></td>
+            <td>${esc(miner.hardware_type || miner.device_arch || "Unknown")}</td>
+            <td class="mono">${esc(miner.antiquity_multiplier || 0)}x</td>
+            <td>${esc(timeAgo(miner.last_attest))}</td>
           </tr>
         `);
       $("minerRows").innerHTML = rows.join("") || `<tr><td colspan="5">No miners returned.</td></tr>`;
@@ -591,10 +592,10 @@
         $("txList").innerHTML = transactions.transactions.slice(0, 8).map((tx) => `
           <div class="tx-row">
             <div class="tx-main">
-              <strong>${tx.status || tx.source || "transaction"}</strong>
-              <span class="mono">${fmt(tx.amount_rtc || 0)} RTC</span>
+              <strong>${esc(tx.status || tx.source || "transaction")}</strong>
+              <span class="mono">${esc(fmt(tx.amount_rtc || 0))} RTC</span>
             </div>
-            <div class="mini">${shortId(tx.tx_hash || tx.from || tx.miner_id || "ledger")} - ${timeAgo(tx.timestamp)}</div>
+            <div class="mini">${esc(shortId(tx.tx_hash || tx.from || tx.miner_id || "ledger"))} - ${esc(timeAgo(tx.timestamp))}</div>
           </div>
         `).join("") || `<div class="notice">Transaction endpoint returned no rows.</div>`;
         return;
@@ -646,7 +647,7 @@
         $("refreshText").textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
         $("healthChip").textContent = health.ok ? "Online" : "Degraded";
         $("healthChip").className = `chip ${health.ok ? "good" : "warn"}`;
-        $("healthBody").innerHTML = `Node version <span class="mono">${health.version || "unknown"}</span>. Uptime <span class="mono">${fmt(health.uptime_s)}</span>s. Database mode: <span class="mono">${health.db_rw ? "read/write" : "read-only"}</span>.`;
+        $("healthBody").innerHTML = `Node version <span class="mono">${esc(health.version || "unknown")}</span>. Uptime <span class="mono">${esc(fmt(health.uptime_s))}</span>s. Database mode: <span class="mono">${esc(health.db_rw ? "read/write" : "read-only")}</span>.`;
         $("apiBaseLabel").textContent = API_BASE;
 
         renderBars(miners);
