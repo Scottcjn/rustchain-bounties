@@ -236,19 +236,15 @@ class RustChainWallet:
     @staticmethod
     def _derive_public_key(private_key: bytes) -> bytes:
         """Derive public key from private key using Ed25519."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-            from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
-            import base64
-
-            # Use cryptography library if available
-            from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-            priv = Ed25519PrivateKey.from_private_bytes(private_key[:32])
-            pub = priv.public_key()
-            return pub.public_bytes(Encoding.Raw, PublicFormat.Raw)
-        except ImportError:
-            # Fallback: simple hash-based "public key" derivation
-            return _sha256d(b"pubkey" + private_key)[:32]
+        # SECURITY: this method requires the `cryptography` library. The previous
+        # `except ImportError` fallback derived the public key from a SHA-256 of the
+        # private key, which is incompatible with real Ed25519 and would silently
+        # produce wallets that no other RustChain client could verify against.
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+        priv = Ed25519PrivateKey.from_private_bytes(private_key[:32])
+        pub = priv.public_key()
+        return pub.public_bytes(Encoding.Raw, PublicFormat.Raw)
 
     @classmethod
     def create(cls, strength: int = 128) -> "RustChainWallet":
@@ -349,14 +345,36 @@ class RustChainWallet:
         Returns:
             The Ed25519 signature (64 bytes).
         """
-        try:
-            from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        # SECURITY: this method requires the `cryptography` library. The previous
+        # `except ImportError` fallback returned HMAC-SHA512 truncated to 64 bytes,
+        # which is NOT a valid Ed25519 signature. The server would reject any
+        # transfer signed this way, and worse, two clients on different machines
+        # (one with `cryptography` installed, one without) would produce divergent
+        # signatures for the same key, silently breaking interoperability.
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        priv = Ed25519PrivateKey.from_private_bytes(self._private_key[:32])
+        return priv.sign(message)
 
-            priv = Ed25519PrivateKey.from_private_bytes(self._private_key[:32])
-            return priv.sign(message)
-        except ImportError:
-            # Fallback: HMAC-based signature (not real Ed25519)
-            return _hmac_sha512(self._private_key, message)[:64]
+    def verify(self, message: bytes, signature: bytes) -> bool:
+        """
+        Verify an Ed25519 signature against this wallet's public key.
+
+        Args:
+            message: The original message bytes that were signed.
+            signature: The 64-byte Ed25519 signature to verify.
+
+        Returns:
+            True iff the signature is a valid Ed25519 signature over `message`
+            under this wallet's public key.
+        """
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+        from cryptography.exceptions import InvalidSignature
+        try:
+            pub = Ed25519PublicKey.from_public_bytes(self._public_key)
+            pub.verify(signature, message)
+            return True
+        except (InvalidSignature, ValueError, TypeError):
+            return False
 
     def sign_transfer(
         self, to_address: str, amount: int, fee: int = 0
