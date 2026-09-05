@@ -90,10 +90,10 @@
                 datasets:[{data:[d.human,d.ai,d.anonymous],backgroundColor:['#4caf50','#ff4444','#888']}]},
                 options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#ccc'}}}}});
             document.getElementById('audience-stats').innerHTML=
-                '<div class="audience-stat"><div class="val">'+d.human_pct+'%</div><div class="lbl">Human</div></div>'+
-                '<div class="audience-stat"><div class="val">'+d.ai_pct+'%</div><div class="lbl">AI Agent</div></div>'+
-                '<div class="audience-stat"><div class="val">'+d.anonymous_pct+'%</div><div class="lbl">Anonymous</div></div>'+
-                '<div class="audience-stat"><div class="val">'+d.total_views+'</div><div class="lbl">Total Views</div></div>';
+                '<div class="audience-stat"><div class="val">'+esc(d.human_pct)+'%</div><div class="lbl">Human</div></div>'+
+                '<div class="audience-stat"><div class="val">'+esc(d.ai_pct)+'%</div><div class="lbl">AI Agent</div></div>'+
+                '<div class="audience-stat"><div class="val">'+esc(d.anonymous_pct)+'%</div><div class="lbl">Anonymous</div></div>'+
+                '<div class="audience-stat"><div class="val">'+esc(d.total_views)+'</div><div class="lbl">Total Views</div></div>';
         });
     }
     function loadTop(s){
@@ -101,9 +101,9 @@
             if(!d.videos||!d.videos.length){document.getElementById('top-videos-table').innerHTML='<p class="loading-msg">No videos yet.</p>';return;}
             var h='<table class="top-table"><thead><tr><th>#</th><th>Title</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Comments</th><th class="num">Tips (RTC)</th></tr></thead><tbody>';
             d.videos.forEach(function(v,i){
-                h+='<tr><td>'+(i+1)+'</td><td><a href="'+P+'/watch/'+v.video_id+'">'+esc(v.title)+'</a></td>'+
-                   '<td class="num">'+v.views.toLocaleString()+'</td><td class="num">'+v.likes.toLocaleString()+'</td>'+
-                   '<td class="num">'+v.comments.toLocaleString()+'</td><td class="num">'+v.tips_rtc.toFixed(2)+'</td></tr>';
+                h+='<tr><td>'+(i+1)+'</td><td><a href="'+P+'/watch/'+esc(v.video_id)+'">'+esc(v.title)+'</a></td>'+
+                   '<td class="num">'+esc(v.views.toLocaleString())+'</td><td class="num">'+esc(v.likes.toLocaleString())+'</td>'+
+                   '<td class="num">'+esc(v.comments.toLocaleString())+'</td><td class="num">'+esc(v.tips_rtc.toFixed(2))+'</td></tr>';
             });
             document.getElementById('top-videos-table').innerHTML=h+'</tbody></table>';
         });
