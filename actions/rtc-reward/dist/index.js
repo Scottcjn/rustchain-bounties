@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+const DEFAULT_WALLET_PATTERN = 'RTC[0-9a-fA-F]{40}(?![0-9a-fA-F])';
+
 // ---- helpers ----
 
 function getInput(name, opts = {}) {
@@ -68,7 +70,7 @@ async function run() {
   const walletFrom = getInput('wallet-from', { required: true });
   const adminKey = getInput('admin-key', { required: true });
   const dryRun = getInput('dry-run') === 'true';
-  const walletPattern = getInput('wallet-pattern') || 'RTC[0-9a-fA-F]{36,44}';
+  const walletPattern = getInput('wallet-pattern') || DEFAULT_WALLET_PATTERN;
   const commentTemplate = getInput('comment-template') || [
     '## RTC Reward',
     '',
@@ -233,4 +235,8 @@ async function sendRTC(nodeUrl, from, to, amount, adminKey, memo) {
   return resp.json();
 }
 
-run();
+if (require.main === module) {
+  run();
+}
+
+module.exports = { DEFAULT_WALLET_PATTERN, extractWallet };

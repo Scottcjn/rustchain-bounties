@@ -43,7 +43,7 @@ Or the repo maintainer places a `.rtc-wallet` file in the repo root.
 | `wallet-from` | Yes | — | Source wallet for rewards |
 | `admin-key` | Yes | — | Admin key for signing |
 | `dry-run` | No | `false` | Log actions without sending transactions |
-| `wallet-pattern` | No | `RTC[0-9a-fA-F]{36,44}` | Regex to find wallet in PR body |
+| `wallet-pattern` | No | `RTC[0-9a-fA-F]{40}(?![0-9a-fA-F])` | Regex to find an exact RTC wallet in PR body |
 | `comment-template` | No | Built-in | Template for reward comment |
 
 ## Outputs
