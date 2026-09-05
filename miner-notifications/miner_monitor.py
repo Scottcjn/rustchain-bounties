@@ -130,8 +130,21 @@ class MinerMonitor:
         except (OSError, json.JSONDecodeError) as exc:
             logger.warning("state file unreadable; starting fresh: %s", exc)
             return
+        if not isinstance(data, dict):
+            logger.warning(
+                "state file must contain a JSON object; starting fresh (got %s)",
+                type(data).__name__,
+            )
+            return
+        miners_data = data.get("miners", {})
+        if not isinstance(miners_data, dict):
+            logger.warning(
+                "state file 'miners' must contain an object; starting fresh (got %s)",
+                type(miners_data).__name__,
+            )
+            return
         loaded = {}
-        for k, v in (data.get("miners") or {}).items():
+        for k, v in miners_data.items():
             try:
                 loaded[k] = MinerState.from_dict(v)
             except (KeyError, TypeError, ValueError) as exc:
