@@ -187,7 +187,15 @@ def transfer_rtc(vps_host: str, admin_key: str, to_wallet: str,
     still fail-safe even on a genuine transient failure: the idempotency
     key means at most one of the attempts can ever actually move funds.
     """
-    url = f"http://{vps_host}:{VPS_PORT}/wallet/transfer"
+    # SECURITY: the wallet-transfer endpoint carries X-Admin-Key and
+    # moves real RTC. Default to HTTPS so the admin key is not sent in the
+    # clear. Operators with a plaintext internal endpoint can force HTTP via
+    # RUSTCHAIN_PAYOUT_INSECURE=1 (a warning is emitted on every call).
+    insecure_payout = os.environ.get("RUSTCHAIN_PAYOUT_INSECURE") == "1"
+    scheme = "http" if insecure_payout else "https"
+    if insecure_payout:
+        print("::warning::RUSTCHAIN_PAYOUT_INSECURE=1 — admin key will be sent in plaintext over HTTP", flush=True)
+    url = f"{scheme}://{vps_host}:{VPS_PORT}/wallet/transfer"
     payload = {
         "from_miner": FROM_WALLET,
         "to_miner": to_wallet,
