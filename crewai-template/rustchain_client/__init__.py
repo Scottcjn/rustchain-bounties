@@ -16,9 +16,25 @@ class RustChainClient:
             "https://50.28.86.131"
         )
         self.session = requests.Session()
-        # Disable SSL verification for IP-based URLs with certificate mismatch
-        if "50.28.86.131" in self.node_url:
+        # SECURITY (C-1): TLS must be verified by default. The previous code
+        # silently disabled cert verification whenever the URL contained the
+        # string "50.28.86.131", which is exactly the case an attacker would
+        # abuse (any URL containing the substring, including
+        # "https://evil.example/?x=50.28.86.131", would also trip the bypass
+        # and would defeat MITM protection on every call). Operators who need
+        # to use a self-signed cert can now opt in explicitly via the
+        # RUSTCHAIN_INSECURE_SKIP_TLS_VERIFY env var, which is logged at
+        # startup and never triggered by URL content.
+        if os.environ.get("RUSTCHAIN_INSECURE_SKIP_TLS_VERIFY") == "1":
+            import warnings
+            warnings.warn(
+                "RUSTCHAIN_INSECURE_SKIP_TLS_VERIFY=1 — TLS certificate "  # —
+                "verification is disabled. This is unsafe in production.",
+                RuntimeWarning,
+            )
             self.session.verify = False
+        else:
+            self.session.verify = True
     
     def _get(self, endpoint: str, params: dict = None) -> dict:
         """Make GET request to RustChain node"""
