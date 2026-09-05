@@ -547,8 +547,8 @@
             // Update cards
             document.getElementById('epoch-number').textContent = epoch.epoch;
             document.getElementById('miner-count').textContent = miners.length;
-            document.getElementById('slot-number').innerHTML = `${epoch.slot}<span class="unit">/144</span>`;
-            document.getElementById('uptime').innerHTML = `${formatUptime(health.uptime_s)}<span class="unit">h</span>`;
+            document.getElementById('slot-number').innerHTML = `${escapeHtml(epoch.slot)}<span class="unit">/144</span>`;
+            document.getElementById('uptime').innerHTML = `${escapeHtml(formatUptime(health.uptime_s))}<span class="unit">h</span>`;
 
             // Update miner display
             document.getElementById('miner-count-display').textContent = `${miners.length} miners`;
@@ -630,6 +630,19 @@
 
         // Auto-refresh every 60 seconds
         setInterval(loadWidget, REFRESH_INTERVAL);
-    </script>
+    
+        // SECURITY: defense-in-depth HTML escape for values interpolated into
+        // innerHTML. epoch.slot and formatUptime(health.uptime_s) are both
+        // expected to produce plain numbers, but a future API change that
+        // returns a string would otherwise be a stored XSS sink.
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+</script>
 </body>
 </html>
