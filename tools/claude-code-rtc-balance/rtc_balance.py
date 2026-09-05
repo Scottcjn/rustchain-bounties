@@ -16,19 +16,34 @@ import json
 import ssl
 from typing import Dict, Optional, Any
 
-# Handle self-signed cert on 50.28.86.131
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+# SECURITY: TLS verification is enabled by default. The previous code created a
+# custom SSL_CTX that disabled hostname check + cert verification globally so
+# that any HTTP call in the process would accept any certificate. That defeats
+# MITM protection on balance queries and is not what the comment claimed
+# (cert verification is normal for the RustChain node which uses a public CA).
+# Operators who need to point at a node with a self-signed cert can now opt
+# in explicitly via `--insecure` (URL is also restricted to a single host).
 
-NODE_URL = "https://50.28.86.131"
+import argparse
+
+DEFAULT_NODE_URL = "https://50.28.86.131"
+NODE_URL = os.environ.get("RTC_NODE_URL", DEFAULT_NODE_URL)
 RTC_USD = 0.10
 
 
-def query(url: str, timeout: int = 10) -> Optional[dict]:
+def _build_ssl_context(insecure: bool):
+    if insecure:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
+    return ssl.create_default_context()
+
+
+def query(url: str, timeout: int = 10, *, insecure: bool = False) -> Optional[dict]:
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "RTC-Balance-CLI/1.0"})
-        with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as resp:
+        with urllib.request.urlopen(req, timeout=timeout, context=_build_ssl_context(insecure)) as resp:
             return json.loads(resp.read().decode())
     except Exception:
         return None
@@ -100,23 +115,41 @@ def format_balance(balance: float) -> str:
         return "N/A"
 
 
+def _validate_wallet(wallet: str) -> str:
+    # Reject anything that isn't a plain wallet token (alnum + dash/underscore),
+    # so a value like `foo&extra=1` can't smuggle query parameters into the URL.
+    import re
+    if not re.match(r"^[A-Za-z0-9_-]{1,64}$", wallet):
+        raise SystemExit("Invalid wallet name; expected [A-Za-z0-9_-]{1,64}") 
+    return wallet
+
+
 def main():
-    if len(sys.argv) < 2:
-        wallet = input("Enter wallet name: ").strip()
-        if not wallet:
-            print("Usage: rtc_balance.py <wallet-name>")
-            sys.exit(1)
-    else:
-        wallet = sys.argv[1].strip()
+    parser = argparse.ArgumentParser(description="Query RustChain wallet balance.")
+    parser.add_argument("wallet", nargs="?", help="Wallet name") 
+    parser.add_argument("--node-url", default=NODE_URL, help="Override RustChain node URL")
+    parser.add_argument("--insecure", action="store_true",
+                        help="Disable TLS certificate verification (use only for self-signed test nodes)")
+    args = parser.parse_args()
+
+    if not args.wallet:
+        args.wallet = input("Enter wallet name: ").strip()
+    if not args.wallet:
+        parser.print_help()
+        sys.exit(1)
+
+    wallet = _validate_wallet(args.wallet.strip())
+    node_url = args.node_url.rstrip("/")
 
     # Health check
-    health = query(f"{NODE_URL}/health")
+    health = query(f"{node_url}/health", insecure=args.insecure)
     if health is None:
         print(f"Error: Node unreachable at {NODE_URL}", file=sys.stderr)
         sys.exit(1)
 
     # Balance
-    balance_data = query(f"{NODE_URL}/wallet/balance?miner_id={wallet}")
+    from urllib.parse import urlencode
+    balance_data = query(f"{node_url}/wallet/balance?{urlencode({'miner_id': wallet})}", insecure=args.insecure)
     if balance_data is None:
         print(f"Error: Failed to fetch wallet '{wallet}'", file=sys.stderr)
         sys.exit(1)
@@ -129,7 +162,7 @@ def main():
 
     # Epoch (optional, non-fatal)
     epoch_info = ""
-    epoch_data = query(f"{NODE_URL}/epoch")
+    epoch_data = query(f"{node_url}/epoch", insecure=args.insecure)
     if epoch_data:
         epoch = extract_epoch(epoch_data)
         miners = extract_miners(epoch_data)
