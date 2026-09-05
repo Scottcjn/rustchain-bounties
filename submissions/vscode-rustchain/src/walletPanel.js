@@ -113,6 +113,8 @@ class WalletPanel {
   <p class="subtitle">Monitor your wallet, miner status, and network activity</p>
   <div id="content" class="loading">Loading dashboard...</div>
   <script>
+    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
     (function() {
       const vscode = acquireVsCodeApi();
       window.addEventListener('message', event => {
@@ -214,7 +216,7 @@ class WalletPanel {
 
         const minerEl = document.getElementById('miner-status');
         const active = d.miner.status === 'active' || d.miner.status === 'mining';
-        minerEl.innerHTML = '<span class="badge ' + (active ? 'badge-active' : 'badge-offline') + '">' + d.miner.status + '</span>';
+        minerEl.innerHTML = '<span class="badge ' + (active ? 'badge-active' : 'badge-offline') + '">' + esc(d.miner.status) + '</span>';
         document.getElementById('miner-hashrate').textContent = 'Hashrate: ' + (d.miner.hashrate || '—') + ' | Workers: ' + (d.miner.activeWorkers || 0);
 
         document.getElementById('epoch').textContent = d.network.epoch;
@@ -225,7 +227,7 @@ class WalletPanel {
         const tbody = document.getElementById('tx-body');
         if (d.transactions && d.transactions.length > 0) {
           tbody.innerHTML = d.transactions.map(tx =>
-            '<tr><td>' + (tx.hash || '—').substring(0, 16) + '...</td><td>' + (tx.amount || '—') + '</td><td>' + (tx.type || '—') + '</td><td>' + (tx.timestamp || '—') + '</td></tr>'
+            '<tr><td>' + esc(String(tx.hash || '—').substring(0, 16)) + '...</td><td>' + esc(tx.amount || '—') + '</td><td>' + esc(tx.type || '—') + '</td><td>' + esc(tx.timestamp || '—') + '</td></tr>'
           ).join('');
         } else {
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">No recent transactions</td></tr>';
