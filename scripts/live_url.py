@@ -58,7 +58,70 @@ _ALLOWLIST: list[tuple[str, callable, re.Pattern]] = [
     ("medium",
      lambda h: h in ("medium.com", "www.medium.com") or h.endswith(".medium.com"),
      re.compile(r"^/.+")),
+    ("substack",
+     lambda h: h.endswith(".substack.com") and h.count(".") == 2,
+     re.compile(r"^/p/[^/]+/?$")),
 ]
+
+# Hosts that are never "publication" for a distribution bounty, each with the
+# reason we tell the claimant. These are the places the 2026-09-05 review found
+# articles actually living: repo files, gists, issues and raw CDN objects. They
+# are fine as supporting links inside an article; they are not where it lives.
+_DENYLIST: list[tuple[callable, str]] = [
+    (lambda h: h in ("github.com", "www.github.com"),
+     "a GitHub repo, README, issue or wiki page is supporting material, not publication"),
+    (lambda h: h == "gist.github.com",
+     "a gist is a file, not a published article"),
+    (lambda h: h == "raw.githubusercontent.com" or h.endswith(".githubusercontent.com"),
+     "a raw GitHub file is not a published article"),
+    (lambda h: h == "cdn.shopify.com" or h.endswith(".cloudfront.net") or h.endswith(".amazonaws.com"),
+     "a file on a CDN has no byline, no page and no readers"),
+    (lambda h: h in ("drive.google.com", "docs.google.com", "dropbox.com", "www.dropbox.com"),
+     "a shared drive document is not publication"),
+    (lambda h: h in ("pastebin.com", "paste.ee", "hastebin.com"),
+     "a paste site is not publication"),
+]
+
+# Returned by classify_for_review() for an https URL on a host that is neither
+# allowlisted nor denied: a personal blog on its own domain. A maintainer
+# confirms the byline and that the page is indexed, once, then it counts.
+CUSTOM_DOMAIN = "custom-domain"
+
+
+def _host_of(url: str) -> str | None:
+    try:
+        p = urlparse(url.strip())
+    except ValueError:
+        return None
+    if p.scheme not in ("http", "https") or not p.netloc:
+        return None
+    return p.netloc.lower().split("@")[-1].split(":")[0]
+
+
+def deny_reason(url: str) -> str | None:
+    """Why this URL can never be a distribution Live-URL, or None if it is not denied."""
+    host = _host_of(url)
+    if host is None:
+        return "not an http(s) URL"
+    for host_bad, reason in _DENYLIST:
+        if host_bad(host):
+            return reason
+    return None
+
+
+def classify_for_review(url: str) -> str | None:
+    """Like classify_live_url(), plus CUSTOM_DOMAIN for an https URL on an unknown
+    host that is not denied. CUSTOM_DOMAIN means 'hold for one manual check', not
+    'accepted'; the strict classify_live_url() is unchanged for the auto path."""
+    platform = classify_live_url(url)
+    if platform:
+        return platform
+    host = _host_of(url)
+    if host is None or deny_reason(url):
+        return None
+    if not url.strip().lower().startswith("https://"):
+        return None
+    return CUSTOM_DOMAIN
 
 
 def classify_live_url(url: str) -> str | None:
@@ -96,7 +159,11 @@ def find_live_url(body: str) -> tuple[str | None, str | None, str]:
       "ok"       - an allowlisted Live-URL was found (url and platform set)
       "missing"  - no `Live-URL:` line at all (url None)
       "rejected" - a Live-URL line exists but no value is on the allowlist
-                   (url is the first offending value, platform None)
+                   (url is the first offending value, platform None). Callers
+                   that talk to the claimant should pass that url to
+                   deny_reason() for the human explanation, and to
+                   classify_for_review() to see whether it is a custom-domain
+                   blog worth a manual look rather than a flat rejection.
     """
     urls = extract_live_urls(body)
     if not urls:
@@ -111,5 +178,7 @@ def find_live_url(body: str) -> tuple[str | None, str | None, str]:
 ALLOWED_HOSTS_HUMAN = (
     "bottube.ai/watch/…, x.com or twitter.com/<user>/status/<id>, "
     "youtube.com/watch?v=… or /shorts/…, youtu.be/…, hackaday.io/project/…, "
-    "dev.to/<user>/<slug>, <you>.hashnode.dev/…, medium.com/…"
+    "dev.to/<user>/<slug>, <you>.hashnode.dev/…, medium.com/…, "
+    "<you>.substack.com/p/<slug>, or your own blog on your own domain (manual check). "
+    "Not publication: github.com, gists, raw/CDN files, Drive, pastebins."
 )

@@ -51,7 +51,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from live_url import ALLOWED_HOSTS_HUMAN, find_live_url  # noqa: E402
+from live_url import ALLOWED_HOSTS_HUMAN, CUSTOM_DOMAIN, classify_for_review, deny_reason, find_live_url  # noqa: E402
 
 REPO = os.environ.get("GH_REPO", "Scottcjn/rustchain-bounties")
 CLAIM_DAYS = int(os.environ.get("CLAIM_DAYS", "7"))
@@ -135,9 +135,26 @@ def live_url_gate(num, author, body, labels) -> bool:
         lead = ("this bounty pays for something that lives **off GitHub** — a post, a "
                 "video, an article — so a claim here needs one extra line that tells us "
                 "where it is.")
+    elif classify_for_review(url) == CUSTOM_DOMAIN:
+        # A blog on the claimant's own domain: not auto-verifiable, not denied.
+        # Record nothing yet, but say so plainly and tag it for one manual look.
+        gh(["issue", "comment", str(num), "-R", REPO, "--body",
+            f"@{author} — `{url}` looks like your own site rather than one of the "
+            f"platforms the bot can verify on its own, so I have flagged it for a "
+            f"maintainer to confirm the byline and that the page is indexed. No "
+            f"action needed from you unless we ask; that check happens once."], None)
+        gh(["issue", "edit", str(num), "-R", REPO, "--add-label", "live-url-manual-review"], None)
+        print(f"live-url custom-domain; held for manual review: {url}")
+        return False
     else:
-        lead = (f"thank you for including a link — but `{url}` is not on a host we can "
-                "verify, so I could not record the claim yet.")
+        why = deny_reason(url)
+        if why:
+            lead = (f"thank you for including a link — but `{url}` cannot count as the "
+                    f"published piece: {why}. It is welcome as a supporting link *inside* "
+                    "the article; the Live-URL has to be where readers find it.")
+        else:
+            lead = (f"thank you for including a link — but `{url}` is not on a host we can "
+                    "verify, so I could not record the claim yet.")
     gh(["issue", "comment", str(num), "-R", REPO, "--body",
         f"@{author} — {lead} Please re-comment with a line like "
         f"`Live-URL: https://…` pointing at the published piece itself (not a draft, "
