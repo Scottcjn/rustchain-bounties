@@ -501,12 +501,12 @@
                 minersTable.innerHTML = data.miners.list.map(miner => `
                     <tr>
                         <td>#${miner.rank}</td>
-                        <td class="address">${miner.address}</td>
+                        <td class="address">${escapeHtml(miner.address)}</td>
                         <td>${miner.blocks?.toLocaleString() || 0}</td>
                         <td>${miner.reward?.toLocaleString() || 0}</td>
                         <td>
                             <span class="badge ${miner.status === 'active' ? 'badge-success' : 'badge-warning'}">
-                                ${miner.status || 'unknown'}
+                                ${escapeHtml(miner.status || 'unknown')}
                             </span>
                         </td>
                     </tr>
@@ -518,13 +518,13 @@
             if (data.transactions.list && data.transactions.list.length > 0) {
                 txTable.innerHTML = data.transactions.list.map(tx => `
                     <tr>
-                        <td class="address">${tx.hash}</td>
-                        <td class="address">${tx.from}</td>
-                        <td class="address">${tx.to}</td>
-                        <td>${tx.amount}</td>
+                        <td class="address">${escapeHtml(tx.hash)}</td>
+                        <td class="address">${escapeHtml(tx.from)}</td>
+                        <td class="address">${escapeHtml(tx.to)}</td>
+                        <td>${escapeHtml(tx.amount)}</td>
                         <td>
                             <span class="badge ${tx.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">
-                                ${tx.status}
+                                ${escapeHtml(tx.status)}
                             </span>
                         </td>
                     </tr>
@@ -580,7 +580,7 @@
                 console.error('Refresh failed:', error);
                 document.getElementById('errorContainer').innerHTML = `
                     <div class="error-message">
-                        ⚠️ Failed to refresh data: ${error.message}
+                        ⚠️ Failed to refresh data: ${escapeHtml(error.message)}
                     </div>
                 `;
             } finally {
@@ -596,6 +596,19 @@
             // Auto-refresh every 30 seconds
             setInterval(refreshData, 30000);
         });
-    </script>
+    
+        // SECURITY: HTML-escape any value that originated from the API before
+        // it is dropped into an innerHTML template. The /rpc response is
+        // expected to be JSON, but a future compromise of a node or a
+        // downstream proxy could return strings containing HTML.
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+</script>
 </body>
 </html>
