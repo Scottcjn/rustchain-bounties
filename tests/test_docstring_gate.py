@@ -134,3 +134,62 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+
+class VerifiedTransitionTests(unittest.TestCase):
+    def setUp(self):
+        self.saved = {
+            name: getattr(dg, name)
+            for name in ("NUM", "gh", "gh_raw", "docstring_rtc_this_week", "add_labels")
+        }
+        dg.NUM = "99999"
+
+        def fake_gh(args, default=None, strict=False):
+            if args[:2] == ["issue", "view"]:
+                return {
+                    "title": "Docstring bounty claim",
+                    "body": "https://github.com/Scottcjn/Rustchain/pull/123",
+                    "labels": [], "author": {"login": "alice"}, "state": "OPEN",
+                }
+            if args[:2] == ["pr", "view"]:
+                return {
+                    "state": "MERGED", "additions": 1, "deletions": 0,
+                    "files": [], "author": {"login": "alice"},
+                    "mergedAt": "2026-08-14T00:00:00Z",
+                }
+            return default
+
+        dg.gh = fake_gh
+        dg.gh_raw = lambda args: '+++ b/x.py\n+    """Documented."""\n'
+        dg.docstring_rtc_this_week = lambda author: 0.0
+
+    def tearDown(self):
+        for name, value in self.saved.items():
+            setattr(dg, name, value)
+
+    def test_comment_failure_writes_no_terminal_labels(self):
+        labels = []
+        def fail_comment(args):
+            if args[:2] == ["issue", "comment"]:
+                raise dg.GhError("simulated comment failure")
+            return '+++ b/x.py\n+    """Documented."""\n'
+        dg.gh_raw = fail_comment
+        dg.add_labels = lambda *names: labels.extend(names) or True
+
+        with self.assertRaises(dg.GhError):
+            dg.main()
+        self.assertEqual(labels, [])
+
+    def test_label_failure_is_not_reported_as_success(self):
+        comments = []
+        def record_comment(args):
+            if args[:2] == ["issue", "comment"]:
+                comments.append(args)
+                return ""
+            return '+++ b/x.py\n+    """Documented."""\n'
+        dg.gh_raw = record_comment
+        dg.add_labels = lambda *names: False
+
+        self.assertEqual(dg.main(), 1)
+        self.assertEqual(len(comments), 1)
+        self.assertIn("rtc-payout-amount: 0.01", comments[0][-1])
