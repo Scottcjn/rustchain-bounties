@@ -23,6 +23,7 @@ import json
 import re
 from pathlib import Path
 from typing import Dict, List, Any
+import os
 import requests
 
 API_BASE = "https://50.28.86.131"
@@ -178,7 +179,8 @@ def fetch_onchain_ages() -> Dict[str, str]:
     """Fetch all miner info once and return a map of miner -> age_string."""
     ages = {}
     try:
-        resp = requests.get(f"{API_BASE}/api/miners", verify=False, timeout=10)
+        _insecure = os.getenv("RUSTCHAIN_INSECURE", "").lower() in ("1", "true", "yes")
+        resp = requests.get(f"{API_BASE}/api/miners", verify=not _insecure, timeout=10)
         if resp.status_code == 200:
             miners = resp.json()
             now = dt.datetime.now(dt.UTC)
