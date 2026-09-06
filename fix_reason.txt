@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "I picked RustChain because it was one of the first Elyan Labs repos I came across in a search. The vintage-hardware angle intrigued me, and I wanted to try my hand at working with old hardware.
+I nearly left when I realized the bounty was lower than expected. One thing you could change that would have made me start with this repo is if it had a higher bounty." > fix_reason.txt
