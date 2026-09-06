@@ -312,7 +312,21 @@ def main():
                 f"Paying the verified number. If you think the gate has miscounted, say so and a "
                 f"human will check — miscounts are usually arithmetic, not bad faith.")
 
-    add_labels("bounty-eligible", "docstring-verified")
+    # Fail closed (#16471, reported by @antoleod 2026-09-04): add_labels() reports
+    # REST label failures, but this caller used to discard that and announce
+    # "verified" anyway. The payout sweep keys off the labels, so a claim could be
+    # publicly verified and never paid. Hold instead, and exit non-zero so the run
+    # is red and the next sweep retries.
+    if not add_labels("bounty-eligible", "docstring-verified"):
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"⏸️ 🤖 **Docstring gate: checks passed, but the payable labels could not be applied** "
+            f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
+            f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
+            f"sweep applies `bounty-eligible` + `docstring-verified`. Nothing is wrong with the "
+            f"claim; the gate is refusing to say 'verified' about a state it did not create."], None)
+        add_labels("needs-human")
+        print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified")
+        return 1
     gh(["issue", "comment", NUM, "-R", REPO, "--body",
         f"✅ 🤖 **Docstring gate: verified.**\n\n"
         f"- PR {pr_repo}#{pr_num} is **merged**\n"
