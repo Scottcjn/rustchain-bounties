@@ -1,8 +1,22 @@
 {
-  "updated_at": "2026-09-05T23:38:36Z",
+  "updated_at": "2026-09-06T00:02:31Z",
   "repo": "Scottcjn/rustchain-bounties",
-  "total": 803,
+  "total": 804,
   "bounties": [
+    {
+      "id": 16863,
+      "title": "[MICRO-BOUNTY: 0.1 RTC] Why did you choose to work on an Elyan Labs repo?",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16863",
+      "state": "open",
+      "created_at": "2026-09-05T23:48:51Z",
+      "updated_at": "2026-09-05T23:59:16Z",
+      "comments": 6,
+      "author": "Scottcjn",
+      "labels": [
+        "bounty"
+      ],
+      "agents_welcome": true
+    },
     {
       "id": 16859,
       "title": "Fix #14476: Claim: [BOUNTY: 2 RTC] Download and test the RustChain miner",
@@ -465,8 +479,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16497",
       "state": "open",
       "created_at": "2026-08-15T16:52:24Z",
-      "updated_at": "2026-09-05T23:38:19Z",
-      "comments": 48,
+      "updated_at": "2026-09-05T23:58:10Z",
+      "comments": 50,
       "author": "Scottcjn",
       "labels": [],
       "agents_welcome": false
@@ -515,8 +529,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/16471",
       "state": "open",
       "created_at": "2026-08-10T17:31:52Z",
-      "updated_at": "2026-09-04T21:00:26Z",
-      "comments": 60,
+      "updated_at": "2026-09-05T23:58:08Z",
+      "comments": 61,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -4653,8 +4667,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/13224",
       "state": "open",
       "created_at": "2026-06-06T15:41:33Z",
-      "updated_at": "2026-09-02T15:10:23Z",
-      "comments": 18,
+      "updated_at": "2026-09-05T23:54:12Z",
+      "comments": 19,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -4783,8 +4797,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/12444",
       "state": "open",
       "created_at": "2026-05-27T21:56:08Z",
-      "updated_at": "2026-08-29T01:39:30Z",
-      "comments": 62,
+      "updated_at": "2026-09-05T23:58:11Z",
+      "comments": 61,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -8565,8 +8579,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/727",
       "state": "open",
       "created_at": "2026-03-07T00:15:26Z",
-      "updated_at": "2026-08-31T06:12:52Z",
-      "comments": 50,
+      "updated_at": "2026-09-05T23:39:15Z",
+      "comments": 51,
       "author": "Scottcjn",
       "labels": [
         "bounty",
@@ -9652,8 +9666,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/282",
       "state": "open",
       "created_at": "2026-02-17T20:14:47Z",
-      "updated_at": "2026-08-31T13:07:30Z",
-      "comments": 51,
+      "updated_at": "2026-09-05T23:39:12Z",
+      "comments": 52,
       "author": "Scottcjn",
       "labels": [
         "bounty"
@@ -9936,8 +9950,8 @@
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/100",
       "state": "open",
       "created_at": "2026-02-12T03:04:09Z",
-      "updated_at": "2026-09-01T16:56:16Z",
-      "comments": 124,
+      "updated_at": "2026-09-05T23:58:13Z",
+      "comments": 125,
       "author": "Scottcjn",
       "labels": [
         "bounty",
