@@ -1,14 +1,27 @@
 name: Verify Bounty Claims
 
 on:
+  issue_comment:
+    types: [created]
   schedule:
     - cron: '0 */6 * * *'  # Every 6 hours
   workflow_dispatch:        # Manual trigger
 
 jobs:
   verify:
+    if: >-
+      github.event_name != 'issue_comment' ||
+      (github.event.issue.state == 'open' &&
+       github.event.comment.user.login != github.repository_owner &&
+       github.event.comment.user.login != 'github-actions[bot]' &&
+       (contains(github.event.comment.body, 'claim') ||
+        contains(github.event.comment.body, 'wallet:') ||
+        contains(github.event.comment.body, 'stars:') ||
+        contains(github.event.comment.body, 'github:') ||
+        contains(github.event.comment.body, 'live-url:')))
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write        # Post/update comments on issues
     steps:
       - uses: actions/checkout@v7
@@ -24,6 +37,7 @@ jobs:
         run: python scripts/verify_bounties.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
           # The Actions app token gets 403 "Resource not accessible by
           # integration" from /stargazers on every repo; the star sweep needs
           # a user PAT (Metadata: read is enough). Comments still go out on
