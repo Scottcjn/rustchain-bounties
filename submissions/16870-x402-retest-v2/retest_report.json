@@ -1,0 +1,279 @@
+{
+  "matrix": {
+    "matrix_results": [
+      {
+        "row": 1,
+        "name": "x402_info",
+        "url": "https://bottube.ai/api/x402/info",
+        "method": "GET",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "latency_ms": 155.82,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "586",
+          "Connection": "close",
+          "Set-Cookie": "_bt_vid=bf281521cc22897b3302c8075a6f1b2d; Expires=Mon, 06 Sep 2027 02:11:29 GMT; Max-Age=31536000; Secure; HttpOnly; Path=/; SameSite=Lax",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, X-API-Key, Authorization",
+          "Vary": "Cookie"
+        },
+        "body_snippet": "{\"facilitator\":\"https://x402-facilitator.cdp.coinbase.com\",\"network\":\"eip155:8453\",\"payment_token\":\"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\"premium_endpoints\":[{\"path\":\"/api/premium/videos\",\"price_usdc\":\"10000\"},{\"path\":\"/api/premium/analytics/<agent>\",\"price_usdc\":\"10000\"},{\"path\":\"/api/premiu",
+        "description": "Capability discovery endpoint (replaces deprecated /status)"
+      },
+      {
+        "row": 2,
+        "name": "premium_videos",
+        "url": "https://bottube.ai/api/premium/videos",
+        "method": "GET",
+        "expected_status": 402,
+        "actual_status": 402,
+        "passed": true,
+        "latency_ms": 131.88,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "539",
+          "Connection": "close",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+        },
+        "body_snippet": "{\"x402Version\": 1, \"accepts\": [{\"scheme\": \"exact\", \"network\": \"base\", \"maxAmountRequired\": \"10000000000\", \"resource\": \"http://bottube.ai/api/premium/videos\", \"description\": \"Bulk video data export\", \"mimeType\": \"\", \"outputSchema\": {\"input\": {\"type\": \"http\", \"method\": \"GET\", \"discoverable\": true}, \"o",
+        "description": "Bulk video data export paywall challenge"
+      },
+      {
+        "row": 3,
+        "name": "premium_analytics",
+        "url": "https://bottube.ai/api/premium/analytics/sophia-elya",
+        "method": "GET",
+        "expected_status": 402,
+        "actual_status": 402,
+        "passed": true,
+        "latency_ms": 126.92,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "552",
+          "Connection": "close",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+        },
+        "body_snippet": "{\"x402Version\": 1, \"accepts\": [{\"scheme\": \"exact\", \"network\": \"base\", \"maxAmountRequired\": \"10000000000\", \"resource\": \"http://bottube.ai/api/premium/analytics/sophia-elya\", \"description\": \"Deep agent analytics\", \"mimeType\": \"\", \"outputSchema\": {\"input\": {\"type\": \"http\", \"method\": \"GET\", \"discoverabl",
+        "description": "Agent performance metrics paywall challenge"
+      },
+      {
+        "row": 4,
+        "name": "premium_trending_export",
+        "url": "https://bottube.ai/api/premium/trending/export",
+        "method": "GET",
+        "expected_status": 402,
+        "actual_status": 402,
+        "passed": true,
+        "latency_ms": 129.39,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "545",
+          "Connection": "close",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+        },
+        "body_snippet": "{\"x402Version\": 1, \"accepts\": [{\"scheme\": \"exact\", \"network\": \"base\", \"maxAmountRequired\": \"5000000000\", \"resource\": \"http://bottube.ai/api/premium/trending/export\", \"description\": \"Trending data export\", \"mimeType\": \"\", \"outputSchema\": {\"input\": {\"type\": \"http\", \"method\": \"GET\", \"discoverable\": tru",
+        "description": "Trending video export paywall challenge"
+      },
+      {
+        "row": 5,
+        "name": "coinbase_wallet_link_unauthenticated",
+        "url": "https://bottube.ai/api/agents/me/coinbase-wallet",
+        "method": "POST",
+        "expected_status": 401,
+        "actual_status": 401,
+        "passed": true,
+        "latency_ms": 131.21,
+        "headers": {
+          "Server": "nginx/1.18.0 (Ubuntu)",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "29",
+          "Connection": "close",
+          "Set-Cookie": "_bt_vid=2860e3dde59428e5cb8a37dbc0857783; Expires=Mon, 06 Sep 2027 02:11:29 GMT; Max-Age=31536000; Secure; HttpOnly; Path=/; SameSite=Lax",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, X-API-Key, Authorization",
+          "Vary": "Cookie"
+        },
+        "body_snippet": "{\"error\":\"API key required\"}\n",
+        "description": "Agent wallet linking without API key"
+      },
+      {
+        "row": 6,
+        "name": "wallet_swap_info",
+        "url": "https://rustchain.org/wallet/swap-info",
+        "method": "GET",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true,
+        "latency_ms": 130.13,
+        "headers": {
+          "Server": "nginx",
+          "Date": "Sun, 06 Sep 2026 02:11:29 GMT",
+          "Content-Type": "application/json",
+          "Content-Length": "381",
+          "Connection": "close",
+          "X-Request-Id": "6b54b07c34ae4bf090a5995befdaf313",
+          "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https://img.shields.io; connect-src 'self' https://raw.githubusercontent.com",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+          "X-Content-Type-Options": "nosniff",
+          "X-Frame-Options": "DENY",
+          "X-RustChain": "Proof-of-Antiquity",
+          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Key"
+        },
+        "body_snippet": "{\"aerodrome_pool\":\"0x4C2A0b915279f0C22EA766D58F9B815Ded2d2A3F\",\"network\":\"Base (eip155:8453)\",\"reference_price_usd\":0.1,\"swap_url\":\"https://aerodrome.finance/swap?from=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&to=0x5683C10596AaA09AD7F4eF13CAB94b9b74A669c6\",\"usdc_contract\":\"0x833589fCD6eDb6E08f4c7C3",
+        "description": "Aerodrome DEX swap metadata and pool address"
+      },
+      {
+        "row": 7,
+        "name": "beacon_endpoints_unmounted",
+        "url": "https://rustchain.org/beacon/api/x402/status",
+        "method": "GET",
+        "expected_status": 404,
+        "actual_status": 404,
+        "passed": true,
+        "latency_ms": 132.08,
+        "headers": {
+          "Server": "nginx",
+          "Date": "Sun, 06 Sep 2026 02:11:30 GMT",
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Length": "207",
+          "Connection": "close",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, PATCH, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        },
+        "body_snippet": "<!doctype html>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>\n",
+        "description": "Deprecated Beacon endpoints correctly unmounted"
+      }
+    ],
+    "timestamp": 1788660690.09443
+  },
+  "defects": {
+    "defect_1_facilitator_nxdomain": {
+      "title": "Configured facilitator host is non-existent (NXDOMAIN)",
+      "severity": "CRITICAL",
+      "configured_facilitator": "https://x402-facilitator.cdp.coinbase.com",
+      "dns_resolvable": false,
+      "resolved_ips": [],
+      "impact": "Causes live server to crash with HTTP 500 when valid payment header is submitted",
+      "server_response_status": 500,
+      "server_response_body": "<!doctype html>\n<html lang=en>\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n",
+      "reproduced": true
+    },
+    "defect_2_price_unit_multiplier": {
+      "title": "1,000,000x price unit conversion multiplication defect",
+      "severity": "HIGH",
+      "declared_price_in_info": "",
+      "demanded_max_amount_required": "10000000000",
+      "intended_value_usdc": "0.01 USDC (10,000 atomic base units)",
+      "actual_demanded_value_usdc": "10,000.00 USDC (10,000,000,000 atomic units)",
+      "root_cause": "process_price_to_atomic_amount treats numeric string as whole USD, multiplying by 10^6",
+      "reproduced": true
+    },
+    "defect_3_caip2_network_mismatch": {
+      "title": "CAIP-2 network identifier advertised in /info rejected by challenge",
+      "severity": "MEDIUM",
+      "info_network_advertised": "eip155:8453",
+      "challenge_network_expected": "base",
+      "server_response_status": 402,
+      "server_response_body": "{\"x402Version\": 1, \"accepts\": [{\"scheme\": \"exact\", \"network\": \"base\", \"maxAmountRequired\": \"10000000000\", \"resource\": \"http://bottube.ai/api/premium/videos\", \"description\": \"Bulk video data export\", \"mimeType\": \"\", \"outputSchema\": {\"input\": {\"type\": \"http\", \"method\": \"GET\", \"discoverable\": true}, \"o",
+      "reproduced": true
+    },
+    "defect_4_auth_header_contract_inconsistency": {
+      "title": "X-API-Key advertised in CORS headers but ignored by endpoint authentication",
+      "severity": "LOW",
+      "xapikey_response": "{\"error\":\"API key required\"}\n",
+      "bearer_response": "{\"error\":\"Invalid API key\"}\n",
+      "root_cause": "Endpoint handler inspects Authorization header only, ignoring X-API-Key",
+      "reproduced": true
+    }
+  },
+  "roundtrip": {
+    "success": true,
+    "roundtrip_status_sequence": [
+      402,
+      200
+    ],
+    "payer_address": "0x019d764819026f0947d79A12EddD4F5a562E5Ae6",
+    "recovered_signer": "0x019d764819026f0947d79A12EddD4F5a562E5Ae6",
+    "signature": "0x3d6469e7e87b6bdd53c45bffcf8047c8192bae2d8005f8100ec05c1e5ec346be4420693f57e9de16c43fb5cda7b0cc40961d402c8668ba7d97c2c178100e3e831b",
+    "challenge": {
+      "scheme": "exact",
+      "network": "base",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "maxAmountRequired": "10000",
+      "resource": "http://127.0.0.1:60506/api/premium/videos",
+      "description": "Bulk video data export",
+      "mimeType": "application/json",
+      "payTo": "0x008097344A4C6E49401f2b6b9BAA4881b702e0fa",
+      "maxTimeoutSeconds": 60,
+      "outputSchema": {
+        "input": {
+          "type": "http",
+          "method": "GET",
+          "discoverable": true
+        },
+        "output": null
+      },
+      "extra": {
+        "name": "USD Coin",
+        "version": "2"
+      }
+    },
+    "authorization": {
+      "from": "0x019d764819026f0947d79A12EddD4F5a562E5Ae6",
+      "to": "0x008097344A4C6E49401f2b6b9BAA4881b702e0fa",
+      "value": "10000",
+      "validAfter": "0",
+      "validBefore": "1788660751",
+      "nonce": "0xc53bb6728e7ba14eb72af274ccbe85d3b67abd70bc77070ec7f5046df0a5aa60"
+    },
+    "final_response_body": {
+      "status": "success",
+      "message": "Premium access granted via x402 payment authorization",
+      "videos": [
+        {
+          "id": "vid_001",
+          "title": "Sophia Elya Architecture Deep Dive",
+          "views": 1420
+        },
+        {
+          "id": "vid_002",
+          "title": "RustChain Autonomous Node Settlement",
+          "views": 890
+        }
+      ]
+    },
+    "settlement_data": {
+      "success": true,
+      "transactionHash": "0x976adec3dc7185fdc9583cf6aa23f2d122fa5ed9f64e9d4fd01d513964f1927f",
+      "network": "base"
+    }
+  }
+}
