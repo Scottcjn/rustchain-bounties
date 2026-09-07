@@ -56,17 +56,32 @@ def _load_gate():
 
 
 def list_unprocessed(gate):
-    """Open review claims that carry neither the processed label nor a verdict."""
-    out = subprocess.run(
+    """Open review claims that carry neither the processed label nor a verdict.
+
+    Authoritative issue enumeration must fail CLOSED. `gh issue list` failing
+    (auth, rate-limit, 5xx, network) or returning unparseable JSON must NOT be
+    read as "zero open claims" -- that would silently strand every unprocessed
+    claim while this safety-net run reports success. Any failure here exits the
+    process non-zero so the backlog forces a retry instead of looking handled.
+    Reported by @bgrubbs1 under #16471; same failure shape as the cap-lookup
+    fix in test_pr_review_gate_cap_fails_closed.py -- check the effect, not the
+    exit code.
+    """
+    proc = subprocess.run(
         ["gh", "issue", "list", "-R", REPO, "--state", "open",
          "--limit", "1000", "--json", "number,title,labels"],
         capture_output=True, text=True, timeout=180,
-    ).stdout
+    )
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout or "").strip()[:200]
+        print(f"::error::gh issue list failed (exit {proc.returncode}): {detail}",
+              file=sys.stderr)
+        sys.exit(1)
     try:
-        issues = json.loads(out or "[]")
-    except json.JSONDecodeError:
-        print("::error::could not parse issue list", file=sys.stderr)
-        return []
+        issues = json.loads(proc.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        print(f"::error::could not parse issue list as JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     never, stranded = [], []
     for i in issues:
