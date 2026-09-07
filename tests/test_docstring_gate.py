@@ -64,6 +64,15 @@ class CountingTests(unittest.TestCase):
         d = diff('+    r"""Raw docstring."""', '+    u"""Unicode docstring."""')
         self.assertEqual(dg.count_added_docstrings(d)[0], 2)
 
+    def test_fstring_prefixed_docstrings(self):
+        """f/rf-prefixed docstrings are valid Python and must count.
+
+        The prefix class used to omit the letter f, so f-string docstring
+        lines were not counted and claims were underpaid silently.
+        """
+        d = diff('+    f"""F-string docstring."""', '+    rf"""Raw f-string docstring."""')
+        self.assertEqual(dg.count_added_docstrings(d)[0], 2)
+
 
 class ClaimParsingTests(unittest.TestCase):
     def test_recognises_docstring_claims(self):

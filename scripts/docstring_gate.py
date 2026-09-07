@@ -69,7 +69,7 @@ COUNT_RE = re.compile(
     r'(?:functions?\s+documented|documented|added\s+docstrings?\s+to)\D{0,20}?(\d{1,3})',
     re.I)
 FILE_RE = re.compile(r'(?:^|\s)((?:[\w.-]+/)*[\w.-]+\.py)\b')
-DOCSTRING_OPEN = re.compile(r'^\s*[rRbBuU]{0,2}("""|\'\'\')')
+DOCSTRING_OPEN = re.compile(r'^\s*[rRbBuUfF]{0,2}("""|\'\'\')')
 
 
 class GhError(RuntimeError):
