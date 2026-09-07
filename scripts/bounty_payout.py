@@ -105,13 +105,29 @@ def _find_handle_in_text(text):
         if m:
             return m.group(1)
     return None
+class CanonicalRegistryError(RuntimeError):
+    """docs/CLAIMANTS.md exists but could not be read/parsed.
+
+    Never degrade this into an empty map: a registered contributor would then
+    fall through to an older wallet or bare handle and be paid to the WRONG
+    destination, silently, on a green run.
+    """
+
+
 def _load_canonical_wallets():
     """Parse docs/CLAIMANTS.md into {handle_lower: native_RTC_wallet}.
 
     Canonical registry: a handle listed here is ALWAYS paid to its registered
     native wallet, regardless of what an individual claim body says. Only native
-    `RTC[0-9a-fA-F]{40}` rows are honored. Missing/garbled file -> empty map
-    (resolution falls back to per-claim parsing).
+    `RTC[0-9a-fA-F]{40}` rows are honored.
+
+    Fail-closed contract (reported by @Nish916 under #16471):
+      - File genuinely ABSENT -> empty map is fine; no registry is configured,
+        so resolution falls back to per-claim parsing.
+      - File PRESENT but unreadable/unparseable (encoding, OS, partial read) ->
+        raise CanonicalRegistryError. Returning a partial/empty map here would
+        violate the "canonical registry ALWAYS wins" invariant and misroute a
+        registered contributor's payout while the run still reports success.
     """
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "CLAIMANTS.md")
     out = {}
@@ -128,9 +144,16 @@ def _load_canonical_wallets():
                 if handle and m and not handle.lower().startswith(("github handle", "---")):
                     out[handle.lower()] = m.group(0)
     except FileNotFoundError:
-        pass
+        # No registry configured for this repo -> per-claim resolution only.
+        return {}
     except Exception as e:
-        print(f"::warning::could not parse CLAIMANTS.md: {e}")
+        # The file exists but could not be read/parsed. Fail closed: abort
+        # before any transfer rather than pay a registered contributor to a
+        # stale wallet or bare handle.
+        raise CanonicalRegistryError(
+            f"docs/CLAIMANTS.md exists but could not be parsed: "
+            f"{e.__class__.__name__}: {e}"
+        ) from e
     return out
 
 
