@@ -369,7 +369,34 @@ def main():
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
-    inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100") or []
+    # Inline comments are money-decision evidence: is_substantive_review()
+    # treats inline_count > 0 as a positive signal, so a failed read that
+    # silently became [] could drop a real first substantive reviewer (paying
+    # the wrong person) OR close a valid short-summary claim as a rubber stamp.
+    # STRICT: a failed/unreadable lookup holds the claim for a human instead of
+    # adjudicating on a false "zero inline comments". Reported by @bgrubbs1
+    # under #16471; same remedy as the cap lookup below.
+    try:
+        inl = api(f"/repos/{target}/pulls/{pr}/comments?per_page=100",
+                  strict=True) or []
+    except ApiError as e:
+        print(f"gate: inline-comment lookup failed, refusing to adjudicate: {e}",
+              file=sys.stderr)
+        _unresolved(
+            f"🤖 Gate: couldn't read the inline review comments for {target}#{pr}, and "
+            f"those decide whether a review is substantive and who reviewed first. Holding "
+            f"for a human rather than risk approving the wrong claimant or closing a valid "
+            f"one — a failed read is not proof there were zero inline comments. Nothing is "
+            f"needed from you.", quiet)
+        return
+    if not isinstance(inl, list):
+        print("gate: inline-comment lookup returned a non-list shape; holding for human",
+              file=sys.stderr)
+        _unresolved(
+            f"🤖 Gate: the inline review comments for {target}#{pr} came back in an "
+            f"unexpected shape, so substantiveness can't be judged reliably. Holding for "
+            f"a human.", quiet)
+        return
     # Per-author inline counts (so the rubber-stamp filter is per-review).
     author_inline = {}
     for c in inl:
