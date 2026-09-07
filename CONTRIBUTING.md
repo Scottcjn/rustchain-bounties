@@ -127,17 +127,57 @@ Only `@Scottcjn` (or a clearly labeled project automation account speaking on hi
 
 ## 🔧 Development Setup
 
+### Choose the repository and component first
+
+This repository contains the bounty board and multiple independent tools and
+examples, not a single application with one install or test command. Check the
+bounty's target repository and the component's README before installing anything.
+The steps below are for contributors working in `rustchain-bounties` itself.
+
+### Clone your fork
+
+Install Git, fork this repository on GitHub, then replace `YOUR_GITHUB_USERNAME`
+with the owner of your fork in the following Bash commands:
+
 ```bash
-# Clone your fork
-git clone https://github.com/Scottcjn/rustchain-bounties.git
+git clone https://github.com/YOUR_GITHUB_USERNAME/rustchain-bounties.git
 cd rustchain-bounties
-
-# Install dependencies
-npm install  # or cargo build (for Rust components)
-
-# Run tests
-npm test     # or cargo test
+git switch -c docs/contributor-setup
 ```
+
+Run the following check from the repository root, not from inside `tests/`.
+
+### Run a dependency-free Python smoke check
+
+With Python 3 installed, exercise the existing bounty-claimer helper tests:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_bounty_claimer.py' -v
+```
+
+The two tests in [tests/test_bounty_claimer.py](tests/test_bounty_claimer.py)
+exercise the real [claim formatter](agent_framework/bounty_claimer.py) and its
+CLI failure handling. Expect both tests to pass and the summary to end in `OK`.
+They mock the `gh` subprocess, so this check does not post a claim and needs no
+GitHub CLI, credentials, wallet, live node, or third-party Python packages.
+Do not run the helper itself as a smoke check: it posts a real issue comment.
+
+### Validate the component you change
+
+The smoke check above is not a full-repository test suite. For another component,
+follow its own README, dependency manifest, and applicable workflow under
+[.github/workflows](.github/workflows) and run the checks for your change.
+Install only that component's dependencies, using an isolated environment where
+appropriate.
+
+The root [package.json](package.json) describes a VS Code extension and defines
+`compile` and `watch`, but no `test` script; `npm test` at the repository root
+fails with `Missing script: "test"`. There is no root `Cargo.toml` either, so
+`cargo build` and `cargo test` are not repository-wide setup commands.
+
+For documentation changes, execute the commands you introduce and check their
+paths and expected output. In your PR, report the exact checks and their scope;
+a passing offline test does not establish that a build or live integration works.
 
 ## 📝 Commit Message Convention
 
