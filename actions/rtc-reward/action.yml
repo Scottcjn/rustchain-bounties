@@ -27,7 +27,7 @@ inputs:
   wallet-pattern:
     description: 'Regex pattern to extract RTC wallet from PR body'
     required: false
-    default: 'RTC[0-9a-fA-F]{36,44}'
+    default: 'RTC[0-9a-fA-F]{40}(?![0-9a-fA-F])'
   comment-template:
     description: 'Template for the reward comment. Use {{amount}} and {{wallet}}'
     required: false
