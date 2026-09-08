@@ -127,3 +127,24 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #177 -->
+```python
+# test_star_tracker.py
+import sqlite3
+import pytest
+from unittest.mock import patch, MagicMock
+from star_tracker import init_db, get_stats, save_repos
+
+@pytest.fixture
+def mock_db():
+    conn = sqlite3.connect(":memory:")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS repos (
+            id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            full_name TEXT,
+            stars INTEGER,
+            forks INTEGER,
+            descri
