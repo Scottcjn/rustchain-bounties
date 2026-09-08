@@ -64,6 +64,11 @@ class CountingTests(unittest.TestCase):
         d = diff('+    r"""Raw docstring."""', '+    u"""Unicode docstring."""')
         self.assertEqual(dg.count_added_docstrings(d)[0], 2)
 
+    def test_fstring_prefixed_strings_are_not_docstrings(self):
+        """f- and rf-prefixed strings are valid Python but not docstrings."""
+        d = diff('+    f"""F-string expression."""', '+    rf"""Raw f-string expression."""')
+        self.assertEqual(dg.count_added_docstrings(d)[0], 0)
+
 
 class ClaimParsingTests(unittest.TestCase):
     def test_recognises_docstring_claims(self):
