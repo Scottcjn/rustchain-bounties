@@ -9,6 +9,11 @@
 
 export { RustChainClient } from "./client.js";
 export {
+  AgentEconomyClient,
+  AGENT_CATEGORIES,
+  PLATFORM_FEE_RATE,
+} from "./agent_economy.js";
+export {
   RustChainError,
   ConnectionError,
   APIError,
@@ -17,4 +22,4 @@ export {
 } from "./errors.js";
 
 export const DEFAULT_NODE_URL = "https://50.28.86.131";
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";

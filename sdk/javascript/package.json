@@ -1,17 +1,20 @@
 {
   "name": "rustchain-sdk",
-  "version": "0.1.0",
-  "description": "Official JavaScript / Node.js SDK for the RustChain blockchain network",
+  "version": "0.2.0",
+  "description": "Official JavaScript / TypeScript / Node.js SDK for the RustChain blockchain network and RIP-302 Agent Economy",
   "type": "module",
   "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": "./src/index.js",
       "require": "./src/index.cjs"
     }
   },
   "files": [
     "src/",
+    "types/",
     "README.md",
     "LICENSE"
   ],
