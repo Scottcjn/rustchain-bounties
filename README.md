@@ -127,3 +127,23 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2819 -->
+```python
+# utxo_db.py - Fixed Version
+import sqlite3
+import hashlib
+import json
+import threading
+import time
+from typing import Dict, List, Optional, Tuple, Set
+from dataclasses import dataclass, field
+from decimal import Decimal, ROUND_DOWN
+import os
+
+# ============== Constants ==============
+MAX_MONEY = 21_000_000 * 100_000_000  # 21M RTC in satoshis
+COIN = 100_000_000  # 1 RTC = 100M satoshis
+DEFAULT_FEE = 1000  # 0.00001 RTC
+MIN_RELAY_FEE = 100  # Minimum relay fee
+LOCKTIME_THRESHOLD = 500_
