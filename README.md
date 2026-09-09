@@ -127,3 +127,29 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2819 -->
+```python
+# utxo_db.py
+import sqlite3
+import hashlib
+import json
+import threading
+import time
+from typing import Dict, List, Optional, Tuple, Set
+from dataclasses import dataclass, field
+from enum import Enum
+import logging
+
+logger = logging.getLogger(__name__)
+
+class UTXOError(Exception):
+    """Base exception for UTXO operations"""
+    pass
+
+class DoubleSpendError(UTXOError):
+    """Raised when attempting to spend an already-spent UTXO"""
+    pass
+
+class InsufficientFundsError(UTXOError):
+    
