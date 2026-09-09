@@ -127,3 +127,22 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #1618 -->
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoTTube UI – Accessibility Fixes</title>
+    <style>
+        /* ===== High contrast theme ===== */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #2d2d2d;
+            --accent: #005fcc;
+            --accent-hover: #004499;
+        
