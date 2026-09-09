@@ -127,3 +127,18 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #315 -->
+```markdown
+# Human Funnel Stage 1 Asset Pack
+
+## Short Hooks & Captions (10)
+
+### 1. The Internet Feels Empty Now
+**Hook:** "Remember when the internet felt like people, not bots?"
+**Caption:** The web got weird. Let's make it human again. One repo at a time. Start here → [link]
+**CTA:** Join the human side of the internet.
+
+### 2. Your First 5 Minutes
+**Hook:** "You're 5 minutes away from building something real."
+**Caption:** No code? No problem. Start with a simple idea. Make it yours. The t
