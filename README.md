@@ -127,3 +127,22 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2819 -->
+```python
+# utxo_db.py - Fixed Version
+import sqlite3
+import hashlib
+import json
+import threading
+import time
+from typing import Dict, List, Optional, Tuple, Set
+from dataclasses import dataclass, field
+from decimal import Decimal, ROUND_DOWN
+import os
+
+# ============= Configuration =============
+UTXO_DB_PATH = os.environ.get("UTXO_DB_PATH", "utxo.db")
+MAX_MEMPOOL_SIZE = 10000  # Maximum transactions in mempool
+MAX_TX_INPUTS = 100  # Maximum inputs per transaction
+MAX_TX_OUTPUTS = 100  # Maximum
