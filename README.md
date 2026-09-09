@@ -127,3 +127,30 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #100 -->
+```python
+#!/usr/bin/env python3
+"""
+GitHub Star Tracker - Track Scottcjn repo stars over time
+Bounty: https://github.com/Scottcjn/rustchain-bounties/issues/1110
+"""
+
+import sqlite3
+import requests
+import json
+from datetime import datetime, date
+import os
+
+# Configuration
+DB_PATH = "star_tracker.db"
+OWNER = "Scottcjn"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+
+# API Endpoints
+GITHUB_API = "https://api.github.com"
+
+
+def init_db():
+    """Initialize SQLite database"""
+    conn = sqlite3.co
