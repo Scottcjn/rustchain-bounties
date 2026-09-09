@@ -127,3 +127,30 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2784 -->
+```python
+#!/usr/bin/env python3
+"""
+RustChain Miner - Hardware Compatibility Test Script
+Run with: python rustchain_miner_test.py --dry-run
+"""
+
+import argparse
+import platform
+import sys
+import os
+import json
+import hashlib
+import struct
+from datetime import datetime
+
+class HardwareFingerprint:
+    """Detect and verify hardware characteristics"""
+    
+    @staticmethod
+    def get_os_info():
+        """Get operating system information"""
+        return {
+            "os": platform.system(),
+  
