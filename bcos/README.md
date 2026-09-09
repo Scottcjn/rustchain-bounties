@@ -17,7 +17,7 @@ Two static HTML pages implementing BCOS v2 tooling for rustchain.org.
 - Mobile responsive
 - Links to BCOS verification page and documentation
 
-**Deploy:** `rustchain.org/bcos/compare.html`
+**Deploy:** [`compare.html`](compare.html)
 
 ## badge-generator.html — BCOS Badge Generator
 
@@ -28,7 +28,7 @@ Two static HTML pages implementing BCOS v2 tooling for rustchain.org.
 - Example badges shown at the bottom
 - No backend required — static HTML/JS only
 
-**Deploy:** `rustchain.org/bcos/badge-generator.html`
+**Deploy:** [`badge-generator.html`](badge-generator.html)
 
 **Badge endpoint:** `GET https://50.28.86.131/bcos/badge/{cert_id}-{style}.svg`  
 **Verify page:** `https://rustchain.org/bcos/`
