@@ -127,3 +127,22 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2819 -->
+```python
+# utxo_db.py - Fixed version
+import sqlite3
+import hashlib
+import json
+import threading
+import time
+from typing import Dict, List, Optional, Tuple, Set
+from dataclasses import dataclass, field
+from decimal import Decimal, ROUND_DOWN
+import os
+
+# ============================================================
+# CRITICAL FIXES:
+# 1. Double-spend prevention: Added transaction lock + spent UTXO tracking
+# 2. Fund creation prevention: Strict conservation law enforcement
+# 3. Genesis migration 
