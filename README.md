@@ -127,3 +127,28 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2784 -->
+```python
+#!/usr/bin/env python3
+"""
+RustChain Miner - Hardware Detection & Dry-Run Test
+Bounty: https://github.com/Scottcjn/Rustchain/issues/ONBOARD-3-RTC
+"""
+
+import platform
+import sys
+import os
+import json
+import hashlib
+import struct
+import subprocess
+from datetime import datetime
+from typing import Dict, List, Tuple
+
+class HardwareDetector:
+    """Detect and report hardware specifications"""
+    
+    @staticmethod
+    def get_os_info() -> Dict[str, str]:
+        """Get operating system inf
