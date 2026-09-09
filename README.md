@@ -127,3 +127,28 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 ---
 
 *Want to add another language? Open a bounty issue!*
+
+<!-- Fix for issue #2784 -->
+```python
+#!/usr/bin/env python3
+"""
+RustChain Miner Hardware Test Script
+Run in dry-run mode to test hardware compatibility without network calls or mining.
+"""
+
+import platform
+import sys
+import os
+import json
+import hashlib
+import subprocess
+from datetime import datetime
+
+class HardwareFingerprint:
+    """Detect and verify hardware fingerprints"""
+    
+    @staticmethod
+    def get_cpu_info():
+        """Get CPU architecture and details"""
+        arch = platform.machine()
+        processor =
