@@ -1,0 +1,14 @@
+name: Link Check
+on: [pull_request]
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.9.0
+        with:
+          args: --exclude-url-regex "^https?://" --verbose .
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
