@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "langchain-rustchain-integration"
+version = "0.1.0"
+description = "LangChain tools for the public RustChain API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["langchain-core>=0.3"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["langchain_rustchain"]
