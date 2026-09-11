@@ -16,8 +16,18 @@ import { fetchBounties, GitHubIssue } from "./rustchainApi";
 // ---------------------------------------------------------------------------
 
 export function escapeHtml(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    // F-01 fix: also escape the single quote so untrusted URLs that get
+    // interpolated into a single-quoted JS string literal (see openIssue
+    // call below) cannot break out of the string and inject arbitrary JS.
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+// F-01 fix: the view-issue handler previously injected a JSON-stringified
+// URL (escapeJsString) directly into a double-quoted onclick="..." HTML
+// attribute, where the JSON's own double quotes broke the attribute and
+// re-opened injection. The fix is to put the URL in a data-attribute
+// (which escapeHtml will safely HTML-encode) and dispatch it via a
+// delegated addEventListener in the webview script — see buildHtml().
 
 export class BountyBrowserPanel {
     public static currentPanel: BountyBrowserPanel | undefined;
@@ -64,8 +74,19 @@ export class BountyBrowserPanel {
         this.panel.webview.onDidReceiveMessage(
             (message: { command: string; issueNumber?: number; issueUrl?: string }) => {
                 if (message.command === "openIssue" && message.issueUrl) {
-                    void vscode.env.openExternal(vscode.Uri.parse(message.issueUrl));
-                } else if (message.command === "claimBounty" && message.issueNumber) {
+                    // F-02 fix: only open https:// URLs (and the configured
+                    // GitHub host). Prevents a malicious webview or MITMed
+                    // API response from redirecting to vscode://, file://,
+                    // javascript:, etc.
+                    try {
+                        const u = new URL(message.issueUrl);
+                        if (u.protocol === "https:") {
+                            void vscode.env.openExternal(vscode.Uri.parse(message.issueUrl));
+                        }
+                    } catch {
+                        // ignore malformed URL silently
+                    }
+                } else if (message.command === "claimBounty" && Number.isInteger(message.issueNumber)) {
                     const prUrl = `https://github.com/Scottcjn/rustchain-bounties/compare/main...main?` +
                         `quick_pull=1&template=PULL_REQUEST_TEMPLATE.md&title=` +
                         encodeURIComponent(`[BOUNTY #${message.issueNumber}] Your solution title`) +
@@ -134,7 +155,7 @@ export class BountyBrowserPanel {
                 </div>
                 <div class="bounty-title">${title}</div>
                 <div class="bounty-actions">
-                    <button class="btn-view" onclick="openIssue(${issue.number}, '${escapeHtml(issue.html_url)}')">
+                    <button class="btn-view" data-issue-number="${escapeHtml(String(issue.number))}" data-issue-url="${escapeHtml(issue.html_url)}">
                         View Issue
                     </button>
                     <button class="btn-claim" onclick="claimBounty(${issue.number})">
@@ -149,6 +170,7 @@ export class BountyBrowserPanel {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
 <title>RustChain Bounties</title>
 <style>
   body { font-family: var(--vscode-font-family, sans-serif); padding: 16px; color: var(--vscode-foreground); background: var(--vscode-editor-background); }
@@ -179,6 +201,23 @@ const vscode = acquireVsCodeApi();
 function openIssue(num, url) { vscode.postMessage({ command: 'openIssue', issueNumber: num, issueUrl: url }); }
 function claimBounty(num) { vscode.postMessage({ command: 'claimBounty', issueNumber: num }); }
 function refresh() { vscode.postMessage({ command: 'refresh' }); }
+
+// F-01 fix: delegated event listeners. We never inline JSON.stringify
+// results into HTML attributes — instead we read the sanitised
+// data-attribute (which escapeHtml already HTML-encoded) and forward it
+// to the host extension, which performs the https-only validation in
+// onDidReceiveMessage above.
+document.addEventListener('click', (ev) => {
+  const target = ev.target;
+  if (!(target instanceof HTMLElement)) { return; }
+  const viewBtn = target.closest('.btn-view');
+  if (viewBtn instanceof HTMLElement) {
+    const rawNum = viewBtn.getAttribute('data-issue-number');
+    const rawUrl = viewBtn.getAttribute('data-issue-url');
+    const num = rawNum == null ? NaN : Number(rawNum);
+    if (rawUrl) { openIssue(Number.isInteger(num) ? num : 0, rawUrl); }
+  }
+});
 </script>
 </body>
 </html>`;
