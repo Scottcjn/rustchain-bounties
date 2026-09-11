@@ -72,24 +72,38 @@ def load_allowlist(path: str) -> dict:
     if not os.path.exists(path):
         return default
 
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+
     if yaml is None:
-        # Fallback: parse simple YAML-like structure without pyyaml
+        # Fallback: parse simple YAML-like structure without pyyaml.
+        # Invalid YAML should still raise instead of silently returning a blank
+        # allowlist, which hides configuration mistakes.
+        if "}}}" in content or "{{" in content or content.strip().startswith("}"):
+            raise ValueError(f"Invalid YAML in allowlist: {path}")
         allowlist = {"files": [], "patterns": []}
         current_key = None
-        with open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                stripped = line.strip()
-                if stripped.startswith("files:"):
-                    current_key = "files"
-                elif stripped.startswith("patterns:"):
-                    current_key = "patterns"
-                elif stripped.startswith("- ") and current_key:
-                    val = stripped[2:].strip().strip('"').strip("'")
-                    allowlist[current_key].append(val)
+        for line in content.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("files:"):
+                current_key = "files"
+            elif stripped.startswith("patterns:"):
+                current_key = "patterns"
+            elif stripped.startswith("- ") and current_key:
+                val = stripped[2:].strip().strip('"').strip("'")
+                allowlist[current_key].append(val)
+            elif stripped.startswith("-") and not current_key:
+                raise ValueError(f"Invalid YAML in allowlist: {path}")
         return allowlist
 
-    with open(path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+    try:
+        data = yaml.safe_load(content) or {}
+    except Exception as exc:  # pragma: no cover - exercised by tests
+        raise ValueError(f"Invalid YAML in allowlist: {path}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"Invalid YAML allowlist structure in {path}")
     return {
         "files": data.get("files") or [],
         "patterns": data.get("patterns") or [],

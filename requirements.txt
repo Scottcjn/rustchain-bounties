@@ -2,3 +2,7 @@ prometheus_client==0.25.0
 requests==2.34.2
 tabulate==0.10.0
 pytest
+httpx>=0.27,<1.0
+openai-agents>=0.22.0,<0.23
+PyGithub>=2.4.0
+PyYAML>=6.0.2

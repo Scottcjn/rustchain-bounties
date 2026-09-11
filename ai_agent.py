@@ -1,17 +1,25 @@
-import requests
-from github import Github
-import json
+import os
 import random
 import string
 
+import requests
+from github import Github
+
 # GitHub API Token for authentication
-GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'
-REPO_NAME = 'Scottcjn/rustchain-bounties'
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "") or ""
+REPO_NAME = "Scottcjn/rustchain-bounties"
 RTC_WALLET = f"RTC-agent-{''.join(random.choices(string.ascii_uppercase + string.digits, k=10))}"
 
-# Initialize GitHub client
-g = Github(GITHUB_TOKEN)
-repo = g.get_repo(REPO_NAME)
+
+def _get_repo():
+    """Create a GitHub repository handle only when credentials are available."""
+    if not GITHUB_TOKEN:
+        return None
+    g = Github(GITHUB_TOKEN)
+    return g.get_repo(REPO_NAME)
+
+
+repo = _get_repo()
 
 # Function to get open issues from the repository
 def get_open_bounties():
@@ -41,10 +49,10 @@ def fork_repo_and_create_branch():
 def implement_solution(forked_repo, branch_name):
     # This is where AI agent would write code, docs, or tests
     file_content = """
-    # AI Agent Solution
-    This is a simple placeholder solution by AI agent.
-    """
-    forked_repo.create_file("solution.py", "Implementing solution", file_content, branch=branch_name)
+# AI Agent Solution
+This is a simple placeholder solution by AI agent.
+"""
+    forked_repo.create_file("solution.py", file_content, branch=branch_name)
     print("Implemented solution in solution.py")
 
 # Function to submit a pull request
