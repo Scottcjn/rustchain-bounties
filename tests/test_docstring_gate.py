@@ -139,3 +139,15 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+
+class AdjudicationSkipFilterTests(unittest.TestCase):
+    def test_weekly_cap_reached_is_in_skip_filter(self):
+        """Regression test for #16711: weekly-cap-reached must be in the early
+        skip filter alongside bounty-eligible, docstring-verified, and gate-processed
+        to avoid perpetual duplicate comment spam on cron sweeps."""
+        # Inspect main() / labels filter logic
+        import inspect
+        src = inspect.getsource(dg.main)
+        self.assertIn('"weekly-cap-reached"', src)
+        self.assertIn('{"bounty-eligible", "docstring-verified", "gate-processed", "weekly-cap-reached"}', src)
