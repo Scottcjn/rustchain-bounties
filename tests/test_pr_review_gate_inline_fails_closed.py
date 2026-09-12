@@ -97,3 +97,43 @@ def test_inline_lookup_failure_holds_for_human():
     assert not any(p.get("state") == "closed" for p in fake.patches), (
         "must not close a valid claim just because the inline read failed"
     )
+
+
+def test_gate_processed_not_applied_before_adjudication():
+    """Regression test for #16710: gate-processed must not be applied prematurely
+    before reviews are fetched and evaluated, preventing permanent silent claim
+    starvation on transient errors."""
+    mod = load_gate()
+    mod.NUM = "42"
+    mod.REPO = "Scottcjn/rustchain-bounties"
+    mod.TARGET = "Scottcjn/Rustchain"
+
+    class FailingApi:
+        def __init__(self):
+            self.labels = []
+        def __call__(self, path, method="GET", data=None, strict=False):
+            if method == "POST" and path.endswith("/labels"):
+                self.labels.extend(data["labels"])
+                return {}
+            if path.endswith("/issues/42"):
+                return {
+                    "state": "open",
+                    "labels": [],
+                    "title": f"Bounty #73 claim: review of PR #{PR}",
+                    "body": "wallet RTC" + "a" * 40,
+                    "user": {"login": AUTHOR},
+                }
+            if "/pulls/" in path and path.endswith("/reviews"):
+                raise mod.ApiError("Transient 503 Service Unavailable")
+            raise AssertionError(f"unexpected API call: {method} {path}")
+
+    fake = FailingApi()
+    mod.api = fake
+    try:
+        mod.main()
+    except mod.ApiError:
+        pass
+
+    assert "gate-processed" not in fake.labels, (
+        "gate-processed must not be committed before reviews are fetched"
+    )
