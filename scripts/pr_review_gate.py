@@ -337,9 +337,9 @@ def main():
         return
     title=iss.get("title",""); body=iss.get("body") or ""; author=iss["user"]["login"]
     if not is_review_claim(title): return  # not our claim type; leave for other workflows
-    add_label(NUM,"gate-processed")
     claim_repo, pr = pr_ref(title, body)
     if not pr:
+        add_label(NUM,"gate-processed")
         _unresolved("🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>` (a full PR URL is best). Flagged for human review.", quiet); return
     # Cross-repo claims: trust an explicit PR URL if it points at one of
     # the maintainer's repos; anything else goes to a human.
@@ -348,8 +348,10 @@ def main():
         if claim_repo.lower().startswith(TARGET.split("/")[0].lower() + "/"):
             target = claim_repo
         else:
+            add_label(NUM,"gate-processed")
             _unresolved(f"🤖 Gate: claim references a PR outside the maintainer's repos ({claim_repo}#{pr}). Flagged for human review.", quiet); return
     if native_wallet(body) is False:
+        add_label(NUM,"gate-processed")
         close(NUM,"🤖 Gate: payout must be a **native RTC wallet** (`RTC…`) — RTC has no off-ramp, no Solana/ETH bridge. Reopen with a native wallet."); return
     reviews=api(f"/repos/{target}/pulls/{pr}/reviews")
     if reviews is None and not claim_repo:
@@ -366,6 +368,7 @@ def main():
             if alt_reviews is not None:
                 target, reviews = alt, alt_reviews
     if reviews is None:
+        add_label(NUM,"gate-processed")
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
     rv=[r for r in reviews if r.get("submitted_at")]
     rv.sort(key=lambda r:r["submitted_at"])
@@ -382,6 +385,7 @@ def main():
     except ApiError as e:
         print(f"gate: inline-comment lookup failed, refusing to adjudicate: {e}",
               file=sys.stderr)
+        add_label(NUM,"gate-processed")
         _unresolved(
             f"🤖 Gate: couldn't read the inline review comments for {target}#{pr}, and "
             f"those decide whether a review is substantive and who reviewed first. Holding "
@@ -392,6 +396,7 @@ def main():
     if not isinstance(inl, list):
         print("gate: inline-comment lookup returned a non-list shape; holding for human",
               file=sys.stderr)
+        add_label(NUM,"gate-processed")
         _unresolved(
             f"🤖 Gate: the inline review comments for {target}#{pr} came back in an "
             f"unexpected shape, so substantiveness can't be judged reliably. Holding for "
@@ -414,8 +419,10 @@ def main():
     body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
     inline = author_inline.get(author, 0)
     if first != author:
+        add_label(NUM,"gate-processed")
         close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {target}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
     if inline==0 and body_len<120:
+        add_label(NUM,"gate-processed")
         close(NUM,f"🤖 Gate: your review of {target}#{pr} has no inline comments and no substantive summary — Bounty #73 requires a **substantive line-level review**, not a bare approval."); return
     # cap check: count author's existing bounty-eligible issues ORG-WIDE
     # (user:Scottcjn spans every repo, so the per-contributor cap stays global
@@ -430,6 +437,7 @@ def main():
                  strict=True) or {}
     except ApiError as e:
         print(f"gate: cap lookup failed, refusing to approve: {e}", file=sys.stderr)
+        add_label(NUM,"gate-processed")
         _unresolved(
             f"🤖 Gate: your review of {target}#{pr} checks out, but the lookup that counts your "
             f"existing eligible claims failed, so the **{CAP} eligible reviews/contributor** cap "
@@ -440,13 +448,16 @@ def main():
     if not isinstance(elig, dict) or "total_count" not in elig:
         # A 200 with an unexpected shape is also not an authoritative zero.
         print("gate: cap lookup returned unexpected shape, refusing to approve", file=sys.stderr)
+        add_label(NUM,"gate-processed")
         _unresolved(
             f"🤖 Gate: your review of {target}#{pr} checks out, but the cap lookup returned an "
             f"unreadable response, so the **{CAP} eligible reviews/contributor** cap (Bounty #73) "
             f"cannot be checked right now. Holding for a human.", quiet)
         return
     if elig.get("total_count",0)>=CAP:
+        add_label(NUM,"gate-processed")
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
+    add_label(NUM,"gate-processed")
     add_label(NUM,"bounty-eligible")
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
