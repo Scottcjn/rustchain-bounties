@@ -91,7 +91,7 @@ class RustChainClient:
             )
             response.raise_for_status()
             return response.json()
-        except httpx.ConnectError as e:
+        except httpx.RequestError as e:
             raise RCConnectionError(f"Failed to connect to {self._base_url}: {e}")
         except httpx.HTTPStatusError as e:
             try:
@@ -130,7 +130,7 @@ class RustChainClient:
             response = await client.get(path, params=params)
             response.raise_for_status()
             return response.json()
-        except httpx.ConnectError as e:
+        except httpx.RequestError as e:
             raise RCConnectionError(f"Failed to connect to {self._base_url}: {e}")
         except httpx.HTTPStatusError as e:
             try:
