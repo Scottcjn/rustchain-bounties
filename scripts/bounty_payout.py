@@ -281,7 +281,8 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
       1. Native `RTC[0-9a-fA-F]{40}` in the issue body (preferred).
       2. `Wallet: <handle>` line in the issue body, when it parses as a
          plausible GitHub login.
-      3. Most recent non-bot `Wallet: <handle>` comment.
+      3. Most recent non-bot claimant/maintainer comment: native `RTC[0-9a-fA-F]{40}`
+         or `Wallet: <handle>`.
       4. `claimant_login` (the PR author) if it is a plausible login and not
          a bot. Caller is responsible for bot-excluding.
     """
@@ -308,6 +309,9 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
                     and author.lower() == claimant_login.lower()) and not _is_trusted(author):
                 continue
             cb = c.get("body") or ""
+            cwm = WALLET_RE.search(cb)
+            if cwm:
+                return cwm.group(0), "native"
             m = _find_handle_in_text(cb)
             if m and _looks_like_handle(m):
                 return m, "handle"
