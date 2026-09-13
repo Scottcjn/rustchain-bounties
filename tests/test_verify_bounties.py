@@ -6,6 +6,7 @@ import sys
 import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 def load_verify_bounties():
@@ -98,6 +99,41 @@ class TestVerifyBounties(unittest.TestCase):
             claimants[1]["wallet"],
             "6Da5nELroja5ngTwYZuofFur5V7gZCLvKVRX7iUahwz2",
         )
+
+    def test_targeted_distribution_event_does_not_fetch_stargazers(self):
+        mod = load_verify_bounties()
+        with patch.object(mod, "is_issue_open", return_value=True), \
+             patch.object(mod, "verify_distribution_claims") as verify, \
+             patch.object(mod, "get_all_stargazers") as get_stars:
+            failures = mod.run_targeted_issue(mod.DISTRIBUTION_BOUNTY_ISSUES[0])
+
+        self.assertEqual(failures, [])
+        verify.assert_called_once_with(mod.DISTRIBUTION_BOUNTY_ISSUES[0])
+        get_stars.assert_not_called()
+
+    def test_targeted_unknown_issue_is_a_clean_noop(self):
+        mod = load_verify_bounties()
+        with patch.object(mod, "is_issue_open", return_value=True), \
+             patch.object(mod, "get_all_stargazers") as get_stars:
+            failures = mod.run_targeted_issue(999999)
+
+        self.assertEqual(failures, [])
+        get_stars.assert_not_called()
+
+    def test_zero_star_claim_is_reported_as_unverified(self):
+        mod = load_verify_bounties()
+        comments = [{
+            "id": 1,
+            "user": {"login": "alice"},
+            "body": "/claim\nWallet: RTCC8CDAA67B90F9B06987135B8B65AB037BFB603A9",
+        }]
+        posted = []
+        with patch.object(mod, "get_issue_comments", return_value=comments), \
+             patch.object(mod, "post_comment", side_effect=lambda n, b: posted.append((n, b))):
+            mod.verify_star_claims(1, {repo: set() for repo in mod.STAR_REPOS})
+
+        self.assertEqual(len(posted), 1)
+        self.assertIn(f"| @alice | 0/{len(mod.STAR_REPOS)} | None | No stars found |", posted[0][1])
 
 
 if __name__ == "__main__":

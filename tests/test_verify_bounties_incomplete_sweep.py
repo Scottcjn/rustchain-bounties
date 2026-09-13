@@ -48,7 +48,7 @@ def install_pages(mod, pages):
     """Make gh_get walk `pages` (a list of FakeResponse) in order."""
     calls = {"n": 0}
 
-    def fake_get(url, params=None):
+    def fake_get(url, params=None, session=None):
         i = calls["n"]
         calls["n"] += 1
         return pages[i] if i < len(pages) else FakeResponse(200, [])

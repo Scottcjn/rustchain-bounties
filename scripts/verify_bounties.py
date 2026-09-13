@@ -3,7 +3,8 @@
 RustChain Bounty Verification Bot
 
 Auto-verifies star/badge/follow/emoji claims on rustchain-bounties issues.
-Runs as a GitHub Action every 6 hours, or manually via workflow_dispatch.
+Runs immediately for new claim comments, every 6 hours as a reconciliation
+sweep, or manually via workflow_dispatch.
 
 Checks:
   1. Star claims   - Did the user star the specified repos?
@@ -23,6 +24,7 @@ import sys
 import json
 import time
 import base64
+import html
 import re
 import logging
 from datetime import datetime, timezone
@@ -87,6 +89,11 @@ DISTRIBUTION_BOUNTY_ISSUES = [315, 16601, 16497, 282, 399, 2798, 14481]
 LIVE_URL_VERIFIED_LABEL = "live-url-verified"
 OFFPLATFORM_TIMEOUT = 20  # seconds per fetch
 OFFPLATFORM_UA = "rustchain-bounty-verify-bot/1.0 (+https://github.com/Scottcjn/rustchain-bounties)"
+ARTICLE_MIN_WORDS = 300
+ARTICLE_TOPIC_RE = re.compile(
+    r"\b(?:rustchain|proof[ -]of[ -]antiquity|elyan(?: labs)?)\b",
+    re.IGNORECASE,
+)
 
 # Bot signature so we can detect our own comments and avoid duplicates
 BOT_SIGNATURE = "<!-- bounty-verify-bot -->"
@@ -706,14 +713,24 @@ def verify_youtube_url(url: str) -> dict:
 
 
 def verify_article_url(url: str) -> dict:
-    """dev.to / hashnode / medium / hackaday: the page exists (HTTP 200)."""
+    """Verify that an article is live and contains substantive project text."""
     try:
         r = _http_get(url)
     except Exception as e:
         return _result("UNVERIFIED", f"fetch failed: {type(e).__name__}")
     if r.status_code != 200:
         return _result("UNVERIFIED", f"HTTP {r.status_code}")
-    return _result("VERIFIED", "HTTP 200")
+    page = re.sub(r"(?is)<(?:script|style)[^>]*>.*?</(?:script|style)>", " ", r.text)
+    text = html.unescape(re.sub(r"(?s)<[^>]+>", " ", page))
+    words = re.findall(r"\b[\w'-]+\b", text, flags=re.UNICODE)
+    if len(words) < ARTICLE_MIN_WORDS:
+        return _result(
+            "UNVERIFIED",
+            f"HTTP 200 but only {len(words)} words (minimum {ARTICLE_MIN_WORDS})",
+        )
+    if not ARTICLE_TOPIC_RE.search(text):
+        return _result("UNVERIFIED", f"{len(words)} words but no RustChain topic marker")
+    return _result("VERIFIED", f"HTTP 200 · {len(words)} words · topic marker present")
 
 
 PLATFORM_VERIFIERS = {
@@ -857,11 +874,62 @@ def run_phase(name: str, issues: list[int], runner) -> list[str]:
     return failures
 
 
+def run_targeted_issue(issue_number: int) -> list[str]:
+    """Run only the verifier configured for one issue-comment event.
+
+    A comment webhook must not launch the expensive all-repository star sweep
+    unless the comment belongs to a star bounty. The scheduled run remains the
+    reconciliation backstop for missed events and transient API failures.
+    """
+    if not is_issue_open(issue_number):
+        return []
+
+    if issue_number in STAR_BOUNTY_ISSUES:
+        try:
+            all_stars = get_all_stargazers()
+        except IncompleteSweep as e:
+            return [f"targeted star verification #{issue_number}: {e}"]
+        return run_phase(
+            "Targeted star bounty",
+            [issue_number],
+            lambda issue: verify_star_claims(issue, all_stars),
+        )
+    if issue_number in BADGE_BOUNTY_ISSUES:
+        return run_phase("Targeted badge bounty", [issue_number], verify_badge_claims)
+    if issue_number in FOLLOW_BOUNTY_ISSUES:
+        return run_phase("Targeted follow bounty", [issue_number], verify_follow_claims)
+    if issue_number in EMOJI_BOUNTY_ISSUES:
+        return run_phase("Targeted emoji bounty", [issue_number], verify_emoji_claims)
+    if issue_number in DISTRIBUTION_BOUNTY_ISSUES:
+        return run_phase(
+            "Targeted distribution bounty",
+            [issue_number],
+            verify_distribution_claims,
+        )
+
+    log.info("Issue #%d has no configured automatic verifier; skipping", issue_number)
+    return []
+
+
 def main() -> int:
     log.info("=" * 60)
     log.info("RustChain Bounty Verification Bot starting")
     log.info("Owner: %s | Bounty repo: %s", OWNER, BOUNTY_REPO)
     log.info("=" * 60)
+
+    event_issue = os.environ.get("EVENT_ISSUE_NUMBER", "").strip()
+    if event_issue:
+        try:
+            issue_number = int(event_issue)
+        except ValueError:
+            log.error("EVENT_ISSUE_NUMBER must be an integer, got %r", event_issue)
+            return 2
+        failures = run_targeted_issue(issue_number)
+        if failures:
+            for failure in failures:
+                log.error("  - %s", failure)
+            return 1
+        return 0
 
     failures: list[str] = []
 

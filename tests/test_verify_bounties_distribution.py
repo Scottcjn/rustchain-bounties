@@ -143,9 +143,27 @@ class ArticleVerifier(unittest.TestCase):
     def setUp(self):
         self.mod = load_verify_bounties()
 
-    def test_200_verified_else_unverified(self):
-        install_http(self.mod, lambda u, p: FakeResponse(200))
-        self.assertEqual(self.mod.verify_article_url("https://dev.to/a/b")["status"], "VERIFIED")
+    def test_200_substantive_on_topic_article_is_verified(self):
+        article = "<article><h1>RustChain</h1><p>" + ("evidence " * 305) + "</p></article>"
+        install_http(self.mod, lambda u, p: FakeResponse(200, text=article))
+        result = self.mod.verify_article_url("https://dev.to/a/b")
+        self.assertEqual(result["status"], "VERIFIED")
+        self.assertIn("words", result["metric"])
+        self.assertIn("topic marker present", result["metric"])
+
+    def test_short_or_off_topic_article_is_unverified(self):
+        install_http(self.mod, lambda u, p: FakeResponse(200, text="<p>RustChain short post</p>"))
+        result = self.mod.verify_article_url("https://dev.to/a/b")
+        self.assertEqual(result["status"], "UNVERIFIED")
+        self.assertIn("minimum 300", result["metric"])
+
+        off_topic = "<article>" + ("unrelated " * 305) + "</article>"
+        install_http(self.mod, lambda u, p: FakeResponse(200, text=off_topic))
+        result = self.mod.verify_article_url("https://dev.to/a/b")
+        self.assertEqual(result["status"], "UNVERIFIED")
+        self.assertIn("no RustChain topic marker", result["metric"])
+
+    def test_non_200_or_network_error_is_unverified(self):
         install_http(self.mod, lambda u, p: FakeResponse(404))
         self.assertEqual(self.mod.verify_article_url("https://dev.to/a/b")["status"], "UNVERIFIED")
         install_http(self.mod, lambda u, p: ConnectionError())
@@ -175,7 +193,8 @@ class DistributionPhase(unittest.TestCase):
             {"id": 2, "user": {"login": "bob"}, "body": "Live-URL: https://gist.github.com/bob/x"},
             {"id": 3, "user": {"login": "carol"}, "body": "posting now, will update"},
         )
-        install_http(self.mod, lambda u, p: FakeResponse(200))
+        article = "<article>RustChain " + ("evidence " * 305) + "</article>"
+        install_http(self.mod, lambda u, p: FakeResponse(200, text=article))
         self.mod.verify_distribution_claims(2798)
         self.assertEqual(len(self.posted), 1)
         self.assertEqual(self.updated, [])
@@ -198,11 +217,25 @@ class DistributionPhase(unittest.TestCase):
             {"id": 9, "user": {"login": "github-actions[bot]"}, "body": f"{self.mod.BOT_SIGNATURE}\nold"},
             {"id": 1, "user": {"login": "alice"}, "body": "Live-URL: https://dev.to/a/p"},
         )
-        install_http(self.mod, lambda u, p: FakeResponse(200))
+        article = "<article>RustChain " + ("evidence " * 305) + "</article>"
+        install_http(self.mod, lambda u, p: FakeResponse(200, text=article))
         self.mod.verify_distribution_claims(399)
         self.assertEqual(self.posted, [])
         self.assertEqual(len(self.updated), 1)
         self.assertEqual(self.updated[0][0], 9)
+
+    def test_same_user_and_url_claim_is_verified_once(self):
+        self._comments(
+            {"id": 1, "user": {"login": "alice"}, "body": "Live-URL: https://dev.to/a/p"},
+            {"id": 2, "user": {"login": "Alice"}, "body": "/claim\nLive-URL: https://dev.to/a/p"},
+        )
+        article = "<article>Proof of Antiquity " + ("evidence " * 305) + "</article>"
+        calls = install_http(self.mod, lambda u, p: FakeResponse(200, text=article))
+
+        self.mod.verify_distribution_claims(399)
+
+        self.assertEqual(len(calls), 1)
+        self.assertIn("Checked **1** `Live-URL:` claim(s)", self.posted[0][1])
 
     def test_no_live_url_claims_posts_nothing(self):
         self._comments({"id": 1, "user": {"login": "alice"}, "body": "/claim"})
