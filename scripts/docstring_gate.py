@@ -135,6 +135,28 @@ def add_labels(*names):
 
 
 
+
+TRUSTED_GATE_COMMENTERS = {"github-actions[bot]", "scottcjn", "nish916"}
+
+
+def _comment_author_login(c):
+    if not isinstance(c, dict):
+        return None
+    a = c.get("author")
+    if isinstance(a, dict) and a.get("login"):
+        return a.get("login")
+    u = c.get("user")
+    if isinstance(u, dict) and u.get("login"):
+        return u.get("login")
+    return None
+
+
+def _is_trusted_commenter(login):
+    if login is None:
+        return True
+    l = login.lower()
+    return l in TRUSTED_GATE_COMMENTERS or l.endswith("[bot]")
+
 def docstring_rtc_this_week(author):
     """RTC this author has already been granted for docstrings in 7 days.
 
@@ -155,6 +177,9 @@ def docstring_rtc_this_week(author):
         # The marker lives in a gate comment, not the issue body, so fetch them.
         cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
         for c in cs:
+            login = _comment_author_login(c)
+            if not _is_trusted_commenter(login):
+                continue
             m = re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
             if m:
                 total += float(m.group(1))
@@ -166,7 +191,8 @@ def is_docstring_claim(title, body):
     t = (title or "").lower()
     if "docstring" in t or re.search(r'\bdocs?\s+batch\b', t):
         return True
-    return "docstring" in (body or "").lower()[:400]
+    b = (body or "").lower()
+    return "docstring" in b or bool(re.search(r'\bdocs?\s+batch\b', b))
 
 
 def count_added_docstrings(diff: str):
@@ -327,15 +353,20 @@ def main():
         add_labels("needs-human")
         print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified")
         return 1
-    gh(["issue", "comment", NUM, "-R", REPO, "--body",
-        f"✅ 🤖 **Docstring gate: verified.**\n\n"
-        f"- PR {pr_repo}#{pr_num} is **merged**\n"
-        f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
-        f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
-        f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
-        f"<!-- rtc-payout-amount: {amount} -->\n"
-        f"Queued for payout. The balance moves after the standard confirmation window, not on this "
-        f"comment."], None)
+    try:
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"✅ 🤖 **Docstring gate: verified.**\n\n"
+            f"- PR {pr_repo}#{pr_num} is **merged**\n"
+            f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
+            f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
+            f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
+            f"<!-- rtc-payout-amount: {amount} -->\n"
+            f"Queued for payout. The balance moves after the standard confirmation window, not on this "
+            f"comment."], None, strict=True)
+    except GhError as e:
+        print(f"::error::failed to post verification comment: {e}", file=sys.stderr)
+        add_labels("needs-human")
+        return 1
     print(f"verified {doc_count} docstrings -> {amount} RTC on {REPO}#{NUM}")
     return 0
 

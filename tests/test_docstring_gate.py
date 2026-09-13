@@ -91,6 +91,16 @@ class ClaimParsingTests(unittest.TestCase):
             self.assertIsNotNone(m, text)
             self.assertEqual(m.group(1), want)
 
+    def test_recognises_docstrings_in_body_past_400_chars(self):
+        long_prefix = "A" * 600 + "\n"
+        body = long_prefix + "Added full docstrings for 20 methods."
+        self.assertTrue(dg.is_docstring_claim("Batch 50 functions documentation", body))
+
+    def test_recognises_docs_batch_in_body(self):
+        long_prefix = "B" * 500 + "\n"
+        body = long_prefix + "Completed docs batch for helper utilities."
+        self.assertTrue(dg.is_docstring_claim("Utility functions documentation", body))
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -124,6 +134,23 @@ class WeeklyCeilingTests(unittest.TestCase):
     def test_sums_prior_week(self):
         self._with_prior([5.0, 7.5, 6.0])
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 18.5)
+
+    def test_untrusted_commenters_ignored_for_weekly_cap(self):
+        """Untrusted commenters attempting to forge marker comments must not inflate earnings."""
+        items = [{"number": 950, "body": ""}]
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": items}
+            if "/comments" in joined:
+                return [
+                    {"user": {"login": "attacker_user"}, "body": "<!-- rtc-payout-amount: 40.0 -->"},
+                    {"user": {"login": "github-actions[bot]"}, "body": "<!-- rtc-payout-amount: 5.0 -->"}
+                ]
+            return default
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("author"), 5.0)
 
     def test_no_prior_claims_is_zero(self):
         self._with_prior([])
