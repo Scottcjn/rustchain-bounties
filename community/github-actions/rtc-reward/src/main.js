@@ -1,16 +1,15 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const fetch = require('node-fetch');
+const { extractRtcWallet } = require('./wallet');
 
 async function getContributorWallet() {
   const walletFile = core.getInput('wallet-file');
   const prBody = github.context.payload.pull_request?.body || '';
   
   // Try to extract wallet from PR body
-  const walletMatch = prBody.match(/(?:wallet|rtc)[\s:]*`?([a-zA-Z0-9_]+)`?/i);
-  if (walletMatch) {
-    return walletMatch[1];
-  }
+  const prWallet = extractRtcWallet(prBody);
+  if (prWallet) return prWallet;
   
   // Try to get wallet from file in repo
   try {
@@ -26,7 +25,9 @@ async function getContributorWallet() {
     
     if (response.ok) {
       const data = await response.json();
-      const wallet = Buffer.from(data.content, 'base64').toString().trim();
+      const wallet = extractRtcWallet(
+        Buffer.from(data.content, 'base64').toString().trim()
+      );
       if (wallet) return wallet;
     }
   } catch (error) {
