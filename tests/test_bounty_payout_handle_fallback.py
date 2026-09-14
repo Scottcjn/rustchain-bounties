@@ -388,6 +388,46 @@ class IntegrationTests(unittest.TestCase):
         self.assertIsNone(w)
         self.assertIsNone(src)
 
+    def test_native_wallet_in_claimant_comment(self):
+        # Issue #16945: claimant specifies native RTC address in comment thread
+        body = "no wallet in body"
+        comments = [
+            {"user": {"login": "alice", "type": "User"}, "body": f"Wallet: {NATIVE_WALLET}"},
+        ]
+        w, src = bp.resolve_wallet(body, comments, claimant_login="alice")
+        self.assertEqual(w, NATIVE_WALLET)
+        self.assertEqual(src, "native")
+
+    def test_native_wallet_in_claimant_comment_raw_address(self):
+        # Issue #16945: claimant posts raw native RTC address without "Wallet:" prefix
+        body = "no wallet in body"
+        comments = [
+            {"user": {"login": "alice", "type": "User"}, "body": f"Please send payout to {NATIVE_WALLET} thanks!"},
+        ]
+        w, src = bp.resolve_wallet(body, comments, claimant_login="alice")
+        self.assertEqual(w, NATIVE_WALLET)
+        self.assertEqual(src, "native")
+
+    def test_native_wallet_in_untrusted_comment_ignored(self):
+        # Third party cannot redirect payout via native RTC wallet comment
+        body = "no wallet in body"
+        comments = [
+            {"user": {"login": "attacker", "type": "User"}, "body": f"Wallet: {NATIVE_WALLET}"},
+        ]
+        w, src = bp.resolve_wallet(body, comments, claimant_login="alice")
+        self.assertEqual(w, "alice")
+        self.assertEqual(src, "handle")
+
+    def test_native_wallet_in_maintainer_comment(self):
+        # Trusted maintainer can specify native RTC wallet for claimant
+        body = "no wallet in body"
+        comments = [
+            {"user": {"login": "Scottcjn", "type": "User"}, "body": f"Sending to {NATIVE_WALLET}"},
+        ]
+        w, src = bp.resolve_wallet(body, comments, claimant_login="alice")
+        self.assertEqual(w, NATIVE_WALLET)
+        self.assertEqual(src, "native")
+
 
 class HandleShapeTests(unittest.TestCase):
     def test_native_rejected_as_handle(self):
