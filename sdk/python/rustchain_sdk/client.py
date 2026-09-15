@@ -547,3 +547,272 @@ class RustChainClient:
             "/epoch/rewards",
             params={"epoch_number": epoch_number},
         )
+
+    # ─────────────────────────────────────────────────────────────────
+    # RIP-302 Agent Economy
+    # ─────────────────────────────────────────────────────────────────
+
+    async def get_agent_stats(self) -> Dict[str, Any]:
+        """
+        Get marketplace-wide statistics for the RIP-302 Agent Economy.
+
+        Returns:
+            Dict with marketplace stats.
+        """
+        return await self._get("/agent/stats")
+
+    async def list_agent_jobs(
+        self,
+        category: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+        min_reward: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """
+        Browse and filter jobs in the RIP-302 Agent Economy.
+
+        Args:
+            category: Optional job category filter.
+            status: Optional status filter ("posted", "claimed", "delivered", etc.).
+            limit: Maximum number of jobs to return.
+            offset: Pagination offset.
+            min_reward: Minimum reward threshold in RTC.
+
+        Returns:
+            Dict with matching jobs and pagination metadata.
+        """
+        params: Dict[str, Any] = {"limit": limit, "offset": offset}
+        if category:
+            params["category"] = category
+        if status:
+            params["status"] = status
+        if min_reward is not None:
+            params["min_reward"] = min_reward
+        return await self._get("/agent/jobs", params=params)
+
+    async def get_agent_job(self, job_id: str) -> Dict[str, Any]:
+        """
+        Fetch details, activity log, and ratings for a specific agent job.
+
+        Args:
+            job_id: The job identifier.
+
+        Returns:
+            Dict with job details and history.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        return await self._get(f"/agent/jobs/{job_id.strip()}")
+
+    async def post_agent_job(
+        self,
+        poster_wallet: str,
+        title: str,
+        category: str,
+        reward_rtc: float,
+        description: str = "",
+        expires_at: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Post a new job to the Agent Economy and lock escrow.
+
+        Args:
+            poster_wallet: Poster's wallet address.
+            title: Job title.
+            category: Job category.
+            reward_rtc: Worker reward in RTC (locks reward + 5% platform fee).
+            description: Detailed job description.
+            expires_at: Optional expiration timestamp.
+
+        Returns:
+            Dict containing the created job.
+        """
+        if not poster_wallet or not poster_wallet.strip():
+            raise ValidationError("poster_wallet must be a non-empty string")
+        if not title or not title.strip():
+            raise ValidationError("title must be a non-empty string")
+        if not category or not category.strip():
+            raise ValidationError("category must be a non-empty string")
+        if reward_rtc <= 0:
+            raise ValidationError("reward_rtc must be positive")
+
+        payload: Dict[str, Any] = {
+            "poster_wallet": poster_wallet.strip(),
+            "title": title.strip(),
+            "description": description,
+            "category": category.strip(),
+            "reward_rtc": reward_rtc,
+        }
+        if expires_at:
+            payload["expires_at"] = expires_at
+
+        return await self._post("/agent/jobs", json_data=payload)
+
+    async def claim_agent_job(
+        self,
+        job_id: str,
+        worker_wallet: str,
+        note: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Claim an open job in the Agent Economy.
+
+        Args:
+            job_id: The job identifier.
+            worker_wallet: Worker's wallet address.
+            note: Optional claim note or estimated delivery time.
+
+        Returns:
+            Dict with claim status and updated job.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        if not worker_wallet or not worker_wallet.strip():
+            raise ValidationError("worker_wallet must be a non-empty string")
+
+        return await self._post(
+            f"/agent/jobs/{job_id.strip()}/claim",
+            json_data={"worker_wallet": worker_wallet.strip(), "note": note},
+        )
+
+    async def deliver_agent_job(
+        self,
+        job_id: str,
+        worker_wallet: str,
+        deliverable_url: str = "",
+        summary: str = "",
+        artifact_hash: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Submit deliverables for a claimed job.
+
+        Args:
+            job_id: The job identifier.
+            worker_wallet: Worker's wallet address.
+            deliverable_url: URL to deliverable artifact or PR.
+            summary: Summary of deliverable work.
+            artifact_hash: Cryptographic hash (e.g. sha256) of deliverable.
+
+        Returns:
+            Dict with delivery confirmation.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        if not worker_wallet or not worker_wallet.strip():
+            raise ValidationError("worker_wallet must be a non-empty string")
+
+        return await self._post(
+            f"/agent/jobs/{job_id.strip()}/deliver",
+            json_data={
+                "worker_wallet": worker_wallet.strip(),
+                "deliverable_url": deliverable_url,
+                "summary": summary,
+                "result_summary": summary,
+                "artifact_hash": artifact_hash,
+            },
+        )
+
+    async def accept_agent_job(
+        self,
+        job_id: str,
+        poster_wallet: str,
+        rating: int = 5,
+        review: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Accept delivered work, release escrow to worker, and submit rating.
+
+        Args:
+            job_id: The job identifier.
+            poster_wallet: Poster's wallet address.
+            rating: Rating from 1 to 5 stars.
+            review: Optional review text.
+
+        Returns:
+            Dict with payout details and updated reputation.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        if not poster_wallet or not poster_wallet.strip():
+            raise ValidationError("poster_wallet must be a non-empty string")
+        if rating < 1 or rating > 5:
+            raise ValidationError("rating must be between 1 and 5")
+
+        return await self._post(
+            f"/agent/jobs/{job_id.strip()}/accept",
+            json_data={
+                "poster_wallet": poster_wallet.strip(),
+                "rating": rating,
+                "review": review,
+            },
+        )
+
+    async def dispute_agent_job(
+        self,
+        job_id: str,
+        poster_wallet: str,
+        reason: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Dispute a deliverable.
+
+        Args:
+            job_id: The job identifier.
+            poster_wallet: Poster's wallet address.
+            reason: Dispute justification.
+
+        Returns:
+            Dict with dispute status.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        if not poster_wallet or not poster_wallet.strip():
+            raise ValidationError("poster_wallet must be a non-empty string")
+
+        return await self._post(
+            f"/agent/jobs/{job_id.strip()}/dispute",
+            json_data={"poster_wallet": poster_wallet.strip(), "reason": reason},
+        )
+
+    async def cancel_agent_job(
+        self,
+        job_id: str,
+        poster_wallet: str,
+        reason: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Cancel an open job and refund escrow.
+
+        Args:
+            job_id: The job identifier.
+            poster_wallet: Poster's wallet address.
+            reason: Cancellation reason.
+
+        Returns:
+            Dict with cancellation confirmation.
+        """
+        if not job_id or not job_id.strip():
+            raise ValidationError("job_id must be a non-empty string")
+        if not poster_wallet or not poster_wallet.strip():
+            raise ValidationError("poster_wallet must be a non-empty string")
+
+        return await self._post(
+            f"/agent/jobs/{job_id.strip()}/cancel",
+            json_data={"poster_wallet": poster_wallet.strip(), "reason": reason},
+        )
+
+    async def get_agent_reputation(self, wallet: str) -> Dict[str, Any]:
+        """
+        Get trust score, reputation tier, and stats for an agent wallet.
+
+        Args:
+            wallet: The agent's wallet address.
+
+        Returns:
+            Dict with reputation data.
+        """
+        if not wallet or not wallet.strip():
+            raise ValidationError("wallet must be a non-empty string")
+        return await self._get(f"/agent/reputation/{wallet.strip()}")
+

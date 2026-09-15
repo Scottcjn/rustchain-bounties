@@ -1,0 +1,85 @@
+{
+  "pipeline_status": "SUCCESS",
+  "total_jobs_executed": 2,
+  "agents_participating": [
+    "agent_alpha_director",
+    "agent_beta_researcher",
+    "agent_gamma_writer"
+  ],
+  "total_rtc_transacted": 85.0,
+  "total_protocol_fees": 4.25,
+  "cryptographic_proofs": {
+    "job_rip302_101": {
+      "artifact_hash": "sha256:fef6bb6d8595772d1c334095fe104eb5b5ea855fc120a1f803205aafe67c180f",
+      "status": "completed"
+    },
+    "job_rip302_102": {
+      "artifact_hash": "sha256:d810cdb0670235c344e1b4b65dd34e346cffdfe1793f0c3d4f2515b60bca4f75",
+      "status": "completed"
+    }
+  },
+  "activity_log": [
+    {
+      "timestamp": 1788149643.076698,
+      "event": "JOB_POSTED",
+      "job_id": "job_rip302_101",
+      "poster": "agent_alpha_director",
+      "reward_rtc": 50.0,
+      "escrow_locked": 52.5
+    },
+    {
+      "timestamp": 1788149643.077117,
+      "event": "JOB_CLAIMED",
+      "job_id": "job_rip302_101",
+      "worker": "agent_beta_researcher"
+    },
+    {
+      "timestamp": 1788149643.0772831,
+      "event": "JOB_DELIVERED",
+      "job_id": "job_rip302_101",
+      "worker": "agent_beta_researcher",
+      "artifact_hash": "sha256:fef6bb6d8595772d1c334095fe104eb5b5ea855fc120a1f803205aafe67c180f"
+    },
+    {
+      "timestamp": 1788149643.07743,
+      "event": "JOB_ACCEPTED",
+      "job_id": "job_rip302_101",
+      "poster": "agent_alpha_director",
+      "worker": "agent_beta_researcher",
+      "payout_rtc": 50.0,
+      "fee_rtc": 2.5,
+      "rating": 5
+    },
+    {
+      "timestamp": 1788149643.077573,
+      "event": "JOB_POSTED",
+      "job_id": "job_rip302_102",
+      "poster": "agent_beta_researcher",
+      "reward_rtc": 35.0,
+      "escrow_locked": 36.75
+    },
+    {
+      "timestamp": 1788149643.077707,
+      "event": "JOB_CLAIMED",
+      "job_id": "job_rip302_102",
+      "worker": "agent_gamma_writer"
+    },
+    {
+      "timestamp": 1788149643.0778491,
+      "event": "JOB_DELIVERED",
+      "job_id": "job_rip302_102",
+      "worker": "agent_gamma_writer",
+      "artifact_hash": "sha256:d810cdb0670235c344e1b4b65dd34e346cffdfe1793f0c3d4f2515b60bca4f75"
+    },
+    {
+      "timestamp": 1788149643.077986,
+      "event": "JOB_ACCEPTED",
+      "job_id": "job_rip302_102",
+      "poster": "agent_beta_researcher",
+      "worker": "agent_gamma_writer",
+      "payout_rtc": 35.0,
+      "fee_rtc": 1.75,
+      "rating": 5
+    }
+  ]
+}

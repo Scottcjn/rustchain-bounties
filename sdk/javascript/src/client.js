@@ -131,17 +131,17 @@ export class RustChainClient {
   // ── public RPC methods ───────────────────────────────────────────
 
   /** GET /health */
-  health() {
+  async health() {
     return this._get("/health");
   }
 
   /** GET /epoch */
-  getEpoch() {
+  async getEpoch() {
     return this._get("/epoch");
   }
 
   /** GET /miners */
-  getMiners() {
+  async getMiners() {
     return this._get("/miners");
   }
 
@@ -151,7 +151,7 @@ export class RustChainClient {
    * Accepts either a wallet *name* (e.g. "zxy0314-work") or an RTC address.
    * The real node accepts both via the same `miner_id` query param.
    */
-  getBalance(wallet) {
+  async getBalance(wallet) {
     if (typeof wallet !== "string" || wallet.length === 0) {
       throw new ValidationError("wallet must be a non-empty string");
     }
@@ -161,7 +161,7 @@ export class RustChainClient {
   /**
    * GET /wallet/history?miner_id=<wallet>&limit=<n>
    */
-  getWalletHistory(wallet, limit = 50) {
+  async getWalletHistory(wallet, limit = 50) {
     if (typeof wallet !== "string" || wallet.length === 0) {
       throw new ValidationError("wallet must be a non-empty string");
     }
@@ -172,12 +172,12 @@ export class RustChainClient {
   }
 
   /** GET /bounties */
-  getBounties() {
+  async getBounties() {
     return this._get("/bounties");
   }
 
   /** GET /epoch/rewards?epoch=<n> */
-  getEpochRewards(epoch) {
+  async getEpochRewards(epoch) {
     if (!Number.isInteger(epoch) || epoch < 0) {
       throw new ValidationError("epoch must be a non-negative integer");
     }
@@ -185,7 +185,7 @@ export class RustChainClient {
   }
 
   /** GET /explorer/blocks?limit=<n> */
-  explorerBlocks(limit = 20) {
+  async explorerBlocks(limit = 20) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 500) {
       throw new ValidationError("limit must be an integer in [1, 500]");
     }
@@ -193,10 +193,224 @@ export class RustChainClient {
   }
 
   /** POST /attest/challenge { miner_public_key } */
-  attestChallenge(minerPublicKey) {
+  async attestChallenge(minerPublicKey) {
     if (typeof minerPublicKey !== "string" || minerPublicKey.length === 0) {
       throw new ValidationError("minerPublicKey must be a non-empty string");
     }
     return this._post("/attest/challenge", { miner_public_key: minerPublicKey });
+  }
+
+  // ── RIP-302 Agent Economy methods ────────────────────────────────
+
+  /**
+   * GET /agent/stats — Marketplace statistics
+   */
+  async getAgentStats() {
+    return this._get("/agent/stats");
+  }
+
+  /**
+   * GET /agent/jobs — Browse marketplace jobs
+   * @param {object} [opts]
+   * @param {number} [opts.limit=50]
+   * @param {number} [opts.offset=0]
+   * @param {string} [opts.category]
+   * @param {string} [opts.status]
+   * @param {number} [opts.min_reward]
+   */
+  async listAgentJobs(opts = {}) {
+    const query = {};
+    if (opts.limit !== undefined) {
+      if (!Number.isInteger(opts.limit) || opts.limit < 1) {
+        throw new ValidationError("limit must be a positive integer");
+      }
+      query.limit = opts.limit;
+    }
+    if (opts.offset !== undefined) {
+      if (!Number.isInteger(opts.offset) || opts.offset < 0) {
+        throw new ValidationError("offset must be a non-negative integer");
+      }
+      query.offset = opts.offset;
+    }
+    if (opts.category) query.category = String(opts.category);
+    if (opts.status) query.status = String(opts.status);
+    if (opts.min_reward !== undefined) query.min_reward = Number(opts.min_reward);
+
+    return this._get("/agent/jobs", query);
+  }
+
+  /**
+   * GET /agent/jobs/:id — Fetch details for a specific job
+   * @param {string} jobId
+   */
+  async getAgentJob(jobId) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    return this._get(`/agent/jobs/${encodeURIComponent(jobId.trim())}`);
+  }
+
+  /**
+   * POST /agent/jobs — Create a new agent job with locked escrow
+   * @param {object} params
+   * @param {string} params.poster_wallet
+   * @param {string} params.title
+   * @param {string} [params.description]
+   * @param {string} params.category
+   * @param {number} params.reward_rtc
+   * @param {string} [params.expires_at]
+   */
+  async postAgentJob(params) {
+    if (!params || typeof params !== "object") {
+      throw new ValidationError("params must be an object");
+    }
+    if (!params.poster_wallet || typeof params.poster_wallet !== "string") {
+      throw new ValidationError("poster_wallet is required");
+    }
+    if (!params.title || typeof params.title !== "string") {
+      throw new ValidationError("title is required");
+    }
+    if (!params.category || typeof params.category !== "string") {
+      throw new ValidationError("category is required");
+    }
+    if (typeof params.reward_rtc !== "number" || params.reward_rtc <= 0) {
+      throw new ValidationError("reward_rtc must be a positive number");
+    }
+
+    const payload = {
+      poster_wallet: params.poster_wallet,
+      title: params.title,
+      description: params.description || "",
+      category: params.category,
+      reward_rtc: params.reward_rtc,
+    };
+    if (params.expires_at) {
+      payload.expires_at = params.expires_at;
+    }
+
+    return this._post("/agent/jobs", payload);
+  }
+
+  /**
+   * POST /agent/jobs/:id/claim — Claim an open job
+   * @param {string} jobId
+   * @param {object} params
+   * @param {string} params.worker_wallet
+   * @param {string} [params.note]
+   */
+  async claimAgentJob(jobId, params) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    if (!params || typeof params !== "object" || !params.worker_wallet) {
+      throw new ValidationError("worker_wallet is required");
+    }
+    return this._post(`/agent/jobs/${encodeURIComponent(jobId.trim())}/claim`, {
+      worker_wallet: params.worker_wallet,
+      note: params.note || "",
+    });
+  }
+
+  /**
+   * POST /agent/jobs/:id/deliver — Submit deliverable for a claimed job
+   * @param {string} jobId
+   * @param {object} params
+   * @param {string} params.worker_wallet
+   * @param {string} [params.deliverable_url]
+   * @param {string} [params.summary]
+   * @param {string} [params.result_summary]
+   * @param {string} [params.artifact_hash]
+   */
+  async deliverAgentJob(jobId, params) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    if (!params || typeof params !== "object" || !params.worker_wallet) {
+      throw new ValidationError("worker_wallet is required");
+    }
+    return this._post(`/agent/jobs/${encodeURIComponent(jobId.trim())}/deliver`, {
+      worker_wallet: params.worker_wallet,
+      deliverable_url: params.deliverable_url || "",
+      summary: params.summary || params.result_summary || "",
+      result_summary: params.result_summary || params.summary || "",
+      artifact_hash: params.artifact_hash || "",
+    });
+  }
+
+  /**
+   * POST /agent/jobs/:id/accept — Accept job and release escrow
+   * @param {string} jobId
+   * @param {object} params
+   * @param {string} params.poster_wallet
+   * @param {number} [params.rating=5]
+   * @param {string} [params.review=""]
+   */
+  async acceptAgentJob(jobId, params) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    if (!params || typeof params !== "object" || !params.poster_wallet) {
+      throw new ValidationError("poster_wallet is required");
+    }
+    const rating = params.rating !== undefined ? Number(params.rating) : 5;
+    if (rating < 1 || rating > 5) {
+      throw new ValidationError("rating must be between 1 and 5");
+    }
+    return this._post(`/agent/jobs/${encodeURIComponent(jobId.trim())}/accept`, {
+      poster_wallet: params.poster_wallet,
+      rating,
+      review: params.review || "",
+    });
+  }
+
+  /**
+   * POST /agent/jobs/:id/dispute — Dispute a deliverable
+   * @param {string} jobId
+   * @param {object} params
+   * @param {string} params.poster_wallet
+   * @param {string} [params.reason=""]
+   */
+  async disputeAgentJob(jobId, params) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    if (!params || typeof params !== "object" || !params.poster_wallet) {
+      throw new ValidationError("poster_wallet is required");
+    }
+    return this._post(`/agent/jobs/${encodeURIComponent(jobId.trim())}/dispute`, {
+      poster_wallet: params.poster_wallet,
+      reason: params.reason || "",
+    });
+  }
+
+  /**
+   * POST /agent/jobs/:id/cancel — Cancel an open or expired job
+   * @param {string} jobId
+   * @param {object} params
+   * @param {string} params.poster_wallet
+   * @param {string} [params.reason=""]
+   */
+  async cancelAgentJob(jobId, params) {
+    if (typeof jobId !== "string" || jobId.trim().length === 0) {
+      throw new ValidationError("jobId must be a non-empty string");
+    }
+    if (!params || typeof params !== "object" || !params.poster_wallet) {
+      throw new ValidationError("poster_wallet is required");
+    }
+    return this._post(`/agent/jobs/${encodeURIComponent(jobId.trim())}/cancel`, {
+      poster_wallet: params.poster_wallet,
+      reason: params.reason || "",
+    });
+  }
+
+  /**
+   * GET /agent/reputation/:wallet — Get agent trust score & reputation
+   * @param {string} wallet
+   */
+  async getAgentReputation(wallet) {
+    if (typeof wallet !== "string" || wallet.trim().length === 0) {
+      throw new ValidationError("wallet must be a non-empty string");
+    }
+    return this._get(`/agent/reputation/${encodeURIComponent(wallet.trim())}`);
   }
 }
