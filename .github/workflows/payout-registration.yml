@@ -1,0 +1,51 @@
+```yaml
+name: Payout Registration
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'GitHub username'
+        required: true
+      rtc_wallet:
+        description: 'RTC wallet name / payout alias'
+        required: true
+      rtc_payout_address:
+        description: 'Native self-custody RTC payout address'
+        required: true
+      ed25519_public_key:
+        description: 'Ed25519 public key'
+        required: true
+      evm_bridge_network:
+        description: 'External bridge network (EVM / USDC)'
+        required: true
+      btc_address:
+        description: 'Bitcoin (BTC)'
+        required: true
+      sol_address:
+        description: 'Solana (SOL)'
+        required: true
+
+jobs:
+  register-payout:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Validate inputs
+      run: |
+        echo "Username: ${{ github.event.inputs.username }}"
+        echo "RTC Wallet: ${{ github.event.inputs.rtc_wallet }}"
+        echo "RTC Payout Address: ${{ github.event.inputs.rtc_payout_address }}"
+        echo "Ed25519 Public Key: ${{ github.event.inputs.ed25519_public_key }}"
+        echo "EVM Bridge Network: ${{ github.event.inputs.evm_bridge_network }}"
+        echo "BTC Address: ${{ github.event.inputs.btc_address }}"
+        echo "Solana Address: ${{ github.event.inputs.sol_address }}"
+
+    - name: Register payout
+      run: |
+        echo "Registering payout for ${{ github.event.inputs.username }}"
+        # Add the registration logic here, e.g., update a database or a config file
+        echo "Payout registered successfully for ${{ github.event.inputs.username }}"
+```
