@@ -8,6 +8,7 @@
 [![Stars](https://img.shields.io/github/stars/Scottcjn/rustchain-bounties?style=social)](https://github.com/Scottcjn/rustchain-bounties/stargazers)
 [![RTC Pool](https://img.shields.io/badge/RTC%20Pool-5%2C900%2B%20RTC-gold)](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aissue+is%3Aopen+label%3Abounty)
 [![BCOS](https://img.shields.io/badge/BCOS-L1%20Certified-blue)](https://github.com/Scottcjn/RustChain)
+[![Powered by RustChain](https://img.shields.io/badge/Powered%20by-RustChain-orange)](https://rustchain.org)
 
 **131 open bounties · 5,900+ RTC available · No experience required for many tasks**
 
