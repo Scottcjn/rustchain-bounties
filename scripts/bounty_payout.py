@@ -422,11 +422,34 @@ for i in issues:
             hook=_second_act.build(claimant or wallet, REPO, i["title"])
         except Exception:
             hook=""
-        gh(["issue","comment",num,"-R",REPO,"--body",
+        comment_body = (
             f"💸 **RTC-AutoPay-Confirmed** — payout {state} "
             f"(source: {source}, verified #73 review, from `founder_community`). "
-            f"Thanks for the review!{hook}"])
-        gh(["issue","close",num,"-R",REPO,"--reason","completed"])
+            f"Thanks for the review!{hook}"
+        )
+        # Exception safety for GitHub API post-actions: retry up to 3 times
+        # to ensure the confirmation comment is posted and the claim is closed,
+        # preventing stranded open claims and double-debit race conditions on subsequent runs.
+        comment_posted = False
+        for attempt in range(3):
+            try:
+                gh(["issue","comment",num,"-R",REPO,"--body",comment_body])
+                comment_posted = True
+                break
+            except Exception as e:
+                print(f"::warning::#{num} gh issue comment attempt {attempt+1}/3 failed: {e}")
+                time.sleep(1)
+
+        if comment_posted:
+            for attempt in range(3):
+                try:
+                    gh(["issue","close",num,"-R",REPO,"--reason","completed"])
+                    break
+                except Exception as e:
+                    print(f"::warning::#{num} gh issue close attempt {attempt+1}/3 failed: {e}")
+                    time.sleep(1)
+        else:
+            print(f"::error::#{num} payout succeeded ({amount:g} RTC) but posting confirmation comment failed after 3 attempts. Manual comment/close required.")
     else: print(f"::warning::pay failed #{num}: {resp}")
     time.sleep(1.5)
 print(f"bounty-payout: paid {paid} claims = {total:g} RTC this run")
