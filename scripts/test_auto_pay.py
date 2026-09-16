@@ -40,6 +40,14 @@ class SensitivePathGuard(unittest.TestCase):
                 auto_pay.is_sensitive_path(p), f"{p} should be sensitive"
             )
 
+    def test_claimants_registry_is_sensitive(self):
+        # The payout-destination registry must never ride the auto-tier: a
+        # change to it reroutes real money and needs a human directive.
+        for p in ("docs/CLAIMANTS.md", "docs/claimants.md", "DOCS/CLAIMANTS.MD"):
+            self.assertTrue(
+                auto_pay.is_sensitive_path(p), f"{p} should be sensitive"
+            )
+
     def test_recased_sensitive_paths_still_flagged(self):
         # The bypass vectors from the report — each maps to a sensitive file
         # on a case-insensitive checkout, so the guard must catch them too.
@@ -166,6 +174,42 @@ class TransferRetry(unittest.TestCase):
         self._call()
 
         self.assertEqual(mock_post.call_count, 1)
+
+
+class StatusCommentTruthfulness(unittest.TestCase):
+    """The false-green regression guard (rustchain-bounties#16697):
+    a queued/pending transfer must NEVER be reported as sent/confirmed."""
+
+    def _c(self, phase, pay_kind="directive"):
+        return auto_pay.status_comment(
+            pay_kind=pay_kind, payment_amount=5, to_wallet="alice",
+            from_wallet="founder_dev_fund", memo="PR #1", phase=phase,
+            pending_id="p123", owner="Scottcjn",
+        )
+
+    def test_pending_phase_is_not_reported_as_confirmed(self):
+        body = self._c("pending")
+        self.assertIn("pending", body.lower())
+        self.assertNotIn("confirmed on RustChain", body)
+        self.assertNotIn("Payment Confirmed", body)
+        self.assertIn("| Status | **pending** |", body)
+
+    def test_missing_phase_defaults_to_pending_not_confirmed(self):
+        # A node response omitting phase must be treated as pending — the
+        # exact omission that produced the original false-green.
+        for phase in ("", "unknown", "queued"):
+            body = self._c(phase)
+            self.assertIn("| Status | **pending** |", body)
+            self.assertNotIn("balance has moved", body)
+
+    def test_confirmed_phase_only_when_node_says_so(self):
+        body = self._c("confirmed")
+        self.assertIn("| Status | **confirmed** |", body)
+        self.assertIn("balance has moved", body)
+
+    def test_marker_preserved_for_dedup(self):
+        # The dedup key must survive unchanged or every paid PR pays again.
+        self.assertIn(auto_pay.ALREADY_PAID_MARKER, self._c("pending"))
 
 
 if __name__ == "__main__":

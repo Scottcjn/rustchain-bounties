@@ -73,6 +73,9 @@ SENSITIVE_PREFIXES = (
     "scripts/",
     ".github/",
     "BOUNTY_LEDGER.md",
+    # Payout-destination registry — a change here reroutes real money and must
+    # never ride the auto-tier; it needs a human maintainer directive.
+    "docs/CLAIMANTS.md",
 )
 
 # Lower-cased copy used for matching. The guard MUST be case-insensitive:
@@ -208,6 +211,54 @@ def fetch_pr_files(repo: str, pr_number: str) -> list:
 def is_bot(author: str) -> bool:
     a = (author or "").lower()
     return a.endswith("[bot]") or a in {"dependabot", "github-actions", "renovate"}
+
+
+def status_comment(pay_kind: str, payment_amount: float, to_wallet: str,
+                   from_wallet: str, memo: str, phase: str, pending_id: str,
+                   owner: str) -> str:
+    """Build the truthful, phase-aware status comment for a transfer.
+
+    A RustChain transfer is two-phase: the POST only QUEUES a pending transfer
+    and the balance does not move until the settlement confirmer clears it.
+    This asserts "confirmed" ONLY when ``phase == "confirmed"``; the normal
+    pending POST and any missing/unknown phase are reported as pending — never
+    "sent"/"confirmed". That is the regression guard for the false-green that
+    told contributors they were paid while the ledger still showed 0
+    (rustchain-bounties#16697).
+    """
+    confirmed = phase == "confirmed"
+    status_word = "confirmed" if confirmed else "pending"
+
+    if pay_kind == "auto-tier":
+        title = (f"## Sophia auto-tier — {payment_amount:g} RTC "
+                 f"(conservative, no human directive)")
+    else:
+        title = "**RTC Payment Confirmed**" if confirmed else "**RTC Payment Queued (pending)**"
+
+    if confirmed:
+        tail = "Transfer **confirmed** on RustChain — the balance has moved."
+    else:
+        tail = (
+            f"\n**Status: pending — not yet paid.** This transfer is queued in the "
+            f"pending ledger (`pending_id {pending_id}`) with a ~24h window; the balance "
+            f"moves only when the settlement confirmer clears it. Please verify against the "
+            f"ledger / block explorer before treating it as paid. "
+            f"@{owner} — to reverse, void `pending_id {pending_id}` before it confirms."
+        )
+
+    return (
+        f"{title}\n\n"
+        f"| Field | Value |\n"
+        f"|-------|-------|\n"
+        f"| Amount | **{payment_amount:g} RTC** |\n"
+        f"| Recipient | `{to_wallet}` |\n"
+        f"| From | `{from_wallet}` |\n"
+        f"| Memo | {memo} |\n"
+        f"| Status | **{status_word}** |\n"
+        f"| pending_id | `{pending_id}` |\n\n"
+        f"{tail}\n\n"
+        f"<!-- {ALREADY_PAID_MARKER} kind={pay_kind} pending_id={pending_id} -->"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -346,6 +397,12 @@ def main() -> None:
     ok = result.get("ok", False)
     pending_id = result.get("pending_id", result.get("tx_id", "n/a"))
     error = result.get("error", "")
+    # Two-phase transfer: the POST only QUEUES a pending transfer; the balance
+    # does not move until the settlement confirmer clears it. Default to
+    # "pending" when the node omits the field, so we can NEVER claim confirmed
+    # without positive evidence — that omission is the false-green that told
+    # contributors they were paid while the ledger still showed 0 (#16697).
+    phase = str(result.get("phase", "pending")).lower()
 
     if not ok:
         print(f"::error::Transfer failed: {error}")
@@ -361,30 +418,10 @@ def main() -> None:
         post_comment(repo, pr_number, fail_body)
         sys.exit(1)
 
-    # --- Post confirmation comment ----------------------------------------
-    if pay_kind == "auto-tier":
-        title = f"## Sophia auto-tier — {payment_amount:g} RTC (conservative, no human directive)"
-        tail = (
-            f"\n**This is reversible.** The transfer is in the pending ledger with a "
-            f"~24h void window. @{repo.split('/')[0]} — if this award is wrong, void "
-            f"`pending_id {pending_id}` before it confirms. Larger or sensitive PRs are "
-            f"not auto-awarded; they need a maintainer `Payment: N RTC` directive."
-        )
-    else:
-        title = "**RTC Payment Sent**"
-        tail = "Transfer confirmed on RustChain."
-
-    confirm_body = (
-        f"{title}\n\n"
-        f"| Field | Value |\n"
-        f"|-------|-------|\n"
-        f"| Amount | **{payment_amount:g} RTC** |\n"
-        f"| Recipient | `{to_wallet}` |\n"
-        f"| From | `{FROM_WALLET}` |\n"
-        f"| Memo | {memo} |\n"
-        f"| pending_id | `{pending_id}` |\n\n"
-        f"{tail}\n\n"
-        f"<!-- {ALREADY_PAID_MARKER} kind={pay_kind} pending_id={pending_id} -->"
+    # --- Post status comment ----------------------------------------------
+    confirm_body = status_comment(
+        pay_kind, payment_amount, to_wallet, FROM_WALLET, memo,
+        phase, pending_id, repo.split("/")[0],
     )
     post_comment(repo, pr_number, confirm_body)
 

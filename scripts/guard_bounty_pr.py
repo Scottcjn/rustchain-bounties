@@ -62,6 +62,9 @@ PROTECTED_EXACT_FILES = {
     "bounties.json",
     "BOUNTY_LEDGER.md",
     "expected_miners.txt",
+    # Payout-destination registry: a single appended row here can silently
+    # redirect another contributor's payout. Any change must be human-reviewed.
+    "docs/CLAIMANTS.md",
 }
 
 LABEL_NAME = "needs-maintainer-review"

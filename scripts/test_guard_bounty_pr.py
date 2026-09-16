@@ -59,6 +59,12 @@ class ProtectedPathDetection(unittest.TestCase):
         ):
             self.assertTrue(g.is_protected_path(p), p)
 
+    def test_claimants_registry_is_protected(self):
+        # docs/CLAIMANTS.md is the payout-destination registry: a single
+        # appended row can silently redirect another contributor's payout,
+        # so a non-collaborator edit must be flagged for human review.
+        self.assertTrue(g.is_protected_path("docs/CLAIMANTS.md"))
+
     def test_real_merged_submission_paths_are_not_protected(self):
         # Drawn from actual merged bounty-submission PRs: #12741, #2094,
         # #2095, #2093, #173. None of these should ever trip the guard.
