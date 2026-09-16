@@ -40,6 +40,14 @@ class SensitivePathGuard(unittest.TestCase):
                 auto_pay.is_sensitive_path(p), f"{p} should be sensitive"
             )
 
+    def test_claimants_registry_is_sensitive(self):
+        # The payout-destination registry must never ride the auto-tier: a
+        # change to it reroutes real money and needs a human directive.
+        for p in ("docs/CLAIMANTS.md", "docs/claimants.md", "DOCS/CLAIMANTS.MD"):
+            self.assertTrue(
+                auto_pay.is_sensitive_path(p), f"{p} should be sensitive"
+            )
+
     def test_recased_sensitive_paths_still_flagged(self):
         # The bypass vectors from the report — each maps to a sensitive file
         # on a case-insensitive checkout, so the guard must catch them too.

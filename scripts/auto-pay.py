@@ -105,6 +105,9 @@ SENSITIVE_PREFIXES = (
     "scripts/",
     ".github/",
     "BOUNTY_LEDGER.md",
+    # Payout-destination registry — a change here reroutes real money and must
+    # never ride the auto-tier; it needs a human maintainer directive.
+    "docs/CLAIMANTS.md",
 )
 
 # Lower-cased copy used for matching. The guard MUST be case-insensitive:
