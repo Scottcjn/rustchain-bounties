@@ -76,7 +76,68 @@ STAR_REPOS = [
 # Issue numbers by bounty type
 # Only OPEN bounty issues belong here: the phases skip closed issues, so a list of
 # closed numbers makes the sweep succeed while checking nobody (2026-08-28).
-STAR_BOUNTY_ISSUES = [16238, 9017, 165, 171, 378]   # star 3 repos / May Flowers / ClawHub / pick-one / BoTTube
+
+class StarRule:
+    """What ONE star bounty actually asks for.
+
+    There used to be a single rule for all five: "3 stars on any of the
+    tracked repos". The five bounties do not ask the same thing, so that one
+    literal was wrong in both directions and said nothing about it:
+
+      * #16238 names RustChain and asks for two more, but three stars on any
+        other repos verified without RustChain among them.
+      * #378 is the BoTTube star bounty; three unrelated stars verified it,
+        and a claimant who starred exactly BoTTube read as "Partial (1 stars)".
+      * #171 asks for ONE star, picked from 55 repos. One star read as
+        "Partial", and a favourite outside the 12 repos this bot can see read
+        as "No stars found" — a public accusation manufactured by a list this
+        file controls, which is precisely what `get_all_stargazers` refuses to
+        do for a truncated read.
+
+    `accepts_untracked` marks the bounties whose accepted set is wider than
+    `STAR_REPOS`. For those, zero visible stars is NOT CHECKED, never "no
+    stars found".
+    """
+
+    def __init__(self, description: str, min_stars: int,
+                 required: tuple[str, ...] = (), accepts_untracked: bool = False):
+        self.description = description
+        self.min_stars = min_stars
+        self.required = required
+        self.accepts_untracked = accepts_untracked
+
+    def verdict(self, starred: list[str]) -> str:
+        missing = [r for r in self.required if r not in starred]
+        if missing:
+            return f"NOT MET (required: {', '.join(missing)})"
+        count = len(starred)
+        if count >= self.min_stars:
+            return f"VERIFIED ({count} stars)"
+        if count == 0:
+            return ("NOT CHECKED (no star on a repo this bot can see)"
+                    if self.accepts_untracked else "No stars found")
+        return f"Partial ({count} of {self.min_stars})"
+
+
+# One entry per issue in the star phase. Adding an issue number without a rule
+# is a KeyError at adjudication time, on purpose: a star bounty with no stated
+# requirement must not silently inherit somebody else's.
+STAR_BOUNTY_RULES: dict[int, StarRule] = {
+    16238: StarRule("RustChain + 2 ecosystem repos", min_stars=3, required=("Rustchain",)),
+    9017:  StarRule("any 3 Elyan Labs repos", min_stars=3),
+    # #165 names "our ClawHub-published repos". That published set is not
+    # encoded anywhere in this repo, so the rule is left as it was (any 3
+    # tracked repos) rather than guessed at. Replace `required` with the real
+    # ClawHub list when it exists.
+    165:   StarRule("3 ClawHub-published repos (published set not encoded here — "
+                    "any 3 tracked repos accepted for now)", min_stars=3,
+                    accepts_untracked=True),
+    171:   StarRule("any ONE Elyan Labs repo, your pick out of 55", min_stars=1,
+                    accepts_untracked=True),
+    378:   StarRule("the BoTTube repo", min_stars=1, required=("bottube",)),
+}
+
+STAR_BOUNTY_ISSUES = list(STAR_BOUNTY_RULES)   # star 3 repos / May Flowers / ClawHub / pick-one / BoTTube
 BADGE_BOUNTY_ISSUES = [13949]                        # RustChain badge in any README
 FOLLOW_BOUNTY_ISSUES = [2155]                        # (2173 closed)
 EMOJI_BOUNTY_ISSUES = [2180]                         # (1611 closed)
@@ -151,6 +212,18 @@ class IncompleteSweep(RuntimeError):
     """A paginated sweep could not be completed.
 
     Must never be mistaken for "the complete set, which happens to be small".
+    """
+
+
+class ReportNotPublished(RuntimeError):
+    """The verification report could not be written to the issue.
+
+    The same rule as `IncompleteSweep`, applied to the other end of the run:
+    a verdict that was computed but never published is not a verified claim,
+    and the sweep that produced it is not a successful sweep. Callers of
+    `post_comment` / `update_comment` used to discard their boolean result, so
+    a 403, a secondary rate limit or a 422 on an oversized body left the phase
+    green with nothing on the issue.
     """
 
 
@@ -319,6 +392,18 @@ def update_comment(comment_id: int, body: str) -> bool:
     return False
 
 
+def publish_report(issue_number: int, existing_comment: Optional[int], body: str) -> None:
+    """Write a phase's verification report, or raise.
+
+    Single choke point for the five phases, so the write result cannot be
+    dropped on the floor in one of them and honoured in the others.
+    """
+    ok = (update_comment(existing_comment, body) if existing_comment
+          else post_comment(issue_number, body))
+    if not ok:
+        raise ReportNotPublished(f"#{issue_number}: verification report was not published")
+
+
 # ---------------------------------------------------------------------------
 # Claim parsing
 # ---------------------------------------------------------------------------
@@ -401,12 +486,15 @@ def verify_star_claims(issue_number: int, all_stars: dict[str, set[str]]) -> Non
         log.info("No claimants found on #%d, skipping", issue_number)
         return
 
+    rule = STAR_BOUNTY_RULES[issue_number]
+
     lines = [
         BOT_SIGNATURE,
         f"## Star Verification Report",
         f"*{BOT_TAG} - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}*",
         "",
-        f"Checked **{len(claimants)}** claim(s) against **{len(STAR_REPOS)}** repos.",
+        f"Checked **{len(claimants)}** claim(s) against this bounty's own rule: "
+        f"**{rule.description}**.",
         "",
         "| User | Stars | Repos Starred | Status |",
         "|------|-------|---------------|--------|",
@@ -424,28 +512,26 @@ def verify_star_claims(issue_number: int, all_stars: dict[str, set[str]]) -> Non
         if len(starred_repos) > 5:
             repo_list += f" +{len(starred_repos) - 5} more"
 
-        if count == 0:
-            status = "No stars found"
-        elif count < 3:
-            status = f"Partial ({count} stars)"
-        else:
-            status = f"VERIFIED ({count} stars)"
+        status = rule.verdict(starred_repos)
 
         lines.append(f"| @{username} | {count}/{len(STAR_REPOS)} | {repo_list or 'None'} | {status} |")
 
     lines.extend([
         "",
         "---",
-        f"*Repos checked: {', '.join(STAR_REPOS)}*",
-        "*Stars can take a few minutes to propagate. Re-run if you just starred.*",
+        f"*This bounty asks for: {rule.description}*",
+        f"*Repos this bot can see stars on: {', '.join(STAR_REPOS)}*",
     ])
+    if rule.accepts_untracked:
+        lines.append(
+            "*This bounty accepts repos outside that list. A star on one of them cannot be "
+            "read here, so it is reported as NOT CHECKED — never as a missing star.*"
+        )
+    lines.append("*Stars can take a few minutes to propagate. Re-run if you just starred.*")
 
     body = "\n".join(lines)
 
-    if existing_comment:
-        update_comment(existing_comment, body)
-    else:
-        post_comment(issue_number, body)
+    publish_report(issue_number, existing_comment, body)
 
 
 def verify_badge_claims(issue_number: int) -> None:
@@ -492,10 +578,7 @@ def verify_badge_claims(issue_number: int) -> None:
 
     body = "\n".join(lines)
 
-    if existing_comment:
-        update_comment(existing_comment, body)
-    else:
-        post_comment(issue_number, body)
+    publish_report(issue_number, existing_comment, body)
 
 
 def verify_follow_claims(issue_number: int) -> None:
@@ -540,10 +623,7 @@ def verify_follow_claims(issue_number: int) -> None:
 
     body = "\n".join(lines)
 
-    if existing_comment:
-        update_comment(existing_comment, body)
-    else:
-        post_comment(issue_number, body)
+    publish_report(issue_number, existing_comment, body)
 
 
 def verify_emoji_claims(issue_number: int) -> None:
@@ -622,10 +702,7 @@ def verify_emoji_claims(issue_number: int) -> None:
 
     body = "\n".join(lines)
 
-    if existing_comment:
-        update_comment(existing_comment, body)
-    else:
-        post_comment(issue_number, body)
+    publish_report(issue_number, existing_comment, body)
 
 
 # ---------------------------------------------------------------------------
@@ -809,10 +886,11 @@ def verify_distribution_claims(issue_number: int) -> None:
     ])
     body = "\n".join(lines)
 
-    if existing_comment:
-        update_comment(existing_comment, body)
-    else:
-        post_comment(issue_number, body)
+    # The label is the payable marker; the comment is the evidence for it.
+    # Publishing the marker after a failed write left claims labelled
+    # `live-url-verified` with no verification table anywhere on the issue —
+    # green run, payable claim, no record. Never stamp what was not published.
+    publish_report(issue_number, existing_comment, body)
 
     if n_ok:
         add_issue_label(issue_number, LIVE_URL_VERIFIED_LABEL)
@@ -822,12 +900,22 @@ def verify_distribution_claims(issue_number: int) -> None:
 # Issue-state check: only process open issues
 # ---------------------------------------------------------------------------
 
-def is_issue_open(issue_number: int) -> bool:
-    """Check if issue is still open."""
+def is_issue_open(issue_number: int) -> Optional[bool]:
+    """True = open, False = closed, None = the state could not be read.
+
+    The third case used to be folded into `False`, so a 403 secondary rate
+    limit or a 502 on this one read made `run_phase` log "Issue #N is closed,
+    skipping" — a false statement — record no failure, and let the whole sweep
+    exit 0 having verified nobody on that bounty. Everything else in this file
+    already refuses to turn "could not look" into a verdict (`IncompleteSweep`,
+    the `None` returns from `check_profile_badge` / `check_follows_owner`); the
+    gate in front of all five phases was the one place that still did.
+    """
     r = gh_get(f"https://api.github.com/repos/{OWNER}/{BOUNTY_REPO}/issues/{issue_number}")
     if r.status_code != 200:
-        log.warning("Could not fetch issue #%d: %d", issue_number, r.status_code)
-        return False
+        log.warning("Could not read issue #%d: HTTP %d — state UNKNOWN, not 'closed'",
+                    issue_number, r.status_code)
+        return None
     return r.json().get("state") == "open"
 
 
@@ -845,7 +933,14 @@ def run_phase(name: str, issues: list[int], runner) -> list[str]:
     failures: list[str] = []
     log.info("--- %s ---", name)
     for issue in issues:
-        if not is_issue_open(issue):
+        state = is_issue_open(issue)
+        if state is None:
+            # Unreadable is not closed. Fail the run so it is retried instead
+            # of silently leaving every claimant on this bounty unverified.
+            log.error("SKIPPED #%d — issue state unreadable", issue)
+            failures.append(f"{name} #{issue}: issue state unreadable")
+            continue
+        if not state:
             log.info("Issue #%d is closed, skipping", issue)
             continue
         try:
@@ -853,6 +948,11 @@ def run_phase(name: str, issues: list[int], runner) -> list[str]:
         except IncompleteSweep as e:
             # No verdict is better than a verdict built on a truncated read.
             log.error("SKIPPED #%d — could not read all data: %s", issue, e)
+            failures.append(f"{name} #{issue}: {e}")
+        except ReportNotPublished as e:
+            # The verdict exists but nobody can see it, and for the Live-URL
+            # phase the payable label is withheld with it. Red, and retried.
+            log.error("UNPUBLISHED #%d — %s", issue, e)
             failures.append(f"{name} #{issue}: {e}")
     return failures
 
