@@ -68,7 +68,7 @@ async function run() {
   const walletFrom = getInput('wallet-from', { required: true });
   const adminKey = getInput('admin-key', { required: true });
   const dryRun = getInput('dry-run') === 'true';
-  const walletPattern = getInput('wallet-pattern') || 'RTC[0-9a-fA-F]{36,44}';
+  const walletPattern = getInput('wallet-pattern') || '(?<![0-9A-Za-z])RTC[0-9a-f]{40}(?![0-9A-Za-z])';
   const commentTemplate = getInput('comment-template') || [
     '## RTC Reward',
     '',
@@ -159,7 +159,27 @@ async function run() {
     info(`  Amount: ${amount} RTC`);
     info(`  Node: ${nodeUrl}`);
   } else {
-    const tx = await sendRTC(nodeUrl, walletFrom, wallet, amount, adminKey, pr.html_url);
+    let tx;
+    try {
+      tx = await sendRTC(nodeUrl, walletFrom, wallet, amount, adminKey, pr.html_url);
+    } catch (err) {
+      // Consumers run this step with continue-on-error, so a thrown error alone
+      // shows as a green run and the contributor is silently never paid (this
+      // hid a stale admin key for weeks). Say so on the PR before failing.
+      const status = (/\((\d{3})\)/.exec(String(err && err.message)) || [])[1] || 'error';
+      try {
+        await octokitRequest(token, 'POST',
+          `${apiBase}/repos/${owner}/${repo}/issues/${prNumber}/comments`,
+          { body: `## RTC Reward: pending\n\nThe automatic **${amount} RTC** reward for this PR could not be sent (node returned ${status}). ` +
+                  `Nothing is lost: a maintainer will send it manually to \`${wallet}\`. No action needed from you.` }
+        );
+      } catch (commentErr) {
+        warning(`Could not post failure comment: ${commentErr.message}`);
+      }
+      setOutput('reward-failed', 'true');
+      setFailed(`RTC reward NOT sent for PR #${prNumber}: ${err.message}`);
+      return;
+    }
     info(`Transfer result: ${JSON.stringify(tx)}`);
   }
 
