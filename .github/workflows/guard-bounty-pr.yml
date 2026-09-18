@@ -25,10 +25,18 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened, edited]
 
+# `administration: read` is what lets the guard ask the API whether an author
+# actually holds write permission, instead of inferring trust from
+# `author_association`. GitHub sets that field to CONTRIBUTOR after ONE commit
+# lands, and this repo merges one-line README badge PRs as a 2 RTC bounty
+# (#13949) -- so the association alone was a 2 RTC bypass of this guard on
+# payout paths. The lookup fails CLOSED: without this scope the guard flags
+# more PRs for human review, never fewer.
 permissions:
   contents: read
   pull-requests: write
   issues: write
+  administration: read
 
 concurrency:
   group: guard-bounty-pr-${{ github.event.pull_request.number }}
