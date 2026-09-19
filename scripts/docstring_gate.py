@@ -237,6 +237,37 @@ def main():
         add_labels("needs-human")
         return 0
 
+    # Scope + authorship (audit #16471, 2026-09-15): the gate previously paid
+    # the CLAIMANT for the docstrings of ANY merged PR on GitHub — no repo
+    # restriction, and no check that the claimant authored the cited PR. A
+    # claim citing a third party's merged documentation PR (any repo, any
+    # author) passed every existing check and was paid. Fail closed: out-of-
+    # scope repos and foreign-authored PRs go to a human, never to the
+    # payable labels.
+    ALLOWED_OWNERS = ("scottcjn",)
+    owner = pr_repo.split("/")[0].lower() if "/" in pr_repo else ""
+    if owner not in ALLOWED_OWNERS:
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"🤖 Docstring gate: {pr_repo}#{pr_num} is outside the maintainer's repos "
+            f"(`Scottcjn/*`). Docstring bounties pay for ecosystem work, so this claim is "
+            f"held for a human rather than auto-adjudicated."], None)
+        add_labels("needs-human")
+        print(f"scope: {pr_repo}#{pr_num} outside allowed owners; held")
+        return 0
+    pr_author_obj = pr.get("author")
+    pr_author = pr_author_obj.get("login") if isinstance(pr_author_obj, dict) else None
+    claimant = (iss.get("author") or {}).get("login", "")
+    if not pr_author or not claimant or pr_author.lower() != claimant.lower():
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"🤖 Docstring gate: {pr_repo}#{pr_num} was authored by "
+            f"**@{pr_author or 'an unavailable account'}**, not @{claimant}. Docstring "
+            f"bounties pay for the claimant's own merged work, so this claim is held for a "
+            f"human rather than paid. If you believe this is a mistake (e.g. a transferred "
+            f"or co-authored PR), say so here."], None)
+        add_labels("needs-human")
+        print(f"authorship: {pr_repo}#{pr_num} author {pr_author!r} != claimant {claimant!r}; held")
+        return 0
+
     if pr.get("state") != "MERGED":
         gh(["issue", "comment", NUM, "-R", REPO, "--body",
             f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
