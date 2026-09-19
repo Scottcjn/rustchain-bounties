@@ -97,6 +97,26 @@ class ActiveClaimTests(unittest.TestCase):
         bc.gh = lambda a, d=None: []
         self.assertIsNone(bc.active_claim(1))
 
+    def test_paginated_comments_finds_claim_on_later_pages(self):
+        """Claims past the 100-comment first page must not be dropped by active_claim."""
+        page1 = [{"body": f"comment {i}"} for i in range(100)]
+        page2 = [{"body": self._claim("charlie", 4)}]
+        calls = []
+
+        def mock_gh(args, default=None):
+            calls.append(args)
+            if args[1].endswith("&page=1"):
+                return page1
+            elif args[1].endswith("&page=2"):
+                return page2
+            return []
+
+        bc.gh = mock_gh
+        got = bc.active_claim(1)
+        self.assertIsNotNone(got)
+        self.assertEqual(got[0], "charlie")
+        self.assertGreaterEqual(len(calls), 2)
+
 
 class LiveUrlGateTests(unittest.TestCase):
     """On `distribution` issues a claim without an allowlisted Live-URL must

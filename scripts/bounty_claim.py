@@ -103,7 +103,16 @@ def is_claim_request(body: str) -> bool:
 
 def active_claim(num):
     """Return (holder, expiry_date) for the newest unexpired claim, else None."""
-    comments = gh(["api", f"/repos/{REPO}/issues/{num}/comments?per_page=100"], []) or []
+    page = 1
+    comments = []
+    while page <= 50:
+        chunk = gh(["api", f"/repos/{REPO}/issues/{num}/comments?per_page=100&page={page}"], []) or []
+        if not isinstance(chunk, list) or not chunk:
+            break
+        comments.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
     today = datetime.date.today()
     newest = None
     for c in comments:
