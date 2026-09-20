@@ -5,4 +5,4 @@ pytest
 httpx>=0.27,<1.0
 openai-agents>=0.22.0,<0.23
 PyGithub>=2.4.0
-PyYAML>=6.0.2
+PyYAML>=6.0.3
