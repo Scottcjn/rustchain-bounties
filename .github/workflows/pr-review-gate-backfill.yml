@@ -7,9 +7,19 @@ name: PR-Review Gate Backfill (#73 safety net)
 # of 104 unanswered claims averaging 82 days old. This sweep re-drives the same
 # gate over anything never adjudicated, so a missed webhook costs hours, not
 # forever. The gate is idempotent, so re-running is safe.
+#
+# SCHEDULE DISABLED 2026-09-21 -- Bounty #73 is CLOSED (2026-06-05) and its body
+# reads "RETIRED 2026-06-14 -- pool closed". This sweep nevertheless kept firing
+# every 4h into late September, succeeding every time, against a bounty that no
+# longer existed. The gate now refuses to adjudicate for a closed bounty
+# (bounty_is_open(), fail-closed), so these runs were already destined to be
+# no-ops -- this just stops paying CI for them.
+#
+# TO REVIVE: open the replacement review bounty, set BOUNTY_ISSUE to its number
+# in the env block below, and uncomment the cron.
 on:
-  schedule:
-    - cron: "41 */4 * * *"   # every 4h, offset off the hour
+  # schedule:
+  #   - cron: "41 */4 * * *"   # every 4h, offset off the hour
   workflow_dispatch:
     inputs:
       max_per_run:
@@ -37,6 +47,9 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TARGET_REPO: Scottcjn/Rustchain
           CAP: "15"
+          DAILY_CAP: "3"          # Bounty #73: 3 PR reviews / 24h
+          POOL_RTC: "200"         # Bounty #73: the pool is finite
+          BOUNTY_ISSUE: "73"      # gate refuses to adjudicate if this is closed
           RATE_RTC: "3"
           MAX_PER_RUN: ${{ github.event.inputs.max_per_run || '60' }}
         run: python3 scripts/pr_review_gate_backfill.py
