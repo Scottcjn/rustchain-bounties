@@ -321,6 +321,46 @@ def _list(extra):
     except json.JSONDecodeError:
         return []
 
+# The pools this script pays FROM. Every review claim is paid as "Bounty #73"
+# and every docstring claim against the docstring bounty. Bounty #73 closed on
+# 2026-06-05 (pool retired 06-14) and the docstring bounty was retired (#16907),
+# but nothing here ever asked. A payout is a promise kept with real RTC, so the
+# pool it draws on must be verifiably OPEN before a single transfer fires.
+#
+#   REVIEW_BOUNTY_ISSUE    issue number of the live code-review bounty (default 73)
+#   DOCSTRING_BOUNTY_ISSUE issue number of the live docstring bounty (default: none)
+#
+# Fail CLOSED: an unset number, a closed issue, a failed lookup, or an unreadable
+# response all mean "not open", and claims drawn on that pool are refused with a
+# non-zero exit — never paid, never silently skipped on a green run.
+REVIEW_BOUNTY_ISSUE=os.environ.get("REVIEW_BOUNTY_ISSUE","73").strip()
+DOCSTRING_BOUNTY_ISSUE=os.environ.get("DOCSTRING_BOUNTY_ISSUE","").strip()
+_pool_state={}
+def pool_open(label, issue_no):
+    """True only if `issue_no` is a readable, OPEN issue in REPO. Memoised per run."""
+    if label in _pool_state:
+        return _pool_state[label]
+    ok=False
+    why=""
+    if not issue_no:
+        why="no bounty issue configured"
+    else:
+        try:
+            iss=json.loads(gh(["issue","view",str(issue_no),"-R",REPO,"--json","state"]) or "null")
+            if not isinstance(iss,dict) or not isinstance(iss.get("state"),str):
+                why="unreadable response from issue lookup"
+            elif iss["state"].upper()!="OPEN":
+                why=f"#{issue_no} is {iss['state']}"
+            else:
+                ok=True
+        except (GhError, json.JSONDecodeError) as e:
+            why=f"lookup failed: {e}"
+    if not ok:
+        print(f"::error::{label} pool is NOT open ({why}); every {label} claim this run is refused. "
+              "Point the *_BOUNTY_ISSUE env at the live bounty, or disable this workflow.")
+    _pool_state[label]=ok
+    return ok
+
 # Candidate set = every gate-labelled claim UNION a recent-window sweep.
 #
 # The recent sweep alone (the previous behaviour, --limit 400) silently
@@ -336,6 +376,7 @@ issues += [i for i in _list(["--limit","400"]) if i["number"] not in _seen]
 print(f"bounty-payout: {len(issues)} candidate issues "
       f"({len(_seen)} label-eligible, {len(issues)-len(_seen)} from recent window)")
 paid=0; total=0.0
+refused=0
 for i in issues:
     if paid>=MAXRUN: print(f"::notice::MAX_PER_RUN={MAXRUN} reached — stopping; remaining eligible will pay next run."); break
     t=i["title"].lower()
@@ -350,6 +391,13 @@ for i in issues:
     is_review = ("review" in t) and ("pr" in t or "code" in t or "#73" in t)
     is_docstring = "docstring-verified" in labels_pre
     if not (is_review or is_docstring): continue
+    # Docstring claims are the more specific gate; a docstring claim whose
+    # title also says "review" is still a docstring claim.
+    pool=("docstring",DOCSTRING_BOUNTY_ISSUE) if is_docstring else ("review",REVIEW_BOUNTY_ISSUE)
+    if not pool_open(*pool):
+        refused+=1
+        print(f"::warning::#{i['number']} refused: {pool[0]} pool is not open")
+        continue
     num=str(i["number"]); labels={l["name"] for l in i.get("labels",[])}
     d=json.loads(gh(["issue","view",num,"-R",REPO,"--json","body,comments,author"]))
     coms=d.get("comments",[])
@@ -429,4 +477,8 @@ for i in issues:
         gh(["issue","close",num,"-R",REPO,"--reason","completed"])
     else: print(f"::warning::pay failed #{num}: {resp}")
     time.sleep(1.5)
-print(f"bounty-payout: paid {paid} claims = {total:g} RTC this run")
+print(f"bounty-payout: paid {paid} claims = {total:g} RTC this run; {refused} refused (pool closed)")
+if refused:
+    # A payable claim on a closed pool is a broken premise, not a quiet day.
+    # Go red so someone looks, instead of succeeding forever like #73's gate.
+    raise SystemExit(1)
