@@ -72,12 +72,18 @@ def pr_ref(title, body):
     Order matters: claim titles look like "Bounty #1009 claim: review of
     PR #1396", so a bare '#N' scan grabs the BOUNTY number, not the PR
     (2026-06-11 bug — 9 valid claims auto-rejected). Full PR URLs win,
-    then explicit 'PR #N'/'pull/N', and bare '#N' only as a last resort
-    with 'Bounty #N' references stripped first.
+    then repository-qualified prose, explicit 'PR #N'/'pull/N', and bare '#N'
+    only as a last resort with 'Bounty #N' references stripped first.
     """
     for s in (title, body or ""):
         m = re.search(r'github\.com/([\w.-]+/[\w.-]+)/pull/(\d{1,6})', s)
         if m: return m.group(1), m.group(2)
+    # Resolve the repository and number together BEFORE consulting GitHub.
+    # PR numbers are repo-local: a successful lookup in TARGET does not mean
+    # it is the PR named by the claimant.
+    repo, number = prose_pr_ref(title, body)
+    if repo:
+        return repo, number
     for s in (title, body or ""):
         m = re.search(r'(?:\bPR\s*#?\s*|pull/)(\d{1,6})', s, re.IGNORECASE)
         if m: return None, m.group(1)
@@ -87,37 +93,30 @@ def pr_ref(title, body):
         if m: return None, m.group(1)
     return None, None
 
-def prose_repo(title, body):
-    """Candidate repo NAME when a claim names it in prose, not as a URL.
+def prose_pr_ref(title, body):
+    """Return a repository-qualified prose reference as (owner/repo, number).
 
-    Claims are routinely written as "Code review bounty #73 for
-    rustchain-bounties PR #13434" or "Code Review - Scottcjn/rustchain-dialup
-    PR #4". pr_ref() only extracts a repo from a full github.com/<o>/<r>/pull/N
-    URL, so these resolve to (None, N) and the caller falls back to
-    TARGET_REPO. It then looks up a number that belongs to a DIFFERENT repo,
-    gets nothing, and files the claim as needs-human.
-
-    That is not a fringe case: on 2026-08-07 it accounted for 7 of the 13
-    unadjudicated claims that had to be paid out partially by hand.
-
-    Returns a bare repo name (no owner) or None. Deliberately does NOT verify
-    the repo exists -- the caller validates by attempting the lookup, so a
-    false positive costs one extra API call and nothing else.
+    Preserve an explicit owner so main() can apply its normal owner check.
+    Bare repo names use TARGET's owner, with the existing narrow name heuristic
+    to avoid interpreting ordinary words such as "this PR #12" as repositories.
     """
     for s in (title, body or ""):
-        if not s:
-            continue
-        # "owner/repo#123" or "owner/repo PR #123"
-        m = re.search(r'\b[\w.-]+/([\w.-]+?)\s*(?:#|\bPR\s*#?\s*)(\d{1,6})\b', s, re.I)
+        m = re.search(r'\b([\w.-]+/[\w.-]+?)\s*(?:#|\bPR\s*#?\s*)(\d{1,6})\b', s, re.I)
         if m:
-            return m.group(1)
-        # "<repo-name> PR #123" -- require a hyphen or a known product prefix
-        # so ordinary words ("the PR #12", "this PR #12") cannot match.
+            return m.group(1), m.group(2)
+    for s in (title, body or ""):
         m = re.search(r'\b((?:[\w.]+-[\w.-]+)|(?:rustchain|bottube|beacon|grazer)[\w.-]*)'
                       r'\s+PR\s*#?\s*(\d{1,6})\b', s, re.I)
         if m:
-            return m.group(1)
-    return None
+            return f"{TARGET.split('/')[0]}/{m.group(1)}", m.group(2)
+    return None, None
+
+
+def prose_repo(title, body):
+    """Return only the repo name for callers of the original prose helper."""
+    repo, _ = prose_pr_ref(title, body)
+    return repo.split("/", 1)[1] if repo else None
+
 def native_wallet(body):
     b=body or ""
     if re.search(r'\bRTC[0-9a-fA-F]{40}\b', b) or re.search(r'(?i)miner[_\-]?id', b): return True
@@ -341,7 +340,7 @@ def main():
     claim_repo, pr = pr_ref(title, body)
     if not pr:
         _unresolved("🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>` (a full PR URL is best). Flagged for human review.", quiet); return
-    # Cross-repo claims: trust an explicit PR URL if it points at one of
+    # Cross-repo claims: accept a URL or qualified prose reference to one of
     # the maintainer's repos; anything else goes to a human.
     target = TARGET
     if claim_repo:
@@ -352,19 +351,6 @@ def main():
     if native_wallet(body) is False:
         close(NUM,"🤖 Gate: payout must be a **native RTC wallet** (`RTC…`) — RTC has no off-ramp, no Solana/ETH bridge. Reopen with a native wallet."); return
     reviews=api(f"/repos/{target}/pulls/{pr}/reviews")
-    if reviews is None and not claim_repo:
-        # The default target was an assumption, not a statement by the
-        # claimant. Before giving up, honour a repo named in prose
-        # ("... for rustchain-bounties PR #13434"). Only reached when the
-        # assumed lookup already failed, so this can rescue a claim but can
-        # never redirect one that was resolving correctly.
-        cand = prose_repo(title, body)
-        if cand and cand.lower() != target.split("/")[1].lower():
-            owner = TARGET.split("/")[0]
-            alt = f"{owner}/{cand}"
-            alt_reviews = api(f"/repos/{alt}/pulls/{pr}/reviews")
-            if alt_reviews is not None:
-                target, reviews = alt, alt_reviews
     if reviews is None:
         _unresolved(f"🤖 Gate: couldn't read reviews for {target}#{pr} (private/deleted?). Flagged for human review.", quiet); return
     rv=[r for r in reviews if r.get("submitted_at")]
