@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """A closed bounty can never make a claim `eligible`.
 
 Auto-triage runs hourly against a fixed list of bounty issues and grades each
