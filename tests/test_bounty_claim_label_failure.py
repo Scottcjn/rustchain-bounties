@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """do_claim() must not announce a claim that was never recorded.
 
 The `claimed` label is the claim: do_sweep() and the "is this taken?" lookup
