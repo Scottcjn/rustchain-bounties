@@ -85,3 +85,14 @@ You can override nodes via environment variables:
 
 - Never commit private keys.
 - If transfer signing is later added, prefer reading keys from environment variables and support a dry-run mode.
+
+## Streaming & long-running tools
+
+**Current behavior (as of v0.3.0):** All tools are **blocking, single-shot calls**. The server does not emit MCP `notifications/progress` (progressive results) for any built-in tool.
+
+- Each tool (`rustchain_health`, `rustchain_miners`, `rustchain_epoch`, `rustchain_balance`, `rustchain_transfer`) executes an HTTP request to a RustChain node, waits for the full response, and returns the complete JSON result in one `CallToolResult`.
+- No tool accepts a `Context` parameter, so none call `ctx.report_progress()` (see `rustchain_mcp/server.py` lines 22–66).
+- The server's `ServerCapabilities` advertises `tools.list_changed` only — no streaming-specific capability flags are declared or required (see MCP SDK `Server.get_capabilities()`).
+- If a tool call takes longer than the client's timeout, the client sees a timeout; the server has no mechanism to keep the connection alive with progress updates.
+
+**For implementers:** To add progress reporting to a future tool, add a `ctx: Context` parameter and call `await ctx.report_progress(current, total, message="...")`. The MCP Python SDK will emit `notifications/progress` automatically. No capability flag change is needed — progress is a standard server-to-client notification.
