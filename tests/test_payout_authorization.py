@@ -64,6 +64,49 @@ class TrustedIdentityTests(unittest.TestCase):
         for who in ("attacker", "leanworld7-netizen", "AInoAKARI", "", None):
             self.assertFalse(bp._is_trusted(who), repr(who))
 
+    def test_docstring_gate_trusts_same_marker_authors_as_payout(self):
+        """The weekly cap must count exactly the markers the payout will pay
+        (#16471, @fsalmon1991); the two allowlists may not drift apart."""
+        self.assertEqual(dg.TRUSTED_MARKER_AUTHORS, bp.TRUSTED_AUTHORS)
+
+    def test_gate_and_payout_read_the_same_amount_from_the_same_thread(self):
+        """Equal allowlists are not enough: author extraction, marker selection
+        and malformed-amount handling must also agree, or the cap counts one
+        figure while the payout moves another. Run identical threads through
+        both code paths."""
+        def c(body, author=None, user=None):
+            d = {"body": body}
+            if author is not None:
+                d["author"] = author
+            if user is not None:
+                d["user"] = user
+            return d
+
+        def mk(v):
+            return f"<!-- rtc-payout-amount: {v} -->"
+
+        bot, rest_bot = {"login": "github-actions"}, {"login": "github-actions[bot]"}
+        threads = [
+            [],
+            [c(mk(5), author=bot)],
+            [c(mk(5), user=rest_bot)],
+            [c(mk(40), user={"login": "attacker"}), c(mk(5), user=rest_bot)],
+            [c(mk(0), author={"login": "collab"}), c(mk(5), author=bot)],
+            [c(mk(5), author=bot), c(mk(2.5), author={"login": "Scottcjn"})],
+            [c(mk(5), author=bot), c(mk("..."), author=bot)],
+            [c(mk("1.2.3"), user=rest_bot)],
+            [c(mk(9), author={"login": "attacker"}, user=rest_bot)],
+            [c(mk(9), author={}, user=rest_bot)],
+            [c(mk(9))],
+            [c(mk(9), author={"login": "scottcjn-fan"})],
+        ]
+        for t in threads:
+            self.assertEqual(dg.trusted_payout_amount(t), bp._trusted_marker_amount(t), t)
+
+    def test_payout_skips_unparseable_trusted_marker_instead_of_crashing(self):
+        thread = [{"author": {"login": "github-actions"}, "body": "<!-- rtc-payout-amount: ... -->"}]
+        self.assertIsNone(bp._trusted_marker_amount(thread))
+
     def test_lookalike_is_not_trusted(self):
         self.assertFalse(bp._is_trusted("scottcjn-fan"))
         self.assertFalse(bp._is_trusted("not-scottcjn"))
