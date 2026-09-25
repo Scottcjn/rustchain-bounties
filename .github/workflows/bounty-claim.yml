@@ -13,6 +13,10 @@ name: Bounty Claim
 # does not stop anyone submitting; first-in-time still decides who is paid. It
 # exists so that people can see what is already in progress before they spend a
 # week on it.
+#
+# Since 2026-09-25 a claim is only recorded on maintainer-posted issues that
+# carry the `bounty` label, by accounts >= 14 days old holding < 2 other active
+# claims. Maintainers release a claim with `/unclaim` (or `/release`).
 on:
   issue_comment:
     types: [created]
@@ -49,6 +53,10 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          # OWNER / MEMBER / COLLABORATOR may `/unclaim` any claim.
+          COMMENT_AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+          CLAIM_MIN_ACCOUNT_AGE_DAYS: "14"
+          CLAIM_MAX_ACTIVE: "2"
         run: python3 scripts/bounty_claim.py
 
   sweep:
