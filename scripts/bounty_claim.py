@@ -209,7 +209,18 @@ def do_claim(num, author, body=""):
         print(f"already claimed by {held[0]}")
         return 0
 
-    add_label(num, LABEL)
+    # The label IS the claim: do_sweep() and every "is this taken?" lookup go
+    # through it. If it did not land, posting the 🔒 comment would tell the
+    # claimant they are recorded when nothing was, and the next person would
+    # be told it is free. Fail loudly instead — no comment claiming success,
+    # a plain note to the claimant, and a red run.
+    if not add_label(num, LABEL):
+        gh(["issue", "comment", str(num), "-R", REPO, "--body",
+            f"@{author} — I could not record your claim (the `{LABEL}` label did not apply). "
+            f"Nothing is held for you yet. Comment `/claim` again in a few minutes; if it "
+            f"keeps failing, a maintainer will see the failed run."], None)
+        print(f"::error::add_label({num}, {LABEL}) failed; claim NOT recorded", file=sys.stderr)
+        return 1
     renew = " (renewed)" if held else ""
     gh(["issue", "comment", str(num), "-R", REPO, "--body",
         f"{MARKER}\n🔒 **Claimed{renew}.** holder: @{author} · expires: {expiry.isoformat()}\n\n"
