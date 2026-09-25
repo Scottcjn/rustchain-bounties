@@ -263,6 +263,39 @@ def _comment_author_login(c):
     if isinstance(u, dict):
         return u.get("login"), u
     return None, None
+
+
+PAYOUT_MARKER_RE = re.compile(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->')
+PAYOUT_AMOUNT_RE = re.compile(r'\d+(?:\.\d+)?')
+
+
+def _trusted_marker_amount(comments, where=""):
+    """The amount a docstring claim's thread authoritatively carries, or None.
+
+    Only markers written by a trusted author count, and the LAST valid one wins.
+    A trusted marker whose amount is not a plain number (`...`, `1.2.3`) is
+    logged and ignored: it used to reach `float()` and raise, killing the whole
+    payout run for every claim behind it. Ignoring it is fail-closed here -- a
+    claim with no valid trusted marker is skipped, never paid.
+
+    scripts/docstring_gate.py has a copy of this (`trusted_payout_amount`) for
+    its weekly cap; the two must agree, and a test runs the same threads
+    through both.
+    """
+    amount = None
+    for c in comments or []:
+        if not _is_trusted(_comment_author_login(c)[0]):
+            continue
+        m = PAYOUT_MARKER_RE.search(c.get("body") or "")
+        if not m:
+            continue
+        if not PAYOUT_AMOUNT_RE.fullmatch(m.group(1)):
+            print(f"::warning::{where} ignoring unparseable trusted payout marker {m.group(1)!r}")
+            continue
+        amount = float(m.group(1))
+    return amount
+
+
 def _looks_like_handle(token):
     if not token:
         return False
@@ -382,16 +415,10 @@ for i in issues:
         # append a larger marker and be paid it -- and because the gate's
         # per-claim ceiling is enforced before that comment exists, the marker
         # also bypassed the ceiling. Trusted authors only, and re-check the cap.
-        m=None
-        for c in coms:
-            if not _is_trusted(_comment_author_login(c)[0]):
-                continue
-            mm=re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
-            if mm: m=mm
-        if not m:
+        amount=_trusted_marker_amount(coms, where=f"#{num}")
+        if amount is None:
             print(f"::warning::#{num} is docstring-verified but carries no trusted amount marker; skipping")
             continue
-        amount=float(m.group(1))
         if amount > MAX_CLAIM_RTC:
             print(f"::warning::#{num} amount {amount} exceeds MAX_CLAIM_RTC={MAX_CLAIM_RTC}; skipping")
             continue

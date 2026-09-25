@@ -92,10 +92,6 @@ class ClaimParsingTests(unittest.TestCase):
             self.assertEqual(m.group(1), want)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class WeeklyCeilingTests(unittest.TestCase):
     """The per-claim ceiling bounds nothing: batches are ~5 RTC each, so the
     50th one passes just as easily as the 1st. The weekly ceiling is the one
@@ -117,7 +113,8 @@ class WeeklyCeilingTests(unittest.TestCase):
                 return {"items": items}
             if "/comments" in joined:
                 idx = int(joined.split("/issues/")[1].split("/")[0]) - 900
-                return [{"body": f"<!-- rtc-payout-amount: {amounts[idx]} -->"}]
+                return [{"user": {"login": "github-actions[bot]"},
+                         "body": f"<!-- rtc-payout-amount: {amounts[idx]} -->"}]
             return default
         dg.gh = fake
 
@@ -139,3 +136,95 @@ class WeeklyCeilingTests(unittest.TestCase):
         the per-claim ceiling, so volume is unbounded without it."""
         typical_batch_rtc = 10 * dg.RATE     # 10 functions
         self.assertLess(typical_batch_rtc, dg.MAX_RTC)
+
+
+class UntrustedMarkerTests(unittest.TestCase):
+    """Bounty #16471, reported by @fsalmon1991 (2026-09-22).
+
+    `docstring_rtc_this_week()` summed the FIRST `rtc-payout-amount` marker on
+    each prior claim with no author check. Issue comments are public input, so
+    anyone could front-run the gate's marker: a large value made an honest
+    contributor look over the weekly cap (held work), and a `0` undercounted
+    prior earnings so the cap failed OPEN. Only markers from the identities the
+    gate/payout actually post as may count; everything else is ignored.
+    """
+
+    BOT = "github-actions[bot]"
+
+    def setUp(self):
+        self._gh = dg.gh
+
+    def tearDown(self):
+        dg.gh = self._gh
+
+    def _one_claim(self, comments):
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 901, "body": ""}]}
+            if "/comments" in joined:
+                return comments
+            return default
+        dg.gh = fake
+
+    @staticmethod
+    def _c(login, amount):
+        return {"user": {"login": login}, "body": f"<!-- rtc-payout-amount: {amount} -->"}
+
+    def test_spoofed_marker_alone_does_not_count(self):
+        self._one_claim([self._c("random-user", 40)])
+        self.assertEqual(dg.docstring_rtc_this_week("victim"), 0.0)
+
+    def test_genuine_bot_marker_counts(self):
+        self._one_claim([self._c(self.BOT, 5)])
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0)
+
+    def test_inflating_marker_before_gate_marker_is_ignored(self):
+        """Front-run with 40: must not push an honest contributor over the cap."""
+        self._one_claim([self._c("attacker", 40), self._c(self.BOT, 5)])
+        self.assertEqual(dg.docstring_rtc_this_week("victim"), 5.0)
+
+    def test_zero_marker_before_gate_marker_is_ignored(self):
+        """Front-run with 0: must not undercount prior earnings (cap fail-open)."""
+        self._one_claim([self._c("collaborator", 0), self._c(self.BOT, 5)])
+        self.assertEqual(dg.docstring_rtc_this_week("farmer"), 5.0)
+
+    def test_marker_after_gate_marker_is_ignored(self):
+        self._one_claim([self._c(self.BOT, 5), self._c("attacker", 0)])
+        self.assertEqual(dg.docstring_rtc_this_week("farmer"), 5.0)
+
+    def test_lookalike_and_missing_author_are_untrusted(self):
+        self._one_claim([self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
+                         {"body": "<!-- rtc-payout-amount: 9 -->"},
+                         {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}])
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+
+    def test_maintainer_marker_counts_and_graphql_shape_is_read(self):
+        self._one_claim([{"author": {"login": "Scottcjn"},
+                          "body": "<!-- rtc-payout-amount: 3 -->"}])
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 3.0)
+
+    def test_unparseable_trusted_marker_is_skipped_not_a_crash(self):
+        """`[\\d.]+` matches `...` and `1.2.3`; those used to reach float() and
+        raise ValueError, which main() does not catch, killing the gate run."""
+        for bad in ("...", "1.2.3", "."):
+            self._one_claim([self._c(self.BOT, 5), self._c(self.BOT, bad)])
+            self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0, bad)
+            self._one_claim([self._c(self.BOT, bad)])
+            self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0, bad)
+
+    def test_author_key_wins_over_user_key_like_the_payout_runner(self):
+        c = {"author": {"login": "attacker"}, "user": {"login": self.BOT},
+             "body": "<!-- rtc-payout-amount: 9 -->"}
+        self._one_claim([c])
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+
+    def test_last_trusted_marker_wins_like_the_payout_runner(self):
+        """bounty_payout.py pays the LAST trusted marker; the cap must count the
+        same figure the payout will actually move, not a different one."""
+        self._one_claim([self._c(self.BOT, 5), self._c("Scottcjn", 2.5)])
+        self.assertEqual(dg.docstring_rtc_this_week("someone"), 2.5)
+
+
+if __name__ == "__main__":
+    unittest.main()

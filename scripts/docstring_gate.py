@@ -70,6 +70,66 @@ COUNT_RE = re.compile(
     re.I)
 FILE_RE = re.compile(r'(?:^|\s)((?:[\w.-]+/)*[\w.-]+\.py)\b')
 DOCSTRING_OPEN = re.compile(r'^\s*[rRbBuU]{0,2}("""|\'\'\')')
+PAYOUT_MARKER_RE = re.compile(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->')
+
+# Identities whose `rtc-payout-amount` marker is an authoritative figure.
+#
+# This gate posts its marker with the workflow's GITHUB_TOKEN, i.e. as
+# `github-actions[bot]` (REST) / `github-actions` (GraphQL). Maintainers can
+# adjudicate by hand. The set deliberately MIRRORS `TRUSTED_AUTHORS` in
+# scripts/bounty_payout.py (a test pins the two together): the weekly cap must
+# count exactly the markers the payout runner will pay. Counting fewer would
+# undercount earnings and fail the cap open; counting more lets strangers
+# steer it. Every other commenter is untrusted -- anyone with a GitHub account
+# can write a marker on a public issue (#16471, @fsalmon1991).
+TRUSTED_MARKER_AUTHORS = frozenset({
+    "scottcjn", "sophiaeagent-beep", "github-actions[bot]", "github-actions"})
+
+
+PAYOUT_AMOUNT_RE = re.compile(r'\d+(?:\.\d+)?')
+
+
+def _comment_login(c):
+    """Author login of a comment in GraphQL (`author`) or REST (`user`) shape.
+
+    Same precedence as `_comment_author_login` in scripts/bounty_payout.py:
+    `author` first, and if it is a dict its login is final (no fall-through to
+    `user`). The two must resolve the same author for the same comment.
+    """
+    if not isinstance(c, dict):
+        return None
+    for key in ("author", "user"):
+        who = c.get(key)
+        if isinstance(who, dict):
+            return who.get("login")
+    return None
+
+
+def trusted_payout_amount(comments):
+    """The payout amount a claim's comment thread authoritatively carries.
+
+    Only markers written by TRUSTED_MARKER_AUTHORS count; a marker from anyone
+    else is ignored no matter where it sits in the thread. Like the payout
+    runner, the LAST valid trusted marker wins. Returns None if there is none.
+
+    A trusted marker whose amount is not a plain number (`...`, `1.2.3`) is
+    logged and ignored rather than crashing the gate run. This matches
+    `_trusted_marker_amount` in bounty_payout.py, which skips the same marker
+    and so never pays it -- the cap keeps counting exactly what gets paid.
+    """
+    amount = None
+    for c in comments or []:
+        login = _comment_login(c)
+        if not login or login.lower() not in TRUSTED_MARKER_AUTHORS:
+            continue
+        m = PAYOUT_MARKER_RE.search(c.get("body") or "")
+        if not m:
+            continue
+        if not PAYOUT_AMOUNT_RE.fullmatch(m.group(1)):
+            print(f"::warning::ignoring unparseable trusted payout marker {m.group(1)!r}")
+            continue
+        amount = float(m.group(1))
+    return amount
 
 
 class GhError(RuntimeError):
@@ -140,7 +200,11 @@ def docstring_rtc_this_week(author):
 
     Summed from this gate's own `rtc-payout-amount` markers rather than from
     the chain, so the check works from Actions with no node access and no
-    admin key. Only claims the gate itself verified are counted.
+    admin key. Only claims the gate itself verified are counted, and only
+    markers from trusted authors: the previous loop took the FIRST marker from
+    ANY commenter, so a stranger could front-run the gate's figure with a large
+    value (holding an honest contributor at the cap) or with 0 (so the cap
+    failed open). See `trusted_payout_amount`.
     """
     since = (datetime.datetime.now(datetime.timezone.utc)
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
@@ -151,14 +215,11 @@ def docstring_rtc_this_week(author):
     for it in (res.get("items") or []):
         if str(it.get("number")) == str(NUM):
             continue          # never count the claim being adjudicated
-        body = it.get("body") or ""
         # The marker lives in a gate comment, not the issue body, so fetch them.
         cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
-        for c in cs:
-            m = re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
-            if m:
-                total += float(m.group(1))
-                break
+        amt = trusted_payout_amount(cs)
+        if amt is not None:
+            total += amt
     return round(total, 2)
 
 
