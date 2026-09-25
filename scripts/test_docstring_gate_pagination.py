@@ -203,6 +203,27 @@ class PaginationTests(unittest.TestCase):
         dg.gh = fake
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 7.0)
 
+    def test_search_page_cap_overrun_refuses(self):
+        """More than max_pages of full search pages -> GhError, never a truncation.
+
+        (Consolidated from the earlier test_docstring_gate.py in this branch.)
+        """
+        full_page = {"total_count": 10_000, "items": [issue_item(8000 + i) for i in range(100)]}
+        fake = FakeGh(search_pages={}, comments_by_issue={})
+        fake.search_pages = {}  # every page returns a full page of 100
+        original_call = fake.__call__
+
+        def endless(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return full_page
+            return original_call(args, default, strict)
+
+        dg.gh = endless
+        with self.assertRaises(dg.GhError) as cm:
+            dg.docstring_rtc_this_week("someone")
+        self.assertIn("exceeded", str(cm.exception))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
