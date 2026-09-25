@@ -135,30 +135,111 @@ def add_labels(*names):
 
 
 
+# --- weekly-cap lookups (paginated, fail closed -- #17054) -------------------
+#
+# Both lookups below used to read ONE page only, so the 40 RTC/week cap
+# failed open: a payout marker pushed past page 1 of a claim thread (100+
+# comments posted while the claim sat in awaiting-merge) or past the first
+# 100 prior verified claims in the window read as "no marker" and summed 0.
+# Found during review of #17053 (bounty #16471). Everything here walks pages
+# until a short page and raises GhError on anything it cannot read
+# completely -- main() already turns that into the needs-human hold, and a
+# partial sum is worse than no sum.
+
+SEARCH_MAX_PAGES = 10    # GitHub search never serves past result 1000
+COMMENTS_MAX_PAGES = 50  # 5,000 comments: far past any real claim thread
+
+
+def _all_verified_claim_items(q):
+    """Every item of the prior-claims search, across pages, or GhError.
+
+    More than 100 prior docstring-verified claims inside the 7-day window
+    is unrealistic at current rates, but it is exactly the shape the cap
+    exists for, so the window is read completely or not summed at all.
+    """
+    items = []
+    for page in range(1, SEARCH_MAX_PAGES + 1):
+        res = gh(["api", "-X", "GET", "search/issues",
+                  "-f", f"q={q}", "-f", "per_page=100", "-f", f"page={page}"],
+                 {}, strict=True)
+        if not isinstance(res, dict) or not isinstance(res.get("items"), list):
+            raise GhError(f"search/issues page {page} is not an items payload")
+        items.extend(res["items"])
+        total_count = res.get("total_count")
+        complete = isinstance(total_count, int) and len(items) >= total_count
+        if len(res["items"]) < 100 or complete:
+            return items
+    # Ten full pages and still incomplete: search cannot serve past result
+    # 1000, so the window is unreadable -- refuse rather than undercount.
+    raise GhError(
+        f"search/issues served {SEARCH_MAX_PAGES} full pages without "
+        f"completing the window; the weekly cap cannot be checked")
+
+
+def _all_issue_comments(number):
+    """Every comment on an issue, across pages, or GhError.
+
+    A marker at position 120 of 150 comments is the regression from #17054:
+    the exploit is ordinary comments posted before the gate writes its
+    marker, pushing it to page 2.
+    """
+    comments = []
+    for page in range(1, COMMENTS_MAX_PAGES + 1):
+        cs = gh(["api",
+                 f"/repos/{REPO}/issues/{number}/comments?per_page=100&page={page}"],
+                [], strict=True)
+        if not isinstance(cs, list):
+            raise GhError(f"comments page {page} of #{number} is not a list")
+        comments.extend(cs)
+        if len(cs) < 100:
+            return comments
+    raise GhError(
+        f"#{number} exceeds {COMMENTS_MAX_PAGES * 100} comments; refusing "
+        f"to sum a partial thread against the weekly cap")
+
+
+def _first_payout_marker(comments):
+    """The thread's rtc-payout-amount marker, or None if no comment has it."""
+    for c in comments:
+        m = re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
+        if m:
+            return float(m.group(1))
+    return None
+
+
 def docstring_rtc_this_week(author):
     """RTC this author has already been granted for docstrings in 7 days.
 
     Summed from this gate's own `rtc-payout-amount` markers rather than from
     the chain, so the check works from Actions with no node access and no
     admin key. Only claims the gate itself verified are counted.
+
+    #17054: both lookups paginate now. A marker at position 120 of 150
+    comments still counts; every prior verified claim in the window is
+    summed; and a `docstring-verified` claim whose fully-read thread carries
+    no marker is an UNKNOWN, not a 0 -- it raises into main()'s needs-human
+    hold instead of understating prior earnings.
     """
     since = (datetime.datetime.now(datetime.timezone.utc)
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
     q = (f"repo:{REPO} is:issue author:{author} label:docstring-verified "
          f"created:>{since}")
-    res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}", "-f", "per_page=100"], {}, strict=True)
     total = 0.0
-    for it in (res.get("items") or []):
+    for it in _all_verified_claim_items(q):
         if str(it.get("number")) == str(NUM):
             continue          # never count the claim being adjudicated
-        body = it.get("body") or ""
-        # The marker lives in a gate comment, not the issue body, so fetch them.
-        cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
-        for c in cs:
-            m = re.search(r'<!--\s*rtc-payout-amount:\s*([\d.]+)\s*-->', c.get("body") or "")
-            if m:
-                total += float(m.group(1))
-                break
+        # The marker lives in a gate comment, not the issue body, so fetch
+        # the whole thread, across pages.
+        marker = _first_payout_marker(_all_issue_comments(it["number"]))
+        if marker is None:
+            # A claim the search says is docstring-verified, whose fully-read
+            # thread carries no marker: an old gate, a deleted comment, or a
+            # hand-applied label. Never a 0.
+            raise GhError(
+                f"#{it['number']} is docstring-verified but its thread "
+                f"carries no rtc-payout-amount marker; prior earnings "
+                f"unknown, holding rather than undercounting")
+        total += marker
     return round(total, 2)
 
 
