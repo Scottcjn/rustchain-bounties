@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: MIT
+name: Bounty Claim Tests
+
+# Unit tests for the claim bot (scripts/bounty_claim.py). The bot decides who
+# may lock a paid bounty for a week, so changes to it must not land untested.
+on:
+  pull_request:
+    paths:
+      - "scripts/bounty_claim.py"
+      - "scripts/live_url.py"
+      - "tests/test_bounty_claim.py"
+      - ".github/workflows/bounty-claim.yml"
+      - ".github/workflows/bounty-claim-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/bounty_claim.py"
+      - "scripts/live_url.py"
+      - "tests/test_bounty_claim.py"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Run claim-bot tests (stdlib unittest, no network)
+        run: python -m unittest -v tests/test_bounty_claim.py
