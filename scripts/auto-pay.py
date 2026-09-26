@@ -80,6 +80,34 @@ def is_already_paid_comment(body: str) -> bool:
         return False
     return ALREADY_PAID_MARKER in b.replace(LEGACY_FAILED_MARKER, "")
 
+
+# Identities whose comment can record a payment. The confirmation is posted by
+# this workflow's GITHUB_TOKEN (`github-actions[bot]`); the maintainer and the
+# Sophia agent account have posted confirmations by hand. Mirrors
+# TRUSTED_AUTHORS in scripts/bounty_payout.py; the repo owner is added at call
+# time.
+TRUSTED_MARKER_AUTHORS = frozenset({
+    "scottcjn", "sophiaeagent-beep", "github-actions[bot]", "github-actions"})
+
+
+def records_completed_payment(comment: dict, repo_owner: str = "") -> bool:
+    """True if `comment` is a TRUSTED record of a completed payment.
+
+    The dedup used to accept the marker from ANY commenter. Anyone can comment
+    on a public PR, so a comment containing `RTC-AutoPay-Confirmed` -- planted
+    on purpose, or just quoted while discussing the payout scripts -- made the
+    run print "Payment already processed. Skipping." and exit 0 green, and the
+    contributor was never paid. A marker only counts from an identity that can
+    actually have made the payment.
+    """
+    if not isinstance(comment, dict):
+        return False
+    login = ((comment.get("user") or {}).get("login") or "").lower()
+    trusted = TRUSTED_MARKER_AUTHORS | ({repo_owner.lower()} if repo_owner else set())
+    if login not in trusted:
+        return False
+    return is_already_paid_comment(comment.get("body") or "")
+
 # ---------------------------------------------------------------------------
 # Conservative auto-tier (folded in from the former sophia-auto-approve.yml,
 # PR #11536). When a merged PR has NO human `Payment:` directive, this single
@@ -274,9 +302,13 @@ def main() -> None:
 
     # --- Check for duplicate run ------------------------------------------
     for c in comments:
-        if is_already_paid_comment(c.get("body") or ""):
+        if records_completed_payment(c, repo_owner):
             print(f"Payment already processed (found {ALREADY_PAID_MARKER}). Skipping.")
             return
+        if is_already_paid_comment(c.get("body") or ""):
+            who = (c.get("user") or {}).get("login", "?")
+            print(f"::warning::ignoring {ALREADY_PAID_MARKER} marker from untrusted "
+                  f"commenter {who} (comment {c.get('id')})")
 
     # --- Find payment directive from repo owner ---------------------------
     payment_amount = None
