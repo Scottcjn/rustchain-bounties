@@ -3,7 +3,11 @@ import random
 import string
 
 import requests
-from github import Github
+
+try:
+    from github import Github
+except ImportError:  # pragma: no cover — optional dependency
+    Github = None
 
 # GitHub API Token for authentication
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "") or ""
@@ -12,21 +16,42 @@ RTC_WALLET = f"RTC-agent-{''.join(random.choices(string.ascii_uppercase + string
 
 
 def _get_repo():
-    """Create a GitHub repository handle only when credentials are available."""
-    if not GITHUB_TOKEN:
+    """Return a GitHub repository handle, or None when unavailable.
+
+    No network I/O happens at import time: the handle is resolved lazily so
+    importing this module never fails when credentials are missing, the
+    optional PyGithub dependency is not installed, or the API errors.
+    """
+    token = os.environ.get("GITHUB_TOKEN", "") or GITHUB_TOKEN
+    if not token or Github is None:
         return None
-    g = Github(GITHUB_TOKEN)
-    return g.get_repo(REPO_NAME)
+    try:
+        g = Github(token)
+        return g.get_repo(REPO_NAME)
+    except Exception:
+        return None
 
 
-repo = _get_repo()
+def _resolve_repo():
+    """Return the patched/test repo if set, else resolve one lazily."""
+    if repo is not None:
+        return repo
+    return _get_repo()
+
+
+# Resolved lazily via _resolve_repo(); kept as a module attribute so tests
+# can patch `ai_agent.repo`.  Must stay None at import (no network I/O).
+repo = None
 
 # Function to get open issues from the repository
 def get_open_bounties():
+    handle = _resolve_repo()
+    if handle is None:
+        return []
     open_bounties = []
-    issues = repo.get_issues(state='open')
+    issues = handle.get_issues(state='open')
     for issue in issues:
-        if 'hardware' not in issue.body.lower():  # Filter out hardware-related issues
+        if 'hardware' not in (getattr(issue, 'body', None) or '').lower():  # Filter out hardware-related issues
             open_bounties.append(issue)
     return open_bounties
 
@@ -38,7 +63,10 @@ def claim_bounty(issue):
 
 # Function to fork the repository and create a branch
 def fork_repo_and_create_branch():
-    forked_repo = repo.create_fork()
+    handle = _resolve_repo()
+    if handle is None:
+        raise RuntimeError("GitHub repository is unavailable (missing token or PyGithub).")
+    forked_repo = handle.create_fork()
     branch_name = f"ai-agent-{RTC_WALLET}"
     main_branch = forked_repo.get_branch("main")
     forked_repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=main_branch.commit.sha)
