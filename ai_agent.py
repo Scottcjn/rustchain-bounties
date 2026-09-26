@@ -3,7 +3,10 @@ import random
 import string
 
 import requests
-from github import Github
+try:
+    from github import Github
+except ImportError:  # PyGithub is optional for offline/test use
+    Github = None
 
 # GitHub API Token for authentication
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "") or ""
@@ -13,10 +16,15 @@ RTC_WALLET = f"RTC-agent-{''.join(random.choices(string.ascii_uppercase + string
 
 def _get_repo():
     """Create a GitHub repository handle only when credentials are available."""
-    if not GITHUB_TOKEN:
+    if not GITHUB_TOKEN or Github is None:
         return None
-    g = Github(GITHUB_TOKEN)
-    return g.get_repo(REPO_NAME)
+    try:
+        g = Github(GITHUB_TOKEN)
+        return g.get_repo(REPO_NAME)
+    except Exception:
+        # Invalid/offline credentials must not crash module import;
+        # callers (and tests) patch `repo` with a mock handle.
+        return None
 
 
 repo = _get_repo()

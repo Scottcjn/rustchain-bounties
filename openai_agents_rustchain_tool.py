@@ -3,7 +3,37 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 import requests
-from agents import Agent, FunctionTool, function_tool
+
+try:
+    from agents import Agent, FunctionTool, function_tool
+except ImportError:  # openai-agents SDK is optional; provide minimal stand-ins
+    class FunctionTool:
+        """Minimal stand-in for agents.FunctionTool (exposes .name)."""
+
+        def __init__(self, name, func=None):
+            self.name = name
+            self.func = func
+
+        def __call__(self, *args, **kwargs):
+            if self.func is None:
+                raise RuntimeError("FunctionTool has no backing function")
+            return self.func(*args, **kwargs)
+
+    def function_tool(fn=None, **kwargs):
+        """Bare-decorator stand-in: wraps func into a FunctionTool."""
+
+        def wrap(f):
+            return FunctionTool(name=kwargs.get("name", f.__name__), func=f)
+
+        return wrap(fn) if fn is not None else wrap
+
+    class Agent:
+        """Minimal stand-in for agents.Agent."""
+
+        def __init__(self, name=None, instructions=None, tools=()):
+            self.name = name
+            self.instructions = instructions
+            self.tools = list(tools)
 
 
 DEFAULT_NODE_URL = "https://rustchain.org"

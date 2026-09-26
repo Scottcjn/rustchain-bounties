@@ -2,7 +2,13 @@
 import json
 import os
 import requests
-from tabulate import tabulate
+try:
+    from tabulate import tabulate
+except ImportError:  # optional pretty-print dependency
+    def tabulate(data, headers=(), tablefmt=None):
+        lines = [" | ".join(str(h) for h in headers)]
+        lines += [" | ".join(str(c) for c in row) for row in data]
+        return "\n".join(lines)
 import argparse
 
 NODES = [
