@@ -26,6 +26,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RTC_ADMIN_KEY: ${{ secrets.RTC_ADMIN_KEY }}
           RTC_VPS_HOST: ${{ secrets.RTC_VPS_HOST }}
+          # SHA-256 of the node's (self-signed) DER certificate. Without it the
+          # script verifies against system CAs and, for a self-signed node,
+          # sends nothing. Set this repo variable before re-enabling.
+          RUSTCHAIN_TLS_PIN_SHA256: ${{ vars.RUSTCHAIN_TLS_PIN_SHA256 }}
           GH_REPO: ${{ github.repository }}
           RATE_RTC: "3"
           MAX_PER_RUN: "40"

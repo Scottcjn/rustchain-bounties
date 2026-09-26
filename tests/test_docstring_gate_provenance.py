@@ -112,5 +112,63 @@ class ProvenanceTests(unittest.TestCase):
         self.assertHeld()
 
 
+class LabelHelpersNeverCrash(unittest.TestCase):
+    """remove_label() is documented as never fatal and sits on the provenance
+    hold path, between the hold comment and `needs-human`. A hung or missing
+    `gh` used to raise out of it, leaving the claim unlabelled to be re-swept
+    and re-commented; add_labels() had the same gap."""
+
+    def setUp(self):
+        self._run = dg.subprocess.run
+
+    def tearDown(self):
+        dg.subprocess.run = self._run
+
+    def _raise(self, exc):
+        def boom(*a, **k):
+            raise exc
+        dg.subprocess.run = boom
+
+    def test_remove_label_timeout_is_logged_not_raised(self):
+        self._raise(dg.subprocess.TimeoutExpired(["gh"], 60))
+        self.assertFalse(dg.remove_label("awaiting-merge"))
+
+    def test_remove_label_missing_gh_is_logged_not_raised(self):
+        self._raise(FileNotFoundError("gh"))
+        self.assertFalse(dg.remove_label("awaiting-merge"))
+
+    def test_add_labels_timeout_reports_failure(self):
+        self._raise(dg.subprocess.TimeoutExpired(["gh"], 60))
+        self.assertFalse(dg.add_labels("bounty-eligible", "docstring-verified"))
+
+    def test_hold_path_still_applies_needs_human_when_removal_hangs(self):
+        applied = []
+
+        def fake_run(args, **kw):
+            if "DELETE" in args:
+                raise dg.subprocess.TimeoutExpired(args, 60)
+            applied.append(args)
+            return _Result()
+        dg.subprocess.run = fake_run
+        saved = {k: getattr(dg, k) for k in ("gh", "gh_raw", "NUM")}
+        try:
+            dg.NUM = "500"
+
+            def fake_gh(args, default=None, strict=False):
+                if args[:2] == ["issue", "view"]:
+                    return {"title": "Docstring batch", "labels": [], "state": "OPEN",
+                            "author": {"login": "mallory"},
+                            "body": "docstrings https://github.com/Scottcjn/bottube/pull/1"}
+                if args[:2] == ["pr", "view"]:
+                    return {"state": "OPEN", "author": {"login": "alice"}}
+                return default
+            dg.gh = fake_gh
+            self.assertEqual(dg.main(), 0)
+        finally:
+            for k, v in saved.items():
+                setattr(dg, k, v)
+        self.assertTrue(any("labels[]=needs-human" in a for a in applied), applied)
+
+
 if __name__ == "__main__":
     unittest.main()

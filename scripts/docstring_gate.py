@@ -199,9 +199,16 @@ def add_labels(*names):
     """
     ok = True
     for n in names:
-        r = subprocess.run(["gh", "api", "-X", "POST",
-                            f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
-                           capture_output=True, text=True, timeout=60)
+        try:
+            r = subprocess.run(["gh", "api", "-X", "POST",
+                                f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
+                               capture_output=True, text=True, timeout=60)
+        except (subprocess.TimeoutExpired, OSError) as e:
+            # A hung or missing `gh` is a failed label, reported like any other
+            # (callers fail closed on False), not a crash mid-adjudication.
+            print(f"::warning::could not apply label {n}: {e.__class__.__name__}: {str(e)[:120]}")
+            ok = False
+            continue
         if r.returncode != 0:
             print(f"::warning::could not apply label {n}: {r.stderr.strip()[:120]}")
             ok = False
@@ -210,12 +217,24 @@ def add_labels(*names):
 
 
 def remove_label(name):
-    """Best-effort REST label removal. A failure is logged, never fatal."""
-    r = subprocess.run(["gh", "api", "-X", "DELETE",
-                        f"/repos/{REPO}/issues/{NUM}/labels/{name}"],
-                       capture_output=True, text=True, timeout=60)
+    """Best-effort REST label removal. A failure is logged, never fatal.
+
+    Timeouts and a missing `gh` are caught too: this runs on the provenance
+    hold path between posting the comment and applying `needs-human`, and a
+    crash there left the claim unlabelled, to be re-swept and re-commented.
+    Returns True if the label is gone (or never existed).
+    """
+    try:
+        r = subprocess.run(["gh", "api", "-X", "DELETE",
+                            f"/repos/{REPO}/issues/{NUM}/labels/{name}"],
+                           capture_output=True, text=True, timeout=60)
+    except (subprocess.TimeoutExpired, OSError) as e:
+        print(f"::warning::could not remove label {name}: {e.__class__.__name__}: {str(e)[:120]}")
+        return False
     if r.returncode != 0 and "Label does not exist" not in (r.stderr or ""):
         print(f"::warning::could not remove label {name}: {(r.stderr or '').strip()[:120]}")
+        return False
+    return True
 
 
 def pr_provenance_problem(claimant, pr_repo, pr):
@@ -227,6 +246,9 @@ def pr_provenance_problem(claimant, pr_repo, pr):
     cited somebody else's merged docstring PR -- in any repository on GitHub --
     was paid to the claimant for work they did not do. Both checks fail closed:
     an unreadable author is not a match.
+
+    scripts/bounty_payout.py re-runs this at payout time, which covers claims
+    labelled payable before this check existed (main() skips those).
     """
     owner = pr_repo.split("/", 1)[0].lower()
     if owner not in ALLOWED_PR_OWNERS:
