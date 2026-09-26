@@ -2,7 +2,34 @@
 import json
 import os
 import requests
-from tabulate import tabulate
+
+try:
+    from tabulate import tabulate
+except ImportError:  # pragma: no cover — optional dependency
+    def tabulate(rows, headers=(), tablefmt="grid"):
+        """Minimal fallback table renderer used when `tabulate` is missing."""
+        headers = list(headers or [])
+        body = [list(map(str, row)) for row in rows]
+        widths = [len(h) for h in headers]
+        for row in body:
+            for i, cell in enumerate(row):
+                if i >= len(widths):
+                    widths.append(0)
+                widths[i] = max(widths[i], len(cell))
+        while len(headers) < len(widths):
+            headers.append("")
+        sep = "+" + "+".join("-" * (w + 2) for w in widths) + "+"
+
+        def fmt(row):
+            cells = [c.ljust(widths[i]) for i, c in enumerate(row)]
+            while len(cells) < len(widths):
+                cells.append(" " * widths[len(cells)])
+            return "| " + " | ".join(cells) + " |"
+
+        lines = [sep, fmt(headers), sep]
+        lines.extend(fmt(row) for row in body)
+        lines.append(sep)
+        return "\n".join(lines)
 import argparse
 
 NODES = [
