@@ -18,7 +18,8 @@ SAFETY:
   - handle fallback excludes bot accounts (`type == 'Bot'` or `[bot]` suffix)
   - idempotency_key=bounty73-claim-<n> + 'RTC-AutoPay-Confirmed' marker => never double-pays
   - MAX_PER_RUN aggregate cap (default 40) — hard stop per run, surfaced in log
-Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
+Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40),
+     RUSTCHAIN_PAYOUT_INSECURE (unset = HTTPS only; "1" allows the plaintext :8099 fallback).
 """
 import os, re, json, time, subprocess, ssl, urllib.request, urllib.error, importlib.util
 
@@ -199,9 +200,19 @@ def transfer(to,memo,idem,amount=None):
     """
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":(RATE if amount is None else amount),"memo":memo,"idempotency_key":idem}).encode()
     # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
-    # nginx HTTPS endpoint (the working path); fall back to the internal port.
+    # nginx HTTPS endpoint (the working path).
+    #
+    # SECURITY: the plaintext http://HOST:8099 fallback used to be tried on ANY
+    # HTTPS exception, re-sending X-Admin-Key in the clear. Anyone able to make
+    # port 443 fail (drop/reset it on-path) could therefore downgrade the
+    # request and read the admin key off the wire. It is now opt-in via
+    # RUSTCHAIN_PAYOUT_INSECURE=1, the same switch scripts/auto-pay.py uses.
+    urls=[f"https://{HOST}/wallet/transfer"]
+    if os.environ.get("RUSTCHAIN_PAYOUT_INSECURE")=="1":
+        print("::warning::RUSTCHAIN_PAYOUT_INSECURE=1 — plaintext fallback enabled; admin key may be sent over HTTP")
+        urls.append(f"http://{HOST}:{PORT}/wallet/transfer")
     last="no_endpoint_attempted"
-    for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
+    for url in urls:
         try:
             resp=_post(url,body)
         except Exception as e:

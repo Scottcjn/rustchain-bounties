@@ -13,7 +13,8 @@ Validates:
   - `{"ok": false}`  -> (False, "server_declined:...")
   - a declining server is NOT retried against the fallback endpoint
     (re-posting a request the server already processed risks a double debit)
-  - a raising endpoint DOES fall through to the fallback endpoint
+  - a raising endpoint falls through to the plaintext fallback ONLY when
+    RUSTCHAIN_PAYOUT_INSECURE=1; by default the admin key never leaves HTTPS
   - both endpoints raising -> (False, last error)
   - a non-dict body (e.g. an HTML error page) is not treated as success
 """
@@ -22,6 +23,7 @@ import os
 import subprocess
 import unittest
 from pathlib import Path
+from unittest import mock
 
 os.environ.setdefault("GITHUB_TOKEN", "dummy")
 os.environ.setdefault("RTC_ADMIN_KEY", "dummy")
@@ -96,15 +98,30 @@ class TransferResultTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(len(self.calls), 1, "fallback endpoint must not be tried")
 
-    def test_raising_endpoint_falls_through_to_fallback(self):
+    def test_raising_endpoint_falls_through_to_fallback_when_opted_in(self):
         def boom(_u):
             raise OSError("connection refused")
 
         self._install([boom, lambda u: {"ok": True, "tx_hash": "z"}])
-        ok, resp = bp.transfer("alice", "memo", "idem-4")
+        with mock.patch.dict(os.environ, {"RUSTCHAIN_PAYOUT_INSECURE": "1"}):
+            ok, resp = bp.transfer("alice", "memo", "idem-4")
         self.assertTrue(ok)
         self.assertEqual(resp["tx_hash"], "z")
         self.assertEqual(len(self.calls), 2)
+
+    def test_https_failure_never_downgrades_to_plaintext_by_default(self):
+        """The admin key must not be re-sent over http:// just because 443 failed."""
+        def boom(_u):
+            raise OSError("connection reset")
+
+        self._install([boom, lambda u: {"ok": True}])
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("RUSTCHAIN_PAYOUT_INSECURE", None)
+            ok, resp = bp.transfer("alice", "memo", "idem-7")
+        self.assertFalse(ok)
+        self.assertIn("connection reset", resp)
+        self.assertEqual(len(self.calls), 1)
+        self.assertTrue(all(u.startswith("https://") for u in self.calls), self.calls)
 
     def test_all_endpoints_raise_is_failure(self):
         def boom(_u):
