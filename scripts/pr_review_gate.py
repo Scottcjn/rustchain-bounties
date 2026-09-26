@@ -14,7 +14,7 @@ Idempotent: skips issues already labeled/closed by the gate.
 Env: GITHUB_TOKEN (repo + public read), GH_REPO (owner/name), ISSUE_NUMBER,
      TARGET_REPO (default Scottcjn/Rustchain), CAP (default 15), RATE_RTC (3).
 """
-import os, re, json, sys, urllib.request, urllib.error
+import os, re, json, sys, time, urllib.request, urllib.error
 
 TOKEN=os.environ.get("GITHUB_TOKEN","")
 REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
@@ -22,6 +22,29 @@ TARGET=os.environ.get("TARGET_REPO","Scottcjn/Rustchain")
 NUM=os.environ.get("ISSUE_NUMBER","")
 CAP=int(os.environ.get("CAP","15")); RATE=os.environ.get("RATE_RTC","3")
 API="https://api.github.com"
+
+# The bounty this gate adjudicates for. It is checked at runtime, because a
+# gate that outlives its bounty keeps promising money from a pool that no
+# longer exists: #73 was closed 2026-06-05 and marked "RETIRED — pool closed"
+# on 2026-06-14, yet this workflow was still running every 4h in late September
+# and its approval comment still said "3 RTC pending payout". Nothing failed —
+# it reported success the whole time, against a world that had moved.
+BOUNTY_ISSUE=os.environ.get("BOUNTY_ISSUE","73")
+
+# Bounty #73, "Eligible Repositories". An owner-prefix test (startswith
+# "scottcjn/") accepted ANY repo the maintainer owns, including personal ones
+# the bounty never covered.
+ELIGIBLE_REPOS={r.strip().lower() for r in os.environ.get(
+    "ELIGIBLE_REPOS",
+    "Scottcjn/Rustchain,Scottcjn/bottube,Scottcjn/rustchain-bounties,Scottcjn/ram-coffers",
+).split(",") if r.strip()}
+
+# "Per-contributor cap: 3 PR reviews / 24h, 15 total" — only the 15 total was
+# ever enforced. And "The 200 RTC pool is finite. Claims are assessed in
+# claim-timestamp order until the pool is exhausted" — nothing tracked the pool,
+# so the gate could approve past it indefinitely.
+DAILY_CAP=int(os.environ.get("DAILY_CAP","3"))
+POOL_RTC=int(os.environ.get("POOL_RTC","200"))
 
 
 class ApiError(RuntimeError):
@@ -62,6 +85,62 @@ def api(path, method="GET", data=None, strict=False):
         # typed error they can fail closed on.
         if strict: raise ApiError(f"{method} {path} failed: {e.__class__.__name__}: {e}") from e
         raise
+
+def bounty_is_open():
+    """True only if the bounty this gate pays from is still open.
+
+    Fail-CLOSED on every uncertainty. The gate's output is a promise of money;
+    a lookup failure is not permission to keep making that promise. Returns
+    False for a closed bounty, a missing one, or an unreadable response.
+
+    Set BOUNTY_ISSUE="" to bypass (tests, or a deliberate manual backfill).
+    """
+    if not BOUNTY_ISSUE:
+        return True
+    try:
+        iss = api(f"/repos/{REPO}/issues/{BOUNTY_ISSUE}", strict=True)
+    except ApiError as e:
+        print(f"gate: bounty #{BOUNTY_ISSUE} lookup failed, refusing to adjudicate: {e}",
+              file=sys.stderr)
+        return False
+    if not isinstance(iss, dict) or "state" not in iss:
+        print(f"gate: bounty #{BOUNTY_ISSUE} returned an unreadable response, refusing",
+              file=sys.stderr)
+        return False
+    if iss.get("state") != "open":
+        print(f"gate: bounty #{BOUNTY_ISSUE} is {iss.get('state')} — refusing to adjudicate. "
+              "Re-point BOUNTY_ISSUE at the live bounty, or disable this workflow.",
+              file=sys.stderr)
+        return False
+    return True
+
+
+def _eligible_claim_count(author, since_iso=None):
+    """Count this author's bounty-eligible claims org-wide, optionally since a date.
+
+    STRICT: raises ApiError rather than returning a falsely-low number, because
+    the result gates money. See api(strict=True).
+    """
+    q = f"user:Scottcjn+label:bounty-eligible+author:{author}+type:issue"
+    if since_iso:
+        q += f"+created:>={since_iso}"
+    res = api(f"/search/issues?q={q}", strict=True)
+    if not isinstance(res, dict) or "total_count" not in res:
+        raise ApiError("cap lookup returned an unexpected shape")
+    return int(res["total_count"])
+
+
+def _pool_spent_rtc():
+    """RTC already committed under this bounty = eligible claims x RATE.
+
+    STRICT for the same reason as the caps: an unreadable count must not read
+    back as "the pool is untouched".
+    """
+    res = api("/search/issues?q=user:Scottcjn+label:bounty-eligible+type:issue", strict=True)
+    if not isinstance(res, dict) or "total_count" not in res:
+        raise ApiError("pool lookup returned an unexpected shape")
+    return int(res["total_count"]) * int(RATE)
+
 
 def is_review_claim(title):
     t=title.lower()
@@ -304,6 +383,11 @@ def _unresolved(msg, quiet):
     comment(NUM, msg)
 
 def main():
+    # Before anything else: is the bounty this gate pays from still open?
+    # Adjudicating for a retired bounty tells a contributor money is coming
+    # from a pool that closed, which is worse than not answering at all.
+    if not bounty_is_open():
+        return
     iss=api(f"/repos/{REPO}/issues/{NUM}")
     if not iss or iss.get("state")!="open": return
     labels={l["name"] for l in iss.get("labels",[])}
@@ -345,10 +429,16 @@ def main():
     # the maintainer's repos; anything else goes to a human.
     target = TARGET
     if claim_repo:
-        if claim_repo.lower().startswith(TARGET.split("/")[0].lower() + "/"):
+        # Bounty #73 names four eligible repositories. The previous test was an
+        # owner prefix, which accepted every repo the maintainer owns — so a
+        # review of an unrelated personal repo passed as bounty work.
+        if claim_repo.lower() in ELIGIBLE_REPOS:
             target = claim_repo
         else:
-            _unresolved(f"🤖 Gate: claim references a PR outside the maintainer's repos ({claim_repo}#{pr}). Flagged for human review.", quiet); return
+            _unresolved(
+                f"🤖 Gate: {claim_repo}#{pr} is not one of the repositories eligible under "
+                f"**Bounty #73** ({', '.join(sorted(ELIGIBLE_REPOS))}). Flagged for human review.",
+                quiet); return
     if native_wallet(body) is False:
         close(NUM,"🤖 Gate: payout must be a **native RTC wallet** (`RTC…`) — RTC has no off-ramp, no Solana/ETH bridge. Reopen with a native wallet."); return
     reviews=api(f"/repos/{target}/pulls/{pr}/reviews")
@@ -426,28 +516,56 @@ def main():
     # api(strict=True) for why a swallowed failure here reads as "zero
     # claims so far" and lets the cap fail open.
     try:
-        elig=api(f"/search/issues?q=user:Scottcjn+label:bounty-eligible+author:{author}+type:issue",
-                 strict=True) or {}
+        total = _eligible_claim_count(author)
+        since = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - 86400))
+        today = _eligible_claim_count(author, since_iso=since)
+        spent = _pool_spent_rtc()
     except ApiError as e:
-        print(f"gate: cap lookup failed, refusing to approve: {e}", file=sys.stderr)
+        print(f"gate: cap/pool lookup failed, refusing to approve: {e}", file=sys.stderr)
         _unresolved(
-            f"🤖 Gate: your review of {target}#{pr} checks out, but the lookup that counts your "
-            f"existing eligible claims failed, so the **{CAP} eligible reviews/contributor** cap "
-            f"(Bounty #73) cannot be checked right now.\n\nHolding for a human rather than "
+            f"🤖 Gate: your review of {target}#{pr} checks out, but the lookups that enforce the "
+            f"**{DAILY_CAP}/24h, {CAP} total** cap and the **{POOL_RTC} RTC pool** (Bounty #73) "
+            f"failed, so they cannot be checked right now.\n\nHolding for a human rather than "
             f"approving — a failed lookup is not proof that you are under the cap. Nothing is "
             f"needed from you.", quiet)
         return
-    if not isinstance(elig, dict) or "total_count" not in elig:
-        # A 200 with an unexpected shape is also not an authoritative zero.
-        print("gate: cap lookup returned unexpected shape, refusing to approve", file=sys.stderr)
-        _unresolved(
-            f"🤖 Gate: your review of {target}#{pr} checks out, but the cap lookup returned an "
-            f"unreadable response, so the **{CAP} eligible reviews/contributor** cap (Bounty #73) "
-            f"cannot be checked right now. Holding for a human.", quiet)
-        return
-    if elig.get("total_count",0)>=CAP:
+    if total >= CAP:
         close(NUM,f"🤖 Gate: @{author} has reached the **{CAP} eligible reviews/contributor** cap (Bounty #73). Quality over volume — thanks!"); return
+    if today >= DAILY_CAP:
+        # Not a close: the cap is a rate, not a disqualification. The claim
+        # stands and a human can approve it once the window rolls.
+        _unresolved(
+            f"🤖 Gate: @{author} has already had **{today}** eligible reviews in the last 24h, and "
+            f"Bounty #73 caps it at **{DAILY_CAP} / 24h**. Holding this claim rather than closing "
+            f"it — it becomes eligible again once the window rolls.", quiet)
+        return
+    if spent + int(RATE) > POOL_RTC:
+        close(NUM,
+              f"🤖 Gate: the **{POOL_RTC} RTC pool** for Bounty #73 is exhausted "
+              f"({spent} RTC already committed across eligible claims). Per the bounty, claims are "
+              f"assessed in timestamp order until the pool runs out; later claims may go unpaid. "
+              f"Thank you for the review — nothing was wrong with it."); return
+
     add_label(NUM,"bounty-eligible")
+    # Re-check AFTER labelling. The read-then-label sequence above is a TOCTOU:
+    # two claims adjudicated concurrently both read the pre-label count and both
+    # pass. GitHub's search index also lags writes by seconds to minutes, so even
+    # sequential runs can see a stale count. Re-reading once the label exists is
+    # what makes this claim visible to its own check; if that shows the cap was
+    # breached, this claim yields — it is the one that just arrived.
+    try:
+        if _eligible_claim_count(author) > CAP:
+            api(f"/repos/{REPO}/issues/{NUM}/labels/bounty-eligible", "DELETE")
+            close(NUM,
+                  f"🤖 Gate: @{author} is over the **{CAP} eligible reviews/contributor** cap "
+                  f"(Bounty #73) once concurrent claims are counted. Quality over volume — thanks!")
+            return
+    except ApiError as e:
+        # The label is already applied and a human reviews payouts, so a failed
+        # confirm is logged rather than treated as a breach.
+        print(f"gate: post-label cap re-check failed ({e}); leaving label for human review",
+              file=sys.stderr)
+
     comment(NUM,f"✅ 🤖 Gate: **verified eligible** — @{author} is the first substantive reviewer of {target}#{pr}. **{RATE} RTC** pending payout (native `RTC…` wallet if not on file).")
 
 if __name__=="__main__":
