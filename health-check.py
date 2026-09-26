@@ -2,7 +2,18 @@
 import json
 import os
 import requests
-from tabulate import tabulate
+
+try:
+    from tabulate import tabulate
+except ImportError:  # pragma: no cover - optional dependency
+    def tabulate(table_data, headers=None, tablefmt=None):
+        lines = []
+        if headers:
+            lines.append(" | ".join(str(h) for h in headers))
+        for row in table_data or []:
+            lines.append(" | ".join(str(c) for c in row))
+        return "\n".join(lines)
+
 import argparse
 
 NODES = [

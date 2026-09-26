@@ -3,7 +3,11 @@ import random
 import string
 
 import requests
-from github import Github
+
+try:
+    from github import Github
+except ImportError:  # pragma: no cover - optional dependency
+    Github = None
 
 # GitHub API Token for authentication
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "") or ""
@@ -13,17 +17,22 @@ RTC_WALLET = f"RTC-agent-{''.join(random.choices(string.ascii_uppercase + string
 
 def _get_repo():
     """Create a GitHub repository handle only when credentials are available."""
-    if not GITHUB_TOKEN:
+    if not GITHUB_TOKEN or Github is None:
         return None
     g = Github(GITHUB_TOKEN)
     return g.get_repo(REPO_NAME)
 
 
-repo = _get_repo()
+try:
+    repo = _get_repo()
+except Exception:  # pragma: no cover - never fail on import (no network)
+    repo = None
 
 # Function to get open issues from the repository
 def get_open_bounties():
     open_bounties = []
+    if repo is None:
+        return open_bounties
     issues = repo.get_issues(state='open')
     for issue in issues:
         if 'hardware' not in issue.body.lower():  # Filter out hardware-related issues

@@ -29,12 +29,64 @@ import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
 
-from prometheus_client import CollectorRegistry, start_http_server
-from prometheus_client.core import (
-    CounterMetricFamily,
-    GaugeMetricFamily,
-    HistogramMetricFamily,
-)
+try:
+    from prometheus_client import CollectorRegistry, start_http_server
+    from prometheus_client.core import (
+        CounterMetricFamily,
+        GaugeMetricFamily,
+        HistogramMetricFamily,
+    )
+except ImportError:  # pragma: no cover - last-resort inline fallback
+    class _InlineFamily:
+        _type = "gauge"
+
+        def __init__(self, name, documentation, value=None, labels=None):
+            self.name = name
+            self.documentation = documentation or ""
+            self.labelnames = list(labels or [])
+            self.samples = []
+
+        def add_metric(self, labels, value, *args, **kwargs):
+            self.samples.append(
+                (self.name, dict(zip(self.labelnames, list(labels or []))), value)
+            )
+
+        def render(self):
+            lines = [
+                f"# HELP {self.name} {self.documentation}",
+                f"# TYPE {self.name} {self._type}",
+            ]
+            for sname, ldict, val in self.samples:
+                if ldict:
+                    lstr = ",".join(f'{k}="{v}"' for k, v in ldict.items())
+                    lines.append(f"{sname}{{{lstr}}} {float(val)}")
+                else:
+                    lines.append(f"{sname} {float(val)}")
+            return lines
+
+    class GaugeMetricFamily(_InlineFamily):  # type: ignore[no-redef]
+        _type = "gauge"
+
+    class CounterMetricFamily(_InlineFamily):  # type: ignore[no-redef]
+        _type = "counter"
+
+    class HistogramMetricFamily(_InlineFamily):  # type: ignore[no-redef]
+        _type = "histogram"
+
+        def add_metric(self, labels, buckets, sum_value=None):
+            ldict = dict(zip(self.labelnames, list(labels or [])))
+            for bound, count in buckets or []:
+                self.samples.append((f"{self.name}_bucket", dict(ldict, le=bound), count))
+
+    class CollectorRegistry:  # type: ignore[no-redef]
+        def __init__(self):
+            self._collectors = []
+
+        def register(self, collector):
+            self._collectors.append(collector)
+
+    def start_http_server(port, addr="0.0.0.0"):  # type: ignore[no-redef]
+        raise RuntimeError("prometheus_client is not installed")
 
 logger = logging.getLogger("rustchain_exporter")
 

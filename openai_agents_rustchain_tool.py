@@ -3,7 +3,44 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 import requests
-from agents import Agent, FunctionTool, function_tool
+
+try:
+    from agents import Agent, FunctionTool, function_tool
+except ImportError:  # pragma: no cover - optional dependency fallback
+    class FunctionTool:  # type: ignore[no-redef]
+        """Minimal stand-in for agents.FunctionTool."""
+
+        def __init__(self, name, func=None):
+            self.name = name
+            self._func = func
+
+        def __call__(self, *args, **kwargs):
+            if self._func is None:
+                raise RuntimeError("FunctionTool has no backing function")
+            return self._func(*args, **kwargs)
+
+    def function_tool(func=None, **kwargs):  # type: ignore[no-redef]
+        """Minimal stand-in decorator mirroring agents.function_tool."""
+
+        def _wrap(fn):
+            tool = FunctionTool(getattr(fn, "__name__", "tool"), fn)
+            try:
+                tool.__wrapped__ = fn
+            except Exception:
+                pass
+            return tool
+
+        if func is None:
+            return _wrap
+        return _wrap(func)
+
+    class Agent:  # type: ignore[no-redef]
+        """Minimal stand-in for agents.Agent."""
+
+        def __init__(self, name, instructions="", tools=None):
+            self.name = name
+            self.instructions = instructions
+            self.tools = list(tools or [])
 
 
 DEFAULT_NODE_URL = "https://rustchain.org"
