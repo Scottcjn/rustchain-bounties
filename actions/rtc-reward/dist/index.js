@@ -120,6 +120,18 @@ async function run() {
     return;
   }
 
+  // House accounts (the maintainer and the project's own agents) never earn
+  // merge rewards: paying them just moves founder funds to ourselves and
+  // pollutes the payout record. Checked before any wallet lookup, so a house
+  // PR that names an RTC address in its body is skipped too.
+  const excluded = parseExcludeAuthors(getInput('exclude-authors'));
+  const author = ((pr.user && pr.user.login) || '').toLowerCase();
+  if (author && excluded.has(author)) {
+    info(`PR #${prNumber} is by house account @${pr.user.login}. Skipping reward.`);
+    setOutput('wallet-found', 'false');
+    return;
+  }
+
   // Extract wallet
   let wallet = extractWallet(pr.body || '', walletPattern);
   let walletSource = 'pr-body';
@@ -204,6 +216,15 @@ async function run() {
   setOutput('wallet', wallet);
   setOutput('amount', String(amount));
   setOutput('pr-number', String(prNumber));
+}
+
+const DEFAULT_EXCLUDED_AUTHORS = 'Scottcjn,sophiaeagent-beep,AutomatedJanitor2015,AutomatedJanitor';
+
+function parseExcludeAuthors(raw) {
+  // An empty input falls back to the defaults rather than excluding nobody,
+  // so a workflow that omits the input is still protected.
+  const src = (raw && raw.trim()) ? raw : DEFAULT_EXCLUDED_AUTHORS;
+  return new Set(src.split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
 }
 
 function extractWallet(text, pattern) {
