@@ -27,6 +27,9 @@ import time
 
 import requests
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import payment_markers  # noqa: E402  (shared dedup rules; see that module)
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -69,16 +72,34 @@ LEGACY_FAILED_MARKER = f"{ALREADY_PAID_MARKER}:FAILED"
 
 
 def is_already_paid_comment(body: str) -> bool:
-    """True if `body` records a COMPLETED payment for this PR.
+    """True if `body` carries a STRUCTURED record of a completed payment.
 
-    Substring matching is required (the live marker carries `kind=` and
-    `pending_id=` suffixes), so legacy failure notices are removed from the
-    text first rather than matched by accident.
+    Author is not checked here; see records_completed_payment(). The marker
+    must be the own-line `<!-- RTC-AutoPay-Confirmed ... -->` form this script
+    emits, so the legacy `...:FAILED` notice, a quoted mention in prose, or a
+    file path echoed by another bot is not a payment record. The rules live in
+    scripts/payment_markers.py, shared with scripts/bounty_payout.py.
     """
-    b = body or ""
-    if ALREADY_PAID_MARKER not in b:
-        return False
-    return ALREADY_PAID_MARKER in b.replace(LEGACY_FAILED_MARKER, "")
+    return payment_markers.body_records_payment(body or "")
+
+
+# Identities whose comment can record a payment (repo owner added at call time).
+TRUSTED_MARKER_AUTHORS = payment_markers.TRUSTED_MARKER_AUTHORS
+
+
+def records_completed_payment(comment: dict, repo_owner: str = "") -> bool:
+    """True if `comment` is a TRUSTED, structured record of a completed payment.
+
+    The dedup used to accept the marker from ANY commenter, as a bare
+    substring. Anyone can comment on a public PR, so a comment containing
+    `RTC-AutoPay-Confirmed` -- planted, quoted while discussing the payout
+    scripts, or echoed by a trusted bot (guard-bounty-pr lists changed file
+    paths as github-actions[bot]) -- made the run print "Payment already
+    processed. Skipping." and exit 0 green, and the contributor was never
+    paid. A marker now counts only from a paying identity AND only in the
+    exact form a payer emits.
+    """
+    return payment_markers.comment_records_payment(comment, repo_owner)
 
 # ---------------------------------------------------------------------------
 # Conservative auto-tier (folded in from the former sophia-auto-approve.yml,
@@ -274,9 +295,13 @@ def main() -> None:
 
     # --- Check for duplicate run ------------------------------------------
     for c in comments:
-        if is_already_paid_comment(c.get("body") or ""):
+        if records_completed_payment(c, repo_owner):
             print(f"Payment already processed (found {ALREADY_PAID_MARKER}). Skipping.")
             return
+        if payment_markers.MARKER in (c.get("body") or ""):
+            who = (c.get("user") or {}).get("login", "?")
+            print(f"::warning::ignoring {ALREADY_PAID_MARKER} mention by {who} "
+                  f"(comment {c.get('id')}): not a trusted, structured payment record")
 
     # --- Find payment directive from repo owner ---------------------------
     payment_amount = None

@@ -15,12 +15,16 @@ rather than paying on assertion. A claim states a PR, a file, a function count
 and a rate, and the diff should be `+N/-0` where N is that count.
 
 WHAT IT VERIFIES (all of it, before paying anything)
-  1. The cited PR is **MERGED**. An open PR is not delivered work.
-  2. The PR touches the claimed file.
+  1. The cited PR lives in an Elyan Labs repository (DOCSTRING_ALLOWED_OWNERS)
+     and was **authored by the claimant**. Without this, citing anyone's
+     merged docstring PR anywhere on GitHub was paid to the claimant.
+  2. The cited PR is **MERGED**. An open PR is not delivered work.
   3. The added lines are **actually docstrings** -- lines opening with a quote
      triple. This is the check that matters: without it "I added 40 docstrings"
      pays out for 40 lines of anything.
-  4. The claimed count matches what was really added.
+  4. The claimed count is compared with what was really added (reported, and
+     the verified count is what gets paid). The file named in the claim is NOT
+     checked; every added docstring in the PR counts.
 
 PAYMENT IS COMPUTED FROM THE VERIFIED COUNT, NEVER THE CLAIMED ONE. A claim
 that overstates is paid the true amount rather than rejected outright -- the
@@ -87,6 +91,16 @@ TRUSTED_MARKER_AUTHORS = frozenset({
 
 
 PAYOUT_AMOUNT_RE = re.compile(r'\d+(?:\.\d+)?')
+
+# Owners whose repositories docstring work is paid for. `PR_RE` accepts a PR
+# URL in ANY repository on GitHub, and nothing downstream checked where it
+# pointed, so a claim citing any merged documentation PR anywhere (CPython,
+# requests, ...) was verified and paid. Mirrors pr_review_gate.py, which only
+# follows cited PRs into the maintainer's own repositories.
+ALLOWED_PR_OWNERS = frozenset(
+    o.strip().lower()
+    for o in os.environ.get("DOCSTRING_ALLOWED_OWNERS", "Scottcjn").split(",")
+    if o.strip())
 
 
 def _comment_login(c):
@@ -185,14 +199,68 @@ def add_labels(*names):
     """
     ok = True
     for n in names:
-        r = subprocess.run(["gh", "api", "-X", "POST",
-                            f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
-                           capture_output=True, text=True, timeout=60)
+        try:
+            r = subprocess.run(["gh", "api", "-X", "POST",
+                                f"/repos/{REPO}/issues/{NUM}/labels", "-f", f"labels[]={n}"],
+                               capture_output=True, text=True, timeout=60)
+        except (subprocess.TimeoutExpired, OSError) as e:
+            # A hung or missing `gh` is a failed label, reported like any other
+            # (callers fail closed on False), not a crash mid-adjudication.
+            print(f"::warning::could not apply label {n}: {e.__class__.__name__}: {str(e)[:120]}")
+            ok = False
+            continue
         if r.returncode != 0:
             print(f"::warning::could not apply label {n}: {r.stderr.strip()[:120]}")
             ok = False
     return ok
 
+
+
+def remove_label(name):
+    """Best-effort REST label removal. A failure is logged, never fatal.
+
+    Timeouts and a missing `gh` are caught too: this runs on the provenance
+    hold path between posting the comment and applying `needs-human`, and a
+    crash there left the claim unlabelled, to be re-swept and re-commented.
+    Returns True if the label is gone (or never existed).
+    """
+    try:
+        r = subprocess.run(["gh", "api", "-X", "DELETE",
+                            f"/repos/{REPO}/issues/{NUM}/labels/{name}"],
+                           capture_output=True, text=True, timeout=60)
+    except (subprocess.TimeoutExpired, OSError) as e:
+        print(f"::warning::could not remove label {name}: {e.__class__.__name__}: {str(e)[:120]}")
+        return False
+    if r.returncode != 0 and "Label does not exist" not in (r.stderr or ""):
+        print(f"::warning::could not remove label {name}: {(r.stderr or '').strip()[:120]}")
+        return False
+    return True
+
+
+def pr_provenance_problem(claimant, pr_repo, pr):
+    """Why this claim may not be paid for this PR, or None if it may.
+
+    The gate verified that the cited PR was merged and added docstrings, but
+    never that the CLAIMANT wrote it or that it is ecosystem work. `main()`
+    already fetched the PR `author` and then ignored it, so filing a claim that
+    cited somebody else's merged docstring PR -- in any repository on GitHub --
+    was paid to the claimant for work they did not do. Both checks fail closed:
+    an unreadable author is not a match.
+
+    scripts/bounty_payout.py re-runs this at payout time, which covers claims
+    labelled payable before this check existed (main() skips those).
+    """
+    owner = pr_repo.split("/", 1)[0].lower()
+    if owner not in ALLOWED_PR_OWNERS:
+        return (f"{pr_repo} is not an Elyan Labs repository. Docstring bounties pay for "
+                f"documentation merged into the project's own repositories.")
+    pr_author = ((pr.get("author") or {}).get("login") or "").lower()
+    if not claimant or not pr_author:
+        return "the claim's author or the PR's author could not be determined."
+    if pr_author != claimant.lower():
+        return (f"{pr_repo} was authored by @{pr_author}, not by the claimant "
+                f"@{claimant}. Docstring bounties are paid to the person who wrote the PR.")
+    return None
 
 
 def docstring_rtc_this_week(author):
@@ -298,6 +366,19 @@ def main():
         add_labels("needs-human")
         return 0
 
+    author = (iss.get("author") or {}).get("login", "")
+    problem = pr_provenance_problem(author, pr_repo, pr)
+    if problem:
+        # Checked before the merge state so a claim on someone else's PR is
+        # never parked as `awaiting-merge` and re-swept every few hours.
+        gh(["issue", "comment", NUM, "-R", REPO, "--body",
+            f"🤖 Docstring gate: this claim cannot be auto-paid: {problem}\n\n"
+            f"Flagged for a human. If the gate has this wrong, say so here."], None)
+        remove_label("awaiting-merge")
+        add_labels("needs-human")
+        print(f"provenance check failed for {REPO}#{NUM}: {problem}")
+        return 0
+
     if pr.get("state") != "MERGED":
         gh(["issue", "comment", NUM, "-R", REPO, "--body",
             f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
@@ -324,7 +405,6 @@ def main():
         add_labels("needs-human")
         return 0
 
-    author = (iss.get("author") or {}).get("login", "")
     try:
         already = docstring_rtc_this_week(author) if author else 0.0
     except GhError as e:

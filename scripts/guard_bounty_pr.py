@@ -121,8 +121,29 @@ def apply_label(owner: str, repo: str, pr_number: int, headers: dict) -> None:
     )
 
 
+def display_path(path: str) -> str:
+    """Render an attacker-chosen file path safely inside a one-line code span.
+
+    This comment is posted as github-actions[bot], a TRUSTED identity for the
+    payout scripts' "already paid" check, and the paths come from the PR. A
+    path containing a newline could otherwise start a line of its own in a
+    trusted comment (e.g. an `<!-- RTC-AutoPay-Confirmed -->` payment marker).
+    Control characters are escaped and backticks replaced so each path stays
+    on its own `- `...`` line.
+    """
+    out = []
+    for ch in path:
+        if ord(ch) < 32 or ord(ch) == 127 or ch in "\u2028\u2029\u0085":
+            out.append(f"\\x{ord(ch):02x}" if ord(ch) < 256 else f"\\u{ord(ch):04x}")
+        elif ch == "`":
+            out.append("'")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
 def post_comment(owner: str, repo: str, pr_number: int, protected_hits: Iterable[str], author: str, headers: dict) -> None:
-    hit_list = "\n".join(f"- `{p}`" for p in sorted(protected_hits))
+    hit_list = "\n".join(f"- `{display_path(p)}`" for p in sorted(protected_hits))
     body = (
         "**guard-bounty-pr**: this PR is from a first-time/non-collaborator "
         f"contributor (`{author}`) and touches automation or payout-critical paths:\n\n"

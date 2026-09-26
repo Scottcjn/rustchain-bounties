@@ -16,11 +16,18 @@ SAFETY:
   - pays ONLY verified-eligible claims (gate label or "Verified eligible" comment)
   - native RTC wallet preferred; handle fallback is opt-in
   - handle fallback excludes bot accounts (`type == 'Bot'` or `[bot]` suffix)
-  - idempotency_key=bounty73-claim-<n> + 'RTC-AutoPay-Confirmed' marker => never double-pays
+  - idempotency_key=bounty73-claim-<n> + trusted 'RTC-AutoPay-Confirmed' marker => never double-pays
+    (the marker only counts from a paying identity, in the structured form; see payment_markers.py)
   - MAX_PER_RUN aggregate cap (default 40) — hard stop per run, surfaced in log
-Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40).
+Env: GITHUB_TOKEN, RTC_ADMIN_KEY, RTC_VPS_HOST, GH_REPO, RATE_RTC(3), MAX_PER_RUN(40),
+     RUSTCHAIN_TLS_PIN_SHA256 (SHA-256 of the node's DER certificate; required for the
+       self-signed node, e.g. `openssl s_client -connect HOST:443 </dev/null |
+       openssl x509 -outform DER | sha256sum`; update it when the cert rotates),
+     RUSTCHAIN_CA_BUNDLE (optional CA file when not pinning; default = system CAs),
+     RUSTCHAIN_PAYOUT_INSECURE (unset = authenticated HTTPS only; "1" allows unverified
+       TLS and the plaintext :8099 fallback -- the admin key is then exposed).
 """
-import os, re, json, time, subprocess, ssl, urllib.request, urllib.error, importlib.util
+import os, re, json, time, subprocess, ssl, hashlib, hmac, http.client, urllib.parse, urllib.request, urllib.error, importlib.util
 
 def _load_second_act():
     """Load the payout second-act hook. Optional: absence must not break payouts."""
@@ -38,6 +45,11 @@ def _load_second_act():
         return _Null()
 
 _second_act = _load_second_act()
+
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import payment_markers  # noqa: E402  (shared "already paid" rules; must not be optional)
+import docstring_gate  # noqa: E402  (provenance rule for docstring claims; must not be optional)
 TOKEN=os.environ["GITHUB_TOKEN"]; ADMIN=os.environ["RTC_ADMIN_KEY"]
 HOST=os.environ.get("RTC_VPS_HOST","50.28.86.131"); REPO=os.environ.get("GH_REPO","Scottcjn/rustchain-bounties")
 RATE=float(os.environ.get("RATE_RTC","3"))
@@ -178,11 +190,107 @@ def gh(args, _check=True):
     if _check and p.returncode != 0:
         raise GhError(f"gh {' '.join(args[:3])} exited {p.returncode}: {(p.stderr or '').strip()[:200]}")
     return p.stdout
+class TlsPinMismatch(RuntimeError):
+    """The node presented a certificate other than the pinned one. Never retried."""
+
+
+def _tls_pin():
+    """RUSTCHAIN_TLS_PIN_SHA256 normalised to lowercase hex, or "" if unset.
+
+    Accepts `sha256sum` output, `openssl x509 -fingerprint -sha256` output
+    (`SHA256 Fingerprint=AB:CD:...`) or bare hex.
+    """
+    raw=os.environ.get("RUSTCHAIN_TLS_PIN_SHA256","").strip()
+    if "=" in raw: raw=raw.split("=",1)[1]
+    raw=raw.split()[0] if raw.split() else ""
+    pin=raw.replace(":","").lower()
+    if pin and not re.fullmatch(r"[0-9a-f]{64}",pin):
+        raise ValueError("RUSTCHAIN_TLS_PIN_SHA256 must be the SHA-256 of the node's DER certificate (64 hex chars)")
+    return pin
+
+
+def _tls_context(pin, insecure):
+    """How the HTTPS leg authenticates the node before X-Admin-Key is sent.
+
+    The node serves a self-signed certificate, so CA verification cannot work
+    and the old code simply turned verification OFF (CERT_NONE). Anyone
+    on-path could then terminate TLS with any certificate and read the admin
+    key -- the plaintext-fallback fix alone only stopped passive sniffing.
+      - pin set    : chain/hostname checks off (self-signed), but the leaf
+                     certificate must hash to the pin (checked in _post
+                     after the handshake, BEFORE any byte of the request).
+      - INSECURE=1 : legacy unauthenticated TLS, with a loud warning.
+      - neither    : normal CA + hostname verification (RUSTCHAIN_CA_BUNDLE
+                     may name a CA file). Against a self-signed node this
+                     fails closed: nothing is sent.
+    """
+    if pin or insecure:
+        ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
+        return ctx
+    return ssl.create_default_context(cafile=os.environ.get("RUSTCHAIN_CA_BUNDLE") or None)
+
+
 def _post(url, body):
-    ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
-    req=urllib.request.Request(url,data=body,method="POST",
-        headers={"Content-Type":"application/json","X-Admin-Key":ADMIN})
-    with urllib.request.urlopen(req,timeout=30,context=ctx) as r: return json.loads(r.read())
+    headers={"Content-Type":"application/json","X-Admin-Key":ADMIN}
+    u=urllib.parse.urlsplit(url)
+    if u.scheme=="http":
+        # Only reachable through the RUSTCHAIN_PAYOUT_INSECURE=1 fallback.
+        req=urllib.request.Request(url,data=body,method="POST",headers=headers)
+        with urllib.request.urlopen(req,timeout=30) as r: return json.loads(r.read())
+    if u.scheme!="https":
+        raise ValueError(f"refusing non-http(s) payout URL scheme {u.scheme!r}")
+    pin=_tls_pin(); insecure=os.environ.get("RUSTCHAIN_PAYOUT_INSECURE")=="1"
+    if not pin and insecure:
+        print("::warning::RUSTCHAIN_PAYOUT_INSECURE=1 and no RUSTCHAIN_TLS_PIN_SHA256 — "
+              "node certificate NOT verified; admin key is exposed to an active on-path attacker")
+    conn=http.client.HTTPSConnection(u.hostname,u.port or 443,timeout=30,context=_tls_context(pin,insecure))
+    try:
+        conn.connect()
+        if pin:
+            der=conn.sock.getpeercert(binary_form=True) or b""
+            got=hashlib.sha256(der).hexdigest()
+            if not hmac.compare_digest(got,pin):
+                raise TlsPinMismatch(f"node certificate sha256 {got[:16]}... does not match RUSTCHAIN_TLS_PIN_SHA256; admin key NOT sent")
+        path=(u.path or "/")+(f"?{u.query}" if u.query else "")
+        conn.request("POST",path,body=body,headers=headers)
+        r=conn.getresponse(); data=r.read()
+        if r.status>=400:
+            raise urllib.error.HTTPError(url,r.status,f"HTTP {r.status}: {data[:160]!r}",r.headers,None)
+        return json.loads(data)
+    finally:
+        conn.close()
+def _docstring_claim_problem(body, title, claimant):
+    """Why a docstring-verified claim must NOT be paid now, or None if it may.
+
+    The docstring gate only started checking provenance (PR in an allowed
+    repository, PR authored by the claimant) on 2026-09-26, and it skips any
+    claim that is already labelled. Claims it verified before then -- possibly
+    for someone else's PR, or a PR in any repository on GitHub -- still carry
+    `docstring-verified` + a trusted amount marker. Re-checking here, at the
+    moment money moves, covers those claims without relying on a manual audit.
+    Uses the gate's own PR_RE (same first match) and pr_provenance_problem.
+    Fails closed: an unreadable or unmerged PR is not payable.
+    """
+    m = docstring_gate.PR_RE.search(body or "") or docstring_gate.PR_RE.search(title or "")
+    if not m:
+        return "no pull request URL in the claim"
+    pr_repo, pr_num = m.group(1), m.group(2)
+    try:
+        pr = json.loads(gh(["pr","view",pr_num,"-R",pr_repo,"--json","author,state"]) or "{}")
+    except (GhError, ValueError) as e:
+        return f"could not read {pr_repo}#{pr_num}: {str(e)[:120]}"
+    if not isinstance(pr, dict):
+        return f"could not read {pr_repo}#{pr_num}"
+    if pr.get("state") != "MERGED":
+        return f"{pr_repo}#{pr_num} is not merged"
+    return docstring_gate.pr_provenance_problem(claimant, pr_repo, pr)
+
+
+# Validate the pin once, up front: a malformed pin must stop the run, not
+# surface later as a per-transfer error that could fall through to plaintext.
+_tls_pin()
+
+
 def transfer(to,memo,idem,amount=None):
     """Return (ok, response_or_error).
 
@@ -199,11 +307,27 @@ def transfer(to,memo,idem,amount=None):
     """
     body=json.dumps({"from_miner":FROM,"to_miner":to,"amount_rtc":(RATE if amount is None else amount),"memo":memo,"idempotency_key":idem}).encode()
     # node gunicorn is bound to 127.0.0.1:8099 (nginx-only) — reach it via the
-    # nginx HTTPS endpoint (the working path); fall back to the internal port.
+    # nginx HTTPS endpoint (the working path).
+    #
+    # SECURITY: the plaintext http://HOST:8099 fallback used to be tried on ANY
+    # HTTPS exception, re-sending X-Admin-Key in the clear. Anyone able to make
+    # port 443 fail (drop/reset it on-path) could therefore downgrade the
+    # request and read the admin key off the wire. It is now opt-in via
+    # RUSTCHAIN_PAYOUT_INSECURE=1, the same switch scripts/auto-pay.py uses.
+    # The HTTPS leg itself authenticates the node (certificate pin or CA
+    # verification, see _tls_context); it no longer accepts any certificate.
+    urls=[f"https://{HOST}/wallet/transfer"]
+    if os.environ.get("RUSTCHAIN_PAYOUT_INSECURE")=="1":
+        print("::warning::RUSTCHAIN_PAYOUT_INSECURE=1 — plaintext fallback enabled; admin key may be sent over HTTP")
+        urls.append(f"http://{HOST}:{PORT}/wallet/transfer")
     last="no_endpoint_attempted"
-    for url in (f"https://{HOST}/wallet/transfer", f"http://{HOST}:{PORT}/wallet/transfer"):
+    for url in urls:
         try:
             resp=_post(url,body)
+        except TlsPinMismatch as e:
+            # Someone other than the node answered on 443. Falling back to
+            # plaintext would hand them the key anyway: stop here.
+            return False,f"tls_pin_mismatch:{str(e)[:160]}"
         except Exception as e:
             last=str(e)[:160]
             continue
@@ -401,7 +525,12 @@ for i in issues:
         and _is_trusted(_comment_author_login(c)[0])
         for c in coms)
     if not eligible: continue
-    if any("RTC-AutoPay-Confirmed" in (c.get("body") or "") for c in coms): continue
+    # Already paid? Only a TRUSTED, structured confirmation counts. This used
+    # to skip on any comment by anyone containing the marker string, so any
+    # GitHub user could cancel an eligible claim's payout on a green run by
+    # commenting it (rules shared with auto-pay; see payment_markers.py). The
+    # idempotency key below still makes a repeat transfer a no-op at the node.
+    if any(payment_markers.comment_records_payment(c, REPO.split("/")[0]) for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
     if not wallet: continue
     # Review claims are a flat RATE. Docstring claims are worth whatever the
@@ -421,6 +550,10 @@ for i in issues:
             continue
         if amount > MAX_CLAIM_RTC:
             print(f"::warning::#{num} amount {amount} exceeds MAX_CLAIM_RTC={MAX_CLAIM_RTC}; skipping")
+            continue
+        problem=_docstring_claim_problem(d.get("body"), i.get("title"), claimant)
+        if problem:
+            print(f"::warning::#{num} is docstring-verified but not payable: {problem}; skipping (needs a human)")
             continue
         memo=f"Docstring bounty — claim #{num}, gate-verified (source: {source})"
         idem=f"docstring-claim-{num}"
@@ -452,7 +585,8 @@ for i in issues:
         gh(["issue","comment",num,"-R",REPO,"--body",
             f"💸 **RTC-AutoPay-Confirmed** — payout {state} "
             f"(source: {source}, verified #73 review, from `founder_community`). "
-            f"Thanks for the review!{hook}"])
+            f"Thanks for the review!{hook}\n\n"
+            f"<!-- {payment_markers.MARKER} kind=claim claim={num} -->"])
         gh(["issue","close",num,"-R",REPO,"--reason","completed"])
     else: print(f"::warning::pay failed #{num}: {resp}")
     time.sleep(1.5)
