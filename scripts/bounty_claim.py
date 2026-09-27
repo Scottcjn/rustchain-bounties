@@ -82,6 +82,14 @@ CLAIM_MAX_ACTIVE = int(os.environ.get("CLAIM_MAX_ACTIVE", "2"))
 LABEL = "claimed"
 BOUNTY_LABEL = "bounty"
 DISTRIBUTION_LABEL = "distribution"
+# Distribution-labelled bounties whose deliverable is a package in a repo (built
+# by agents, published by humans later), so there is no off-GitHub Live-URL to
+# give at claim time. #16601: "Distribution Packages - agents build it, humans
+# publish". Override with LIVE_URL_EXEMPT_ISSUES="16601,123" (comma list).
+LIVE_URL_EXEMPT_ISSUES = frozenset(
+    int(x) for x in os.environ.get("LIVE_URL_EXEMPT_ISSUES", "16601").split(",")
+    if x.strip().isdigit()
+)
 MARKER = "<!-- bounty-claim -->"
 
 # Maintainer identity: GitHub's author_association on the issue/comment
@@ -279,6 +287,9 @@ def live_url_gate(num, author, body, labels) -> bool:
     must then NOT add the `claimed` label.
     """
     if DISTRIBUTION_LABEL not in labels:
+        return True
+    if int(num) in LIVE_URL_EXEMPT_ISSUES:
+        print(f"live-url: #{num} is a package bounty; no Live-URL required at claim time")
         return True
     url, platform, reason = find_live_url(body)
     if reason == "ok":

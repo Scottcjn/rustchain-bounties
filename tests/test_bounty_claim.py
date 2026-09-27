@@ -259,6 +259,10 @@ class LiveUrlGateTests(_BotCase):
     def test_gate_helper_direct(self):
         self.assertTrue(bc.live_url_gate(1, "a", "/claim", {"standard"}))
         self.assertFalse(bc.live_url_gate(1, "a", "/claim", {"distribution"}))
+        # #16601 is a package bounty: the deliverable is a repo, not an off-GitHub post.
+        self.assertTrue(bc.live_url_gate(16601, "a", "/claim", {"distribution"}))
+        self.assertTrue(bc.live_url_gate("16601", "a", "/claim", {"distribution"}))
+        self.assertFalse(bc.live_url_gate(16602, "a", "/claim", {"distribution"}))
         self.assertTrue(bc.live_url_gate(1, "a", "Live-URL: https://youtu.be/dQw4w9WgXcQ",
                                          {"distribution"}))
 
