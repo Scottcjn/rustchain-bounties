@@ -275,6 +275,19 @@ class LockableIssueTests(_BotCase):
         bc.do_claim(10, "alice", "/claim")
         self.assertLocked(10)
 
+    def test_failed_claimed_label_write_does_not_announce_success(self):
+        """A failed canonical label write must not produce split-brain claim state."""
+        self.f.issue(14)
+        bc.add_label = lambda num, name: False
+
+        rc = bc.do_claim(14, "alice", "/claim")
+
+        self.assertEqual(rc, 1)
+        self.assertNotLocked(14)
+        self.assertEqual(len(self.f.posted(14)), 1)
+        self.assertIn("could not verify", self.f.posted(14)[0])
+        self.assertNotIn(bc.MARKER, self.f.posted(14)[0])
+
     def test_collaborator_and_member_authors_are_maintainers(self):
         for n, assoc in ((11, "COLLABORATOR"), (12, "MEMBER")):
             self.f.issue(n, author="someone", assoc=assoc)

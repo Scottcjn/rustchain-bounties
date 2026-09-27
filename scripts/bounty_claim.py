@@ -426,7 +426,14 @@ def do_claim(num, author, body="", explicit=None):
             print(f"{author} holds {others} claims >= cap {CLAIM_MAX_ACTIVE}; refused")
             return 0
 
-    add_label(num, LABEL)
+    if not add_label(num, LABEL):
+        # The public claim marker must never outrun the canonical label write.
+        # Global active-claim accounting enumerates label:claimed, so announcing
+        # success after a failed label write creates split-brain claim state and
+        # lets the holder disappear from the concurrency cap.
+        comment(num, f"@{author} — {NEUTRAL_REFUSAL}")
+        print("claimed-label write failed; claim not recorded")
+        return 1
     renew = " (renewed)" if held else ""
     comment(num,
         f"{MARKER}\n🔒 **Claimed{renew}.** holder: @{author} · expires: {expiry.isoformat()}\n\n"
