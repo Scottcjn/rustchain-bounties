@@ -11,40 +11,117 @@ name: Retention Snapshot
 # Snapshotting matters because `gh issue list` caps out (~4,000). As the
 # tracker grows, the earliest weeks stop being reachable through the API, and
 # a snapshot is the only surviving record of what those weeks looked like.
+#
+# DELIVERY: through a pull request, never a direct push. main is governed by a
+# ruleset ("Changes must be made through a pull request" + required status
+# checks), so the direct push this job used to make was rejected with GH013 on
+# every run from 2026-08-24 to 2026-09-21 — five weeks of snapshots taken and
+# thrown away. The job now writes to the branch `metrics/retention-snapshot`
+# and opens (or refreshes) one standing PR from it. Unmerged weeks accumulate
+# on that branch, so nothing is lost if the PR waits.
+#
+# TOKEN: the default GITHUB_TOKEN can neither push to main nor open a PR here
+# (the repo's Actions setting "Allow GitHub Actions to create and approve pull
+# requests" is off), so the job uses BOUNTY_PUSH_TOKEN — the same PAT
+# bounty-index.yml and maintenance-sweep.yml already use — and FAILS CLOSED if
+# it is missing rather than falling back to a token that cannot deliver.
 on:
   schedule:
     - cron: "13 6 * * 1"   # Mondays, after the week rolls over
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  issues: read
 
 concurrency:
   group: retention-snapshot
   cancel-in-progress: false
 
+env:
+  SNAPSHOT_BRANCH: metrics/retention-snapshot
+  SNAPSHOT_FILE: data/retention.jsonl
+
 jobs:
   snapshot:
     runs-on: ubuntu-latest
     steps:
+      - name: Require a token that can deliver
+        env:
+          PUSH_TOKEN: ${{ secrets.BOUNTY_PUSH_TOKEN }}
+        run: |
+          if [ -z "$PUSH_TOKEN" ]; then
+            echo "::error title=BOUNTY_PUSH_TOKEN missing::This job delivers through a PR and the default GITHUB_TOKEN cannot open one here. Set the BOUNTY_PUSH_TOKEN secret (a PAT with contents+pull_requests write)."
+            exit 1
+          fi
+
       - uses: actions/checkout@v6
+        with:
+          ref: main
+          token: ${{ secrets.BOUNTY_PUSH_TOKEN }}
+
+      - name: Carry forward snapshots still waiting on the branch
+        # If last week's PR has not been merged yet, its rows live only on the
+        # snapshot branch. Start from that copy when it is the longer one, so
+        # this week's row is appended to it rather than replacing it.
+        run: |
+          if git fetch --quiet origin "$SNAPSHOT_BRANCH" 2>/dev/null; then
+            main_rows=$(wc -l < "$SNAPSHOT_FILE" 2>/dev/null || echo 0)
+            branch_rows=$(git show "FETCH_HEAD:$SNAPSHOT_FILE" 2>/dev/null | wc -l || echo 0)
+            if [ "$branch_rows" -gt "$main_rows" ]; then
+              git show "FETCH_HEAD:$SNAPSHOT_FILE" > "$SNAPSHOT_FILE"
+              echo "carried forward $((branch_rows - main_rows)) unmerged row(s) from $SNAPSHOT_BRANCH"
+            fi
+          else
+            echo "no $SNAPSHOT_BRANCH yet; starting from main"
+          fi
+
       - name: Snapshot retention
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-        run: python3 scripts/retention_metrics.py --snapshot | tee "$GITHUB_STEP_SUMMARY"
-      - name: Commit snapshot
         run: |
-          if git diff --quiet -- data/retention.jsonl; then
-            echo "no change to snapshot; nothing to commit"
+          today=$(date -u +%F)
+          if tail -n 1 "$SNAPSHOT_FILE" 2>/dev/null | grep -q "\"generated\":\"$today\""; then
+            echo "::notice::a snapshot for $today already exists; not appending a duplicate"
+            echo "SKIP=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          python3 scripts/retention_metrics.py --snapshot | tee "$GITHUB_STEP_SUMMARY"
+
+      - name: Push branch and open or refresh the PR
+        if: env.SKIP != '1'
+        env:
+          GH_TOKEN: ${{ secrets.BOUNTY_PUSH_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if git diff --quiet -- "$SNAPSHOT_FILE"; then
+            echo "no change to snapshot; nothing to deliver"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/retention.jsonl
-          git commit -m "chore(metrics): weekly retention snapshot [skip ci]"
-          # The tracker is written to constantly by other jobs; rebase rather
-          # than fail the run on a race.
-          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git checkout -B "$SNAPSHOT_BRANCH"
+          git add "$SNAPSHOT_FILE"
+          # No "[skip ci]": that marker suppresses pull_request workflows too,
+          # which would leave the PR's required checks "expected" forever.
+          git commit -m "chore(metrics): weekly retention snapshot $(date -u +%F)"
+          # The branch is rebuilt from main each week (with unmerged rows
+          # carried forward above), so its history is replaced, not extended.
+          git push --force origin "HEAD:refs/heads/$SNAPSHOT_BRANCH"
+
+          existing=$(gh pr list --head "$SNAPSHOT_BRANCH" --base main --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            echo "refreshed open PR #$existing on $SNAPSHOT_BRANCH"
+            gh pr view "$existing" --json url --jq .url
+            exit 0
+          fi
+          gh pr create --base main --head "$SNAPSHOT_BRANCH" \
+            --title "chore(metrics): weekly retention snapshot" \
+            --body "$(printf '%s\n' \
+              'Weekly contributor-retention snapshot appended to `data/retention.jsonl` by the Retention Snapshot workflow.' \
+              '' \
+              'This PR is refreshed in place each Monday; unmerged weeks accumulate on the branch. Merge whenever convenient: the rows are append-only measurement data and nothing reads them in CI.' \
+              '' \
+              'Opened by automation via BOUNTY_PUSH_TOKEN; main does not accept direct pushes.')"
