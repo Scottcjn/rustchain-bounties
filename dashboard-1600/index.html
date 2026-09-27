@@ -178,6 +178,7 @@
         .address {
             font-family: monospace;
             font-size: 13px;
+            overflow-wrap: anywhere;
             color: #60a5fa;
         }
 
@@ -242,7 +243,7 @@
             color: rgba(255,255,255,0.5);
         }
 
-        .error-message {
+        #errorContainer:not(:empty) {
             background: rgba(248, 113, 113, 0.1);
             border: 1px solid rgba(248, 113, 113, 0.3);
             border-radius: 12px;
@@ -279,16 +280,16 @@
             <p class="subtitle">Real-time blockchain statistics</p>
             <div class="status-bar" id="statusBar">
                 <div class="status-item">
-                    <div class="status-dot"></div>
-                    <span>API: Connected</span>
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="apiStatus" role="status">API: Connecting</span>
                 </div>
                 <div class="status-item">
-                    <span>Last update: <span id="lastUpdate">--</span></span>
+                    <span>Last successful update: <span id="lastUpdate">--</span></span>
                 </div>
             </div>
         </header>
 
-        <div id="errorContainer"></div>
+        <div id="errorContainer" role="alert"></div>
 
         <div class="grid">
             <div class="card" id="cardEpoch">
@@ -314,22 +315,22 @@
 
             <div class="card" id="cardTransactions">
                 <div class="card-icon">🔄</div>
-                <div class="card-label">24h Transactions</div>
+                <div class="card-label">Payout Transactions</div>
                 <div class="card-value" id="txValue">--</div>
                 <div class="card-subvalue" id="txSubvalue">Loading...</div>
             </div>
         </div>
 
         <div class="table-container">
-            <h2 class="section-title">🏆 Top Miners</h2>
+            <h2 class="section-title">🏆 Active Miners</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Rank</th>
+                        <th>#</th>
                         <th>Miner Address</th>
-                        <th>Blocks Mined</th>
-                        <th>Reward (RTC)</th>
-                        <th>Status</th>
+                        <th>Hardware</th>
+                        <th>Multiplier</th>
+                        <th>Last Attestation</th>
                     </tr>
                 </thead>
                 <tbody id="minersTable">
@@ -341,20 +342,19 @@
         </div>
 
         <div class="table-container">
-            <h2 class="section-title">📜 Recent Transactions</h2>
+            <h2 class="section-title">📜 Payout Transaction Summary</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Hash</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Amount (RTC)</th>
-                        <th>Status</th>
+                        <th>Total Paid (RTC)</th>
+                        <th>Recipients</th>
+                        <th>Feed Updated</th>
+                        <th>Scope</th>
                     </tr>
                 </thead>
                 <tbody id="transactionsTable">
                     <tr>
-                        <td colspan="5" class="loading">Loading transactions...</td>
+                        <td colspan="4" class="loading">Loading payout summary...</td>
                     </tr>
                 </tbody>
             </table>
@@ -371,236 +371,121 @@
     </button>
 
     <script>
-        // API Configuration
-        const API_BASE = 'https://50.28.86.131';
-        const RPC_NODE = 'https://50.28.86.131';
-        
-        // Mock data for demonstration (API may not be available)
-        const USE_MOCK_DATA = true;
-
-        // State
+        const API_BASE = 'https://rustchain.org';
         let isRefreshing = false;
+        let lastSuccessfulUpdate = '--';
 
-        // Mock data generator
-        function getMockData() {
-            const epoch = Math.floor(Date.now() / 86400000) % 1000 + 1;
-            const miners = Array.from({ length: 10 }, (_, i) => ({
-                rank: i + 1,
-                address: '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').substring(0, 10) + '...',
-                blocks: Math.floor(Math.random() * 500) + 50,
-                reward: (Math.random() * 10000 + 1000).toFixed(2),
-                status: Math.random() > 0.1 ? 'active' : 'idle'
-            }));
-
-            const transactions = Array.from({ length: 8 }, () => ({
-                hash: '0x' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').substring(0, 12) + '...',
-                from: '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').substring(0, 8) + '...',
-                to: '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('').substring(0, 8) + '...',
-                amount: (Math.random() * 1000 + 1).toFixed(4),
-                status: Math.random() > 0.05 ? 'confirmed' : 'pending'
-            }));
-
-            return {
-                epoch: {
-                    number: epoch,
-                    startTime: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-                    endTime: new Date(Date.now() + (86400000 - Math.random() * 86400000)).toISOString(),
-                    progress: Math.random() * 100
-                },
-                miners: {
-                    total: 156,
-                    active: 142,
-                    list: miners
-                },
-                supply: {
-                    total: 21000000,
-                    circulating: 15432876.54,
-                    burned: 234567.89
-                },
-                transactions: {
-                    total24h: 8432,
-                    pending: 23,
-                    list: transactions
-                },
-                network: {
-                    tps: 145.6,
-                    avgBlockTime: 2.3,
-                    difficulty: 1234567890
-                }
-            };
-        }
-
-        // Fetch data from API
-        async function fetchData() {
-            if (USE_MOCK_DATA) {
-                return getMockData();
-            }
-
+        async function readJson(path) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 10000);
             try {
-                const [epochRes, minersRes] = await Promise.all([
-                    fetch(`${RPC_NODE}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            method: 'rustchain_getEpoch',
-                            params: [],
-                            id: 1
-                        })
-                    }).then(r => r.json()),
-                    fetch(`${RPC_NODE}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            method: 'rustchain_getMiners',
-                            params: [10],
-                            id: 2
-                        })
-                    }).then(r => r.json())
-                ]);
-
-                return {
-                    epoch: epochRes.result,
-                    miners: { list: minersRes.result || [], total: (minersRes.result || []).length },
-                    supply: { total: 21000000, circulating: 15432876.54 },
-                    transactions: { total24h: 8432, list: [] }
-                };
-            } catch (error) {
-                console.error('API fetch failed, using mock data:', error);
-                return getMockData();
+                const response = await fetch(`${API_BASE}${path}`, {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+                return await response.json();
+            } finally {
+                clearTimeout(timer);
             }
         }
 
-        // Update UI
+        async function fetchData() {
+            const [epoch, miners, transactions] = await Promise.all([
+                readJson('/epoch'),
+                readJson('/api/miners'),
+                readJson('/payouts.json').catch(() => null)
+            ]);
+            if (!Number.isFinite(epoch?.epoch) || !Number.isFinite(epoch?.total_supply_rtc)
+                || !Array.isArray(miners?.miners)
+                || miners.miners.some(miner => !miner || typeof miner !== 'object')) {
+                throw new Error('Invalid epoch or miner response');
+            }
+            return { epoch, miners, transactions: Number.isFinite(transactions?.transactions)
+                && transactions.transactions >= 0 ? transactions : null };
+        }
+
         function updateUI(data) {
-            // Update epoch card
-            document.getElementById('epochValue').textContent = `#${data.epoch.number}`;
-            document.getElementById('epochSubvalue').textContent = 
-                `${data.epoch.progress?.toFixed(1) || 0}% complete • ${formatTimeRemaining(data.epoch.endTime)}`;
+            document.getElementById('epochValue').textContent = `#${data.epoch.epoch}`;
+            document.getElementById('epochSubvalue').textContent =
+                `Slot ${data.epoch.slot ?? '--'} | ${data.epoch.enrolled_miners ?? '--'} enrolled miners`;
+            document.getElementById('minersValue').textContent =
+                String(data.miners.pagination?.total ?? data.miners.miners.length);
+            document.getElementById('minersSubvalue').textContent = 'Miners reported by the node';
+            document.getElementById('supplyValue').textContent = data.epoch.total_supply_rtc.toLocaleString();
+            document.getElementById('supplySubvalue').textContent = 'RTC total supply';
 
-            // Update miners card
-            document.getElementById('minersValue').textContent = data.miners.total || data.miners.list?.length || 0;
-            document.getElementById('minersSubvalue').textContent = 
-                `${data.miners.active || data.miners.list?.filter(m => m.status === 'active').length || 0} active`;
-
-            // Update supply card
-            document.getElementById('supplyValue').textContent = 
-                (data.supply.circulating / 1000000).toFixed(2) + 'M';
-            document.getElementById('supplySubvalue').textContent = 
-                `${((data.supply.circulating / data.supply.total) * 100).toFixed(1)}% of ${data.supply.total.toLocaleString()} RTC`;
-
-            // Update transactions card
-            document.getElementById('txValue').textContent = data.transactions.total24h?.toLocaleString() || '0';
-            document.getElementById('txSubvalue').textContent = 
-                `${data.transactions.pending || 0} pending • ${data.network?.tps?.toFixed(1) || 0} TPS`;
-
-            // Update miners table
-            const minersTable = document.getElementById('minersTable');
-            if (data.miners.list && data.miners.list.length > 0) {
-                minersTable.innerHTML = data.miners.list.map(miner => `
+            document.getElementById('minersTable').innerHTML = data.miners.miners.length
+                ? data.miners.miners.slice(0, 10).map((miner, index) => `
                     <tr>
-                        <td>#${miner.rank}</td>
-                        <td class="address">${escapeHtml(miner.address)}</td>
-                        <td>${miner.blocks?.toLocaleString() || 0}</td>
-                        <td>${miner.reward?.toLocaleString() || 0}</td>
-                        <td>
-                            <span class="badge ${miner.status === 'active' ? 'badge-success' : 'badge-warning'}">
-                                ${escapeHtml(miner.status || 'unknown')}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+                        <td>${index + 1}</td>
+                        <td class="address">${escapeHtml(miner.miner)}</td>
+                        <td>${escapeHtml(miner.hardware_type ?? '--')}</td>
+                        <td>${escapeHtml(miner.antiquity_multiplier ?? '--')}</td>
+                        <td>${Number.isFinite(miner.last_attest)
+                            ? escapeHtml(new Date(miner.last_attest * 1000).toLocaleString()) : '--'}</td>
+                    </tr>`).join('')
+                : '<tr><td colspan="5" class="loading">No active miners reported</td></tr>';
 
-            // Update transactions table
-            const txTable = document.getElementById('transactionsTable');
-            if (data.transactions.list && data.transactions.list.length > 0) {
-                txTable.innerHTML = data.transactions.list.map(tx => `
+            const transactions = data.transactions;
+            document.getElementById('txValue').textContent = transactions === null
+                ? '--' : transactions.transactions.toLocaleString();
+            document.getElementById('txSubvalue').textContent = transactions === null
+                ? 'Payout feed unavailable' : 'Published payout count, not all network transactions';
+            document.getElementById('transactionsTable').innerHTML = transactions
+                ? `
                     <tr>
-                        <td class="address">${escapeHtml(tx.hash)}</td>
-                        <td class="address">${escapeHtml(tx.from)}</td>
-                        <td class="address">${escapeHtml(tx.to)}</td>
-                        <td>${escapeHtml(tx.amount)}</td>
-                        <td>
-                            <span class="badge ${tx.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">
-                                ${escapeHtml(tx.status)}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            // Update last update time
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                        <td>${escapeHtml(transactions.total_paid_rtc_exact ?? transactions.total_paid_rtc ?? '--')}</td>
+                        <td>${escapeHtml(transactions.unique_recipients ?? '--')}</td>
+                        <td>${escapeHtml(transactions.updated_at ?? '--')}</td>
+                        <td>${escapeHtml(transactions.methodology ?? 'Scope not provided by the feed')}</td>
+                    </tr>`
+                : '<tr><td colspan="4" class="loading">Payout feed unavailable. No transaction data to display.</td></tr>';
+            lastSuccessfulUpdate = new Date().toLocaleTimeString();
         }
 
-        // Helper: Format time remaining
-        function formatTimeRemaining(endTime) {
-            if (!endTime) return '';
-            const end = new Date(endTime).getTime();
-            const now = Date.now();
-            const diff = end - now;
-            
-            if (diff <= 0) return 'ending soon';
-            
-            const hours = Math.floor(diff / 3600000);
-            const minutes = Math.floor((diff % 3600000) / 60000);
-            
-            if (hours > 0) {
-                return `${hours}h ${minutes}m remaining`;
-            }
-            return `${minutes}m remaining`;
+        function updateStatus(message, failed = false) {
+            document.getElementById('statusBar').innerHTML = `
+                <div class="status-item">
+                    <div class="status-dot ${failed ? 'error' : ''}"></div>
+                    <span role="status">API: ${escapeHtml(message)}</span>
+                </div>
+                <div class="status-item">
+                    <span>Last successful update: <span id="lastUpdate">${escapeHtml(lastSuccessfulUpdate)}</span></span>
+                </div>`;
         }
 
-        // Refresh data
         async function refreshData() {
             if (isRefreshing) return;
-            
             isRefreshing = true;
             const btn = document.getElementById('refreshBtn');
             btn.classList.add('spinning');
-
+            updateStatus('Refreshing');
             try {
-                const data = await fetchData();
-                updateUI(data);
-                
-                // Update status
-                const statusBar = document.getElementById('statusBar');
-                statusBar.innerHTML = `
-                    <div class="status-item">
-                        <div class="status-dot"></div>
-                        <span>API: ${USE_MOCK_DATA ? 'Demo Mode' : 'Connected'}</span>
-                    </div>
-                    <div class="status-item">
-                        <span>Last update: <span id="lastUpdate">${new Date().toLocaleTimeString()}</span></span>
-                    </div>
-                `;
+                updateUI(await fetchData());
+                document.getElementById('errorContainer').textContent = '';
+                updateStatus('Connected');
             } catch (error) {
-                console.error('Refresh failed:', error);
-                document.getElementById('errorContainer').innerHTML = `
-                    <div class="error-message">
-                        ⚠️ Failed to refresh data: ${escapeHtml(error.message)}
-                    </div>
-                `;
+                document.getElementById('errorContainer').textContent = `Failed to refresh data: ${error.message}`;
+                updateStatus(lastSuccessfulUpdate === '--' ? 'Unavailable' : 'Unavailable (data stale)', true);
+                if (lastSuccessfulUpdate === '--') {
+                    for (const id of ['epochSubvalue', 'minersSubvalue', 'supplySubvalue', 'txSubvalue']) {
+                        document.getElementById(id).textContent = 'Data unavailable';
+                    }
+                    document.getElementById('minersTable').innerHTML = '<tr><td colspan="5" class="loading">Data unavailable</td></tr>';
+                    document.getElementById('transactionsTable').innerHTML = '<tr><td colspan="4" class="loading">Data unavailable</td></tr>';
+                }
             } finally {
                 isRefreshing = false;
                 btn.classList.remove('spinning');
             }
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             refreshData();
-            
-            // Auto-refresh every 30 seconds
             setInterval(refreshData, 30000);
         });
-    
-        // SECURITY: HTML-escape any value that originated from the API before
-        // it is dropped into an innerHTML template. The /rpc response is
-        // expected to be JSON, but a future compromise of a node or a
-        // downstream proxy could return strings containing HTML.
+
         function escapeHtml(value) {
             return String(value == null ? '' : value)
                 .replaceAll('&', '&amp;')
@@ -609,6 +494,6 @@
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
         }
-</script>
+    </script>
 </body>
 </html>
