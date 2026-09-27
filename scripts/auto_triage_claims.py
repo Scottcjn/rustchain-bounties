@@ -281,6 +281,29 @@ def _status_label(blockers: List[str]) -> str:
     return "eligible" if not blockers else "needs-action"
 
 
+def _bounty_closed_blocker(issue_obj: Any) -> Optional[str]:
+    """Blocker to attach to EVERY claim on a bounty that is no longer open.
+
+    `eligible` is a promise of money, and the bounty this script reads claims
+    from is the pool that promise draws on. As of 2026-09-21 six of the seven
+    DEFAULT_TARGETS were closed (some since February) and the hourly run was
+    still grading fresh claims on them as `eligible`. Nothing errored; the
+    report simply described a world that had stopped existing.
+
+    Fail CLOSED on every uncertainty: a closed bounty, a missing or unreadable
+    `state`, or a non-dict response all yield a blocker. Only a literal
+    `"open"` yields None.
+    """
+    if not isinstance(issue_obj, dict):
+        return "bounty_state_unreadable"
+    state = issue_obj.get("state")
+    if not isinstance(state, str) or not state:
+        return "bounty_state_unreadable"
+    if state.lower() != "open":
+        return f"bounty_{state.lower()}"
+    return None
+
+
 @dataclass
 class ClaimResult:
     claim_id: str
@@ -526,6 +549,17 @@ def main() -> int:
             results_by_issue[issue_ref] = []
             continue
 
+        # A closed bounty cannot make anyone eligible. Claims are still
+        # collected and reported (so a maintainer can see them and reply), but
+        # every one carries a blocker, so the status can never read `eligible`.
+        closed_blocker = _bounty_closed_blocker(issue_obj)
+        if closed_blocker:
+            print(
+                f"WARN: {issue_ref} is not open ({closed_blocker}); no claim on it can be "
+                "eligible. Remove it from the targets or reopen the bounty.",
+                file=sys.stderr,
+            )
+
         # Merge multi-comment claims per user (users often add follow-ups).
         per_user: Dict[str, Dict[str, Any]] = {}
         for c in comments:
@@ -576,6 +610,8 @@ def main() -> int:
             bottube_user = _extract_bottube_user(merged_body)
             proof_links = list(extract_links(merged_body))
             blockers: List[str] = []
+            if closed_blocker:
+                blockers.append(closed_blocker)
 
             if age_days is not None and age_days < min_age:
                 blockers.append(f"account_age<{min_age}")
