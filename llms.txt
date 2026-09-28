@@ -33,7 +33,6 @@ RustChain is a working blockchain where vintage and exotic hardware (Amiga, Powe
 
 - [#253 Star 10 Scottcjn repos (5 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/253): smallest verifiable task, ~2 min.
 - [#2781 Star + first bug report (1 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2781).
-- [#2782 Star + review an open PR (2 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2782).
 - [#2783 Star + fix doc issue / first PR (2 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2783).
 - [#2784 Star + test miner + hardware report (3 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2784).
 
