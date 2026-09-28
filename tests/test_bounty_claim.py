@@ -56,13 +56,13 @@ class ClaimDetectionTests(unittest.TestCase):
 
 class ActiveClaimTests(unittest.TestCase):
     def setUp(self):
-        self._gh = bc.gh
+        self._gh = bc.gh_strict
 
     def tearDown(self):
-        bc.gh = self._gh
+        bc.gh_strict = self._gh
 
     def _comments(self, *bodies):
-        bc.gh = lambda a, d=None: [{"body": b} for b in bodies]
+        bc.gh_strict = lambda a: [{"body": b} for b in bodies]
 
     def _claim(self, who, days):
         d = (TODAY + datetime.timedelta(days=days)).isoformat()
@@ -98,7 +98,7 @@ class ActiveClaimTests(unittest.TestCase):
         self.assertIsNone(bc.active_claim(1))
 
     def test_no_comments_at_all(self):
-        bc.gh = lambda a, d=None: []
+        bc.gh_strict = lambda a: []
         self.assertIsNone(bc.active_claim(1))
 
     def test_paginated_comments_finds_claim_on_later_pages(self):
@@ -107,7 +107,7 @@ class ActiveClaimTests(unittest.TestCase):
         page2 = [{"body": self._claim("charlie", 4)}]
         calls = []
 
-        def mock_gh(args, default=None):
+        def mock_gh(args):
             calls.append(args)
             if args[1].endswith("&page=1"):
                 return page1
@@ -115,7 +115,7 @@ class ActiveClaimTests(unittest.TestCase):
                 return page2
             return []
 
-        bc.gh = mock_gh
+        bc.gh_strict = mock_gh
         got = bc.active_claim(1)
         self.assertIsNotNone(got)
         self.assertEqual(got[0], "charlie")
@@ -147,6 +147,9 @@ class FakeGitHub:
     def __init__(self):
         self.issues, self.comments, self.users = {}, {}, {}
         self.search_fails = False
+        self.comments_fail = set()   # issue numbers whose comment listing errors
+        self.label_write_fails = False
+        self.comment_write_fails = False
         self.added, self.removed = [], []
 
     def issue(self, num, title="[BOUNTY: 10 RTC] Do a thing", author="Scottcjn",
@@ -164,15 +167,17 @@ class FakeGitHub:
         if args[:2] == ["issue", "comment"]:
             self.comments.setdefault(int(args[2]), []).append(args[args.index("--body") + 1])
             return None
-        if args[0] == "api" and "/comments?" in args[1]:
-            num = int(args[1].split("/issues/")[1].split("/")[0])
-            page = int(args[1].rsplit("page=", 1)[1])
-            return [{"body": b} for b in self.comments.get(num, [])] if page == 1 else []
         return default
 
     # --- gh_strict() : issue, user, search
     def gh_strict(self, args):
         path = args[1] if args[1] != "-X" else args[3]
+        if "/comments?" in path:
+            num = int(path.split("/issues/")[1].split("/")[0])
+            if num in self.comments_fail:
+                return None
+            page = int(path.rsplit("page=", 1)[1])
+            return [{"body": b} for b in self.comments.get(num, [])] if page == 1 else []
         if path.startswith(f"/repos/{bc.REPO}/issues/"):
             return self.issues.get(int(path.rsplit("/", 1)[1]))
         if path.startswith("users/"):
@@ -186,7 +191,15 @@ class FakeGitHub:
             return {"items": items}
         return None
 
+    def comment_ok(self, num, body):
+        if self.comment_write_fails:
+            return False
+        self.comments.setdefault(int(num), []).append(body)
+        return True
+
     def add_label(self, num, name):
+        if self.label_write_fails:
+            return False
         self.added.append((int(num), name))
         lab = self.issues.get(int(num))
         if lab is not None:
@@ -203,15 +216,15 @@ class FakeGitHub:
 
 class _BotCase(unittest.TestCase):
     def setUp(self):
-        self._saved = (bc.gh, bc.gh_strict, bc.add_label, bc.remove_label)
+        self._saved = (bc.gh, bc.gh_strict, bc.add_label, bc.remove_label, bc.comment_ok)
         self.f = FakeGitHub()
-        bc.gh, bc.gh_strict = self.f.gh, self.f.gh_strict
+        bc.gh, bc.gh_strict, bc.comment_ok = self.f.gh, self.f.gh_strict, self.f.comment_ok
         bc.add_label, bc.remove_label = self.f.add_label, self.f.remove_label
         self.f.users["alice"] = OLD_ACCOUNT
         self.f.users["bob"] = OLD_ACCOUNT
 
     def tearDown(self):
-        bc.gh, bc.gh_strict, bc.add_label, bc.remove_label = self._saved
+        bc.gh, bc.gh_strict, bc.add_label, bc.remove_label, bc.comment_ok = self._saved
 
     def assertLocked(self, num, who="alice"):
         self.assertIn((num, bc.LABEL), self.f.added)
@@ -510,6 +523,147 @@ class UnclaimTests(_BotCase):
                 else:
                     os.environ[k] = v
         self.assertIsNone(bc.active_claim(n))
+
+
+class FailClosedTests(_BotCase):
+    """#16471 (2026-09-27): a lookup or write failure must never read as
+    "no claim" or "claimed" and must turn the run red."""
+
+    def test_failed_later_page_raises_not_none(self):
+        page1 = [{"body": f"comment {i}"} for i in range(100)]
+
+        bc.gh_strict = lambda a: page1 if a[1].endswith("&page=1") else None
+        with self.assertRaises(bc.ClaimLookupError):
+            bc.active_claim(1)
+
+    def test_nonzero_exit_with_empty_array_raises(self):
+        """`gh api` exiting non-zero while printing `[]` must not read as end-of-list."""
+        import subprocess as sp
+        page1 = [{"body": f"comment {i}"} for i in range(100)]
+        real_run = bc.subprocess.run
+
+        def fake_run(cmd, **kw):
+            import json as _j
+            if cmd[-1].endswith("&page=1"):
+                return sp.CompletedProcess(cmd, 0, _j.dumps(page1), "")
+            return sp.CompletedProcess(cmd, 1, "[]", "HTTP 502")
+
+        bc.gh_strict = self._saved[1]  # the real one
+        bc.subprocess.run = fake_run
+        try:
+            with self.assertRaises(bc.ClaimLookupError):
+                bc.active_claim(1)
+        finally:
+            bc.subprocess.run = real_run
+
+    def test_error_body_page_raises(self):
+        bc.gh_strict = lambda a: {"message": "API rate limit exceeded"}
+        with self.assertRaises(bc.ClaimLookupError):
+            bc.active_claim(1)
+
+    def test_label_write_failure_announces_nothing(self):
+        self.f.issue(60)
+        self.f.label_write_fails = True
+        rc = bc.do_claim(60, "alice", "/claim")
+        self.assertEqual(rc, 1)
+        self.assertFalse(any(bc.MARKER in b for b in self.f.posted(60)))
+        self.assertIn(bc.NEUTRAL_REFUSAL, self.f.posted(60)[-1])
+
+    def test_unreadable_history_refuses_claim(self):
+        self.f.issue(61)
+        self.f.comments_fail.add(61)
+        rc = bc.do_claim(61, "alice", "/claim")
+        self.assertEqual(rc, 1)
+        self.assertNotIn((61, bc.LABEL), self.f.added)
+        self.assertIn(bc.NEUTRAL_REFUSAL, self.f.posted(61)[-1])
+
+    def test_one_unreadable_issue_does_not_freeze_the_board(self):
+        """Unknown counts as held (worst case); below the cap the claim proceeds."""
+        self.f.issue(71)
+        self.f.issue(72, labels=("bounty", bc.LABEL))
+        self.f.comments_fail.add(72)
+        self.assertEqual(bc.do_claim(71, "alice", "/claim"), 0)
+        self.assertLocked(71)
+
+    def test_cap_count_lookup_failure_refuses(self):
+        """Enough unknowns to reach the cap: refuse, neutrally, and go red."""
+        self.f.issue(62)
+        for n in (63, 73):
+            self.f.issue(n, labels=("bounty", bc.LABEL))
+            self.f.comments_fail.add(n)
+        self.assertEqual(bc.do_claim(62, "alice", "/claim"), 1)
+        self.assertNotIn((62, bc.LABEL), self.f.added)
+        self.assertIn(bc.NEUTRAL_REFUSAL, self.f.posted(62)[-1])
+
+    def test_sweep_skips_unknown_claim_and_goes_red(self):
+        self.f.issue(64, labels=("bounty", bc.LABEL))
+        self.f.comments[64].append(_marker("alice", 3))
+        self.f.comments_fail.add(64)
+        self.assertEqual(bc.do_sweep(), 1)
+        self.assertNotIn((64, bc.LABEL), self.f.removed)
+        self.assertFalse(any("lapsed" in b for b in self.f.posted(64)))
+
+    def test_sweep_search_failure_goes_red(self):
+        self.f.issue(65, labels=("bounty", bc.LABEL))
+        self.f.search_fails = True
+        self.assertEqual(bc.do_sweep(), 1)
+        self.assertEqual(self.f.removed, [])
+
+    def test_sweep_still_releases_expired(self):
+        self.f.issue(66, labels=("bounty", bc.LABEL))
+        self.f.comments[66].append(_marker("alice", -2))
+        self.f.issue(67, labels=("bounty", bc.LABEL))
+        self.f.comments[67].append(_marker("bob", 2))
+        self.assertEqual(bc.do_sweep(), 0)
+        self.assertIn((66, bc.LABEL), self.f.removed)
+        self.assertNotIn((67, bc.LABEL), self.f.removed)
+
+    def test_sweep_mixed_releases_expired_skips_unknown(self):
+        """Production shape: one lapsed claim and one unreadable in the same run."""
+        self.f.issue(69, labels=("bounty", bc.LABEL))
+        self.f.comments[69].append(_marker("alice", -2))
+        self.f.issue(70, labels=("bounty", bc.LABEL))
+        self.f.comments[70].append(_marker("bob", 3))
+        self.f.comments_fail.add(70)
+        self.assertEqual(bc.do_sweep(), 1)
+        self.assertIn((69, bc.LABEL), self.f.removed)
+        self.assertNotIn((70, bc.LABEL), self.f.removed)
+
+    def test_marker_write_failure_rolls_back_label(self):
+        self.f.issue(74)
+        self.f.comment_write_fails = True
+        self.assertEqual(bc.do_claim(74, "alice", "/claim"), 1)
+        self.assertIn((74, bc.LABEL), self.f.removed)
+        self.assertNotIn(bc.LABEL, [lb["name"] for lb in self.f.issues[74]["labels"]])
+
+    def test_full_page_50_is_not_complete(self):
+        full = [{"body": "x"}] * 100
+        bc.gh_strict = lambda a: full
+        with self.assertRaises(bc.ClaimLookupError):
+            bc.active_claim(1)
+
+    def test_duplicate_search_numbers_swept_once(self):
+        self.f.issue(75, labels=("bounty", bc.LABEL))
+        self.f.comments[75].append(_marker("alice", -2))
+        real = self.f.gh_strict
+
+        def dup(args):
+            r = real(args)
+            if isinstance(r, dict) and "items" in r:
+                return {"items": r["items"] * 2}
+            return r
+
+        bc.gh_strict = dup
+        bc.do_sweep()
+        self.assertEqual(self.f.removed.count((75, bc.LABEL)), 1)
+
+    def test_unclaim_with_unreadable_history_releases_nothing(self):
+        self.f.issue(68, labels=("bounty", bc.LABEL))
+        self.f.comments_fail.add(68)
+        rc = bc.do_unclaim(68, "Scottcjn", "OWNER")
+        self.assertEqual(rc, 1)
+        self.assertEqual(self.f.removed, [])
+        self.assertFalse(any(bc.MARKER in b for b in self.f.posted(68)))
 
 
 class GhStrictTests(unittest.TestCase):

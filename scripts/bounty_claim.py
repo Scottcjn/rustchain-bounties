@@ -140,7 +140,13 @@ def gh_strict(args):
 
 
 def comment(num, body):
+    # Best-effort: `gh issue comment` prints a URL, not JSON, so gh() always
+    # returns None here. Use comment_ok() where the write has to be checked.
     return gh(["issue", "comment", str(num), "-R", REPO, "--body", body], None)
+
+
+def comment_ok(num, body):
+    return gh_ok(["issue", "comment", str(num), "-R", REPO, "--body", body])
 
 
 def is_maintainer(login, association="") -> bool:
@@ -209,21 +215,35 @@ def claimed_issue_numbers():
         nums.extend(it["number"] for it in res["items"] if "number" in it)
         if len(res["items"]) < 100:
             break
-    return nums
+    # Search can repeat a number across pages; a duplicate would be swept twice.
+    return list(dict.fromkeys(nums))
 
 
 def active_claims_held_by(author, exclude=None):
-    """How many OTHER issues `author` currently holds, or None on lookup failure."""
+    """How many OTHER issues `author` currently holds, or None if that is unknowable.
+
+    An issue whose history can't be read is counted as held by `author` (worst
+    case). That keeps the cap fail-closed without letting one unreadable issue
+    freeze every claim on the board: the answer is None only when the unknowns
+    could actually decide it.
+    """
     nums = claimed_issue_numbers()
     if nums is None:
         return None
-    count = 0
+    count = unknown = 0
     for n in nums:
         if exclude is not None and str(n) == str(exclude):
             continue
-        held = active_claim(n)
+        try:
+            held = active_claim(n)
+        except ClaimLookupError as exc:
+            print(f"[WARN] {exc}", file=sys.stderr)
+            unknown += 1
+            continue
         if held and held[0].lower() == (author or "").lower():
             count += 1
+    if unknown and count + unknown >= CLAIM_MAX_ACTIVE:
+        return None
     return count
 
 
@@ -253,13 +273,33 @@ def is_claim_request(body: str) -> bool:
     return bool(CLAIM_RE.search(_unquoted(body)))
 
 
+class ClaimLookupError(RuntimeError):
+    """The comment history could not be read in full, so claim state is UNKNOWN.
+
+    Never treat this as "no claim": a failed page used to end pagination early,
+    hiding a live holder marker further down, and the sweep then publicly
+    declared the claim lapsed (#16471, 2026-09-27). Callers must refuse / skip.
+    """
+
+
 def active_claim(num):
-    """Return (holder, expiry_date) for the newest unexpired claim, else None."""
+    """Return (holder, expiry_date) for the newest unexpired claim, else None.
+
+    Raises ClaimLookupError if any comments page fails to load: an empty page is
+    the end of the list, an error is not.
+    """
     page = 1
     comments = []
-    while page <= 50:
-        chunk = gh(["api", f"/repos/{REPO}/issues/{num}/comments?per_page=100&page={page}"], []) or []
-        if not isinstance(chunk, list) or not chunk:
+    while True:
+        if page > 50:
+            # 50 full pages and still going: history is too long to be sure.
+            raise ClaimLookupError(f"#{num} has more than 5000 comments; claim state unknown")
+        # gh_strict, not gh: `gh api` can exit non-zero yet still print JSON,
+        # and gh() would parse that as a real (possibly empty) page.
+        chunk = gh_strict(["api", f"/repos/{REPO}/issues/{num}/comments?per_page=100&page={page}"])
+        if not isinstance(chunk, list):
+            raise ClaimLookupError(f"comments page {page} of #{num} could not be read")
+        if not chunk:
             break
         comments.extend(chunk)
         if len(chunk) < 100:
@@ -393,7 +433,12 @@ def do_claim(num, author, body="", explicit=None):
     if not live_url_gate(num, author, body, labels):
         return 0
 
-    held = active_claim(num)
+    try:
+        held = active_claim(num)
+    except ClaimLookupError as exc:
+        comment(num, f"@{author} — {NEUTRAL_REFUSAL}")
+        print(f"::error::claim state unknown, claim refused: {exc}")
+        return 1
     expiry = datetime.date.today() + datetime.timedelta(days=CLAIM_DAYS)
 
     if held and held[0].lower() != (author or "").lower():
@@ -414,8 +459,8 @@ def do_claim(num, author, body="", explicit=None):
         others = active_claims_held_by(author, exclude=num)
         if others is None:
             comment(num, f"@{author} — {NEUTRAL_REFUSAL}")
-            print("active-claim count lookup failed; claim refused")
-            return 0
+            print("::error::active-claim count lookup failed; claim refused")
+            return 1
         if others >= CLAIM_MAX_ACTIVE:
             comment(num,
                 f"@{author} — you already hold {others} active claims, and each "
@@ -426,9 +471,14 @@ def do_claim(num, author, body="", explicit=None):
             print(f"{author} holds {others} claims >= cap {CLAIM_MAX_ACTIVE}; refused")
             return 0
 
-    add_label(num, LABEL)
+    # The label is the cap inventory and the sweep's work list. If it did not
+    # land, do not announce a claim that half the system cannot see (#16471).
+    if not add_label(num, LABEL):
+        comment(num, f"@{author} — {NEUTRAL_REFUSAL}")
+        print(f"::error::`{LABEL}` label write failed on #{num}; claim not recorded")
+        return 1
     renew = " (renewed)" if held else ""
-    comment(num,
+    posted = comment_ok(num,
         f"{MARKER}\n🔒 **Claimed{renew}.** holder: @{author} · expires: {expiry.isoformat()}\n\n"
         f"This bounty now shows as taken so nobody else duplicates your work. The claim "
         f"lapses automatically on **{expiry.isoformat()}** — comment `/claim` again to renew "
@@ -436,6 +486,14 @@ def do_claim(num, author, body="", explicit=None):
         f"A claim is a courtesy signal, not a lock: it does not reserve payment, and anyone "
         f"who submits first is still paid first. It exists so people can see what is already "
         f"being worked on.")
+    if not posted:
+        # Label without a marker reads as "lapsed" to the next sweep, which would
+        # then publicly void a claim that was never recorded. Roll the label back
+        # unless an earlier marker (a renewal) still stands behind it.
+        if not held:
+            remove_label(num, LABEL)
+        print(f"::error::claim marker comment failed on #{num}; claim not recorded")
+        return 1
     print(f"claimed #{num} by {author} until {expiry}")
     return 0
 
@@ -445,7 +503,13 @@ def do_unclaim(num, author, association=""):
 
     Allowed for maintainers and for the current holder releasing their own.
     """
-    held = active_claim(num)
+    try:
+        held = active_claim(num)
+    except ClaimLookupError as exc:
+        comment(num, f"@{author} — I could not read this issue's claim history just now, "
+                     f"so nothing was released. Please try `/unclaim` again shortly.")
+        print(f"::error::claim state unknown, release not performed: {exc}")
+        return 1
     maintainer = is_maintainer(author, association)
     if not maintainer and not (held and held[0].lower() == (author or "").lower()):
         comment(num, f"@{author} — only a maintainer or the current claim holder can "
@@ -473,14 +537,21 @@ def do_unclaim(num, author, association=""):
 
 def do_sweep():
     """Release expired claims so a bounty cannot be squatted."""
-    res = gh(["api", "-X", "GET", "search/issues",
-              "-f", f"q=repo:{REPO} is:issue is:open label:{LABEL}",
-              "-f", "per_page=100"], {})
-    items = (res or {}).get("items") or []
-    released = 0
-    for it in items:
-        num = it["number"]
-        if active_claim(num):
+    # Strict + paginated: a failed search used to read as "nothing to sweep"
+    # and exit green, and only the first 100 labelled issues were ever seen.
+    nums = claimed_issue_numbers()
+    if nums is None:
+        print(f"::error::sweep: `{LABEL}` label search failed; nothing swept")
+        return 1
+    released = unknown = 0
+    for num in nums:
+        try:
+            if active_claim(num):
+                continue
+        except ClaimLookupError as exc:
+            # Unknown is not lapsed: releasing here would publicly void a live claim.
+            print(f"::warning::sweep: skipping #{num}: {exc}")
+            unknown += 1
             continue
         remove_label(num, LABEL)
         gh(["issue", "comment", str(num), "-R", REPO, "--body",
@@ -491,8 +562,9 @@ def do_sweep():
             "Anyone can take it now by commenting `/claim`."], None)
         released += 1
         print(f"released #{num}")
-    print(f"sweep: {released} claim(s) released of {len(items)} labelled")
-    return 0
+    print(f"sweep: {released} claim(s) released of {len(nums)} labelled"
+          + (f"; {unknown} skipped (claim state unknown)" if unknown else ""))
+    return 1 if unknown else 0
 
 
 def main():
