@@ -110,7 +110,7 @@ class WeeklyCeilingTests(unittest.TestCase):
         def fake(args, default=None, strict=False):
             joined = " ".join(args)
             if "search/issues" in joined:
-                return {"items": items}
+                return {"total_count": len(items), "items": items}
             if "/comments" in joined:
                 idx = int(joined.split("/issues/")[1].split("/")[0]) - 900
                 return [{"user": {"login": "github-actions[bot]"},
@@ -161,7 +161,7 @@ class UntrustedMarkerTests(unittest.TestCase):
         def fake(args, default=None, strict=False):
             joined = " ".join(args)
             if "search/issues" in joined:
-                return {"items": [{"number": 901, "body": ""}]}
+                return {"total_count": 1, "items": [{"number": 901, "body": ""}]}
             if "/comments" in joined:
                 return comments
             return default
@@ -172,8 +172,19 @@ class UntrustedMarkerTests(unittest.TestCase):
         return {"user": {"login": login}, "body": f"<!-- rtc-payout-amount: {amount} -->"}
 
     def test_spoofed_marker_alone_does_not_count(self):
+        """A spoofed-only thread is UNKNOWN, not 0 -- and not their figure.
+
+        Under the merged #17054+#17053 semantics a verified prior claim with no
+        TRUSTED marker cannot establish prior earnings: counting 0 would fail
+        the weekly cap open (the exact bug this gate fix exists to close), so
+        it raises into the needs-human hold until a maintainer posts a real
+        marker on that thread. A spoofer can cause a LOUD hold, never a silent
+        undercount, and never their number.
+        """
         self._one_claim([self._c("random-user", 40)])
-        self.assertEqual(dg.docstring_rtc_this_week("victim"), 0.0)
+        with self.assertRaises(dg.GhError) as cm:
+            dg.docstring_rtc_this_week("victim")
+        self.assertIn("UNKNOWN", str(cm.exception))
 
     def test_genuine_bot_marker_counts(self):
         self._one_claim([self._c(self.BOT, 5)])
@@ -194,10 +205,14 @@ class UntrustedMarkerTests(unittest.TestCase):
         self.assertEqual(dg.docstring_rtc_this_week("farmer"), 5.0)
 
     def test_lookalike_and_missing_author_are_untrusted(self):
+        """Lookalike logins and missing authors leave no trusted marker:
+        UNKNOWN, never 0 and never their figure."""
         self._one_claim([self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
                          {"body": "<!-- rtc-payout-amount: 9 -->"},
                          {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError) as cm:
+            dg.docstring_rtc_this_week("someone")
+        self.assertIn("UNKNOWN", str(cm.exception))
 
     def test_maintainer_marker_counts_and_graphql_shape_is_read(self):
         self._one_claim([{"author": {"login": "Scottcjn"},
@@ -206,18 +221,24 @@ class UntrustedMarkerTests(unittest.TestCase):
 
     def test_unparseable_trusted_marker_is_skipped_not_a_crash(self):
         """`[\\d.]+` matches `...` and `1.2.3`; those used to reach float() and
-        raise ValueError, which main() does not catch, killing the gate run."""
+        raise ValueError, which main() does not catch, killing the gate run.
+        A trusted-but-unparseable marker is IGNORED -- and if it was the only
+        one, the claim's earnings are UNKNOWN (raise), never 0."""
         for bad in ("...", "1.2.3", "."):
             self._one_claim([self._c(self.BOT, 5), self._c(self.BOT, bad)])
             self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0, bad)
             self._one_claim([self._c(self.BOT, bad)])
-            self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0, bad)
+            with self.assertRaises(dg.GhError) as cm:
+                dg.docstring_rtc_this_week("someone")
+            self.assertIn("UNKNOWN", str(cm.exception))
 
     def test_author_key_wins_over_user_key_like_the_payout_runner(self):
         c = {"author": {"login": "attacker"}, "user": {"login": self.BOT},
              "body": "<!-- rtc-payout-amount: 9 -->"}
         self._one_claim([c])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError) as cm:
+            dg.docstring_rtc_this_week("someone")
+        self.assertIn("UNKNOWN", str(cm.exception))
 
     def test_last_trusted_marker_wins_like_the_payout_runner(self):
         """bounty_payout.py pays the LAST trusted marker; the cap must count the
