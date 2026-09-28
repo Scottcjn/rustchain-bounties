@@ -67,6 +67,10 @@ class FakeApi:
             }]
         if "/pulls/" in path and "/comments" in path:
             return []
+        # The gate now verifies its bounty is still open before adjudicating
+        # (a retired bounty must not keep promising payouts).
+        if path.endswith("/issues/73"):
+            return {"state": "open", "number": 73}
         if path.endswith("/issues/42"):
             return {
                 "state": "open",
