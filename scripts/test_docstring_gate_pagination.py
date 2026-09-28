@@ -253,5 +253,65 @@ class PaginationTests(unittest.TestCase):
         self.assertIn("10", str(cm.exception))
 
 
+class RecoveryPathTests(unittest.TestCase):
+    """The manual-recovery path must not poison the claimant (#17055 review item 1).
+
+    A claim whose labels were applied by hand after a gate label-API failure
+    used to end up docstring-verified with NO payout marker anywhere, so every
+    later claim by that contributor raised "no trusted marker" forever. The
+    hold comment now carries the gate's own marker; these tests pin that.
+    """
+
+    def setUp(self):
+        self._orig_gh = dg.gh
+
+    def tearDown(self):
+        dg.gh = self._orig_gh
+
+    def test_label_failure_hold_body_carries_gate_marker(self):
+        """The hold body embeds a parseable marker for the computed amount."""
+        body = dg._label_failure_hold_body("Scottcjn/rustchain-bounties", 4321, 37, 4.35)
+        m = dg.PAYOUT_MARKER_RE.search(body)
+        self.assertIsNotNone(m, "hold body must contain the rtc-payout-amount marker")
+        self.assertTrue(dg.PAYOUT_AMOUNT_RE.fullmatch(m.group(1)))
+        self.assertEqual(float(m.group(1)), 4.35)
+        # the human instructions survive alongside the marker
+        self.assertIn("bounty-eligible", body)
+        self.assertIn("docstring-verified", body)
+
+    def test_hand_recovered_hold_comment_resolves_as_trusted(self):
+        """A claim whose ONLY marker is the gate's hold comment is machine-readable.
+
+        This is the poisoning scenario from the review: the human applies the
+        two labels by hand after a label-API failure. The hold comment is
+        authored by the gate's own identity, so the weekly cap reads its figure
+        instead of raising UNKNOWN on every future claim of this contributor.
+        """
+        hold = {"author": {"login": "github-actions[bot]"},
+                "body": dg._label_failure_hold_body("Scottcjn/rustchain-bounties", 4321, 37, 4.35)}
+        self.assertEqual(dg.trusted_payout_amount([hold]), 4.35)
+        # and inside a full thread it unblocks the weekly-cap sum
+        fake = FakeGh(
+            search_pages={1: {"total_count": 1, "items": [issue_item(9001)]}},
+            comments_by_issue={9001: {1: [hold] + [plain_comment(i) for i in range(99)]}},
+        )
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("recovered-contributor"), 4.35)
+
+    def test_hold_marker_from_a_stranger_is_not_trusted(self):
+        """The same hold text pasted by a stranger still counts for nothing."""
+        hold = {"author": {"login": "rando-stranger"},
+                "body": dg._label_failure_hold_body("Scottcjn/rustchain-bounties", 4321, 37, 99.0)}
+        self.assertIsNone(dg.trusted_payout_amount([hold]))
+
+    def test_maintainer_override_of_hold_marker_wins(self):
+        """#17053 coordination: a later maintainer marker overrides the hold figure."""
+        hold = {"author": {"login": "github-actions[bot]"},
+                "body": dg._label_failure_hold_body("Scottcjn/rustchain-bounties", 4321, 37, 4.35)}
+        override = {"author": {"login": "scottcjn"},
+                    "body": "Corrected after review: <!-- rtc-payout-amount: 3.00 -->"}
+        self.assertEqual(dg.trusted_payout_amount([hold, override]), 3.00)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

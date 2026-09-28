@@ -417,6 +417,36 @@ def count_added_docstrings(diff: str):
     return doc, total, files
 
 
+def _label_failure_hold_body(pr_repo, pr_num, doc_count, amount):
+    """Body of the hold comment when the payable labels could not be applied.
+
+    The hold message used to tell a human to apply `bounty-eligible` +
+    `docstring-verified` by hand and nothing else. A claim recovered that way
+    is docstring-verified with NO rtc-payout-amount marker anywhere, so with
+    the fully-paginated weekly-cap lookup every later claim by that
+    contributor raises "no trusted marker" and sits in needs-human forever:
+    the recovery path poisoned the claimant (review of #17055, item 1).
+
+    The hold comment therefore carries the gate's own marker. It is authored
+    by the same identity that posts verified comments (github-actions[bot] in
+    CI), so it counts as first-party under #17053's TRUSTED_MARKER_AUTHORS:
+    a hand-recovered claim stays machine-readable for both the payout runner
+    and the weekly cap. A maintainer who disagrees with the figure can post
+    their own marker later -- the last trusted marker wins.
+    """
+    return (
+        f"⏸️ 🤖 **Docstring gate: checks passed, but the payable labels could not be applied** "
+        f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
+        f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
+        f"sweep applies `bounty-eligible` + `docstring-verified`.\n\n"
+        f"<!-- rtc-payout-amount: {amount} -->\n"
+        f"The marker above is posted by the gate itself, so a hand-recovered claim stays "
+        f"machine-readable: apply the two labels and both the payout runner and the weekly cap "
+        f"read this figure. If the amount looks wrong, say so here — a maintainer's marker "
+        f"posted later overrides it (last trusted marker wins, #17053). Nothing is wrong with "
+        f"the claim; the gate is refusing to say 'verified' about a state it did not create.")
+
+
 def main():
     if not NUM:
         print("ISSUE_NUMBER not set", file=sys.stderr)
@@ -502,7 +532,10 @@ def main():
             f"weekly-earnings lookup failed, so the {MAX_RTC_PER_WEEK:g} RTC/week cap cannot be "
             f"checked right now.\n\nHolding rather than approving — a failed lookup is not proof "
             f"that you have earned nothing. This retries automatically on the next sweep; you do "
-            f"not need to do anything."], None)
+            f"not need to do anything. If the workflow log names an older claim of yours that "
+            f"predates payout markers, a maintainer can post "
+            f"`<!-- rtc-payout-amount: N -->` on that thread and the next sweep clears this "
+            f"hold."], None)
         add_labels("needs-human")
         print(f"::error::earnings lookup failed, refusing to approve: {e}")
         return 0
@@ -546,23 +579,38 @@ def main():
     # is red and the next sweep retries.
     if not add_labels("bounty-eligible", "docstring-verified"):
         gh(["issue", "comment", NUM, "-R", REPO, "--body",
-            f"⏸️ 🤖 **Docstring gate: checks passed, but the payable labels could not be applied** "
-            f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
-            f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
-            f"sweep applies `bounty-eligible` + `docstring-verified`. Nothing is wrong with the "
-            f"claim; the gate is refusing to say 'verified' about a state it did not create."], None)
+            _label_failure_hold_body(pr_repo, pr_num, doc_count, amount)], None)
         add_labels("needs-human")
-        print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified")
+        print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified "
+              f"(gate marker embedded in the hold comment)")
         return 1
-    gh(["issue", "comment", NUM, "-R", REPO, "--body",
-        f"✅ 🤖 **Docstring gate: verified.**\n\n"
-        f"- PR {pr_repo}#{pr_num} is **merged**\n"
-        f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
-        f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
-        f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
-        f"<!-- rtc-payout-amount: {amount} -->\n"
-        f"Queued for payout. The balance moves after the standard confirmation window, not on this "
-        f"comment."], None)
+    # The verified comment carries the payout marker the rest of the pipeline
+    # keys off. gh() cannot report a comment-post failure (the CLI prints a
+    # comment URL, not JSON, so it parses to the default), so post via
+    # gh_raw() and treat any failure as "did not land": labels without a
+    # reachable marker are the same poisoning shape the hold path now defends
+    # against, and the next sweep would SKIP a labelled claim ("already
+    # adjudicated") without ever repairing it. Roll the labels back and hold;
+    # the next sweep re-adjudicates from scratch. Residual: if BOTH the
+    # comment and the label removal fail, the claim stays labelled without a
+    # marker -- a red run and needs-human is the signal for that case.
+    try:
+        gh_raw(["issue", "comment", NUM, "-R", REPO, "--body",
+                f"✅ 🤖 **Docstring gate: verified.**\n\n"
+                f"- PR {pr_repo}#{pr_num} is **merged**\n"
+                f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
+                f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
+                f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
+                f"<!-- rtc-payout-amount: {amount} -->\n"
+                f"Queued for payout. The balance moves after the standard confirmation window, "
+                f"not on this comment."])
+    except (GhError, subprocess.TimeoutExpired, OSError) as e:
+        remove_label("bounty-eligible")
+        remove_label("docstring-verified")
+        add_labels("needs-human")
+        print(f"::error::verified comment failed on {REPO}#{NUM} ({e}); "
+              f"labels rolled back, held for the next sweep")
+        return 1
     print(f"verified {doc_count} docstrings -> {amount} RTC on {REPO}#{NUM}")
     return 0
 
