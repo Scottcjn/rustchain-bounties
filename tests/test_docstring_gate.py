@@ -172,8 +172,12 @@ class UntrustedMarkerTests(unittest.TestCase):
         return {"user": {"login": login}, "body": f"<!-- rtc-payout-amount: {amount} -->"}
 
     def test_spoofed_marker_alone_does_not_count(self):
+        # The marker is not trusted, so trusted_payout_amount sees None
+        self.assertIsNone(dg.trusted_payout_amount([self._c("random-user", 40)]))
+        # Prior verified claim with no trusted marker fails closed (raises GhError -> hold)
         self._one_claim([self._c("random-user", 40)])
-        self.assertEqual(dg.docstring_rtc_this_week("victim"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("victim")
 
     def test_genuine_bot_marker_counts(self):
         self._one_claim([self._c(self.BOT, 5)])
@@ -194,10 +198,13 @@ class UntrustedMarkerTests(unittest.TestCase):
         self.assertEqual(dg.docstring_rtc_this_week("farmer"), 5.0)
 
     def test_lookalike_and_missing_author_are_untrusted(self):
-        self._one_claim([self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
-                         {"body": "<!-- rtc-payout-amount: 9 -->"},
-                         {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        comments = [self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
+                    {"body": "<!-- rtc-payout-amount: 9 -->"},
+                    {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}]
+        self.assertIsNone(dg.trusted_payout_amount(comments))
+        self._one_claim(comments)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_maintainer_marker_counts_and_graphql_shape_is_read(self):
         self._one_claim([{"author": {"login": "Scottcjn"},
@@ -211,19 +218,107 @@ class UntrustedMarkerTests(unittest.TestCase):
             self._one_claim([self._c(self.BOT, 5), self._c(self.BOT, bad)])
             self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0, bad)
             self._one_claim([self._c(self.BOT, bad)])
-            self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0, bad)
+            with self.assertRaises(dg.GhError):
+                dg.docstring_rtc_this_week("someone")
 
     def test_author_key_wins_over_user_key_like_the_payout_runner(self):
         c = {"author": {"login": "attacker"}, "user": {"login": self.BOT},
              "body": "<!-- rtc-payout-amount: 9 -->"}
+        self.assertIsNone(dg.trusted_payout_amount([c]))
         self._one_claim([c])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_last_trusted_marker_wins_like_the_payout_runner(self):
         """bounty_payout.py pays the LAST trusted marker; the cap must count the
         same figure the payout will actually move, not a different one."""
         self._one_claim([self._c(self.BOT, 5), self._c("Scottcjn", 2.5)])
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 2.5)
+
+
+class PaginationTests(unittest.TestCase):
+    """Issue #17054: weekly-cap lookup must paginate comments and search results.
+
+    If comments or search results are capped at page 1 (100 items), a trusted
+    marker pushed to position 101+ (or a prior claim past claim #100) is missed,
+    causing prior earnings to be undercounted and the weekly cap to fail open.
+    """
+
+    def setUp(self):
+        self._gh = dg.gh
+
+    def tearDown(self):
+        dg.gh = self._gh
+
+    def test_marker_at_position_120_of_150_comments_is_counted(self):
+        """Regression test for #17054: 150 comments with trusted marker at pos 120."""
+        # 150 comments: pos 0..119 noise, pos 120 trusted marker, pos 121..149 noise
+        all_comments = []
+        for i in range(150):
+            if i == 120:
+                all_comments.append({
+                    "user": {"login": "github-actions[bot]"},
+                    "body": "✅ Docstring gate: verified.\n<!-- rtc-payout-amount: 15.5 -->"
+                })
+            else:
+                all_comments.append({
+                    "user": {"login": f"user-{i}"},
+                    "body": f"comment {i} while in awaiting-merge"
+                })
+
+        # Simulate gh api --paginate --slurp returning pages of 100 comments
+        page1 = all_comments[:100]
+        page2 = all_comments[100:]
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            self.assertIn("--paginate", args)
+            self.assertIn("--slurp", args)
+            if "search/issues" in joined:
+                return [{"items": [{"number": 901, "body": ""}]}]
+            if "/comments" in joined:
+                return [page1, page2]
+            return default
+
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("contributor"), 15.5)
+
+    def test_search_results_paginated(self):
+        """Regression test for #17054: prior claims across multiple search pages are summed."""
+        # 120 prior claims across two search pages
+        page1_items = [{"number": 1000 + i} for i in range(100)]
+        page2_items = [{"number": 1100 + i} for i in range(20)]
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            self.assertIn("--paginate", args)
+            self.assertIn("--slurp", args)
+            if "search/issues" in joined:
+                return [{"items": page1_items}, {"items": page2_items}]
+            if "/comments" in joined:
+                # each claim has 0.1 RTC
+                return [[{"user": {"login": "github-actions[bot]"},
+                          "body": "<!-- rtc-payout-amount: 0.1 -->"}]]
+            return default
+
+        dg.gh = fake
+        # 120 claims * 0.1 = 12.0 RTC
+        self.assertEqual(dg.docstring_rtc_this_week("prolific_author"), 12.0)
+
+    def test_prior_verified_claim_missing_marker_raises_gh_error(self):
+        """A verified claim with no trusted marker is unknown, not 0 (fail-closed)."""
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return [{"items": [{"number": 901}]}]
+            if "/comments" in joined:
+                return [[{"user": {"login": "random-user"}, "body": "no marker here"}]]
+            return default
+
+        dg.gh = fake
+        with self.assertRaises(dg.GhError) as ctx:
+            dg.docstring_rtc_this_week("author")
+        self.assertIn("has no trusted payout marker", str(ctx.exception))
 
 
 if __name__ == "__main__":
