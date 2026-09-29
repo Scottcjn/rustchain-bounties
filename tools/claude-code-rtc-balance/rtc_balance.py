@@ -33,6 +33,10 @@ RTC_USD = 0.10
 
 def _build_ssl_context(insecure: bool):
     if insecure:
+        print(
+            "WARNING: TLS certificate verification is disabled (--insecure). "
+            "This connection is vulnerable to man-in-the-middle attacks."
+        )
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
