@@ -23,6 +23,9 @@ We take security seriously at Rustchain. If you discover a security vulnerabilit
 - Steps to reproduce the issue
 - Potential impact assessment
 - Suggested fix (if any)
+- For wallet or ledger data exposure, use the smallest possible proof. Prefer
+  a wallet you control, redact third-party amounts or transaction identifiers
+  when practical, and do not bulk-enumerate miners in a public report.
 
 ### What to Expect
 
@@ -64,6 +67,9 @@ scope creep; please respect it.
 
 - **Live attestation nodes** — `rustchain.org`, `50.28.86.131`, `50.28.86.153`
   (consensus, `/wallet/transfer*`, `/attest/*`, epoch settlement, admin endpoints)
+- **Live wallet privacy surfaces** — deployed wallet endpoints that expose
+  account-specific balances, transaction history, payout metadata, or ledger
+  identifiers, including `/wallet/balance` and `/wallet/history`.
 - **Live BoTTube** — `bottube.ai` (the deployed Flask app and its public APIs)
 - **Distributed client artifacts** — the `clawrtc` package and the miner clients
   shipped to users (anything that handles real keys, funds, or attestation)
