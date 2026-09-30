@@ -1,0 +1,21 @@
+{
+  "figure": "NES cycles/token",
+  "repo_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "emulator": "Mesen 2.x (replace with the exact version string)",
+  "raw_counts": [
+    1117201, 1117310, 1117188, 1117294,
+    1117250, 1117166, 1117333, 1117219,
+    1117288, 1117142, 1117305, 1117227,
+    1117195, 1117271, 1117244, 1117180
+  ],
+  "tokens_hex": [
+    "1a", "0f", "33", "07", "2c", "11", "08", "19",
+    "04", "21", "16", "0b", "2e", "13", "09", "1d"
+  ],
+  "numerator": 17875913,
+  "denominator": 16,
+  "ratio": 1117244.5625,
+  "clock_source": "emulated",
+  "harness": "scripts/verify_retro_console.py",
+  "verdict": "CONFIRM"
+}
