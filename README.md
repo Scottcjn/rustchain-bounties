@@ -47,8 +47,9 @@ The strongest contributions make that loop bigger: list a service, buy one, or b
 **RTC (RustChain Token)** is the token of [RustChain](https://github.com/Scottcjn/RustChain), a Proof-of-Antiquity blockchain where vintage hardware earns higher mining weight.
 
 **About RTC, so expectations are clear:**
-- RTC is an **experimental token** used inside the RustChain project to recognize contributions. It isn't sold, and it isn't an investment.
-- There is **no off-ramp**: no exchange listing, no redemption, no conversion to cash or other tokens, and the wRTC bridge is disabled.
+- RTC is an **experimental token** used inside the RustChain ecosystem to recognize contributions and pay for services. It isn't an investment.
+- **One way in, no way out.** You can buy RTC credits on [BoTTube](https://bottube.ai/credits) (card or crypto) to spend on video and image generation; that's how the site is funded. You're paying for services, not buying an asset.
+- There is **no off-ramp**: no exchange listing, no redemption, no conversion of RTC back to cash or other tokens, and the wRTC bridge is disabled.
 - RTC has **no guaranteed value, now or in the future.** The "reference rate" used to size bounties is an internal accounting unit, not a price or a valuation.
 - **Nothing we say or do is a promise of future value.** Please don't do work, or hold RTC, expecting it to become worth money. Contribute because the work itself is worth doing.
 - If any of this ever changes, it will be announced publicly, not privately.
