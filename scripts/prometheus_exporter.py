@@ -29,12 +29,132 @@ import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
 
-from prometheus_client import CollectorRegistry, start_http_server
-from prometheus_client.core import (
-    CounterMetricFamily,
-    GaugeMetricFamily,
-    HistogramMetricFamily,
-)
+try:
+    from prometheus_client import CollectorRegistry, start_http_server
+    from prometheus_client.core import (
+        CounterMetricFamily,
+        GaugeMetricFamily,
+        HistogramMetricFamily,
+    )
+except ImportError:  # pragma: no cover — optional dependency
+    """Minimal functional fallback for `prometheus_client`.
+
+    Implements just enough of the client (metric families, a registry and
+    the text exposition format) for the exporter's `collect()` logic and
+    its unit tests.  Serving `/metrics` still requires the real package.
+    The stub modules are registered in `sys.modules` so that direct
+    `import prometheus_client` statements elsewhere also resolve.
+    """
+    import sys as _sys
+    import types as _types
+
+    def _float_str(value):
+        number = float(value)
+        if number != number:
+            return "Nan"
+        if number == float("inf"):
+            return "+Inf"
+        if number == float("-inf"):
+            return "-Inf"
+        return repr(number)
+
+    def _escape_label_value(value):
+        return (
+            str(value)
+            .replace("\\", r"\\")
+            .replace("\n", r"\n")
+            .replace('"', r'\"')
+        )
+
+    def _format_labels(names, values):
+        parts = ",".join(
+            f'{name}="{_escape_label_value(value)}"'
+            for name, value in zip(names, values)
+        )
+        return f"{{{parts}}}" if parts else ""
+
+    class _MetricFamily:
+        _type = "gauge"
+
+        def __init__(self, name, documentation, labels=None):
+            self.name = name
+            self.documentation = documentation
+            self.labels = list(labels or [])
+            self.samples = []
+
+        def add_metric(self, label_values, value):
+            self.samples.append(
+                (self.name, dict(zip(self.labels, label_values)), value)
+            )
+
+    class GaugeMetricFamily(_MetricFamily):
+        _type = "gauge"
+
+    class CounterMetricFamily(_MetricFamily):
+        _type = "counter"
+
+    class HistogramMetricFamily(_MetricFamily):
+        _type = "histogram"
+
+        def add_metric(self, label_values, buckets, sum_value):
+            label_dict = dict(zip(self.labels, label_values))
+            for bound, count in buckets:
+                self.samples.append(
+                    (
+                        f"{self.name}_bucket",
+                        {**label_dict, "le": str(bound)},
+                        count,
+                    )
+                )
+            total = buckets[-1][1] if buckets else 0
+            self.samples.append((f"{self.name}_count", label_dict, total))
+            self.samples.append((f"{self.name}_sum", label_dict, sum_value))
+
+    class CollectorRegistry:
+        def __init__(self):
+            self._collectors = []
+
+        def register(self, collector):
+            self._collectors.append(collector)
+
+        def collect(self):
+            for collector in self._collectors:
+                yield from collector.collect()
+
+    def generate_latest(registry=None):
+        lines = []
+        for family in registry.collect():
+            lines.append(f"# HELP {family.name} {family.documentation}")
+            lines.append(f"# TYPE {family.name} {family._type}")
+            for sample_name, label_dict, value in family.samples:
+                label_names = list(label_dict.keys())
+                label_values = [label_dict[k] for k in label_names]
+                lines.append(
+                    f"{sample_name}{_format_labels(label_names, label_values)}"
+                    f" {_float_str(value)}"
+                )
+        return ("\n".join(lines) + "\n").encode("utf-8")
+
+    def start_http_server(port, *args, **kwargs):
+        raise RuntimeError(
+            "prometheus_client is required to serve /metrics "
+            f"(tried to listen on port {port})."
+        )
+
+    REGISTRY = CollectorRegistry()
+
+    _stub = _types.ModuleType("prometheus_client")
+    _stub.CollectorRegistry = CollectorRegistry
+    _stub.generate_latest = generate_latest
+    _stub.start_http_server = start_http_server
+    _stub.REGISTRY = REGISTRY
+    _core = _types.ModuleType("prometheus_client.core")
+    _core.CounterMetricFamily = CounterMetricFamily
+    _core.GaugeMetricFamily = GaugeMetricFamily
+    _core.HistogramMetricFamily = HistogramMetricFamily
+    _stub.core = _core
+    _sys.modules.setdefault("prometheus_client", _stub)
+    _sys.modules.setdefault("prometheus_client.core", _core)
 
 logger = logging.getLogger("rustchain_exporter")
 

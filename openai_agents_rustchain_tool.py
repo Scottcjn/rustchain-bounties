@@ -3,7 +3,44 @@
 from typing import Any, Dict, List, Optional, Sequence
 
 import requests
-from agents import Agent, FunctionTool, function_tool
+
+try:
+    from agents import Agent, FunctionTool, function_tool
+except ImportError:  # pragma: no cover — optional dependency
+    """Minimal fallback for the OpenAI Agents SDK (only what this module uses)."""
+    import functools
+
+    class FunctionTool:
+        """Stand-in for agents.FunctionTool exposing the wrapped name."""
+
+        def __init__(self, name, func=None):
+            self.name = name
+            self._func = func
+
+        def __call__(self, *args, **kwargs):
+            if self._func is None:
+                raise RuntimeError("Tool has no implementation.")
+            return self._func(*args, **kwargs)
+
+    def function_tool(func=None, *, name=None):
+        """Bare-`@function_tool` compatible decorator producing FunctionTool."""
+
+        def wrap(fn):
+            tool = FunctionTool(name or fn.__name__, fn)
+            functools.update_wrapper(tool, fn)
+            return tool
+
+        if func is None:
+            return wrap
+        return wrap(func)
+
+    class Agent:
+        """Stand-in for agents.Agent keeping name/instructions/tools."""
+
+        def __init__(self, name, instructions="", tools=()):
+            self.name = name
+            self.instructions = instructions
+            self.tools = list(tools)
 
 
 DEFAULT_NODE_URL = "https://rustchain.org"
