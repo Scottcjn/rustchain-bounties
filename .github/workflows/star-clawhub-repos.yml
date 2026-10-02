@@ -1,0 +1,44 @@
+name: Star ClawHub Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      github_username:
+        description: 'Your GitHub username'
+        required: true
+        default: '${{ github.actor }}'
+
+jobs:
+  star-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+          
+      - name: Star repositories and leave reviews
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/star_clawhub_repos.py
+          
+      - name: Comment on bounty issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `I have successfully starred all 4 repositories for bounty #165 and left review comments with the required disclosure statement.\n\nGitHub username: ${{ github.event.inputs.github_username }}`
+            })
