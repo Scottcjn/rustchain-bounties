@@ -8,8 +8,16 @@ Usage:
 
 Or as a Claude Code skill:
     /rtc-balance <wallet-name>
+
+Exit codes:
+    0 - Success
+    1 - Usage error (invalid arguments, missing wallet)
+    2 - Network error (node unreachable, connection failed, timeout)
+    3 - Bad response (non-200 HTTP status, malformed JSON)
+    4 - Wallet not found / empty balance
 """
 import sys
+import os
 import urllib.request
 import urllib.error
 import json
@@ -26,6 +34,36 @@ from typing import Dict, Optional, Any
 
 import argparse
 
+
+class RTCBalanceError(Exception):
+    """Base exception for RTC balance errors."""
+    exit_code = 1
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+
+class UsageError(RTCBalanceError):
+    """Usage / argument error."""
+    exit_code = 1
+
+
+class NetworkError(RTCBalanceError):
+    """Network / connection error."""
+    exit_code = 2
+
+
+class BadResponseError(RTCBalanceError):
+    """Bad HTTP response (non-200, malformed JSON)."""
+    exit_code = 3
+
+
+class WalletNotFoundError(RTCBalanceError):
+    """Wallet not found or empty balance."""
+    exit_code = 4
+
+
 DEFAULT_NODE_URL = "https://50.28.86.131"
 NODE_URL = os.environ.get("RTC_NODE_URL", DEFAULT_NODE_URL)
 RTC_USD = 0.10
@@ -40,13 +78,36 @@ def _build_ssl_context(insecure: bool):
     return ssl.create_default_context()
 
 
-def query(url: str, timeout: int = 10, *, insecure: bool = False) -> Optional[dict]:
+def query(url: str, timeout: int = 10, *, insecure: bool = False) -> dict:
+    """
+    Query the given URL and return parsed JSON.
+    Raises NetworkError on connection/timeout errors.
+    Raises BadResponseError on non-200 status or malformed JSON.
+    """
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "RTC-Balance-CLI/1.0"})
         with urllib.request.urlopen(req, timeout=timeout, context=_build_ssl_context(insecure)) as resp:
-            return json.loads(resp.read().decode())
-    except Exception:
-        return None
+            if resp.status != 200:
+                raise BadResponseError(f"HTTP {resp.status}: {resp.reason}")
+            body = resp.read().decode()
+            try:
+                return json.loads(body)
+            except json.JSONDecodeError as e:
+                raise BadResponseError(f"Malformed JSON response: {e}")
+    except BadResponseError:
+        raise
+    except NetworkError:
+        raise
+    except urllib.error.HTTPError as e:
+        raise BadResponseError(f"HTTP {e.code}: {e.reason}")
+    except urllib.error.URLError as e:
+        raise NetworkError(f"Network error: {e.reason}")
+    except ssl.SSLError as e:
+        raise NetworkError(f"TLS error: {e}")
+    except TimeoutError:
+        raise NetworkError("Request timed out")
+    except Exception as e:
+        raise NetworkError(f"Unexpected error: {e}")
 
 
 def extract_balance(data: dict):
@@ -120,13 +181,16 @@ def _validate_wallet(wallet: str) -> str:
     # so a value like `foo&extra=1` can't smuggle query parameters into the URL.
     import re
     if not re.match(r"^[A-Za-z0-9_-]{1,64}$", wallet):
-        raise SystemExit("Invalid wallet name; expected [A-Za-z0-9_-]{1,64}") 
+        raise UsageError("Invalid wallet name; expected [A-Za-z0-9_-]{1,64}")
     return wallet
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Query RustChain wallet balance.")
-    parser.add_argument("wallet", nargs="?", help="Wallet name") 
+    parser = argparse.ArgumentParser(
+        description="Query RustChain wallet balance.",
+        epilog="Exit codes: 0=ok, 1=usage, 2=network, 3=bad response, 4=wallet not found"
+    )
+    parser.add_argument("wallet", nargs="?", help="Wallet name")
     parser.add_argument("--node-url", default=NODE_URL, help="Override RustChain node URL")
     parser.add_argument("--insecure", action="store_true",
                         help="Disable TLS certificate verification (use only for self-signed test nodes)")
@@ -136,43 +200,65 @@ def main():
         args.wallet = input("Enter wallet name: ").strip()
     if not args.wallet:
         parser.print_help()
-        sys.exit(1)
+        raise UsageError("Wallet name required")
 
-    wallet = _validate_wallet(args.wallet.strip())
+    try:
+        wallet = _validate_wallet(args.wallet.strip())
+    except RTCBalanceError:
+        raise
+    except Exception as e:
+        raise UsageError(f"Invalid wallet name: {e}")
+
     node_url = args.node_url.rstrip("/")
 
     # Health check
-    health = query(f"{node_url}/health", insecure=args.insecure)
+    try:
+        health = query(f"{node_url}/health", insecure=args.insecure)
+    except NetworkError as e:
+        raise NetworkError(f"Node unreachable at {node_url}: {e}")
+    except BadResponseError as e:
+        raise BadResponseError(f"Health check failed: {e}")
+
     if health is None:
-        print(f"Error: Node unreachable at {NODE_URL}", file=sys.stderr)
-        sys.exit(1)
+        raise BadResponseError("Health check returned empty response")
 
     # Balance
     from urllib.parse import urlencode
-    balance_data = query(f"{node_url}/wallet/balance?{urlencode({'miner_id': wallet})}", insecure=args.insecure)
+    balance_url = f"{node_url}/wallet/balance?{urlencode({'miner_id': wallet})}"
+    try:
+        balance_data = query(balance_url, insecure=args.insecure)
+    except NetworkError as e:
+        raise NetworkError(f"Failed to fetch wallet '{wallet}': {e}")
+    except BadResponseError as e:
+        raise BadResponseError(f"Balance query failed: {e}")
+
     if balance_data is None:
-        print(f"Error: Failed to fetch wallet '{wallet}'", file=sys.stderr)
-        sys.exit(1)
+        raise BadResponseError("Balance query returned empty response")
 
     balance = extract_balance(balance_data)
     if balance is None:
-        print(f"Wallet '{wallet}' not found or returned empty balance.")
-        print(f"Raw response: {json.dumps(balance_data)[:200]}")
-        sys.exit(1)
+        raise WalletNotFoundError(
+            f"Wallet '{wallet}' not found or returned empty balance. "
+            f"Raw response: {json.dumps(balance_data)[:200]}"
+        )
 
     # Epoch (optional, non-fatal)
     epoch_info = ""
-    epoch_data = query(f"{node_url}/epoch", insecure=args.insecure)
-    if epoch_data:
-        epoch = extract_epoch(epoch_data)
-        miners = extract_miners(epoch_data)
-        parts = []
-        if epoch is not None:
-            parts.append(f"Epoch: {epoch}")
-        if miners is not None:
-            parts.append(f"Miners online: {miners}")
-        if parts:
-            epoch_info = " | ".join(parts)
+    try:
+        epoch_data = query(f"{node_url}/epoch", insecure=args.insecure)
+        if epoch_data:
+            epoch = extract_epoch(epoch_data)
+            miners = extract_miners(epoch_data)
+            parts = []
+            if epoch is not None:
+                parts.append(f"Epoch: {epoch}")
+            if miners is not None:
+                parts.append(f"Miners online: {miners}")
+            if parts:
+                epoch_info = " | ".join(parts)
+    except (NetworkError, BadResponseError):
+        # Non-fatal: epoch info is optional
+        pass
 
     formatted = format_balance(balance)
 
@@ -183,4 +269,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RTCBalanceError as e:
+        print(f"Error: {e.message}", file=sys.stderr)
+        sys.exit(e.exit_code)
+    except KeyboardInterrupt:
+        print("Interrupted", file=sys.stderr)
+        sys.exit(130)
+    except Exception as e:
+        print(f"Error: Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
