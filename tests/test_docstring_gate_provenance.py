@@ -45,7 +45,16 @@ class ProvenanceTests(unittest.TestCase):
         dg.subprocess.run = fake_run
         dg.NUM = "500"
         dg.add_labels = lambda *names: self.labels.extend(names) or True
-        dg.gh_raw = lambda args: DIFF
+
+        def fake_gh_raw(args):
+            # The verified comment is posted via gh_raw() so a failed post is
+            # detectable (a comment URL is not JSON; gh() parses it to None
+            # either way). Capture it like fake_gh captures issue comments.
+            if args[:2] == ["issue", "comment"]:
+                self.comments.append(args[args.index("--body") + 1])
+                return f"https://github.com/Scottcjn/rustchain-bounties/issues/500#issuecomment-1"
+            return DIFF
+        dg.gh_raw = fake_gh_raw
 
     def tearDown(self):
         for k, v in self._saved.items():
@@ -66,7 +75,7 @@ class ProvenanceTests(unittest.TestCase):
                 self.comments.append(args[args.index("--body") + 1])
                 return None
             if "search/issues" in " ".join(args):
-                return {"items": []}
+                return {"total_count": 0, "items": []}
             return default
         dg.gh = fake_gh
         return dg.main()
@@ -110,6 +119,29 @@ class ProvenanceTests(unittest.TestCase):
         self.assertIn("awaiting-merge", self.removed,
                       "a previously parked claim must leave the re-check sweep")
         self.assertHeld()
+
+    def test_label_failure_hold_carries_the_gate_marker(self):
+        """#17055 review item 1: when the label API fails, the hold comment
+        itself must carry the payout marker.
+
+        A human then applies bounty-eligible + docstring-verified by hand, and
+        the claim stays machine-readable (gate-authored marker = first-party
+        under #17053) instead of poisoning every later claim by this
+        contributor with "no trusted marker". Note the contrast with
+        assertHeld(): THAT is the provenance hold, where no amount may ever be
+        associated; THIS is the recovery hold, where the amount was already
+        verified and only the labels failed.
+        """
+        dg.add_labels = lambda *names: self.labels.extend(names) or False
+        rc = self._run_claim("alice", "https://github.com/Scottcjn/bottube/pull/1", "alice")
+        # labels[] records ATTEMPTED labels; the failure itself is proven by
+        # the exit code and by the hold comment being the marker carrier.
+        self.assertEqual(rc, 1)
+        self.assertIn("needs-human", self.labels)
+        self.assertTrue(any("rtc-payout-amount: 0.1" in c for c in self.comments),
+                        "the hold comment must embed the gate's payout marker")
+        self.assertTrue(any("bounty-eligible" in c for c in self.comments),
+                        "the hold comment must still tell a human which labels to apply")
 
 
 class LabelHelpersNeverCrash(unittest.TestCase):

@@ -478,6 +478,38 @@ def _list(extra):
     except json.JSONDecodeError:
         return []
 
+def _claim_thread(num):
+    """(body, claimant_login, comments) for one claim, via explicit REST pages.
+
+    This used to be `gh issue view --json body,comments,author`. Verified
+    empirically (gh 2.101.0, #73: 2,483 comments returned, == 2,483 by explicit
+    REST pagination, same first/last): the CLI does paginate the comments
+    connection internally today. But that completeness is an undocumented
+    CLI-internal behavior, not a contract, and the payout runner's own
+    `RTC-AutoPay-Confirmed` marker is always the NEWEST comment -- a future
+    CLI that caps the fetch would drop exactly the comment that prevents a
+    double pay, silently, on a green run. Paginate ourselves so completeness
+    is this file's invariant. (Both the CLI and REST also under-count vs the
+    issue's `comments` field -- minimized/hidden comments are invisible to any
+    list endpoint -- which is why the transfer's idempotency key is the real
+    backstop against a repeat pay.)
+    """
+    d = json.loads(gh(["api", f"/repos/{REPO}/issues/{num}"]))
+    coms = []
+    page = 1
+    while True:
+        batch = json.loads(gh(["api", f"/repos/{REPO}/issues/{num}/comments",
+                               "-F", "per_page=100", "-F", f"page={page}"]) or "[]")
+        coms.extend(batch)
+        if len(batch) < 100:
+            break                      # short page = last page
+        page += 1
+        if page > 100:
+            raise GhError(f"#{num}: comments pagination exceeded 100 pages -- "
+                          f"refusing to treat a partial fetch as the full history")
+    a = d.get("user") or {}
+    return d.get("body") or "", (a.get("login") if isinstance(a, dict) else None), coms
+
 # Candidate set = every gate-labelled claim UNION a recent-window sweep.
 #
 # The recent sweep alone (the previous behaviour, --limit 400) silently
@@ -508,14 +540,15 @@ for i in issues:
     is_docstring = "docstring-verified" in labels_pre
     if not (is_review or is_docstring): continue
     num=str(i["number"]); labels={l["name"] for l in i.get("labels",[])}
-    d=json.loads(gh(["issue","view",num,"-R",REPO,"--json","body,comments,author"]))
-    coms=d.get("comments",[])
-    # `claimant_login` is the issue author's GitHub login. It is the last-resort
-    # handle fallback for claims whose body says "Wallet: TBD" and whose
-    # comment thread has no parseable handle. The previous version fetched
-    # only `body,comments`, so the fallback was unreachable in production.
-    a=d.get("author") or {}
-    claimant=a.get("login") if isinstance(a, dict) else None
+    # Fail closed per claim: a thread that cannot be read COMPLETELY is
+    # skipped loudly, never paid on a partial history (the eligibility and
+    # already-paid scans below would both be reading a truncated thread).
+    try:
+        claim_body, claimant, coms = _claim_thread(num)
+    except GhError as e:
+        print(f"::error::#{num}: claim thread could not be read completely "
+              f"({str(e)[:160]}); skipping -- no pay on a partial history")
+        continue
     # A label can only be applied by someone with triage/write access, so it is
     # an authorization. A COMMENT is not: anyone with a GitHub account can write
     # "Verified eligible" on a public issue and, before this check, be paid for
@@ -531,7 +564,7 @@ for i in issues:
     # commenting it (rules shared with auto-pay; see payment_markers.py). The
     # idempotency key below still makes a repeat transfer a no-op at the node.
     if any(payment_markers.comment_records_payment(c, REPO.split("/")[0]) for c in coms): continue
-    wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
+    wallet, source = resolve_wallet(claim_body, coms, claimant_login=claimant)
     if not wallet: continue
     # Review claims are a flat RATE. Docstring claims are worth whatever the
     # gate verified (0.5 RTC per docstring), so paying the flat rate would pay
@@ -551,7 +584,7 @@ for i in issues:
         if amount > MAX_CLAIM_RTC:
             print(f"::warning::#{num} amount {amount} exceeds MAX_CLAIM_RTC={MAX_CLAIM_RTC}; skipping")
             continue
-        problem=_docstring_claim_problem(d.get("body"), i.get("title"), claimant)
+        problem=_docstring_claim_problem(claim_body, i.get("title"), claimant)
         if problem:
             print(f"::warning::#{num} is docstring-verified but not payable: {problem}; skipping (needs a human)")
             continue
