@@ -1,3 +1,4 @@
+```bash
 To create an RTC address, run the following command in the Rustchain repo:
 
 ```bash
@@ -13,3 +14,4 @@ For example:
 RTC12345678901234567890123456789012345678901234567890123456789012
 
 (Note: Replace with your actual RTC address.)
+```
