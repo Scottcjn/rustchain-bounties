@@ -273,21 +273,53 @@ def docstring_rtc_this_week(author):
     ANY commenter, so a stranger could front-run the gate's figure with a large
     value (holding an honest contributor at the cap) or with 0 (so the cap
     failed open). See `trusted_payout_amount`.
+
+    Both the search/issues query and the per-claim comments lookups paginate
+    exhaustively via `gh api --paginate --slurp` (#17054). If comments
+    cannot be fetched, or if a `docstring-verified` prior claim carries no
+    valid trusted marker, we fail closed (raise GhError -> needs-human hold)
+    because an unknown or missing prior payout must not be treated as an
+    authoritative zero.
     """
     since = (datetime.datetime.now(datetime.timezone.utc)
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
     q = (f"repo:{REPO} is:issue author:{author} label:docstring-verified "
          f"created:>{since}")
-    res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}", "-f", "per_page=100"], {}, strict=True)
+    res = gh(["api", "--paginate", "--slurp", "-X", "GET", "search/issues",
+              "-f", f"q={q}", "-f", "per_page=100"], [], strict=True)
+    items = []
+    if isinstance(res, list):
+        for page in res:
+            if isinstance(page, dict):
+                items.extend(page.get("items") or [])
+            elif isinstance(page, list):
+                items.extend(page)
+    elif isinstance(res, dict):
+        items.extend(res.get("items") or [])
+
     total = 0.0
-    for it in (res.get("items") or []):
-        if str(it.get("number")) == str(NUM):
+    for it in items:
+        claim_num = it.get("number")
+        if claim_num is None or str(claim_num) == str(NUM):
             continue          # never count the claim being adjudicated
-        # The marker lives in a gate comment, not the issue body, so fetch them.
-        cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
-        amt = trusted_payout_amount(cs)
-        if amt is not None:
-            total += amt
+        # The marker lives in a gate comment, not the issue body, so fetch them exhaustively.
+        cs_raw = gh(["api", "--paginate", "--slurp",
+                     f"/repos/{REPO}/issues/{claim_num}/comments?per_page=100"],
+                    [], strict=True)
+        comments = []
+        if isinstance(cs_raw, list):
+            for entry in cs_raw:
+                if isinstance(entry, list):
+                    comments.extend(entry)
+                elif isinstance(entry, dict):
+                    comments.append(entry)
+        elif isinstance(cs_raw, dict):
+            comments.append(cs_raw)
+
+        amt = trusted_payout_amount(comments)
+        if amt is None:
+            raise GhError(f"prior verified claim #{claim_num} has no trusted payout marker")
+        total += amt
     return round(total, 2)
 
 
