@@ -137,3 +137,15 @@ A submission can be closed with no payout if it has:
 - unrelated or spammy changes
 - knowingly unavailable submission or proof routes presented as completed
 - cap/slot overflow represented as payable work
+
+
+## 10) Retro-console re-measurement claims (#16517)
+
+Claims that reproduce or falsify published retro-console figures must ship raw counts and a 16-token gate log, not a ratio alone. Shape-check the log before filing:
+
+```bash
+python3 scripts/verify_retro_console.py --check --log path/to/record.json
+python3 scripts/verify_retro_console.py --self-test
+```
+
+Full procedure, failure modes, and example records: `docs/bounty-16517-remeasurement-kit.md` and `docs/examples/bounty-16517-record.example.json`.

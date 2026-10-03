@@ -1,0 +1,22 @@
+{
+  "figure": "Genesis speedup",
+  "repo_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "emulator": "MAME 0.277 genesis",
+  "raw_counts": [
+    13786113, 13786114, 13786112, 13786115,
+    13786111, 13786116, 13786113, 13786114,
+    13786112, 13786115, 13786113, 13786111,
+    13786116, 13786114, 13786112, 13786113
+  ],
+  "tokens_hex": [
+    "10", "11", "12", "13", "14", "15", "16", "17",
+    "18", "19", "1a", "1b", "1c", "1d", "1e", "1f"
+  ],
+  "numerator": 220579814,
+  "denominator": 142972761,
+  "ratio": 1.674,
+  "clock_source": "emulated",
+  "harness": "scripts/verify_retro_console.py",
+  "verdict": "WRONG",
+  "_note": "220579814/142972761 = 1.543, not 1.674. Checker must reject a pasted published ratio."
+}
