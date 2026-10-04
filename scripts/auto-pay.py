@@ -9,6 +9,10 @@ Payment directive format (in a PR comment by repo owner):
     **Payment: 75 RTC**
     Payment: 75 RTC
 
+Only the owner's own prose counts: a directive inside a `> ` quote, a fenced
+code block or an inline code span is ignored, and if one comment carries
+several directives the last one wins (see find_payment_directive).
+
 Environment variables (set by the GitHub Action):
     GITHUB_TOKEN    — GitHub token for API access
     PR_NUMBER       — Pull request number
@@ -19,7 +23,6 @@ Environment variables (set by the GitHub Action):
     REPO_OWNER      — Repository owner username (e.g. Scottcjn)
 """
 
-import json
 import os
 import re
 import sys
@@ -69,6 +72,22 @@ FAILED_PAYMENT_MARKER = "RTC-AutoPay-Rejected"
 # so it is stripped before the dedup check — otherwise this fix would leave
 # every already-poisoned PR poisoned.
 LEGACY_FAILED_MARKER = f"{ALREADY_PAID_MARKER}:FAILED"
+
+
+def find_payment_directive(body: str):
+    """Amount (float) of the directive in `body`, or None if there is none.
+
+    Only the author's own prose counts: blockquotes, fenced code and inline
+    code are stripped first (payment_markers.strip_quoted_and_code), so an
+    owner quoting a contributor's "Payment: 500 RTC" or showing the syntax in
+    a code block does not pay. If one comment holds several directives the
+    LAST one wins -- "Payment: 50 RTC ... correction: Payment: 30 RTC" pays
+    30, the same last-wins rule main() applies across comments.
+    """
+    amount = None
+    for m in PAYMENT_RE.finditer(payment_markers.strip_quoted_and_code(body or "")):
+        amount = float(m.group(1))
+    return amount
 
 
 def is_already_paid_comment(body: str) -> bool:
@@ -315,9 +334,9 @@ def main() -> None:
         if author.lower() != repo_owner.lower():
             continue
 
-        match = PAYMENT_RE.search(body)
-        if match:
-            payment_amount = float(match.group(1))
+        amount = find_payment_directive(body)
+        if amount is not None:
+            payment_amount = amount
             payment_comment_id = c.get("id")
             print(f"Found payment directive: {payment_amount} RTC "
                   f"(comment {payment_comment_id} by {author})")
@@ -408,7 +427,7 @@ def main() -> None:
         print(f"::error::VPS returned error: {e.response.status_code} — {e.response.text}")
         sys.exit(1)
     except requests.exceptions.Timeout:
-        print(f"::error::VPS request timed out after 30s")
+        print("::error::VPS request timed out after 30s")
         sys.exit(1)
 
     ok = result.get("ok", False)

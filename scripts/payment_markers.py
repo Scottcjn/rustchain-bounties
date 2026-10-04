@@ -60,6 +60,28 @@ _FENCE_RE = re.compile(r"^[ \t]*(```|~~~).*?(?:^[ \t]*\1[^\n]*$|\Z)",
                        re.MULTILINE | re.DOTALL)
 
 
+# A Markdown blockquote line (`> ...`, nested `>> ...` included).
+_QUOTE_LINE_RE = re.compile(r"^[ \t]*>[^\n]*$", re.MULTILINE)
+# An inline code span: a run of N backticks closed by a run of exactly N.
+_INLINE_CODE_RE = re.compile(r"(?<!`)(`+)(?!`).+?(?<!`)\1(?!`)", re.DOTALL)
+
+
+def strip_quoted_and_code(body) -> str:
+    """`body` with everything the author did not say in their own voice removed.
+
+    Drops fenced code blocks (``` / ~~~, unterminated ones run to the end),
+    blockquote lines (`> ...`) and inline code spans. What is left is the
+    author's own prose, which is the only place an instruction (e.g. a
+    `Payment: N RTC` directive) may come from -- quoting someone else's text
+    or showing an example of the syntax must not act on it.
+    """
+    if not isinstance(body, str):
+        return ""
+    text = _FENCE_RE.sub("", body.replace("\r\n", "\n"))
+    text = _QUOTE_LINE_RE.sub("", text)
+    return _INLINE_CODE_RE.sub("", text)
+
+
 def body_records_payment(body) -> bool:
     """True if `body` carries a structured payment marker (author NOT checked)."""
     if not isinstance(body, str) or MARKER not in body:
