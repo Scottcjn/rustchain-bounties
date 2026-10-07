@@ -150,6 +150,8 @@ class FakeGitHub:
         self.comments_fail = set()   # issue numbers whose comment listing errors
         self.label_write_fails = False
         self.comment_write_fails = False
+        self.gone = set()             # logins GitHub answers 404 for (deleted accounts)
+        self.lookup_unknown = set()   # logins whose lookup is inconclusive (rate limit etc.)
         self.added, self.removed = [], []
 
     def issue(self, num, title="[BOUNTY: 10 RTC] Do a thing", author="Scottcjn",
@@ -191,6 +193,11 @@ class FakeGitHub:
             return {"items": items}
         return None
 
+    def user_lookup_status(self, login):
+        if login in self.lookup_unknown:
+            return "unknown"
+        return "gone" if login in self.gone else "exists"
+
     def comment_ok(self, num, body):
         if self.comment_write_fails:
             return False
@@ -217,7 +224,9 @@ class FakeGitHub:
 class _BotCase(unittest.TestCase):
     def setUp(self):
         self._saved = (bc.gh, bc.gh_strict, bc.add_label, bc.remove_label, bc.comment_ok)
+        self._saved_lookup = bc.user_lookup_status
         self.f = FakeGitHub()
+        bc.user_lookup_status = self.f.user_lookup_status
         bc.gh, bc.gh_strict, bc.comment_ok = self.f.gh, self.f.gh_strict, self.f.comment_ok
         bc.add_label, bc.remove_label = self.f.add_label, self.f.remove_label
         self.f.users["alice"] = OLD_ACCOUNT
@@ -225,6 +234,7 @@ class _BotCase(unittest.TestCase):
 
     def tearDown(self):
         bc.gh, bc.gh_strict, bc.add_label, bc.remove_label, bc.comment_ok = self._saved
+        bc.user_lookup_status = self._saved_lookup
 
     def assertLocked(self, num, who="alice"):
         self.assertIn((num, bc.LABEL), self.f.added)
@@ -629,6 +639,43 @@ class FailClosedTests(_BotCase):
         self.assertIn((69, bc.LABEL), self.f.removed)
         self.assertNotIn((70, bc.LABEL), self.f.removed)
 
+    def test_sweep_releases_live_claim_of_deleted_account(self):
+        """#398 (2026-10-07): a deleted account held a live lock until its expiry."""
+        self.f.issue(80, labels=("bounty", bc.LABEL))
+        self.f.comments[80].append(_marker("ghostholder", 5))
+        self.f.gone.add("ghostholder")
+        self.assertEqual(bc.do_sweep(), 0)
+        self.assertIn((80, bc.LABEL), self.f.removed)
+        last = self.f.posted(80)[-1]
+        self.assertIn("released automatically", last)
+        self.assertIn("no longer exists", last)
+        # The release marker must read as lapsed, so the issue is claimable again.
+        self.assertIsNone(bc.active_claim(80))
+
+    def test_sweep_keeps_live_claim_of_existing_account(self):
+        self.f.issue(81, labels=("bounty", bc.LABEL))
+        self.f.comments[81].append(_marker("alice", 5))
+        self.assertEqual(bc.do_sweep(), 0)
+        self.assertNotIn((81, bc.LABEL), self.f.removed)
+        self.assertEqual(bc.active_claim(81)[0], "alice")
+
+    def test_sweep_keeps_claim_when_holder_lookup_inconclusive(self):
+        """A rate limit or network error is not proof the account is gone."""
+        self.f.issue(82, labels=("bounty", bc.LABEL))
+        self.f.comments[82].append(_marker("bob", 5))
+        self.f.lookup_unknown.add("bob")
+        self.assertEqual(bc.do_sweep(), 0)
+        self.assertNotIn((82, bc.LABEL), self.f.removed)
+        self.assertEqual(bc.active_claim(82)[0], "bob")
+
+    def test_sweep_deleted_holder_marker_failure_keeps_label_and_goes_red(self):
+        self.f.issue(83, labels=("bounty", bc.LABEL))
+        self.f.comments[83].append(_marker("ghostholder", 5))
+        self.f.gone.add("ghostholder")
+        self.f.comment_write_fails = True
+        self.assertEqual(bc.do_sweep(), 1)
+        self.assertNotIn((83, bc.LABEL), self.f.removed)
+
     def test_marker_write_failure_rolls_back_label(self):
         self.f.issue(74)
         self.f.comment_write_fails = True
@@ -693,6 +740,46 @@ class GhStrictTests(unittest.TestCase):
         self._fake(0, "not json")
         self.assertIsNone(bc.gh_strict(["api", "users/x"]))
 
+
+
+class UserLookupStatusTest(unittest.TestCase):
+    """Only a definite 404 may read as "gone"; anything else is "unknown"."""
+
+    def setUp(self):
+        self._run = bc.subprocess.run
+
+    def tearDown(self):
+        bc.subprocess.run = self._run
+
+    def _fake(self, rc, out, err=""):
+        class P:
+            returncode, stdout, stderr = rc, out, err
+        bc.subprocess.run = lambda *a, **k: P()
+
+    def test_existing_user(self):
+        self._fake(0, '{"login": "alice"}')
+        self.assertEqual(bc.user_lookup_status("alice"), "exists")
+
+    def test_404_is_gone(self):
+        self._fake(1, '{"message": "Not Found", "status": "404"}', "gh: Not Found (HTTP 404)")
+        self.assertEqual(bc.user_lookup_status("deleted-user"), "gone")
+
+    def test_rate_limit_is_unknown(self):
+        self._fake(1, '{"message": "API rate limit exceeded", "status": "403"}', "HTTP 403")
+        self.assertEqual(bc.user_lookup_status("alice"), "unknown")
+
+    def test_empty_failure_is_unknown(self):
+        self._fake(1, "", "connection reset")
+        self.assertEqual(bc.user_lookup_status("alice"), "unknown")
+
+    def test_exception_is_unknown(self):
+        def boom(*a, **k):
+            raise OSError("gh missing")
+        bc.subprocess.run = boom
+        self.assertEqual(bc.user_lookup_status("alice"), "unknown")
+
+    def test_empty_login_is_unknown(self):
+        self.assertEqual(bc.user_lookup_status(""), "unknown")
 
 if __name__ == "__main__":
     unittest.main()

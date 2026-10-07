@@ -203,6 +203,37 @@ def account_age_days(login):
     return (datetime.datetime.now(datetime.timezone.utc) - ts).days
 
 
+def user_lookup_status(login):
+    """'exists', 'gone' (GitHub answers 404 for the login), or 'unknown'.
+
+    Only a definite 404 counts as gone. Rate limits, timeouts, network errors
+    and anything else are 'unknown', so a live holder is never released just
+    because GitHub was briefly unreachable.
+    """
+    if not login:
+        return "unknown"
+    try:
+        p = subprocess.run(["gh", "api", f"users/{login}"],
+                           capture_output=True, text=True, timeout=90)
+    except Exception as exc:  # timeout, gh missing
+        print(f"[WARN] user lookup for {login} failed: {exc}", file=sys.stderr)
+        return "unknown"
+    if p.returncode == 0:
+        return "exists"
+    try:
+        body = json.loads(p.stdout) if p.stdout.strip() else {}
+    except ValueError:
+        body = {}
+    if isinstance(body, dict) and (str(body.get("status")) == "404"
+                                   or body.get("message") == "Not Found"):
+        return "gone"
+    if "HTTP 404" in (p.stderr or ""):
+        return "gone"
+    print(f"[WARN] user lookup for {login} inconclusive (exit {p.returncode}): "
+          f"{(p.stderr or '').strip()}", file=sys.stderr)
+    return "unknown"
+
+
 def claimed_issue_numbers():
     """Open issues carrying the `claimed` label, or None if the search failed."""
     nums = []
@@ -546,7 +577,28 @@ def do_sweep():
     released = unknown = 0
     for num in nums:
         try:
-            if active_claim(num):
+            held = active_claim(num)
+            if held:
+                # A live claim normally stands until it expires. The exception is
+                # a holder whose GitHub account no longer exists (deleted or
+                # removed): nobody can finish the work, and the lock would squat
+                # the bounty until expiry (#398, 2026-10-07). Only a definite 404
+                # releases; an inconclusive lookup leaves the claim alone.
+                if user_lookup_status(held[0]) != "gone":
+                    continue
+                past = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
+                if not comment_ok(num,
+                        f"{MARKER}\n🔓 **Claim released automatically.** "
+                        f"holder: @{held[0]} · expires: {past}\n\n"
+                        f"The holder's GitHub account no longer exists, so this claim "
+                        f"can't be completed. The bounty is open again — anyone can "
+                        f"take it by commenting `/claim`."):
+                    print(f"::warning::sweep: release marker failed on #{num}; claim left in place")
+                    unknown += 1
+                    continue
+                remove_label(num, LABEL)
+                released += 1
+                print(f"released #{num} (holder @{held[0]} no longer exists)")
                 continue
         except ClaimLookupError as exc:
             # Unknown is not lapsed: releasing here would publicly void a live claim.
