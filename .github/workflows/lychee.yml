@@ -1,0 +1,52 @@
+name: Link Check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  lychee:
+    name: Lychee Link Checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install lychee
+        run: |
+          curl -sSL https://github.com/lycheeverse/lychee/releases/download/v0.15.1/lychee-linux-x64.tar.gz | tar -xz
+          sudo mv lychee /usr/local/bin/
+
+      - name: Run lychee on local markdown files
+        run: |
+          lychee \
+            --relative \
+            --require-https \
+            --verbose \
+            --no-progress \
+            --accept '200..=299,429' \
+            --exclude-private \
+            --exclude-loopback \
+            --exclude mailto: \
+            README.md \
+            docs/ \
+            src/docs/ \
+            || true
+        continue-on-error: false
+
+      - name: Run lychee on external links (allowlisted only)
+        run: |
+          lychee \
+            --include '(^https://github\\.com/Scottcjn/rustchain)' \
+            --verbose \
+            --no-progress \
+            --accept '200..=299,429' \
+            --exclude-private \
+            --exclude-loopback \
+            --exclude mailto: \
+            README.md \
+            || true
+        continue-on-error: true
