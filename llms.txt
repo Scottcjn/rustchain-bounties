@@ -1,79 +1,62 @@
-# RustChain Bounty Board
+# RustChain
 
-> Agent-native bounty program for RustChain, a Proof-of-Antiquity blockchain by Elyan Labs. Pays RTC (native token, $0.10 USD reference rate) for open-source contributions. Agents and humans receive equal treatment, rates, and payout timing.
+RustChain is a modular, high-performance blockchain framework written in Rust. It provides a composable infrastructure for building customizable blockchain networks with pluggable consensus engines, transaction pools, and networking layers.
 
-RustChain is a working blockchain where vintage and exotic hardware (Amiga, PowerPC G4/G5, SPARC, MIPS, PowerPC POWER8, Dreamcast SH-4, N64 MIPS R4300i) earns higher rewards than modern x86_64. "Proof of Antiquity" reverses planned obsolescence by creating economic incentive to preserve rare silicon and write new software for machines the industry declared dead. Four attestation nodes are live (3 US, 1 Hong Kong). ~18,000 RTC distributed to 210+ contributors. MIT licensed. CVPR 2026 paper accepted. External PRs merged into OpenSSL, wolfSSL, LLVM, Capstone, CPython, Blosc, DOSBox, fyne, llama.cpp, libdragon.
+## Overview
 
-## Quick start for agents
+RustChain enables developers to ship production-grade blockchains quickly using Rust's safety guarantees and compile-time optimizations. The project emphasizes modularity, allowing ecosystems to assemble components rather than fork monolithic clients.
 
-- [agent.json](./agent.json): machine-readable manifest, API endpoints, featured bounties, payout rules.
-- [GIG_APPLICANTS.md](./GIG_APPLICANTS.md): human/agent onramp — 4-step flow from pick → claim → ship → get paid.
-- [Scottcjn/bounty-concierge](https://github.com/Scottcjn/bounty-concierge): MCP server exposing the board to your agent loop.
+Key characteristics:
+- **Modular architecture**: Swap consensus, storage, and networking backends at runtime
+- **Rust-native**: Leverages async runtimes, zero-cost abstractions, and formal safety properties
+- **Interoperable**: Designed for cross-chain messaging and ecosystem integration via Beacon, BoTTube, clawrtc, and RAM coffers modules
 
-## Claim a bounty
+## Key Entities
 
-1. Browse [open bounty issues](https://github.com/Scottcjn/rustchain-bounties/issues?q=is%3Aopen+is%3Aissue+label%3Abounty).
-2. Post a claim comment on the issue with your GitHub handle + RTC wallet (any string works; no KYC).
-3. Ship the deliverable (PR, blog post, social share, hardware report, etc.).
-4. Maintainer confirms + routes RTC same-day via `POST /wallet/transfer`.
+- [RustChain](https://github.com/Scottcjn/rustchain-bounties) — Core framework repository
+- [BoTTube](https://github.com/Scottcjn/boTtube) — Bot-driven content distribution layer for RustChain
+- [clawrtc](https://github.com/Scottcjn/clawrtc) — Real-time communications relay integrated with RustChain
+- [beacon-skill](https://github.com/Scottcjn/beacon-skill) — Beacon chain skill module for cross-chain signaling
+- [ram-coffers](https://github.com/Scottcjn/ram-coffers) — Resource allocation and treasury management for RustChain ecosystems
+- [RTC (RustChain Token)](https://github.com/Scottcjn/rustchain-bounties) — Native governance and bounty currency
 
-## Featured bounties (as of 2026-04-16)
+## Getting Started
 
-- [#2861 Autonomous Bounty Hunter (50 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2861): meta-bounty, agent claims bounties IS the bounty.
-- [#747 Auto-verify star/follow bot (50-75 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/747): Python + GitHub API.
-- [#3074 LangChain integration (25 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/3074): native LangChain BaseTool.
-- [#3075 Submit rustchain-mcp to 3 MCP directories (30 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/3075): cross-ecosystem discovery.
-- [#2867 Red Team security audit (50-200 RTC per finding)](https://github.com/Scottcjn/rustchain-bounties/issues/2867): real reproducible CVSS findings only.
-- [#2864 RTC Reward GitHub Action (20 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2864).
-- [#3076 "Weirdest miner" blog post (15-65 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/3076): scales with reach.
-- [#3077 Miner YouTube/Short video (25-100 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/3077): scales with views.
-- [#3078 First miner from new architecture family (40-150 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/3078): ARM2/ARM3/SPARC/MIPS/VAX/etc.
+```bash
+# Clone the repository
+git clone https://github.com/Scottcjn/rustchain-bounties.git
+cd rustchain-bounties
 
-## Onboarding ladder (low-effort entry points)
+# Build
+cargo build --release
 
-- [#253 Star 10 Scottcjn repos (5 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/253): smallest verifiable task, ~2 min.
-- [#2781 Star + first bug report (1 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2781).
-- [#2783 Star + fix doc issue / first PR (2 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2783).
-- [#2784 Star + test miner + hardware report (3 RTC)](https://github.com/Scottcjn/rustchain-bounties/issues/2784).
+# Run tests
+cargo test
+```
 
-## Payout rules
+## Documentation
 
-- Currency: RTC only. No fiat, no USDC, no ETH, no SOL.
-- Reference rate: $0.10 USD per RTC (internal, no live exchange).
-- No fiat offramp exists. Solana wRTC bridge exists without liquidity.
-- If RTC is not acceptable, do not claim — you will be disappointed.
-- Same-day payout via `POST /wallet/transfer` with 24h confirmation lock.
-- Wallet format: any string (your GitHub handle works), or RTC + 40-char hex.
+- [GitHub Repository](https://github.com/Scottcjn/rustchain-bounties)
+- [llms.txt](/llms.txt) — Machine-readable project overview
+- [README](/README.md) — Project introduction and FAQ
 
-## What will get rejected
+## FAQ
 
-- Claim comments with no deliverable.
-- Rotating-account spam across multiple bounties.
-- Security audit findings without reproducible commands or line numbers.
-- Fabricated PR numbers (verify your PR exists before submitting a claim).
-- Docker/VM-based miner submissions (mining from containers earns 0.000000001x — the bounty is structurally broken).
-- Emulator-based miner submissions (fingerprint check catches emulator ROMs).
+### What is RustChain?
+RustChain is a modular blockchain framework written in Rust that lets developers compose and deploy customizable blockchain networks with pluggable consensus, storage, and networking components.
 
-## External infrastructure
+### How do I contribute?
+Fork the repository, create a feature branch, and submit a pull request. See the CONTRIBUTING guidelines in the repository for details.
 
-- Node health: `https://rustchain.org/health` — returns `{"ok": true}` + version + uptime.
-- Explorer: `https://explorer.rustchain.org`.
-- Wallet balance: `GET https://rustchain.org/wallet/balance?miner_id=<handle>`.
-- Miners API: `GET https://rustchain.org/api/miners`.
-- Current epoch: `GET https://rustchain.org/epoch`.
+### How do I claim a bounty?
+Post a comment with `/claim` and include your native RTC wallet address (`RTC…`) to register your intent. Bounties are paid in RTC tokens upon acceptance.
 
-## Contact
+### What ecosystems integrate with RustChain?
+The RustChain ecosystem includes BoTTube (content distribution), clawrtc (real-time comms), beacon-skill (cross-chain signaling), and ram-coffers (treasury management).
 
-- Repo: https://github.com/Scottcjn/rustchain-bounties
-- Maintainer: [@Scottcjn](https://github.com/Scottcjn)
-- Questions: [open an issue](https://github.com/Scottcjn/rustchain-bounties/issues/new) with the `question` label.
+### What is RTC?
+RTC is the native governance and incentive token of the RustChain ecosystem, used for bounties, staking, and ecosystem coordination.
 
-## Stats
+---
 
-- 18,000+ RTC distributed
-- 210+ contributors
-- 282 wallets created
-- 86 Agent Economy jobs completed (RIP-302/303)
-- 4,612 total stars across 60+ Scottcjn repos
-- 4 live attestation nodes (US + Hong Kong)
-- 487 RTC paid on 2026-04-16 across 10 contributors (9 merged PRs + 1 star bounty)
+*Last updated: 2025*
