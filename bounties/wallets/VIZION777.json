@@ -1,0 +1,12 @@
+{
+  "github_username": "VIZION777",
+  "rtc_wallet_name": "VIZION777",
+  "external_bridge_network": "none",
+  "wallet_address": "0x96eE7904BdCd8a82c71B4FFc3362C96b1Aae03e0",
+  "network": "Base",
+  "network_type": "EVM",
+  "verified": true,
+  "related_issue": 16471,
+  "registered_at": "2026-07-09T00:00:00Z",
+  "notes": "Canonical RustChain payout target for future RTC bounty settlements."
+}
