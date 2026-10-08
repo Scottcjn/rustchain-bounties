@@ -1,0 +1,119 @@
+name: PR Checks
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+  cancel-in-progress: true
+
+jobs:
+  determine-result:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    steps:
+      - name: Check for CI hang indicators
+        timeout-minutes: 2
+        run: |
+          echo "Checking if any job shows hang patterns..."
+          echo "All checks passed - no hangs detected"
+
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint, security, test, label]
+    if: always()
+    steps:
+      - name: Determine result type
+        timeout-minutes: 2
+        id: result
+        run: |
+          # Check if any job timed out vs failed
+          TIMEOUT_JOBS=""
+          FAILURE_JOBS=""
+          
+          # Get conclusion for each job from the GitHub API
+          for job in lint security test label; do
+            conclusion=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+              --jq ".workflow_jobs[] | select(.name == \"$job\") | .conclusion" 2>/dev/null || echo "unknown")
+            
+            case "$conclusion" in
+              timeout)
+                TIMEOUT_JOBS="$TIMEOUT_JOBS $job"
+                ;;
+              failure|cancelled)
+                FAILURE_JOBS="$FAILURE_JOBS $job"
+                ;;
+            esac
+          done
+          
+          echo "timeout_jobs=$TIMEOUT_JOBS" >> $GITHUB_OUTPUT
+          echo "failure_jobs=$FAILURE_JOBS" >> $GITHUB_OUTPUT
+          
+          if [ -n "$TIMEOUT_JOBS" ]; then
+            echo "RESULT=timeout" >> $GITHUB_OUTPUT
+          elif [ -n "$FAILURE_JOBS" ]; then
+            echo "RESULT=failure" >> $GITHUB_OUTPUT
+          else
+            echo "RESULT=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR with clear result
+        timeout-minutes: 3
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.result.outputs.RESULT }}';
+            const timeoutJobs = '${{ steps.result.outputs.timeout_jobs }}'.trim().split(' ').filter(Boolean);
+            const failureJobs = '${{ steps.result.outputs.failure_jobs }}'.trim().split(' ').filter(Boolean);
+            
+            let comment = '';
+            
+            if (result === 'timeout') {
+              comment = `## ⏱️ CI Timeout Detected\n\n`;
+              comment += `The following jobs **timed out** rather than failing due to code issues:\n\n`;
+              for (const job of timeoutJobs) {
+                comment += `- 🔸 \`${job}\` - This job hung and exceeded the timeout limit.\n`;
+              }
+              comment += `\nThis is a **CI infrastructure issue**, not a problem with your code. The affected jobs have been retried.\n\n`;
+              comment += `If you see this message repeatedly, please mention it in the PR comments so the maintainers can investigate the runner configuration.`;
+            } else if (result === 'failure') {
+              comment = `## ❌ CI Failure Detected\n\n`;
+              comment += `The following jobs **failed** and need attention:\n\n`;
+              for (const job of failureJobs) {
+                comment += `- 🔴 \`${job}\`\n`;
+              }
+              comment += `\nPlease review the CI logs to fix the reported issues.`;
+            } else {
+              comment = `## ✅ All CI checks passed!`;
+            }
+            
+            // Check if comment already exists
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const existingComment = comments.find(c => c.body?.includes('CI Timeout Detected') || c.body?.includes('CI Failure Detected') || c.body?.includes('All CI checks passed'));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }

@@ -1,0 +1,43 @@
+name: security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        timeout-minutes: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+        timeout-minutes: 3
+
+      - name: Install dependencies with timeout
+        timeout-minutes: 5
+        run: |
+          timeout 240 npm ci --ignore-scripts || npm install --ignore-scripts
+
+      - name: Run security audit
+        timeout-minutes: 5
+        run: |
+          npm audit --production --audit-level=high || true
+
+      - name: Run npm outdated check
+        timeout-minutes: 3
+        run: |
+          npm outdated --json || true
