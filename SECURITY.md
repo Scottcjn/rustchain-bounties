@@ -35,18 +35,16 @@ We take security seriously at Rustchain. If you discover a security vulnerabilit
 
 Security-related contributions are eligible for RTC token rewards.
 
-**Rates were reduced 2026-06-11 as RTC's reference value rose** (1,300+ holding
-wallets; reference rate stepped up, so nominal RTC per finding steps down to keep
-USD-equivalent value per finding stable). The anchor is **USD value per finding**,
-not a fixed RTC number.
+Bounty amounts are set in RTC per bounty and may change over time. RTC is an
+experimental in-ecosystem token with no cash value and no off-ramp.
 
-| Severity | Reward | USD-equiv anchor | Example |
-| -------- | ------ | ---------------- | ------- |
-| **Critical** | **50 RTC** | ~$10 | Remote fund theft, RCE, consensus break, or auth bypass **on a live node/wallet endpoint** |
-| **High** | **25 RTC** | ~$5 | Privilege escalation or sensitive-data exposure on a **deployed** surface |
-| **Medium** | **13 RTC** | ~$2.50 | Limited-impact logic flaw or DoS on a **deployed** surface, with PoC |
-| **Low** | **5 RTC** | ~$1 | Minor info disclosure on a **deployed** surface, with PoC |
-| Out of scope | **0 RTC** | — | Acknowledged with thanks, not paid (see below) |
+| Severity | Reward | Example |
+| -------- | ------ | ------- |
+| **Critical** | **50 RTC** | Remote fund theft, RCE, consensus break, or auth bypass **on a live node/wallet endpoint** |
+| **High** | **25 RTC** | Privilege escalation or sensitive-data exposure on a **deployed** surface |
+| **Medium** | **13 RTC** | Limited-impact logic flaw or DoS on a **deployed** surface, with PoC |
+| **Low** | **5 RTC** | Minor info disclosure on a **deployed** surface, with PoC |
+| Out of scope | **0 RTC** | Acknowledged with thanks, not paid (see below) |
 
 Severity is assigned by the maintainer based on **demonstrated impact on a
 deployed surface**, not on the reporter's self-rated CVSS. A "CRITICAL" label on a
