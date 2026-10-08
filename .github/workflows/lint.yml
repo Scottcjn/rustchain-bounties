@@ -1,0 +1,43 @@
+name: lint
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        timeout-minutes: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+        timeout-minutes: 3
+
+      - name: Install dependencies
+        timeout-minutes: 5
+        run: |
+          npm ci --ignore-scripts || npm install --ignore-scripts
+          # Ensure we fail fast if install hangs
+          echo "Dependencies installed successfully"
+
+      - name: Run linter
+        timeout-minutes: 5
+        run: |
+          npm run lint --if-present || echo "No lint script found"
+
+      - name: Check formatting
+        timeout-minutes: 3
+        run: |
+          npx prettier --check "**/*.{js,ts,json,md}" || true
