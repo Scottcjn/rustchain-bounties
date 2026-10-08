@@ -1,0 +1,19 @@
+{
+  "claim_id": "RTC973498f72747cd1637e395521319c0ad61c0f68c",
+  "bounty_id": 9017,
+  "github_user": "L1nkinPark",
+  "payout_wallet": "RTC973498f72747cd1637e395521319c0ad61c0f68c",
+  "public_key": "ee2b512bf5a18951c328282c07848e76aa9945c35cd56b229e90793dfe069e4c",
+  "reward": 2,
+  "currency": "RTC",
+  "verified_flower_comment": "https://github.com/Scottcjn/rustchain-bounties/pull/16581#issuecomment-5448043093",
+  "starred_repos": [
+    "Scottcjn/Rustchain",
+    "Scottcjn/rustchain-bounties",
+    "Scottcjn/bottube",
+    "Scottcjn/beacon-skill",
+    "Scottcjn/grazer-skill"
+  ],
+  "claimed_at": "2025-07-10T00:00:00Z",
+  "status": "verified"
+}
