@@ -97,16 +97,9 @@ def bounty_is_open():
     """
     if not BOUNTY_ISSUE:
         return True
-    try:
-        iss = api(f"/repos/{REPO}/issues/{BOUNTY_ISSUE}", strict=True)
-    except ApiError as e:
-        print(f"gate: bounty #{BOUNTY_ISSUE} lookup failed, refusing to adjudicate: {e}",
-              file=sys.stderr)
-        return False
+    iss = api(f"/repos/{REPO}/issues/{BOUNTY_ISSUE}", strict=True)
     if not isinstance(iss, dict) or "state" not in iss:
-        print(f"gate: bounty #{BOUNTY_ISSUE} returned an unreadable response, refusing",
-              file=sys.stderr)
-        return False
+        raise ApiError(f"bounty #{BOUNTY_ISSUE} returned an unreadable response")
     if iss.get("state") != "open":
         print(f"gate: bounty #{BOUNTY_ISSUE} is {iss.get('state')} — refusing to adjudicate. "
               "Re-point BOUNTY_ISSUE at the live bounty, or disable this workflow.",

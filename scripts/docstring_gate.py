@@ -341,7 +341,7 @@ def main():
         print(f"could not read {REPO}#{NUM}", file=sys.stderr)
         return 1
     labels = {l["name"] for l in iss.get("labels", [])}
-    if {"bounty-eligible", "docstring-verified", "gate-processed"} & labels:
+    if {"bounty-eligible", "docstring-verified", "gate-processed", "needs-human", "weekly-cap-reached"} & labels:
         print("already adjudicated; skipping")
         return 0
     title, body = iss.get("title", ""), iss.get("body") or ""
@@ -380,15 +380,17 @@ def main():
         return 0
 
     if pr.get("state") != "MERGED":
-        gh(["issue", "comment", NUM, "-R", REPO, "--body",
-            f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
-            f"Docstring bounties pay on merge, because until then the documentation is not in the "
-            f"codebase. This claim is not closed — it will be re-checked automatically once the PR "
-            f"lands, and you do not need to re-file it."], None)
-        add_labels("awaiting-merge")
+        if "awaiting-merge" not in labels:
+            gh(["issue", "comment", NUM, "-R", REPO, "--body",
+                f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
+                f"Docstring bounties pay on merge, because until then the documentation is not in the "
+                f"codebase. This claim is not closed — it will be re-checked automatically once the PR "
+                f"lands, and you do not need to re-file it."], None)
+            add_labels("awaiting-merge")
         print(f"{pr_repo}#{pr_num} not merged ({pr.get('state')}); waiting")
         return 0
 
+    remove_label("awaiting-merge")
     diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
     doc_count, total_added, files = count_added_docstrings(diff)
     claimed = None

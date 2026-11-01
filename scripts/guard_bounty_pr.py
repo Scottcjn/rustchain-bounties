@@ -92,7 +92,10 @@ def fetch_changed_files(owner: str, repo: str, pr_number: int, headers: dict) ->
         batch = resp.json()
         if not batch:
             break
-        paths.extend(item["filename"] for item in batch)
+        for item in batch:
+            paths.append(item["filename"])
+            if item.get("previous_filename"):
+                paths.append(item["previous_filename"])
         if len(batch) < 100:
             break
         page += 1
@@ -113,12 +116,13 @@ def ensure_label(owner: str, repo: str, headers: dict) -> None:
 
 def apply_label(owner: str, repo: str, pr_number: int, headers: dict) -> None:
     ensure_label(owner, repo, headers)
-    requests.post(
+    resp = requests.post(
         f"{API}/repos/{owner}/{repo}/issues/{pr_number}/labels",
         headers=headers,
         json={"labels": [LABEL_NAME]},
         timeout=30,
     )
+    resp.raise_for_status()
 
 
 def display_path(path: str) -> str:
@@ -159,12 +163,13 @@ def post_comment(owner: str, repo: str, pr_number: int, protected_hits: Iterable
         "legitimate and intentional, a maintainer can dismiss this and merge "
         "normally."
     )
-    requests.post(
+    resp = requests.post(
         f"{API}/repos/{owner}/{repo}/issues/{pr_number}/comments",
         headers=headers,
         json={"body": body},
         timeout=30,
     )
+    resp.raise_for_status()
 
 
 def main() -> None:

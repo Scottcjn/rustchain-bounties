@@ -190,18 +190,22 @@ def gh_headers() -> dict:
 
 
 def fetch_pr_comments(repo: str, pr_number: str) -> list:
-    """Fetch all comments on a PR (issue comments endpoint)."""
+    """Fetch all issue comments and PR review bodies on a PR."""
     comments = []
-    page = 1
-    while True:
-        url = f"{GITHUB_API}/repos/{repo}/issues/{pr_number}/comments"
-        resp = requests.get(url, headers=gh_headers(), params={"per_page": 100, "page": page})
-        resp.raise_for_status()
-        batch = resp.json()
-        if not batch:
-            break
-        comments.extend(batch)
-        page += 1
+    for endpoint in ("issues", "pulls"):
+        sub = "comments" if endpoint == "issues" else "reviews"
+        page = 1
+        while True:
+            url = f"{GITHUB_API}/repos/{repo}/{endpoint}/{pr_number}/{sub}"
+            resp = requests.get(url, headers=gh_headers(), params={"per_page": 100, "page": page})
+            resp.raise_for_status()
+            batch = resp.json()
+            if not batch:
+                break
+            comments.extend(batch)
+            if len(batch) < 100:
+                break
+            page += 1
     return comments
 
 
@@ -371,8 +375,15 @@ def main() -> None:
         # self-merge (observed 2026-07-09: six 5 RTC self-pays in one evening
         # of routine merges). A human `Payment:` directive is still the way to
         # pay a genuine owner contribution deliberately.
-        if pr_author.lower() == repo_owner.lower():
-            print(f"No directive; author {pr_author} is the repo owner — no self-award.")
+        house_accounts = {
+            repo_owner.lower(),
+            "scottcjn",
+            "sophiaeagent-beep",
+            "automatedjanitor2015",
+            "automatedjanitor",
+        }
+        if pr_author.lower() in house_accounts:
+            print(f"No directive; author {pr_author} is a house/owner account — no self-award.")
             return
 
         files = fetch_pr_files(repo, pr_number)
@@ -410,9 +421,10 @@ def main() -> None:
     # Wallet is the contributor's GitHub username.
     to_wallet = pr_author
     memo = f"PR #{pr_number} in {repo} — auto-pay ({pay_kind})"
-    # Per-PR idempotency key: the node de-duplicates so this PR can be paid
-    # at most once, no matter how many times the workflow fires.
-    idem_key = f"autopay-{repo.replace('/', '-')}-pr-{pr_number}"
+    # Per-PR + pay_kind idempotency key: the node de-duplicates retries of the
+    # same payout class while allowing an explicit maintainer `directive` to
+    # top up a PR that only received the 3 RTC `auto-tier` on merge.
+    idem_key = f"autopay-{repo.replace('/', '-')}-pr-{pr_number}-{pay_kind}"
 
     print(f"Initiating transfer: {payment_amount} RTC from {FROM_WALLET} to "
           f"{to_wallet} ({pay_kind}, idem={idem_key})")

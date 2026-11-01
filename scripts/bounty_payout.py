@@ -553,7 +553,8 @@ for i in issues:
             continue
         problem=_docstring_claim_problem(d.get("body"), i.get("title"), claimant)
         if problem:
-            print(f"::warning::#{num} is docstring-verified but not payable: {problem}; skipping (needs a human)")
+            print(f"::warning::#{num} is docstring-verified but not payable: {problem}; quarantining as needs-human")
+            gh(["issue","edit",str(num),"-R",REPO,"--remove-label","bounty-eligible","--remove-label","docstring-verified","--add-label","needs-human"], None)
             continue
         memo=f"Docstring bounty — claim #{num}, gate-verified (source: {source})"
         idem=f"docstring-claim-{num}"
