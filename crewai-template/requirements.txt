@@ -13,7 +13,7 @@ langgraph>=1.2.11
 requests>=2.34.2
 
 # Environment variables
-python-dotenv>=1.2.3
+python-dotenv>=1.2.4
 
 # For async support
 aiohttp>=3.14.1
