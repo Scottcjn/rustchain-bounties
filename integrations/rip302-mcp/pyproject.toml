@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain-agent-economy-mcp"
+version = "0.1.0"
+description = "Claude Code MCP server for the RustChain RIP-302 Agent Economy"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "RustChain Community"}]
+dependencies = [
+  "mcp>=2,<3",
+  "rustchain-agent-economy @ git+https://github.com/woahwhattheheck/rustchain-bounties.git@a9056b8e8514e5508a6989f62626a7918180429d#subdirectory=sdk/rustchain-agent-economy",
+]
+
+[project.scripts]
+rustchain-agent-economy-mcp = "rustchain_agent_economy_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
