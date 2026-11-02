@@ -26,8 +26,12 @@ WALLET = "RTC" + "a" * 40
 _orig_run = subprocess.run
 
 
-def run_payout(issue, pr=None):
-    """Execute bounty_payout.py for one open claim. Returns (transfers, gh_calls)."""
+def run_payout(issue, pr=None, comment_pages=None):
+    """Execute bounty_payout.py for one open claim. Returns (transfers, gh_calls).
+
+    `comment_pages` overrides the single-page fixture: a list of pages, each
+    a list of comments, served in order for the paginated comments GET.
+    """
     transfers, calls = [], []
 
     def fake_run(args, *a, **kw):
@@ -37,9 +41,17 @@ def run_payout(issue, pr=None):
             out = json.dumps([{"number": issue["number"], "title": issue["title"],
                                "labels": [{"name": n} for n in issue["labels"]]}]
                              if "--label" in args else [])
-        elif args[:3] == ["gh", "issue", "view"]:
-            out = json.dumps({"body": issue["body"], "comments": issue["comments"],
-                              "author": {"login": issue["author"]}})
+        elif args[:2] == ["gh", "api"] and args[2].endswith("/comments"):
+            # Explicit REST comment pages (review item 2 on #17055: the runner
+            # no longer relies on gh issue view's internal pagination).
+            if comment_pages is not None:
+                page = int(next(a for a in args if a.startswith("page="))[5:])
+                out = json.dumps(comment_pages[page - 1] if page <= len(comment_pages) else [])
+            else:
+                out = json.dumps(issue["comments"]) if "page=1" in args else "[]"
+        elif args[:2] == ["gh", "api"]:
+            # Issue GET: body + claimant, REST 'user' shape.
+            out = json.dumps({"body": issue["body"], "user": {"login": issue["author"]}})
         elif args[:3] == ["gh", "pr", "view"]:
             if pr is None:
                 return mock.Mock(stdout="", stderr="not found", returncode=1)
@@ -142,6 +154,41 @@ class DocstringProvenanceAtPayout(unittest.TestCase):
 
     def test_unmerged_pr_is_not_paid(self):
         t, _ = run_payout(docstring_claim(), {"author": {"login": "alice"}, "state": "OPEN"})
+        self.assertEqual(t, [])
+
+
+class PaginatedThreadGuards(unittest.TestCase):
+    """#17054/#17055 review item 2 at the payout layer: the runner must read
+    EVERY comment of a fat claim thread, because its own RTC-AutoPay-Confirmed
+    marker is always the NEWEST comment and the gate's amount marker sits deep
+    after review traffic."""
+
+    def _fat_pages(self, marker_at):
+        plain = [{"user": {"login": f"commenter-{i}"}, "body": f"chatter #{i}"}
+                 for i in range(1, 151)]
+        plain[marker_at - 1] = {"user": {"login": "github-actions[bot]"},
+                                "body": "✅ verified\n<!-- rtc-payout-amount: 0.5 -->"}
+        return [plain[:100], plain[100:]]          # page 1 full, page 2 short
+
+    def test_marker_pushed_past_position_100_is_paid(self):
+        """The exact #17054 acceptance case: gate marker at position 120 of 150."""
+        issue = docstring_claim()
+        t, _ = run_payout(issue, {"author": {"login": "Alice"}, "state": "MERGED"},
+                          comment_pages=self._fat_pages(120))
+        self.assertEqual(len(t), 1)
+        self.assertEqual(t[0]["amount_rtc"], 0.5)
+
+    def test_confirmation_past_position_100_dedups(self):
+        """A confirmation comment pushed deep (re-run on a fat thread) must
+        still prevent a second pay -- this is the double-pay hazard that made
+        explicit pagination mandatory."""
+        pages = self._fat_pages(120)
+        pages[1].append({"user": {"login": "github-actions"},
+                         "body": "💸 **RTC-AutoPay-Confirmed** — payout **queued** — 0.5 RTC\n"
+                                 "<!-- RTC-AutoPay-Confirmed kind=claim claim=502 -->"})
+        issue = docstring_claim()
+        t, _ = run_payout(issue, {"author": {"login": "Alice"}, "state": "MERGED"},
+                          comment_pages=pages)
         self.assertEqual(t, [])
 
 

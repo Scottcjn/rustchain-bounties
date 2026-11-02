@@ -187,6 +187,75 @@ def gh_raw(args):
     return result.stdout
 
 
+def _paginate_comments(number, page_size=100, max_pages=100):
+    """Every comment on an issue, following pagination. Fails closed.
+
+    A single per_page=100 request silently truncates at the first page. The
+    gate's own `rtc-payout-amount` marker is posted AFTER a claim's review
+    traffic, so on an active claim it sits deep in the comment list -- past
+    position 100 it was invisible, the prior-earnings sum treated that claim
+    as 0.00 RTC, and the weekly cap failed OPEN (issue #17054). Paginate until
+    a short page, and raise GhError if pagination cannot complete, so the
+    caller's needs-human hold catches it instead of an authoritative-looking
+    undercount.
+    """
+    items = []
+    page = 1
+    while True:
+        batch = gh(["api", f"/repos/{REPO}/issues/{number}/comments",
+                    "-F", f"per_page={page_size}", "-F", f"page={page}"],
+                   [], strict=True) or []
+        items.extend(batch)
+        if len(batch) < page_size:
+            return items          # short page = last page
+        page += 1
+        if page > max_pages:
+            raise GhError(
+                f"#{number}: comments pagination exceeded {max_pages} pages -- "
+                f"refusing to treat an incomplete fetch as the full history")
+
+
+def _paginate_search_issues(q, first_res, page_size=100, max_pages=10):
+    """Every issue a search returns, continuing past the first page. Fails closed.
+
+    `first_res` is page 1's parsed response (already fetched by the caller);
+    pagination continues from page 2 while the fetched count lags
+    `total_count`. A contributor over 100 docstring-verified claims in the
+    window had their OLDEST claims dropped from the weekly-cap sum -- again
+    failing the cap open (issue #17054). Raises GhError on any page-shape or
+    completeness problem rather than returning a short, silent history.
+
+    `max_pages` defaults to 10 because GitHub's search API cannot serve past
+    result 1000 (10 full pages x 100): page 11+ errors out anyway, so a window
+    that big is refused up front with a clear message instead of a raw 422.
+    """
+    items = list(first_res.get("items") or [])
+    total = first_res.get("total_count")
+    if not isinstance(total, int):
+        raise GhError("search/issues: total_count missing -- cannot verify "
+                      "that pagination is complete, refusing to guess")
+    page = 2
+    while len(items) < total:
+        res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}",
+                  "-f", f"per_page={page_size}", "-F", f"page={page}"],
+                 {}, strict=True)
+        batch = res.get("items")
+        if batch is None:
+            raise GhError(f"search/issues page {page}: unexpected response shape")
+        if not batch:
+            raise GhError(
+                f"search/issues: fetched {len(items)} of {total} matching issues "
+                f"but page {page} came back empty -- index did not converge, "
+                f"refusing to treat an incomplete fetch as the full history")
+        items.extend(batch)
+        page += 1
+        if page > max_pages:
+            raise GhError(
+                f"search/issues: pagination exceeded {max_pages} pages -- "
+                f"refusing to treat an incomplete fetch as the full history")
+    return items
+
+
 
 def add_labels(*names):
     """Apply labels via REST.
@@ -273,21 +342,38 @@ def docstring_rtc_this_week(author):
     ANY commenter, so a stranger could front-run the gate's figure with a large
     value (holding an honest contributor at the cap) or with 0 (so the cap
     failed open). See `trusted_payout_amount`.
+
+    Both lookups PAGINATE to completion and every incompleteness is LOUD
+    (issue #17054): a page fetch that fails, a page shape that is not
+    understood, pagination that does not converge, or a docstring-verified
+    prior claim whose fully-read thread carries no trusted payout marker all
+    raise GhError, which the caller turns into the needs-human hold. Prior
+    earnings that cannot be fully established are UNKNOWN, never 0 -- "a failed
+    lookup is not an authoritative zero."
     """
     since = (datetime.datetime.now(datetime.timezone.utc)
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
     q = (f"repo:{REPO} is:issue author:{author} label:docstring-verified "
          f"created:>{since}")
     res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}", "-f", "per_page=100"], {}, strict=True)
+    its = _paginate_search_issues(q, res)
     total = 0.0
-    for it in (res.get("items") or []):
+    for it in its:
         if str(it.get("number")) == str(NUM):
             continue          # never count the claim being adjudicated
-        # The marker lives in a gate comment, not the issue body, so fetch them.
-        cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
+        # The marker lives in a gate comment, not the issue body, so fetch
+        # them -- all pages of them.
+        cs = _paginate_comments(it["number"])
         amt = trusted_payout_amount(cs)
-        if amt is not None:
-            total += amt
+        if amt is None:
+            # A docstring-verified claim with no reachable TRUSTED marker means
+            # prior earnings cannot be established. Counting it as 0 is exactly
+            # the fail-open this function exists to prevent.
+            raise GhError(
+                f"prior docstring-verified claim #{it.get('number')} by {author} has no "
+                f"trusted rtc-payout-amount marker ({len(cs)} comments read, fully "
+                f"paginated) -- prior earnings UNKNOWN, refusing to treat as 0")
+        total += amt
     return round(total, 2)
 
 
@@ -329,6 +415,36 @@ def count_added_docstrings(diff: str):
             if stripped.count(quote) < 2:
                 in_docstring = True
     return doc, total, files
+
+
+def _label_failure_hold_body(pr_repo, pr_num, doc_count, amount):
+    """Body of the hold comment when the payable labels could not be applied.
+
+    The hold message used to tell a human to apply `bounty-eligible` +
+    `docstring-verified` by hand and nothing else. A claim recovered that way
+    is docstring-verified with NO rtc-payout-amount marker anywhere, so with
+    the fully-paginated weekly-cap lookup every later claim by that
+    contributor raises "no trusted marker" and sits in needs-human forever:
+    the recovery path poisoned the claimant (review of #17055, item 1).
+
+    The hold comment therefore carries the gate's own marker. It is authored
+    by the same identity that posts verified comments (github-actions[bot] in
+    CI), so it counts as first-party under #17053's TRUSTED_MARKER_AUTHORS:
+    a hand-recovered claim stays machine-readable for both the payout runner
+    and the weekly cap. A maintainer who disagrees with the figure can post
+    their own marker later -- the last trusted marker wins.
+    """
+    return (
+        f"⏸️ 🤖 **Docstring gate: checks passed, but the payable labels could not be applied** "
+        f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
+        f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
+        f"sweep applies `bounty-eligible` + `docstring-verified`.\n\n"
+        f"<!-- rtc-payout-amount: {amount} -->\n"
+        f"The marker above is posted by the gate itself, so a hand-recovered claim stays "
+        f"machine-readable: apply the two labels and both the payout runner and the weekly cap "
+        f"read this figure. If the amount looks wrong, say so here — a maintainer's marker "
+        f"posted later overrides it (last trusted marker wins, #17053). Nothing is wrong with "
+        f"the claim; the gate is refusing to say 'verified' about a state it did not create.")
 
 
 def main():
@@ -416,7 +532,10 @@ def main():
             f"weekly-earnings lookup failed, so the {MAX_RTC_PER_WEEK:g} RTC/week cap cannot be "
             f"checked right now.\n\nHolding rather than approving — a failed lookup is not proof "
             f"that you have earned nothing. This retries automatically on the next sweep; you do "
-            f"not need to do anything."], None)
+            f"not need to do anything. If the workflow log names an older claim of yours that "
+            f"predates payout markers, a maintainer can post "
+            f"`<!-- rtc-payout-amount: N -->` on that thread and the next sweep clears this "
+            f"hold."], None)
         add_labels("needs-human")
         print(f"::error::earnings lookup failed, refusing to approve: {e}")
         return 0
@@ -460,23 +579,38 @@ def main():
     # is red and the next sweep retries.
     if not add_labels("bounty-eligible", "docstring-verified"):
         gh(["issue", "comment", NUM, "-R", REPO, "--body",
-            f"⏸️ 🤖 **Docstring gate: checks passed, but the payable labels could not be applied** "
-            f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
-            f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
-            f"sweep applies `bounty-eligible` + `docstring-verified`. Nothing is wrong with the "
-            f"claim; the gate is refusing to say 'verified' about a state it did not create."], None)
+            _label_failure_hold_body(pr_repo, pr_num, doc_count, amount)], None)
         add_labels("needs-human")
-        print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified")
+        print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified "
+              f"(gate marker embedded in the hold comment)")
         return 1
-    gh(["issue", "comment", NUM, "-R", REPO, "--body",
-        f"✅ 🤖 **Docstring gate: verified.**\n\n"
-        f"- PR {pr_repo}#{pr_num} is **merged**\n"
-        f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
-        f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
-        f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
-        f"<!-- rtc-payout-amount: {amount} -->\n"
-        f"Queued for payout. The balance moves after the standard confirmation window, not on this "
-        f"comment."], None)
+    # The verified comment carries the payout marker the rest of the pipeline
+    # keys off. gh() cannot report a comment-post failure (the CLI prints a
+    # comment URL, not JSON, so it parses to the default), so post via
+    # gh_raw() and treat any failure as "did not land": labels without a
+    # reachable marker are the same poisoning shape the hold path now defends
+    # against, and the next sweep would SKIP a labelled claim ("already
+    # adjudicated") without ever repairing it. Roll the labels back and hold;
+    # the next sweep re-adjudicates from scratch. Residual: if BOTH the
+    # comment and the label removal fail, the claim stays labelled without a
+    # marker -- a red run and needs-human is the signal for that case.
+    try:
+        gh_raw(["issue", "comment", NUM, "-R", REPO, "--body",
+                f"✅ 🤖 **Docstring gate: verified.**\n\n"
+                f"- PR {pr_repo}#{pr_num} is **merged**\n"
+                f"- Files: `{', '.join(files[:4]) or 'n/a'}`\n"
+                f"- Added lines opening a docstring: **{doc_count}** (of {total_added} added lines)\n"
+                f"- Rate {RATE} RTC each → **{amount} RTC**{note}\n\n"
+                f"<!-- rtc-payout-amount: {amount} -->\n"
+                f"Queued for payout. The balance moves after the standard confirmation window, "
+                f"not on this comment."])
+    except (GhError, subprocess.TimeoutExpired, OSError) as e:
+        remove_label("bounty-eligible")
+        remove_label("docstring-verified")
+        add_labels("needs-human")
+        print(f"::error::verified comment failed on {REPO}#{NUM} ({e}); "
+              f"labels rolled back, held for the next sweep")
+        return 1
     print(f"verified {doc_count} docstrings -> {amount} RTC on {REPO}#{NUM}")
     return 0
 
