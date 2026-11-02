@@ -1,0 +1,36 @@
+name: MCP Server
+
+on:
+  pull_request:
+    paths:
+      - ".github/mcp_server/**"
+      - ".github/workflows/mcp-server.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/mcp_server/**"
+      - ".github/workflows/mcp-server.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  stdio-protocol:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12"]
+    defaults:
+      run:
+        working-directory: .github/mcp_server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile package and tests
+        run: python -m compileall -q rustchain_mcp tests
+      - name: Run offline stdio protocol tests
+        run: python -m unittest discover -s tests -v

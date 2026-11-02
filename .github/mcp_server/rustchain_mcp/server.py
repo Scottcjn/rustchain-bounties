@@ -268,28 +268,44 @@ def main():
     """
     import sys
 
-    # Send capabilities on startup
-    import json
-    sys.stdout.write(json.dumps({
-        "jsonrpc": "2.0",
-        "result": {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {"tools": {}},
-            "serverInfo": {
-                "name": "rustchain-mcp",
-                "version": "1.0.0"
-            }
-        }
-    }) + "\n")
-    sys.stdout.flush()
-
     for line in sys.stdin:
         line = line.strip()
         if not line:
             continue
+
+        # Correlation state is per frame. Never let a malformed later frame
+        # inherit the id (or notification status) of an earlier request.
+        msg_id = None
+        is_notification = False
         try:
-            request = json.loads(line)
-            method = request.get("method")
+            try:
+                request = json.loads(line)
+            except json.JSONDecodeError:
+                err_resp = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32700, "message": "Parse error"}
+                }
+                sys.stdout.write(json.dumps(err_resp) + "\n")
+                sys.stdout.flush()
+                continue
+
+            if (
+                not isinstance(request, dict)
+                or request.get("jsonrpc") != "2.0"
+                or not isinstance(request.get("method"), str)
+            ):
+                err_resp = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32600, "message": "Invalid Request"}
+                }
+                sys.stdout.write(json.dumps(err_resp) + "\n")
+                sys.stdout.flush()
+                continue
+
+            is_notification = "id" not in request
+            method = request["method"]
             msg_id = request.get("id")
             params = request.get("params", {})
 
@@ -326,16 +342,25 @@ def main():
                     }
                 }
             else:
-                # Notifcation or unknown — no response needed
-                continue
+                if is_notification:
+                    continue
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": msg_id,
+                    "error": {"code": -32601, "message": "Method not found"}
+                }
 
+            if is_notification:
+                continue
             sys.stdout.write(json.dumps(response) + "\n")
             sys.stdout.flush()
 
         except Exception as e:
+            if is_notification:
+                continue
             err_resp = {
                 "jsonrpc": "2.0",
-                "id": msg_id if 'msg_id' in dir() else None,
+                "id": msg_id,
                 "error": {"code": -32603, "message": str(e)}
             }
             sys.stdout.write(json.dumps(err_resp) + "\n")
