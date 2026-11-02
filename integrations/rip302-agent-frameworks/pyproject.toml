@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustchain-agent-frameworks"
+version = "0.1.0"
+description = "LangChain and CrewAI tools for the RustChain RIP-302 Agent Economy"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "RustChain Community"}]
+dependencies = [
+  "rustchain-agent-economy @ git+https://github.com/woahwhattheheck/rustchain-bounties.git@a9056b8e8514e5508a6989f62626a7918180429d#subdirectory=sdk/rustchain-agent-economy",
+]
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=1"]
+crewai = ["crewai>=1"]
+all = ["langchain-core>=1", "crewai>=1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
