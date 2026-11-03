@@ -190,7 +190,7 @@ def gh_headers() -> dict:
 
 
 def fetch_pr_comments(repo: str, pr_number: str) -> list:
-    """Fetch all issue comments and PR review bodies on a PR."""
+    """Fetch all issue comments and maintainer PR review bodies on a PR."""
     comments = []
     for endpoint in ("issues", "pulls"):
         sub = "comments" if endpoint == "issues" else "reviews"
@@ -202,6 +202,13 @@ def fetch_pr_comments(repo: str, pr_number: str) -> list:
             batch = resp.json()
             if not batch:
                 break
+            if endpoint == "pulls":
+                # Only accept submitted reviews from maintainers, never dismissed or non-collaborator reviews
+                batch = [
+                    r for r in batch
+                    if (r.get("state") or "").upper() in ("APPROVED", "COMMENTED")
+                    and (r.get("author_association") or "").upper() in ("OWNER", "MEMBER", "COLLABORATOR")
+                ]
             comments.extend(batch)
             if len(batch) < 100:
                 break
@@ -421,10 +428,8 @@ def main() -> None:
     # Wallet is the contributor's GitHub username.
     to_wallet = pr_author
     memo = f"PR #{pr_number} in {repo} — auto-pay ({pay_kind})"
-    # Per-PR + pay_kind idempotency key: the node de-duplicates retries of the
-    # same payout class while allowing an explicit maintainer `directive` to
-    # top up a PR that only received the 3 RTC `auto-tier` on merge.
-    idem_key = f"autopay-{repo.replace('/', '-')}-pr-{pr_number}-{pay_kind}"
+    # Exactly one settlement idempotency key per PR to prevent double-payment.
+    idem_key = f"autopay-{repo.replace('/', '-')}-pr-{pr_number}"
 
     print(f"Initiating transfer: {payment_amount} RTC from {FROM_WALLET} to "
           f"{to_wallet} ({pay_kind}, idem={idem_key})")

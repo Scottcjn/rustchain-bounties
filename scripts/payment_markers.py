@@ -79,7 +79,9 @@ def strip_quoted_and_code(body) -> str:
     """
     if not isinstance(body, str):
         return ""
-    text = _FENCE_RE.sub("", body.replace("\r\n", "\n"))
+    # Normalize CRLF and bare CR before any regex processing
+    text = body.replace("\r\n", "\n").replace("\r", "\n")
+    text = _FENCE_RE.sub("", text)
     text = _QUOTE_LINE_RE.sub("", text)
     return _INLINE_CODE_RE.sub("", text)
 
@@ -88,6 +90,7 @@ def body_records_payment(body) -> bool:
     """True if `body` carries a structured payment marker (author NOT checked)."""
     if not isinstance(body, str) or MARKER not in body:
         return False
+    body = body.replace("\r\n", "\n").replace("\r", "\n")
     text = strip_quoted_and_code(body)
     return bool(_HTML_MARKER_RE.search(text) or _PAYOUT_LINE_RE.search(text))
 
