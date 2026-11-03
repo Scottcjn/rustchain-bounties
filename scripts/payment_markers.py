@@ -55,8 +55,10 @@ _PAYOUT_LINE_RE = re.compile(
     r"^💸 \*\*" + re.escape(MARKER) + r"\*\* — payout ", re.MULTILINE)
 # Fenced code (``` or ~~~). A marker quoted inside a code block is a quotation,
 # not a record. An unterminated fence runs to the end of the body, as it
-# renders on GitHub.
-_FENCE_RE = re.compile(r"^[ \t]*(```|~~~).*?(?:^[ \t]*\1[^\n]*$|\Z)",
+# renders on GitHub. Closing fence must match at least the opening run length
+# (`\1` captures the full run of 3+ backticks or tildes) so 4-backtick outer
+# fences wrapping 3-backtick examples do not terminate early on the inner fence.
+_FENCE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})[^\n]*\n.*?(?:^[ \t]*\1[`~]*[ \t]*$|\Z)",
                        re.MULTILINE | re.DOTALL)
 
 
@@ -77,7 +79,9 @@ def strip_quoted_and_code(body) -> str:
     """
     if not isinstance(body, str):
         return ""
-    text = _FENCE_RE.sub("", body.replace("\r\n", "\n"))
+    # Normalize CRLF and bare CR before any regex processing
+    text = body.replace("\r\n", "\n").replace("\r", "\n")
+    text = _FENCE_RE.sub("", text)
     text = _QUOTE_LINE_RE.sub("", text)
     return _INLINE_CODE_RE.sub("", text)
 
@@ -86,7 +90,8 @@ def body_records_payment(body) -> bool:
     """True if `body` carries a structured payment marker (author NOT checked)."""
     if not isinstance(body, str) or MARKER not in body:
         return False
-    text = _FENCE_RE.sub("", body.replace("\r\n", "\n"))
+    body = body.replace("\r\n", "\n").replace("\r", "\n")
+    text = strip_quoted_and_code(body)
     return bool(_HTML_MARKER_RE.search(text) or _PAYOUT_LINE_RE.search(text))
 
 

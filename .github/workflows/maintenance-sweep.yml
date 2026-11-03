@@ -48,13 +48,19 @@ jobs:
           # the run still works but sees only this repository.
           GH_TOKEN: ${{ secrets.BOUNTY_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          python3 scripts/maintenance_sweep.py \
+          if python3 scripts/maintenance_sweep.py \
             --limit "${{ github.event.inputs.limit || '250' }}" \
-            > sweep.md 2> sweep.err || true
+            > sweep.md 2> sweep.err && [ -s sweep.md ]; then
+            echo "sweep_ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "sweep_ok=0" >> "$GITHUB_OUTPUT"
+            cat sweep.err >&2 || true
+            exit 1
+          fi
           cat sweep.err >&2 || true
           tee -a "$GITHUB_STEP_SUMMARY" < sweep.md
       - name: Publish digest to tracking issue
-        if: ${{ github.event.inputs.tracking_issue != '' || vars.MAINTENANCE_TRACKING_ISSUE != '' }}
+        if: ${{ steps.sweep.outputs.sweep_ok == '1' && (github.event.inputs.tracking_issue != '' || vars.MAINTENANCE_TRACKING_ISSUE != '') }}
         env:
           GH_TOKEN: ${{ secrets.BOUNTY_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
           ISSUE: ${{ github.event.inputs.tracking_issue || vars.MAINTENANCE_TRACKING_ISSUE }}

@@ -341,7 +341,7 @@ def main():
         print(f"could not read {REPO}#{NUM}", file=sys.stderr)
         return 1
     labels = {l["name"] for l in iss.get("labels", [])}
-    if {"bounty-eligible", "docstring-verified", "gate-processed"} & labels:
+    if {"bounty-eligible", "docstring-verified", "gate-processed", "needs-human"} & labels:
         print("already adjudicated; skipping")
         return 0
     title, body = iss.get("title", ""), iss.get("body") or ""
@@ -380,15 +380,17 @@ def main():
         return 0
 
     if pr.get("state") != "MERGED":
-        gh(["issue", "comment", NUM, "-R", REPO, "--body",
-            f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
-            f"Docstring bounties pay on merge, because until then the documentation is not in the "
-            f"codebase. This claim is not closed — it will be re-checked automatically once the PR "
-            f"lands, and you do not need to re-file it."], None)
-        add_labels("awaiting-merge")
+        if "awaiting-merge" not in labels:
+            gh(["issue", "comment", NUM, "-R", REPO, "--body",
+                f"🤖 Docstring gate: {pr_repo}#{pr_num} is **{pr.get('state','OPEN').lower()}**, not merged.\n\n"
+                f"Docstring bounties pay on merge, because until then the documentation is not in the "
+                f"codebase. This claim is not closed — it will be re-checked automatically once the PR "
+                f"lands, and you do not need to re-file it."], None)
+            add_labels("awaiting-merge")
         print(f"{pr_repo}#{pr_num} not merged ({pr.get('state')}); waiting")
         return 0
 
+    remove_label("awaiting-merge")
     diff = gh_raw(["pr", "diff", pr_num, "-R", pr_repo])
     doc_count, total_added, files = count_added_docstrings(diff)
     claimed = None
@@ -421,23 +423,27 @@ def main():
         print(f"::error::earnings lookup failed, refusing to approve: {e}")
         return 0
     if already + amount > MAX_RTC_PER_WEEK:
-        add_labels("weekly-cap-reached")
-        gh(["issue", "comment", NUM, "-R", REPO, "--body",
-            f"🤖 Docstring gate: verified **{doc_count} docstrings** in {pr_repo}#{pr_num} "
-            f"(**{amount} RTC**), but this would take you to "
-            f"**{round(already + amount, 2)} RTC** of docstring earnings in a rolling 7 days, "
-            f"over the **{MAX_RTC_PER_WEEK:g} RTC/week** ceiling for this bounty type.\n\n"
-            f"**The work is accepted and this claim is not closed.** It becomes payable again as "
-            f"soon as the rolling window clears, and it will be picked up automatically. You do "
-            f"not need to re-file it or do anything.\n\n"
-            f"Why the ceiling exists: documentation bounties are unbounded by nature, since there "
-            f"is always another file. The cap keeps one bounty type from consuming the pool, and "
-            f"40 RTC/week is roughly the top of what any contributor earns across all bounty types. "
-            f"It is not a judgement on the quality of your work, which has been consistently fine.\n\n"
-            f"If you want higher-value work, the bounty board has open items at 7 to 35 RTC each "
-            f"that are not rate-limited."], None)
+        if "weekly-cap-reached" not in labels:
+            add_labels("weekly-cap-reached")
+            gh(["issue", "comment", NUM, "-R", REPO, "--body",
+                f"🤖 Docstring gate: verified **{doc_count} docstrings** in {pr_repo}#{pr_num} "
+                f"(**{amount} RTC**), but this would take you to "
+                f"**{round(already + amount, 2)} RTC** of docstring earnings in a rolling 7 days, "
+                f"over the **{MAX_RTC_PER_WEEK:g} RTC/week** ceiling for this bounty type.\n\n"
+                f"**The work is accepted and this claim is not closed.** It becomes payable again as "
+                f"soon as the rolling window clears, and it will be picked up automatically. You do "
+                f"not need to re-file it or do anything.\n\n"
+                f"Why the ceiling exists: documentation bounties are unbounded by nature, since there "
+                f"is always another file. The cap keeps one bounty type from consuming the pool, and "
+                f"40 RTC/week is roughly the top of what any contributor earns across all bounty types. "
+                f"It is not a judgement on the quality of your work, which has been consistently fine.\n\n"
+                f"If you want higher-value work, the bounty board has open items at 7 to 35 RTC each "
+                f"that are not rate-limited."], None)
         print(f"weekly cap: {author} at {already} + {amount} > {MAX_RTC_PER_WEEK}")
         return 0
+
+    if "weekly-cap-reached" in labels:
+        remove_label("weekly-cap-reached")
 
     if amount > MAX_RTC:
         gh(["issue", "comment", NUM, "-R", REPO, "--body",
