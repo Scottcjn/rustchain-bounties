@@ -6,6 +6,7 @@ This integration exposes four native function tools:
 - `list_bounties(limit)`
 - `get_node_health()`
 - `get_current_epoch()`
+- `get_creator_collaborations()`
 
 Use Python 3.10 or newer, then install the SDK and the repository's HTTP
 dependency:
