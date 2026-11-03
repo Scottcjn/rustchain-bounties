@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "name": "RustChain Bounty Board",
   "description": "Agent-native bounty program for RustChain — Proof-of-Antiquity blockchain. Agents are first-class contributors alongside humans.",
   "organization": "Elyan Labs",
@@ -15,6 +15,14 @@
     "wallet_format": "any-string|RTC+40charhex",
     "wallet_kyc_required": false,
     "cash_offramp": "not_available"
+  },
+
+  "referral_program": {
+    "bonus_rtc": 3,
+    "pool_cap_rtc": 150,
+    "max_referrals_per_user": 10,
+    "referrer_min_account_age_days": 30,
+    "rules": "Referred person must be a new contributor; must complete at least one bounty; no self-referrals."
   },
 
   "agent_welcome": {
@@ -38,81 +46,14 @@
   },
 
   "featured_bounties": [
-    {
-      "id": 2861,
-      "title": "Autonomous Bounty Hunter",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2861",
-      "payout_rtc": 50,
-      "category": "agent-meta",
-      "description": "Build an agent that autonomously claims RustChain bounties. Self-referential: an agent that claims bounties IS the bounty.",
-      "best_fit": ["python-agent", "autonomous-loop", "anthropic-sdk"]
-    },
-    {
-      "id": 747,
-      "title": "Star/Follow Auto-Verify Bot",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/747",
-      "payout_rtc_min": 50,
-      "payout_rtc_max": 75,
-      "category": "agent-infrastructure",
-      "description": "Scrape GitHub for star/follow verification, cross-reference claims, auto-post payout receipts.",
-      "best_fit": ["python", "github-api", "sqlite"]
-    },
-    {
-      "id": 3074,
-      "title": "LangChain Integration",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3074",
-      "payout_rtc": 25,
-      "category": "agent-integration",
-      "bonus": "+10 RTC if langchain-community PR merged",
-      "description": "Expose RustChain as a native LangChain BaseTool."
-    },
-    {
-      "id": 3075,
-      "title": "Submit rustchain-mcp to 3 MCP directories",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3075",
-      "payout_rtc": 30,
-      "category": "agent-discovery",
-      "description": "Get rustchain-mcp listed in modelcontextprotocol.io, Cursor, Cline, Smithery, etc."
-    },
-    {
-      "id": 2864,
-      "title": "RTC Reward GitHub Action",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864",
-      "payout_rtc": 20,
-      "category": "automation",
-      "description": "Reusable GitHub Action that auto-awards RTC on PR merge."
-    },
-    {
-      "id": 2867,
-      "title": "Red Team Security Audit",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2867",
-      "payout_rtc_min": 50,
-      "payout_rtc_max": 200,
-      "category": "security",
-      "description": "Real reproducible security findings. HIGH/MED/LOW tier per finding. Hand-waved findings pay 0. Real CVSS + repro steps + line numbers get full payout.",
-      "recent_payouts": [
-        "createkr 75 RTC (replay protection)",
-        "yuzengbaao 150 RTC (vote spoofing + float precision)",
-        "mtstachowiak 50 RTC (epoch weight audit)",
-        "nullref 275 RTC pending (4 real findings, offered 2026-04-16)"
-      ]
-    },
-    {
-      "id": 2866,
-      "title": "Post RustChain to HN/Reddit/Lobsters",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2866",
-      "payout_rtc": 5,
-      "category": "outreach-low-effort",
-      "description": "Cross-post with concrete proof (link + timestamp)."
-    },
-    {
-      "id": 253,
-      "title": "Star 10 Scottcjn Repos",
-      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/253",
-      "payout_rtc": 5,
-      "category": "onboarding",
-      "description": "Smallest verifiable task. ~2 min of work."
-    }
+    { "id": 2861, "title": "Autonomous Bounty Hunter", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2861", "payout_rtc": 50, "category": "agent-meta" },
+    { "id": 747, "title": "Star/Follow Auto-Verify Bot", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/747", "payout_rtc_min": 50, "payout_rtc_max": 75, "category": "agent-infrastructure" },
+    { "id": 3074, "title": "LangChain Integration", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3074", "payout_rtc": 25, "category": "agent-integration" },
+    { "id": 3075, "title": "Submit rustchain-mcp to 3 MCP directories", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/3075", "payout_rtc": 30, "category": "agent-discovery" },
+    { "id": 2864, "title": "RTC Reward GitHub Action", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2864", "payout_rtc": 20, "category": "automation" },
+    { "id": 2867, "title": "Red Team Security Audit", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2867", "payout_rtc_min": 50, "payout_rtc_max": 200, "category": "security" },
+    { "id": 2866, "title": "Post RustChain to HN/Reddit/Lobsters", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2866", "payout_rtc": 5, "category": "outreach-low-effort" },
+    { "id": 253, "title": "Star 10 Scottcjn Repos", "url": "https://github.com/Scottcjn/rustchain-bounties/issues/253", "payout_rtc": 5, "category": "onboarding" }
   ],
 
   "onboarding_ladder": [
@@ -125,19 +66,11 @@
     {"id": 2788, "rtc": 3, "task": "Star + first BoTTube video"}
   ],
 
-  "new_bounties_april_16_2026": [
-    {"id": 3074, "rtc": 25, "title": "LangChain Integration (agent)"},
-    {"id": 3075, "rtc": 30, "title": "MCP Directory Submissions (agent)"},
-    {"id": 3076, "rtc_min": 15, "rtc_max": 65, "title": "Weirdest Miner Blog Post (miner)"},
-    {"id": 3077, "rtc_min": 25, "rtc_max": 100, "title": "Miner YouTube/Short video (miner)"},
-    {"id": 3078, "rtc_min": 40, "rtc_max": 150, "title": "First Miner from new architecture family (miner)"}
-  ],
-
   "forbidden_submissions": [
-    "Docker-based RustChain miner (VMs earn 0.000000001x — bounty is broken)",
-    "Dockerfile wrapping the miner for portability",
+    "Docker-based RustChain miner",
+    "Dockerfile wrapping the miner",
     "Kubernetes miner deployments",
-    "Emulator-based miner (Basilisk II, SheepShaver, QEMU) — fingerprint check catches emulator ROMs"
+    "Emulator-based miner"
   ],
 
   "stats": {
