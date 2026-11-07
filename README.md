@@ -129,9 +129,11 @@ Once verified, RTC is sent to your wallet. First time? We will help you set one 
 
 <div align="center">
 
-**Part of the [Elyan Labs](https://github.com/Scottcjn) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
+**Part of the [Elyan Labs](https://elyanlabs.ai) ecosystem** · 1,882 commits · 97 repos · 1,334 stars · $0 raised
 
-[⭐ Star RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
+If this project is useful to you, a ⭐ helps other people find it. [elyanlabs.ai](https://elyanlabs.ai)
+
+[RustChain](https://github.com/Scottcjn/RustChain) · [📊 Q1 2026 Traction Report](https://github.com/Scottcjn/RustChain/blob/main/docs/DEVELOPER_TRACTION_Q1_2026.md) · [Follow @Scottcjn](https://github.com/Scottcjn)
 
 </div>
 
