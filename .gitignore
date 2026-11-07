@@ -3,3 +3,4 @@ __pycache__/
 
 # Generated scan artifacts
 reports/
+.aider*
