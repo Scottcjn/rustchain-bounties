@@ -303,31 +303,48 @@ def count_added_docstrings(diff: str):
 
     Counts only ADDED lines that open a docstring. Continuation lines of a
     multi-line docstring are not counted, so one docstring is one unit however
-    many lines it spans.
+    many lines it spans. Tracks the active opening quote delimiter (\"\"\" vs
+    ''') and also closes `in_docstring` across unchanged context lines or hunk
+    headers (`@@`) so an edited docstring opener with an unchanged closing
+    delimiter cannot swallow the next added docstring in the same file.
     """
     doc = total = 0
     files = []
     in_docstring = False
+    open_quote = ""
     for line in diff.splitlines():
         if line.startswith("+++ b/"):
             files.append(line[6:].strip())
             in_docstring = False
+            open_quote = ""
+            continue
+        if line.startswith("@@"):
+            in_docstring = False
+            open_quote = ""
+            continue
+        if line.startswith(" ") and in_docstring:
+            if open_quote and open_quote in line[1:]:
+                in_docstring = False
+                open_quote = ""
             continue
         if not line.startswith("+") or line.startswith("+++"):
             continue
         total += 1
         content = line[1:]
         if in_docstring:
-            if '"""' in content or "'''" in content:
+            if open_quote and open_quote in content:
                 in_docstring = False
+                open_quote = ""
             continue
-        if DOCSTRING_OPEN.match(content):
+        m = DOCSTRING_OPEN.match(content)
+        if m:
             doc += 1
+            quote = m.group(1)
             stripped = content.strip()
-            # One-liner if the closing quotes appear again on the same line.
-            quote = '"""' if '"""' in stripped else "'''"
+            # One-liner if the SAME opening triple-quote appears again on the same line.
             if stripped.count(quote) < 2:
                 in_docstring = True
+                open_quote = quote
     return doc, total, files
 
 

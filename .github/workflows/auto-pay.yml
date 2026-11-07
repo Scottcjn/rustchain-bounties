@@ -30,16 +30,33 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pr_json=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
-            -H "Accept: application/vnd.github+json" 2>/dev/null || echo '[]')
-          number=$(echo "$pr_json" | jq -r '.[0].number // empty')
-          author=$(echo "$pr_json" | jq -r '.[0].user.login // empty')
+          set -euo pipefail
+          # Fail closed on API/auth/rate-limit errors instead of swallowing into '[]'
+          # on a one-shot push trigger (which permanently drops the merged PR's payout).
+          pr_json=""
+          for attempt in 1 2 3; do
+            if pr_json=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+              -H "Accept: application/vnd.github+json"); then
+              break
+            fi
+            echo "::warning::Attempt ${attempt}/3 to resolve PRs for commit ${{ github.sha }} failed; retrying..."
+            sleep $((attempt * 2))
+          done
+          if [ -z "$pr_json" ]; then
+            echo "::error::Failed to query associated PRs for commit ${{ github.sha }}"
+            exit 1
+          fi
+          prs_compact=$(echo "$pr_json" | jq -c '[.[] | select(.merged_at != null) | {number: .number, author: .user.login}]')
+          count=$(echo "$prs_compact" | jq 'length')
+          number=$(echo "$prs_compact" | jq -r '.[0].number // empty')
+          author=$(echo "$prs_compact" | jq -r '.[0].author // empty')
           echo "number=${number}" >> "$GITHUB_OUTPUT"
           echo "author=${author}" >> "$GITHUB_OUTPUT"
-          if [ -z "$number" ]; then
-            echo "No associated PR for this push — nothing to pay."
+          echo "prs=${prs_compact}" >> "$GITHUB_OUTPUT"
+          if [ "$count" -eq 0 ]; then
+            echo "No associated merged PR for this push — nothing to pay."
           else
-            echo "Resolved PR #${number} by ${author}"
+            echo "Resolved ${count} merged PR(s) for commit ${{ github.sha }}: ${prs_compact}"
           fi
 
       - name: Set up Python
@@ -56,10 +73,19 @@ jobs:
         if: steps.pr.outputs.number != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          MERGED_PRS_JSON: ${{ steps.pr.outputs.prs }}
           REPO: ${{ github.repository }}
-          PR_AUTHOR: ${{ steps.pr.outputs.author }}
           RTC_VPS_HOST: ${{ secrets.RTC_VPS_HOST }}
           RTC_ADMIN_KEY: ${{ secrets.RTC_ADMIN_KEY }}
           REPO_OWNER: ${{ github.repository_owner }}
-        run: python scripts/auto-pay.py
+        run: |
+          set -euo pipefail
+          failed=0
+          while IFS=$'\t' read -r pr_num pr_auth; do
+            [ -z "$pr_num" ] && continue
+            PR_NUMBER="$pr_num" PR_AUTHOR="$pr_auth" python scripts/auto-pay.py || failed=$((failed + 1))
+          done < <(echo "$MERGED_PRS_JSON" | jq -r '.[] | "\(.number)\t\(.author)"')
+          if [ "$failed" -gt 0 ]; then
+            echo "::error::RTC Auto-Pay failed for ${failed} merged PR(s)"
+            exit 1
+          fi
