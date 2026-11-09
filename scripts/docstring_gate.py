@@ -263,6 +263,35 @@ def pr_provenance_problem(claimant, pr_repo, pr):
     return None
 
 
+def _flatten_slurped_items(res):
+    """Unpack `gh api --paginate --slurp` responses (or single-page dicts) for search/issues."""
+    if isinstance(res, dict):
+        items = res.get("items")
+        if not isinstance(items, list):
+            raise GhError("search/issues response missing 'items' list")
+        return items
+    if isinstance(res, list):
+        items = []
+        for page in res:
+            if not isinstance(page, dict) or not isinstance(page.get("items"), list):
+                raise GhError("search/issues paginated page missing 'items' list")
+            items.extend(page["items"])
+        return items
+    raise GhError("unexpected search/issues response shape")
+
+
+def _flatten_slurped_comments(res):
+    """Unpack `gh api --paginate --slurp` responses (or single-page lists) for issue comments."""
+    if not isinstance(res, list):
+        raise GhError("comments response is not a list")
+    if res and all(isinstance(page, list) for page in res):
+        comments = []
+        for page in res:
+            comments.extend(page)
+        return comments
+    return res
+
+
 def docstring_rtc_this_week(author):
     """RTC this author has already been granted for docstrings in 7 days.
 
@@ -278,16 +307,21 @@ def docstring_rtc_this_week(author):
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
     q = (f"repo:{REPO} is:issue author:{author} label:docstring-verified "
          f"created:>{since}")
-    res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}", "-f", "per_page=100"], {}, strict=True)
+    res = gh(["api", "--paginate", "--slurp", "-X", "GET", "search/issues",
+              "-f", f"q={q}", "-f", "per_page=100"], None, strict=True)
+    items = _flatten_slurped_items(res)
     total = 0.0
-    for it in (res.get("items") or []):
+    for it in items:
         if str(it.get("number")) == str(NUM):
             continue          # never count the claim being adjudicated
-        # The marker lives in a gate comment, not the issue body, so fetch them.
-        cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
+        # The marker lives in a gate comment, not the issue body, so fetch all pages.
+        raw_cs = gh(["api", "--paginate", "--slurp",
+                     f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], None, strict=True)
+        cs = _flatten_slurped_comments(raw_cs)
         amt = trusted_payout_amount(cs)
-        if amt is not None:
-            total += amt
+        if amt is None:
+            raise GhError(f"docstring-verified claim #{it.get('number')} has no trusted rtc-payout-amount marker")
+        total += amt
     return round(total, 2)
 
 

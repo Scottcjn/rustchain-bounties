@@ -173,7 +173,8 @@ class UntrustedMarkerTests(unittest.TestCase):
 
     def test_spoofed_marker_alone_does_not_count(self):
         self._one_claim([self._c("random-user", 40)])
-        self.assertEqual(dg.docstring_rtc_this_week("victim"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("victim")
 
     def test_genuine_bot_marker_counts(self):
         self._one_claim([self._c(self.BOT, 5)])
@@ -197,7 +198,8 @@ class UntrustedMarkerTests(unittest.TestCase):
         self._one_claim([self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
                          {"body": "<!-- rtc-payout-amount: 9 -->"},
                          {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_maintainer_marker_counts_and_graphql_shape_is_read(self):
         self._one_claim([{"author": {"login": "Scottcjn"},
@@ -211,19 +213,58 @@ class UntrustedMarkerTests(unittest.TestCase):
             self._one_claim([self._c(self.BOT, 5), self._c(self.BOT, bad)])
             self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0, bad)
             self._one_claim([self._c(self.BOT, bad)])
-            self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0, bad)
+            with self.assertRaises(dg.GhError):
+                dg.docstring_rtc_this_week("someone")
 
     def test_author_key_wins_over_user_key_like_the_payout_runner(self):
         c = {"author": {"login": "attacker"}, "user": {"login": self.BOT},
              "body": "<!-- rtc-payout-amount: 9 -->"}
         self._one_claim([c])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_last_trusted_marker_wins_like_the_payout_runner(self):
         """bounty_payout.py pays the LAST trusted marker; the cap must count the
         same figure the payout will actually move, not a different one."""
         self._one_claim([self._c(self.BOT, 5), self._c("Scottcjn", 2.5)])
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 2.5)
+
+
+class PaginationAndFailClosedTests(unittest.TestCase):
+    """Regression tests for #17054: paginate search/issues and comments, fail closed."""
+
+    BOT = "github-actions[bot]"
+
+    def setUp(self):
+        self._gh = dg.gh
+
+    def tearDown(self):
+        dg.gh = self._gh
+
+    def test_150_comments_with_trusted_marker_at_position_120_is_counted(self):
+        comments = []
+        for idx in range(1, 151):
+            if idx == 120:
+                comments.append({"user": {"login": self.BOT},
+                                 "body": "Verified!\n<!-- rtc-payout-amount: 12.5 -->"})
+            else:
+                comments.append({"user": {"login": f"spammer-{idx}"},
+                                 "body": f"noise {idx}"})
+        slurped_comments = [comments[:100], comments[100:]]
+        slurped_search = [{"items": [{"number": 950, "body": ""}]}]
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            self.assertIn("--paginate", args)
+            self.assertIn("--slurp", args)
+            if "search/issues" in joined:
+                return slurped_search
+            if "/comments" in joined:
+                return slurped_comments
+            return default
+
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("honest_dev"), 12.5)
 
 
 if __name__ == "__main__":
