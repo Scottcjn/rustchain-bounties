@@ -532,7 +532,12 @@ for i in issues:
     # idempotency key below still makes a repeat transfer a no-op at the node.
     if any(payment_markers.comment_records_payment(c, REPO.split("/")[0]) for c in coms): continue
     wallet, source = resolve_wallet(d.get("body"), coms, claimant_login=claimant)
-    if not wallet: continue
+    if not wallet:
+        # Every other skip path here logs; a silent continue made an eligible
+        # but unresolvable claim invisible for months while the stale bot ran
+        # its clock and closed it out of every open-state payout query (#16471).
+        print(f"::warning::#{num} is eligible but no payable wallet resolves; skipping (needs a human or a Wallet: line)")
+        continue
     # Review claims are a flat RATE. Docstring claims are worth whatever the
     # gate verified (0.5 RTC per docstring), so paying the flat rate would pay
     # 3 RTC for work verified at 4.5, 7.5 or 9. Read the gate's own figure.
