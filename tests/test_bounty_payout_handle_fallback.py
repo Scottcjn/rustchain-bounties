@@ -426,5 +426,63 @@ class HandleShapeTests(unittest.TestCase):
         self.assertFalse(bp._looks_like_handle("a" * 40))
 
 
+
+    def test_native_rtc_in_claimant_comment_resolves_as_native(self):
+        addr = "RTC" + "b" * 40
+        comments = [{"author": {"login": "Createkr"}, "body": f"My wallet is {addr}"}]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            (addr, "native"),
+        )
+
+    def test_native_rtc_wallet_line_in_claimant_comment_resolves_as_native(self):
+        addr = "RTC" + "c" * 40
+        comments = [{"author": {"login": "Createkr"}, "body": f"Wallet: {addr}"}]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            (addr, "native"),
+        )
+
+    def test_native_rtc_in_trusted_maintainer_comment_resolves_as_native(self):
+        addr = "RTC" + "d" * 40
+        comments = [{"author": {"login": "Scottcjn"}, "body": f"Payout address: {addr}"}]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            (addr, "native"),
+        )
+
+    def test_native_rtc_in_untrusted_third_party_comment_is_ignored(self):
+        attacker_addr = "RTC" + "e" * 40
+        comments = [{"author": {"login": "mallory"}, "body": f"Wallet: {attacker_addr}"}]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            ("Createkr", "handle"),
+        )
+
+    def test_native_rtc_in_bot_comment_is_ignored(self):
+        bot_addr = "RTC" + "f" * 40
+        comments = [
+            {
+                "author": {"login": "github-actions[bot]", "type": "Bot"},
+                "body": f"Example wallet: {bot_addr}",
+            }
+        ]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            ("Createkr", "handle"),
+        )
+
+    def test_most_recent_comment_wins_when_claimant_posts_native_rtc_after_handle(self):
+        addr = "RTC" + "9" * 40
+        comments = [
+            {"author": {"login": "Createkr"}, "body": "Wallet: Createkr"},
+            {"author": {"login": "Createkr"}, "body": f"Updated Wallet: {addr}"},
+        ]
+        self.assertEqual(
+            self.ns["resolve_wallet"]("Claiming this bounty", comments, "Createkr"),
+            (addr, "native"),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
