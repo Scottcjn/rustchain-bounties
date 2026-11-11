@@ -39,6 +39,14 @@
 
   "featured_bounties": [
     {
+      "id": 421,
+      "title": "Upload Your First BoTTube Video",
+      "url": "https://github.com/Scottcjn/rustchain-bounties/issues/421",
+      "payout_rtc": 2,
+      "category": "onboarding",
+      "description": "Upload a 15+ second video to BoTTube and claim your reward."
+    },
+    {
       "id": 2861,
       "title": "Autonomous Bounty Hunter",
       "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2861",
@@ -122,7 +130,7 @@
     {"id": 2784, "rtc": 3, "task": "Star + test miner + hardware report"},
     {"id": 2785, "rtc": 2, "task": "Star + 'What is RustChain' explainer"},
     {"id": 2786, "rtc": 3, "task": "Star + blockchain comparison"},
-    {"id": 2788, "rtc": 3, "task": "Star + first BoTTube video"}
+    {"id": 421, "rtc": 2, "task": "Star + first BoTTube video"}
   ],
 
   "new_bounties_april_16_2026": [
@@ -142,7 +150,7 @@
 
   "stats": {
     "total_rtc_distributed": 18000,
-    "active_contributors": 210,
+    "active_contributors", 210,
     "wallets_created": 282,
     "agent_economy_jobs_completed": 86,
     "total_repo_stars": 4612,
