@@ -367,7 +367,9 @@ def is_substantive_review(review, inline_count=0):
 def comment(n, body): api(f"/repos/{REPO}/issues/{n}/comments","POST",{"body":body})
 def add_label(n, lab): api(f"/repos/{REPO}/issues/{n}/labels","POST",{"labels":[lab]})
 def close(n, reason_comment):
-    comment(n, reason_comment); api(f"/repos/{REPO}/issues/{n}","PATCH",{"state":"closed","state_reason":"not_planned"})
+    comment(n, reason_comment)
+    api(f"/repos/{REPO}/issues/{n}","PATCH",{"state":"closed","state_reason":"not_planned"})
+    add_label(n,"gate-processed")
 
 def _unresolved(msg, quiet):
     """Flag a claim the gate could not decide.
@@ -380,6 +382,7 @@ def _unresolved(msg, quiet):
     if quiet:
         return
     add_label(NUM, "needs-human")
+    add_label(NUM, "gate-processed")
     comment(NUM, msg)
 
 def main():
@@ -388,8 +391,14 @@ def main():
     # from a pool that closed, which is worse than not answering at all.
     if not bounty_is_open():
         return
-    iss=api(f"/repos/{REPO}/issues/{NUM}")
-    if not iss or iss.get("state")!="open": return
+    # STRICT (#16471): a failed GET on the claim issue itself (HTTP 403 rate-limit,
+    # 502/503, network timeout) previously returned None and exited 0 (green),
+    # causing both pr-review-gate.yml and pr_review_gate_backfill.py to report
+    # success while leaving the claim completely unadjudicated.
+    iss=api(f"/repos/{REPO}/issues/{NUM}", strict=True)
+    if not isinstance(iss, dict) or "state" not in iss:
+        raise ApiError(f"claim #{NUM} returned an unreadable issue payload")
+    if iss.get("state")!="open": return
     labels={l["name"] for l in iss.get("labels",[])}
     # Idempotency, with one deliberate exception.
     #
@@ -417,11 +426,10 @@ def main():
         if not retry:
             return
         quiet = True            # only speak up if the outcome improves
-    elif "gate-processed" in labels:
+    elif "gate-processed" in labels and not retry:
         return
-    title=iss.get("title",""); body=iss.get("body") or ""; author=iss["user"]["login"]
-    if not is_review_claim(title): return  # not our claim type; leave for other workflows
-    add_label(NUM,"gate-processed")
+    title=iss.get("title",""); body=iss.get("body") or ""; author=(iss.get("user") or {}).get("login") or ""
+    if not author or not is_review_claim(title): return  # not our claim type; leave for other workflows
     claim_repo, pr = pr_ref(title, body)
     if not pr:
         _unresolved("🤖 Gate: couldn't find a single PR reference. Per **Bounty #73**, file one claim per PR with `PR #<number>` (a full PR URL is best). Flagged for human review.", quiet); return
@@ -497,11 +505,11 @@ def main():
     # reviewer. If a review has no inline comments, run it through
     # is_substantive_review(); if it has any inline comments, it is
     # substantive by definition.
-    substantive = [r for r in rv if is_substantive_review(
+    substantive = [r for r in rv if (r.get("user") or {}).get("login") and is_substantive_review(
         r, inline_count=author_inline.get(r["user"]["login"], 0)
     )]
     first = substantive[0]["user"]["login"] if substantive else None
-    body_len = next((len(r.get("body") or "") for r in rv if r["user"]["login"]==author), 0)
+    body_len = max((len((r.get("body") or "").strip()) for r in rv if (r.get("user") or {}).get("login")==author), default=0)
     inline = author_inline.get(author, 0)
     if first != author:
         close(NUM,f"🤖 Gate (Bounty #73 — first substantive review only): {target}#{pr} was first reviewed by **{first or 'someone else'}** (after filtering rubber-stamps), not @{author}. Path back: review PRs where you're the first reviewer."); return
@@ -547,6 +555,12 @@ def main():
               f"Thank you for the review — nothing was wrong with it."); return
 
     add_label(NUM,"bounty-eligible")
+    add_label(NUM,"gate-processed")
+    if "needs-human" in labels:
+        try:
+            api(f"/repos/{REPO}/issues/{NUM}/labels/needs-human", "DELETE")
+        except Exception:
+            pass
     # Re-check AFTER labelling. The read-then-label sequence above is a TOCTOU:
     # two claims adjudicated concurrently both read the pre-label count and both
     # pass. GitHub's search index also lags writes by seconds to minutes, so even
