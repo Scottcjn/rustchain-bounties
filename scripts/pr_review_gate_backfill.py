@@ -99,6 +99,12 @@ def list_unprocessed(gate):
             stranded.append(i["number"])
         elif PROCESSED_LABEL not in labels:
             never.append(i["number"])
+        else:
+            # Open review claim carrying `gate-processed` but neither
+            # `bounty-eligible` nor `needs-human`: victim of an interrupted run
+            # where `gate-processed` was applied before the final verdict label
+            # or close completed (#16471). Rescue via retry pass.
+            stranded.append(i["number"])
     # Oldest first: the longest-waiting contributor gets an answer first.
     # Never-adjudicated claims lead, since nobody has told those people
     # anything at all.
