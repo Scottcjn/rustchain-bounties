@@ -18,9 +18,13 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install requests
+        timeout-minutes: 3
+        run: |
+          # Fail fast if the package index cannot be reached
+          pip install requests --default-timeout=30 --retries=0
 
       - name: Run bounty verification
+        timeout-minutes: 10
         run: python scripts/verify_bounties.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

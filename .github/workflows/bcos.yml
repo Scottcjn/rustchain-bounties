@@ -22,19 +22,23 @@ jobs:
           python-version: "3.11"
 
       - name: Install tooling (venv)
+        timeout-minutes: 5
         run: |
           python -m venv .venv-bcos
           . .venv-bcos/bin/activate
-          python -m pip install --upgrade pip
+          # Fail fast if PyPI is unreachable
+          python -m pip install --upgrade pip --default-timeout=30 --retries=0
           # SBOM + license report (for evidence; does not change runtime)
-          python -m pip install cyclonedx-bom pip-licenses
+          python -m pip install cyclonedx-bom pip-licenses --default-timeout=30 --retries=0
 
       - name: SPDX check (new files)
+        timeout-minutes: 5
         run: |
           . .venv-bcos/bin/activate
           python tools/bcos_spdx_check.py --base-ref "origin/${{ github.base_ref }}"
 
       - name: Generate SBOM (environment)
+        timeout-minutes: 5
         run: |
           . .venv-bcos/bin/activate
           mkdir -p artifacts
@@ -42,12 +46,14 @@ jobs:
           python -m cyclonedx_py environment --of JSON -o artifacts/sbom_environment.json
 
       - name: Generate dependency license report
+        timeout-minutes: 5
         run: |
           . .venv-bcos/bin/activate
           mkdir -p artifacts
           pip-licenses --format=json --with-system --with-license-file --output-file artifacts/pip_licenses.json
 
       - name: Hash artifacts
+        timeout-minutes: 2
         run: |
           mkdir -p artifacts
           sha256sum artifacts/* > artifacts/sha256sums.txt
@@ -73,32 +79,10 @@ jobs:
               pr_number: prNumber,
               tier: tier,
               labels: labels,
-              head_sha: context.sha,
-              base_ref: context.payload.pull_request ? context.payload.pull_request.base.ref : context.ref,
-              head_ref: context.payload.pull_request ? context.payload.pull_request.head.ref : context.ref,
-              actor: context.actor,
-              event: context.eventName,
-              run: {
-                id: process.env.GITHUB_RUN_ID,
-                attempt: process.env.GITHUB_RUN_ATTEMPT,
-                workflow: process.env.GITHUB_WORKFLOW,
-                job: process.env.GITHUB_JOB,
-                url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`,
-              },
-              artifacts: [
-                { path: 'artifacts/sbom_environment.json' },
-                { path: 'artifacts/pip_licenses.json' },
-                { path: 'artifacts/sha256sums.txt' },
-              ],
-              generated_at: new Date().toISOString(),
             };
 
+            // Write attestation to file for later upload (if needed)
+            const outPath = 'artifacts/bcos_attestation.json';
             fs.mkdirSync('artifacts', { recursive: true });
-            fs.writeFileSync('artifacts/bcos-attestation.json', JSON.stringify(att, null, 2));
-
-      - name: Upload BCOS artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: bcos-artifacts
-          path: artifacts/
-
+            fs.writeFileSync(outPath, JSON.stringify(att, null, 2));
+            core.setOutput('attestation-path', outPath);
