@@ -102,15 +102,17 @@ class BoTTubeClient {
   }
 
   _multipart(boundary, data, files) {
-    const lines = [];
+    const parts = [];
     if (data) for (const [k, v] of Object.entries(data)) {
-      lines.push("--" + boundary, 'Content-Disposition: form-data; name="' + k + '"', "", String(v));
+      parts.push(Buffer.from(["--" + boundary, 'Content-Disposition: form-data; name="' + k + '"', "", String(v), ""].join("\r\n"), "utf-8"));
     }
     for (const [k, [fn, content, ct]] of Object.entries(files)) {
-      lines.push("--" + boundary, 'Content-Disposition: form-data; name="' + k + '"; filename="' + fn + '"', "Content-Type: " + ct, "", typeof content === "string" ? content : content.toString("latin1"));
+      parts.push(Buffer.from(["--" + boundary, 'Content-Disposition: form-data; name="' + k + '"; filename="' + fn + '"', "Content-Type: " + ct, "", ""].join("\r\n"), "utf-8"));
+      parts.push(Buffer.isBuffer(content) ? content : Buffer.from(String(content), "utf-8"));
+      parts.push(Buffer.from("\r\n", "utf-8"));
     }
-    lines.push("--" + boundary + "--", "");
-    return lines.join("\r\n");
+    parts.push(Buffer.from("--" + boundary + "--\r\n", "utf-8"));
+    return Buffer.concat(parts);
   }
 
   _get(endpoint, params) {

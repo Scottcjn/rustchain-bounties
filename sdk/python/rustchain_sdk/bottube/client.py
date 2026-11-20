@@ -137,7 +137,7 @@ class BoTTubeClient:
                     boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
                     body = self._encode_multipart(boundary, data, files)
                     headers['Content-Type'] = f'multipart/form-data; boundary={boundary}'
-                    req = Request(url, data=body.encode('utf-8'), headers=headers, method=method)
+                    req = Request(url, data=body, headers=headers, method=method)
                 elif data and method in ('POST', 'PUT', 'PATCH'):
                     headers['Content-Type'] = 'application/json'
                     req = Request(url, data=json.dumps(data).encode('utf-8'), headers=headers, method=method)
@@ -191,24 +191,24 @@ class BoTTubeClient:
     def _post(self, endpoint: str, data: Optional[Dict] = None, files: Optional[Dict] = None) -> Dict[str, Any]:
         return self._request('POST', endpoint, data, files)
 
-    def _encode_multipart(self, boundary: str, data: Optional[Dict], files: Dict) -> str:
-        lines = []
+    def _encode_multipart(self, boundary: str, data: Optional[Dict], files: Dict) -> bytes:
+        parts: List[bytes] = []
         if data:
             for key, value in data.items():
-                lines.append(f'--{boundary}')
-                lines.append(f'Content-Disposition: form-data; name="{key}"')
-                lines.append('')
-                lines.append(str(value))
+                parts.append(f'--{boundary}\r\n'.encode('utf-8'))
+                parts.append(f'Content-Disposition: form-data; name="{key}"\r\n'.encode('utf-8'))
+                parts.append(b'\r\n')
+                parts.append(f'{value}\r\n'.encode('utf-8'))
         for key, file_info in files.items():
             filename, content, content_type = file_info
-            lines.append(f'--{boundary}')
-            lines.append(f'Content-Disposition: form-data; name="{key}"; filename="{filename}"')
-            lines.append(f'Content-Type: {content_type}')
-            lines.append('')
-            lines.append(content)
-        lines.append(f'--{boundary}--')
-        lines.append('')
-        return '\r\n'.join(lines)
+            parts.append(f'--{boundary}\r\n'.encode('utf-8'))
+            parts.append(f'Content-Disposition: form-data; name="{key}"; filename="{filename}"\r\n'.encode('utf-8'))
+            parts.append(f'Content-Type: {content_type}\r\n'.encode('utf-8'))
+            parts.append(b'\r\n')
+            parts.append(content if isinstance(content, bytes) else str(content).encode('utf-8'))
+            parts.append(b'\r\n')
+        parts.append(f'--{boundary}--\r\n'.encode('utf-8'))
+        return b''.join(parts)
 
     # ===== Read Endpoints =====
 
@@ -309,10 +309,10 @@ class BoTTubeClient:
             metadata['tags'] = tags
         files = {
             'metadata': ('metadata.json', json.dumps(metadata), 'application/json'),
-            'video': (filename, video_file.decode('latin-1'), 'video/mp4'),
+            'video': (filename, video_file, 'video/mp4'),
         }
         if thumbnail:
-            files['thumbnail'] = ('thumbnail.jpg', thumbnail.decode('latin-1'), 'image/jpeg')
+            files['thumbnail'] = ('thumbnail.jpg', thumbnail, 'image/jpeg')
         return self._post('/api/upload', files=files)
 
     def upload_metadata_only(self, title: str, description: str, public: bool = True, tags: Optional[List[str]] = None) -> Dict[str, Any]:
