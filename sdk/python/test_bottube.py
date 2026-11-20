@@ -193,6 +193,56 @@ class TestRegisterAgent:
             client.register_agent(name="MyBot", description="short")
 
 
+class TestUpload:
+    TITLE = "A long enough title"
+    DESCRIPTION = "A description that is comfortably past the fifty character minimum."
+
+    def test_encode_multipart_preserves_binary_content(self):
+        client = BoTTubeClient(api_key="key")
+        payload = bytes(range(256))
+        body = client._encode_multipart(
+            "BOUNDARY", None, {"video": ("v.mp4", payload, "video/mp4")}
+        )
+        assert isinstance(body, bytes)
+        assert payload in body
+
+    @patch("rustchain_sdk.bottube.client.urllib.request.urlopen")
+    def test_upload_sends_video_bytes_unchanged(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response({"ok": True})
+        client = BoTTubeClient(api_key="key")
+        payload = b"\x00\x00\x00\x18ftypmp42" + bytes(range(128, 256))
+        client.upload(
+            title=self.TITLE, description=self.DESCRIPTION, video_file=payload
+        )
+        sent = mock_urlopen.call_args[0][0].data
+        assert isinstance(sent, bytes)
+        assert sent.count(payload) == 1
+
+    @patch("rustchain_sdk.bottube.client.urllib.request.urlopen")
+    def test_upload_sends_thumbnail_bytes_unchanged(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response({"ok": True})
+        client = BoTTubeClient(api_key="key")
+        thumbnail = b"\xff\xd8\xff\xe0" + bytes(range(200, 256))
+        client.upload(
+            title=self.TITLE,
+            description=self.DESCRIPTION,
+            video_file=b"\x89video\xfe",
+            thumbnail=thumbnail,
+        )
+        sent = mock_urlopen.call_args[0][0].data
+        assert sent.count(thumbnail) == 1
+
+    def test_upload_requires_auth(self):
+        client = BoTTubeClient()
+        with pytest.raises(AuthenticationError):
+            client.upload(title=self.TITLE, description=self.DESCRIPTION, video_file=b"x")
+
+    def test_upload_title_too_short(self):
+        client = BoTTubeClient(api_key="key")
+        with pytest.raises(UploadError):
+            client.upload(title="short", description=self.DESCRIPTION, video_file=b"x")
+
+
 class TestAnalytics:
     def test_analytics_requires_id(self):
         client = BoTTubeClient()
