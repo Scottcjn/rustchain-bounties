@@ -263,6 +263,79 @@ def pr_provenance_problem(claimant, pr_repo, pr):
     return None
 
 
+MAX_SEARCH_PAGES = 10   # GitHub Search API caps results at 1000 (10 x 100).
+MAX_COMMENT_PAGES = 100
+
+
+def _paginate_search_issues(q, max_pages=MAX_SEARCH_PAGES):
+    """Fetch matching issues across search pages, failing closed on truncation."""
+    items = []
+    seen = set()
+    raw_count = 0
+    total_count = None
+    for page in range(1, max_pages + 1):
+        res = gh(
+            ["api", "-X", "GET", "search/issues",
+             "-f", f"q={q}", "-f", "per_page=100", "-f", f"page={page}"],
+            None,
+            strict=True,
+        )
+        if not isinstance(res, dict) or not isinstance(res.get("items"), list):
+            raise GhError(f"search/issues page {page} returned unexpected payload")
+        if res.get("incomplete_results"):
+            raise GhError(f"search/issues page {page} returned incomplete_results")
+        tc = res.get("total_count")
+        if isinstance(tc, int):
+            total_count = tc
+            if tc > max_pages * 100:
+                raise GhError(
+                    f"search/issues reported {tc} results, exceeding {max_pages * 100}-result cap"
+                )
+        batch = res["items"]
+        raw_count += len(batch)
+        for it in batch:
+            num = it.get("number")
+            if num is not None:
+                if num in seen:
+                    continue
+                seen.add(num)
+            items.append(it)
+        if len(batch) < 100:
+            if total_count is not None and raw_count < total_count:
+                raise GhError(
+                    f"search/issues returned {raw_count} items but total_count={total_count}"
+                )
+            return items
+    if total_count is not None and raw_count >= total_count and total_count <= max_pages * 100:
+        return items
+    raise GhError(f"search/issues exceeded {max_pages} pages ({max_pages * 100}-result cap)")
+
+
+def _paginate_issue_comments(issue_num, max_pages=MAX_COMMENT_PAGES):
+    """Fetch every comment on an issue across pages, failing closed on truncation."""
+    comments = []
+    page = 1
+    while True:
+        if page > max_pages:
+            raise GhError(f"#{issue_num} exceeded {max_pages} comment pages")
+        chunk = gh(
+            ["api", f"/repos/{REPO}/issues/{issue_num}/comments?per_page=100&page={page}"],
+            None,
+            strict=True,
+        )
+        if not isinstance(chunk, list):
+            raise GhError(
+                f"comments lookup for #{issue_num} page {page} returned unexpected payload"
+            )
+        if not chunk:
+            break
+        comments.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
+    return comments
+
+
 def docstring_rtc_this_week(author):
     """RTC this author has already been granted for docstrings in 7 days.
 
@@ -278,16 +351,20 @@ def docstring_rtc_this_week(author):
              - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
     q = (f"repo:{REPO} is:issue author:{author} label:docstring-verified "
          f"created:>{since}")
-    res = gh(["api", "-X", "GET", "search/issues", "-f", f"q={q}", "-f", "per_page=100"], {}, strict=True)
+    items = _paginate_search_issues(q)
     total = 0.0
-    for it in (res.get("items") or []):
+    for it in items:
         if str(it.get("number")) == str(NUM):
             continue          # never count the claim being adjudicated
-        # The marker lives in a gate comment, not the issue body, so fetch them.
-        cs = gh(["api", f"/repos/{REPO}/issues/{it['number']}/comments?per_page=100"], [], strict=True) or []
+        # The marker lives in a gate comment, not the issue body, so fetch all pages.
+        cs = _paginate_issue_comments(it["number"])
         amt = trusted_payout_amount(cs)
-        if amt is not None:
-            total += amt
+        if amt is None:
+            raise GhError(
+                f"no trusted rtc-payout-amount marker found on docstring-verified "
+                f"claim #{it.get('number')}; prior earnings unknown"
+            )
+        total += amt
     return round(total, 2)
 
 
@@ -464,7 +541,8 @@ def main():
             f"(GitHub label API error), so this is **held**, not verified. PR {pr_repo}#{pr_num} is "
             f"merged with **{doc_count}** docstrings → **{amount} RTC** once a human or the next "
             f"sweep applies `bounty-eligible` + `docstring-verified`. Nothing is wrong with the "
-            f"claim; the gate is refusing to say 'verified' about a state it did not create."], None)
+            f"claim; the gate is refusing to say 'verified' about a state it did not create.\n\n"
+            f"<!-- rtc-payout-amount: {amount} -->"], None)
         add_labels("needs-human")
         print(f"::error::labels not applied on {REPO}#{NUM}; held, not verified")
         return 1

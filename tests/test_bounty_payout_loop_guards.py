@@ -26,7 +26,7 @@ WALLET = "RTC" + "a" * 40
 _orig_run = subprocess.run
 
 
-def run_payout(issue, pr=None):
+def run_payout(issue, pr=None, rest_comments=None, rest_fail_page=None):
     """Execute bounty_payout.py for one open claim. Returns (transfers, gh_calls)."""
     transfers, calls = [], []
 
@@ -40,6 +40,12 @@ def run_payout(issue, pr=None):
         elif args[:3] == ["gh", "issue", "view"]:
             out = json.dumps({"body": issue["body"], "comments": issue["comments"],
                               "author": {"login": issue["author"]}})
+        elif args[:2] == ["gh", "api"] and "/comments?" in args[2]:
+            page = int(args[2].rsplit("page=", 1)[1])
+            if rest_fail_page is not None and page == rest_fail_page:
+                return mock.Mock(stdout="", stderr="rate limit", returncode=1)
+            src = rest_comments if rest_comments is not None else issue["comments"]
+            out = json.dumps(src[(page - 1) * 100 : page * 100])
         elif args[:3] == ["gh", "pr", "view"]:
             if pr is None:
                 return mock.Mock(stdout="", stderr="not found", returncode=1)
@@ -142,6 +148,42 @@ class DocstringProvenanceAtPayout(unittest.TestCase):
 
     def test_unmerged_pr_is_not_paid(self):
         t, _ = run_payout(docstring_claim(), {"author": {"login": "alice"}, "state": "OPEN"})
+        self.assertEqual(t, [])
+
+
+class CommentPaginationGuards(unittest.TestCase):
+    """Issue #17054: markers/confirmations past comment #100 must be honored."""
+
+    def test_150_comments_with_docstring_marker_at_120_is_paid(self):
+        comments = [{"author": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 151)]
+        comments[119] = {"author": {"login": "github-actions"},
+                         "body": "✅ verified\n<!-- rtc-payout-amount: 0.5 -->"}
+        claim = docstring_claim()
+        claim["comments"] = comments
+        t, _ = run_payout(claim, {"author": {"login": "alice"}, "state": "MERGED"})
+        self.assertEqual(len(t), 1)
+        self.assertEqual(t[0]["amount_rtc"], 0.5)
+
+    def test_150_comments_with_confirmation_at_120_dedups(self):
+        comments = [{"author": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 151)]
+        comments[119] = {"author": {"login": "github-actions"},
+                         "body": "💸 **RTC-AutoPay-Confirmed** — payout **queued** — 3 RTC"}
+        t, _ = run_payout(review_claim(comments))
+        self.assertEqual(t, [])
+
+    def test_capped_100_view_falls_back_to_rest_pagination_and_dedups_at_120(self):
+        full_rest = [{"user": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 151)]
+        full_rest[119] = {"user": {"login": "github-actions[bot]"},
+                          "body": "<!-- RTC-AutoPay-Confirmed kind=claim claim=501 -->"}
+        capped_view = [{"author": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 101)]
+        t, calls = run_payout(review_claim(capped_view), rest_comments=full_rest)
+        self.assertEqual(t, [])
+        self.assertTrue(any(c[:2] == ["gh", "api"] and "page=2" in c[2] for c in calls))
+
+    def test_capped_100_view_rest_failure_fails_closed(self):
+        full_rest = [{"user": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 151)]
+        capped_view = [{"author": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 101)]
+        t, _ = run_payout(review_claim(capped_view), rest_comments=full_rest, rest_fail_page=2)
         self.assertEqual(t, [])
 
 

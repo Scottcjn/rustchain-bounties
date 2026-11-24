@@ -111,6 +111,25 @@ class ProvenanceTests(unittest.TestCase):
                       "a previously parked claim must leave the re-check sweep")
         self.assertHeld()
 
+    def test_label_failure_hold_emits_trusted_marker_for_manual_recovery(self):
+        """If payable labels fail to apply, the hold comment carries the marker
+        so manually labelling the claim later does not poison weekly-cap lookups."""
+        def fail_payable(*names):
+            if "bounty-eligible" in names:
+                return False
+            self.labels.extend(names)
+            return True
+
+        dg.add_labels = fail_payable
+        rc = self._run_claim("alice", "https://github.com/Scottcjn/bottube/pull/1", "alice")
+        self.assertEqual(rc, 1)
+        self.assertIn("needs-human", self.labels)
+        self.assertTrue(any("<!-- rtc-payout-amount: 0.1 -->" in c for c in self.comments))
+        amt = dg.trusted_payout_amount(
+            [{"user": {"login": "github-actions[bot]"}, "body": self.comments[-1]}]
+        )
+        self.assertEqual(amt, 0.1)
+
 
 class LabelHelpersNeverCrash(unittest.TestCase):
     """remove_label() is documented as never fatal and sits on the provenance
