@@ -471,6 +471,26 @@ def resolve_wallet(issue_body, comments, claimant_login=None):
     if claimant_login and _looks_like_handle(claimant_login) and not _is_bot_login(claimant_login, None):
         return claimant_login, "handle"
     return None, None
+def _paginate_issue_comments(num, max_pages=100):
+    """Fetch all issue comments via REST pagination; fail closed on incomplete read."""
+    comments = []
+    page = 1
+    while True:
+        if page > max_pages:
+            raise GhError(f"#{num} exceeded {max_pages} comment pages")
+        raw = gh(["api", f"/repos/{REPO}/issues/{num}/comments?per_page=100&page={page}"])
+        chunk = json.loads(raw) if raw and raw.strip() else None
+        if not isinstance(chunk, list):
+            raise GhError(f"comments lookup for #{num} page {page} returned unexpected payload")
+        if not chunk:
+            break
+        comments.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
+    return comments
+
+
 def _list(extra):
     try:
         return json.loads(gh(["issue","list","-R",REPO,"--state","open",
@@ -509,7 +529,15 @@ for i in issues:
     if not (is_review or is_docstring): continue
     num=str(i["number"]); labels={l["name"] for l in i.get("labels",[])}
     d=json.loads(gh(["issue","view",num,"-R",REPO,"--json","body,comments,author"]))
-    coms=d.get("comments",[])
+    coms=d.get("comments") or []
+    if len(coms) == 100:
+        # Guard against a 100-comment CLI cap: confirm via REST pagination so
+        # markers or confirmations past position 100 are never dropped.
+        try:
+            coms = _paginate_issue_comments(num)
+        except (GhError, ValueError) as e:
+            print(f"::warning::skipping #{num}: incomplete comment history ({e})")
+            continue
     # `claimant_login` is the issue author's GitHub login. It is the last-resort
     # handle fallback for claims whose body says "Wallet: TBD" and whose
     # comment thread has no parseable handle. The previous version fetched

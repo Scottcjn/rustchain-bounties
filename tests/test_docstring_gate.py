@@ -171,9 +171,12 @@ class UntrustedMarkerTests(unittest.TestCase):
     def _c(login, amount):
         return {"user": {"login": login}, "body": f"<!-- rtc-payout-amount: {amount} -->"}
 
-    def test_spoofed_marker_alone_does_not_count(self):
-        self._one_claim([self._c("random-user", 40)])
-        self.assertEqual(dg.docstring_rtc_this_week("victim"), 0.0)
+    def test_spoofed_marker_alone_fails_closed(self):
+        comments = [self._c("random-user", 40)]
+        self.assertIsNone(dg.trusted_payout_amount(comments))
+        self._one_claim(comments)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("victim")
 
     def test_genuine_bot_marker_counts(self):
         self._one_claim([self._c(self.BOT, 5)])
@@ -194,10 +197,13 @@ class UntrustedMarkerTests(unittest.TestCase):
         self.assertEqual(dg.docstring_rtc_this_week("farmer"), 5.0)
 
     def test_lookalike_and_missing_author_are_untrusted(self):
-        self._one_claim([self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
-                         {"body": "<!-- rtc-payout-amount: 9 -->"},
-                         {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        comments = [self._c("github-actions-bot", 9), self._c("scottcjn-fan", 9),
+                    {"body": "<!-- rtc-payout-amount: 9 -->"},
+                    {"user": None, "body": "<!-- rtc-payout-amount: 9 -->"}]
+        self.assertIsNone(dg.trusted_payout_amount(comments))
+        self._one_claim(comments)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_maintainer_marker_counts_and_graphql_shape_is_read(self):
         self._one_claim([{"author": {"login": "Scottcjn"},
@@ -210,20 +216,208 @@ class UntrustedMarkerTests(unittest.TestCase):
         for bad in ("...", "1.2.3", "."):
             self._one_claim([self._c(self.BOT, 5), self._c(self.BOT, bad)])
             self.assertEqual(dg.docstring_rtc_this_week("someone"), 5.0, bad)
-            self._one_claim([self._c(self.BOT, bad)])
-            self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0, bad)
+            bad_only = [self._c(self.BOT, bad)]
+            self.assertIsNone(dg.trusted_payout_amount(bad_only), bad)
+            self._one_claim(bad_only)
+            with self.assertRaises(dg.GhError):
+                dg.docstring_rtc_this_week("someone")
 
     def test_author_key_wins_over_user_key_like_the_payout_runner(self):
         c = {"author": {"login": "attacker"}, "user": {"login": self.BOT},
              "body": "<!-- rtc-payout-amount: 9 -->"}
+        self.assertIsNone(dg.trusted_payout_amount([c]))
         self._one_claim([c])
-        self.assertEqual(dg.docstring_rtc_this_week("someone"), 0.0)
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("someone")
 
     def test_last_trusted_marker_wins_like_the_payout_runner(self):
         """bounty_payout.py pays the LAST trusted marker; the cap must count the
         same figure the payout will actually move, not a different one."""
         self._one_claim([self._c(self.BOT, 5), self._c("Scottcjn", 2.5)])
         self.assertEqual(dg.docstring_rtc_this_week("someone"), 2.5)
+
+
+class WeeklyCapPaginationTests(unittest.TestCase):
+    """Issue #17054: paginate search/issues + comments and fail closed on unknown."""
+
+    BOT = "github-actions[bot]"
+
+    def setUp(self):
+        self._saved = {k: getattr(dg, k) for k in ("gh", "gh_raw", "add_labels", "NUM")}
+
+    def tearDown(self):
+        for k, v in self._saved.items():
+            setattr(dg, k, v)
+
+    @staticmethod
+    def _page_arg(args):
+        for a in args:
+            if a.startswith("page="):
+                return int(a.split("=", 1)[1])
+            if "?page=" in a or "&page=" in a:
+                return int(a.rsplit("page=", 1)[1])
+        return 1
+
+    def test_150_comments_with_trusted_marker_at_position_120(self):
+        comments = [
+            {"user": {"login": "spammer"}, "body": f"noise {i}"}
+            for i in range(1, 151)
+        ]
+        # 1-based position 120 -> index 119 (on page 2).
+        comments[119] = {
+            "user": {"login": self.BOT},
+            "body": "<!-- rtc-payout-amount: 12.5 -->",
+        }
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"total_count": 1, "incomplete_results": False, "items": [{"number": 901}]}
+            if "/comments" in joined:
+                p = self._page_arg(args)
+                return comments[(p - 1) * 100 : p * 100]
+            return default
+
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("alice"), 12.5)
+
+    def test_exact_100_comments_boundary(self):
+        comments = [{"user": {"login": "chatter"}, "body": f"c{i}"} for i in range(1, 101)]
+        comments[99] = {"user": {"login": self.BOT}, "body": "<!-- rtc-payout-amount: 4.25 -->"}
+        seen_pages = []
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"total_count": 1, "items": [{"number": 902}]}
+            if "/comments" in joined:
+                p = self._page_arg(args)
+                seen_pages.append(p)
+                return comments if p == 1 else []
+            return default
+
+        dg.gh = fake
+        self.assertEqual(dg.docstring_rtc_this_week("alice"), 4.25)
+        self.assertEqual(seen_pages, [1, 2])
+
+    def test_comment_pagination_page2_error_or_non_list_fails_closed(self):
+        page1 = [{"user": {"login": self.BOT}, "body": "<!-- rtc-payout-amount: 5 -->"}] * 100
+
+        def fake_err(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 903}]}
+            if "/comments" in joined:
+                if self._page_arg(args) == 1:
+                    return page1
+                raise dg.GhError("rate limit on page 2")
+            return default
+
+        dg.gh = fake_err
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("alice")
+
+        def fake_none(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 903}]}
+            if "/comments" in joined:
+                return page1 if self._page_arg(args) == 1 else None
+            return default
+
+        dg.gh = fake_none
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("alice")
+
+    def test_comment_pagination_exceeds_max_pages_fails_closed(self):
+        full_page = [{"user": {"login": self.BOT}, "body": "<!-- rtc-payout-amount: 1 -->"}] * 100
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                return {"items": [{"number": 904}]}
+            if "/comments" in joined:
+                return full_page
+            return default
+
+        dg.gh = fake
+        with self.assertRaises(dg.GhError):
+            dg.docstring_rtc_this_week("alice")
+
+    def test_search_pagination_sums_over_100_claims_and_skips_self(self):
+        dg.NUM = "1050"
+        all_items = [{"number": 1000 + i} for i in range(125)]
+        # Duplicate issue #1005 at page 2 boundary to confirm no double-count.
+        page2_items = [{"number": 1005}] + all_items[100:]
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if "search/issues" in joined:
+                p = self._page_arg(args)
+                return {
+                    "total_count": 125,
+                    "incomplete_results": False,
+                    "items": all_items[:100] if p == 1 else page2_items,
+                }
+            if "/comments" in joined:
+                num = int(joined.split("/issues/")[1].split("/")[0])
+                if num == 1050:
+                    raise AssertionError("self-claim must be skipped before fetching comments")
+                return [{"user": {"login": self.BOT}, "body": "<!-- rtc-payout-amount: 0.5 -->"}]
+            return default
+
+        dg.gh = fake
+        # 124 other claims x 0.5 RTC = 62.0 RTC
+        self.assertEqual(dg.docstring_rtc_this_week("alice"), 62.0)
+
+    def test_search_pagination_incomplete_shortfall_and_over_cap_fail_closed(self):
+        cases = [
+            lambda p: {"total_count": 1, "incomplete_results": True, "items": [{"number": 1}]},
+            lambda p: {"total_count": 150, "items": [{"number": i} for i in range(100)] if p == 1 else []},
+            lambda p: {"total_count": 1001, "items": [{"number": i} for i in range(100)]},
+            lambda p: {"items": [{"number": p * 100 + i} for i in range(100)]},
+        ]
+        for builder in cases:
+            def fake(args, default=None, strict=False, _b=builder):
+                if "search/issues" in " ".join(args):
+                    return _b(self._page_arg(args))
+                return default
+            dg.gh = fake
+            with self.assertRaises(dg.GhError):
+                dg.docstring_rtc_this_week("alice")
+
+    def test_main_holds_needs_human_when_prior_claim_lacks_trusted_marker(self):
+        labels, comments = [], []
+        dg.NUM = "777"
+        dg.add_labels = lambda *names: labels.extend(names) or True
+        dg.gh_raw = lambda args: (
+            "diff --git a/a.py b/a.py\n--- a/a.py\n+++ b/a.py\n@@ -1 +1 @@\n"
+            '+    """Added doc."""\n'
+        )
+
+        def fake(args, default=None, strict=False):
+            joined = " ".join(args)
+            if args[:2] == ["issue", "view"]:
+                return {"title": "Docstring batch", "body": "https://github.com/Scottcjn/bottube/pull/9",
+                        "labels": [], "author": {"login": "alice"}, "state": "OPEN"}
+            if args[:2] == ["pr", "view"]:
+                return {"state": "MERGED", "author": {"login": "alice"}}
+            if "search/issues" in joined:
+                return {"total_count": 1, "items": [{"number": 700}]}
+            if "/comments" in joined:
+                return [{"user": {"login": "attacker"}, "body": "<!-- rtc-payout-amount: 0 -->"}]
+            if args[:2] == ["issue", "comment"]:
+                comments.append(args[args.index("--body") + 1])
+                return None
+            return default
+
+        dg.gh = fake
+        rc = dg.main()
+        self.assertEqual(rc, 0)
+        self.assertIn("needs-human", labels)
+        self.assertNotIn("bounty-eligible", labels)
+        self.assertNotIn("docstring-verified", labels)
+        self.assertFalse(any("rtc-payout-amount" in c for c in comments))
 
 
 if __name__ == "__main__":
